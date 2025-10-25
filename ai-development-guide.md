@@ -1,8 +1,8 @@
 # 通用 AI 協作開發指南
 
-> **適用範圍**: 所有軟體開發專案
-> **AI 系統**: Claude Code、KiloCode、Gemini 等
-> **核心理念**: Understanding-First + Examples-Driven + User-Story-Centered
+**適用範圍**: 所有軟體開發專案
+**AI 系統**: Claude Code、KiloCode、Gemini 等
+**核心理念**: Understanding-First + Examples-Driven + User-Story-Centered
 
 ---
 

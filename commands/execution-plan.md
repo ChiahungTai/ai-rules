@@ -1,8 +1,176 @@
 # Execution Plan Command - 段落式實作計畫書生成器
 
-為量化交易專案生成**段落式實作計畫書**，執行 Phase 3 的分段實作與品質保證，專為功能實現、Examples驅動開發和品質保證設計。
+為軟體開發專案生成**段落式實作計畫書**，基於 Story Design 的 4-Stage 設計成果，執行分段實作與品質保證，專為功能實現、Examples驅動開發和品質保證設計。
 
-**🚨 重要**: 此命令生成實作執行專精計畫書，專注於Phase 3的段落式實作方法論。系統分析請使用 `/analysis-plan`，系統設計請使用 `/design-plan`。
+**🚨 重要**: 此命令基於 `/story-design` 的 SD1-SD4 成果生成實作計畫書，專注於段落式實作方法論。
+
+## 📖 OpenSpec 完整指導 (AI 必讀)
+
+### **什麼是 OpenSpec？**
+
+OpenSpec 是一個結構化規範格式系統，用於標準化技術文檔的編寫。**即使您從未聽說過 OpenSpec，本命令也提供完整的使用指導**。
+
+#### **OpenSpec 核心特點**
+- **結構化格式**: 使用固定的標題結構確保一致性
+- **可解析性**: 工具可以自動解析和驗證
+- **明確性**: 使用 SHALL 語言明確陳述需求
+- **驗證機制**: 內建驗證和錯誤修復指導
+
+### **🚨 OpenSpec 結構化格式 (強制要求)**
+
+本命令**必須**遵循以下 OpenSpec 結構化格式：
+
+#### **基本結構模式**
+```markdown
+### Requirement: [需求名稱]
+
+[需求描述 SHALL 陳述]
+
+#### Scenario: [場景描述]
+
+- **GIVEN** [初始狀態] (可選)
+- **WHEN** [條件或觸發]
+- **THEN** [預期結果]
+- **AND** [額外結果或條件]
+```
+
+#### **📝 撰寫規範 (必須遵守)**
+
+**1. Requirement 標題規範**
+```markdown
+# ✅ 正確格式
+### Requirement: Self-Contained Segment Structure
+
+# ❌ 錯誤格式
+### Self-Contained Segment Structure
+## Requirement: Self-Contained Segment Structure
+#### Requirement: Self-Contained Segment Structure
+```
+
+**2. SHALL 語言規範**
+```markdown
+# ✅ 正確：使用 SHALL 明確陳述
+每個實作段落 SHALL 是完全獨立的，AI 只需讀取該段落就能完成實作。
+
+# ❌ 錯誤：避免使用模糊語言
+每個實作段落應該是完全獨立的...
+每個實作段落需要是完全獨立的...
+每個實作段落可以是完全獨立的...
+```
+
+**3. Scenario 結構規範**
+```markdown
+# ✅ 正確：使用 WHEN/THEN/AND 結構
+#### Scenario: Creating self-contained implementation segments
+- **GIVEN** technical story decomposition and implementation requirements
+- **WHEN** designing self-contained segments
+- **THEN** each segment SHALL include:
+  - **段落概要**: Context 獨立的基礎資訊
+  - **核心實作要點**: 基於智能分析的實作指導
+  - **程式碼指導**: 可直接使用的實作框架
+- **AND** each segment SHALL be independently executable
+
+# ❌ 錯誤：不使用結構化格式
+#### Scenario: Creating self-contained implementation segments
+設計段落時，應包含概要、實作要點和程式碼指導。
+```
+
+### **🔍 OpenSpec 驗證機制 (Execution Plan 專用)**
+
+#### **預驗證檢查清單**
+Execution Plan 完成後必須通過以下檢查：
+
+```markdown
+## Execution Plan 預驗證檢查清單
+- [ ] 使用 `### Requirement:` 標題格式
+- [ ] 所有 Requirement 描述包含 SHALL 陳述
+- [ ] 每個 Requirement 都有對應的 Scenario
+- [ ] Scenario 使用 `#### Scenario:` 標題
+- [ ] Scenario 包含 WHEN/THEN/AND 結構
+- [ ] 功能段落設計為 Self-Contained
+- [ ] 包含完整的 Examples 驗證策略
+- [ ] 提供明確的完成檢查清單
+```
+
+#### **錯誤修復指導**
+當驗證失敗時，提供具體修復步驟：
+
+```markdown
+## Execution Plan 錯誤修復指導
+
+**問題**: 功能段落不夠 Self-Contained
+**修復步驟**:
+1. 確保每個段落包含完整的實作資訊
+2. 添加檔案路徑和依賴關係說明
+3. 提供具體的程式碼框架
+4. 包含驗證方法和完成標準
+
+**問題**: Examples 驗證不完整
+**修復步驟**:
+1. 為每個段落設計對應的 Examples
+2. 明確 Examples 檔案路徑和名稱
+3. 提供具體的驗證場景
+4. 標註執行命令和預期結果
+```
+
+### **📋 Execution Plan 專用最佳實踐**
+
+#### **功能段落設計最佳實踐**
+```markdown
+# ✅ 好的範例
+### Requirement: Self-Contained Segment Structure
+
+每個實作段落 SHALL 是完全獨立的，AI 只需讀取該段落就能完成實作。
+
+#### Scenario: Creating self-contained implementation segments
+
+- **GIVEN** technical story decomposition and implementation requirements
+- **WHEN** designing self-contained segments
+- **THEN** each segment SHALL include:
+  - **段落概要**: Context 獨立的基礎資訊
+  - **核心實作要點**: 基於智能分析的實作指導
+  - **程式碼指導**: 可直接使用的實作框架
+  - **驗證機制**: Examples 和測試設計
+  - **完成檢查**: 明確的驗收標準
+- **AND** each segment SHALL be independently executable without additional context
+```
+
+#### **Examples 驅動設計最佳實踐**
+```markdown
+# ✅ 好的範例
+### Requirement: Examples Design and Validation
+
+系統 SHALL 設計完整的 Examples 驗證策略，確保實作品質。
+
+#### Scenario: Creating Examples validation strategy
+
+- **GIVEN** User Story requirements and implementation design
+- **WHEN** designing Examples validation
+- **THEN** the strategy SHALL include:
+  - **basic_usage.py**: 基本使用場景驗證 (P0)
+  - **integration.py**: 系統整合驗證 (P1)
+  - **error_handling.py**: 錯誤處理驗證 (P1)
+  - **測試覆蓋**: 涵蓋 90% 以上使用場景
+- **AND** each Example SHALL be executable and provide clear validation results
+```
+
+### **🎯 本命令的 OpenSpec 應用**
+
+本命令將 OpenSpec 格式應用於：
+- **段落式實作設計**: 每個功能段落都有結構化的 Requirements 和 Scenarios
+- **驗證機制**: 確保段落 Self-Contained 和 Examples 可執行
+- **錯誤修復**: 提供具體的實作問題解決方案
+- **品質保證**: 明確的完成檢查清單和驗收標準
+
+### **🔄 與 Story Design 的整合**
+
+Execution Plan **基於** Story Design 的 SD1-SD4 成果，並將其轉換為：
+- **可執行的段落**: 將技術故事分解為獨立實作段落
+- **具體的程式碼**: 將 Pseudo Code 轉換為實作框架
+- **驗證機制**: 設計 Examples 和測試策略
+- **品質標準**: 制定完成檢查清單
+
+**🔥 重要提醒**: 即使您完全不熟悉 OpenSpec，只要遵循本命令提供的範例和模板，就能產出符合 OpenSpec 標準的高品質實作計畫書。
 
 ## 使用方式
 ```bash
@@ -12,10 +180,11 @@
 ## 🎯 Execution Plan 段落式實作計畫書定位
 
 ### **主要受眾**
-- **主要受眾**: AI執行Phase 3段落式實作
+- **主要受眾**: AI執行段落式實作
 - **次要受眾**: `/impl` + Module Expert協作、功能實作Review
 
 ### **核心價值**
+- **Story Design 驅動**: 基於 SD1-SD4 設計成果，確保與用戶故事一致
 - **Self-Contained分段實作**: 每個功能段落獨立完整，應對context限制
 - **Examples驅動開發**: 以可執行範例驗證功能，確保用戶體驗
 - **強制Review機制**: 每段落完成後USER REVIEW，確保品質
@@ -25,14 +194,16 @@
 
 🚨 **必須按順序載入以下核心文檔：**
 1. CLAUDE.md - 基礎行為準則與環境約束
-2. docs/plans/session_notes.md - 當前任務狀態
-3. docs/ai_support/core/developer_comprehensive_guide.md - Examples驅動開發指導
+2. session_notes.md - 當前任務狀態
+3. Story Design 設計文檔 - SD1-SD4 完整設計成果
+4. docs/ai_support/core/developer_comprehensive_guide.md - Examples驅動開發指導
 
 ## 🎯 段落式實作方法論核心
 
-### **Phase 3的戰略地位**
-Phase 3在故事驅動開發中是**功能實現的品質保證**：
+### **Execution Plan 的戰略地位**
+Execution Plan 在 4-Stage 設計流程中是**功能實現的品質保證**：
 
+- **Story Design 驅動**: 基於 SD1-SD4 設計成果，確保與用戶故事完全一致
 - **Examples驅動驗證**: Examples是核心驗證機制，不只是輔助工具
 - **Self-Contained執行**: 每個功能段落獨立執行，context效率最大化
 - **強制Review品質**: 每段完成後USER REVIEW，避免累積品質債務
@@ -42,74 +213,169 @@ Phase 3在故事驅動開發中是**功能實現的品質保證**：
 **絕對禁止**: 一次完成複雜功能，必須按功能段落分段進行
 **執行策略**: 功能段落1 → USER REVIEW → 功能段落2 → USER REVIEW → ...
 
-## 🧠 智能設計分析與自動補強指導
+## 🧠 智能設計分析與驗證機制 (基於 OpenSpec)
 
-### **🔍 執行前強制SD設計分析**
-**執行 /execution-plan 時，AI 基於完整SD設計進行智能分析：**
+### **🔍 執行前強制 Story Design 分析**
+**執行 /execution-plan 時，AI 基於完整 Story Design (SD1-SD4) 進行智能分析與驗證：**
 
-#### **Step 1: SD設計基礎確認**
-確認SD設計文檔包含實作必需資訊：
-- **檔案結構**: 檔案樹展示和修改清單
-- **Pseudo Code**: 完整的程式碼設計藍圖
-- **API設計**: 方法簽名和參數定義
-- **Call Stack**: 函數調用關係展示
-- **架構決策**: 設計原因和技術考量
+#### **Step 1: Story Design 結構化驗證**
+使用 OpenSpec 結構化格式驗證 Story Design 文檔：
+
+**結構化格式驗證**:
+- 確認使用 `### Requirement:` 和 `#### Scenario:` 結構
+- 驗證每個需求都有 SHALL 語言陳述
+- 檢查 WHEN/THEN/AND 場景步驟的完整性
+
+**內容完整性檢查**:
+- **SD1 專案探索**: Purpose、Requirements、Scenarios 完整性
+- **SD2 系統分析**: 系統分析需求和驗證場景
+- **SD3 架構設計**: 架構設計需求和技术故事分解
+- **SD4 最終確認**: 最終驗證需求和實作計劃場景
 
 #### **Step 2: 實作導向智能分析**
-基於完整的SD設計，AI 進行實作導向的智能分析：
+基於驗證過的 Story Design，進行實作導向分析：
 
 **檔案影響分析**:
-- 基於SD設計和現有代碼，分析實際需要修改的檔案
-- 評估模組間依賴關係和整合複雜度
-- 識別高風險變更和向後相容性問題
+- 基於 SD3 架構設計分析實際修改檔案
+- 評估依賴關係和整合複雜度
+- 識別向後相容性風險
 
 **實作模板生成**:
-- 將SD設計的Pseudo Code轉換為具體實作框架
-- 補強實作細節和方法調用關係
-- 生成可直接參考的程式碼模板
+- 將 SD3 Pseudo Code 轉換為具體實作框架
+- 補強實作細節和調用關係
+- 生成可執行程式碼模板
 
-**實作規範分析**:
-- 分析API方法簽名的實作要求
-- 明確錯誤處理和驗證策略
-- 確保實作符合專案約束
+**技術故事映射**:
+- 將 SD4 技術故事分解映射到實作段落
+- 計算段落優先級和依賴關係
+- 設計驗證策略和 Examples 規劃
 
-#### **Step 3: Self-Contained段落智能生成**
-基於SD設計和智能分析，生成真正獨立完整的功能段落：
-- **Context獨立**: 每個段落包含完整實作資訊
-- **實作就緒**: 提供可直接使用的程式碼框架
-- **品質保證**: 整合Examples驗證和Review機制
+#### **Step 3: Self-Contained段落生成**
+基於分析結果生成獨立完整的功能段落：
+- **Context獨立**: 包含完整實作資訊
+- **實作就緒**: 提供可直接使用的程式碼
+- **驗證完整**: 整合 Examples 和 Review 機制
 
-## 🏗️ Execution Plan 計畫書標準結構
+### **🚨 OpenSpec 驗證機制**
 
-### **1. 實作任務概要 (基於智能分析)**
-- **實作目標**: 基於Phase 2設計的具體實作目標
-- **SD設計基礎**: 依據哪些SD設計文檔進行實作
-- **智能補強摘要**: 自動分析發現的設計不足和補強策略
-- **分段策略**: 功能分段的策略和Review節點
-- **品質標準**: 每個段落的完成標準和驗收條件
+#### **Requirement: Pre-Validation Checklist**
 
-### **2. Self-Contained分段執行設計**
+Execution Plan SHALL 提供完整的預驗證檢查清單，確保實作前的品質保證。
 
-#### **Self-Contained設計原則**
-**目標**: 每個功能段落都是self-contained，AI只需讀取該段落就能獨立完成實作
+#### **Scenario: Performing comprehensive validation**
 
-#### **功能段落標準格式**
-每個功能段落必須包含以下完整資訊：
+- **GIVEN** generated execution plan and Story Design
+- **WHEN** executing validation checklist
+- **THEN** the validation SHALL include:
+  - **Story Design 結構驗證**: 確認遵循 OpenSpec 格式
+  - **需求完整性檢查**: 驗證每個 Requirement 都有對應 Scenario
+  - **技術故事一致性**: 確認技術故事與 User Story 對應
+  - **實作可行性評估**: 評估每個段落的實作可行性
 
-**功能段落X: [功能名稱]**
+#### **Requirement: Error Remediation Guidance**
 
-#### 📋 段落概要 (Context獨立性)
-- **功能描述**: [具體要實作的功能，1-2句話說明]
-- **預期成果**: [完成後的具體成果和可驗證的輸出]
-- **前置條件**: [執行前需要確認的條件和依賴]
-- **預估時間**: [實作預估時間，幫助規劃]
+系統 SHALL 提供具體的錯誤修復指導，幫助解決常見問題。
 
-#### 🎯 核心實作要點 (智能分析結果)
-- **關鍵檔案**: [基於檔案影響分析的修改清單，最多3-5個]
-- **核心邏輯**: [從SD設計提取並補強的實作邏輯，2-3個要點]
-- **API設計**: [自動補強的介面規範和參數設計]
-- **錯誤處理**: [驗證策略的具體應用]
-- **Call Stack**: [自動分析的函數調用關係和執行順序]
+#### **Scenario: Providing actionable error fixes**
+
+- **GIVEN** validation failures or implementation issues
+- **WHEN** generating remediation guidance
+- **THEN** the guidance SHALL include:
+  - **具體修復步驟**: 詳細的問題解決方案
+  - **預期結構範例**: 正確的格式模板
+  - **調試建議**: 除錯和驗證的方法
+  - **最佳實踐提醒**: 避免常見陷阱的建議
+
+## 🏗️ Execution Plan 計畫書標準結構 (基於 OpenSpec)
+
+### **Purpose**
+
+本 Execution Plan 文檔定義了基於 Story Design (SD1-SD4) 的段落式實作計畫，採用 OpenSpec 結構化格式，確保實作過程的品質保證和可追溯性。
+
+### **1. 實作任務概要 Requirements**
+
+#### **Requirement: Implementation Task Definition**
+
+Execution Plan SHALL 提供清晰的實作任務定義，基於 Story Design 各階段成果。
+
+#### **Scenario: Defining implementation scope**
+
+- **GIVEN** validated Story Design with SD1-SD4 outcomes
+- **WHEN** creating implementation task summary
+- **THEN** the task definition SHALL include:
+  - **實作目標**: 基於 Story Design 的具體實作目標
+  - **Story Design 基礎**: 明確引用的 SD1-SD4 階段成果
+  - **智能補強摘要**: 自動分析發現的設計補強策略
+  - **分段策略**: 基於技術故事的功能分段計劃
+  - **品質標準**: 每個段落的驗收標準和完成條件
+
+### **2. Self-Contained段落執行設計 Requirements**
+
+#### **Requirement: Self-Contained Segment Structure**
+
+每個實作段落 SHALL 是完全獨立的，AI 只需讀取該段落就能完成實作。
+
+#### **Scenario: Creating self-contained implementation segments**
+
+- **GIVEN** technical story decomposition and implementation requirements
+- **WHEN** designing self-contained segments
+- **THEN** each segment SHALL include:
+  - **段落概要**: Context 獨立的基礎資訊
+  - **核心實作要點**: 基於智能分析的實作指導
+  - **程式碼指導**: 可直接使用的實作框架
+  - **驗證機制**: Examples 和測試設計
+  - **完成檢查**: 明確的驗收標準
+
+### **3. 功能段落標準格式 Requirements**
+
+#### **Requirement: Segment Template Standardization**
+
+實作段落 SHALL 遵循標準化模板格式，確保一致性和可預測性。
+
+#### **Scenario: Applying segment template**
+
+- **GIVEN** validated Story Design and implementation requirements
+- **WHEN** creating implementation segments
+- **THEN** each segment SHALL follow this structure:
+
+```markdown
+## 功能段落X: [US-ID] [User Story 標題] 實作
+
+### 📋 段落概要 (Context獨立性)
+- **功能描述**: 基於 User Story 的具體功能描述
+- **User Story 對應**: SD4 技術故事 US-ID 的實作
+- **預期成果**: 可驗證的具體成果和輸出
+- **前置條件**: SD3 架構設計完成，依賴存在
+- **預估時間**: 實作預估時間
+
+### 🎯 核心實作要點 (智能分析結果)
+- **Story Design 依據**: SD1 User Story 和 SD3 Pseudo Code
+- **關鍵檔案**: 基於檔案影響分析的修改清單
+- **核心邏輯**: 基於 Pseudo Code 的實作邏輯
+- **API設計**: 基於 SD3 設計的具體介面
+- **錯誤處理**: 基於 Story Design 的錯誤策略
+
+### 💻 程式碼指導 (實作模板)
+- **初始化邏輯**: 基於 Pseudo Code 的實作框架
+- **核心方法**: 主要業務功能的具體實作
+- **輔助方法**: 支援功能的實作指導
+
+### 🧪 Examples驗證 (功能驗證)
+- **Examples檔案**: SD4 設計的驗證檔案
+- **驗證場景**: 基於 User Story 的測試場景
+- **執行命令**: 標準化的驗證命令
+
+### ✅ 完成檢查清單 (明確驗收)
+- **功能實作**: 核心功能完成且符合 User Story
+- **Examples驗證**: Examples 可正常執行
+- **錯誤處理**: 錯誤處理邏輯驗證通過
+- **API規範**: 符合 SD3 設計規範
+- **整合測試**: 與現有系統整合無衝突
+
+### 🔗 下一段落銜接 (流程連貫)
+- **交付物**: 本段落完成的具體交付
+- **下段前置**: 下一段落開始前的準備
+```
 
 #### 💻 程式碼指導 (智能生成的實作模板)
 ```python
@@ -188,7 +454,7 @@ Examples在故事驅動開發中是**核心驗證機制**，具備4個關鍵角�
 #### **Examples品質標準**
 - ✅ **可執行性**: 所有examples在乾淨環境中可直接執行
 - ✅ **完整性**: 涵蓋90%以上的實際使用場景
-- ✅ **易學性**: 新用戶能通過examples在20分鐘內完成基本操作
+- ✅ **易學性**: 新用戶能通過examples在20分�內完成基本操作
 - ✅ **實用性**: Examples直接解決真實世界的問題
 - ✅ **維護性**: Examples程式碼簡潔清晰，註解充分
 
@@ -214,67 +480,136 @@ Examples在故事驅動開發中是**核心驗證機制**，具備4個關鍵角�
 
 ### **5. 實作段落模板範例**
 
-#### **範例1: 核心功能段落模板**
-```markdown
-## 功能段落1: DataGateway數據載入核心實作
+### **4. Examples 驅動開發策略 Requirements**
 
-### 📋 段落概要 (Context獨立性)
-- **功能描述**: 實作DataGateway的統一數據載入介面，支援多數據源整合
-- **預期成果**: 可運行的DataGateway類別，支援主要數據源和本地檔案數據載入
-- **前置條件**: 資料模組結構已建立，基礎配置檔案存在
+#### **Requirement: Examples Design and Validation**
+
+系統 SHALL 設計完整的 Examples 驗證策略，確保實作品質。
+
+#### **Scenario: Creating Examples validation strategy**
+
+- **GIVEN** User Story requirements and implementation design
+- **WHEN** designing Examples validation
+- **THEN** the strategy SHALL include:
+  - **basic_usage.py**: 基本使用場景驗證 (P0)
+  - **integration.py**: 系統整合驗證 (P1)
+  - **error_handling.py**: 錯誤處理驗證 (P1)
+  - **測試覆蓋**: 涵蓋 90% 以上使用場景
+
+### **5. 驗證與品質保證 Requirements**
+
+#### **Requirement: Quality Assurance Framework**
+
+系統 SHALL 提供完整的驗證框架，確保實作品質。
+
+#### **Scenario: Implementing quality assurance**
+
+- **GIVEN** implementation segments and Examples
+- **WHEN** performing quality assurance
+- **THEN** the framework SHALL include:
+  - **強制 Review 機制**: 每段落完成後 USER REVIEW
+  - **自動化測試**: 基於 Examples 的自動化驗證
+  - **回歸測試**: 確保不破壞現有功能
+  - **整合測試**: 跨模組整合驗證
+
+## 📋 實作範例模板 (基於 OpenSpec 格式)
+
+### **Requirement: Core Implementation Segment Template**
+
+核心功能段落 SHALL 遵循標準化範本，確保一致性和可維護性。
+
+#### **Scenario: Applying core segment template**
+
+- **GIVEN** SD3 Pseudo Code and SD4 technical story
+- **WHEN** creating core implementation segment
+- **THEN** the segment SHALL follow this template:
+
+```markdown
+## 功能段落1: [US-001] [User Story 標題] 核心實作
+
+### 📋 段落概要 (Context 獨立性)
+- **功能描述**: 基於 SD1 User Story 的具體功能描述
+- **User Story 對應**: SD4 技術故事 US-001 的實作
+- **預期成果**: 可驗證的具體成果和功能輸出
+- **前置條件**: SD3 架構設計已完成，相關依賴存在
 - **預估時間**: 4-6小時
 
-### 🎯 核心實作要點 (濃縮精華)
+### 🎯 核心實作要點 (智能分析結果)
+- **Story Design 依據**:
+  - SD1 User Story: [對應的用戶故事描述]
+  - SD3 Pseudo Code: [基於哪個 Pseudo Code 設計]
 - **關鍵檔案**:
-  - `data/gateway/data_gateway.py` (核心實作)
-  - `data/providers/base_provider.py` (基礎介面)
-  - `examples/data/basic_data_loading.py` (驗證範例)
+  - `[基於SD3 ERD的主要檔案]` (核心實作)
+  - `[相關依賴檔案]` (基礎介面/工具)
+  - `examples/[SD4設計的檔案]` (驗證範例)
 - **核心邏輯**:
-  1. 統一數據載入介面設計 (load_data方法)
-  2. 多提供者策略模式實作 (Provider Pattern)
-  3. 數據驗證和錯誤處理機制
-- **API設計**: `DataGateway.load_data(symbol, start_date, end_date, provider='default')`
-- **錯誤處理**: 數據來源異常、日期範圍驗證、數據格式錯誤
+  1. [基於 Pseudo Code 的核心邏輯1]
+  2. [基於 Pseudo Code 的核心邏輯2]
+  3. [基於 Story Design 的驗證機制]
+- **API設計**: [基於 SD3 設計的具體 API 介面]
+- **錯誤處理**: [基於 Story Design 的錯誤處理策略]
 
-### 💻 程式碼指導 (實作模板)
+### 💻 程式碼指導 (基於 SD3 Pseudo Code)
 ```python
-class DataGateway:
-    def __init__(self, config: Dict):
-        self.providers = {}  # 數據提供者註冊
-        self.cache_enabled = config.get('cache_enabled', True)
+# 基於 SD3 Pseudo Code 轉換的實作框架
+class [ComponentName]:
+    """
+    User Story: [SD1 中的對應用戶故事]
+    設計意圖: [解決什麼痛點，支援什麼業務場景]
+    架構位置: [SD3 中的架構位置]
+    依賴模組: [具體依賴的其他模組]
+    """
 
-    def load_data(self, symbol: str, start_date: datetime,
-                  end_date: datetime, provider: str = 'default') -> pd.DataFrame:
-        # 1. 參數驗證
-        assert isinstance(symbol, str), "Symbol must be string"
-        assert start_date < end_date, "Invalid date range"
+    def __init__(self, config: Dict[str, Any]):
+        """
+        設計意圖: [初始化邏輯和依賴注入]
+        Call Stack: __init__ -> _validate_config -> _setup_dependencies
+        User Story 支援: [如何支援具體的用戶場景]
+        """
+        # 基於 Pseudo Code 的初始化邏輯
+        pass
 
-        # 2. 提供者選擇和數據載入
-        provider_instance = self.providers[provider]
-        data = provider_instance.fetch_data(symbol, start_date, end_date)
+    def core_business_method(self, params: ParamType) -> ResultType:
+        """
+        設計意圖: [核心業務功能，直接解決用戶痛點]
+        Call Stack: core_business_method -> _step1 -> _step2 -> _validate_result
+        User Story 支援: [具體支援用戶故事的哪個部分]
+        業務價值: [為用戶創造什麼價值]
+        架構考量: [設計決策和技術原因]
+        整合說明: [與其他模組的整合方式]
+        """
+        # 基於 Pseudo Code 的核心邏輯
+        result1 = self._step1(params)      # 步驟1：處理用戶輸入
+        result2 = self._step2(result1)     # 步驟2：核心業務邏輯
+        return self._validate_result(result2)  # 步驟3：結果驗證
 
-        # 3. 數據驗證和回傳
-        return self._validate_data(data)
+    def _step1(self, data: InputType) -> IntermediateType:
+        """
+        Call Stack: _step1 -> DataService.process -> Validation.check
+        User Story 支援: [支援用戶故事的哪個子場景]
+        """
+        # 基於 Pseudo Code 的具體實現邏輯
+        pass
 ```
 
-### 🧪 Examples驗證 (功能驗證)
-- **Examples檔案**: `examples/data/basic_data_loading.py`
+### 🧪 Examples驗證 (基於 SD4 設計)
+- **Examples檔案**: `examples/[SD4設計的檔案名]`
 - **驗證場景**:
-  1. 主要數據源數據載入 (熱門商品, 最近30天)
-  2. 錯誤處理驗證 (無效商品代碼)
-  3. 日期範圍邊界測試
-- **執行命令**: `python examples/data/basic_data_loading.py`
+  1. [基於 User Story 的主要使用場景]
+  2. [錯誤處理驗證場景]
+  3. [邊界條件測試場景]
+- **執行命令**: [基於專案環境的標準執行命令]
 
 ### ✅ 完成檢查清單 (明確驗收)
-- [ ] DataGateway類別實作完成且可實例化
-- [ ] load_data方法可正常載入主要數據源數據
-- [ ] Examples可正常執行並展示數據載入結果
-- [ ] 錯誤處理邏輯通過邊界測試
-- [ ] API介面符合設計規範 (參數類型、回傳格式)
+- [ ] 核心功能實作完成且符合 User Story 需求
+- [ ] Examples可正常執行並展示功能
+- [ ] 錯誤處理邏輯驗證通過
+- [ ] API介面符合 SD3 設計規範
+- [ ] 與現有系統整合無衝突
 
 ### 🔗 下一段落銜接 (流程連貫)
-- **交付物**: 可運行的DataGateway和basic_data_loading.py範例
-- **下段前置**: DataGateway基礎功能驗證通過，準備擴充快取機制
+- **交付物**: 可運行的核心功能和驗證範例
+- **下段前置**: 核心功能驗證通過，準備整合其他模組
 ```
 
 #### **範例2: 整合功能段落模板**
@@ -410,15 +745,24 @@ Execution Plan生成完成後：
 
 ---
 
-**重要**: 此命令專注於段落式實作計畫書生成，為Phase 3執行提供詳細指導。SA分析規劃請使用 `/analysis-plan`，SD設計規劃請使用 `/design-plan`。
+**重要**: 此命令專注於段落式實作計畫書生成，基於 Story Design (SD1-SD4) 成果為實作提供詳細指導。完整專案設計請使用 `/story-design`。
 
-**🚨 強制要求**:
-- **🧠 必須執行智能設計分析**: 基於完整SD設計進行實作導向分析
-- **📁 必須進行檔案影響分析**: 基於SD設計和現有代碼分析實際修改檔案
-- **💻 必須生成實作模板**: 將SD設計轉換為具體可執行的程式碼框架
-- **🔗 必須展示Call Stack**: 分析和展示函數調用關係和執行順序
-- 必須設計Self-Contained功能段落，應對context限制
-- 必須設計強制Review機制，每段完成後USER REVIEW
-- 必須包含完整的Examples驅動開發策略
-- Examples必須可執行且涵蓋90%使用場景
-- 實作必須基於SD設計和智能分析結果
+**🚨 強制要求 (基於 OpenSpec 最佳實踐)**:
+- **🧠 必須執行 Story Design 分析**: 基於完整 SD1-SD4 設計進行結構化驗證和分析
+- **📁 必須進行檔案影響分析**: 基於 SD3 架構設計和現有代碼分析實際修改檔案
+- **💻 必須生成實作模板**: 將 SD3 Pseudo Code 轉換為具體可執行的程式碼框架
+- **🔗 必須展示 Call Stack**: 分析和展示基於 Story Design 的函數調用關係
+- **🎭 必須基於 User Story**: 確保所有實作都回歸到 SD1 的用戶故事
+- **📝 必須遵循 OpenSpec 格式**: 使用 `### Requirement:` 和 `#### Scenario:` 結構
+- **📝 必須使用 SHALL 語言**: 明確陳述需求和預期行為
+- **📝 必須包含驗證場景**: 每個需求都有對應的 WHEN/THEN/AND 場景
+- 必須設計 Self-Contained 功能段落，應對 context 限制
+- 必須設計強制 Review 機制，每段完成後 USER REVIEW
+- 必須包含完整的 Examples 驅動開發策略
+- Examples 必須可執行且涵蓋 90% 使用場景
+- 實作必須基於 Story Design 和智能分析結果
+
+### **📋 OpenSpec 相容性要求**
+- **結構化格式**: 文檔必須遵循 OpenSpec 的 `### Requirement:` 和 `#### Scenario:` 格式
+- **驗證機制**: 提供完整的預驗證檢查清單和錯誤修復指導
+- **工具相容**: 確保與 OpenSpec 工具鏈的相容性
