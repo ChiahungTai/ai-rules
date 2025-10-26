@@ -1,6 +1,6 @@
 # Master Plan Command - 互動式專案規劃協作
 
-為量化交易專案提供**互動式專案規劃協作**，透過 AI 與 User 的深度對話，確保核心用戶故事正確理解，並生成高品質的專案總覽計畫書。
+為軟體開發專案提供**互動式專案規劃協作**，透過 AI 與 User 的深度對話，確保核心用戶故事正確理解，並生成高品質的專案總覽計畫書。
 
 **🚨 核心理念**: 此命令專注於**互動協作**，不是單純文檔生成。AI 必須主動提問、確認需求、搜尋資料，與 User 共同打造精準的專案規劃。
 
@@ -25,8 +25,7 @@
 
 🚨 **必須按順序載入以下核心文檔：**
 1. CLAUDE.md - 基礎行為準則與環境約束
-2. docs/plans/session_notes.md - 當前任務狀態
-3. docs/ai_support/core/architect_comprehensive_guide.md - 架構指導
+2. session_notes.md - 當前任務狀態
 
 ## 🏗️ Master Plan 計畫書標準結構
 

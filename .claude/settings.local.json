@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/ctai/Github/finml/.claude/commands/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

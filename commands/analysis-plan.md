@@ -1,6 +1,6 @@
 # Analysis Plan Command - SA結構化分析計畫書生成器
 
-為量化交易專案生成**SA結構化分析計畫書**，執行 Phase 1 的深度系統分析與需求理解，專為系統理解、需求分析和技術可行性評估設計。
+為軟體開發專案生成**SA結構化分析計畫書**，執行 Phase 1 的深度系統分析與需求理解，專為系統理解、需求分析和技術可行性評估設計。
 
 **🚨 重要**: 此命令生成SA分析專精計畫書，專注於Phase 1的結構化分析方法論。系統設計請使用 `/design-plan`，實作執行請使用 `/execution-plan`。
 
@@ -67,8 +67,7 @@
 
 🚨 **必須按順序載入以下核心文檔：**
 1. CLAUDE.md - 基礎行為準則與環境約束
-2. docs/plans/session_notes.md - 當前任務狀態
-3. docs/ai_support/core/architect_comprehensive_guide.md - SA分析方法論指導
+2. session_notes.md - 當前任務狀態
 
 ## 🔍 SA結構化分析方法論核心
 
@@ -141,7 +140,7 @@ SA (Structured Analysis) 在故事驅動開發中是**系統理解的基礎**：
 - **分解規則**: 保持數據流平衡，控制複雜度
 - **輸出標準**: 每個功能分解為3-7個子功能
 
-#### **量化交易系統DFD分析重點範例**
+#### **典型軟體系統DFD分析重點範例**
 - **數據載入流程**: 數據源 → 數據處理 → 快取管理
 - **模型訓練流程**: 數據準備 → 特徵工程 → 模型訓練 → 模型評估
 - **策略回測流程**: 數據載入 → 策略計算 → 信號生成 → 績效分析
@@ -207,11 +206,11 @@ SA (Structured Analysis) 在故事驅動開發中是**系統理解的基礎**：
 #### **狀態轉換分析框架**
 系統狀態識別 → 轉換條件分析 → 狀態行為定義 → 狀態驗證
 
-#### **量化交易系統狀態分析重點範例**
-- **數據載入系統狀態**: IDLE → LOADING → CACHING → READY → ERROR
-- **模型訓練系統狀態**: INIT → TRAINING → VALIDATING → COMPLETED → FAILED
-- **策略執行系統狀態**: SETUP → RUNNING → PAUSED → COMPLETED → ERROR
-- **訂單管理系統狀態**: PENDING → SUBMITTED → FILLED → CANCELLED → REJECTED
+#### **典型軟體系統狀態分析重點範例**
+- **數據處理系統狀態**: IDLE → LOADING → PROCESSING → READY → ERROR
+- **任務執行系統狀態**: INIT → RUNNING → VALIDATING → COMPLETED → FAILED
+- **業務流程系統狀態**: SETUP → RUNNING → PAUSED → COMPLETED → ERROR
+- **事務管理系統狀態**: PENDING → SUBMITTED → PROCESSED → CANCELLED → REJECTED
 
 #### **狀態轉換條件分析**
 - **觸發條件**: 導致狀態改變的事件和條件
@@ -230,7 +229,7 @@ Level 0: 系統總功能
 └── Level 1: 主要子系統功能
 ```
 
-#### **量化交易系統功能分解範例框架**
+#### **典型軟體系統功能分解範例框架**
 - **數據管理子系統**: 數據載入、快取、驗證模組
 - **策略開發子系統**: 策略設計、回測、評估模組
 - **模型管理子系統**: 模型訓練、預測、評估模組
@@ -390,9 +389,9 @@ class [Entity2]:
 - [ ] 段落間的依賴關係明確
 
 ### **專案相關性檢查**
-- [ ] SA分析重點符合量化交易系統特徵
+- [ ] SA分析重點符合軟體系統特徵
 - [ ] 查證清單包含關鍵模組檔案
-- [ ] 分析方法適合金融數據處理特性
+- [ ] 分析方法適合數據處理特性
 
 ## 🔧 輸出和後續行動
 

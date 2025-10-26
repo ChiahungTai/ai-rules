@@ -1,6 +1,6 @@
 # Design Plan Command - SD結構化設計計畫書生成器
 
-為量化交易專案生成**SD結構化設計計畫書**，執行 Phase 2 的系統設計與架構規劃，專為系統架構設計、技術方案制定和用戶故事細化設計。
+為軟體開發專案生成**SD結構化設計計畫書**，執行 Phase 2 的系統設計與架構規劃，專為系統架構設計、技術方案制定和用戶故事細化設計。
 
 **🚨 重要**: 此命令生成SD設計專精計畫書，專注於Phase 2的結構化設計方法論。系統分析請使用 `/analysis-plan`，實作執行請使用 `/execution-plan`。
 
@@ -45,8 +45,7 @@
 
 🚨 **必須按順序載入以下核心文檔：**
 1. CLAUDE.md - 基礎行為準則與環境約束
-2. docs/plans/session_notes.md - 當前任務狀態
-3. docs/ai_support/core/architect_comprehensive_guide.md - SD設計方法論指導
+2. session_notes.md - 當前任務狀態
 
 ## 🏗️ SD結構化設計方法論核心
 
@@ -79,7 +78,7 @@ SD (Structured Design) 在故事驅動開發中是**架構設計的藍圖**：
 ### **2. 系統架構圖設計規劃**
 
 #### **分層架構設計範例** (可根據專案調整)
-**典型量化交易系統架構**：
+**典型軟體系統架構**：
 - **應用層 (Application Layer)**:
   - Web UI (視覺化應用)
   - CLI工具
