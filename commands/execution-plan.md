@@ -1,4 +1,4 @@
-# Execution Plan Command - 段落式實作計畫書生成器
+# Execution Plan - 段落式實作計畫書生成器
 
 為軟體開發專案生成**段落式實作計畫書**，基於 Story Design 的 4-Stage 設計成果，執行分段實作與品質保證，專為功能實現、Examples驅動開發和品質保證設計。
 
