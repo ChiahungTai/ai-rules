@@ -55,8 +55,7 @@
 
 🚨 **必須按順序載入以下核心文檔**：
 1. CLAUDE.md - 基礎行為準則與環境約束
-2. session_notes.md - 當前任務狀態
-3. 設計文檔 - design-plan.md/story-design.md/execution-plan.md
+2. 設計文檔 - design-plan.md/story-design.md/execution-plan.md
 
 ---
 

@@ -73,8 +73,7 @@
 
 🚨 **必須按順序載入以下核心文檔**：
 1. CLAUDE.md - 基礎行為準則與環境約束
-2. session_notes.md - 當前任務狀態
-3. Story Design 設計文檔 - SD1-SD4 完整設計成果
+2. Story Design 設計文檔 - SD1-SD4 完整設計成果
 
 ---
 
@@ -307,20 +306,13 @@ Story Design 成果 (SD1-SD4)
 
 ## 🚀 與其他命令的整合
 
-### **執行鏈路**
-```
-/story-design → /execution-plan → /impl
-```
-
 ### **命令協作模式**
 - **story-design**: 提供 SD1-SD4 設計成果
 - **execution-plan**: 基於設計成果生成段落式實作計畫書
-- **impl**: 執行具體的段落式實作
 
 ### **資訊流動**
 - **設計到實作**: Story Design → Execution Plan
-- **實作到驗證**: Execution Plan → impl → Examples 驗證
-- **驗證到調整**: impl 結果 → 調整後續段落
+- **實作到驗證**: Execution Plan → vibe coding → Examples 驗證
 
 ---
 
@@ -413,7 +405,6 @@ Story Design 成果 (SD1-SD4)
 4. **品質保證**: 段落檢查清單和驗證策略
 
 ### **後續行動建議**
-- **開始執行**: 使用 `/impl` 基於段落式計畫書執行具體實作
 - **段落優先級**: 根據依賴關係和業務價值確定執行順序
 - **持續驗證**: 每個段落完成後立即進行驗證
 - **整合測試**: 所有段落完成後進行整體整合驗證
@@ -425,8 +416,6 @@ Story Design 成果 (SD1-SD4)
 - **文檔同步**: 實作過程中同步更新設計文檔
 
 ---
-
-**重要**: 此命令專注於段落式實作計畫書生成，為段落實作提供詳細指導。系統分析請使用 `/story-design`，具體實作請使用 `/impl`。
 
 **🚨 強制要求**:
 - 段落設計必須基於 Story Design SD1-SD4 成果
