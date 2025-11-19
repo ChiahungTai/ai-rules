@@ -29,72 +29,68 @@
 - 評估分析複雜度
 - 建立 Agent 配置策略
 
-### 步驟 2: 啟動 5 個並行檢查 Agents
+### 步驟 2: 根據檢查深度啟動相應 Agents
 
-同時啟動以下 5 個專業 agents 進行獨立檢查：
+#### **快速模式 (--quick) - 5-10秒完成**
+啟動 2 個核心 agents 進行基本檢查：
 
-#### **Agent #1: 內容品質檢查**
-讀取文檔內容，檢查品質問題：
+##### **Agent #1: 基本結構檢查**
+- 檢查標題層級的基本一致性
+- 識別明顯的結構錯誤
+- 快速檢測章節缺失
 
-**具體任務**：
+##### **Agent #2: 明顯錯誤檢查**
+- 檢查基本語法錯誤和拼寫錯誤
+- 識別明顯的格式問題
+- 基本的連結有效性檢查
+
+#### **標準模式 (--standard) - 30秒內完成（預設）**
+啟動全部 5 個專業 agents 進行全面檢查：
+
+##### **Agent #1: 內容品質檢查**
 - 檢查重複內容和冗餘描述
 - 識別過時的技術資訊
 - 評估語言表達的清晰度
 - 檢測技術陳述的準確性
 - 回傳品質問題列表及嚴重程度
 
-#### **Agent #2: 結構與章節分析**
-分析文檔結構和章節組織：
-
-**具體任務**：
+##### **Agent #2: 結構與章節分析**
 - 檢查標題層級的一致性
 - 評估章節排列的邏輯性
 - 識別缺失的重要章節
 - 檢查導航結構的便利性
 - 回傳結構問題及改善建議
 
-#### **Agent #3: 連結與引用驗證**
-驗證所有連結和引用的準確性：
-
-**具體任務**：
+##### **Agent #3: 連結與引用驗證**
 - 檢查內部錨點連結的有效性
-- 驗證外部 URL 的可訪問性
+- 驗證外部 URL 的基本可訪問性
 - 確認程式碼路徑的存在性
 - 檢查引用來源的準確性
 - 回傳連結問題及修復建議
 
-#### **Agent #4: 自洽性與矛盾檢查**
-深度檢查文檔內部的一致性：
-
-**具體任務**：
+##### **Agent #4: 自洽性與矛盾檢查**
 - 識別邏輯矛盾的陳述
 - 檢查術語使用的一致性
 - 驗證版本號和規格的一致性
 - 檢查時間線陳述的一致性
 - 回傳矛盾問題及解決方案
 
-#### **Agent #5: 程式碼範例驗證**
-專門檢查程式碼範例和技術實作：
-
-**具體任務**：
-```bash
-# 檢查程式碼路徑存在性
-find . -name "referenced_file.py" -o -name "referenced_file.js"
-
-# 驗證程式碼語法正確性
-python -m py_compile referenced_file.py
-node --check referenced_file.js
-
-# 檢查程式碼與文檔的一致性
-grep -n "function_name" docs/ && grep -n "function_name" src/
-```
-
-**分析重點**：
-- 確認程式碼範例的語法正確性
+##### **Agent #5: 程式碼範例驗證**
+- 基本程式碼語法檢查
 - 驗證程式碼與描述的一致性
 - 檢查是否有過時的 API 調用
 - 識別潛在的執行錯誤
 - 回傳程式碼問題及修正建議
+
+#### **深度模式 (--deep) - 60秒內完成**
+啟動全面分析，包含外部驗證：
+
+- **標準模式的所有 5 個 Agent**
+- **額外功能**:
+  - 完整外部連結有效性驗證
+  - 程式碼可執行性測試
+  - 詳細的改進建議生成
+  - 複雜問題的合併分析
 
 ### 步驟 3: 信心評分機制（並行 Haiku agents）
 
@@ -247,44 +243,59 @@ grep -n "function_name" docs/ && grep -n "function_name" src/
 ### 基本用法
 
 ```bash
-# 1. 分析單個文檔
+# 1. 快速模式 (5-10秒完成，適合草稿檢查)
+/doc-quality-checker README.md --quick
+/doc-quality-checker docs/ --quick
+
+# 2. 標準模式 (30秒內完成，預設模式)
 /doc-quality-checker README.md
-/doc-quality-checker docs/api-guide.md
-
-# 2. 分析整個目錄
 /doc-quality-checker docs/
-/doc-quality-checker ./documentation
+/doc-quality-checker docs/ --standard
 
-# 3. 並行處理多個文檔
+# 3. 深度模式 (60秒內完成，適合重要文檔)
+/doc-quality-checker README.md --deep
+/doc-quality-checker docs/ --deep
+
+# 4. 分析單個目錄
+/doc-quality-checker docs/
+
+# 5. 並行處理多個目錄
 /doc-quality-checker docs/ specs/ --parallel
 
-# 4. 指定檢查項目
-/doc-quality-checker docs/ --check-links
-/doc-quality-checker docs/ --check-consistency
-/doc-quality-checker docs/ --check-structure
-/doc-quality-checker docs/ --comprehensive  # 全面檢查
-
-# 5. 輸出格式選項
+# 6. 輸出格式選項
 /doc-quality-checker docs/ --format json
 /doc-quality-checker docs/ --format markdown
 /doc-quality-checker docs/ --format html --output report.html
 
-# 6. 預覽模式
+# 7. 預覽模式
 /doc-quality-checker docs/ --dry-run
 ```
 
 ### 參數說明
 
-- **無參數**: 分析當前目錄的文檔品質
+#### 檢查深度控制
+- **無參數**: 使用標準模式（預設）
+- **--quick**: 快速模式 - 5-10秒完成，基本檢查
+- **--standard**: 標準模式 - 30秒內完成，全面檢查（預設）
+- **--deep**: 深度模式 - 60秒內完成，詳細分析
+
+#### 其他參數
 - **路徑參數**: 指定要分析的文檔或目錄
 - **--parallel**: 並行處理多個文檔（適用大量文檔）
 - **--check-links**: 僅檢查連結和引用
 - **--check-consistency**: 僅檢查自洽性和矛盾
 - **--check-structure**: 僅檢查結構和章節順序
-- **--comprehensive**: 執行全面檢查（預設）
 - **--format**: 輸出格式 (json/markdown/html)
-- **--output**: 指定輸出檔案路徑
+- **output**: 指定輸出檔案路徑
 - **--dry-run**: 預覽分析結果，不生成報告檔案
+
+#### 檢查模式對照表
+
+| 模式 | 時間 | 適用場景 | Agent 數量 | 檢查深度 |
+|------|------|----------|------------|----------|
+| **quick** | 5-10秒 | 草稿檢查、快速驗證 | 2個 | 基本結構 + 明顯錯誤 |
+| **standard** | 30秒 | 正式文檔檢查 | 5個 | 完整 Agent 分析 |
+| **deep** | 60秒 | 重要文檔發布前 | 5個 + 外部驗證 | 全面分析 + 改善建議 |
 
 ---
 

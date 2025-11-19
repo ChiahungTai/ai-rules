@@ -4,7 +4,8 @@
       "Read(//Users/ctai/Github/finml/.claude/commands/**)",
       "Bash(say:*)",
       "WebFetch(domain:github.com)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "SlashCommand(/explain)"
     ],
     "deny": [],
     "ask": []
