@@ -66,6 +66,23 @@ usage: /explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>
 4. 包含多種檔案類型（程式碼+配置+文檔）
 ```
 
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#6366f1',
+    'secondaryColor': '#8b5cf6',
+    'tertiaryColor': '#06b6d4',
+    'background': '#ffffff',
+    'primaryBorderColor': '#4f46e5',
+    'secondaryBorderColor': '#7c3aed',
+    'tertiaryBorderColor': '#0891b2',
+    'primaryTextColor': '#111827',
+    'secondaryTextColor': '#374151',
+    'lineColor': '#d1d5db',
+    'sectionBkgColor': '#f9fafb',
+    'altSectionBkgColor': '#f3f4f6'
+  }
+}}%%
 ### 處理模式決策流程
 ```mermaid
 graph TD
@@ -143,6 +160,23 @@ graph TD
 - **層次結構**: 多級標題，詳細展開
 - **文檔導向**: 適合長期保存和分享
 
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#6366f1',
+    'secondaryColor': '#8b5cf6',
+    'tertiaryColor': '#06b6d4',
+    'background': '#ffffff',
+    'primaryBorderColor': '#4f46e5',
+    'secondaryBorderColor': '#7c3aed',
+    'tertiaryBorderColor': '#0891b2',
+    'primaryTextColor': '#111827',
+    'secondaryTextColor': '#374151',
+    'lineColor': '#d1d5db',
+    'sectionBkgColor': '#f9fafb',
+    'altSectionBkgColor': '#f3f4f6'
+  }
+}}%%
 ### Mermaid 圖表類型
 ```mermaid
 # 流程圖
@@ -277,6 +311,23 @@ wait  # 等待視覺化任務完成
 Task report-coordinator "整合所有分析結果和視覺化輸出，生成完整的分析報告"
 ```
 
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#6366f1',
+    'secondaryColor': '#8b5cf6',
+    'tertiaryColor': '#06b6d4',
+    'background': '#ffffff',
+    'primaryBorderColor': '#4f46e5',
+    'secondaryBorderColor': '#7c3aed',
+    'tertiaryBorderColor': '#0891b2',
+    'primaryTextColor': '#111827',
+    'secondaryTextColor': '#374151',
+    'lineColor': '#d1d5db',
+    'sectionBkgColor': '#f9fafb',
+    'altSectionBkgColor': '#f3f4f6'
+  }
+}}%%
 ### 平行處理執行流程
 
 ```mermaid
@@ -327,6 +378,23 @@ def group_files_for_analysis(file_paths):
 
 ## 執行邏輯
 
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#6366f1',
+    'secondaryColor': '#8b5cf6',
+    'tertiaryColor': '#06b6d4',
+    'background': '#ffffff',
+    'primaryBorderColor': '#4f46e5',
+    'secondaryBorderColor': '#7c3aed',
+    'tertiaryBorderColor': '#0891b2',
+    'primaryTextColor': '#111827',
+    'secondaryTextColor': '#374151',
+    'lineColor': '#d1d5db',
+    'sectionBkgColor': '#f9fafb',
+    'altSectionBkgColor': '#f3f4f6'
+  }
+}}%%
 ### 簡化決策流程
 ```mermaid
 graph TD
@@ -570,6 +638,23 @@ Docker 將應用程式打包成輕量級、可移植的容器
 
 # 輸出完整 Markdown 報告：
 
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#6366f1',
+    'secondaryColor': '#8b5cf6',
+    'tertiaryColor': '#06b6d4',
+    'background': '#ffffff',
+    'primaryBorderColor': '#4f46e5',
+    'secondaryBorderColor': '#7c3aed',
+    'tertiaryBorderColor': '#0891b2',
+    'primaryTextColor': '#111827',
+    'secondaryTextColor': '#374151',
+    'lineColor': '#d1d5db',
+    'sectionBkgColor': '#f9fafb',
+    'altSectionBkgColor': '#f3f4f6'
+  }
+}}%%
 # 系統架構分析報告
 
 ## 一、整體架構概覽

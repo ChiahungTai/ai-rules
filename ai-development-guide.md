@@ -63,12 +63,94 @@
   - 檔案路徑 (如 `path/to/code.py:122-184`)
   - 具體代碼特徵 (函數名、類名、關鍵邏輯)
 
-## 🌙 Dark Theme 設計約束
+## 🎨 通用色彩設計約束
 
-**CRITICAL**: 文檔預設在 Dark Theme 下檢視
+**CRITICAL**: 文檔色彩設計必須在 Dark/Light 模式下都清晰可見
 
+### 📋 色彩選擇原則
 - **🚫 禁止**: Mermaid 自定義底色 (`style NodeName fill:#color`)
 - **✅ 使用**: Emoji 強調節點 (`[✅ 改善]` `[❌ 問題]` `[🚀 新功能]`)
+- **✅ 使用**: 統一的通用配色方案
+- **✅ 要求**: Dark/Light 模式下對比度都 ≥4.5:1
+
+### 🎨 推薦通用配色
+```yaml
+# 所有 Mermaid 圖表必須使用此配置
+universal_colors:
+  backgrounds:
+    primary: "#6366f1"      # 中性紫色 - Dark/Light 皆可
+    secondary: "#8b5cf6"    # 中性紫羅蘭色
+    tertiary: "#06b6d4"     # 中性青色
+    neutral: "#f9fafb"      # 淺灰色 - Dark 模式也清晰
+    dark: "#f3f4f6"         # 中灰色 - 適合邊框
+
+  text_colors:
+    primary: "#111827"      # 深灰色 - Light 模式清晰
+    secondary: "#374151"    # 中灰色 - Dark 模式也清晰
+    muted: "#6b7280"        # 柔和灰色
+
+  borders:
+    light: "#e5e7eb"        # 淺灰邊框
+    medium: "#d1d5db"       # 中灰邊框
+    dark: "#9ca3af"         # 深灰邊框
+```
+
+### 📐 Mermaid 標準配置
+**所有 slash commands 使用 Mermaid 圖表時，必須添加以下配置**：
+
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#6366f1',
+    'secondaryColor': '#8b5cf6',
+    'tertiaryColor': '#06b6d4',
+    'background': '#ffffff',
+    'primaryBorderColor': '#4f46e5',
+    'secondaryBorderColor': '#7c3aed',
+    'tertiaryBorderColor': '#0891b2',
+    'primaryTextColor': '#111827',
+    'secondaryTextColor': '#374151',
+    'lineColor': '#d1d5db',
+    'sectionBkgColor': '#f9fafb',
+    'altSectionBkgColor': '#f3f4f6'
+  }
+}}%%
+```
+
+### ✅ 正確範例
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#6366f1',
+    'background': '#ffffff',
+    'primaryTextColor': '#111827'
+  }
+}}%%
+graph TD
+    A[開始] --> B[處理]
+    B --> C[結束]
+```
+
+### ❌ 錯誤範例
+```mermaid
+style A fill:#fbbf24  <!-- 亮黃色，Dark 模式對比度不足 -->
+style B fill:#93c5fd  <!-- 淺藍色，Light 模式效果不佳 -->
+style C fill:#1e3a8a  <!-- 深藍色，Light 模式文字看不清 -->
+```
+
+### 🔍 通用對比度標準
+**同時適用 Dark/Light 模式的顏色**：
+- **✅ 優選**: #6366f1, #8b5cf6, #06b6d4, #10b981, #f59e0b
+- **✅ 可用**: #f9fafb, #f3f4f6, #e5e7eb, #111827, #374151
+- **🚫 避免**: 極深色 (#000000, #1a1a1a) 和 極淺色 (#ffffff, #f8f9fa)
+
+### 📋 檢查清單
+- [ ] 所有 Mermaid 圖表都有通用配置
+- [ ] 沒有使用極端深色或淺色
+- [ ] 在實際 Dark/Light 模式都測試過
+- [ ] 文字與背景對比度 ≥4.5:1（雙模式）
 
 ---
 

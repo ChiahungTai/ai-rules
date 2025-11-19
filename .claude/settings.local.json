@@ -7,7 +7,9 @@
       "Bash(python3:*)",
       "SlashCommand(/explain)",
       "Bash(tree:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
