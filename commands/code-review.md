@@ -303,12 +303,30 @@ def process_data(df, symbol):
 - 資深工程師不會指出的吹毛求疵
 
 ### 工具自動處理的問題
-- Linter、類型檢查器或編譯器會捕獲的問題：
+- **Linter、類型檢查器或編譯器會捕獲的問題**：
   - 缺少或不正確的 import
   - 類型錯誤
   - 格式問題
   - 基本風格問題（如換行符）
+  - 命名規範問題（如 C0103 invalid-name）
+  - 函數參數過多（如 R0913 too-many-arguments）
+  - 程式碼複雜度問題
 - **注意**：不需執行這些檢查，假設 CI 會處理
+
+#### 🔧 現代 Linting 工具對照
+| 工具類型 | 傳統工具 | 現代替代品 | 說明 |
+|---------|---------|-----------|------|
+| **Linting** | pylint + flake8 | **ruff** | ruff 速度快 10-100 倍，支援自動修復 |
+| **Formatting** | black | **ruff format** | 統一工具，相容 black 配置 |
+| **Import Sorting** | isort | **ruff check --select I** | 內建 import 排序功能 |
+| **Type Checking** | mypy | **mypy** | 仍推薦使用 mypy |
+
+**🚀 為什麼現代專案選擇 ruff**：
+- **極速效能**：Rust 實作，檢查速度提升 10-100 倍
+- **統一工具鏈**：一個工具取代 pylint + flake8 + isort + black
+- **自動修復**：`ruff check --fix` 直接修復多數問題
+- **配置相容**：支援現有 flake8/pylint 配置遷移
+- **IDE 整合**： VSCode、PyCharm 完整支援
 
 ### 一般性問題（除非 CLAUDE.md 明確要求）
 - 缺乏測試覆蓋
