@@ -5,7 +5,9 @@
       "Bash(say:*)",
       "WebFetch(domain:github.com)",
       "Bash(python3:*)",
-      "SlashCommand(/explain)"
+      "SlashCommand(/explain)",
+      "Bash(tree:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

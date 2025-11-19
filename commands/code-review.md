@@ -32,11 +32,11 @@ git show <commit_hash> --name-only
 - 影響的模組和功能
 - 潛在的風險點
 
-### 步驟 4: 啟動 5 個並行檢查 Agents
+### 步驟 4: 啟動 5 個並行檢查 Tasks
 
 同時啟動以下 5 個專業 agents 進行獨立檢查：
 
-#### **Agent #1: CLAUDE.md 合規性審核**
+#### **Task verification-expert: CLAUDE.md 合規性審核**
 審核變更確保符合 CLAUDE.md。**注意**：CLAUDE.md 是 Claude 編寫程式碼的指導，因此並非所有指示在程式碼審查中都適用。
 
 **具體任務**：
@@ -45,7 +45,7 @@ git show <commit_hash> --name-only
 - 確認是否遵循專案的命名規範和結構約束
 - 回傳問題列表及標記原因（如：「違反 CLAUDE.md 第三章約束」）
 
-#### **Agent #2: 明顯 Bug 掃描**
+#### **Task verification-expert: 明顯 Bug 掃描**
 讀取變更的檔案內容，進行淺層掃描以發現明顯 bug。**重要約束**：
 - 避免讀取變更之外的額外上下文，專注於變更本身
 - 專注於重大 bug，避免小問題和吹毛求疵
@@ -58,7 +58,7 @@ git show <commit_hash> --name-only
 - 專注於重大問題，忽略 lint 工具會處理的小問題
 - 回傳問題列表及標記原因（如：「邏輯錯誤」、「潛在崩潰風險」）
 
-#### **Agent #3: Git 歷史上下文分析**
+#### **Task context-analyzer: Git 歷史上下文分析**
 讀取修改程式碼的 git blame 和歷史，根據歷史上下文識別任何 bug。
 
 **具體任務**：
@@ -77,7 +77,7 @@ git log --follow --oneline <modified_files>
 - 查看相關 commits 的上下文
 - 回傳問題列表及標記原因（如：「重複歷史錯誤」、「與現有模式不一致」）
 
-#### **Agent #4: 相關 Pull Request 檢查**
+#### **Task context-analyzer: 相關 Pull Request 檢查**
 讀取之前觸及這些檔案的 Pull Requests，檢查那些 PR 上的評論是否也可能適用於當前變更。
 
 **具體任務**：
@@ -94,7 +94,7 @@ git log --oneline -- <modified_files> | head -10
 - 查看是否有未解決的技術債務
 - 回傳問題列表及標記原因（如：「類似 PR 中提及的問題」、「未解決的技術債務」）
 
-#### **Agent #5: 程式碼評論符合性檢查**
+#### **Task verification-expert: 程式碼評論符合性檢查**
 讀取修改檔案中的程式碼評論，確保變更符合評論中的任何指導。
 
 **具體任務**：
@@ -230,19 +230,19 @@ No issues found. Checked for bugs and CLAUDE.md compliance.
 
 ## 🔍 Agent 檢查結果
 
-### Agent #1: 程式碼品質檢查
+### Task verification-expert: 程式碼品質檢查
 [發現的品質問題]
 
-### Agent #2: 架構與設計檢查
+### Task verification-expert: 架構與設計檢查
 [發現的架構問題]
 
-### Agent #3: 效能與安全檢查
+### Task context-analyzer: 效能與安全檢查
 [發現的效能安全問題]
 
-### Agent #4: 測試與維護性檢查
+### Task context-analyzer: 測試與維護性檢查
 [發現的測試維護問題]
 
-### Agent #5: Git 歷史上下文檢查
+### Task verification-expert: Git 歷史上下文檢查
 [歷史相關問題]
 
 ## 🚀 問題分類與建議

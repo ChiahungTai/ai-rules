@@ -1,0 +1,83 @@
+# AI Rules Project Configuration
+
+project:
+  name: "ai-rules"
+  description: "AI 協作開發指南和最佳實踐專案"
+  version: "1.0.0"
+
+# Agent 設定
+agents:
+  # 全域設定
+  global:
+    communication_language: "繁體中文"
+    communication_style: "專業但親切"
+    output_folder: "./analysis"
+
+  # 個別 agent 設定
+  content-analyzer:
+    analysis_depth: "deep"
+    quality_threshold: 0.8
+    focus_areas: ["logic", "consistency", "professionalism"]
+
+  structure-analyzer:
+    exclude_patterns: [".git", "node_modules", "__pycache__", ".vscode"]
+    max_depth: 10
+    dependency_analysis: true
+
+  context-analyzer:
+    git_analysis_depth: 50
+    include_external_docs: true
+    pr_analysis_limit: 10
+
+  verification-expert:
+    strict_mode: true
+    auto_fix_minor: false
+    compliance_standards: ["commonmark", "project-specific"]
+
+  visualization-specialist:
+    default_chart_type: "mermaid"
+    ascii_fallback: true
+    color_scheme: "dark"
+
+  content-processor:
+    distillation_ratio: 0.3  # 保留 30% 核心內容
+    preserve_context: true
+    indexing_depth: 3
+
+  report-coordinator:
+    priority_matrix: "impact_vs_effort"
+    conflict_resolution: "evidence_based"
+    synthesis_level: "comprehensive"
+
+# 工作流程設定
+workflows:
+  parallel_analysis:
+    min_files: 5
+    auto_trigger: true
+
+  sequential_review:
+    required_agents: ["verification-expert"]
+
+  coordinated_output:
+    final_review: true
+    timestamp_reports: true
+
+# 輸出設定
+output:
+  report_format: "markdown"
+  include_timestamps: true
+  backup_previous: true
+  compression_threshold: 100  # KB
+
+# 品質設定
+quality:
+  min_analysis_score: 0.7
+  require_evidence: true
+  conflict_detection: true
+
+# 整合設定
+integrations:
+  git_history: true
+  external_docs: true
+  web_fetch: true
+  system_commands: "restricted"
