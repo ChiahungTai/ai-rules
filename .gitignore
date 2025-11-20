@@ -17,5 +17,5 @@
 *.tmp.claude/settings.local.json
 
 # AI agents
-.claude/settings.local.json
-.claude/*.tmp.claude/
+.claude/
+
