@@ -21,64 +21,114 @@
 
 ---
 
-## 🚀 多 Agent 工作流程
+## 🚀 並行處理工作流程（按檔案切分原則）
 
-### 步驟 1: 文檔掃描與初始分析
-首先掃描目標文檔或目錄，建立分析計畫：
-- 識別文檔類型和數量
-- 評估分析複雜度
-- 建立 Agent 配置策略
+### 核心設計原則
+**✅ 按檔案切分**：每個 Task 處理一個或少量相關檔案，避免重複讀取
+**✅ 功能整合**：每個 Task 內部整合所有檢查能力（內容+結構+驗證）
+**✅ 無依賴關係**：所有檔案分析可同時進行
+**✅ 動態Task數量**：根據檔案數量智能調整並行度
 
-### 步驟 2: 根據檢查深度啟動相應 Tasks
+### 步驟 1: 智能檔案分組
+根據目標檔案數量和類型，自動分組以達到最佳並行效果：
 
-#### **快速模式 (--quick) - 5-10秒完成**
-啟動 2 個核心 Tasks 進行基本檢查：
+```python
+# 檔案分組算法
+def group_files_for_quality_check(file_paths):
+    """智能分組檔案以進行並行品質檢查"""
 
-```bash
-Task structure-analyzer "檢查標題層級基本一致性，識別明顯結構錯誤，快速檢測章節缺失" &
+    if len(file_paths) <= 5:
+        # 少量檔案：單一處理
+        return [[file] for file in file_paths]
 
-Task verification-expert "檢查基本語法錯誤和拼寫錯誤，識別明顯格式問題，內部連結有效性檢查（僅限本地檔案）" &
+    elif len(file_paths) <= 15:
+        # 中等檔案：按類型分組，每組2-3個檔案
+        groups = []
+        current_group = []
 
-wait
+        for file in sorted(file_paths):
+            if len(current_group) >= 3:
+                groups.append(current_group)
+                current_group = [file]
+            else:
+                current_group.append(file)
+
+        if current_group:
+            groups.append(current_group)
+        return groups
+
+    else:
+        # 大量檔案：按大小和類型分組，每組3-5個檔案
+        # 確保每組工作量相近，避免負載不均
+        return balanced_grouping(file_paths, max_group_size=5)
 ```
 
-#### **標準模式 (--standard) - 30秒內完成（預設）**
-啟動全部 4 個專業 Tasks 進行本地檔案全面檢查：
+### 步驟 2: 並行檔案分析
+
+#### **快速模式 (--quick) - 每組5-10秒**
+基礎檢查，專注關鍵問題：
 
 ```bash
-Task content-analyzer "檢查重複內容和冗餘描述，識別過時技術資訊，評估語言表達清晰度，檢測技術陳述準確性" &
-
-Task structure-analyzer "檢查標題層級一致性，評估章節排列邏輯性，識別缺失重要章節，檢查導航結構便利性" &
-
-Task verification-expert "檢查內部錨點連結有效性，確認程式碼路徑存在性，檢查引用來源準確性，限制於本地檔案檢查" &
-
-Task content-analyzer "識別邏輯矛盾陳述，檢查術語使用一致性，驗證版本號和規格一致性，檢查時間線陳述一致性" &
+# 假設檢測到 8 個文檔檔案，分為 3 組
+Task 1: 處理檔案組 [docs/api.md, docs/guide.md] "基礎結構和語法檢查" &
+Task 2: 處理檔案組 [README.md, CHANGELOG.md] "基本連結和格式檢查" &
+Task 3: 處理檔案組 [specs/requirements.md, specs/design.md] "規格文檔基本驗證" &
 
 wait
 
-# 程式碼範例驗證
-Task verification-expert "基本程式碼語法檢查，驗證程式碼與描述一致性，檢查過時 API 調用，識別潛在執行錯誤，僅限本地驗證"
+# 最終整合
+Task report-coordinator "整合所有基礎檢查結果，生成快速品質報告"
 ```
 
-#### **深度模式 (--deep) - 60秒內完成**
-啟動全面分析，包含外部驗證和深度檢查：
+#### **標準模式 (--standard) - 每組20-30秒（預設）**
+全面本地檔案檢查：
 
 ```bash
-# 執行標準模式的所有 Tasks + 外部驗證
-Task content-analyzer "檢查重複內容和冗餘描述，識別過時技術資訊，評估語言表達清晰度，檢測技術陳述準確性" &
+# 智能分組後的並行處理
+Task 1: 處理檔案組 [docs/api.md, docs/examples.md] "
+  - 內容品質：重複檢查、術語一致性、技術準確性
+  - 結構分析：標題層級、章節邏輯、導航便利性
+  - 驗證檢查：內部連結、程式碼路徑、引用準確性
+" &
 
-Task structure-analyzer "檢查標題層級一致性，評估章節排列邏輯性，識別缺失重要章節，檢查導航結構便利性" &
+Task 2: 處理檔案組 [README.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md] "
+  - 內容品質：專案描述一致性、貢獻指南清晰度
+  - 結構分析：文檔層次、資訊組織
+  - 驗證檢查：錨點連結、檔案引用
+" &
 
-Task verification-expert "完整外部連結有效性驗證（包含 HTTP 狀態檢查、網站可達性驗證），程式碼可執行性測試，外部資源可用性檢查，識別潛在執行錯誤" &
+Task 3: 處理檔案組 [specs/, requirements/] "
+  - 內容品質：規格一致性、版本同步性
+  - 結構分析：規格文檔標準化程度
+  - 驗證檢查：技術實作路徑、依賴關係
+" &
 
-Task content-analyzer "識別邏輯矛盾陳述，檢查術語使用一致性，驗證版本號和規格一致性，檢查時間線陳述一致性" &
-
-Task verification-expert "基本程式碼語法檢查，驗證程式碼與描述一致性，檢查過時 API 調用，識別潛在執行錯誤，包含外部 API 調用驗證" &
+Task 4: 處理檔案組 [ai-rules/, .claude/] "
+  - 內容品質：AI工具配置一致性、規則邏輯性
+  - 結構分析：配置檔案組織、導航清晰度
+  - 驗證檢查：命令語法、路徑引用
+" &
 
 wait
 
-# 生成詳細的改進建議
-Task report-coordinator "整合所有檢查結果（包含外部驗證報告），生成詳細的改進建議，進行複雜問題的合併分析"
+# 生成綜合報告
+Task report-coordinator "整合所有分析結果，生成詳細品質評估報告和優先級改進建議"
+```
+
+#### **深度模式 (--deep) - 每組45-60秒**
+包含外部驗證的深度分析：
+
+```bash
+# 執行所有標準檢查 + 外部驗證
+Task 1: 處理檔案組 [docs/] "完整分析 + 外部連結驗證 + 程式碼可執行性測試" &
+Task 2: 處理檔案組 [specs/] "完整分析 + API端點驗證 + 實作可行性檢查" &
+Task 3: 處理檔案組 [examples/] "完整分析 + 範例程式碼執行驗證 + 依賴檢查" &
+... (其他檔案組)
+
+wait
+
+# 高級分析和建議
+Task report-coordinator "整合深度分析結果，生成包含外部驗證狀態的完整品質報告和實施路線圖"
 ```
 
 ### 步驟 3: 信心評分機制
@@ -229,54 +279,63 @@ Task report-coordinator "整合所有檢查結果（包含外部驗證報告）�
 
 ## 🔧 命令介面設計
 
-### 基本用法
+### 基本用法（自動並行處理）
 
 ```bash
-# 1. 快速模式 (5-10秒完成，適合草稿檢查 - 僅本地檔案)
+# 1. 快速模式 - 基礎檢查（按檔案自動分組，每組5-10秒）
 /doc-quality-checker README.md --quick
-/doc-quality-checker docs/ --quick
+/doc-quality-checker docs/ --quick           # 自動分組並行處理
 
-# 2. 標準模式 (30秒內完成，預設模式 - 僅本地檔案檢查)
+# 2. 標準模式 - 全面檢查（預設，按檔案自動分組，每組20-30秒）
 /doc-quality-checker README.md
 /doc-quality-checker docs/
-/doc-quality-checker docs/ --standard
+/doc-quality-checker docs/ specs/ ai-rules/  # 多目錄自動並行
 
-# 3. 深度模式 (60秒內完成，包含外部驗證)
-/doc-quality-checker README.md --deep
+# 3. 深度模式 - 外部驗證（按檔案自動分組，每組45-60秒）
 /doc-quality-checker docs/ --deep
 
-# 4. 分析單個目錄
-/doc-quality-checker docs/
+# 4. 單檔案精確檢查
+/doc-quality-checker docs/api.md --single    # 跳過分組，單獨處理
 
-# 5. 並行處理多個目錄
-/doc-quality-checker docs/ specs/ --parallel
+# 5. 自定義輸出
+/doc-quality-checker docs/ --format json --output custom-report.html
+/doc-quality-checker docs/ --dry-run         # 預覽分組結果
+```
 
-# 6. 輸出格式選項
-/doc-quality-checker docs/ --format json
-/doc-quality-checker docs/ --format markdown
-/doc-quality-checker docs/ --format html --output ai-analysis/quality-reports/quality-report.html
+### 智能並行處理特性
 
-# 7. 預覽模式
-/doc-quality-checker docs/ --dry-run
+#### **自動檔案分組**
+- **檢測檔案數量**：自動掃描目標路徑，統計待分析檔案
+- **智能分組策略**：
+  - 1-5個檔案：單獨處理
+  - 6-15個檔案：按類型分組（每組2-3個）
+  - 16+個檔案：按大小+類型分組（每組3-5個）
+
+#### **動態Task數量**
+```bash
+# 範例：處理不同規模的文檔集合
+/doc-quality-checker docs/              # 8個檔案 → 3個並行Tasks
+/doc-quality-checker docs/ specs/       # 15個檔案 → 5個並行Tasks
+/doc-quality-checker docs/ specs/ ai/   # 25個檔案 → 8個並行Tasks
 ```
 
 ### 參數說明
 
-#### 檢查深度控制
-- **無參數**: 使用標準模式（預設）
-- **--quick**: 快速模式 - 5-10秒完成，基本檢查
-- **--standard**: 標準模式 - 30秒內完成，全面檢查（預設）
-- **--deep**: 深度模式 - 60秒內完成，詳細分析
+#### **檢查深度控制**
+- **無參數**: 標準模式（預設）- 完整本地檔案檢查
+- **--quick**: 快速模式 - 基礎檢查，關鍵問題識別
+- **--deep**: 深度模式 - 包含外部連結驗證和程式碼執行測試
 
-#### 其他參數
-- **路徑參數**: 指定要分析的文檔或目錄
-- **--parallel**: 並行處理多個文檔（適用大量文檔）
-- **--check-links**: 僅檢查連結和引用
-- **--check-consistency**: 僅檢查自洽性和矛盾
-- **--check-structure**: 僅檢查結構和章節順序
+#### **並行處理控制**
+- **--single**: 單檔案模式，跳過自動分組
+- **--max-tasks N**: 限制最大並行Task數量（預設10個）
+- **--group-size N**: 設定每組最大檔案數量（預設5個）
+
+#### **輸出控制**
 - **--format**: 輸出格式 (json/markdown/html)
-- **output**: 指定輸出檔案路徑（預設輸出到 ai-analysis/quality-reports/）
-- **--dry-run**: 預覽分析結果，不生成報告檔案
+- **--output**: 自定義輸出路徑
+- **--dry-run**: 預覽分組結果和執行計畫
+- **--verbose**: 顯示詳細的並行執行過程
 
 #### 檢查模式對照表
 

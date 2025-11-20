@@ -9,51 +9,107 @@
 - **索引生成**: 自動生成和更新 INDEX.md
 - **品質保證**: 確保文檔結構一致和內容品質
 
-## 🚀 多 Task 工作流程
+## 🚀 動態並行處理工作流程（按檔案切分）
 
-### 階段 1: 文檔現況分析
-首先啟動分析 Tasks 評估文檔現況：
+### 智能文檔分組與動態Task生成
 
+```python
+def create_document_management_tasks(target_paths: List[str]) -> ManagementPlan:
+    """
+    根據實際文檔數量和類型，動態生成並行處理任務
+
+    動態分組策略：
+    - 1-5個檔案：單獨處理，每檔案一個Task
+    - 6-15個檔案：按類型分組，每組2-3個檔案
+    - 16+個檔案：按目錄+類型分組，每組3-5個檔案
+    """
+
+    # 1. 掃描目標路徑，收集所有文檔
+    all_docs = scan_documents(target_paths)
+
+    # 2. 按類型和大小智能分組
+    doc_groups = intelligent_document_grouping(all_docs)
+
+    # 3. 動態生成並行Tasks
+    tasks = []
+    for group in doc_groups:
+        task = create_document_task(group)
+        tasks.append(task)
+
+    return ManagementPlan(tasks=tasks, estimated_time=calculate_time(tasks))
+```
+
+### 階段 1: 按檔案分組並行分析
+**根據實際檔案數量動態調整Task數量**
+
+#### **小型專案（1-5個文檔）**
 ```bash
-# 並行執行文檔掃描和品質評估
-Task structure-analyzer "掃描目標目錄，收集文檔統計資訊，進行文檔數量和類型分析，檔案大小和修改時間統計，重複檔案識別，結構混亂程度評估" &
-
-Task content-analyzer "評估各文檔的內容品質，進行重複內容比例檢測，過時內容識別，矛盾陳述分析，結構一致性檢查" &
-
-Task context-analyzer "分析 lessons 和 distill 流程產出的文檔，進行技術決策完整性評估，Tradeoff 分析覆蓋度，決策連貫性檢查，重要決策遺漏識別" &
+# 每個文檔單獨處理
+Task 1: 處理 [README.md] "完整分析：結構+內容品質+上下文檢查" &
+Task 2: 處理 [CONTRIBUTING.md] "完整分析：結構+內容品質+上下文檢查" &
+Task 3: 處理 [specs/requirements.md] "完整分析：技術規格檢查+蒸餾評估" &
+Task 4: 處理 [docs/api.md] "完整分析：文檔品質+導航檢查" &
+Task 5: 處理 [ai-rules/CLAUDE.md] "完整分析：AI工具配置+規則一致性" &
 
 wait
 ```
 
-### 階段 2: 蒸餾與清理
-
+#### **中型專案（6-15個文檔）**
 ```bash
-# 並行執行各類內容處理
-Task content-processor "基於 /distill-spec.md 處理 specs/ 目錄，執行蒸餾流程，解決版本矛盾和重複，提煉核心技術決策，重組文檔結構" &
-
-Task content-processor "基於 /distill-claude.md 處理 CLAUDE.md 檔案，執行蒸餾流程，提煉核心開發原則，去除冗餘實作細節，保留 AI 導航資訊" &
-
-Task content-processor "基於 /lessons.md 處理知識提取，分析對話歷史中的新知識，識別未記錄的重要決策，提取新的技術規格，更新相關文檔" &
+# 按類型分組，每組2-3個文檔
+Task 1: 處理 [README.md, CHANGELOG.md, LICENSE] "專案核心文檔分析" &
+Task 2: 處理 [specs/, requirements/] "技術規格文檔深度分析" &
+Task 3: 處理 [docs/, guides/, tutorials/] "用戶文檔品質檢查" &
+Task 4: 處理 [ai-rules/, .claude/] "AI工具配置一致性檢查" &
+Task 5: 處理 [examples/, demos/] "範例文檔有效性驗證" &
 
 wait
 ```
 
-### 階段 3: 索引生成與整理
-
+#### **大型專案（16+個文檔）**
 ```bash
-# 並行執行索引生成和結構優化
-Task content-processor "參考 bmad 的 index-docs.xml 生成索引，掃描 ai-specs/ 和 ai-docs/ 目錄，按類型和用途分組文檔，生成準確的文檔描述，建立清晰的導航結構，輸出到 ai-docs/INDEX.md" &
-
-Task structure-analyzer "優化整體文檔結構，統一模板和格式，改善導航和連結，確保邏輯層次，提升可讀性" &
+# 按目錄和大小智能分組，最多10個並行Tasks
+Task 1: 處理 [specs/core/] "核心技術規格分析+蒸餾建議" &
+Task 2: 處理 [specs/api/] "API規格文檔分析+一致性檢查" &
+Task 3: 處理 [docs/user-guide/] "用戶指南品質+結構優化" &
+Task 4: 處理 [docs/developer/] "開發者文檔+技術深度評估" &
+Task 5: 處理 [ai-rules/commands/] "命令工具配置檢查" &
+Task 6: 處理 [ai-rules/agents/] "AI代理配置一致性" &
+Task 7: 處理 [examples/] "範例代碼+文檔配對檢查" &
+Task 8: 處理 [lessons.md, distill-*] "知識蒸餾文檔分析" &
+Task 9: 處理 [根目錄配置檔案] "專案配置一致性檢查" &
+Task 10: 處理 [INDEX.md files] "索引檔案完整性和準確性" &
 
 wait
 ```
 
-### 階段 4: 整合報告
-
+### 階段 2: 專門化蒸餾處理（按檔案類型）
 ```bash
-# 生成最終的管理報告
-Task report-coordinator "整合所有分析結果和處理效果，生成文檔管理總結報告，提供後續維護建議"
+# 根據分析結果，對不同類型文檔進行專門化蒸餾
+Task 1 (content-processor): 處理所有 specs/ 檔案 "技術規格蒸餾：版本同步、矛盾解決、核心決策提煉" &
+Task 2 (content-processor): 處理所有 CLAUDE.md 檔案 "AI導航蒸餾：原則提煉、配置優化、實作細節精簡" &
+Task 3 (content-processor): 處理所有 lessons 相關檔案 "知識提取蒸餾：新決策識別、技術規格更新、經驗沉澱" &
+Task 4 (content-processor): 處理所有文檔檔案 "文檔品質蒸餾：結構優化、內容精煉、表達清晰化" &
+
+wait
+```
+
+### 階段 3: 索引生成與結構優化（按目標目錄）
+```bash
+# 按目標目錄並行生成索引
+Task 1: 生成 specs/INDEX.md "技術規格索引：分類、描述、導航" &
+Task 2: 生成 docs/INDEX.md "用戶文檔索引：主題、難度、學習路徑" &
+Task 3: 生成 ai-docs/INDEX.md "AI工具索引：功能、使用場景、配置指南" &
+Task 4: 更新根目錄 INDEX.md "總體索引：跨目錄導航、快速查找" &
+Task 5: 優化整體文檔結構 "導航改善、連結檢查、模板統一" &
+
+wait
+```
+
+### 階段 4: 整合報告與建議
+```bash
+# 最終整合，生成綜合管理報告
+Task report-coordinator "整合所有分析和處理結果，生成文檔健康報告、維護建議、優化路線圖"
 ```
 
 ---
