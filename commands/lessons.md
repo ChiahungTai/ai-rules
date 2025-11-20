@@ -162,7 +162,7 @@ Spec 是技術規格文檔，記錄重要的技術決策和實作標準：
 /lessons --since "2024-01-01"  # 指定日期之後
 
 # 5. Spec 萃取功能
-/lessons --spec              # 同時萃取 spec 並生成至 specs/ 目錄
+/lessons --spec              # 同時萃取 spec 並生成至 ai-specs/ 目錄
 /lessons --spec-only         # 只萃取 spec，不生成 CLAUDE.md
 /lessons --spec-format api   # 指定 spec 格式：api, design, deployment
 

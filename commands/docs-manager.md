@@ -42,7 +42,7 @@ wait
 
 ```bash
 # 並行執行索引生成和結構優化
-Task content-processor "參考 bmad 的 index-docs.xml 生成索引，掃描 specs/ 和 docs/ 目錄，按類型和用途分組文檔，生成準確的文檔描述，建立清晰的導航結構" &
+Task content-processor "參考 bmad 的 index-docs.xml 生成索引，掃描 ai-specs/ 和 ai-docs/ 目錄，按類型和用途分組文檔，生成準確的文檔描述，建立清晰的導航結構，輸出到 ai-docs/INDEX.md" &
 
 Task structure-analyzer "優化整體文檔結構，統一模板和格式，改善導航和連結，確保邏輯層次，提升可讀性" &
 
@@ -121,7 +121,7 @@ Task report-coordinator "整合所有分析結果和處理效果，生成文檔�
    ✓新規格: 5 項技術要求
 
 📋 階段 3: 索引生成與整理
-🗂️ Task content-processor - INDEX 生成: 建立 specs/INDEX.md
+🗂️ Task content-processor - INDEX 生成: 建立 ai-docs/INDEX.md
    ✓索引條目: 18 個文檔，4 個分類
 🔗 Task structure-analyzer - 結構優化: 改善導航和連結
    ✓優化完成: 統一模板，改善連結

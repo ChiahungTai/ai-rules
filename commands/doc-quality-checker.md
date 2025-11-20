@@ -37,48 +37,48 @@
 ```bash
 Task structure-analyzer "檢查標題層級基本一致性，識別明顯結構錯誤，快速檢測章節缺失" &
 
-Task verification-expert "檢查基本語法錯誤和拼寫錯誤，識別明顯格式問題，基本連結有效性檢查" &
+Task verification-expert "檢查基本語法錯誤和拼寫錯誤，識別明顯格式問題，內部連結有效性檢查（僅限本地檔案）" &
 
 wait
 ```
 
 #### **標準模式 (--standard) - 30秒內完成（預設）**
-啟動全部 4 個專業 Tasks 進行全面檢查：
+啟動全部 4 個專業 Tasks 進行本地檔案全面檢查：
 
 ```bash
 Task content-analyzer "檢查重複內容和冗餘描述，識別過時技術資訊，評估語言表達清晰度，檢測技術陳述準確性" &
 
 Task structure-analyzer "檢查標題層級一致性，評估章節排列邏輯性，識別缺失重要章節，檢查導航結構便利性" &
 
-Task verification-expert "檢查內部錨點連結有效性，驗證外部 URL 基本可訪問性，確認程式碼路徑存在性，檢查引用來源準確性" &
+Task verification-expert "檢查內部錨點連結有效性，確認程式碼路徑存在性，檢查引用來源準確性，限制於本地檔案檢查" &
 
 Task content-analyzer "識別邏輯矛盾陳述，檢查術語使用一致性，驗證版本號和規格一致性，檢查時間線陳述一致性" &
 
 wait
 
 # 程式碼範例驗證
-Task verification-expert "基本程式碼語法檢查，驗證程式碼與描述一致性，檢查過時 API 調用，識別潛在執行錯誤"
+Task verification-expert "基本程式碼語法檢查，驗證程式碼與描述一致性，檢查過時 API 調用，識別潛在執行錯誤，僅限本地驗證"
 ```
 
 #### **深度模式 (--deep) - 60秒內完成**
-啟動全面分析，包含外部驗證：
+啟動全面分析，包含外部驗證和深度檢查：
 
 ```bash
-# 執行標準模式的所有 Tasks
+# 執行標準模式的所有 Tasks + 外部驗證
 Task content-analyzer "檢查重複內容和冗餘描述，識別過時技術資訊，評估語言表達清晰度，檢測技術陳述準確性" &
 
 Task structure-analyzer "檢查標題層級一致性，評估章節排列邏輯性，識別缺失重要章節，檢查導航結構便利性" &
 
-Task verification-expert "完整外部連結有效性驗證，程式碼可執行性測試，識別潛在執行錯誤" &
+Task verification-expert "完整外部連結有效性驗證（包含 HTTP 狀態檢查、網站可達性驗證），程式碼可執行性測試，外部資源可用性檢查，識別潛在執行錯誤" &
 
 Task content-analyzer "識別邏輯矛盾陳述，檢查術語使用一致性，驗證版本號和規格一致性，檢查時間線陳述一致性" &
 
-Task verification-expert "基本程式碼語法檢查，驗證程式碼與描述一致性，檢查過時 API 調用，識別潛在執行錯誤" &
+Task verification-expert "基本程式碼語法檢查，驗證程式碼與描述一致性，檢查過時 API 調用，識別潛在執行錯誤，包含外部 API 調用驗證" &
 
 wait
 
 # 生成詳細的改進建議
-Task report-coordinator "整合所有檢查結果，生成詳細的改進建議，進行複雜問題的合併分析"
+Task report-coordinator "整合所有檢查結果（包含外部驗證報告），生成詳細的改進建議，進行複雜問題的合併分析"
 ```
 
 ### 步驟 3: 信心評分機制
@@ -232,16 +232,16 @@ Task report-coordinator "整合所有檢查結果，生成詳細的改進建議�
 ### 基本用法
 
 ```bash
-# 1. 快速模式 (5-10秒完成，適合草稿檢查)
+# 1. 快速模式 (5-10秒完成，適合草稿檢查 - 僅本地檔案)
 /doc-quality-checker README.md --quick
 /doc-quality-checker docs/ --quick
 
-# 2. 標準模式 (30秒內完成，預設模式)
+# 2. 標準模式 (30秒內完成，預設模式 - 僅本地檔案檢查)
 /doc-quality-checker README.md
 /doc-quality-checker docs/
 /doc-quality-checker docs/ --standard
 
-# 3. 深度模式 (60秒內完成，適合重要文檔)
+# 3. 深度模式 (60秒內完成，包含外部驗證)
 /doc-quality-checker README.md --deep
 /doc-quality-checker docs/ --deep
 
@@ -254,7 +254,7 @@ Task report-coordinator "整合所有檢查結果，生成詳細的改進建議�
 # 6. 輸出格式選項
 /doc-quality-checker docs/ --format json
 /doc-quality-checker docs/ --format markdown
-/doc-quality-checker docs/ --format html --output report.html
+/doc-quality-checker docs/ --format html --output ai-analysis/quality-reports/quality-report.html
 
 # 7. 預覽模式
 /doc-quality-checker docs/ --dry-run
@@ -275,7 +275,7 @@ Task report-coordinator "整合所有檢查結果，生成詳細的改進建議�
 - **--check-consistency**: 僅檢查自洽性和矛盾
 - **--check-structure**: 僅檢查結構和章節順序
 - **--format**: 輸出格式 (json/markdown/html)
-- **output**: 指定輸出檔案路徑
+- **output**: 指定輸出檔案路徑（預設輸出到 ai-analysis/quality-reports/）
 - **--dry-run**: 預覽分析結果，不生成報告檔案
 
 #### 檢查模式對照表

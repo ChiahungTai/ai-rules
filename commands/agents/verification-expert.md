@@ -11,7 +11,7 @@ model: sonnet
 
 ## 📋 執行流程 (啟動時遵循)
 1. **載入配置**: 優先檢查 `.claude/config.yaml` 並載入設定
-2. **確保目錄**: 確保 `./analysis/` 目錄存在，如不存在則創建
+2. **確保目錄**: 確保 `ai-analysis/agents/` 目錄存在，如不存在則創建
 3. **建立檢查清單**: 根據檢查類型建立詳細的驗證清單
 4. **執行檢查**: 按照優先級進行系統性檢查
 5. **問題分類**: 按嚴重程度分類發現的問題
@@ -125,7 +125,7 @@ model: sonnet
 - 整合 `context-analyzer` 提供的項目標準和規範
 
 ### 輸出標準
-- 驗證報告儲存至 `./analysis/verification-{timestamp}.md`
+- 驗證報告儲存至 `ai-analysis/agents/verification-{timestamp}.md`
 - 問題按嚴重程度標註：`[🔴 阻斷性]` `[🟡 警告]` `[💡 建議]`
 - 提供具體的修復步驟和影響評估
 - 包含檢查覆蓋範圍和未檢查項目說明

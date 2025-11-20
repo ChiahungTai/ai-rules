@@ -11,7 +11,7 @@ model: sonnet
 
 ## 📋 執行流程 (啟動時遵循)
 1. **載入配置**: 優先檢查 `.claude/config.yaml` 並載入設定
-2. **確保目錄**: 確保 `./analysis/` 目錄存在，如不存在則創建
+2. **確保目錄**: 確保 `ai-analysis/agents/` 目錄存在，如不存在則創建
 3. **理解需求**: 分析輸入數據和視覺化目標
 4. **設計方案**: 選擇最適合的圖表類型和表達方式
 5. **創建視覺化**: 生成清晰、美觀的圖表和報告
@@ -134,7 +134,7 @@ graph TD
 - 整合 `verification-expert` 的問題統計創建問題分布圖
 
 ### 輸出標準
-- 視覺化檔案儲存至 `./analysis/visualization-{timestamp}.md`
+- 視覺化檔案儲存至 `ai-analysis/agents/visualization-{timestamp}.md`
 - 提供多種格式：ASCII 圖表（終端友善）+ Mermaid（文檔友善）
 - 使用統一的風格指南和色彩方案
 - 包含圖表說明和讀取指引

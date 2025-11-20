@@ -28,7 +28,7 @@ usage: /explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>
 - **圖表類型**: Mermaid 圖表
 - **內容長度**: 詳盡完整
 - **輸出格式**: 自動儲存為 Markdown 檔案
-- **儲存位置**: 專案目錄下 (`./analysis/` 或 `./docs/generated/`)
+- **儲存位置**: 專案目錄下 (`ai-analysis/reports/`)
 - **適用場景**: 文檔記錄、深度分析、知識沉澱
 
 ## 使用方式
@@ -36,19 +36,19 @@ usage: /explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>
 ```bash
 # 單一主題解釋（預設 Console 模式）
 /explain 微服務架構
-/explain md Kubernetes 叢集管理     # 生成: ./analysis/kubernetes-叢集管理.md
+/explain md Kubernetes 叢集管理     # 生成: ai-analysis/reports/kubernetes-叢集管理-analysis.md
 
 # 目錄分析（自動檢測檔案數量）
 /explain @src/components/          # Console 輸出
-/explain md @docs/                 # 生成: ./analysis/docs-分析報告.md
+/explain md @docs/                 # 生成: ai-analysis/reports/docs-analysis.md
 
 # 多檔案分析（自動觸發平行處理）
 /explain @file1.js @file2.js @config.json
-/explain md @src/ @tests/          # 生成: ./analysis/src-tests-架構分析.md
+/explain md @src/ @tests/          # 生成: ai-analysis/reports/src-tests-analysis.md
 
 # 自定義檔名
 /explain md @architecture/ --output "系統架構分析.md"
-/explain md @api/ --output ./docs/api-接口分析.md
+/explain md @api/ --output ai-analysis/reports/api-analysis.md
 
 # 進階分析
 /explain md 深度分析整個專案架構 @src/
@@ -464,10 +464,10 @@ graph TD
 
 ### 儲存路徑策略
 ```bash
-# 自動決定儲存路徑：
-1. 檢查是否存在 ./docs/ 目錄 → 是 → 儲存到 ./docs/generated/
-2. 檢查是否存在 ./analysis/ 目錄 → 是 → 儲存到 ./analysis/
-3. 兩者都不存在 → 建立 ./analysis/ 目錄並儲存
+# 統一儲存路徑：
+- 預設位置：ai-analysis/reports/
+- 自定義路徑：使用 --output 參數指定完整路徑
+- 自動建立：確保 ai-analysis/reports/ 目錄存在
 ```
 
 ### 檔名生成規則

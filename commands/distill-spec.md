@@ -105,17 +105,17 @@ specs/                     specs/
 /distill-spec
 
 # 2. 蒸餾指定路徑的 spec 文檔
-/distill-spec specs/modules
-/distill-spec specs/watchlist-spec.md
-/distill-spec ./specs
+/distill-spec ai-specs/modules
+/distill-spec ai-specs/watchlist-spec.md
+/distill-spec ./ai-specs
 
 # 3. 預覽模式（不實際修改檔案）
 /distill-spec --dry-run
-/distill-spec specs/modules --dry-run
+/distill-spec ai-specs/modules --dry-run
 
 # 4. 指定蒸餾程度
 /distill-spec --aggressive       # 高純度蒸餾，只保留決策精華
-/distill-spec specs/watchlist-spec.md --moderate      # 標準蒸餾，平衡精華與細節
+/distill-spec ai-specs/watchlist-spec.md --moderate      # 標準蒸餾，平衡精華與細節
 /distill-spec --conservative    # 輕度蒸餾，只去除重複和矛盾
 
 # 5. 特定功能
@@ -139,7 +139,7 @@ specs/                     specs/
 ### 輸出範例
 
 ```
-🔥 開始蒸餾 specs/modules/watchlist-spec.md...
+🔥 開始蒸餾 ai-specs/modules/watchlist-spec.md...
    📊 原料狀態: 523 行，8 個主要章節
    ⚠️  檢測到冗餘濃度過高，建議執行蒸餾提純
 
