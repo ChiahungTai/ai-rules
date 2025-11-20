@@ -126,6 +126,7 @@ model: sonnet
 
 ### 輸出標準
 - 驗證報告儲存至 `ai-analysis/agents/verification-{timestamp}.md`
+  - **時間戳格式**: `YYYY-MM-DD-HHmmss` (例: 2025-11-20-143022)
 - 問題按嚴重程度標註：`[🔴 阻斷性]` `[🟡 警告]` `[💡 建議]`
 - 提供具體的修復步驟和影響評估
 - 包含檢查覆蓋範圍和未檢查項目說明
@@ -138,7 +139,7 @@ model: sonnet
 ### 目錄創建邏輯
 ```bash
 # 確保輸出目錄存在
-ANALYSIS_DIR="./analysis"
+ANALYSIS_DIR="./ai-analysis/agents"
 if [ ! -d "$ANALYSIS_DIR" ]; then
     mkdir -p "$ANALYSIS_DIR"
     echo "Created analysis directory: $ANALYSIS_DIR"

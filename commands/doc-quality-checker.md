@@ -60,7 +60,27 @@ def group_files_for_quality_check(file_paths):
     else:
         # 大量檔案：按大小和類型分組，每組3-5個檔案
         # 確保每組工作量相近，避免負載不均
-        return balanced_grouping(file_paths, max_group_size=5)
+        groups = []
+        current_group = []
+        current_size = 0
+
+        for file_path in sorted(file_paths):
+            # 估算檔案複雜度（簡化為檔案名長度）
+            file_complexity = len(file_path.split('/')[-1])
+
+            if current_size + file_complexity > 50 or len(current_group) >= 5:
+                if current_group:
+                    groups.append(current_group)
+                current_group = [file_path]
+                current_size = file_complexity
+            else:
+                current_group.append(file_path)
+                current_size += file_complexity
+
+        if current_group:
+            groups.append(current_group)
+
+        return groups
 ```
 
 ### 步驟 2: 並行檔案分析

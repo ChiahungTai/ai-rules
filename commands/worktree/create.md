@@ -2,6 +2,7 @@
 ---
 argument-hint: [name]
 description: 建立新的 Git Worktree
+related-commands: [done, cleanup, status]
 ---
 
 根據提供的參數建立新的 Git Worktree 並自動設置完整的開發環境。
@@ -34,15 +35,15 @@ description: 建立新的 Git Worktree
      - 避免縮寫，確保名稱具描述性
      - 遵循 Fortuna 專案的 4-6 個單字命名原則
 
-2. **建立工作樹**：
+2. **建立 Git Worktree**：
 
-   - 使用 `git worktree add` 建立新工作樹
+   - 使用 `git worktree add` 建立新 Git Worktree
    - 確保目錄和分支命名符合專案規範
 
 3. **完成報告**：
    提供建立結果摘要，包含：
    - 原始中文輸入 → 轉換後的英文名稱
-   - 工作樹路徑和分支名稱
+   - Git Worktree 路徑和分支名稱
    - 下一步指令
 
-執行所有必要的安全檢查，確保不與現有工作樹衝突。
+執行所有必要的安全檢查，確保不與現有 Git Worktree 衝突。

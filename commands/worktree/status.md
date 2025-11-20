@@ -1,6 +1,8 @@
 
 ---
+argument-hint: [可選]
 description: 列出所有 Git Worktrees 狀態
+related-commands: [create, cleanup, done]
 ---
 
 列出目前所有的 Git Worktrees 狀態。

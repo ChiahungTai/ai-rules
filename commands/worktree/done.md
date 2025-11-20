@@ -1,10 +1,12 @@
 ---
-description: 合併工作樹分支並清理
+argument-hint: [可選]
+description: 合併 Git Worktree 分支並清理
+related-commands: [create, cleanup, status]
 ---
 
-在主目錄中執行工作樹完成流程：選擇並合併工作樹分支到 main，然後清理工作樹。
+在主目錄中執行 Git Worktree 完成流程：選擇並合併 Git Worktree 分支到 main，然後清理 Git Worktree。
 
-**使用場景**：當您完成工作樹開發，希望將變更合併回主分支並清理工作樹時使用。
+**使用場景**：當您完成 Git Worktree 開發，希望將變更合併回主分支並清理 Git Worktree 時使用。
 
 執行以下流程：
 
@@ -14,19 +16,19 @@ description: 合併工作樹分支並清理
    - 檢查主目錄工作狀態是否清潔
    - 驗證當前在 main 分支
 
-2. **工作樹分支發現**：
+2. **Git Worktree 分支發現**：
 
-   - 自動掃描所有現有的工作樹
-   - 檢查每個工作樹分支的狀態和提交情況
-   - 顯示可合併的工作樹分支清單（已有提交且工作目錄清潔）
+   - 自動掃描所有現有的 Git Worktree
+   - 檢查每個 Git Worktree 分支的狀態和提交情況
+   - 顯示可合併的 Git Worktree 分支清單（已有提交且工作目錄清潔）
 
 3. **互動式分支選擇**：
 
-   - 顯示工作樹分支清單，包含：
+   - 顯示 Git Worktree 分支清單，包含：
      - 分支名稱
      - 最新提交訊息
      - 提交時間
-     - 工作樹路徑
+     - Git Worktree 路徑
    - 讓使用者選擇要合併的分支
    - 確認合併操作
 
@@ -38,8 +40,8 @@ description: 合併工作樹分支並清理
    - 執行品質檢查確保合併成功
 
 5. **自動清理**：
-   - 刪除已合併的工作樹目錄
-   - 移除本地工作樹分支
+   - 刪除已合併的 Git Worktree 目錄
+   - 移除本地 Git Worktree 分支
    - 顯示清理結果
 
 **使用範例**：
@@ -53,7 +55,7 @@ cd /Users/jackle/workspace/Fortuna
 **輸出範例**：
 
 ```
-🔍 發現以下可合併的工作樹分支：
+🔍 發現以下可合併的 Git Worktree 分支：
 
 1. feature/strapi-typescript-optimization
    📂 /Users/jackle/workspace/fortuna-feature-strapi-typescript-optimization
@@ -70,12 +72,12 @@ cd /Users/jackle/workspace/Fortuna
 
 **安全檢查**：
 
-- 僅顯示已提交且工作目錄清潔的工作樹
+- 僅顯示已提交且工作目錄清潔的 Git Worktree
 - 合併前確認 main 分支是最新狀態
 - 提供合併預覽和確認步驟
 
 **注意事項**：
 
-- 必須在主目錄中執行（非工作樹目錄）
-- 確保選定的工作樹已完成所有開發工作
-- 合併後工作樹將被自動清理，請確保重要變更已提交
+- 必須在主目錄中執行（非 Git Worktree 目錄）
+- 確保選定的 Git Worktree 已完成所有開發工作
+- 合併後 Git Worktree 將被自動清理，請確保重要變更已提交

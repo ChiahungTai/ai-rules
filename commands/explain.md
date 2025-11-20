@@ -159,10 +159,10 @@ graph TD
 - **🚫 禁止**: 使用未定義的 CSS class（如 `class A primaryNode`）
 
 **色彩約束**:
-- **✅ 必須遵守**: `~/.claude/CLAUDE.md` 通用色彩設計約束
-- **✅ 完全遵循**: `~/.claude/CLAUDE.md` 中的智能最小干預策略
+- **✅ 必須遵守**: 專案的通用色彩設計約束
+- **✅ 完全遵循**: 智能最小干預策略
 - **🚫 絕對禁止**: 任何重複的色彩定義或配置
-- **📖 配置來源**: 所有 Mermaid 配置來自 `~/.claude/CLAUDE.md`，此文件不重複定義
+- **📖 配置來源**: 遵循統一的 Mermaid 配置標準
 ### Mermaid 圖表類型
 ```mermaid
 # 流程圖
@@ -282,8 +282,8 @@ Task report-coordinator: 整合所有結果，生成統一報告
 - **🚫 嚴格禁止**: 缺少 ````mermaid` 代碼塊標記
 
 **必須遵守的約束**：
-- **✅ 必須遵守**: `~/.claude/CLAUDE.md` 中的通用色彩設計約束
-- **✅ 必須遵守**: `/Users/ctai/Github/ai-rules/ai-development-guide.md` 中的色彩規範
+- **✅ 必須遵守**: 專案的通用色彩設計約束
+- **✅ 必須遵守**: 專案 AI 開發指南中的色彩規範
 - **✅ 必須使用**: 標準的 init 配置（見下方範例）
 - **✅ 必須使用**: ````mermaid` 代碼塊包裝所有圖表
 

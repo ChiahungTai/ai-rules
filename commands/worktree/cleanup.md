@@ -2,6 +2,7 @@
 ---
 argument-hint: [target]
 description: 智能清理 Git Worktrees
+related-commands: [create, done, status]
 ---
 
 智能分析並安全清理 Git Worktrees，確保不遺失重要開發成果。
