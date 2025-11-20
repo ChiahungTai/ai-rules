@@ -76,14 +76,24 @@
 
 ### 🎨 推薦通用配色
 ```yaml
-# 智能最小干預配色方案（2025年最佳實踐）
+# 最小干預配色方案（基於實驗驗證）
 universal_colors:
-  primary: "#3b82f6"      # 藍色 - 主要操作，雙主題清晰
-  secondary: "#10b981"    # 綠色 - 成功狀態，語義明確
-  tertiary: "#f59e0b"     # 橙色 - 警告注意，對比度足夠
-  neutral: "#64748b"      # 中性灰 - 輔助信息
-  background: "transparent" # 關鍵：透明背景，適應所有主題
+  background: "transparent"  # 關鍵：透明背景，適應所有主題
+  lineColor: "#94a3b8"       # 中性灰 - 連接線
+  textColor: "#374151"       # 適應性文字色
+
+# 僅用於關鍵節點強調（最多3個節點）
+emphasis_colors:
+  success: "#10b981"         # 綠色 - 成功/完成狀態
+  error: "#ef4444"           # 紅色 - 錯誤/失敗狀態
+  warning: "#f59e0b"         # 橙色 - 警告/注意狀態
+  info: "#3b82f6"            # 藍色 - 一般強調
 ```
+
+**核心約束**：
+- 普通節點禁止使用底色
+- 最多3個節點使用 `style` 語法
+- 只在關鍵狀態（成功/錯誤/警告）時使用底色
 
 ### 🚨 Mermaid 代碼塊語法約束（重要提醒）
 
@@ -103,37 +113,68 @@ universal_colors:
 %%{init: {
   'theme': 'base',
   'themeVariables': {
-    'primaryColor': '#3b82f6',      /* 藍色 - 主要操作 */
-    'secondaryColor': '#10b981',    /* 綠色 - 成功狀態 */
-    'tertiaryColor': '#f59e0b',     /* 橙色 - 警告注意 */
-    'background': 'transparent',    /* 關鍵：透明背景 */
-    'lineColor': '#94a3b8',         /* 中性灰 - 連接線 */
-    'textColor': '#374151'          /* 適應性文字色 */
+    'background': 'transparent',
+    'lineColor': '#94a3b8',
+    'textColor': '#374151',
+    'primaryColor': '#ffffff',
+    'secondaryColor': '#ffffff',
+    'tertiaryColor': '#ffffff'
   }
 }}%%
 ```
 
-### ✅ 正確範例
+**重要說明**：某些 Mermaid 渲染器會忽略 `transparent` 設置，因此需要明確設置所有顏色為白色背景。
+
+### 📊 Mermaid 範例對比
+
+#### ✅ 最小干預範例（推薦）
 ```mermaid
 %%{init: {
   'theme': 'base',
   'themeVariables': {
-    'primaryColor': '#3b82f6',
-    'secondaryColor': '#10b981',
-    'tertiaryColor': '#f59e0b',
-    'background': 'transparent'
+    'background': 'transparent',
+    'lineColor': '#94a3b8',
+    'textColor': '#374151',
+    'primaryColor': '#ffffff',
+    'secondaryColor': '#ffffff',
+    'tertiaryColor': '#ffffff'
+  }
+}}%%
+graph TD
+    A[開始] --> B{決策}
+    B -->|成功| C[完成]
+    B -->|失敗| D[錯誤]
+
+    style C fill:#10b981,color:#ffffff
+    style D fill:#ef4444,color:#ffffff
+```
+
+#### ❌ 過度使用底色（禁止）
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'background': 'transparent',
+    'lineColor': '#94a3b8',
+    'textColor': '#374151',
+    'primaryColor': '#ffffff',
+    'secondaryColor': '#ffffff',
+    'tertiaryColor': '#ffffff'
   }
 }}%%
 graph TD
     A[開始] --> B[處理]
     B --> C[完成]
-```
+    B --> D[分支]
+    D --> E[結果1]
+    D --> F[結果2]
 
-### ❌ 錯誤範例
-```mermaid
-style A fill:#fbbf24  <!-- 亮黃色，Dark 模式對比度不足 -->
-style B fill:#ffffff  <!-- 白色背景，Dark 模式白字消失 -->
-style C fill:#f0f0f0  <!-- 淺灰背景，任何主題都看不清 -->
+    style A fill:#3b82f6,color:#ffffff
+    style B fill:#10b981,color:#ffffff
+    style C fill:#f59e0b,color:#000000
+    style D fill:#8b5cf6,color:#ffffff
+    style E fill:#06b6d4,color:#ffffff
+    style F fill:#f59e0b,color:#000000
 ```
 
 ### 🔍 通用對比度標準
@@ -144,9 +185,9 @@ style C fill:#f0f0f0  <!-- 淺灰背景，任何主題都看不清 -->
 - **🚫 避免**: #000000, #1a1a1a（極端深色）
 
 ### 📋 檢查清單
-- [ ] 使用 `theme: 'base'` + 3色簡化配置
+- [ ] 使用 `theme: 'base'` + 3變數簡化配置（background, lineColor, textColor）
 - [ ] 背景設置為 `transparent`
-- [ ] 最多使用3種主要顏色
+- [ ] 最多3個節點使用底色（僅強調節點）
 - [ ] 在實際 Dark/Light 模式都測試過
 - [ ] 文字與背景對比度 ≥4.5:1（雙模式）
 
