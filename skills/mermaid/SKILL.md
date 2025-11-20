@@ -25,15 +25,17 @@ allowed-tools: [Read, Write, Edit]
 %%{init: {
   'theme': 'default',
   'themeVariables': {
-    'lineColor': '#3b82f6'
+    'lineColor': '#3b82f6',
+    'signalColor': '#f43f5e',
+    'signalTextColor': '#10b981'
   }
 }}%%
 ```
 
-**為什麼需要 lineColor？**
-- 預設黑色連接線在 Dark Theme 不可見
-- 藍色 `#3b82f6` 在深色背景下清晰可見
-- 保持簡單，只解決這一個關鍵問題
+**為什麼需要這些顏色設定？**
+- **lineColor**: `#3b82f6` - 預設黑色連接線在 Dark Theme 不可見，藍色在深色背景下清晰可見
+- **signalColor**: `#f43f5e` - Sequence Diagram 中的信號線顏色，確保在深色主題下可見
+- **signalTextColor**: `#10b981` - Sequence Diagram 中信號文字的顏色，提供良好對比度
 
 **為什麼這樣夠用？**
 - Mermaid 團隊已經處理了大部分 Dark Theme 相容性
@@ -69,7 +71,9 @@ skill: "mermaid" "生成一個系統架構圖"
 %%{init: {
   'theme': 'default',
   'themeVariables': {
-    'lineColor': '#3b82f6'
+    'lineColor': '#3b82f6',
+    'signalColor': '#f43f5e',
+    'signalTextColor': '#10b981'
   }
 }}%%
 flowchart TD
@@ -84,7 +88,9 @@ flowchart TD
 %%{init: {
   'theme': 'default',
   'themeVariables': {
-    'lineColor': '#3b82f6'
+    'lineColor': '#3b82f6',
+    'signalColor': '#f43f5e',
+    'signalTextColor': '#10b981'
   }
 }}%%
 flowchart TD
@@ -111,7 +117,9 @@ flowchart TD
 %%{init: {
   'theme': 'default',
   'themeVariables': {
-    'lineColor': '#3b82f6'
+    'lineColor': '#3b82f6',
+    'signalColor': '#f43f5e',
+    'signalTextColor': '#10b981'
   }
 }}%%
 flowchart TD
@@ -127,6 +135,15 @@ flowchart TD
 - 🔴 `#ef4444` - 失敗/錯誤
 - 🟠 `#f59e0b` - 警告/注意
 - 🔵 `#3b82f6` - 資訊/處理中
+- 🔴 `#f43f5e` - Sequence Diagram 信號線
+- 🟢 `#10b981` - Sequence Diagram 信號文字
+
+### 🔄 Sequence Diagram 特別注意
+
+**Signal 設定的重要性**：
+- `signalColor`: 確保序列圖中的信號箭頭在深色主題下可見
+- `signalTextColor`: 確保信號上的文字有良好對比度
+- 這兩個設定對 Sequence Diagram 至關重要，否則某些連接線會消失
 
 ---
 
@@ -139,7 +156,9 @@ flowchart TD
 %%{init: {
   'theme': 'default',
   'themeVariables': {
-    'lineColor': '#3b82f6'
+    'lineColor': '#3b82f6',
+    'signalColor': '#f43f5e',
+    'signalTextColor': '#10b981'
   }
 }}%%
 classDiagram
@@ -166,7 +185,9 @@ classDiagram
 %%{init: {
   'theme': 'default',
   'themeVariables': {
-    'lineColor': '#3b82f6'
+    'lineColor': '#3b82f6',
+    'signalColor': '#f43f5e',
+    'signalTextColor': '#10b981'
   }
 }}%%
 xychart-beta
@@ -181,7 +202,9 @@ xychart-beta
 %%{init: {
   'theme': 'default',
   'themeVariables': {
-    'lineColor': '#3b82f6'
+    'lineColor': '#3b82f6',
+    'signalColor': '#f43f5e',
+    'signalTextColor': '#10b981'
   }
 }}%%
 pie title 部門預算分配
@@ -197,7 +220,9 @@ pie title 部門預算分配
 %%{init: {
   'theme': 'default',
   'themeVariables': {
-    'lineColor': '#3b82f6'
+    'lineColor': '#3b82f6',
+    'signalColor': '#f43f5e',
+    'signalTextColor': '#10b981'
   }
 }}%%
 sequenceDiagram
@@ -240,7 +265,9 @@ sequenceDiagram
 ```mermaid
    %%{init: {'theme': 'default',
    'themeVariables': {
-       'lineColor': '#3b82f6'
+       'lineColor': '#3b82f6',
+       'signalColor': '#f43f5e',
+       'signalTextColor': '#10b981'
    }
    }}%%
 [你的圖表代碼]
