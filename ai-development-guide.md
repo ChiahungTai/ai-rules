@@ -76,24 +76,13 @@
 
 ### 🎨 推薦通用配色
 ```yaml
-# 所有 Mermaid 圖表必須使用此配置
+# 智能最小干預配色方案（2025年最佳實踐）
 universal_colors:
-  backgrounds:
-    primary: "#6366f1"      # 中性紫色 - Dark/Light 皆可
-    secondary: "#8b5cf6"    # 中性紫羅蘭色
-    tertiary: "#06b6d4"     # 中性青色
-    neutral: "#f9fafb"      # 淺灰色 - Dark 模式也清晰
-    dark: "#f3f4f6"         # 中灰色 - 適合邊框
-
-  text_colors:
-    primary: "#111827"      # 深灰色 - Light 模式清晰
-    secondary: "#374151"    # 中灰色 - Dark 模式也清晰
-    muted: "#6b7280"        # 柔和灰色
-
-  borders:
-    light: "#e5e7eb"        # 淺灰邊框
-    medium: "#d1d5db"       # 中灰邊框
-    dark: "#9ca3af"         # 深灰邊框
+  primary: "#3b82f6"      # 藍色 - 主要操作，雙主題清晰
+  secondary: "#10b981"    # 綠色 - 成功狀態，語義明確
+  tertiary: "#f59e0b"     # 橙色 - 警告注意，對比度足夠
+  neutral: "#64748b"      # 中性灰 - 輔助信息
+  background: "transparent" # 關鍵：透明背景，適應所有主題
 ```
 
 ### 🚨 Mermaid 代碼塊語法約束（重要提醒）
@@ -108,24 +97,18 @@ universal_colors:
 - **🚫 禁止**: 使用未定義的 CSS class（如 `class A primaryNode`）
 
 ### 📐 Mermaid 標準配置
-**所有 slash commands 使用 Mermaid 圖表時，必須添加以下配置**：
+**所有 Mermaid 圖表必須使用以下簡化配置**：
 
 ```mermaid
 %%{init: {
   'theme': 'base',
   'themeVariables': {
-    'primaryColor': '#6366f1',
-    'secondaryColor': '#8b5cf6',
-    'tertiaryColor': '#06b6d4',
-    'background': '#ffffff',
-    'primaryBorderColor': '#4f46e5',
-    'secondaryBorderColor': '#7c3aed',
-    'tertiaryBorderColor': '#0891b2',
-    'primaryTextColor': '#111827',
-    'secondaryTextColor': '#374151',
-    'lineColor': '#d1d5db',
-    'sectionBkgColor': '#f9fafb',
-    'altSectionBkgColor': '#f3f4f6'
+    'primaryColor': '#3b82f6',      /* 藍色 - 主要操作 */
+    'secondaryColor': '#10b981',    /* 綠色 - 成功狀態 */
+    'tertiaryColor': '#f59e0b',     /* 橙色 - 警告注意 */
+    'background': 'transparent',    /* 關鍵：透明背景 */
+    'lineColor': '#94a3b8',         /* 中性灰 - 連接線 */
+    'textColor': '#374151'          /* 適應性文字色 */
   }
 }}%%
 ```
@@ -135,32 +118,35 @@ universal_colors:
 %%{init: {
   'theme': 'base',
   'themeVariables': {
-    'primaryColor': '#6366f1',
-    'background': '#ffffff',
-    'primaryTextColor': '#111827'
+    'primaryColor': '#3b82f6',
+    'secondaryColor': '#10b981',
+    'tertiaryColor': '#f59e0b',
+    'background': 'transparent'
   }
 }}%%
 graph TD
     A[開始] --> B[處理]
-    B --> C[結束]
+    B --> C[完成]
 ```
 
 ### ❌ 錯誤範例
 ```mermaid
 style A fill:#fbbf24  <!-- 亮黃色，Dark 模式對比度不足 -->
-style B fill:#93c5fd  <!-- 淺藍色，Light 模式效果不佳 -->
-style C fill:#1e3a8a  <!-- 深藍色，Light 模式文字看不清 -->
+style B fill:#ffffff  <!-- 白色背景，Dark 模式白字消失 -->
+style C fill:#f0f0f0  <!-- 淺灰背景，任何主題都看不清 -->
 ```
 
 ### 🔍 通用對比度標準
-**同時適用 Dark/Light 模式的顏色**：
-- **✅ 優選**: #6366f1, #8b5cf6, #06b6d4, #10b981, #f59e0b
-- **✅ 可用**: #f9fafb, #f3f4f6, #e5e7eb, #111827, #374151
-- **🚫 避免**: 極深色 (#000000, #1a1a1a) 和 極淺色 (#ffffff, #f8f9fa)
+**基於實際測試驗證的顏色**：
+- **✅ 強烈推薦**: #3b82f6, #10b981, #f59e0b, #64748b
+- **✅ 可用**: #6366f1, #8b5cf6, #06b6d4
+- **🚫 絕對禁止**: #ffffff, #f0f0f0, #f8fafc, #fbbf24（淺色災難）
+- **🚫 避免**: #000000, #1a1a1a（極端深色）
 
 ### 📋 檢查清單
-- [ ] 所有 Mermaid 圖表都有通用配置
-- [ ] 沒有使用極端深色或淺色
+- [ ] 使用 `theme: 'base'` + 3色簡化配置
+- [ ] 背景設置為 `transparent`
+- [ ] 最多使用3種主要顏色
 - [ ] 在實際 Dark/Light 模式都測試過
 - [ ] 文字與背景對比度 ≥4.5:1（雙模式）
 

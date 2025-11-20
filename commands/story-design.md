@@ -6,8 +6,12 @@
 
 ## 使用方式
 ```bash
-/story-design "設計任務描述" [可選：PROMPT檔案路徑]
+/story-design "設計任務描述" --output "story-[專案名稱].md"
 ```
+
+**執行後生成**: `ai-analysis/stories/story-[專案名稱].md` - 完整的整合式專案設計文檔
+
+**🚨 強制輸出**: 自動建立 `ai-analysis/stories/` 目錄並強制寫入文檔
 
 ---
 

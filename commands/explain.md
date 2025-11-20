@@ -28,7 +28,7 @@ usage: /explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>
 - **圖表類型**: Mermaid 圖表
 - **內容長度**: 詳盡完整
 - **輸出格式**: 自動儲存為 Markdown 檔案
-- **儲存位置**: 專案目錄下 (`ai-analysis/reports/`)
+- **儲存位置**: `ai-analysis/reports/` (統一路徑規則)
 - **適用場景**: 文檔記錄、深度分析、知識沉澱
 
 ## 使用方式
@@ -69,18 +69,12 @@ usage: /explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>
 %%{init: {
   'theme': 'base',
   'themeVariables': {
-    'primaryColor': '#6366f1',
-    'secondaryColor': '#8b5cf6',
-    'tertiaryColor': '#06b6d4',
-    'background': '#ffffff',
-    'primaryBorderColor': '#4f46e5',
-    'secondaryBorderColor': '#7c3aed',
-    'tertiaryBorderColor': '#0891b2',
-    'primaryTextColor': '#111827',
-    'secondaryTextColor': '#374151',
-    'lineColor': '#d1d5db',
-    'sectionBkgColor': '#f9fafb',
-    'altSectionBkgColor': '#f3f4f6'
+    'primaryColor': '#3b82f6',
+    'secondaryColor': '#10b981',
+    'tertiaryColor': '#f59e0b',
+    'background': 'transparent',
+    'lineColor': '#94a3b8',
+    'textColor': '#374151'
   }
 }}%%
 ### 處理模式決策流程
@@ -168,32 +162,14 @@ graph TD
 
 **樣式定義規範**:
 - **✅ 推薦**: 使用標準 `style` 語法定義節點顏色
-- **✅ 範例**: `style A fill:#6366f1,stroke:#4f46e5,color:#ffffff`
+- **✅ 範例**: `style A fill:#3b82f6,color:#ffffff`
 - **🚫 禁止**: 使用未定義的 CSS class（如 `class A primaryNode`）
 
 **色彩約束**:
-- **✅ 必須遵守**: CLAUDE.md 通用色彩設計約束
-- **✅ 必須使用**: 符合 Dark/Light 模式相容性的顏色
-- **🚫 嚴格禁止**: 極端深色和淺色配色
-- **📖 詳細約束**: 見「階段 2: 視覺化處理」章節
-
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#6366f1',
-    'secondaryColor': '#8b5cf6',
-    'tertiaryColor': '#06b6d4',
-    'background': '#ffffff',
-    'primaryBorderColor': '#4f46e5',
-    'secondaryBorderColor': '#7c3aed',
-    'tertiaryBorderColor': '#0891b2',
-    'primaryTextColor': '#111827',
-    'secondaryTextColor': '#374151',
-    'lineColor': '#d1d5db',
-    'sectionBkgColor': '#f9fafb',
-    'altSectionBkgColor': '#f3f4f6'
-  }
-}}%%
+- **✅ 必須遵守**: `~/.claude/CLAUDE.md` 通用色彩設計約束
+- **✅ 完全遵循**: `~/.claude/CLAUDE.md` 中的智能最小干預策略
+- **🚫 絕對禁止**: 任何重複的色彩定義或配置
+- **📖 配置來源**: 所有 Mermaid 配置來自 `~/.claude/CLAUDE.md`，此文件不重複定義
 ### Mermaid 圖表類型
 ```mermaid
 # 流程圖
@@ -328,7 +304,7 @@ wait  # 等待所有分析任務完成
 
 **推薦做法**：
 - **✅ 推薦**: 使用標準 `style` 語法定義節點樣式
-- **✅ 範例**: `style A fill:#6366f1,stroke:#4f46e5,color:#ffffff`
+- **✅ 範例**: `style A fill:#3b82f6,color:#ffffff`
 - **✅ 推薦**: 使用 Emoji 強調節點（如 `[✅ 改善]` `[❌ 問題]` `[🚀 新功能]`）
 - **✅ 推薦**: Dark/Light 模式下對比度都 ≥4.5:1 的色彩
 
@@ -361,18 +337,12 @@ Task report-coordinator "整合所有分析結果和視覺化輸出，生成完�
 %%{init: {
   'theme': 'base',
   'themeVariables': {
-    'primaryColor': '#6366f1',
-    'secondaryColor': '#8b5cf6',
-    'tertiaryColor': '#06b6d4',
-    'background': '#ffffff',
-    'primaryBorderColor': '#4f46e5',
-    'secondaryBorderColor': '#7c3aed',
-    'tertiaryBorderColor': '#0891b2',
-    'primaryTextColor': '#111827',
-    'secondaryTextColor': '#374151',
-    'lineColor': '#d1d5db',
-    'sectionBkgColor': '#f9fafb',
-    'altSectionBkgColor': '#f3f4f6'
+    'primaryColor': '#3b82f6',
+    'secondaryColor': '#10b981',
+    'tertiaryColor': '#f59e0b',
+    'background': 'transparent',
+    'lineColor': '#94a3b8',
+    'textColor': '#374151'
   }
 }}%%
 ### 平行處理執行流程
@@ -428,18 +398,12 @@ def group_files_for_analysis(file_paths):
 %%{init: {
   'theme': 'base',
   'themeVariables': {
-    'primaryColor': '#6366f1',
-    'secondaryColor': '#8b5cf6',
-    'tertiaryColor': '#06b6d4',
-    'background': '#ffffff',
-    'primaryBorderColor': '#4f46e5',
-    'secondaryBorderColor': '#7c3aed',
-    'tertiaryBorderColor': '#0891b2',
-    'primaryTextColor': '#111827',
-    'secondaryTextColor': '#374151',
-    'lineColor': '#d1d5db',
-    'sectionBkgColor': '#f9fafb',
-    'altSectionBkgColor': '#f3f4f6'
+    'primaryColor': '#3b82f6',
+    'secondaryColor': '#10b981',
+    'tertiaryColor': '#f59e0b',
+    'background': 'transparent',
+    'lineColor': '#94a3b8',
+    'textColor': '#374151'
   }
 }}%%
 ### 簡化決策流程
@@ -688,18 +652,12 @@ Docker 將應用程式打包成輕量級、可移植的容器
 %%{init: {
   'theme': 'base',
   'themeVariables': {
-    'primaryColor': '#6366f1',
-    'secondaryColor': '#8b5cf6',
-    'tertiaryColor': '#06b6d4',
-    'background': '#ffffff',
-    'primaryBorderColor': '#4f46e5',
-    'secondaryBorderColor': '#7c3aed',
-    'tertiaryBorderColor': '#0891b2',
-    'primaryTextColor': '#111827',
-    'secondaryTextColor': '#374151',
-    'lineColor': '#d1d5db',
-    'sectionBkgColor': '#f9fafb',
-    'altSectionBkgColor': '#f3f4f6'
+    'primaryColor': '#3b82f6',
+    'secondaryColor': '#10b981',
+    'tertiaryColor': '#f59e0b',
+    'background': 'transparent',
+    'lineColor': '#94a3b8',
+    'textColor': '#374151'
   }
 }}%%
 # 系統架構分析報告

@@ -4,10 +4,12 @@
 
 ## 使用方式
 ```bash
-/design2prompt "設計文檔路徑" [可選：輸出目錄]
+/design2prompt "設計文檔路徑" --output "prompt-[專案名稱].md"
 ```
 
-**執行後生成**: `prompt_[專案名稱].md` - 包含分段好的 prompt，可直接複製貼上
+**執行後生成**: `ai-analysis/prompts/prompt-[專案名稱].md` - 包含分段好的 prompt，可直接複製貼上
+
+**🚨 強制輸出**: 自動建立 `ai-analysis/prompts/` 目錄並強制寫入文檔
 
 ---
 
