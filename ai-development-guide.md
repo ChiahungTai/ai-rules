@@ -68,7 +68,8 @@
 **CRITICAL**: 文檔色彩設計必須在 Dark/Light 模式下都清晰可見
 
 ### 📋 色彩選擇原則
-- **🚫 禁止**: Mermaid 自定義底色 (`style NodeName fill:#color`)
+- **✅ 推薦**: Mermaid 標準 style 語法 (`style NodeName fill:#color,color:#ffffff`)
+- **🚫 禁止**: 使用未定義的 CSS class（如 `class NodeName customClass`）
 - **✅ 使用**: Emoji 強調節點 (`[✅ 改善]` `[❌ 問題]` `[🚀 新功能]`)
 - **✅ 使用**: 統一的通用配色方案
 - **✅ 要求**: Dark/Light 模式下對比度都 ≥4.5:1
@@ -94,6 +95,17 @@ universal_colors:
     medium: "#d1d5db"       # 中灰邊框
     dark: "#9ca3af"         # 深灰邊框
 ```
+
+### 🚨 Mermaid 代碼塊語法約束（重要提醒）
+
+**代碼塊標記要求**:
+- **✅ 必須使用**: ````mermaid` 代碼塊包裝所有圖表
+- **🚫 禁止**: 直接在文檔中寫 Mermaid 語法而不包裝
+
+**樣式定義規範**:
+- **✅ 推薦**: 使用標準 `style` 語法定義節點顏色
+- **✅ 範例**: `style A fill:#6366f1,stroke:#4f46e5,color:#ffffff`
+- **🚫 禁止**: 使用未定義的 CSS class（如 `class A primaryNode`）
 
 ### 📐 Mermaid 標準配置
 **所有 slash commands 使用 Mermaid 圖表時，必須添加以下配置**：

@@ -160,11 +160,21 @@ graph TD
 - **層次結構**: 多級標題，詳細展開
 - **文檔導向**: 適合長期保存和分享
 
-### 🚨 Mermaid 圖表色彩約束（重要提醒）
-- **🚫 嚴格禁止**: `style fill:#color` 自定義顏色
-- **🚫 嚴格禁止**: 不符合 Dark/Light 模式相容性的配置
-- **✅ 必須使用**: 標準 init 配置（見下方範例）
-- **✅ 推薦做法**: CSS class 或 Emoji 強調節點
+### 🚨 Mermaid 圖表語法約束（重要提醒）
+
+**代碼塊標記要求**:
+- **✅ 必須使用**: ````mermaid` 代碼塊包裝所有圖表
+- **🚫 禁止**: 直接在文檔中寫 Mermaid 語法而不包裝
+
+**樣式定義規範**:
+- **✅ 推薦**: 使用標準 `style` 語法定義節點顏色
+- **✅ 範例**: `style A fill:#6366f1,stroke:#4f46e5,color:#ffffff`
+- **🚫 禁止**: 使用未定義的 CSS class（如 `class A primaryNode`）
+
+**色彩約束**:
+- **✅ 必須遵守**: CLAUDE.md 通用色彩設計約束
+- **✅ 必須使用**: 符合 Dark/Light 模式相容性的顏色
+- **🚫 嚴格禁止**: 極端深色和淺色配色
 - **📖 詳細約束**: 見「階段 2: 視覺化處理」章節
 
 %%{init: {
@@ -302,22 +312,30 @@ Task context-analyzer "分析 Git 歷史、文件註解、配置，提供開發�
 wait  # 等待所有分析任務完成
 ```
 
-### 🚨 重要：Mermaid 圖表色彩約束
+### 🚨 重要：Mermaid 圖表語法和色彩約束
 
 **嚴格禁止事項**：
-- **🚫 嚴格禁止**: 使用 `style fill:#color` 自定義顏色
+- **🚫 嚴格禁止**: 使用未定義的 CSS class（如 `class A primaryNode`）
 - **🚫 嚴格禁止**: 任何不符合 Dark/Light 模式相容性的顏色配置
 - **🚫 嚴格禁止**: 極端深色 (#000000, #1a1a1a) 和極端淺色 (#ffffff, #f8f9fa)
+- **🚫 嚴格禁止**: 缺少 ````mermaid` 代碼塊標記
 
 **必須遵守的約束**：
 - **✅ 必須遵守**: `~/.claude/CLAUDE.md` 中的通用色彩設計約束
 - **✅ 必須遵守**: `/Users/ctai/Github/ai-rules/ai-development-guide.md` 中的色彩規範
 - **✅ 必須使用**: 標準的 init 配置（見下方範例）
+- **✅ 必須使用**: ````mermaid` 代碼塊包裝所有圖表
 
 **推薦做法**：
-- **✅ 推薦**: 使用 CSS class 定義節點樣式（如 `class A primaryNode`）
+- **✅ 推薦**: 使用標準 `style` 語法定義節點樣式
+- **✅ 範例**: `style A fill:#6366f1,stroke:#4f46e5,color:#ffffff`
 - **✅ 推薦**: 使用 Emoji 強調節點（如 `[✅ 改善]` `[❌ 問題]` `[🚀 新功能]`）
 - **✅ 推薦**: Dark/Light 模式下對比度都 ≥4.5:1 的色彩
+
+**CSS Class 使用注意**：
+- **⚠️ 注意**: CSS class 需要在 %%{init}%% 中預先定義
+- **🚫 禁止**: 使用未定義的 class 名稱
+- **✅ 安全**: 直接使用 style 語法更可靠
 
 **違規後果**：
 - 生成的圖表無法在 Dark/Light 模式下正常顯示
