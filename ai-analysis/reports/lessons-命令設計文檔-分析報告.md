@@ -53,14 +53,18 @@ scope: "技術文檔設計與 AI 協作開發"
 ```mermaid
 %%{init: {
   'theme': 'base',
+  'darkMode': true,
   'themeVariables': {
     'background': 'transparent',
-    'lineColor': '#94a3b8',
-    'textColor': '#374151'
+    'lineColor': '#64748b',
+    'textColor': '#e2e8f0',
+    'primaryColor': '#ffffff',
+    'primaryTextColor': '#111827',
+    'primaryBorderColor': '#475569'
   }
 }}%%
 graph TD
-    A[對話歷史] --> B[/lessons 命令觸發]
+    A[對話歷史] --> B["/lessons 命令觸發"]
     B --> C[掃描相關對話]
     C --> D[知識提取引擎]
 
@@ -95,10 +99,14 @@ graph TD
 ```mermaid
 %%{init: {
   'theme': 'base',
+  'darkMode': true,
   'themeVariables': {
     'background': 'transparent',
-    'lineColor': '#94a3b8',
-    'textColor': '#374151'
+    'lineColor': '#64748b',
+    'textColor': '#e2e8f0',
+    'primaryColor': '#ffffff',
+    'primaryTextColor': '#111827',
+    'primaryBorderColor': '#475569'
   }
 }}%%
 graph LR
@@ -148,10 +156,14 @@ class KnowledgeExtractor:
 ```mermaid
 %%{init: {
   'theme': 'base',
+  'darkMode': true,
   'themeVariables': {
     'background': 'transparent',
-    'lineColor': '#94a3b8',
-    'textColor': '#374151'
+    'lineColor': '#64748b',
+    'textColor': '#e2e8f0',
+    'primaryColor': '#ffffff',
+    'primaryTextColor': '#111827',
+    'primaryBorderColor': '#475569'
   }
 }}%%
 graph TD
@@ -241,18 +253,27 @@ def detect_duplicate_knowledge(new_item, existing_items):
     4. 版本更新: 保留較新版本
     """
     similarity_threshold = 0.85
-    # 實作語意相似度計算
-    pass
+
+    # TODO: 實作語意相似度計算
+    # new_item: 新提取的知識項目
+    # existing_items: 現有的知識庫項目
+    print(f"檢測重複: {new_item} vs {len(existing_items)} 個現有項目")
+    print(f"使用相似度閾值: {similarity_threshold}")
+    return False  # 暫時返回無重複
 ```
 
 #### 智能合併邏輯
 ```mermaid
 %%{init: {
   'theme': 'base',
+  'darkMode': true,
   'themeVariables': {
     'background': 'transparent',
-    'lineColor': '#94a3b8',
-    'textColor': '#374151'
+    'lineColor': '#64748b',
+    'textColor': '#e2e8f0',
+    'primaryColor': '#ffffff',
+    'primaryTextColor': '#111827',
+    'primaryBorderColor': '#475569'
   }
 }}%%
 graph TD
@@ -277,10 +298,14 @@ graph TD
 ```mermaid
 %%{init: {
   'theme': 'base',
+  'darkMode': true,
   'themeVariables': {
     'background': 'transparent',
-    'lineColor': '#94a3b8',
-    'textColor': '#374151'
+    'lineColor': '#64748b',
+    'textColor': '#e2e8f0',
+    'primaryColor': '#ffffff',
+    'primaryTextColor': '#111827',
+    'primaryBorderColor': '#475569'
   }
 }}%%
 graph TB
@@ -321,8 +346,8 @@ class ConsistencyChecker:
             self.format_consistency,
             self.terminology_consistency,
             self.logical_consistency,
-            self.version_consistency,
-            self.link_validity
+            # self.version_consistency,  # TODO: 實作版本一致性檢查
+            # self.link_validity          # TODO: 實作連結有效性檢查
         ]
 
     def format_consistency(self, document):
@@ -383,10 +408,14 @@ class ConsistencyChecker:
 ```mermaid
 %%{init: {
   'theme': 'base',
+  'darkMode': true,
   'themeVariables': {
     'background': 'transparent',
-    'lineColor': '#94a3b8',
-    'textColor': '#374151'
+    'lineColor': '#64748b',
+    'textColor': '#e2e8f0',
+    'primaryColor': '#ffffff',
+    'primaryTextColor': '#111827',
+    'primaryBorderColor': '#475569'
   }
 }}%%
 graph TD

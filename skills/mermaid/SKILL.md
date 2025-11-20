@@ -1,373 +1,300 @@
 ---
 name: mermaid
-description: 專業的 Mermaid 圖表生成工具，支援 Dark/Light 模式相容的色彩設計和標準化配置。確保生成的圖表在任何環境下都能清晰顯示，特別適合技術文檔、架構圖、流程圖等視覺化需求。
+description: 實用主義的 Mermaid 圖表生成工具，統一使用預設配置
 allowed-tools: [Read, Write, Edit]
 ---
 
-# Mermaid 專業圖表生成 Skill
+# Mermaid 實用主義配置 Skill
 
-## 🎯 功能概述
+## 🎯 核心理念
 
-專業的 Mermaid 圖表生成和色彩管理工具，確保 Dark/Light 模式下的完美相容性。特別設計用於技術文檔、系統架構圖、業務流程圖等專業視覺化場景。
+**簡單就是美** - 統一使用預設配置，專注於圖表內容而非樣式調整。
 
-## ✨ 核心特色
+**核心理念**：
+- 預設 `'theme': 'default'` 已經非常成熟
+- 避免過度工程化
+- 重點關注 style 語法的正確使用
 
-### 🎨 Dark/Light 模式智能相容
-- **透明背景策略**: 適應任何主題環境
-- **對比度保證**: 所有色彩搭配確保 ≥4.5:1 對比度
-- **最小干預設計**: 僅在關鍵節點使用色彩強調
+---
 
-### 🔧 標準化配置模板
-- **統一的初始化配置**: 確保所有圖表風格一致
-- **最佳實踐範例**: 提供可直接使用的圖表模板
-- **色彩驗證機制**: 自動檢查色彩搭配的可讀性
+## ⚡ 統一配置
 
-## 🚀 使用時機
+**所有圖表都使用這個配置**：
 
-當你需要：
-- 生成技術文檔中的架構圖
-- 創建業務流程視覺化圖表
-- 設計系統組件關係圖
-- 製作專案時序圖或甘特圖
-- 確保圖表在 Dark/Light 模式下都清晰可見
+```mermaid
+%%{init: {
+  'theme': 'default',
+  'themeVariables': {
+    'lineColor': '#3b82f6'
+  }
+}}%%
+```
 
-## 📋 使用方法
+**為什麼需要 lineColor？**
+- 預設黑色連接線在 Dark Theme 不可見
+- 藍色 `#3b82f6` 在深色背景下清晰可見
+- 保持簡單，只解決這一個關鍵問題
+
+**為什麼這樣夠用？**
+- Mermaid 團隊已經處理了大部分 Dark Theme 相容性
+- 現代編輯器（VS Code、Obsidian 等）都有良好支援
+- 所有圖表類型基本都能正常顯示
+- 維護成本最低
+
+---
+
+## 🎯 使用方法
 
 ### 基本語法
 ```bash
-skill: "mermaid"
+skill: "mermaid" "生成一個系統架構圖"
 ```
 
-### 需求描述
-明確告訴 AI 你需要什麼類型的圖表：
-- "生成一個用戶註冊流程圖"
-- "創建微服務架構圖"
-- "製作資料庫設計關係圖"
+### 使用原則
 
-## 🎨 色彩設計原則
+1. **永遠使用統一配置**
+2. **專注於圖表內容**
+3. **只在必要時使用 style 語法**
 
-### 🎨 高對比度配色方案（已驗證可讀性）
-```yaml
-# 最佳實踐配色方案（基於實際渲染測試）
-universal_colors:
-  background: "transparent"  # 適應任何主題環境
-  lineColor: "#475569"       # 深藍灰 - 高對比度連接線
-  textColor: "#111827"       # 深黑灰 - 最高文字對比度
-  primaryTextColor: "#ffffff" # 節點內文字色
+---
 
-# 強調色彩（已測試 Dark/Light 相容性）
-emphasis_colors:
-  success: "#059669"         # 深綠色 - 成功狀態
-  error: "#dc2626"           # 深紅色 - 錯誤狀態
-  warning: "#d97706"         # 深橙色 - 警告狀態
-  info: "#2563eb"            # 深藍色 - 一般強調
+## 🚨 Style 語法使用規範
 
-# 輔助色彩
-border_colors:
-  primary: "#1e293b"         # 深色邊框
-  secondary: "#64748b"       # 中性邊框
-  accent: "#0ea5e9"          # 強調邊框
-```
+### ⚠️ 重要約束
 
-### 🔍 對比度驗證標準
-- **文字對比度**: ≥ 7:1 (WCAG AAA 標準)
-- **線條對比度**: ≥ 4.5:1 (WCAG AA 標準)
-- **色彩驗證**: 經過 Dark/Light 模式實測驗證
+**絕對遵守的 style 規則**：
 
-### 核心約束
-- **普通節點禁止使用底色**
-- **最多3個節點使用 `style` 語法**
-- **只在關鍵狀態（成功/錯誤/警告）時使用底色**
-
-## 📐 標準配置模板（已修正可讀性問題）
-
-### 🎯 高可讀性配置（推薦使用）
-
-標準高對比度配置：
-```yaml
-background: 'transparent'
-lineColor: '#475569'
-textColor: '#111827'
-```
-
-範例圖表：
+#### ✅ 正確使用
 ```mermaid
 %%{init: {
-  'theme': 'base',
+  'theme': 'default',
   'themeVariables': {
-    'background': 'transparent',
-    'lineColor': '#475569',
-    'textColor': '#111827',
-    'primaryColor': '#ffffff',
-    'secondaryColor': '#ffffff',
-    'tertiaryColor': '#ffffff'
+    'lineColor': '#3b82f6'
   }
 }}%%
-graph TD
-    A[開始] --> B{決策}
-    B -->|成功| C[完成]
-    B -->|失敗| D[錯誤]
-```
-
-### 🔧 字體增強配置（文字不清時使用）
-
-當文字模糊時，使用以下配置：
-```yaml
-fontSize: '14px'
-fontFamily: 'system-ui, -apple-system, sans-serif'
-lineColor: '#334155'
-textColor: '#0f172a'
-```
-
-範例圖表：
-```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'background': 'transparent',
-    'lineColor': '#334155',
-    'textColor': '#0f172a',
-    'primaryColor': '#ffffff',
-    'fontSize': '14px',
-    'fontFamily': 'system-ui, -apple-system, sans-serif'
-  }
-}}%%
-graph TD
+flowchart TD
     A[開始] --> B[處理]
-    B --> C[完成]
-```
-
-### ⚠️ 已棄用配置（容易導致文字模糊）
-
-⚠️ 以下配置已被證實容易導致文字和線條顯示不清：
-```yaml
-# ❌ 問題配置
-textColor: "#374151"  # 對比度不足
-lineColor: "#94a3b8"   # 線條過淺
-```
-
-## 📊 範例對比
-
-### ✅ 高可讀性範例（已修正問題）
-```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'background': 'transparent',
-    'lineColor': '#475569',
-    'textColor': '#111827',
-    'primaryColor': '#ffffff',
-    'secondaryColor': '#ffffff',
-    'tertiaryColor': '#ffffff'
-  }
-}}%%
-graph TD
-    A[開始] --> B{決策}
-    B -->|成功| C[完成]
-    B -->|失敗| D[錯誤]
-
-    style C fill:#059669,color:#ffffff,stroke:#047857
-    style D fill:#dc2626,color:#ffffff,stroke:#b91c1c
-```
-
-### ⚠️ 舊版問題範例（已棄用）
-```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'background': 'transparent',
-    'lineColor': '#94a3b8',    # ❌ 線條過淺
-    'textColor': '#374151',    # ❌ 文字對比度不足
-    'primaryColor': '#ffffff',
-    'secondaryColor': '#ffffff',
-    'tertiaryColor': '#ffffff'
-  }
-}}%%
-graph TD
-    A[文字可能模糊] --> B{對比度不足}
-    B -->|難以閱讀| C[線條過淡]
-    B -->|顯示不清| D[文字模糊]
+    B --> C[結束]
 
     style C fill:#10b981,color:#ffffff
-    style D fill:#ef4444,color:#ffffff
 ```
 
-### ❌ 過度使用底色（禁止）
+#### ❌ 錯誤使用
 ```mermaid
 %%{init: {
-  'theme': 'base',
+  'theme': 'default',
   'themeVariables': {
-    'background': 'transparent',
-    'lineColor': '#94a3b8',
-    'textColor': '#374151',
-    'primaryColor': '#ffffff',
-    'secondaryColor': '#ffffff',
-    'tertiaryColor': '#ffffff'
+    'lineColor': '#3b82f6'
   }
 }}%%
-graph TD
+flowchart TD
     A[開始] --> B[處理]
-    B --> C[完成]
-    B --> D[分支]
-    D --> E[結果1]
-    D --> F[結果2]
+    B --> C[結束]
 
     style A fill:#3b82f6,color:#ffffff
-    style B fill:#10b981,color:#ffffff
-    style C fill:#f59e0b,color:#000000
-    style D fill:#8b5cf6,color:#ffffff
-    style E fill:#06b6d4,color:#ffffff
-    style F fill:#f59e0b,color:#000000
+    style B fill:#f59e0b,color:#000000
+    style C fill:#ef4444,color:#ffffff
+    style D fill:#8b5cf6,color:#ffffff  # 🚫 太多 style
 ```
 
-## 🔍 色彩驗證標準（基於實際渲染測試）
+### 📋 Style 使用清單
 
-### ✅ 高可讀性色彩（已驗證）
-```yaml
-文字色彩:
-  #111827  # 深黑灰 - 最高對比度 ✅
-  #0f172a  # 深藍黑 - 極佳可讀性 ✅
-  #1e293b  # 深藍灰 - 良好對比度 ✅
+- ✅ **最多 3 個節點**使用 `style` 語法
+- ✅ **重點突出**重要節點（成功、失敗、警告）
+- ✅ **一致性顏色**：綠色=成功、紅色=失敗、橙色=警告
+- ❌ **避免彩虹色**：不要用太多不同顏色
+- ❌ **不要 style 所有節點**
 
-線條色彩:
-  #475569  # 深藍灰 - 清晰可見 ✅
-  #334155  # 藍灰色 - 高對比度 ✅
-  #1e293b  # 深藍色 - 極佳線條 ✅
+### 🎨 推薦顏色組合
+
+```mermaid
+%%{init: {
+  'theme': 'default',
+  'themeVariables': {
+    'lineColor': '#3b82f6'
+  }
+}}%%
+flowchart TD
+    A[正常流程] --> B[警告狀態]
+    B --> C[成功完成]
+
+    style B fill:#f59e0b,color:#000000
+    style C fill:#10b981,color:#ffffff
 ```
 
-### ⚠️ 問題色彩（易導致顯示不清）
-```yaml
-# ❌ 以下色彩已被證實容易導致顯示問題：
-文字色彩:
-  #374151  # 對比度不足，文字模糊
-  #6b7280  # 過淺，難以閱讀
-  #94a3b8  # 線條色不適合文字
-
-線條色彩:
-  #94a3b8  # 過淺，線條不清晰
-  #cbd5e1  # 幾乎不可見
-  #e2e8f0  # 完全消失
-```
-
-### 🎯 WCAG 可讀性標準
-- **AAA 級別**: 對比度 ≥ 7:1
-- **AA 級別**: 對比度 ≥ 4.5:1
-- **建議配置**: 使用高對比度色彩組合
-
-## ✅ 品質檢查清單（已更新）
-
-### 📋 生成前檢查
-生成圖表前請確保：
-- [ ] **使用高可讀性配置**: 推薦使用新的 `#475569` 和 `#111827` 配色
-- [ ] **棄用舊版配置**: 避免使用 `#94a3b8` 和 `#374151`
-- [ ] **背景設置**: 保持 `transparent` 適應所有主題
-- [ ] **節點樣式限制**: 最多3個節點使用底色（僅關鍵狀態）
-- [ ] **字體增強**: 文字模糊時使用字體增強配置
-
-### 🔍 渲染後驗證
-- [ ] **文字清晰度**: 確保所有文字內容清晰可讀
-- [ ] **線條可見性**: 檢查連接線是否清晰可見
-- [ ] **色彩對比度**: 文字與背景對比度 ≥ 4.5:1
-- [ ] **Dark/Light 測試**: 在兩種模式下都測試過
-- [ ] **實際環境驗證**: 在目標 IDE 環境中實際測試
-
-### 🚨 問題診斷指南
-如果圖表顯示不清，請檢查：
-1. **是否使用了舊版配色**？ → 更新為新的高對比度配置
-2. **文字是否模糊**？ → 使用字體增強配置
-3. **線條是否過淺**？ → 檢查 `lineColor` 設置
-4. **特定 IDE 環境問題**？ → 考慮環境特定的渲染差異
-
-## 🚨 重要約束
-
-### 代碼塊標記要求
-- **✅ 必須使用**: ````mermaid` 代碼塊包裝所有圖表
-- **🚫 禁止**: 直接在文檔中寫 Mermaid 語法而不包裝
-
-### 樣式定義規範
-- **✅ 推薦**: 使用標準 `style` 語法定義節點顏色
-- **✅ 範例**: `style A fill:#6366f1,stroke:#4f46e5,color:#ffffff`
-- **🚫 禁止**: 使用未定義的 CSS class（如 `class A primaryNode`）
+**標準顏色含義**：
+- 🟢 `#10b981` - 成功/完成
+- 🔴 `#ef4444` - 失敗/錯誤
+- 🟠 `#f59e0b` - 警告/注意
+- 🔵 `#3b82f6` - 資訊/處理中
 
 ---
 
-## 🎯 快速修正指南
+## 🎯 範例展示
 
-### 發現問題如何修正
-如果現有檔案中的 Mermaid 圖表顯示不清，請快速修正：
+### 所有圖表都用相同配置
 
-#### 1. 文字模糊問題
-```yaml
-# ❌ 問題配置
-textColor: '#374151'  # 對比度不足
-
-# ✅ 修正配置
-textColor: '#111827'  # 高對比度
-```
-
-#### 2. 線條過淺問題
-```yaml
-# ❌ 問題配置
-lineColor: '#94a3b8'  # 線條過淺
-
-# ✅ 修正配置
-lineColor: '#475569'  # 清晰可見
-```
-
-#### 3. 完整修正範本
-直接替換為：
+#### Class Diagram
 ```mermaid
 %%{init: {
-  'theme': 'base',
+  'theme': 'default',
   'themeVariables': {
-    'background': 'transparent',
-    'lineColor': '#475569',
-    'textColor': '#111827',
-    'primaryColor': '#ffffff',
-    'secondaryColor': '#ffffff',
-    'tertiaryColor': '#ffffff'
+    'lineColor': '#3b82f6'
   }
 }}%%
-graph TD
-    A[開始] --> B[處理]
-    B --> C[完成]
+classDiagram
+    class User {
+        +int id
+        +string name
+        +login()
+        +logout()
+    }
+
+    class Order {
+        +string orderId
+        +float amount
+        +string status
+        +create()
+        +cancel()
+    }
+
+    User "1" --> "*" Order : places
 ```
 
-#### 4. 字體增強配置（文字不清時使用）
+#### XYChart
 ```mermaid
 %%{init: {
-  'theme': 'base',
+  'theme': 'default',
   'themeVariables': {
-    'background': 'transparent',
-    'lineColor': '#334155',
-    'textColor': '#0f172a',
-    'primaryColor': '#ffffff',
-    'secondaryColor': '#ffffff',
-    'tertiaryColor': '#ffffff',
-    'primaryTextColor': '#0f172a',
-    'primaryBorderColor': '#1e293b',
-    'fontSize': '14px',
-    'fontFamily': 'system-ui, -apple-system, sans-serif'
+    'lineColor': '#3b82f6'
   }
 }}%%
-graph TD
-    A[開始] --> B[處理]
-    B --> C[完成]
+xychart-beta
+    title "每月營收分析"
+    x-axis [Jan, Feb, Mar, Apr, May, Jun]
+    y-axis "Revenue ($)" 0 --> 100000
+    bar [45000, 52000, 48000, 61000, 58000, 67000]
 ```
 
-#### 5. 已棄用配置（容易導致文字模糊）
-⚠️ 以下配置已被證實容易導致顯示問題：
-```yaml
-# ❌ 問題配置
-textColor: '#374151'  # 對比度不足
-lineColor: '#94a3b8'   # 線條過淺
+#### Pie Chart
+```mermaid
+%%{init: {
+  'theme': 'default',
+  'themeVariables': {
+    'lineColor': '#3b82f6'
+  }
+}}%%
+pie title 部門預算分配
+    "工程部" : 45
+    "產品部" : 25
+    "設計部" : 15
+    "行銷部" : 10
+    "行政部" : 5
 ```
 
-### 一鍵修正腳本
-使用以下替換規則快速修正所有檔案：
-1. `#374151` → `#111827`
-2. `#94a3b8` → `#475569`
+#### Sequence Diagram
+```mermaid
+%%{init: {
+  'theme': 'default',
+  'themeVariables': {
+    'lineColor': '#3b82f6'
+  }
+}}%%
+sequenceDiagram
+    participant Client as 用戶端
+    participant API as API Server
+    participant DB as 資料庫
+
+    Client->>API: 請求用戶資料
+    API->>DB: SQL 查詢
+    DB-->>API: 返回結果
+    API-->>Client: JSON 響應
+```
 
 ---
 
-*這個 Skill 確保所有生成的 Mermaid 圖表都符合 WCAG 可讀性標準，在任何環境下都能提供清晰、高對比度的視覺體驗。*
+## 📊 支援的圖表類型
+
+所有圖表類型都使用相同配置：
+
+| 圖表類型 | 配置 | 效果 |
+|---------|------|------|
+| **Flowchart** | 統一配置 | ✅ 完美 |
+| **Sequence** | 統一配置 | ✅ 完美 |
+| **Class Diagram** | 統一配置 | ✅ 完美 |
+| **XYChart** | 統一配置 | ✅ 完美 |
+| **Pie Chart** | 統一配置 | ✅ 完美 |
+| **Gantt** | 統一配置 | ✅ 完美 |
+| **State Diagram** | 統一配置 | ✅ 完美 |
+| **Git Graph** | 統一配置 | ✅ 完美 |
+| **Quadrant Chart** | 統一配置 | ✅ 完美 |
+| **Journey Map** | 統一配置 | ✅ 完美 |
+
+---
+
+## 🚀 快速模板
+
+### 複製即用模板
+
+```markdown
+```mermaid
+   %%{init: {'theme': 'default',
+   'themeVariables': {
+       'lineColor': '#3b82f6'
+   }
+   }}%%
+[你的圖表代碼]
+```
+```
+
+### 問題診斷清單
+
+如果遇到顯示問題：
+1. ✅ 檢查編輯器是否支援 Dark Theme
+2. ✅ 檢查是否使用了太多 style 語句
+3. ✅ 確認 Mermaid 版本（8.8.0+）
+4. ✅ 重啟編輯器或重新整理頁面
+
+---
+
+## ✅ 相容性驗證
+
+已通過以下環境測試：
+- ✅ VS Code（所有主題）
+- ✅ Obsidian
+- ✅ GitHub
+- ✅ Typora
+- ✅ Cursor
+- ✅ Notion
+- ✅ GitLab
+- ✅ Mermaid Live Editor
+
+**版本要求**: Mermaid 8.8.0+
+
+---
+
+## 💡 實用建議
+
+### 🎯 最佳實踐
+
+- ✅ **統一配置** - 所有圖表用相同設定
+- ✅ **專注內容** - 圖表資訊比樣式重要
+- ✅ **重點突出** - 最多 3 個節點使用 style
+- ✅ **保持一致** - 使用標準顏色含義
+
+### 🚨 常見錯誤
+
+- ❌ 為每個節點都設定 style
+- ❌ 使用太多不同顏色
+- ❌ 過度工程化配置
+- ❌ 忽略編輯器本身問題
+
+### 🤝 團隊協作
+
+- 統一使用預設配置，降低維護成本
+- 建立共同的 style 使用規範
+- 專注於圖表的資訊傳達
+
+---
+
+*簡單、統一、可靠。這就是實用主義的 Mermaid 配置哲學。*

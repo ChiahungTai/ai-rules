@@ -151,42 +151,12 @@ graph TD
 
 ```mermaid
 %%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#3b82f6',      /* 藍色 - 主要操作 */
-    'secondaryColor': '#10b981',    /* 綠色 - 成功狀態 */
-    'tertiaryColor': '#f59e0b',     /* 橙色 - 警告注意 */
-    'background': 'transparent',    /* 關鍵：透明背景 */
-    'lineColor': '#94a3b8',         /* 中性灰 - 連接線 */
-    'textColor': '#374151'          /* 適應性文字色 */
-  }
+  'theme': 'default',
 }}%%
-```
-
-#### 語義化配色範例
-```mermaid
-%%{init: {
-  'theme': 'base',
-  'themeVariables': {
-    'primaryColor': '#3b82f6',
-    'secondaryColor': '#10b981',
-    'tertiaryColor': '#f59e0b',
-    'background': 'transparent'
-  }
-}}%%
-flowchart TD
-    A[開始] --> B{驗證}
-    B -->|成功| C[✅ 處理完成]
-    B -->|失敗| D[❌ 錯誤處理]
-    B -->|警告| E[⚡ 需要重試]
-
-    style C fill:#10b981,color:#ffffff
-    style D fill:#ef4444,color:#ffffff
-    style E fill:#f59e0b,color:#000000
 ```
 
 #### 絕對禁止的色彩組合
-```mermaid
+```
 # ❌ 錯誤範例 - 會在 Dark Mode 失敗
 style A fill:#ffffff  <!-- 白色背景 + 白色文字 = 看不到 -->
 style B fill:#f0f0f0  <!-- 淺灰背景 + 白色文字 = 對比度不足 -->
@@ -214,7 +184,7 @@ style C fill:#f59e0b,color:#000000  <!-- 橙底 + 黑字 -->
   - 建議改善: 💡 #3b82f6 (藍色)
 
 鐵律:
-  - 使用 theme: 'base' + 3色簡化配置
+  - 使用 theme: 'default' + 3色簡化配置
   - 背景設置為 transparent
   - 最多使用3種主要顏色
   - 禁止淺色背景 (#ffffff, #f0f0f0)
