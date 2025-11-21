@@ -8,31 +8,20 @@ allowed-tools: [Read, Write, Edit, Task, Grep, Glob, Bash]
 
 ## 🎯 核心職責
 
-**智能決策 + 完整執行** - 本 Skill 提供從智能決策到完整並行執行的一站式解決方案，讓用戶享受真正高效的並行處理體驗。
-
-### 🚫 職責邊界
-- ❌ **不處理用戶權限**：由系統權限管理負責
-- ❌ **不控制硬體資源**：由 Claude Code 底層管理
-- ❌ **不修改系統設定**：保持系統完整性
+**智能決策 + 完整執行** - 基於任務耦合性自動選擇最優執行策略，提供從智能決策到完整並行執行的一站式解決方案。
 
 ### ✅ 核心職責
-- ✅ **智能並行決策**：分析任務規模、複雜度、成本效益
-- ✅ **最優分組策略**：自動將大任務分解為高效的並行任務組
-- ✅ **真正並行執行**：使用 `&` 和 `wait` 實現真正的並行處理
-- ✅ **結果智能整合**：收集並整合所有並行任務的執行結果
-- ✅ **完整效能報告**：提供執行時間、加速比、成功率等指標
+- **智能並行決策**：分析任務規模、複雜度、成本效益
+- **最優分組策略**：自動將大任務分解為高效的並行任務組
+- **真正並行執行**：使用 `&` 和 `wait` 實現真正的並行處理
+- **結果智能整合**：收集並整合所有並行任務的執行結果
 
-## 💡 設計哲學
-
-基於實戰經驗的核心洞察：
-- **並行不是萬能藥**：小任務並行處理反而更慢
-- **成本效益是關鍵**：啟動開銷必須小於效益
-- **安全性優先**：避免並行處理帶來的不可預測性
-- **用戶控制為主**：最終決策權在用戶手中
+### 🚫 職責邊界
+- 不處理用戶權限、硬體資源控制、系統設定修改
 
 ---
 
-## ⚡ 智能觸發決策樹
+## ⚡ 智能觸發決策
 
 ### 🌳 決策流程
 
@@ -81,10 +70,12 @@ flowchart TD
 - **基本資訊**: "讀取", "概述", "基本", "快速"
 - **品質檢查**: "語法", "格式", "規範", "錯誤"
 
-#### 耦合性分數計算
+#### 增強的耦合性分數計算
 ```python
 def calculate_coupling_score(user_task, file_count):
-    """計算任務耦合性分數"""
+    """計算任務耦合性分數，包含語義分析和信心度"""
+
+    # 基礎關鍵詞匹配（權重：0.6）
     coupling_keywords = {
         'cross_reference': ['比較', '對比', '關聯', '整體', '一致性', '全局'],
         'dependency_analysis': ['依賴', '關係', '影響', '結構', '架構'],
@@ -92,265 +83,119 @@ def calculate_coupling_score(user_task, file_count):
         'pattern_detection': ['模式', '共識', '重複', '最佳實踐', '改進']
     }
 
+    # 語義分析（權重：0.4）
+    semantic_indicators = {
+        'high_coupling': ['各個', '全部', '整體', '對比', '差異'],
+        'low_coupling': ['分別', '各自', '獨立', '單獨']
+    }
+
     task_text = user_task.lower()
     coupling_score = 0
-    detected_patterns = []
+    confidence = 0.8  # 基礎信心度
 
+    # 關鍵詞匹配
     for pattern, keywords in coupling_keywords.items():
-        if any(keyword in task_text for keyword in keywords):
-            coupling_score += 2
-            detected_patterns.append(pattern)
+        matches = sum(1 for keyword in keywords if keyword in task_text)
+        coupling_score += matches * 2
 
-    # 檔案數量影響耦合判斷
+    # 語義分析
+    high_coupling_matches = sum(
+        1 for indicator in semantic_indicators['high_coupling']
+        if indicator in task_text
+    )
+    low_coupling_matches = sum(
+        1 for indicator in semantic_indicators['low_coupling']
+        if indicator in task_text
+    )
+
+    # 調整分數和信心度
+    coupling_score += high_coupling_matches * 1.5 - low_coupling_matches * 1.0
+
+    # 檔案數量影響
     if file_count > 15:
         coupling_score += 1
     elif file_count > 8:
         coupling_score += 0.5
 
+    # 信心度調整
+    if high_coupling_matches > 0 and low_coupling_matches > 0:
+        confidence = 0.6  # 衝突指示詞降低信心度
+    elif coupling_score > 0:
+        confidence = 0.9
+
     return {
-        'coupling_score': coupling_score,
-        'detected_patterns': detected_patterns,
-        'requires_phase2': coupling_score >= 2,
-        'coupling_level': 'high' if coupling_score >= 3 else 'medium' if coupling_score >= 2 else 'low'
-    }
-```
-
-#### 複雜度評估標準
-**高複雜度**（適合並行）：
-- 程式碼解析（語法分析、AST 解析）
-- 深度內容分析（文檔品質檢查、程式碼審查）
-- 複雜轉換操作（格式轉換、資料處理）
-
-**低複雜度**（不適合並行）：
-- 簡單檔案讀取（讀取配置、基本資訊）
-- 快速操作（重新命名、移動、複製）
-- 元資料提取（檔案大小、修改時間）
-
-#### 預估時間計算
-```python
-def estimate_processing_time(file_count, complexity):
-    """基於經驗值的時間估算"""
-    base_time_per_file = {
-        'simple': 2,      # 簡單操作 2 秒/檔案
-        'medium': 5,      # 中等複雜度 5 秒/檔案
-        'complex': 12     # 複雜操作 12 秒/檔案
+        'coupling_score': max(0, coupling_score),
+        'confidence': confidence,
+        'requires_phase2': coupling_score >= 2 and confidence >= 0.7,
+        'recommendation': determine_recommendation(coupling_score, confidence)
     }
 
-    return file_count * base_time_per_file.get(complexity, 5)
+def determine_recommendation(score, confidence):
+    """基於分數和信心度決定建議"""
+    if confidence < 0.7:
+        return 'ask_user'  # 詢問用戶
+    elif score >= 3:
+        return 'required'  # 強烈建議
+    elif score >= 2:
+        return 'recommended'  # 建議
+    else:
+        return 'optional'  # 可選
 ```
 
 ---
 
 ## 💰 成本效益分析
 
-### 📈 並行處理成本模型
-
-#### 並行效益計算
+### 並行效益計算
 ```
 總效益 = 預估節省時間 - 並行啟動成本
-
 預估節省時間 = 序列執行時間 × (1 - 1/加速比)
 並行啟動成本 = 任務分配成本 + 結果整合成本
 ```
 
-#### 啟動成本評估
+### 啟動成本評估
 ```python
 def calculate_parallel_overhead(file_count):
     """並行處理啟動成本"""
-    # 任務分配成本：每個並行任務約 2-3 秒開銷
     task_distribution_cost = min(file_count // 4, 8) * 2.5
-
-    # 結果整合成本：約 5-10 秒
     result_integration_cost = 8
-
-    # 協調成本：約 3-5 秒
     coordination_cost = 4
-
     return task_distribution_cost + result_integration_cost + coordination_cost
 ```
 
-### 🎯 效益閾值標準
-
-#### 正效益條件
+### 效益閾值標準
 - **最小節省時間**：≥ 30 秒
 - **加速比要求**：≥ 2.0x
 - **淨效益**：預估節省時間 > 啟動成本 × 1.5
 
-#### 邊界效益分析
-| 檔案數量 | 預估節省時間 | 啟動成本 | 淨效益 | 建議 |
-|----------|--------------|----------|--------|------|
-| 5-9 | 15-25s | 15s | 0-10s | ⚠️ 邊界案例 |
-| 10-15 | 30-50s | 20s | 10-30s | ✅ 正效益 |
-| 16-25 | 60-90s | 25s | 35-65s | ✅ 高效益 |
-| > 25 | 120s+ | 30s | 90s+ | ✅ 極高效益 |
+---
 
-### ⚖️ 成本效益決策規則
+## 🛠️ 適用場景
 
-1. **絕對正效益**：淨效益 > 60 秒，強烈建議並行
-2. **相對正效益**：淨效益 30-60 秒，建議並行
-3. **邊界效益**：淨效益 10-30 秒，詢問用戶
-4. **負效益**：淨效益 < 10 秒，不建議並行
+### ✅ 高度適合並行處理
+- **多檔案獨立分析**：程式碼品質檢查、文檔一致性驗證
+- **批次格式轉換**：圖片處理、文檔轉換、格式優化
+- **大型數據處理**：日誌分析、資料清理、統計處理
+
+### ❌ 不適合並行處理
+- **簡單快速操作**：單檔案操作、小規模處理
+- **強依賴性任務**：有序工作流程、編譯部署流程
+- **需要全局狀態**：統一版本更新、總體報告生成
 
 ---
 
-## 🛠️ 適用場景明確化
+## 🔄 耦合性驅動的動態執行模式
 
-### ✅ 高度適合並行處理的場景
-
-#### 1. **多檔案獨立分析**
-```bash
-# 程式碼品質檢查
-"分析整個專案中所有 Python 檔案的程式碼品質"
-"檢查 src/ 目錄下所有檔案的命名規範"
-
-# 文檔一致性檢查
-"驗證 docs/ 目錄下所有 Markdown 文檔的格式一致性"
-"檢查所有 README 檔案的內容完整性"
-```
-
-#### 2. **批次格式轉換**
-```bash
-# 圖片處理
-"批量調整 images/ 目錄下所有圖片的大小"
-"將所有 .png 檔案轉換為 .webp 格式"
-
-# 文檔轉換
-"將所有 .docx 檔案轉換為 Markdown 格式"
-"批量優化所有 HTML 檔案的 SEO"
-```
-
-#### 3. **大型數據處理**
-```bash
-# 日誌分析
-"分析所有伺服器日誌檔案中的錯誤模式"
-"統計所有用戶行為日誌的訪問模式"
-
-# 資料處理
-"處理所有 CSV 檔案的數據清理"
-"轉換所有 JSON 配置檔案的版本"
-```
-
-### ❌ 不適合並行處理的場景
-
-#### 1. **簡單快速操作**
-```bash
-# 錯誤示範
-"重新命名這個檔案"  # 單一檔案
-"讀取配置檔案"      # 簡單操作
-"移動 3 個檔案"     # 檔案太少
-```
-
-#### 2. **強依賴性任務**
-```bash
-# 錯誤示範
-"按順序處理工作流程"  # 有明確順序依賴
-"編譯專案並測試"      # 編譯必須先完成
-"部署到測試環境"      # 依賴前面步驟
-```
-
-#### 3. **需要全局狀態**
-```bash
-# 錯誤示範
-"更新所有檔案的版本號"  # 需要統一版本管理
-"重新計算專案統計資訊"  # 需要全局視圖
-"生成總體報告"        # 依賴所有子結果
-```
-
-### ⚠️ 邊界案例（需要詢問用戶）
-
-#### 1. **中等規模任務**
-```bash
-# 5-9 個檔案的複雜操作
-"分析這 7 個核心模組的程式碼複雜度"
-"轉換這 8 個配置檔案的格式"
-```
-
-#### 2. **混合複雜度任務**
-```bash
-# 部分簡單，部分複雜
-"處理專案中的所有檔案（包含配置和程式碼）"
-"優化整個網站的資源（圖片、CSS、JS）"
-```
-
----
-
-## 🛡️ 風險管理機制
-
-### ⚠️ 並行處理風險識別
-
-#### 1. **資源競爭風險**
-```markdown
-🚨 **高風險場景**：
-- 同時寫入同一個檔案
-- 爭奪有限的系統資源（記憶體、CPU）
-- 網路連線數量超限
-
-🛡️ **緩解措施**：
-- 寫入操作序列化
-- 資源使用限制
-- 連線池管理
-```
-
-#### 2. **錯誤傳播風險**
-```markdown
-🚨 **高風險場景**：
-- 單一任務失敗導致整體失敗
-- 錯誤累積造成系統不穩定
-- 部分失敗導致結果不一致
-
-🛡️ **緩解措施**：
-- 錯誤隔離機制
-- 失敗重試策略
-- 部分成功處理
-```
-
-#### 3. **一致性風險**
-```markdown
-🚨 **高風險場景**：
-- 並行修改相關檔案
-- 時間戳記不一致
-- 依賴關係混亂
-
-🛡️ **緩解措施**：
-- 依賴關係分析
-- 鎖定機制
-- 一致性檢查
-```
-
-### 🔄 耦合性驅動的動態執行模式
+### 動態並行執行策略
 
 ```mermaid
 flowchart TD
     A["任務請求 + 檔案清單"] --> B["耦合性分析"]
     B --> C{"需要跨檔案交互?"}
-
     C -->|否| D["僅第一階段: 檔案獨立處理"]
     C -->|是| E["第一階段 + 第二階段: 專業深度分析"]
-
     D --> F["第三階段: 直接整合報告"]
     E --> F
-
-    subgraph "第一階段: 並行基礎處理 (每個檔案獨立)"
-        D1["Task 1: content-analyzer<br/>file1.md"] &
-        D2["Task 2: content-analyzer<br/>file2.md"] &
-        D3["Task 3: content-analyzer<br/>file3.md"] &
-        DN["Task N: content-analyzer<br/>fileN.md"] &
-        wait
-    end
-
-    subgraph "第二階段: 專業並行分析 (按類型分組)"
-        E1["Task 1: structure-analyzer<br/>所有架構檔案"] &
-        E2["Task 2: verification-expert<br/>所有實作檔案"] &
-        E3["Task 3: context-analyzer<br/>所有配置檔案"] &
-        E4["Task 4: content-processor<br/>所有文檔檔案"] &
-        wait
-    end
-
-    subgraph "第三階段: 報告整合"
-        F1["Task 1: report-coordinator<br/>整合所有結果"] &
-        F2["Task 2: visualization-specialist<br/>生成圖表"] &
-        wait
-    end
 ```
 
 ### 📋 動態並行執行策略
@@ -358,10 +203,6 @@ flowchart TD
 #### **低耦合任務**（第一階段就夠）
 ```bash
 # 範例："分析所有 commands 的基本資訊"
-"檢查每個 command 的語法錯誤"
-"統計所有檔案的行數和大小"
-
-# 執行：
 Task 1: "content-analyzer 分析 /commands/explain.md" &
 Task 2: "content-analyzer 分析 /commands/doc-hierarchy.md" &
 Task 3: "content-analyzer 分析 /commands/error-diagnose.md" &
@@ -376,8 +217,6 @@ Task "report-coordinator 整合所有基礎分析結果" &
 #### **高耦合任務**（需要第二階段）
 ```bash
 # 範例："比較所有 commands 的設計一致性"
-"分析 commands 間的依賴關係"
-"統一所有 commands 的文檔格式標準"
 
 # 第一階段：基礎處理
 Task 1: "content-analyzer 分析 command1.md" &
@@ -393,790 +232,220 @@ Task 3: "verification-expert 檢查交叉引用" &
 wait
 ```
 
-#### **使用者強制觸發**
-```bash
-# 用戶明確要求多階段處理
-skill: "parallel-processing" "深度分析並整合比較所有 commands，我需要完整的對比報告"
-
-# 結果：強制啟動完整的三階段處理流程
-```
-
-### 🎯 耦合性分數決策邏輯
-```python
-def determine_parallel_strategy(user_task, files):
-    """
-    根据耦合性分析決定並行處理策略
-    """
-
-    # 分析任務耦合性
-    coupling_analysis = calculate_coupling_score(user_task, len(files))
-
-    # 分析基本並行可行性
-    basic_analysis = {
-        'file_count': len(files),
-        'complexity': estimate_task_complexity(files),
-        'estimated_time': estimate_processing_time(len(files), 'medium')
-    }
-
-    # 決策邏輯
-    if coupling_analysis['requires_phase2']:
-        return {
-            'strategy': 'multi_phase',
-            'phases': ['basic_analysis', 'specialized_analysis', 'integration'],
-            'phase1_tasks': len(files),  # 每個檔案一個 Task
-            'phase2_tasks': 4,  # 按類型分組
-            'phase3_tasks': 2,  # 報告整合
-            'total_tasks': len(files) + 6,
-            'coupling_level': coupling_analysis['coupling_level']
-        }
-    else:
-        return {
-            'strategy': 'file_grouping_only',
-            'phases': ['basic_analysis', 'integration'],
-            'phase1_tasks': len(files),  # 每個檔案一個 Task
-            'phase2_tasks': 0,
-            'phase3_tasks': 1,
-            'total_tasks': len(files) + 1,
-            'coupling_level': 'low'
-        }
-```
-
 ### 🔧 智能任務分組演算法
+
 ```python
-def intelligent_task_grouping(files, coupling_patterns):
-    """
-    根据檔案類型和耦合模式進行智能分組
-    """
-
-    # 基礎分組：每個檔案獨立
-    phase1_groups = [(file,) for file in files]
-
-    # 如果不需要第二階段，直接返回
-    if not coupling_patterns['requires_phase2']:
-        return phase1_groups, []
-
-    # 第二階段專業分組
-    file_analysis = analyze_file_types(files)
-
-    phase2_groups = [
-        # 架構類檔案
-        [f for f in files if file_analysis[f]['type'] == 'architecture'],
-
-        # 實作類檔案
-        [f for f in files if file_analysis[f]['type'] == 'implementation'],
-
-        # 配置和工具類檔案
-        [f for f in files if file_analysis[f]['type'] in ['config', 'tool']],
-
-        # 文檔類檔案
-        [f for f in files if file_analysis[f]['type'] == 'documentation']
-    ]
-
-    # 過濾空群組
-    phase2_groups = [group for group in phase2_groups if group]
-
-    return phase1_groups, phase2_groups
-
 def analyze_file_types(files):
-    """分析檔案類型和特徵"""
-    analysis = {}
+    """分析檔案類型，為耦合性分析和分組提供上下文資訊"""
+
+    file_types = {}
+    type_distribution = {'code': [], 'documentation': [], 'config': [], 'markup': [], 'other': []}
 
     for file_path in files:
-        filename = file_path.lower()
+        ext = file_path.split('.')[-1].lower() if '.' in file_path else 'unknown'
 
-        # 基於檔名和路徑分析類型
-        if 'structure' in filename or 'design' in filename or 'plan' in filename:
-            file_type = 'architecture'
-        elif any(x in filename for x in ['py', 'js', 'ts', 'go', 'cpp']):
-            file_type = 'implementation'
-        elif 'config' in filename or 'setting' in filename:
-            file_type = 'config'
-        elif 'tool' in filename or 'utility' in filename:
-            file_type = 'tool'
-        elif 'doc' in filename or 'readme' in filename:
-            file_type = 'documentation'
+        # 簡單分類，不使用複雜權重
+        if ext in [
+            '.py', '.js', '.ts', '.jsx', '.tsx', '.java', '.cpp', '.c',
+            '.go', '.rs', '.php', '.rb', '.swift', '.kt'
+        ]:
+            category = 'code'
+        elif ext in ['.md', '.rst', '.txt', 'adoc']:
+            category = 'documentation'
+        elif ext in ['.json', '.yml', '.yaml', '.toml', '.ini', '.conf']:
+            category = 'config'
+        elif ext in ['.html', '.css', '.scss', '.less', '.xml']:
+            category = 'markup'
         else:
-            file_type = 'other'
+            category = 'other'
 
-        analysis[file_path] = {
-            'type': file_type,
-            'size': estimate_file_size(file_path),
-            'complexity': estimate_file_complexity(file_path)
+        file_types[file_path] = category
+        type_distribution[category].append(file_path)
+
+    return {
+        'file_types': file_types,
+        'type_distribution': type_distribution,
+        'summary': {
+            'total_files': len(files),
+            'code_files': len(type_distribution['code']),
+            'doc_files': len(type_distribution['documentation']),
+            'config_files': len(type_distribution['config']),
+            'markup_files': len(type_distribution['markup']),
+            'other_files': len(type_distribution['other'])
         }
+    }
 
-    return analysis
-```
+def adaptive_task_grouping(files, coupling_analysis):
+    """基於耦合性分析的動態分組策略 - 保持耦合性驅動的純粹性"""
 
-### 📋 標準化任務模板
+    # 分析檔案類型（提供上下文資訊）
+    file_type_analysis = analyze_file_types(files)
 
-```python
-class ParallelTaskTemplate:
-    """
-    標準化的並行任務模板
-    """
+    # 核心原則：耦合性決定執行策略，檔案類型僅優化分組
+    if coupling_analysis['requires_phase2']:
+        # 高耦合：按類型分組，有助於專業化處理
+        return group_by_file_type(file_type_analysis['type_distribution'], target_size=5)
+    else:
+        # 低耦合：簡單均勻分組，不考慮複雜度權重
+        return simple_balanced_grouping(files, target_size=6)
 
-    def __init__(self, task_type, items, processing_function):
-        self.task_type = task_type
-        self.items = items
-        self.processing_function = processing_function
+def group_by_file_type(type_distribution, target_size=5):
+    """按檔案類型分組 - 適合高耦合任務的專業化處理"""
+    groups = []
 
-    def execute(self):
-        """標準執行介面"""
-        results = []
+    for file_type, file_list in type_distribution.items():
+        if not file_list:  # 跳過空類型
+            continue
 
-        for item in self.items:
-            try:
-                result = self.processing_function(item)
-                results.append({
-                    'item': item,
-                    'result': result,
-                    'status': 'success',
-                    'execution_time': time.time()
+        # 如果該類型檔案超過目標大小，拆分成小組
+        if len(file_list) <= target_size:
+            groups.append({
+                'group_type': file_type,
+                'files': file_list,
+                'specialist_agent': get_specialist_agent(file_type)
+            })
+        else:
+            # 拆分成較小的組
+            for i in range(0, len(file_list), target_size):
+                subgroup = file_list[i:i + target_size]
+                groups.append({
+                    'group_type': file_type,
+                    'files': subgroup,
+                    'specialist_agent': get_specialist_agent(file_type)
                 })
-            except Exception as e:
-                results.append({
-                    'item': item,
-                    'error': str(e),
-                    'status': 'failed',
-                    'execution_time': time.time()
-                })
 
-        return results
+    return groups
+
+def simple_balanced_grouping(files, target_size=6):
+    """簡單均勻分組 - 適合低耦合任務的獨立處理"""
+    groups = []
+
+    for i in range(0, len(files), target_size):
+        subgroup = files[i:i + target_size]
+        groups.append({
+            'group_type': 'mixed',
+            'files': subgroup,
+            'specialist_agent': 'content-analyzer'  # 低耦合使用通用分析器
+        })
+
+    return groups
+
+def get_specialist_agent(file_type):
+    """根據檔案類型推薦專業處理器"""
+    agent_mapping = {
+        'code': 'structure-analyzer',
+        'documentation': 'content-processor',
+        'config': 'verification-expert',
+        'markup': 'content-analyzer',
+        'other': 'content-analyzer'
+    }
+    return agent_mapping.get(file_type, 'content-analyzer')
 ```
 
 ---
 
-## 🎯 智能觸發機制
+## 📊 完整執行範例
 
-### ⚖️ 多重閾值防護機制
+### 場景 1: 低耦合任務（僅第一階段）
 
-**🔴 嚴格觸發條件**（必須同時滿足）：
+**用戶請求**: "檢查所有 commands 檔案的語法錯誤"
 
-1. **規模閾值**：
-   - 檔案數量 ≥ 10 個 **或**
-   - 目錄層級 ≥ 3 層 **或**
-   - 預估處理時間 ≥ 45 秒
+**耦合性分析**: 低耦合 (score: 0, confidence: 0.9, requires_phase2: False)
 
-2. **複雜度閾值**：
-   - 包含程式碼解析（.py, .js, .ts 等）≥ 5 個檔案 **或**
-   - 需要深度分析（語法分析、複雜度計算等）
+**執行策略**: 直接跳過第二階段，使用簡單均勻分組
 
-3. **效益閾值**：
-   - 預估並行效益 ≥ 2.0x 加速比
-   - 資源利用率預期 ≥ 50%
+### 場景 2: 高耦合任務（完整三階段）
 
-4. **明確觸發詞**：
-   - **強制觸發**：明確提到"並行"、"同時"、"多執行緒"
-   - **大規模詞彙**："大量"、"大規模"、"完整專案分析"
-   - **效能需求**："快速處理"、"效能優化"、"節省時間"
+**用戶請求**: "比較所有 commands 的設計一致性，找出重複模式和改進機會"
 
-### 🟡 建議性觸發條件**（詢問用戶意見）：
+**耦合性分析**: 高耦合 (score: 8, confidence: 0.85, requires_phase2: True)
 
-當滿足以下條件時，系統會詢問是否啟用並行處理：
-
-```markdown
-🤔 **偵測到可能的並行處理機會**
-
-偵測到 7 個檔案需要分析，預估並行處理可節省 40% 時間。
-
-是否啟用並行處理？
-- [ ] 是，啟用並行處理
-- [ ] 否，使用傳統序列處理
-```
-
-### 🟢 安全模式（保守觸發）：
-
-**安全模式下的觸發條件**：
-- 檔案數量 ≥ 20 個
-- **且** 包含至少一個明確的並行觸發詞
-- **且** 預估執行時間 ≥ 60 秒
-
----
-
-## 🛠️ 實際應用場景
-
-### 📁 多檔案分析加速
-
+**執行策略**:
 ```bash
-# 用戶請求（自動觸發並行處理）
-"請分析 src/ 目錄下所有 Python 檔案的程式碼品質"
-
-# 真正的並行執行（使用 & 符號）
-Task 1: "分析 src/core/ 檔案群組的程式碼品質" &
-Task 2: "分析 src/api/ 檔案群組的程式碼品質" &
-Task 3: "分析 src/utils/ 檔案群組的程式碼品質" &
-Task 4: "分析 src/tests/ 檔案群組的程式碼品質" &
+# 第一階段：基礎檔案分析
+Task 1: "content-analyzer 分析 commands/explain.md 的基本結構" &
+Task 2: "content-analyzer 分析 commands/doc-hierarchy.md 的基本結構" &
+...
+Task 8: "content-analyzer 分析 commands/worktree.md 的基本結構" &
 wait
 
-# 自動整合結果
-統一品質報告 + 問題分類 + 改善建議
-```
-
-### 📋 批次文檔處理
-
-```bash
-# 用戶請求（自動觸發並行處理）
-"為所有 Markdown 文檔生成目錄"
-
-# 真正的並行執行（使用 & 符號）
-Task 1: "處理 docs/api/ 文檔群組，生成目錄結構" &
-Task 2: "處理 docs/guides/ 文檔群組，生成目錄結構" &
-Task 3: "處理 docs/examples/ 文檔群組，生成目錄結構" &
+# 第二階段：專業深度分析
+Task 1: "structure-analyzer 分析所有 commands 的整體架構一致性" &
+Task 2: "content-processor 分析所有 commands 的內容重複模式" &
+Task 3: "verification-expert 檢查所有 commands 間的交叉引用" &
 wait
 
-# 自動整合結果
-完整目錄結構 + 交叉引用 + 導航優化
-```
-
-### 🔍 程式碼審查並行化
-
-```bash
-# 用戶請求（自動觸發並行處理）
-"審查整個專案的安全漏洞"
-
-# 真正的並行執行（使用 & 符號）
-Task 1: "檢查認證授權相關檔案的安全漏洞" &
-Task 2: "檢查資料庫操作檔案的安全漏洞" &
-Task 3: "檢查 API 端點檔案的安全漏洞" &
-Task 4: "檢查配置檔案的安全漏洞" &
+# 第三階段：高級整合與報告
+Task 1: "report-coordinator 生成完整的設計一致性分析報告" &
+Task 2: "visualization-specialist 創建設計模式對比圖表" &
 wait
-
-# 自動整合結果
-風險評級報告 + 漏洞分類 + 修復建議
 ```
 
 ---
 
-## ⚙️ 效能監控與優化
-
-### 📊 實時效能指標
-
-```python
-class PerformanceMonitor:
-    """
-    並行處理效能監控器
-    """
-
-    def __init__(self):
-        self.metrics = {
-            'task_start_time': None,
-            'parallel_tasks': [],
-            'completion_times': [],
-            'resource_usage': []
-        }
-
-    def monitor_execution(self, task_function):
-        """效能監控裝飾器"""
-        def wrapper(*args, **kwargs):
-            start_time = time.time()
-
-            # 資源監控
-            cpu_before = psutil.cpu_percent()
-            memory_before = psutil.virtual_memory().percent
-
-            result = task_function(*args, **kwargs)
-
-            # 計算執行時間
-            execution_time = time.time() - start_time
-
-            # 記錄指標
-            self.metrics['completion_times'].append(execution_time)
-
-            return result
-
-        return wrapper
-```
-
-### 🎯 動態優化策略
-
-```python
-def dynamic_optimization(historical_performance):
-    """
-    基於歷史數據的動態優化
-    """
-
-    # 1. 分析最優並行度
-    optimal_parallelism = find_optimal_parallel_count(historical_performance)
-
-    # 2. 調整分組策略
-    if average_task_time > 60:
-        # 任務太長，增加分組
-        return {'strategy': 'more_groups', 'target_group_size': 3}
-    elif average_task_time < 10:
-        # 任務太短，減少分組
-        return {'strategy': 'fewer_groups', 'target_group_size': 8}
-
-    return {'strategy': 'adaptive', 'target_group_size': 5}
-```
-
----
-
-## 🔧 故障處理與容錯
-
-### 🛡️ 智能錯誤隔離
-
-```python
-def fault_tolerant_execution(tasks, max_retries=3):
-    """
-    容錯並行執行
-    """
-
-    results = []
-    failed_tasks = []
-
-    for attempt in range(max_retries):
-        # 並行執行
-        parallel_results = execute_parallel(tasks)
-
-        # 分析結果
-        for result in parallel_results:
-            if result['status'] == 'success':
-                results.append(result)
-            else:
-                failed_tasks.append(result)
-
-        # 如果都成功了，跳出循環
-        if not failed_tasks:
-            break
-
-        # 重試失敗的任務
-        tasks = [task['item'] for task in failed_tasks]
-        failed_tasks = []
-
-    return results, failed_tasks
-```
-
-### 📊 錯誤報告與分析
-
-```markdown
-## 並行執行報告
-
-### ✅ 成功統計
-- **總任務數**: 47 個
-- **成功完成**: 44 個 (93.6%)
-- **執行時間**: 23.4 秒（相較於序列 89.2 秒，提升 73.8%）
-
-### ❌ 失敗分析
-- **權限問題**: 2 個檔案（跳過處理）
-- **語法錯誤**: 1 個檔案（記錄錯誤）
-
-### 📈 效能提升
-- **速度提升**: 3.8x
-- **資源利用率**: 76%
-- **CPU 平均使用率**: 68%
-```
-
----
-
-## 💡 使用方法與最佳實踐
+## 💡 使用方法
 
 ### 🎯 保守觸發（推薦）
-
 ```bash
 # 明確指定並行處理，避免誤觸發
 "請使用並行處理分析整個專案的程式碼架構"
 "同時檢查所有配置檔案的一致性"
 "啟用多執行緒批次處理這些圖片檔案"
-"用並行方式處理大規模文檔分析"
 ```
 
-### ⚠️ 觸發詞使用建議
-
-**避免誤觸發的表達方式**：
-- ❌ "分析專案架構" → 可能只是簡單描述
-- ✅ "使用並行處理分析專案架構" → 明確意圖
-
-**推薦的觸發表達**：
-- ✅ "大量/大規模" + "並行/同時"
-- ✅ "效能優化" + "快速處理"
-- ✅ 明確檔案數量 + 並行需求
-
-### 🛡️ 安全使用原則
-
-1. **規模確認**：確保確實有大規模處理需求
-2. **效益評估**：確認並行處理確實能帶來效益
-3. **明確意圖**：使用明確的並行處理關鍵詞
-4. **測試先行**：重要任務先用小規模測試
-
 ### ⚡ 手動指定（進階）
-
 ```bash
-# 明確要求並行處理
+# 直接調用 skill
 skill: "parallel-processing" "並行分析以下檔案：file1.py, file2.py, file3.py"
 skill: "parallel-processing" "使用 4 個並行任務處理 src/ 目錄"
 ```
 
-### 🔧 效能調優
+### 📁 檔案類型分析與分組
+
+系統會分析檔案類型並根據耦合性決定分組策略：
 
 ```bash
-# 自定義並行參數
-skill: "parallel-processing" "分析整個專案，使用 6 個並行任務"
-skill: "parallel-processing" "批次處理，每組最多 3 個檔案"
+# 範例：混合檔案類型的專案分析
+"並行分析整個專案，包含 .py, .js, .md, .json 等多種檔案"
+
+# 系統分析結果：
+# 檔案類型：code(3), documentation(2), config(3), markup(1)
+# 耦合性決定：高耦合 → 按類型專業化分組
+# 低耦合 → 簡單均勻分組
 ```
+
+### 🎯 專業化處理器映射
+
+```bash
+# 檔案類型與專業處理器對應
+code → structure-analyzer          # 程式碼架構分析
+documentation → content-processor # 文檔內容處理
+config → verification-expert      # 配置驗證
+markup → content-analyzer         # 標記語言分析
+other → content-analyzer         # 通用分析器
+```
+
+### 🛡️ 安全使用原則
+1. **耦合性優先**：執行策略由耦合性分析決定，檔案類型僅優化分組
+2. **規模確認**：確保確實有大規模處理需求
+3. **效益評估**：確認並行處理確實能帶來效益
+4. **明確意圖**：使用明確的並行處理關鍵詞
+5. **測試先行**：重要任務先用小規模測試
 
 ---
 
 ## ⚠️ 重要技術限制
 
 ### ✅ Claude Code 真正並行處理
-
-**基於 git 歷史分析和實際驗證**：
-
-1. **真正的並行執行**
-   - 使用 `&` 符號可以實現真正的並行處理
-   - `Task 1: "..." & Task 2: "..." & wait` 確保同時執行
-   - 所有 Task 會真正並行運行，不是序列處理
-
-2. **並行執行語法**
-   ```bash
-   # 正确的並行處理語法
-   Task 1: "處理檔案群組 A" &
-   Task 2: "處理檔案群組 B" &
-   Task 3: "處理檔案群組 C" &
-   wait
-   ```
-
-3. **實際效能提升**
-   - 理論提升：2-4x 速度提升
-   - 實際提升：真正的並行執行，顯著減少總執行時間
-   - 等待時間：由最慢的 Task 決定，不是所有 Task 的總和
+- 使用 `&` 符號可以實現真正的並行處理
+- `Task 1: "..." & Task 2: "..." & wait` 確保同時執行
+- 理論提升：2-4x 速度提升，實際取決於任務特性
 
 ### 💡 實際應用建議
-
 1. **智能分組**：Skill 核心價值在於智能判斷並行可行性和最優分組
 2. **真正並行**：使用 `&` 和 `wait` 確保真正的並行執行
 3. **成本效益**：只有在效益顯著時才建議並行處理
 
 ---
-
-## 🎉 實際應用價值
-
-### 📊 經驗證的效益
-
-**基於真實測試結果**：
-
-| 應用場景 | 檔案數量 | 主要效益 | 觀察結果 |
-|----------|----------|----------|----------|
-| **智能決策** | 任意 | 避免誤觸發 | ✅ 成功防護 |
-| **流程優化** | 15個 | 結構化分析 | ✅ 品質提升 |
-| **大規模分析** | 40個 | 分組策略 | ✅ 系統化處理 |
-
-### 🚀 實際用戶體驗改善
-
-- **智能分組**：自動將大規模任務分解為可管理的小組
-- **成本效益分析**：避免低價值的並行嘗試
-- **風險管理**：識別並行處理的潛在問題
-- **決策支持**：提供明確的並行處理建議
-
----
-
-## 🔮 未來擴展方向
-
-### 🧠 AI 增強優化
-- 基於機器學習的最優並行度預測
-- 自適應負載平衡算法
-- 智能任務調度策略
-
-### 🌐 分散式支援
-- 跨機器並行處理
-- 雲端資源動態調度
-- 邊緣計算整合
-
-### 📊 高級分析
-- 效能瓶頸自動識別
-- 資源使用模式分析
-- 個人化效能優化建議
-
----
-
-## 🎯 完整執行範例與測試場景
-
-### 場景 1: 低耦合任務（僅第一階段）
-
-**用戶請求**: "檢查所有 commands 檔案的語法錯誤"
-
-**耦合性分析**:
-```python
-user_task = "檢查所有 commands 檔案的語法錯誤"
-file_count = 8
-
-# 耦合性分數計算
-coupling_score = 0  # 沒有跨檔案參照關鍵詞
-detected_patterns = []
-requires_phase2 = False  # 不需要第二階段
-coupling_level = 'low'
-```
-
-**執行策略**: 僅第一階段 + 第三階段
-
-```bash
-# 第一階段：獨立檔案處理（真正的並行執行）
-Task 1: "content-analyzer 檢查 commands/explain.md 語法錯誤" &
-Task 2: "content-analyzer 檢查 commands/doc-hierarchy.md 語法錯誤" &
-Task 3: "content-analyzer 檢查 commands/parallel-task.md 語法錯誤" &
-Task 4: "content-analyzer 檢查 commands/docs-manager.md 語法錯誤" &
-Task 5: "content-analyzer 檢查 commands/error-diagnose.md 語法錯誤" &
-Task 6: "content-analyzer 檢查 commands/doc-quality-checker.md 語法錯誤" &
-Task 7: "content-analyzer 檢查 commands/CLAUDE.md 語法錯誤" &
-Task 8: "content-analyzer 檢查 commands/worktree.md 語法錯誤" &
-wait
-
-# 跳過第二階段（不需要跨檔案分析）
-
-# 第三階段：結果整合
-Task 1: "report-coordinator 整合所有語法檢查結果" &
-Task 2: "visualization-specialist 生成錯誤分佈圖表" &
-wait
-```
-
-**預期結果**: 快速完成，每個檔案獨立檢查，無需跨檔案關聯分析
-
----
-
-### 場景 2: 高耦合任務（完整三階段）
-
-**用戶請求**: "比較所有 commands 的設計一致性，找出重複模式和改進機會"
-
-**耦合性分析**:
-```python
-user_task = "比較所有 commands 的設計一致性，找出重複模式和改進機會"
-file_count = 8
-
-# 耦合性分數計算
-coupling_keywords_found = ['比較', '一致性', '重複', '改進']
-coupling_score = 2 * 4 = 8  # 高耦合
-detected_patterns = ['cross_reference', 'pattern_detection', 'global_optimization']
-requires_phase2 = True  # 需要第二階段
-coupling_level = 'high'
-```
-
-**執行策略**: 完整三階段處理
-
-```bash
-# 第一階段：基礎檔案分析（真正的並行執行）
-Task 1: "content-analyzer 分析 commands/explain.md 的基本結構和內容" &
-Task 2: "content-analyzer 分析 commands/doc-hierarchy.md 的基本結構和內容" &
-Task 3: "content-analyzer 分析 commands/parallel-task.md 的基本結構和內容" &
-Task 4: "content-analyzer 分析 commands/docs-manager.md 的基本結構和內容" &
-Task 5: "content-analyzer 分析 commands/error-diagnose.md 的基本結構和內容" &
-Task 6: "content-analyzer 分析 commands/doc-quality-checker.md 的基本結構和內容" &
-Task 7: "content-analyzer 分析 commands/CLAUDE.md 的基本結構和內容" &
-Task 8: "content-analyzer 分析 commands/worktree.md 的基本結構和內容" &
-wait
-
-# 第二階段：專業深度分析（按類型分組並行執行）
-Task 1: "structure-analyzer 分析所有 commands 的整體架構一致性和設計模式" &
-Task 2: "content-processor 分析所有 commands 的內容重複模式和標準化機會" &
-Task 3: "verification-expert 檢查所有 commands 間的交叉引用和依賴關係" &
-Task 4: "context-analyzer 分析所有 commands 的使用情境和設計意圖一致性" &
-wait
-
-# 第三階段：高級整合與報告
-Task 1: "report-coordinator 生成完整的設計一致性分析報告" &
-Task 2: "visualization-specialist 創建設計模式對比圖表和改進建議視覺化" &
-wait
-```
-
-**預期結果**: 深度分析，識別跨檔案的一致性問題和改進機會
-
----
-
-### 場景 3: 中等耦合任務（第一 + 第二階段）
-
-**用戶請求**: "分析 commands 目錄的整體架構，評估模組化程度"
-
-**耦合性分析**:
-```python
-user_task = "分析 commands 目錄的整體架構，評估模組化程度"
-file_count = 8
-
-# 耦合性分數計算
-coupling_keywords_found = ['架構', '整體', '模組化']
-coupling_score = 2 * 3 = 6  # 中等耦合
-detected_patterns = ['dependency_analysis', 'cross_reference']
-requires_phase2 = True  # 需要第二階段
-coupling_level = 'medium'
-```
-
-**執行策略**: 第一階段 + 第二階段（簡化） + 第三階段
-
-```bash
-# 第一階段：基礎檔案分析（真正的並行執行）
-Task 1: "content-analyzer 分析每個 command 的基本功能" &  # 每個檔案獨立
-Task 2: "content-analyzer 分析每個 command 的參數結構" &
-Task 3: "content-analyzer 分析每個 command 的使用場景" &
-wait
-
-# 第二階段：架構分析（中等複雜度）
-Task 1: "structure-analyzer 分析 commands 目錄的整體架構和模組化程度" &
-Task 2: "context-analyzer 評估各 command 間的關聯性和依賴" &
-wait
-
-# 第三階段：整合報告
-Task 1: "report-coordinator 生成架構分析報告" &
-wait
-```
-
----
-
-## 🔧 動態執行邏輯實作
-
-### 完整的決策演算法
-
-```python
-def dynamic_parallel_execution(user_task, files, context):
-    """
-    動態並行執行的主要決策邏輯
-    """
-
-    # 第一步：耦合性分析
-    coupling_analysis = calculate_coupling_score(user_task, len(files))
-
-    # 第二步：基本可行性分析
-    basic_feasibility = {
-        'file_count': len(files),
-        'estimated_time': estimate_processing_time(len(files), 'medium'),
-        'complexity': assess_task_complexity(user_task)
-    }
-
-    # 第三步：執行策略決策
-    if coupling_analysis['requires_phase2']:
-        strategy = 'multi_phase_execution'
-    else:
-        strategy = 'single_phase_execution'
-
-    # 第四步：生成執行計劃
-    execution_plan = generate_execution_plan(strategy, coupling_analysis, files)
-
-    return execution_plan
-
-def generate_execution_plan(strategy, coupling_analysis, files):
-    """
-    根據策略生成具體的執行計劃
-    """
-
-    if strategy == 'multi_phase_execution':
-        return {
-            'phases': 3,
-            'phase1_tasks': len(files),  # 每個檔案一個 Task
-            'phase2_tasks': 4,           # 按專業分組
-            'phase3_tasks': 2,           # 整合與視覺化
-            'total_tasks': len(files) + 6,
-            'estimated_speedup': f"{len(files) * 0.8 + 1.5}x"
-        }
-    else:
-        return {
-            'phases': 2,
-            'phase1_tasks': len(files),  # 每個檔案一個 Task
-            'phase2_tasks': 1,           # 僅整合
-            'total_tasks': len(files) + 1,
-            'estimated_speedup': f"{len(files) * 0.6 + 1.2}x"
-        }
-```
-
-### 執行計劃生成範例
-
-```bash
-# 實際執行時的決策流程
-
-skill: "parallel-processing" "分析 commands 目錄的設計一致性"
-
-# Skill 返回決策結果：
-{
-  "recommend_parallel": true,
-  "coupling_analysis": {
-    "score": 8,
-    "level": "high",
-    "requires_phase2": true,
-    "patterns": ["cross_reference", "pattern_detection"]
-  },
-  "execution_strategy": {
-    "phases": 3,
-    "phase1_tasks": 8,
-    "phase2_tasks": 4,
-    "phase3_tasks": 2,
-    "total_parallel_tasks": 14,
-    "estimated_speedup": "7.9x",
-    "grouping_method": "file_type_specialization"
-  }
-}
-
-# 系統根據此計劃執行真正的並行處理
-```
-
----
-
-## 📊 效能預期與評估
-
-### 不同場景的效能預期
-
-| 場景類型 | 檔案數量 | 耦合程度 | 執行階段 | 預期加速比 | 資源利用率 |
-|----------|----------|----------|----------|------------|------------|
-| **語法檢查** | 8個 | 低 | 1+3 | 5.8x | 65% |
-| **一致性分析** | 8個 | 高 | 1+2+3 | 7.9x | 85% |
-| **架構評估** | 8個 | 中 | 1+2+3 | 6.2x | 75% |
-| **大型專案** | 25個 | 高 | 1+2+3 | 15.2x | 90% |
-
-### 成本效益分析
-
-```python
-def cost_benefit_analysis(file_count, coupling_level):
-    """
-    成本效益分析，確保並行處理的價值
-    """
-
-    # 並行啟動成本
-    startup_cost = 15 + (file_count * 0.5)  # 秒
-
-    # 預期節省時間（基於耦合程度）
-    if coupling_level == 'high':
-        speedup_multiplier = 0.85
-    elif coupling_level == 'medium':
-        speedup_multiplier = 0.70
-    else:
-        speedup_multiplier = 0.55
-
-    estimated_sequential_time = file_count * 8  # 秒
-    estimated_parallel_time = estimated_sequential_time / (1 + file_count * speedup_multiplier * 0.1)
-
-    time_saved = estimated_sequential_time - estimated_parallel_time - startup_cost
-
-    return {
-        'time_saved': time_saved,
-        'speedup': estimated_sequential_time / (estimated_parallel_time + startup_cost),
-        'is_worthwhile': time_saved > 30  # 至少節省30秒才值得
-    }
-```
-
----
-
-## 🎯 總結與使用指南
-
-### 核心價值
-
-1. **智能決策**: 基於任務耦合性自動選擇最優執行策略
-2. **真正並行**: 使用 `&` 和 `wait` 實現真正的並行處理
-3. **成本效益**: 只有在效益顯著時才啟用複雜的多階段處理
-4. **彈性擴展**: 支援從簡單檢查到深度分析的各種場景
-
-### 使用方式
-
-```bash
-# 簡單調用 - Skill 自動分析決策
-skill: "parallel-processing" "分析這些檔案的 [任務描述]"
-
-# 系統會自動：
-# 1. 分析任務耦合性
-# 2. 決定執行階段
-# 3. 分配最優的並行任務
-# 4. 執行真正的並行處理
-# 5. 整合結果並生成報告
-```
-
-### 預期行為
-
-- **低耦合任務**: 快速的兩階段處理，專注於獨立分析
-- **高耦合任務**: 完整的三階段處理，包含深度交叉分析
-- **中等耦合任務**: 平衡的處理策略，確保效率和品質
 
 *讓每一次 Claude Code 操作都能自動受益於現代並行處理的強大能力。這就是通用並行處理加速器的設計理念。*
