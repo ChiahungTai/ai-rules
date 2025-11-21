@@ -156,162 +156,111 @@ usage: /doc-hierarchy [directory_path] [options]
 - 關鍵測試: test_models.py, test_authentication.py
 ```
 
-## 🚀 並行處理架構 (基於 parallel-task.md 原則)
+## 🚀 智能並行處理架構 (基於 parallel-processing skill)
 
-### 🎯 工具責任分工（關鍵區別）
+### 🎯 並行處理決策引擎
+
+在開始並行處理前，使用 **parallel-processing skill** 進行智能決策：
 
 ```bash
-# 📋 工具職責明確分工
-Task 工具:    分析、提取、組織（記憶體中）     ← 不創建檔案！
-Write 工具:   寫入、保存、創建（檔案系統）   ← 唯一創建檔案的方式！
-Bash 工具:    驗證、確認、檢查（確保存在）   ← 確認檔案真的存在
+# Step 0: 並行可行性評估
+skill: "parallel-processing" "評估分析 [directory_path] 的並行處理可行性"
 ```
 
-### 🔄 真實執行流程（基於實測驗證）
+### 🔄 智能執行流程
 
-#### Wave 1: 準備階段 (序列執行)
+#### Phase 1: 準備與決策階段
 ```bash
-Task 0: 參數解析與目錄掃描
-- 解析命令列參數與驗證
-- 遞歸掃描目標目錄結構
-- 智能檔案分組 (按類型/大小/位置)
-- 輸出: 檔案清單 + 分組策略
+# 1. 參數解析與目錄驗證
+- 解析目標目錄路徑
+- 驗證目錄存在性和可訪問性
+- 基本統計：檔案數量、目錄層級、檔案類型
+
+# 2. 並行處理決策 (skill 決策)
+skill: "parallel-processing" "檔案數量: [count], 預估處理時間: [estimate]"
 ```
 
-#### Wave 2: 並行分析階段（記憶體中，不創建檔案）
+**Skill 決策結果**：
+- ✅ **建議並行**: 檔案 ≥ 10個 且預估時間 ≥ 45秒
+- ⚠️ **詢問用戶**: 5-9個檔案 或中等複雜度
+- ❌ **序列處理**: 檔案少或簡單操作
+
+#### Phase 2: 智能並行執行 (僅在 skill 建議時)
 ```bash
-# ⚠️ 重要：此階段不創建任何檔案！
-# 按檔案切分原則，同時發起多個 Task 工具調用
-Task 1 (content-analyzer): 分析 src/core/ 模組，回傳結構化結果
-Task 2 (structure-analyzer): 分析 src/api/ 模組，回傳結構化結果
-Task 3 (content-processor): 分析 src/services/ 模組，回傳結構化結果
-Task 4 (verification-expert): 分析 tests/ 目錄，回傳結構化結果
-Task 5 (context-analyzer): 分析 config/, utils/ 模組，回傳結構化結果
+# 3. 按技能建議的並行度執行
+# Skill 自動計算最優並行度 (3-8個 Task)
 
-# 注意：所有 Task 都在記憶體中工作，不會創建任何檔案！
+# 範例：Skill 建議 4 個並行任務（真正的並行執行）
+Task 1: "分析 [核心模組群組]，生成 CLAUDE.md 架構文檔" &
+Task 2: "分析 [API 層群組]，生成 CLAUDE.md 介面文檔" &
+Task 3: "分析 [工具配置群組]，生成 CLAUDE.md 配置文檔" &
+Task 4: "分析 [測試文檔群組]，生成 CLAUDE.md 測試文檔" &
+wait
+
+# 所有 Task 真正並行執行，然後整合結果創建檔案
 ```
 
-#### Wave 3: 檔案寫入階段（關鍵步驟，必須手動執行）
+#### Phase 3: 結果整合與檔案創建
 ```bash
-# 🔥 關鍵：必須使用 Write 工具創建檔案
-# 根據 Wave 2 的分析結果，手動使用 Write 工具生成檔案
-Write: /path/to/project/CLAUDE.md (根目錄總覽)
-Write: /path/to/project/src/CLAUDE.md (src 模組指南)
-Write: /path/to/project/src/core/CLAUDE.md (core 實作指南)
-Write: /path/to/project/src/api/CLAUDE.md (api 實作指南)
-Write: /path/to/project/tests/CLAUDE.md (測試指南)
+# 4. 收集並行分析結果並創建 CLAUDE.md
+Write: [project_root]/CLAUDE.md (總覽文檔)
+Write: [subdirs]/CLAUDE.md (各模組文檔)
+
+# 5. 驗證檔案創建成功
+find [target_path] -name "CLAUDE.md" -type f
 ```
 
-#### Wave 4: 驗證確認階段（確保檔案真的存在）
+## 🔧 實作步驟
+
+### 步驟 1: 初始分析與決策 (序列)
 ```bash
-# 🔍 關鍵：必須確認檔案真的存在
-# 確保檔案真的存在的重要步驟
-find /target/path -name "CLAUDE.md" -type f | wc -l
+# 1. 基本目錄分析
+- 解析目標目錄路徑
+- 驗證目錄存在性
+- 統計檔案數量和類型分布
 
-# 檢查生成的檔案數量和大小
-ls -la /target/path/*/CLAUDE.md
-
-# 驗證檔案內容正確性
-head -20 /target/path/CLAUDE.md
+# 2. 觸發並行處理決策
+skill: "parallel-processing" "分析 [directory_path] - [file_count] 個檔案，包含 [type_distribution]"
 ```
 
-### 🎯 並行分組策略
-
-#### 智能檔案分組演算法
-```python
-def intelligent_file_grouping(files: List[str], max_groups: int = 10) -> List[FileGroup]:
-    """
-    基於 parallel-task.md 的按檔案切分原則
-    """
-
-    # 1. 按類型和位置預分組
-    type_groups = {
-        'core': [],      # 核心業務邏輯
-        'api': [],       # API/路由檔案
-        'config': [],    # 配置/設定檔案
-        'utils': [],     # 工具/輔助函數
-        'tests': [],     # 測試檔案
-        'docs': []       # 文檔/範例檔案
-    }
-
-    # 2. 檔案分類
-    for file_path in files:
-        group_type = classify_file_type(file_path)
-        type_groups[group_type].append(file_path)
-
-    # 3. 動態負載平衡 - 確保每組工作量相近
-    balanced_groups = balance_workload(type_groups, max_groups)
-
-    return balanced_groups
-```
-
-#### 分組範例 (中型專案)
-```markdown
-🔍 **檔案分析結果**
-檢測到 45 個目標檔案，智能分組為 6 組並行處理：
-
-- 組1: [src/core/*.py] - 核心業務邏輯 (8檔案, ~2000行)
-- 組2: [src/api/**/*.py] - REST API 層 (7檔案, ~1800行)
-- 組3: [src/services/*.py] - 服務層邏輯 (6檔案, ~1500行)
-- 組4: [config/, utils/] - 配置工具 (5檔案, ~800行)
-- 組5: [tests/**/*.py] - 測試套件 (10檔案, ~2200行)
-- 組6: [docs/, examples/] - 文檔範例 (9檔案, ~1200行)
-
-🚀 **啟動並行執行**
-```
-
-## 🔧 並行實作步驟
-
-### 步驟 1: 參數解析與驗證 (序列)
-1. 解析命令列參數
-2. 驗證目錄存在性
-3. 設定預設值與選項衝突處理
-4. **並行度評估**: 根據檔案數量決定 Task 數量
-
-### 步驟 2: 智能目錄掃描與分組 (序列)
-1. 遞歸掃描指定目錄
-2. 過濾排除的目錄和檔案類型
-3. **智能分組**: 按類型、大小、位置平衡分配
-4. 建立檔案樹結構和依賴關係預分析
-
-### 步驟 3: 並行程式碼內容分析 (完全並行)
+### 步驟 2: Skill 決策響應
 ```bash
-# 同時發起多個獨立 Task 工具調用
-Task 1 (content-analyzer):
-完整分析 [核心業務檔案群組]，包含 AST 解析、複雜度計算、設計模式識別
-
-Task 2 (structure-analyzer):
-完整分析 [API 層檔案群組]，專注架構層次和端點組織
-
-Task 3 (content-processor):
-完整分析 [服務層檔案群組]，處理業務邏輯和數據流
-
-Task 4 (verification-expert):
-完整分析 [測試檔案群組]，評估測試覆蓋率和測試品質
-
-Task 5 (context-analyzer):
-完整分析 [配置工具檔案群組]，分析配置邏輯和工具函數
-
-Task 6 (context-analyzer):
-完整分析 [文檔範例檔案群組]，評估文檔完整性和範例有效性
-
-# 所有 Task 無依賴關係，可真正並行執行
+# Skill 可能的三種回應：
+✅ **建議並行處理**: "檔案數量充足，預估可節省 [X]% 時間，建議使用 [N] 個並行任務"
+⚠️ **詢問用戶意見**: "中等規模任務，並行處理可提升 [Y]% 效率，是否啟用？"
+❌ **建議序列處理**: "規模較小，序列處理更高效"
 ```
 
-### 步驟 4: 並行重要性評估 (組內並行)
-1. **各組內部評估**: 每個 Task 獨立計算所屬檔案的重要性分數
-2. **並行評估指标**:
-   - 行數權重 (30%) + 類別/函數數量 (25%) + 複雜度 (25%) + 架構重要性 (20%)
-   - 識別各組內的高優先級模組
-3. **組間依賴分析**: 等待所有組完成後進行跨組依賴評估
+### 步驟 3: 執行策略選擇
+```bash
+# A. 真正的並行處理模式 (Skill 建議且用戶同意)
+根據 Skill 建議的並行度 [3-8] 個 Task，使用 & 符號：
+Task 1: "核心業務模組分析，生成架構文檔" &
+Task 2: "API/介面層分析，生成介面文檔" &
+Task 3: "工具配置分析，生成配置文檔" &
+Task N: "測試文檔分析，生成測試文檔" &
+wait
 
-### 步驟 5: 整合文檔生成 (序列)
-1. 收集所有並行分析結果
-2. **跨模整合**: 建立完整的依賴關係圖
-3. 生成根目錄 CLAUDE.md (整體架構總覽)
-4. 生成子目錄 CLAUDE.md (詳細實作指南)
-5. 建立 @path 匯入關係鏈
-6. 執行安全性檢查和最終驗證
+# B. 序列處理模式 (Skill 建議或用戶選擇)
+單一 Task 依序處理所有檔案
+```
+
+### 步驟 4: 結果整合與文檔生成
+```bash
+# 1. 收集所有 Task 分析結果
+# 2. 生成階層式 CLAUDE.md 文檔
+Write: [root]/CLAUDE.md (專案總覽)
+Write: [subdirs]/CLAUDE.md (模組詳情)
+
+# 3. 建立模組間匯入關係
+# 4. 驗證所有檔案正確生成
+```
+
+### 步驟 5: 最終驗證
+```bash
+# 必須確認檔案真的存在！
+find [target_path] -name "CLAUDE.md" -type f | wc -l
+```
 
 ## 🔍 演算法設計
 
@@ -382,93 +331,170 @@ def detect_architecture_pattern(directory_structure):
 /doc-hierarchy ./src
 ```
 
-## ⚡ 並行效能優化
+## ⚡ 智能效能優化 (由 Skill 主導)
 
-### 🚀 核心並行優化策略
-1. **智能並行處理**: 基於檔案數量動態調整並行度 (3-10 Tasks)
-2. **負載平衡分組**: 確保每個 Task 工作量相近，避免資源浪費
-3. **無衝突並行**: 所有分析任務皆為純讀取操作，安全並行
-4. **快取機制**: 避免重複分析相同檔案結構
-5. **增量更新**: 支援只處理變更檔案，大型專案快速更新
+### 🧠 Skill-Driven 優化策略
+parallel-processing skill 自動處理以下優化：
 
-
-### 🔧 深度限制與記憶體管理
-1. **智能深度控制**: 根據專案複雜度動態調整分析深度
-2. **記憶體最佳化**: 大型專案分批並行處理，避免記憶體溢出
-3. **資源監控**: 實時監控 CPU 和記憶體使用率，動態調整並行度
-
-### 🛡️ 錯誤處理策略
-- **檔案衝突檢測**: 自動檢測並避免檔案操作衝突
-- **錯誤隔離**: 單一 Task 失敗不影響其他並行任務
-- **繼續處理**: 大部分錯誤跳過失敗檔案，繼續分析其他檔案
-- **最終報告**: 所有錯誤和跳過的檔案在最後統一報告
-
-## 🎯 並行執行範例
-
-### 範例 1: 一般專案並行分析
-**用戶輸入**: `/doc-hierarchy ./my-web-app`
-
-**並行執行過程**:
-```markdown
-🔍 **Wave 1**: 目錄掃描與檔案分組
-檔案數量: 42 個 | 並行度: 6 個 Tasks
-
-🚀 **Wave 2**: 6 個並行 Task 同時執行
-
-Task 1 (content-analyzer): 分析 src/core/ 模組
-Task 2 (structure-analyzer): 分析 src/api/ 模組
-Task 3 (content-processor): 分析 src/services/ 模組
-Task 4 (verification-expert): 分析 tests/ 目錄
-Task 5 (context-analyzer): 分析 config/, utils/ 模組
-Task 6 (context-analyzer): 分析 docs/, examples/ 目錄
-
-📊 **執行完成**
-✅ 成功分析: 40/42 檔案
-❌ 跳過檔案: 2 個 (語法錯誤)
-✅ 根目錄 CLAUDE.md 生成完成
-✅ 子目錄 CLAUDE.md 生成完成
+#### 1. **智能並行度計算**
+```bash
+# Skill 根據以下因素自動計算最優並行度：
+- 檔案總數和類型分布
+- 預估處理複雜度
+- 系統資源可用性
+- 預期加速比
 ```
 
-### 預期並行輸出結構
+#### 2. **動態負載平衡**
+```bash
+# Skill 自動分組策略：
+- 按檔案類型和位置智能分組
+- 確保每組工作量相近
+- 避免資源閒置
+```
+
+#### 3. **成本效益分析**
+```bash
+# Skill 自動評估：
+- 並行啟動成本 vs 預期效益
+- 最小效益閾值：≥ 2.0x 加速比
+- 淨效益：節省時間 > 啟動成本 × 1.5
+```
+
+### 🛡️ 統一錯誤處理
+```bash
+# Skill 提供的標準化錯誤處理：
+- 錯誤隔離：單一 Task 失敗不影響其他
+- 智能重試：自動重試失敗的 Task
+- 部分成功：繼續處理其他檔案
+- 統一報告：所有錯誤在最終統一彙總
+```
+
+## 🎯 智能執行範例
+
+### 範例 1: 大型專案並行處理
+**用戶輸入**: `/doc-hierarchy ./large-web-app`
+
+**執行過程**:
+```markdown
+🔍 **Phase 1**: 初始分析
+目錄: ./large-web-app
+檔案數量: 48 個 | 類型: Python(32) + Config(8) + Docs(8)
+
+🧠 **Phase 2**: Skill 決策
+skill: "parallel-processing" "48個檔案，包含32個Python檔案，預估需要深度分析"
+
+✅ **Skill 建議**: "檔案數量充足，預估可節省 65% 時間，建議使用 5 個並行任務"
+
+🚀 **Phase 3**: 並行執行
+Task 1: 分析 src/core/, src/models/ (核心模組)
+Task 2: 分析 src/api/, src/routes/ (API層)
+Task 3: 分析 src/services/, src/utils/ (服務層)
+Task 4: 分析 tests/, config/ (測試配置)
+Task 5: 分析 docs/, examples/ (文檔範例)
+
+📊 **Phase 4**: 結果整合
+✅ 成功分析: 46/48 檔案 (2個語法錯誤跳過)
+✅ 並行效率: 3.2x 加速比
+✅ CLAUDE.md 生成完成: 6 個檔案
+```
+
+### 範例 2: 中型專案詢問決策
+**用戶輸入**: `/doc-hierarchy ./medium-project`
+
+**執行過程**:
+```markdown
+🔍 **Phase 1**: 初始分析
+目錄: ./medium-project
+檔案數量: 12 個 | 類型: Python(8) + Config(4)
+
+🧠 **Phase 2**: Skill 決策
+skill: "parallel-processing" "12個檔案，中等規模任務"
+
+⚠️ **Skill 詢問**: "中等規模任務，並行處理可提升 40% 效率，是否啟用並行處理？"
+
+👤 **用戶選擇**: "是，啟用並行處理"
+
+🚀 **Phase 3**: 並行執行 (3 個 Task)
+Task 1: 分析核心業務檔案
+Task 2: 分析配置和工具檔案
+Task 3: 分析測試檔案
+
+📊 **Phase 4**: 結果整合
+✅ 成功分析: 12/12 檔案
+✅ 並行效率: 1.7x 加速比
+```
+
+### 範例 3: 小型專案序列處理
+**用戶輸入**: `/doc-hierarchy ./small-lib`
+
+**執行過程**:
+```markdown
+🔍 **Phase 1**: 初始分析
+目錄: ./small-lib
+檔案數量: 4 個 | 類型: Python(3) + Config(1)
+
+🧠 **Phase 2**: Skill 決策
+skill: "parallel-processing" "4個檔案，小規模任務"
+
+❌ **Skill 建議**: "規模較小，序列處理更高效"
+
+🔧 **Phase 3**: 序列執行
+單一 Task 依序處理所有檔案
+
+📊 **Phase 4**: 結果整合
+✅ 成功分析: 4/4 檔案
+✅ 執行時間: 8 秒
+```
+
+### 輸出結構統一模式
 ```
 project/
-├── CLAUDE.md                 # 根目錄總覽 (並行整合結果)
+├── CLAUDE.md                 # 根目錄總覽
 ├── src/
-│   ├── CLAUDE.md             # src 模組指南 (並行分析結果)
-│   ├── controllers/
-│   │   └── CLAUDE.md         # controllers 實作指南
-│   ├── services/
-│   │   └── CLAUDE.md         # services 實作指南
-│   └── models/
-│       └── CLAUDE.md         # models 實作指南
+│   └── CLAUDE.md             # 模組指南
 ├── tests/
-│   └── CLAUDE.md             # 測試指南 (並行驗證結果)
+│   └── CLAUDE.md             # 測試指南
 └── docs/
-    └── CLAUDE.md             # 文檔指南 (並行分析結果)
+    └── CLAUDE.md             # 文檔指南
 
-並行執行日誌: .doc-hierarchy-parallel.log
+# 執行方式記錄在每個 CLAUDE.md 頂部
+# 生成方式: [並行處理 | 序列處理] + [加速比]
 ```
 
 ## 🔧 執行檢查清單（確保成功）
 
 ### ✅ 執行前檢查
 ```markdown
-- [ ] 了解 Task 只在記憶體中工作，不會創建檔案
-- [ ] 準備好使用 Write 工具來創建檔案
-- [ ] 明確目標檔案路徑和命名規則
-- [ ] 確認有足夠的磁碟空間和權限
+- [ ] 確認目標目錄存在且可訪問
+- [ ] 了解 parallel-processing skill 決策機制
+- [ ] 準備好響應 skill 的並行處理建議
+- [ ] 確認有足夠的磁碟空間和寫入權限
+```
+
+### ✅ Skill 決策階段檢查
+```markdown
+- [ ] Phase 1 完成：目錄掃描和檔案統計正確
+- [ ] Skill 決策獲取：收到並行處理建議
+- [ ] 用戶回應：確認採納或拒絕並行處理建議
+- [ ] 執行策略確定：並行或序列處理路線明確
 ```
 
 ### ✅ 執行中檢查
 ```markdown
-- [ ] Wave 1 完成：目錄掃描和檔案分組正確
-- [ ] Wave 2 完成：所有 Task 回報分析結果
-- [ ] Wave 3 完成：使用 Write 工具逐個寫入檔案
-- [ ] 每個檔案寫入後確認成功（無錯誤訊息）
+# 並行處理模式：
+- [ ] 所有 Task 並行啟動成功
+- [ ] 各 Task 回報分析結果
+- [ ] 結果整合無錯誤
+
+# 序列處理模式：
+- [ ] 單一 Task 完成所有檔案分析
+- [ ] 分析結果結構化正確
 ```
 
 ### ✅ 執行後檢查（關鍵驗證）
 ```markdown
+- [ ] 使用 Write 工具創建所有 CLAUDE.md 檔案
 - [ ] 使用 find 確認檔案存在：
   ```bash
   find /target/path -name "CLAUDE.md" -type f | wc -l
@@ -484,49 +510,67 @@ project/
 - [ ] 檢查檔案數量：1(根目錄) + N(子目錄) = N+1
 ```
 
-### 🚨 常見錯誤與解決方案
+### 🚨 常見情況與處理方式
 
-#### 錯誤 1: Task 完成但找不到檔案
-**原因**: 忘記使用 Write 工具
-**解決**: 回到 Wave 3，使用 Write 工具創建檔案
+#### 情況 1: Skill 建議並行但用戶選擇序列
+**處理方式**: 使用單一 Task 依序處理所有檔案
+**優點**: 執行流程簡單，資源使用穩定
+**缺點**: 處理時間較長
 
-#### 錯誤 2: 檔案存在但內容空白
-**原因**: Write 工具內容參數錯誤
-**解決**: 檢查 Write 工具的內容參數，確保包含 Task 分析結果
+#### 情況 2: Skill 建議序列但用戶希望並行
+**處理方式**: 可強制啟用並行，但效率可能不佳
+**注意**: 小規模任務並行可能反而更慢
 
-#### 錯誤 3: 檔案數量不正確
-**原因**: 漏掉某些子目錄的 CLAUDE.md
-**解決**: 檢查每個子目錄，確保都有對應的 CLAUDE.md
+#### 情況 3: 並行執行中部分 Task 失敗
+**處理方式**: Skill 自動錯誤隔離，繼續處理其他檔案
+**結果**: 部分成功，最終報告會標註失敗檔案
 
-### Task 分配策略
-```bash
-# 按檔案類型和模組智能分配
-content-analyzer: 處理程式碼檔案 (.py, .js, .ts)
-structure-analyzer: 處理架構相關檔案
-context-analyzer: 處理文檔和配置檔案
-verification-expert: 處理測試檔案
-content-processor: 處理範例和工具檔案
+#### 情況 4: 檔案寫入失敗
+**原因**: 記憶體中的分析結果未正確傳遞給 Write 工具
+**解決**: 檢查 Write 工具參數，確保包含完整的分析結果
 
-# 同時發起多個 Task，無依賴關係
-```
-
-### 錯誤處理方式
+### 📊 執行報告範本
 ```markdown
-📊 最終執行報告
-✅ 成功分析: 40/42 檔案
-❌ 跳過檔案:
-   - config/settings.yaml (語法錯誤)
-   - src/broken.py (檔案損壞)
+## doc-hierarchy 執行報告
 
-💡 建議修復錯誤檔案後重新執行以獲得完整文檔
+### 基本資訊
+- 目標目錄: [directory_path]
+- 檔案總數: [count] 個
+- Skill 決策: [並行處理 | 序列處理 | 詢問用戶]
+- 執行策略: [用戶選擇的策略]
+
+### 執行結果
+- ✅ 成功分析: [成功數量]/[總數量] 檔案
+- ❌ 跳過檔案: [失敗數量] 個 (列出原因)
+- 🚀 效能提升: [加速比]x (並行處理時)
+- ⏱️ 執行時間: [總時間] 秒
+
+### 輸出檔案
+- 根目錄 CLAUDE.md: ✅ 生成成功
+- 子目錄 CLAUDE.md: [數量] 個 ✅ 生成成功
 ```
 
-### 關鍵原則
-- **正確性優先**: 確保架構分析準確
-- **錯誤隔離**: 單一檔案錯誤不影響其他分析
-- **品質一致**: 無論並行或序列，輸出品質相同
-- **驗證強制**: 每個階段都要驗證結果
+### 🎯 關鍵成功原則
+- **Skill 主導**: 相信 parallel-processing skill 的智能決策
+- **正確性優先**: 確保架構分析準確性比速度更重要
+- **靈活應對**: 根據 skill 建議和實際情況選擇執行策略
+- **強制驗證**: 每個階段都要確認檔案真的存在且內容正確
 
 ---
 
-*💡 這個工具專注於正確的架構分析，讓 AI 能快速理解任何程式碼庫的結構和定位。*
+## 🎯 總結
+
+doc-hierarchy 命令現在採用 **skill-first** 設計理念，將複雜的並行處理邏輯交由專門的 **parallel-processing skill** 處理：
+
+### 核心優勢
+- **智能決策**: 自動評估是否需要並行處理
+- **成本效益**: 只有在效益顯著時才啟用並行
+- **簡化邏輯**: 移除複雜的手動並行分組
+- **統一標準**: 使用標準化的 skill 介面
+
+### 執行流程
+1. **初始分析** → **Skill 決策** → **用戶確認** → **執行** → **驗證**
+2. 所有並行處理細節由 skill 自動處理
+3. 保持原有的階層文檔生成功能
+
+*💡 這個工具專注於正確的架構分析，讓 AI 能快速理解任何程式碼庫的結構和定位。並行處理由 parallel-processing skill 智能決策，確保最佳效能。*

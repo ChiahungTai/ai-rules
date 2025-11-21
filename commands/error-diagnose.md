@@ -6,8 +6,8 @@ description: 【終極錯誤診斷機】自動分析任何錯誤訊息，給出�
 
 你現在是世界頂尖的 Full-Stack 除錯大師 + SRE + 框架核心貢獻者，擁有無限工具權限。
 
-請診斷以下錯誤訊息（用戶會直接把錯誤貼在 $ARGUMENTS）：
-$ARGUMENTS
+請診斷以下錯誤訊息（用戶會直接把錯誤貼在 $ERROR_MESSAGE）：
+$ERROR_MESSAGE
 
 請嚴格按照以下 10 步流程輸出（每一步都要有，用 --- 分隔，讓報告超級易讀）：
 
@@ -29,39 +29,43 @@ $ARGUMENTS
 /error-diagnose "[錯誤訊息內容]"
 ```
 
-### 適度並行化的診斷流程
+### Skill-First 智能診斷工作流程
 
-**核心設計**：保持10步驟序列框架，在關鍵階段實施並行資訊收集
+**核心設計**：保持10步驟序列框架，使用 `parallel-processing` skill 進行智能決策和資訊收集
 
-#### **階段 1: 並行資訊收集（步驟3）**
+#### **智能決策引擎（第3步根因定位）**
 ```bash
-# 當需要深度根因分析時，同時啟動多個資訊收集任務
-Task context-analyzer "分析 Git 歷史，找出相關 commit，識別最近變更" &
-Task context-analyzer "檢查專案背景，查找相關配置，分析環境設定" &
-Task content-analyzer "搜尋相關檔案，匹配錯誤模式，識別潛在問題點" &
-Task verification-expert "驗證依賴版本，檢查環境配置，確認工具鏈狀態" &
+# 使用 parallel-processing skill 進行並行可行性分析
+skill: "parallel-processing" "分析錯誤診斷任務：$ERROR_MESSAGE"
 
-wait
-
-# 整合資訊收集結果
-Task report-coordinator "整合所有背景資訊，確定最可能的根因位置"
+# skill 返回決策結果，決定是否使用並行資訊收集
+# {
+#   "recommend_parallel": true,
+#   "reason": "錯誤分析涉及多個檔案和依賴，並行可節省60秒，加速比3.5x",
+#   "optimal_task_count": 4,
+#   "suggested_tasks": [
+#     {"agent": "context-analyzer", "task": "分析 Git 歷史，找出相關 commit"},
+#     {"agent": "content-analyzer", "task": "搜尋相關檔案，匹配錯誤模式"},
+#     {"agent": "verification-expert", "task": "驗證依賴版本，檢查環境配置"},
+#     {"agent": "report-coordinator", "task": "整合資訊，確定根因位置"}
+#   ]
+# }
 ```
 
-#### **階段 2: 專業化錯誤分析（步驟5-6）**
-```bash
-# 根據並行收集的資訊，進行專業化分析
-Task content-analyzer "基於收集的資訊，分析錯誤的根本原因，評估影響範圍" &
-Task verification-expert "驗證潛在修復方案，測試修復可行性，評估風險" &
+#### **執行策略選擇**
+**Skill 建議並行時**：
+- 使用 skill 建議的最優任務數量和分組
+- 並行執行資訊收集，提升診斷效率
+- 快速整合多角度分析結果
 
-wait
+**Skill 建議序列執行時**：
+- 使用高效的序列錯誤分析
+- 避免不必要的並行開銷
+- 保持精準的逐步診斷
 
-# 生成最終診斷報告
-Task report-coordinator "整合分析結果，生成完整的錯誤診斷報告"
-```
+### 🔥 10步驟診斷流程（Skill-First 模式）
 
-### 🔥 10步驟診斷流程（保持序列，優化資訊收集）
-
-請按照以下 10 步驟輸出，在步驟 3 使用並行資訊收集：
+請按照以下 10 步驟輸出，在步驟 3 使用 `parallel-processing` skill 智能決策：
 
 **1. 錯誤一句話總結**
 用最白話的一句話講清楚「這到底是什麼錯」
@@ -71,15 +75,16 @@ Task report-coordinator "整合分析結果，生成完整的錯誤診斷報告"
 - [ ] 依賴衝突　[ ] 版本相容　[ ] 環境變數　[ ] 權限問題
 - [ ] 第三方 API 變更　[ ] 快取/狀態問題　[ ] 其他：____
 
-**3. 問題根因定位（🚀 並行資訊收集）**
-- 同時分析 Git 歷史、檔案內容、環境配置
+**3. 問題根因定位（🧠 Skill-First 智能決策）**
+- 使用 `parallel-processing` skill 分析並行可行性
+- 根據 skill 建議選擇最優資訊收集策略
 - 整合多角度資訊，確定最可疑的程式碼位置
 
 **4. 重現步驟**
 用 1. 2. 3. 編號寫出最小的重現方式
 
 **5. 最可能的三種根本原因**
-基於並行收集的豐富資訊，由高到低機率排序，附上證據
+基於 skill 智能分析的豐富資訊，由高到低機率排序，附上證據
 
 **6. 立即可執行的修復方案（Top 3）**
 提供可直接複製貼上的程式碼或指令
@@ -132,6 +137,57 @@ Task report-coordinator "整合分析結果，生成完整的錯誤診斷報告"
 ```
 
 ---
+
+## 💡 Skill-First 實際執行範例
+
+### 範例 1：智能並行的複雜錯誤診斷
+**用戶輸入**: `/error-diagnose "ModuleNotFoundError: No module named 'pandas' in production environment"`
+
+**Skill 智能決策過程**:
+```markdown
+🧠 **第一步：Skill 決策分析**
+skill: "parallel-processing" "分析錯誤診斷任務：ModuleNotFoundError: No module named 'pandas' in production environment"
+
+📊 **Skill 決策結果**
+{
+  "recommend_parallel": true,
+  "reason": "生產環境錯誤涉及多個系統層面，預估並行可節省85秒，加速比4.2x",
+  "optimal_task_count": 4,
+  "suggested_tasks": [
+    {"agent": "context-analyzer", "task": "分析生產環境配置和部署歷史"},
+    {"agent": "content-analyzer", "task": "檢查 requirements.txt 和依賴配置"},
+    {"agent": "verification-expert", "task": "驗證環境變數和 Python 路徑設定"},
+    {"agent": "report-coordinator", "task": "整合分析結果，確定根本原因"}
+  ]
+}
+
+🚀 **第二步：並行執行診斷**
+根據 skill 建議同時執行4個專業化任務，快速定位問題根源。
+```
+
+### 範例 2：智能拒絕的簡單錯誤診斷
+**用戶輸入**: `/error-diagnose "SyntaxError: invalid syntax in my_function.py"`
+
+**Skill 智能決策過程**:
+```markdown
+🧠 **第一步：Skill 決策分析**
+skill: "parallel-processing" "分析錯誤診斷任務：SyntaxError: invalid syntax in my_function.py"
+
+📊 **Skill 決策結果**
+{
+  "recommend_parallel": false,
+  "reason": "單一檔案語法錯誤，預估處理時間8秒，並行開銷會超過效益",
+  "recommended_strategy": "sequential",
+  "efficiency_estimate": {
+    "parallel_overhead": "20秒",
+    "sequential_time": "8秒",
+    "efficiency_loss": "250%"
+  }
+}
+
+🚀 **第二步：高效序列診斷**
+直接進行語法分析，快速提供修復方案，避免不必要的複雜度。
+```
 
 ## 🎯 常見錯誤模式庫
 
@@ -219,12 +275,14 @@ Task report-coordinator "整合分析結果，生成完整的錯誤診斷報告"
 └─────────────┴─────────────┴─────────────┴─────────────┘
 ```
 
-## 🎨 設計哲學
+## 🎨 Skill-First 設計哲學
 
 > 💡 **核心價值**: 不只解決當前錯誤，更要提供完整的錯誤處理思維框架。
 
+> 🧠 **智能決策**: 使用 `parallel-processing` skill 進行成本效益分析，自動選擇最優診斷策略。
+
 > 🚀 **目標**: 讓每次錯誤都成為學習機會，提升開發者的問題解決能力。
 
-> ⚡ **原則**: 主動、完整、實用。不問問題，直接提供最完整的解決方案。
+> ⚡ **原則**: Skill-First、職責清晰、成本效益。避免不必要的並行開銷，智能提升診斷效率。
 
 > 🎯 **特色**: 給出信心度評分，讓你決定是否採納 AI 的診斷結果。

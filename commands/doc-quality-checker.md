@@ -21,78 +21,70 @@
 
 ---
 
-## 🚀 並行處理工作流程（按檔案切分原則）
+## 🚀 Skill-First 智能並行處理工作流程
 
 ### 核心設計原則
-**✅ 按檔案切分**：每個 Task 處理一個或少量相關檔案，避免重複讀取
-**✅ 功能整合**：每個 Task 內部整合所有檢查能力（內容+結構+驗證）
-**✅ 無依賴關係**：所有檔案分析可同時進行
-**✅ 動態Task數量**：根據檔案數量智能調整並行度
+**✅ 決策外包**: 使用 `parallel-processing` skill 進行並行可行性分析
+**✅ 智能觸發**: 基於成本效益的自動決策機制
+**✅ 最優執行**: 根據 skill 建議選擇最佳並行策略
+**✅ 職責清晰**: 本 command 專注於文檔品質檢查邏輯
 
-### 步驟 1: 智能檔案分組
-根據目標檔案數量和類型，自動分組以達到最佳並行效果：
+### 步驟 1: 智能並行決策（使用 parallel-processing skill）
 
-```python
-# 檔案分組算法
-def group_files_for_quality_check(file_paths):
-    """智能分組檔案以進行並行品質檢查"""
+在開始任何文檔品質檢查前，先使用 skill 進行智能分析：
 
-    if len(file_paths) <= 5:
-        # 少量檔案：單一處理
-        return [[file] for file in file_paths]
+```bash
+# 使用 skill 進行並行可行性分析
+skill: "parallel-processing" "分析以下文檔品質檢查任務是否適合並行處理：$USER_TASK"
 
-    elif len(file_paths) <= 15:
-        # 中等檔案：按類型分組，每組2-3個檔案
-        groups = []
-        current_group = []
-
-        for file in sorted(file_paths):
-            if len(current_group) >= 3:
-                groups.append(current_group)
-                current_group = [file]
-            else:
-                current_group.append(file)
-
-        if current_group:
-            groups.append(current_group)
-        return groups
-
-    else:
-        # 大量檔案：按大小和類型分組，每組3-5個檔案
-        # 確保每組工作量相近，避免負載不均
-        groups = []
-        current_group = []
-        current_size = 0
-
-        for file_path in sorted(file_paths):
-            # 估算檔案複雜度（簡化為檔案名長度）
-            file_complexity = len(file_path.split('/')[-1])
-
-            if current_size + file_complexity > 50 or len(current_group) >= 5:
-                if current_group:
-                    groups.append(current_group)
-                current_group = [file_path]
-                current_size = file_complexity
-            else:
-                current_group.append(file_path)
-                current_size += file_complexity
-
-        if current_group:
-            groups.append(current_group)
-
-        return groups
+# skill 返回決策結果：
+# {
+#   "recommend_parallel": true,
+#   "reason": "檢測到12個文檔檔案，預估處理時間180秒，並行可節費120秒，加速比3.0x",
+#   "optimal_task_count": 4,
+#   "suggested_grouping": "按文檔類型和大小分組"
+# }
 ```
 
-### 步驟 2: 並行檔案分析
+### 步驟 2: 執行策略選擇
 
-#### **快速模式 (--quick) - 每組5-10秒**
+根據 skill 的決策結果，選擇最優執行策略：
+
+#### **Skill 建議並行時 - 智能文檔分組**
+```bash
+# 使用 skill 建議的最優並行度和分組策略
+if skill.recommend_parallel:
+    # 根據 skill 建議的檔案分組創建專門的品質檢查任務
+    for group in skill.recommended_groups:
+        create_document_quality_task(group.files, group.analysis_type)
+```
+
+#### **Skill 建議序列執行時 - 高效串列檢查**
+```bash
+# 避免不必要的並行開銷
+if not skill.recommend_parallel:
+    # 使用高效的序列文檔檢查
+    for doc_file in document_files:
+        Task document-quality-checker: 完整檢查 [doc_file]
+```
+
+### 步驟 3: 專業化文檔品質檢查任務
+
+#### **快速模式 (--quick) - 基礎檢查**
 基礎檢查，專注關鍵問題：
 
 ```bash
-# 假設檢測到 8 個文檔檔案，分為 3 組
-Task 1: 處理檔案組 [docs/api.md, docs/guide.md] "基礎結構和語法檢查" &
-Task 2: 處理檔案組 [README.md, CHANGELOG.md] "基本連結和格式檢查" &
-Task 3: 處理檔案組 [specs/requirements.md, specs/design.md] "規格文檔基本驗證" &
+# Skill 決策並行時（預設 2-3 個並行任務）
+Task 1 (document-quality-checker): 處理 skill 建議的檔案組 1 "
+  - 基礎結構檢查：標題層級、章節順序
+  - 明顯錯誤檢查：語法錯誤、格式問題
+  - 快速連結檢查：主要路徑有效性
+" &
+Task 2 (document-quality-checker): 處理 skill 建議的檔案組 2 "
+  - 內容重複檢查：快速重複內容識別
+  - 基本術語一致性：關鍵術語統一性
+  - 格式規範檢查：Markdown 語法正確性
+" &
 
 wait
 
@@ -100,34 +92,30 @@ wait
 Task report-coordinator "整合所有基礎檢查結果，生成快速品質報告"
 ```
 
-#### **標準模式 (--standard) - 每組20-30秒（預設）**
-全面本地檔案檢查：
+#### **標準模式 (--standard) - 全面檢查（預設）**
+完整文檔品質檢查：
 
 ```bash
-# 智能分組後的並行處理
-Task 1: 處理檔案組 [docs/api.md, docs/examples.md] "
-  - 內容品質：重複檢查、術語一致性、技術準確性
+# 根據 skill 建議的最優並行度執行（預設 3-5 個並行任務）
+Task 1 (document-quality-checker): 處理 skill 建議的檔案組 1 "
+  - 內容品質：深度分析、術語一致性、技術準確性
   - 結構分析：標題層級、章節邏輯、導航便利性
   - 驗證檢查：內部連結、程式碼路徑、引用準確性
 " &
 
-Task 2: 處理檔案組 [README.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md] "
+Task 2 (document-quality-checker): 處理 skill 建議的檔案組 2 "
   - 內容品質：專案描述一致性、貢獻指南清晰度
   - 結構分析：文檔層次、資訊組織
-  - 驗證檢查：錨點連結、檔案引用
+  - 驗證檢查：錨點連結、檔案引用、路徑驗證
 " &
 
-Task 3: 處理檔案組 [specs/, requirements/] "
-  - 內容品質：規格一致性、版本同步性
-  - 結構分析：規格文檔標準化程度
-  - 驗證檢查：技術實作路徑、依賴關係
+Task 3 (document-quality-checker): 處理 skill 建議的檔案組 3 "
+  - 內容品質：規格一致性、版本同步性、技術細節
+  - 結構分析：規格文檔標準化程度、邏輯性
+  - 驗證檢查：技術實作路徑、依賴關係驗證
 " &
 
-Task 4: 處理檔案組 [ai-rules/, .claude/] "
-  - 內容品質：AI工具配置一致性、規則邏輯性
-  - 結構分析：配置檔案組織、導航清晰度
-  - 驗證檢查：命令語法、路徑引用
-" &
+# 根據 skill 建議的任務數量，可能還有更多並行任務...
 
 wait
 
@@ -135,15 +123,25 @@ wait
 Task report-coordinator "整合所有分析結果，生成詳細品質評估報告和優先級改進建議"
 ```
 
-#### **深度模式 (--deep) - 每組45-60秒**
-包含外部驗證的深度分析：
+#### **深度模式 (--deep) - 包含外部驗證**
+深度分析 + 外部驗證：
 
 ```bash
-# 執行所有標準檢查 + 外部驗證
-Task 1: 處理檔案組 [docs/] "完整分析 + 外部連結驗證 + 程式碼可執行性測試" &
-Task 2: 處理檔案組 [specs/] "完整分析 + API端點驗證 + 實作可行性檢查" &
-Task 3: 處理檔案組 [examples/] "完整分析 + 範例程式碼執行驗證 + 依賴檢查" &
-... (其他檔案組)
+# 根據 skill 建議的並行度執行深度檢查（預設 4-6 個並行任務）
+Task 1 (document-quality-checker): 處理 skill 建議的檔案組 1 "
+  - 完整標準檢查 + 外部連結驗證 + 程式碼可執行性測試
+" &
+Task 2 (document-quality-checker): 處理 skill 建議的檔案組 2 "
+  - 完整標準檢查 + API端點驗證 + 實作可行性檢查
+" &
+Task 3 (document-quality-checker): 處理 skill 建議的檔案組 3 "
+  - 完整標準檢查 + 範例程式碼執行驗證 + 依賴檢查
+" &
+Task 4 (external-validator): 並行執行外部驗證任務 "
+  - 外部 URL 連結有效性檢查
+  - 第三方文檔引用驗證
+  - 程式碼倉庫路徑驗證
+" &
 
 wait
 
@@ -151,7 +149,7 @@ wait
 Task report-coordinator "整合深度分析結果，生成包含外部驗證狀態的完整品質報告和實施路線圖"
 ```
 
-### 步驟 3: 信心評分機制
+### 步驟 4: 信心評分機制
 
 針對前面 Tasks 發現的每個問題，進行信心評分機制。每個問題評估基於：
 - 發現的問題描述
@@ -187,7 +185,7 @@ Task report-coordinator "整合深度分析結果，生成包含外部驗證狀�
 - 在實際使用中會經常造成問題
 - 有明確證據支持這一判斷
 
-### 步驟 4: 過濾與分類
+### 步驟 5: 過濾與分類
 
 **過濾標準**：只保留分數 ≥ 70 的問題
 
@@ -299,44 +297,57 @@ Task report-coordinator "整合深度分析結果，生成包含外部驗證狀�
 
 ## 🔧 命令介面設計
 
-### 基本用法（自動並行處理）
+### 基本用法（Skill-First 智能並行）
 
 ```bash
-# 1. 快速模式 - 基礎檢查（按檔案自動分組，每組5-10秒）
+# 1. 快速模式 - 基礎檢查（skill 決策並行策略）
 /doc-quality-checker README.md --quick
-/doc-quality-checker docs/ --quick           # 自動分組並行處理
+/doc-quality-checker docs/ --quick           # skill 分析後智能並行
 
-# 2. 標準模式 - 全面檢查（預設，按檔案自動分組，每組20-30秒）
+# 2. 標準模式 - 全面檢查（預設，skill 智能並行）
 /doc-quality-checker README.md
 /doc-quality-checker docs/
-/doc-quality-checker docs/ specs/ ai-rules/  # 多目錄自動並行
+/doc-quality-checker docs/ specs/ ai-rules/  # skill 分析多目錄並行策略
 
-# 3. 深度模式 - 外部驗證（按檔案自動分組，每組45-60秒）
+# 3. 深度模式 - 外部驗證（skill 決策深度並行策略）
 /doc-quality-checker docs/ --deep
 
 # 4. 單檔案精確檢查
-/doc-quality-checker docs/api.md --single    # 跳過分組，單獨處理
+/doc-quality-checker docs/api.md --single    # skill 會建議跳過並行
 
 # 5. 自定義輸出
 /doc-quality-checker docs/ --format json --output custom-report.html
-/doc-quality-checker docs/ --dry-run         # 預覽分組結果
+/doc-quality-checker docs/ --dry-run         # 預覽 skill 決策結果
 ```
 
-### 智能並行處理特性
+### Skill-First 智能特性
 
-#### **自動檔案分組**
-- **檢測檔案數量**：自動掃描目標路徑，統計待分析檔案
-- **智能分組策略**：
-  - 1-5個檔案：單獨處理
-  - 6-15個檔案：按類型分組（每組2-3個）
-  - 16+個檔案：按大小+類型分組（每組3-5個）
-
-#### **動態Task數量**
+#### **智能決策流程**
 ```bash
-# 範例：處理不同規模的文檔集合
-/doc-quality-checker docs/              # 8個檔案 → 3個並行Tasks
-/doc-quality-checker docs/ specs/       # 15個檔案 → 5個並行Tasks
-/doc-quality-checker docs/ specs/ ai/   # 25個檔案 → 8個並行Tasks
+# 每次執行前都會進行 skill 分析
+skill: "parallel-processing" "分析文檔品質檢查任務：$USER_TASK"
+
+# skill 返回決策後自動執行
+if skill.recommend_parallel:
+    execute_parallel_with_skill_recommendations()
+else:
+    execute_optimal_sequential()
+```
+
+#### **動態並行策略**
+```bash
+# skill 根據檔案規模和複雜度智能決策
+/doc-quality-checker docs/              # skill: 建議 3 個並行任務
+/doc-quality-checker docs/ specs/       # skill: 建議 5 個並行任務
+/doc-quality-checker docs/ specs/ ai/   # skill: 建議 8 個並行任務
+/doc-quality-checker single-file.md     # skill: 建議序列執行
+```
+
+#### **邊界案例處理**
+```bash
+# skill 對於邊界情況會詢問用戶
+/doc-quality-checker medium-sized-docs/
+# skill: "檔案數量7個，並行效益有限。是否啟用並行處理？"
 ```
 
 ### 參數說明
@@ -347,23 +358,22 @@ Task report-coordinator "整合深度分析結果，生成包含外部驗證狀�
 - **--deep**: 深度模式 - 包含外部連結驗證和程式碼執行測試
 
 #### **並行處理控制**
-- **--single**: 單檔案模式，跳過自動分組
-- **--max-tasks N**: 限制最大並行Task數量（預設10個）
-- **--group-size N**: 設定每組最大檔案數量（預設5個）
+- **--single**: 單檔案模式，skill 會建議跳過並行
+- **--force-parallel**: 強制並行（覆蓋 skill 建議）
+- **--dry-run**: 預覽 skill 決策結果和執行計畫
 
 #### **輸出控制**
 - **--format**: 輸出格式 (json/markdown/html)
 - **--output**: 自定義輸出路徑
-- **--dry-run**: 預覽分組結果和執行計畫
-- **--verbose**: 顯示詳細的並行執行過程
+- **--verbose**: 顯示 skill 決策過程和並行執行細節
 
 #### 檢查模式對照表
 
-| 模式 | 時間 | 適用場景 | Agent 數量 | 檢查深度 |
+| 模式 | 時間 | 適用場景 | Skill 決策 | 檢查深度 |
 |------|------|----------|------------|----------|
-| **quick** | 5-10秒 | 草稿檢查、快速驗證 | 2個 | 基本結構 + 明顯錯誤 |
-| **standard** | 30秒 | 正式文檔檢查 | 5個 | 完整 Agent 分析 |
-| **deep** | 60秒 | 重要文檔發布前 | 5個 + 外部驗證 | 全面分析 + 改善建議 |
+| **quick** | 5-10秒 | 草稿檢查、快速驗證 | 智能決策並行度 | 基本結構 + 明顯錯誤 |
+| **standard** | 30秒 | 正式文檔檢查 | 智能決策並行度 | 完整文檔品質分析 |
+| **deep** | 60秒 | 重要文檔發布前 | 智能決策並行度 | 全面分析 + 外部驗證 |
 
 ---
 
@@ -389,11 +399,13 @@ Task report-coordinator "整合深度分析結果，生成包含外部驗證狀�
 
 ## 🎯 執行約束與注意事項
 
-### 📋 分析執行檢查清單
+### 📋 Skill-First 執行檢查清單
 
 在完成文檔品質分析前，請確認以下項目：
-- [ ] 已完成文檔掃描與初始分析
-- [ ] 已啟動 5 個並行檢查 agents
+- [ ] 已使用 `parallel-processing` skill 進行智能決策分析
+- [ ] 已根據 skill 建議選擇最優並行策略（並行或序列）
+- [ ] 已按 skill 建議的檔案分組創建品質檢查任務
+- [ ] 已完成文檔掃描與深度分析
 - [ ] 已完成信心評分（≥70分過濾）
 - [ ] 已排除 false positive
 - [ ] 已按優先級分類問題
@@ -403,9 +415,10 @@ Task report-coordinator "整合深度分析結果，生成包含外部驗證狀�
 - [ ] 已檢查通過條件
 - [ ] 已提供量化的品質指標
 
-### 核心約束
+### Skill-First 核心約束
+- **決策外包**: 所有並行決策必須基於 `parallel-processing` skill 分析
 - **完整讀取文檔**: 必須完整讀取並理解文檔內容
-- **批量並行處理**: 支援大量文檔的並行處理
+- **技能導向執行**: 根據 skill 建議的最優策略執行（並行或序列）
 - **來源驗證**: 積極驗證程式碼連結和引用
 - **建設性回饋**: 提供具體的改善建議而非僅指出問題
 
@@ -418,8 +431,27 @@ Task report-coordinator "整合深度分析結果，生成包含外部驗證狀�
 - **範圍限制**: 某些特定領域的文檔（如法律、醫療）需要專業知識
 - **依賴限制**: 連結驗證依賴於網路連線和外部服務可用性
 
-### 最佳實踐建議
+### Skill-First 最佳實踐建議
 
+#### ✅ 執行原則
+1. **永遠先問 Skill**: 在任何並行決策前先調用 `parallel-processing` skill
+2. **相信 Skill 判斷**: Skill 的成本效益分析比直覺更可靠
+3. **遵循 Skill 建議**: 使用 Skill 建議的最優並行度和分組策略
+4. **尊重用戶選擇**: 在邊界案例時讓用戶做最終決定
+
+#### ⚠️ 重要約束
+- **禁止直覺判斷**: 不再基於經驗決定是否並行
+- **移除重複邏輯**: 所有並行決策邏輯已由 Skill 接管
+- **保持職責清晰**: 本 command 專注於文檔品質檢查
+- **確保一致性**: 所有 commands 使用相同的 Skill-First 模式
+
+#### 🚀 架構優勢
+- **智能決策**: 基於量化分析的並行決策
+- **成本效益**: 避免不必要的並行開銷
+- **統一體驗**: 跨 commands 的一致性並行處理
+- **可維護性**: 集中的並行邏輯，易於優化
+
+### 實際使用建議
 1. **適度使用**: 對於重要文檔，建議結合人工審核
 2. **批次控制**: 大量文檔建議分批處理，避免資源耗盡
 3. **定期更新**: 文檔品質標準可能隨時間變化，需要定期調整
@@ -439,6 +471,8 @@ Task report-coordinator "整合深度分析結果，生成包含外部驗證狀�
 
 ---
 
-> 💡 **文檔品質分析哲學**: 高品質的文檔是產品成功的重要組成部分。透過系統化的多 Agent 分析，我們可以確保文檔內容準確、結構清晰、連結有效，為用戶提供優質的閱讀體驗。
+> 💡 **Skill-First 文檔品質分析哲學**: 高品質的文檔是產品成功的重要組成部分。透過 `parallel-processing` skill 的智能決策和系統化的文檔品質分析，我們可以確保文檔內容準確、結構清晰、連結有效，為用戶提供優質的閱讀體驗。
 
 > 🤖 **AI 協作價值**: 高品質的文檔對 AI 協作開發至關重要。結構清晰、內容準確、連結有效的文檔能讓 AI 更好地理解專案，提供更準確的建議和實作指導。
+
+> ⚡ **Skill-First 架構優勢**: 基於 `parallel-processing` skill 的智能並行決策，避免了直覺判斷的不確定性，提供了成本效益最優的文檔分析策略，確保了跨 commands 的一致性體驗。
