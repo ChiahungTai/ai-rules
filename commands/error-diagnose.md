@@ -75,16 +75,225 @@ skill: "parallel-processing" "分析錯誤診斷任務：$ERROR_MESSAGE"
 - [ ] 依賴衝突　[ ] 版本相容　[ ] 環境變數　[ ] 權限問題
 - [ ] 第三方 API 變更　[ ] 快取/狀態問題　[ ] 其他：____
 
-**3. 問題根因定位（🧠 Skill-First 智能決策）**
-- 使用 `parallel-processing` skill 分析並行可行性
-- 根據 skill 建議選擇最優資訊收集策略
-- 整合多角度資訊，確定最可疑的程式碼位置
+**3. 智能並行決策與根因定位（🧠 自動適應處理）**
+
+#### **3.1 輸入類型自動分析**
+```python
+def analyze_input_type(error_message):
+    """智能分析錯誤輸入類型，決定最優處理策略"""
+
+    import re
+
+    # 批量測試失敗的識別模式
+    test_failure_indicators = [
+        r"test session starts",
+        r"collected \d+ items",
+        r"\d+ failed",
+        r"FAILED .+::.+",
+        r"={5,}.*test session.*={5,}",
+        r"Ran \d+ tests in \d+\.\d+s",
+        r"OK|FAILED|ERROR"
+    ]
+
+    # 單一程式錯誤的識別模式
+    single_error_indicators = [
+        r"Traceback \(most recent call last\):",
+        r"File .+, line \d+",
+        r"^\w+Error:",
+        r"Exception in thread",
+        r"fatal error:",
+        r"panic:"
+    ]
+
+    error_lower = error_message.lower()
+
+    # 計算測試失敗特徵分數
+    test_score = sum(1 for pattern in test_failure_indicators
+                     if re.search(pattern, error_message, re.IGNORECASE | re.MULTILINE))
+
+    # 計算單一錯誤特徵分數
+    single_score = sum(1 for pattern in single_error_indicators
+                      if re.search(pattern, error_message, re.IGNORECASE | re.MULTILINE))
+
+    # 提取失敗的測試案例
+    failed_tests = re.findall(r"FAILED (.+?)::(.+?) - (.+)", error_message, re.MULTILINE)
+    failure_count = len(failed_tests)
+
+    # 智能決策邏輯
+    if test_score >= 3 and failure_count >= 5:
+        return {
+            "type": "batch_test_failures",
+            "confidence": 0.9,
+            "count": failure_count,
+            "failed_tests": failed_tests,
+            "recommended_strategy": "parallel_processing"
+        }
+    elif test_score >= 2 and failure_count >= 2:
+        return {
+            "type": "small_batch_failures",
+            "confidence": 0.7,
+            "count": failure_count,
+            "failed_tests": failed_tests,
+            "recommended_strategy": "conditional_parallel"
+        }
+    elif single_score >= 2:
+        return {
+            "type": "single_program_error",
+            "confidence": 0.95,
+            "count": 1,
+            "recommended_strategy": "sequential_processing"
+        }
+    else:
+        return {
+            "type": "unknown_format",
+            "confidence": 0.5,
+            "count": 0,
+            "recommended_strategy": "fallback_to_skill"
+        }
+
+def generate_parallel_plan(failed_tests):
+    """為批量測試失敗生成智能並行處理計畫"""
+
+    # 按錯誤類型分組
+    error_groups = {}
+    for test_file, test_name, error_msg in failed_tests:
+        error_type = classify_error_type(error_msg)
+        if error_type not in error_groups:
+            error_groups[error_type] = []
+        error_groups[error_type].append({
+            'file': test_file,
+            'test': test_name,
+            'error': error_msg
+        })
+
+    # 生成並行任務計畫
+    plan = {
+        "total_failures": len(failed_tests),
+        "error_groups": len(error_groups),
+        "strategy": "parallel_by_error_type",
+        "tasks": []
+    }
+
+    for i, (error_type, tests) in enumerate(error_groups.items()):
+        specialist_agent = get_specialist_agent(error_type)
+        plan["tasks"].append({
+            "task_id": i + 1,
+            "error_type": error_type,
+            "test_count": len(tests),
+            "specialist_agent": specialist_agent,
+            "description": f"分析 {len(tests)} 個 {error_type} 錯誤",
+            "files": list(set([t['file'] for t in tests]))
+        })
+
+    return plan
+
+def classify_error_type(error_msg):
+    """分類錯誤類型"""
+    error_lower = error_msg.lower()
+
+    if any(keyword in error_lower for keyword in ['assertionerror', 'assert']):
+        return 'AssertionError'
+    elif any(keyword in error_lower for keyword in ['connection', 'network', 'timeout']):
+        return 'ConnectionError'
+    elif any(keyword in error_lower for keyword in ['import', 'module', 'no module named']):
+        return 'ImportError'
+    elif any(keyword in error_lower for keyword in ['key', 'not found', 'missing']):
+        return 'KeyError'
+    elif any(keyword in error_lower for keyword in ['type', 'cannot', 'argument']):
+        return 'TypeError'
+    elif any(keyword in error_lower for keyword in ['value', 'invalid']):
+        return 'ValueError'
+    else:
+        return 'OtherError'
+
+def get_specialist_agent(error_type):
+    """根據錯誤類型推薦專業處理器"""
+    agent_mapping = {
+        'AssertionError': 'verification-expert',
+        'ConnectionError': 'context-analyzer',
+        'ImportError': 'content-analyzer',
+        'KeyError': 'structure-analyzer',
+        'TypeError': 'verification-expert',
+        'ValueError': 'content-analyzer',
+        'OtherError': 'content-analyzer'
+    }
+    return agent_mapping.get(error_type, 'content-analyzer')
+```
+
+#### **3.2 智能策略選擇**
+```bash
+# 根據輸入分析結果自動選擇最優處理策略
+
+input_analysis = analyze_input_type($ERROR_MESSAGE)
+
+case "$input_analysis[type]" in
+    "batch_test_failures")
+        # 大量測試失敗 → 生成並行計畫
+        parallel_plan = generate_parallel_plan($input_analysis[failed_tests])
+
+        # 詢問 parallel-processing skill 評估並行策略
+        skill: "parallel-processing" "評估批量測試失敗並行處理計畫：$parallel_plan，請提供優化建議"
+
+        # 執行並行分析
+        execute_parallel_error_analysis($parallel_plan)
+        ;;
+
+    "small_batch_failures")
+        # 小批量失敗 → 詢問用戶意見
+        echo "偵測到 $input_analysis[count] 個測試失敗，是否啟用並行處理來加速分析？"
+
+        # 根據用戶選擇決定
+        if user_wants_parallel; then
+            parallel_plan = generate_parallel_plan($input_analysis[failed_tests])
+            execute_parallel_error_analysis($parallel_plan)
+        else
+            proceed_with_sequential_analysis
+        fi
+        ;;
+
+    "single_program_error")
+        # 單一程式錯誤 → 直接序列分析
+        proceed_with_sequential_analysis
+        ;;
+
+    "unknown_format")
+        # 未知格式 → 回退到原有 skill 決策
+        skill: "parallel-processing" "分析錯誤診斷任務：$ERROR_MESSAGE"
+        ;;
+esac
+```
+
+#### **3.3 並行分析執行**
+```bash
+# 並行錯誤分析執行模板
+function execute_parallel_error_analysis(parallel_plan) {
+    echo "🚀 開始並行分析 $parallel_plan[total_failures] 個測試失敗"
+
+    # 根據 skill 建議並行執行錯誤分析
+    for task in $parallel_plan[tasks]; do
+        echo "Task $task[task_id]: $task[specialist_agent] $task[description]" &
+    done
+    wait
+
+    # 整合並行分析結果
+    echo "📊 整合所有並行分析結果，確定共同根因"
+}
+```
+
+#### **3.4 根因整合分析**
+- 整合並行處理的多角度分析結果
+- 識別跨錯誤類型的共同模式
+- 確定最可疑的根本原因位置
 
 **4. 重現步驟**
 用 1. 2. 3. 編號寫出最小的重現方式
 
 **5. 最可能的三種根本原因**
-基於 skill 智能分析的豐富資訊，由高到低機率排序，附上證據
+基於智能分析的豐富資訊（單一錯誤分析或並行批量分析），由高到低機率排序，附上證據
+
+*並行分析特殊說明*：
+- **批量模式**: 顯示跨錯誤類型的共同根因模式
+- **單一模式**: 顯示深度單錯誤分析結果
 
 **6. 立即可執行的修復方案（Top 3）**
 提供可直接複製貼上的程式碼或指令
@@ -135,6 +344,27 @@ skill: "parallel-processing" "分析錯誤診斷任務：$ERROR_MESSAGE"
 ```bash
 /error-diagnose "ERROR: pip's dependency resolver does not currently take into account all the packages that are installed"
 ```
+
+### 範例 5：大量測試失敗（批量並行處理）
+```bash
+/error-diagnose "============================= test session starts ==============================
+collected 156 items / 154 failed
+
+FAILED tests/test_user.py::test_user_creation - AssertionError: Expected 201, got 500
+FAILED tests/test_auth.py::test_login_invalid - KeyError: 'user_id'
+FAILED tests/test_api.py::test_api_endpoint - TimeoutError: Request timed out
+FAILED tests/test_database.py::test_db_connection - ConnectionError: Can't connect
+FAILED tests/test_payment.py::test_payment_process - ImportError: No module named 'stripe'
+... (149 more failures)
+
+============================== 154 failed, 2 passed in 45.23s ==============================="
+```
+
+**預期處理流程**：
+1. **自動識別**: 批量測試失敗（154個失敗）
+2. **智能分組**: 按錯誤類型分組（AssertionError, KeyError, TimeoutError, ConnectionError, ImportError）
+3. **並行分析**: 5個專業化任務同時執行
+4. **整合結果**: 找出共同根因（環境配置問題）
 
 ---
 
