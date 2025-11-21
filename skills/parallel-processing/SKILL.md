@@ -1,125 +1,274 @@
 ---
 name: parallel-processing
-description: 智能並行處理加速器，自動分析任務並行潛力，動態分配工作負載，大幅提升 Claude Code 執行效率
+description: 智能並行處理決策引擎，自動判斷任務是否適合並行處理，評估成本效益，確保安全高效的並行執行
 allowed-tools: [Read, Write, Edit, Task, Grep, Glob, Bash]
 ---
 
-# 通用並行處理加速器
+# 智能並行處理決策引擎
 
-## 🎯 核心設計理念
+## 🎯 核心職責
 
-**智能並行，無感加速** - 讓 Claude Code 的所有操作都能自動受益於現代並行處理技術，用戶無需了解底層實現細節。
+**專注決策，而非實現** - 本 Skill 的核心職責是智能判斷「是否啟用並行處理」，而不是實現並行處理機制。
 
-基於實際經驗的核心洞察：
-- **多檔案操作是常態**：文檔分析、程式碼審查、測試執行都涉及多個檔案
-- **I/O 密集型任務**：大部分 Claude Code 操作受制於檔案讀寫速度
-- **CPU 密集型分析**：程式碼解析、複雜度計算可並行處理
-- **獨立性普遍存在**：許多任務本質上可以並行執行
+### 🚫 職責邊界
+- ❌ **不實現並行機制**：由 Claude Code Task 工具負責
+- ❌ **不控制記憶體載入**：由 Claude Code 記憶體系統管理
+- ❌ **不驗證程式碼狀態**：由專案品質管理負責
+
+### ✅ 核心職責
+- ✅ **並行可行性分析**：判斷任務是否適合並行處理
+- ✅ **成本效益評估**：計算並行處理的價值
+- ✅ **觸發決策**：決定是否建議啟用並行處理
+- ✅ **風險評估**：識別並行處理的潛在風險
+
+## 💡 設計哲學
+
+基於實戰經驗的核心洞察：
+- **並行不是萬能藥**：小任務並行處理反而更慢
+- **成本效益是關鍵**：啟動開銷必須小於效益
+- **安全性優先**：避免並行處理帶來的不可預測性
+- **用戶控制為主**：最終決策權在用戶手中
 
 ---
 
-## ⚡ 智能並行分析引擎
+## ⚡ 智能觸發決策樹
 
-### 🔍 任務類型自動識別
+### 🌳 決策流程
 
-```python
-def analyze_task_parallel_potential(task_description, context):
-    """
-    智能分析任務的並行潛力
-    """
-
-    # 1. 任務類型識別
-    task_patterns = {
-        'multi_file_analysis': {
-            'keywords': ['分析', '檢查', '審查', '掃描'],
-            'triggers': ['多個檔案', '目錄', '專案', '所有'],
-            'parallel_potential': 'HIGH'
-        },
-        'batch_processing': {
-            'keywords': ['批次', '批量', '多個', '全部'],
-            'triggers': ['處理', '轉換', '生成', '執行'],
-            'parallel_potential': 'HIGH'
-        },
-        'independent_operations': {
-            'keywords': ['分別', '各自', '獨立', '同時'],
-            'triggers': ['操作', '任務', '處理', '分析'],
-            'parallel_potential': 'MEDIUM'
-        }
-    }
-
-    # 2. 依賴關係分析
-    dependency_score = analyze_dependencies(context)
-
-    # 3. 資源需求評估
-    resource_requirements = estimate_resource_needs(task_description)
-
-    return {
-        'parallel_feasible': dependency_score < 0.3,
-        'optimal_parallelism': calculate_optimal_tasks(resource_requirements),
-        'estimated_speedup': predict_speedup(task_type, resource_requirements)
-    }
+```mermaid
+flowchart TD
+    A["用戶請求"] --> B["檔案數量分析"]
+    B --> C{"檔案數量 ≥ 10?"}
+    C -->|否| D["❌ 不建議並行"]
+    C -->|是| E["複雜度評估"]
+    E --> F{"需要深度分析?"}
+    F -->|否| G["❌ 簡單操作，序列處理更快"]
+    F -->|是| H["預估時間計算"]
+    H --> I{"預估時間 ≥ 45秒?"}
+    I -->|否| J["⚠️ 詢問用戶意見"]
+    I -->|是| K["效益分析"]
+    K --> L{"預估加速比 ≥ 2.0x?"}
+    L -->|否| M["❌ 效益不顯著"]
+    L -->|是| N["風險評估"]
+    N --> O{"低風險?"}
+    O -->|否| P["⚠️ 警告用戶風險"]
+    O -->|是| Q["✅ 建議並行處理"]
 ```
 
-### 📊 智能負載平衡
+### 📊 觸發條件矩陣
 
+| 檔案數量 | 複雜度 | 預估時間 | 加速比 | 建議 |
+|----------|--------|----------|--------|------|
+| < 5 | 簡單 | < 15s | < 1.5x | ❌ 不建議 |
+| 5-9 | 簡單 | 15-30s | 1.5-2.0x | ⚠️ 詢問用戶 |
+| 5-9 | 複雜 | 30-45s | 2.0-2.5x | ⚠️ 詢問用戶 |
+| ≥ 10 | 簡單 | 30-45s | 2.0-2.5x | ⚠️ 詢問用戶 |
+| ≥ 10 | 複雜 | ≥ 45s | ≥ 2.5x | ✅ 建議並行 |
+| ≥ 20 | 任意 | ≥ 60s | ≥ 3.0x | ✅ 強烈建議 |
+
+### 🔍 智能分析指標
+
+#### 複雜度評估標準
+**高複雜度**（適合並行）：
+- 程式碼解析（語法分析、AST 解析）
+- 深度內容分析（文檔品質檢查、程式碼審查）
+- 複雜轉換操作（格式轉換、資料處理）
+
+**低複雜度**（不適合並行）：
+- 簡單檔案讀取（讀取配置、基本資訊）
+- 快速操作（重新命名、移動、複製）
+- 元資料提取（檔案大小、修改時間）
+
+#### 預估時間計算
 ```python
-def intelligent_workload_distribution(items, max_tasks=8):
-    """
-    基於實測優化的負載平衡算法
-    """
+def estimate_processing_time(file_count, complexity):
+    """基於經驗值的時間估算"""
+    base_time_per_file = {
+        'simple': 2,      # 簡單操作 2 秒/檔案
+        'medium': 5,      # 中等複雜度 5 秒/檔案
+        'complex': 12     # 複雜操作 12 秒/檔案
+    }
 
-    def calculate_item_complexity(item):
-        """基於檔案類型和大小的複雜度評估"""
-        complexity = 1
-
-        # 檔案類型權重
-        type_weights = {
-            '.py': 1.5,      # Python 需要解析
-            '.js': 1.3,      # JavaScript 複雜度中等
-            '.md': 0.8,      # Markdown 較簡單
-            '.json': 0.3,    # JSON 最簡單
-            '.yml': 0.4,     # YAML 簡單
-            'directory': 2.0 # 目錄需要遞歸處理
-        }
-
-        # 大小權重（對數曲線避免大檔案壓倒性影響）
-        if hasattr(item, 'size'):
-            size_factor = 1 + math.log(item.size / 1024 + 1) / 10
-
-        return type_weights.get(item.extension, 1.0) * size_factor
-
-    # 智能分組算法
-    groups = []
-    current_group = []
-    current_complexity = 0
-
-    # 按複雜度排序，確保負載平衡
-    sorted_items = sorted(items, key=calculate_item_complexity, reverse=True)
-
-    for item in sorted_items:
-        item_complexity = calculate_item_complexity(item)
-
-        # 動態閾值調整
-        if len(current_group) >= 5 or current_complexity + item_complexity > 15:
-            if current_group:
-                groups.append(current_group)
-                current_group = [item]
-                current_complexity = item_complexity
-            else:
-                groups.append([item])
-        else:
-            current_group.append(item)
-            current_complexity += item_complexity
-
-    if current_group:
-        groups.append(current_group)
-
-    return groups
+    return file_count * base_time_per_file.get(complexity, 5)
 ```
 
 ---
 
-## 🚀 並行執行框架
+## 💰 成本效益分析
+
+### 📈 並行處理成本模型
+
+#### 並行效益計算
+```
+總效益 = 預估節省時間 - 並行啟動成本
+
+預估節省時間 = 序列執行時間 × (1 - 1/加速比)
+並行啟動成本 = 任務分配成本 + 結果整合成本
+```
+
+#### 啟動成本評估
+```python
+def calculate_parallel_overhead(file_count):
+    """並行處理啟動成本"""
+    # 任務分配成本：每個並行任務約 2-3 秒開銷
+    task_distribution_cost = min(file_count // 4, 8) * 2.5
+
+    # 結果整合成本：約 5-10 秒
+    result_integration_cost = 8
+
+    # 協調成本：約 3-5 秒
+    coordination_cost = 4
+
+    return task_distribution_cost + result_integration_cost + coordination_cost
+```
+
+### 🎯 效益閾值標準
+
+#### 正效益條件
+- **最小節省時間**：≥ 30 秒
+- **加速比要求**：≥ 2.0x
+- **淨效益**：預估節省時間 > 啟動成本 × 1.5
+
+#### 邊界效益分析
+| 檔案數量 | 預估節省時間 | 啟動成本 | 淨效益 | 建議 |
+|----------|--------------|----------|--------|------|
+| 5-9 | 15-25s | 15s | 0-10s | ⚠️ 邊界案例 |
+| 10-15 | 30-50s | 20s | 10-30s | ✅ 正效益 |
+| 16-25 | 60-90s | 25s | 35-65s | ✅ 高效益 |
+| > 25 | 120s+ | 30s | 90s+ | ✅ 極高效益 |
+
+### ⚖️ 成本效益決策規則
+
+1. **絕對正效益**：淨效益 > 60 秒，強烈建議並行
+2. **相對正效益**：淨效益 30-60 秒，建議並行
+3. **邊界效益**：淨效益 10-30 秒，詢問用戶
+4. **負效益**：淨效益 < 10 秒，不建議並行
+
+---
+
+## 🛠️ 適用場景明確化
+
+### ✅ 高度適合並行處理的場景
+
+#### 1. **多檔案獨立分析**
+```bash
+# 程式碼品質檢查
+"分析整個專案中所有 Python 檔案的程式碼品質"
+"檢查 src/ 目錄下所有檔案的命名規範"
+
+# 文檔一致性檢查
+"驗證 docs/ 目錄下所有 Markdown 文檔的格式一致性"
+"檢查所有 README 檔案的內容完整性"
+```
+
+#### 2. **批次格式轉換**
+```bash
+# 圖片處理
+"批量調整 images/ 目錄下所有圖片的大小"
+"將所有 .png 檔案轉換為 .webp 格式"
+
+# 文檔轉換
+"將所有 .docx 檔案轉換為 Markdown 格式"
+"批量優化所有 HTML 檔案的 SEO"
+```
+
+#### 3. **大型數據處理**
+```bash
+# 日誌分析
+"分析所有伺服器日誌檔案中的錯誤模式"
+"統計所有用戶行為日誌的訪問模式"
+
+# 資料處理
+"處理所有 CSV 檔案的數據清理"
+"轉換所有 JSON 配置檔案的版本"
+```
+
+### ❌ 不適合並行處理的場景
+
+#### 1. **簡單快速操作**
+```bash
+# 錯誤示範
+"重新命名這個檔案"  # 單一檔案
+"讀取配置檔案"      # 簡單操作
+"移動 3 個檔案"     # 檔案太少
+```
+
+#### 2. **強依賴性任務**
+```bash
+# 錯誤示範
+"按順序處理工作流程"  # 有明確順序依賴
+"編譯專案並測試"      # 編譯必須先完成
+"部署到測試環境"      # 依賴前面步驟
+```
+
+#### 3. **需要全局狀態**
+```bash
+# 錯誤示範
+"更新所有檔案的版本號"  # 需要統一版本管理
+"重新計算專案統計資訊"  # 需要全局視圖
+"生成總體報告"        # 依賴所有子結果
+```
+
+### ⚠️ 邊界案例（需要詢問用戶）
+
+#### 1. **中等規模任務**
+```bash
+# 5-9 個檔案的複雜操作
+"分析這 7 個核心模組的程式碼複雜度"
+"轉換這 8 個配置檔案的格式"
+```
+
+#### 2. **混合複雜度任務**
+```bash
+# 部分簡單，部分複雜
+"處理專案中的所有檔案（包含配置和程式碼）"
+"優化整個網站的資源（圖片、CSS、JS）"
+```
+
+---
+
+## 🛡️ 風險管理機制
+
+### ⚠️ 並行處理風險識別
+
+#### 1. **資源競爭風險**
+```markdown
+🚨 **高風險場景**：
+- 同時寫入同一個檔案
+- 爭奪有限的系統資源（記憶體、CPU）
+- 網路連線數量超限
+
+🛡️ **緩解措施**：
+- 寫入操作序列化
+- 資源使用限制
+- 連線池管理
+```
+
+#### 2. **錯誤傳播風險**
+```markdown
+🚨 **高風險場景**：
+- 單一任務失敗導致整體失敗
+- 錯誤累積造成系統不穩定
+- 部分失敗導致結果不一致
+
+🛡️ **緩解措施**：
+- 錯誤隔離機制
+- 失敗重試策略
+- 部分成功處理
+```
+
+#### 3. **一致性風險**
+```markdown
+🚨 **高風險場景**：
+- 並行修改相關檔案
+- 時間戳記不一致
+- 依賴關係混亂
+
+🛡️ **緩解措施**：
+- 依賴關係分析
+- 鎖定機制
+- 一致性檢查
+```
 
 ### 🔄 統一執行模式
 
