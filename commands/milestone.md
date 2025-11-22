@@ -1,6 +1,12 @@
-# /milestone 指令 - 對話里程碑記錄工具
+---
+description: "對話里程碑記錄工具，將長對話中的重要進展沉澱為結構化 YAML 檔案"
+argument-hint: "[--output PATH] [--verbose|--compact|--dry-run|--restart-only]"
+allowed-tools: ["Write", "Read", "Bash"]
+---
 
 你是對話里程碑記錄專家，專門負責將長對話中的重要進展和知識沉澱為結構化的 YAML 檔案，便於清除 context 後快速重啟高品質工作。
+
+# /milestone 指令 - 對話里程碑記錄工具
 
 ## 🎯 核心目標
 
@@ -150,7 +156,7 @@ restart_prompt: |
 
 ### 參數說明
 
-- **無參數**: 自動分析對話，生成 milestone.yaml 到當前目錄
+- **無參數**: 自動分析對話，生成 milestone-YYYY-MM-DD-描述.yaml 到當前目錄
 - **--output**: 指定輸出檔案路徑
 - **--verbose**: 包含更多細節和過程資訊
 - **--compact**: 只保留最重要的資訊，適合快速重啟
@@ -203,7 +209,7 @@ restart_prompt: |
    ✓ 里程碑: 3 個重要成果
    ✓ 當前狀態: 設計階段完成
 
-💾 檔案已寫入: ./milestone.yaml
+💾 檔案已寫入: ./milestone-2025-01-22-項目描述.yaml
 
 ## 🚀 Context 清除後的重啟 Prompt
 
@@ -237,7 +243,7 @@ restart_prompt: |
    當前階段：Implementation (第3步)
    下一個 BMAD 步驟：Step 4 - Testing
 
-💾 檔案已寫入: ./milestone-bmad-step3.yaml
+💾 檔案已寫入: ./milestone-2025-01-22-bmad-step3.yaml
 
 ## 🚀 Context 清除後的重啟 Prompt
 
@@ -288,7 +294,7 @@ restart_prompt: |
    ✓ 知識沉澱: 8 個可重用模式
    ✓ 重啟指引: 包含所有必要上下文
 
-💾 檔案已寫入: ./milestone-2025-01-18-session.yaml
+💾 檔案已寫入: ./milestone-2025-01-22-verbose-session.yaml
 
 ## 🚀 Context 清除後的重啟 Prompt
 
@@ -320,7 +326,7 @@ restart_prompt: |
 ```
 🎯 生成精簡里程碑記錄...
 
-💾 檔案已寫入: ./milestone-compact.yaml
+💾 檔案已寫入: ./milestone-2025-01-22-compact.yaml
 
 ## 🚀 Context 清除後的重啟 Prompt
 
@@ -350,7 +356,7 @@ restart_prompt: |
 
 ⚠️  檢測到 BMAD method 進行中 (Step 3)
 
-💾 檔案已寫入: ./milestone-compact-bmad.yaml
+💾 檔案已寫入: ./milestone-2025-01-22-compact-bmad.yaml
 
 ## 🚀 Context 清除後的重啟 Prompt
 
@@ -389,7 +395,7 @@ restart_prompt: |
    ✓ 當前狀態: 策略執行引擎實作中
    ✓ BMAD 狀態: 未檢測到 BMAD 進行中
 
-🚀 準備生成: ./milestone-preview.yaml（預覽模式，不實際寫入）
+🚀 準備生成: ./milestone-2025-01-22-preview.yaml（預覽模式，不實際寫入）
 
 ## 🚀 Context 清除後的重啟 Prompt
 
@@ -427,7 +433,7 @@ restart_prompt: |
    ✓ 當前狀態: BMAD Step 2 - Analysis & Planning
    ✓ BMAD 狀態: 準備進入 Step 3 - Implementation
 
-🚀 準備生成: ./milestone-bmad-step2.yaml（預覽模式，不實際寫入）
+🚀 準備生成: ./milestone-2025-01-22-bmad-step2.yaml（預覽模式，不實際寫入）
 
 ## 🚀 Context 清除後的重啟 Prompt
 
@@ -568,7 +574,7 @@ troubleshooting:
 
 2. **載入里程碑**
    ```bash
-   請讀取 milestone.yaml 檔案，快速了解專案狀況
+   請讀取 milestone-YYYY-MM-DD-描述.yaml 檔案，快速了解專案狀況
    ```
 
 3. **使用生成的重啟 Prompt**
@@ -613,7 +619,7 @@ troubleshooting:
 - **可重用性**: 提煉的模式應適用於未來類似情況
 
 ### 檔案管理
-- **命名規範**: 使用 `milestone-YYYY-MM-DD-session.yaml` 格式
+- **命名規範**: 使用 `milestone-YYYY-MM-DD-描述.yaml` 格式，描述應簡潔反映里程碑內容
 - **版本控制**: 里程碑檔案應加入 Git 追蹤
 - **定期清理**: 過時的里程碑檔案可歸檔或刪除
 - **備份機制**: 重要里程碑建議有額外備份
@@ -631,3 +637,23 @@ troubleshooting:
 > 🔄 **重啟優先**: 特別針對 context 清理場景設計，提供即用型重啟 prompt，確保工作流程無縫銜接，尤其是 BMAD method 的進度保持。
 
 > 🎯 **BMAD 感知**: 自動識別並保護 BMAD method 的執行狀態，確保複雜的結構化流程不因 context 清除而中斷。
+
+---
+
+## 🚀 執行邏輯
+
+現在開始分析對話內容，生成里程碑記錄。參數：$ARGUMENTS
+
+1. 分析對話模式和關鍵進展
+2. 提取重要里程碑和學習
+3. 生成結構化 YAML 檔案
+4. 顯示重啟 prompt
+
+輸出檔案路徑：
+- 預設：./milestone-YYYY-MM-DD-描述.yaml（自動生成描述）
+- 指定：--output 參數路徑
+- Compact 模式：./milestone-YYYY-MM-DD-compact.yaml
+- Dry run：不寫入檔案
+- Restart only：不寫入檔案
+
+所有模式都將顯示重啟 prompt。
