@@ -29,7 +29,7 @@ allowed-tools: [Read, Write, Edit, Task, Grep, Glob, Bash, WebSearch, WebFetch]
 ### 🎯 自動觸發場景
 
 當用戶提到以下關鍵詞時自動啟用：
-- **來源詞**："其他 AI"、"ChatGPT"、"Claude"、"Gemini"、"外部建議"
+- **來源詞**："其他 AI"、"ChatGPT"、"Claude"、"Gemini"、"Grok"、"GLM"、"Deepseek, DS"、"外部建議"
 - **分析詞**："批判性思考"、"第一性原則"、"評估"、"分析"、"建議"
 - **查證詞**："查證實作"、"檢查代碼"、"看看現有實作"
 - **決策詞**："要不要採納"、"是否可行"、"怎麼判斷"
