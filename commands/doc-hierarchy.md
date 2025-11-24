@@ -388,6 +388,7 @@ def analyze_module_relationships(file_path: str, project_structure: dict) -> dic
     """
 
     # 分析 import 語句識別依賴
+    import os
     dependencies = []
     file_dir = os.path.dirname(file_path)
 

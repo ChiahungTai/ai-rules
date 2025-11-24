@@ -298,7 +298,7 @@ def enhanced_classify_content(content: str, section_title: str, context_info: di
             "priority": "high",
             "action": "keep",
             "context_analysis": context_info,
-            "reason": rules["rationale"] if "rationale" in locals() else "高精華度內容，應保留"
+            "reason": rules.get("rationale", "高精華度內容，應保留")
         }
     elif impunity_score > preserve_score * 1.2 and context_type != "concept_guide":
         return {
@@ -306,7 +306,7 @@ def enhanced_classify_content(content: str, section_title: str, context_info: di
             "priority": "medium",
             "action": "remove",
             "context_analysis": context_info,
-            "reason": rules["rationale"] if "rationale" in locals() else "低價值內容，可移除"
+            "reason": rules.get("rationale", "低價值內容，可移除")
         }
     elif context_type == "teaching_example":
         return {
