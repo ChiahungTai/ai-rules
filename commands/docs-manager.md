@@ -5,29 +5,161 @@
 ## 🎯 角色職責
 - **協調多 Agent 工作流程**: 管理並行文檔處理流程
 - **智能文檔分析**: 分析文檔品質、重複度、一致性
+- **文檔脈絡理解**: 區分概念文檔、實作文檔、教學文檔等不同類型
+- **設計意圖分析**: 理解文檔的設計目的和使用場景
 - **蒸餾與整理**: 協調蒸餾 agents 進行文檔優化
 - **索引生成**: 自動生成和更新 INDEX.md
 - **品質保證**: 確保文檔結構一致和內容品質
 
 ## 🚀 智能並行處理工作流程（使用 Parallel Processing Skill）
 
-### 第一步：並行可行性決策
+### 第一步：文檔脈絡分析（優化決策基礎）
+
+在並行決策前，先進行文檔脈絡分析，避免機械化處理：
+
+```python
+def analyze_document_type_and_intent(content: str, file_path: str) -> dict:
+    """
+    文檔類型和設計意圖分析 - 為智能決策提供上下文
+
+    回傳:
+    - doc_type: "concept_guide", "implementation_spec", "api_documentation", "tutorial", "reference"
+    - design_intent: 設計意圖分析
+    - parallel_suitability: 適合並行處理的程度
+    - false_positive_risk: False Positive 風險評估
+    """
+
+    doc_type_indicators = {
+        "concept_guide": {
+            "keywords": ["理念", "哲學", "原則", "設計思想"],
+            "characteristics": "概念性指導文檔",
+            "parallel_safe": True,
+            "distillation_priority": "high"
+        },
+        "implementation_spec": {
+            "keywords": ["實作", "規格", "API", "介面", "技術細節"],
+            "characteristics": "技術實作規格文檔",
+            "parallel_safe": True,
+            "distillation_priority": "medium-high"
+        },
+        "api_documentation": {
+            "keywords": ["API", "endpoint", "method", "response"],
+            "characteristics": "API 接口文檔",
+            "parallel_safe": False,  # API 文檔通常有關聯性
+            "distillation_priority": "medium"
+        },
+        "tutorial": {
+            "keywords": ["教學", "範例", "步驟", "如何", "tutorial"],
+            "characteristics": "教學和範例文檔",
+            "parallel_safe": True,
+            "distillation_priority": "low-medium"
+        },
+        "reference": {
+            "keywords": ["參考", "手冊", "指南", "reference"],
+            "characteristics": "參考手冊類文檔",
+            "parallel_safe": True,
+            "distillation_priority": "low"
+        }
+    }
+
+    # 分析文檔類型
+    type_scores = {}
+    for doc_type, indicators in doc_type_indicators.items():
+        score = sum(1 for kw in indicators["keywords"] if kw.lower() in content.lower())
+        type_scores[doc_type] = score
+
+    primary_type = max(type_scores, key=type_scores.get) if max(type_scores.values()) > 0 else "reference"
+
+    return {
+        "doc_type": primary_type,
+        "doc_characteristics": doc_type_indicators[primary_type]["characteristics"],
+        "parallel_safe": doc_type_indicators[primary_type]["parallel_safe"],
+        "distillation_priority": doc_type_indicators[primary_type]["distillation_priority"],
+        "all_scores": type_scores
+    }
+
+def enhanced_distillation_strategy(doc_analysis: dict, content_length: int) -> dict:
+    """
+    基於文檔脈絡分析的增強蒸餾策略
+
+    參數:
+    - doc_analysis: 文檔脈絡分析結果
+    - content_length: 內容長度
+
+    回傳:
+    - distillation_approach: 蒸餾方法建議
+    - preserve_priority: 保留優先級
+    - processing_order: 處理順序建議
+    """
+
+    doc_type = doc_analysis["doc_type"]
+    distillation_priority = doc_analysis["distillation_priority"]
+
+    strategies = {
+        "concept_guide": {
+            "distillation_approach": "principle-focused",
+            "preserve_keywords": ["原則", "哲學", "核心價值", "設計理念"],
+            "distill_keywords": ["具體範例", "實作細節", "配置參數"],
+            "processing_order": "high_priority"
+        },
+        "implementation_spec": {
+            "distillation_approach": "balance-focused",
+            "preserve_keywords": ["關鍵規格", "核心介面", "重要約束"],
+            "distill_keywords": ["詳細範例", "過時資訊", "重複描述"],
+            "processing_order": "medium_priority"
+        },
+        "api_documentation": {
+            "distillation_approach": "interface-focused",
+            "preserve_keywords": ["核心 API", "重要端點", "關鍵方法"],
+            "distill_keywords": ["過時範例", "詳細配置", "冗長說明"],
+            "processing_order": "sequential_priority"  # API 文檔關聯性強，建議序列處理
+        },
+        "tutorial": {
+            "distillation_approach": "example-condensed",
+            "preserve_keywords": ["關鍵步驟", "核心概念", "重要範例"],
+            "distill_keywords": ["冗長解釋", "過於詳細的程式碼", "次要範例"],
+            "processing_order": "low_priority"
+        },
+        "reference": {
+            "distillation_approach": "index-focused",
+            "preserve_keywords": ["關鍵概念", "重要索引", "核心參考"],
+            "distill_keywords": ["次要資訊", "過時參考", "詳細範例"],
+            "processing_order": "batch_priority"
+        }
+    }
+
+    strategy = strategies.get(doc_type, strategies["reference"])
+
+    return {
+        "distillation_approach": strategy["distillation_approach"],
+        "preserve_keywords": strategy["preserve_keywords"],
+        "distill_keywords": strategy["distill_keywords"],
+        "processing_order": strategy["processing_order"],
+        "parallel_safe": doc_analysis["parallel_safe"],
+        "distillation_priority": distillation_priority
+    }
+```
+
+### 第二步：增強並行可行性決策
 
 ```bash
-# 使用 parallel-processing skill 進行智能決策
+# 結合文檔脈絡分析和 parallel-processing skill 進行智能決策
 skill: "parallel-processing" "分析文檔管理任務：$USER_TASK"
 
-# 輸入參數：
+# 增強的輸入參數：
 # - 目標文檔清單和路徑
+# - 文檔脈絡分析結果（第一步）
 # - 處理類型：文檔分析、蒸餾、索引生成
+# - 文檔關聯性分析
 # - 系統資源限制
 # - 成本效益考量
 
-# Skill 回傳：
-# - 最優並行策略（並行 vs 串行）
-# - 建議的並行度
-# - 任務分組方案
+# Skill 回傳（增強版）：
+# - 最優並行策略（並行 vs 串行 vs 混合）
+# - 建議的並行度（基於文檔類型調整）
+# - 智能任務分組（考慮文檔關聯性）
 # - 預估執行時間和成本
+# - False Positive 風險評估
 ```
 
 ### 階段 1: 智能文檔分析
@@ -319,48 +451,127 @@ def generate_description(filename: str, content: str) -> str:
 
 ## 🎯 執行順序與邏輯
 
-### 推薦執行順序
+### 推薦執行順序（增強版）
 
 ```bash
 # 開發到一段落時執行
 /docs-manager
 
-# 完整的執行順序邏輯：
-# 0. parallel-processing skill 決策最優策略
-# 1. 按 skill 建議執行文檔分析
-# 2. 按 skill 優化順序執行蒸餾處理
-# 3. 按 skill 安全評估執行索引生成
-# 4. 整合所有結果，生成管理報告
+# 完整的執行順序邏輯（結合自身分析 + Skill 輔助）：
+# 0. 文檔脈絡和設計意圖分析（自身能力）
+# 1. 基於脈絡分析的智能分組（自身能力）
+# 2. parallel-processing skill 輔助決策（優化並行策略）
+# 3. 混合執行：關聯文檔序列處理 + 獨立文檔並行處理
+# 4. 增強蒸餾處理（基於文檔類型的智能策略）
+# 5. 智能索引生成（考慮文檔關聯性）
+# 6. 整合所有結果，生成管理報告
 ```
 
-### Skill-驅動的智能決策流程
+### 混合智能決策流程（自身能力 + Skill 輔助）
 
 ```python
-def skill_driven_document_management(target_paths: List[str], options: dict) -> ManagementResult:
+def hybrid_intelligent_document_management(target_paths: List[str], options: dict) -> ManagementResult:
     """
-    使用 parallel-processing skill 驅動的文檔管理流程
+    結合自身文檔理解能力和 Skill 輔助的智能文檔管理流程
 
-    階段 0: Skill 決策
+    階段 0: 自身文檔脈絡分析
+    階段 1: Skill 輔助決策
     """
 
-    # 1. 呼叫 parallel-processing skill
+    # 0. 自身文檔脈絡分析
+    document_analyses = {}
+    for doc_path in scan_documents(target_paths):
+        content = read_document_content(doc_path)
+        doc_analysis = analyze_document_type_and_intent(content, doc_path)
+        doc_analysis['distillation_strategy'] = enhanced_distillation_strategy(doc_analysis, len(content))
+        document_analyses[doc_path] = doc_analysis
+
+    # 1. 基於自身分析的智能分組
+    document_groups = intelligent_grouping(document_analyses)
+
+    # 2. 呼叫 parallel-processing skill 輔助決策
     skill_input = {
         "task_type": "document_management",
-        "target_files": scan_documents(target_paths),
+        "document_analyses": document_analyses,  # 傳遞自身分析結果
+        "document_groups": document_groups,
         "processing_options": options,
         "resource_constraints": get_system_constraints(),
-        "cost_optimization": True
+        "cost_optimization": True,
+        "context_awareness": True  # 標記已進行脈絡分析
     }
 
     skill_recommendation = call_parallel_processing_skill(skill_input)
 
-    # 2. 根據 skill 建議執行
-    if skill_recommendation.recommended_approach == "full_parallel":
-        return execute_full_parallel_workflow(skill_recommendation)
-    elif skill_recommendation.recommended_approach == "hybrid":
-        return execute_hybrid_workflow(skill_recommendation)
-    else:
-        return execute_sequential_workflow(skill_recommendation)
+    # 3. 混合執行策略
+    return execute_hybrid_workflow_with_context(document_analyses, skill_recommendation)
+
+def intelligent_grouping(document_analyses: dict) -> dict:
+    """
+    基於文檔脈絡分析的智能分組
+
+    分組原則：
+    - 關聯性強的文檔（如 API 系列）放在同一組，序列處理
+    - 獨立性強的文檔可以並行處理
+    - 不同處理優先級的文檔分開處理
+    """
+
+    # 按文檔類型和處理順序分組
+    groups = {
+        "high_priority_concept": [],    # 概念性文檔，高優先級
+        "sequential_api_docs": [],     # API 文檔，序列處理（有關聯性）
+        "parallel_independent": [],   # 獨立文檔，可並行處理
+        "low_priority_tutorials": []   # 教學文檔，低優先級
+    }
+
+    for doc_path, analysis in document_analyses.items():
+        doc_type = analysis["doc_type"]
+        processing_order = analysis["distillation_strategy"]["processing_order"]
+        parallel_safe = analysis["parallel_safe"]
+
+        if doc_type == "concept_guide":
+            groups["high_priority_concept"].append(doc_path)
+        elif doc_type == "api_documentation" or not parallel_safe:
+            groups["sequential_api_docs"].append(doc_path)
+        elif processing_order in ["batch_priority", "medium_priority"]:
+            groups["parallel_independent"].append(doc_path)
+        else:
+            groups["low_priority_tutorials"].append(doc_path)
+
+    return groups
+
+def execute_hybrid_workflow_with_context(doc_analyses: dict, skill_rec: dict) -> ManagementResult:
+    """
+    結合上下文分析的混合工作流程
+    """
+
+    # 步驟 1: 高優先級概念文檔處理（序列）
+    concept_docs = skill_rec.get("document_groups", {}).get("high_priority_concept", [])
+    for doc_path in concept_docs:
+        analysis = doc_analyses[doc_path]
+        strategy = analysis["distillation_strategy"]
+        process_document_with_context(doc_path, strategy)
+
+    # 步驟 2: 關聯性文檔序列處理
+    sequential_docs = skill_rec.get("document_groups", {}).get("sequential_api_docs", [])
+    for doc_path in sequential_docs:
+        analysis = doc_analyses[doc_path]
+        strategy = analysis["distillation_strategy"]
+        process_document_with_context(doc_path, strategy)
+
+    # 步驟 3: 獨立文檔並行處理
+    parallel_docs = skill_rec.get("document_groups", {}).get("parallel_independent", [])
+    if len(parallel_docs) > 1:
+        execute_parallel_processing(parallel_docs, doc_analyses)
+
+    # 步驟 4: 低優先級文檔處理
+    low_priority_docs = skill_rec.get("document_groups", {}).get("low_priority_tutorials", [])
+    for doc_path in low_priority_docs:
+        analysis = doc_analyses[doc_path]
+        strategy = analysis["distillation_strategy"]
+        process_document_with_context(doc_path, strategy)
+
+    return generate_context_aware_management_report(document_analyses, skill_rec)
+```
 
 def execute_hybrid_workflow(skill_rec: dict) -> ManagementResult:
     """

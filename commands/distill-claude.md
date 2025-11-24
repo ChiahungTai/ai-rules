@@ -178,41 +178,211 @@
 ### 詳細檢查清單 (但保留核心驗證要點)
 ```
 
-### 蒸餾分餾邏輯
+### 蒸餾分餾邏輯（含文檔脈絡分析）
 
 ```python
-def classify_content(content: str) -> str:
+def analyze_document_context(content: str, file_path: str = "", section_title: str = "") -> dict:
     """
-    蒸餾分餾邏輯
+    文檔脈絡分析 - 避免機械化分類
+
+    參數:
+    - content: 內容文本
+    - file_path: 檔案路徑 (可選)
+    - section_title: 章節標題 (可選)
 
     回傳:
-    - "essence": 精華成分（高沸點，保留）
-    - "impurity": 雜質成分（低沸點，蒸發）
-    - "uncertain": 疑難成分（需要人工判斷）
+    - context_type: "concept_guide", "implementation_spec", "design_philosophy", "teaching_example"
+    - design_intent: 設計意圖分析
+    - false_positive_risk: False Positive 風險評估
     """
 
-    # 精華成分關鍵詞（高沸點）
+    context_indicators = {
+        "concept_guide": {
+            "keywords": ["概念", "理念", "哲學", "原則", "思考方式"],
+            "patterns": ["# 為什麼", "# 設計理念", "# 思考框架"],
+            "characteristics": "解釋性、指導性、原則性"
+        },
+        "implementation_spec": {
+            "keywords": ["具體", "參數", "配置", "實作", "詳細步驟"],
+            "patterns": ["## 實作", "## 配置", "## 步驟"],
+            "characteristics": "操作細節、技術規格"
+        },
+        "design_philosophy": {
+            "keywords": ["價值觀", "核心價值", "設計哲學", "決策原則"],
+            "patterns": ["## 🎯 核心原則", "## 設計哲學"],
+            "characteristics": "高層次指導原則"
+        },
+        "teaching_example": {
+            "keywords": ["範例", "示例", "例子", "演示"],
+            "patterns": ["### 範例", "### 示例", "### 演示"],
+            "characteristics": "教學性、示範性"
+        }
+    }
+
+    # 分析上下文類型
+    context_scores = {}
+    for ctx_type, indicators in context_indicators.items():
+        score = 0
+        for kw in indicators["keywords"]:
+            if kw in content:
+                score += content.count(kw) * 2
+        for pattern in indicators["patterns"]:
+            if pattern in content:
+                score += 3
+        context_scores[ctx_type] = score
+
+    # 判斷主要上下文
+    primary_context = max(context_scores, key=context_scores.get)
+
+    return {
+        "context_type": primary_context,
+        "context_description": context_indicators[primary_context]["characteristics"],
+        "all_scores": context_scores
+    }
+
+def enhanced_classify_content(content: str, section_title: str, context_info: dict) -> dict:
+    """
+    增強蒸餾分餾邏輯 - 結合文檔脈絡分析
+
+    參數:
+    - content: 內容文本
+    - section_title: 章節標題
+    - context_info: 文檔脈絡分析結果
+
+    回傳:
+    {
+        "type": "essence|impurity|uncertain|context_preserve",
+        "priority": "high|medium|low",
+        "action": "keep|remove|review|condense",
+        "context_analysis": context_info,
+        "reason": "決策原因說明"
+    }
+    """
+
+    context_type = context_info["context_type"]
+
+    # 基於上下文調整分類策略
+    context_rules = {
+        "concept_guide": {
+            "preserve_keywords": ["原則", "哲學", "理念", "價值觀"],
+            "impunity_keywords": [],  # 概念指南通常不蒸餾
+            "default_action": "preserve"
+        },
+        "implementation_spec": {
+            "preserve_keywords": ["關鍵", "重要", "核心", "必要"],
+            "impunity_keywords": ["具體參數", "詳細配置", "命令範例"],
+            "default_action": "distill"
+        },
+        "design_philosophy": {
+            "preserve_keywords": ["哲學", "價值", "原則", "核心"],
+            "impunity_keywords": [],  # 設計哲學通常都保留
+            "default_action": "preserve"
+        },
+        "teaching_example": {
+            "preserve_keywords": ["重要", "關鍵", "核心"],
+            "impunity_keywords": ["具體範例", "詳細代碼", "完整步驟"],
+            "default_action": "condense"  # 縮減而非移除
+        }
+    }
+
+    rules = context_rules.get(context_type, context_rules["implementation_spec"])
+
+    # 檢查保留關鍵詞
+    preserve_score = sum(1 for kw in rules["preserve_keywords"] if kw in content)
+    impunity_score = sum(1 for kw in rules["impunity_keywords"] if kw in content)
+
+    # 判斷邏輯
+    if preserve_score > impunity_score * 1.2:
+        return {
+            "type": "essence",
+            "priority": "high",
+            "action": "keep",
+            "context_analysis": context_info,
+            "reason": rules["rationale"] if "rationale" in locals() else "高精華度內容，應保留"
+        }
+    elif impunity_score > preserve_score * 1.2 and context_type != "concept_guide":
+        return {
+            "type": "impurity",
+            "priority": "medium",
+            "action": "remove",
+            "context_analysis": context_info,
+            "reason": rules["rationale"] if "rationale" in locals() else "低價值內容，可移除"
+        }
+    elif context_type == "teaching_example":
+        return {
+            "type": "context_preserve",
+            "priority": "medium",
+            "action": "condense",
+            "context_analysis": context_info,
+            "reason": "教學內容基於脈絡應保留但可簡化"
+        }
+    else:
+        return {
+            "type": "uncertain",
+            "priority": "low",
+            "action": "review",
+            "context_analysis": context_info,
+            "reason": "需要人工判斷的邊界情況"
+        }
+
+def classify_content(content: str, section_title: str = "") -> dict:
+    """
+    主蒸餾分餾邏輯
+
+    整合傳統關鍵詞分析和現代文檔脈絡分析
+
+    回傳:
+    {
+        "type": "essence|impurity|uncertain|context_preserve",
+        "priority": "high|medium|low",
+        "action": "keep|remove|review|condense",
+        "context_analysis": dict,
+        "reason": str
+    }
+    """
+
+    # 第一步：文檔脈絡分析
+    context_info = analyze_document_context(content, section_title)
+
+    # 第二步：增強分類決策
+    enhanced_result = enhanced_classify_content(content, section_title, context_info)
+
+    # 第三步：傳統關鍵詞分析（作為備用驗證）
+    if enhanced_result["type"] in ["essence", "impurity"]:
+        return enhanced_result
+
+    # 備用傳統邏輯（僅作最後驗證）
     essence_keywords = [
         "原則", "哲學", "理念", "約束", "鐵律",
         "禁止", "強制", "必須", "絕對", "核心"
     ]
 
-    # 雜質成分關鍵詞（低沸點）
     impurity_keywords = [
         "參數", "配置", "範例", "模板", "詳細清單",
         "步驟", "工具", "命令", "設定", "數值"
     ]
 
-    # 蒸餾判斷邏輯
     essence_score = sum(1 for kw in essence_keywords if kw in content)
     impurity_score = sum(1 for kw in impurity_keywords if kw in content)
 
     if essence_score > impurity_score * 1.5:
-        return "essence"  # 高沸點，精華成分
+        return {
+            "type": "essence",
+            "priority": "high",
+            "action": "keep",
+            "context_analysis": context_info,
+            "reason": "傳統關鍵詞分析確認為精華內容"
+        }
     elif impurity_score > essence_score * 1.5:
-        return "impurity"  # 低沸點，雜質成分
+        return {
+            "type": "impurity",
+            "priority": "medium",
+            "action": "remove",
+            "context_analysis": context_info,
+            "reason": "傳統關鍵詞分析確認為雜質內容"
+        }
     else:
-        return "uncertain"  # 沸點相近，需人工判斷
+        return enhanced_result  # 返回之前的分析結果
 ```
 
 ---

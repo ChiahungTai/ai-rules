@@ -77,16 +77,25 @@ usage: /doc-hierarchy [directory_path] [options]
 - 識別設計模式
 - 提取配置參數和關鍵常數
 
+### 2.5 文檔脈絡與關聯分析（新增）
+- **文檔上下文理解**：區分「概念說明」vs「實際實作」vs「教學範例」
+- **模組關聯分析**：識別模組間的依賴關係和影響範圍
+- **設計意圖識別**：理解每個檔案/模組的設計目的和使用場景
+- **關鍵路徑分析**：識別核心業務流程和關鍵代碼路徑
+- **False Positive 預防**：避免將範例代碼視為問題，區分不同用途的重複
+
 ### 3. CLAUDE.md 自動生成
 - 根目錄：整體架構總覽 + 模組匯入
 - 子目錄：詳細實作指南 + 檔案分析
 - 精確行數引用（如：connection.py:44-60）
 - 使用 @path 語法建立匯入關係
+- **上下文感知生成**：根據模組用途調整生成策略
 
 ### 4. 智能重要性評估
-- 🔴 高複雜度：>500行 或 核心功能
-- 🟡 中複雜度：200-500行 或 重要功能
-- 🟢 低複雜度：<200行 或 輔助功能
+- 🔴 高複雜度：>500行 或 核心功能 或 架構關鍵節點
+- 🟡 中複雜度：200-500行 或 重要功能 或 業務邏輯節點
+- 🟢 低複雜度：<200行 或 輔助功能 或 工具函數
+- **關聯重要性**：考慮模組在整體架構中的影響力
 
 ## 🏗️ 輸出模板
 
@@ -307,6 +316,149 @@ def detect_architecture_pattern(directory_structure):
             detected.append(pattern)
 
     return detected
+
+def analyze_document_context(content: str, file_path: str = "", section_title: str = "") -> dict:
+    """
+    文檔脈絡與關聯分析 - 避免機械化分析
+
+    參數:
+    - content: 內容文本
+    - file_path: 檔案路徑 (可選)
+    - section_title: 章節標題 (可選)
+
+    回傳:
+    - context_type: "concept_guide", "implementation_spec", "config_template", "example_code"
+    - design_intent: 設計意圖分析
+    - module_relationships: 模組關聯分析
+    - false_positive_risk: False Positive 風險評估
+    """
+
+    context_indicators = {
+        "concept_guide": {
+            "keywords": ["理念", "設計", "原則", "哲學", "思考"],
+            "patterns": ["## 為什麼", "## 設計理念", "## 思考方式"],
+            "characteristics": "概念性、指導性內容"
+        },
+        "implementation_spec": {
+            "keywords": ["實作", "接口", "類別", "函數", "方法"],
+            "patterns": ["## 實作", "## API", "## 類別定義"],
+            "characteristics": "具體實現細節和技術規格"
+        },
+        "config_template": {
+            "keywords": ["配置", "參數", "設定", "範例"],
+            "patterns": ["## 配置", "## 參數", "## 範例"],
+            "characteristics": "配置參數和範例模板"
+        },
+        "example_code": {
+            "keywords": ["範例", "示例", "demo", "用法"],
+            "patterns": ["### 範例", "### 示例", "### 用法"],
+            "characteristics": "教學性和示範性代碼"
+        }
+    }
+
+    # 分析內容類型
+    context_scores = {}
+    for ctx_type, indicators in context_indicators.items():
+        score = 0
+        for kw in indicators["keywords"]:
+            if kw in content:
+                score += content.count(kw) * 2
+        for pattern in indicators["patterns"]:
+            if pattern in content:
+                score += 3
+        context_scores[ctx_type] = score
+
+    primary_context = max(context_scores, key=context_scores.get) if max(context_scores.values()) > 0 else "implementation_spec"
+
+    return {
+        "context_type": primary_context,
+        "context_description": context_indicators[primary_context]["characteristics"],
+        "all_scores": context_scores
+    }
+
+def analyze_module_relationships(file_path: str, project_structure: dict) -> dict:
+    """
+    模組關聯分析 - 理解模組間的依賴和影響關係
+
+    回傳:
+    - dependencies: 依賴的模組清單
+    - dependents: 依賴此模組的模組清單
+    - influence_scope: 影響範圍評估
+    - critical_path: 是否在關鍵路徑上
+    """
+
+    # 分析 import 語句識別依賴
+    dependencies = []
+    file_dir = os.path.dirname(file_path)
+
+    # 基於專案結構分析潛在依賴
+    for module_dir in project_structure.get('directories', []):
+        if module_dir != file_dir and is_likely_dependency(file_path, module_dir):
+            dependencies.append(module_dir)
+
+    # 分析影響範圍
+    influence_score = len(dependencies)
+    if influence_score > 3:
+        influence_scope = "high"
+    elif influence_score > 1:
+        influence_scope = "medium"
+    else:
+        influence_scope = "low"
+
+    # 判斷是否在關鍵路徑上
+    critical_indicators = [
+        "main.py", "app.py", "index.py", "router", "handler",
+        "service", "controller", "core", "engine"
+    ]
+    is_critical = any(indicator in file_path.lower() for indicator in critical_indicators)
+
+    return {
+        "dependencies": dependencies,
+        "dependents": [],  # 需要反向分析
+        "influence_scope": influence_scope,
+        "critical_path": is_critical
+    }
+
+def enhanced_importance_assessment(file_path: str, content: str, context_info: dict, relationship_info: dict) -> float:
+    """
+    增強重要性評估 - 結合脈絡分析和關聯分析
+
+    參數:
+    - file_path: 檔案路徑
+    - content: 檔案內容
+    - context_info: 文檔脈絡分析結果
+    - relationship_info: 模組關聯分析結果
+
+    回傳:
+    - importance_score: 0-1 的評分
+    """
+
+    # 基礎複雜度評分 (40%)
+    line_count = len(content.split('\n'))
+    complexity_score = min(line_count / 1000, 1.0) * 0.4
+
+    # 脈絡重要性評分 (30%)
+    context_weights = {
+        "implementation_spec": 0.8,
+        "concept_guide": 0.9,
+        "config_template": 0.6,
+        "example_code": 0.4
+    }
+    context_score = context_weights.get(context_info["context_type"], 0.7) * 0.3
+
+    # 關聯重要性評分 (30%)
+    relationship_weights = {
+        "high": 0.9,
+        "medium": 0.6,
+        "low": 0.3
+    }
+    relationship_score = relationship_weights.get(relationship_info["influence_scope"], 0.5) * 0.3
+
+    if relationship_info["critical_path"]:
+        relationship_score += 0.1  # 關鍵路徑加權
+
+    total_score = complexity_score + context_score + relationship_score
+    return min(total_score, 1.0)
 ```
 
 ## 🔒 安全性檢查
