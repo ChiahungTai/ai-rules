@@ -90,7 +90,7 @@ session:
 
 # 專案上下文
 context:
-  goal: "基於用戶意圖「{用戶意圖}」的工作目標"
+  goal: "基於用戶意圖「{用戶意圖|對話里程碑記錄}」的工作目標"
   why: "AI 協作開發過程中的重要節點記錄"
   approach: "結構化對話管理 + YAML 持久化"
   success_criteria: "功能正確實作，文檔完整記錄"
@@ -98,11 +98,11 @@ context:
 
 # 當前狀態
 current:
-  working_on: "{用戶意圖}"
+  working_on: "{用戶意圖|對話里程碑記錄}"
   status: "進行中"
   progress: "根據當前對話內容分析"
   blocking_issues: "無特定阻礙"
-  next_actions: ["根據意圖分析執行下一步", "記錄重要決策和發現"]
+  next_actions: ["完成里程碑記錄檔案生成", "根據實際意圖執行下一步工作"]
 
 # 重要成果里程碑
 milestones:
@@ -128,9 +128,9 @@ learnings:
 
 # 快速重啟指引
 restart:
-  quick_context: "{專案類型} 專案的 AI 協作開發，正在處理 {意圖類型}"
-  priority: "繼續執行 {用戶意圖}"
-  immediate_next: "根據 current.next_actions 執行下一步"
+  quick_context: "{專案類型} 專案的 AI 協作開發，正在處理 {意圖類型|一般任務}"
+  priority: "繼續執行 {用戶意圖|對話相關工作}"
+  immediate_next: "讀取里程碑檔案並根據 next_actions 繼續工作"
   must_understand: "專案目標和當前工作進度"
   critical_files: ["{輸出檔案}", "重要配置檔案"]
 
@@ -191,17 +191,17 @@ mkdir -p ai-analysis
 📍 **請先讀取里程碑檔案**: `ai-analysis/{FILENAME}.yaml`
 
 根據里程碑記錄：
-- 專案目標：基於用戶意圖「{用戶意圖}」的工作目標
+- 專案目標：基於用戶意圖「{用戶意圖|對話里程碑記錄}」的工作目標
 - 當前狀態：進行中
-- 正在處理：{用戶意圖}
+- 正在處理：{用戶意圖|對話相關工作}
 - 專案類型：{專案類型}
 - Git 狀態：{Git狀態}
 
-識別到的意圖類型：{意圖類型}
+識別到的意圖類型：{意圖類型|一般}
 
-立即下一步：根據 current.next_actions 執行下一步
+立即下一步：讀取里程碑檔案中的 current.next_actions 並執行
 
-請確認你理解了當前狀況，然後我們繼續 {用戶意圖}。
+請確認你理解了當前狀況，然後我們繼續 {用戶意圖|對話相關工作}。
 ```
 
 ## 💡 執行流程總結
