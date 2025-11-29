@@ -59,5 +59,5 @@ allowed-tools: ["Task"]
 # 調用 milestone-recorder sub agent
 Task
   description="執行對話里程碑記錄"
-  prompt="請分析對話上下文並生成里程碑記錄。參數：$ARGUMENTS。你必須執行完整的里程碑記錄流程，包括：1. 解析參數（意圖、模式）2. 分析當前環境（工作目錄、Git狀態、專案類型）3. 生成時間戳和檔名 4. 建立完整的 YAML 內容 5. 根據模式執行對應操作 6. 輸出完整的重啟指引。重啟指引應包含：📍 里程碑檔案路徑、專案目標和狀態、當前工作進度、立即下一步：讀取里程碑檔案並根據 current.next_actions 執行。請確保輸出結果與原始 milestone.md 的完整功能完全相同。"
+  prompt="參數：$ARGUMENTS。請執行里程碑記錄流程：解析參數、分析環境、生成YAML內容、執行對應操作、輸出重啟指引。確保 next_actions 根據實際情況動態生成，不要使用硬編碼內容。"
   subagent_type="milestone-recorder"
