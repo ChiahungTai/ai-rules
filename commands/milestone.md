@@ -19,8 +19,9 @@ Task
 重啟指引應該是一個完整的文本，包含：
 - 工作目標和背景
 - 當前狀態和進度
-- 關鍵檔案路徑
+- 關鍵檔案路徑（包含 CLAUDE.md）
 - 下一步具體行動
+- **重要提醒**：必須先讀取專案的 CLAUDE.md 和 ~/.claude/CLAUDE.md 來理解 AI 協作開發規範
 
 確保 next_actions 根據實際情況動態生成，不要使用硬編碼內容。"
   subagent_type="milestone-recorder"
