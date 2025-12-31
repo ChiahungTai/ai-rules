@@ -406,6 +406,51 @@ def test_worker_task():
 
 **向後相容確認機制**: 只有影響外部系統整合、數據處理流程、部署環境或用戶明確要求時才需確認
 
+### **import 語句約束**
+
+**toplevel 原則**: import 語句必須在檔案頂部（toplevel）加入，不得在函數或類內部 import
+
+**例外情況**: 僅在以下情況允許局部 import：
+- 避免循環依賴（circular import）
+- 條件性依賴（optional dependencies）
+- 延遲載入以減少啟動時間
+
+**正確做法**:
+
+```python
+# 檔案頂部
+from pathlib import Path
+from typing import Optional
+
+def process_data(file_path: Optional[Path] = None) -> dict:
+    # 實際邏輯
+    ...
+```
+
+**原因**: 遵循 Python 約定（PEP 8），提高可讀性和維護性
+
+### **命令執行約束**
+
+**uv run 原則**: 執行 Python 指令時使用 `uv run`，不使用 `timeout`/`gtimeout` 或 `PYTHONPATH`
+
+**原因**:
+- `uv run` 會自動管理虛擬環境和依賴
+- `timeout`/`gtimeout` 在不同平台行為不一致
+- `PYTHONPATH` 會破壞 uv 的環境隔離機制
+
+**正確做法**:
+
+```bash
+# 執行 Python 腳本
+uv run python script.py
+
+# 執行測試
+uv run pytest
+
+# 執行模組
+uv run python -m module_name
+```
+
 ---
 
 # IV. 量化交易專屬鐵律（2025版實用主義）
