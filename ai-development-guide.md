@@ -700,14 +700,75 @@ import 語句必須在檔案頂部加入，不得在函數或類內部 import
 ```python
 # 檔案頂部
 from pathlib import Path
-from typing import Optional
 
-def process_data(file_path: Optional[Path] = None) -> dict:
+def process_data(file_path: Path | None = None) -> dict:
     # 實際邏輯
     ...
 ```
 
 💡 **原理說明**：遵循 Python 約定（PEP 8），提高可讀性和維護性。toplevel import 讓依賴關係一目瞭然。
+
+### 型別註解標準（Python 3.11+）
+
+> **核心原則**：優先使用內建型別語法，僅在必要時從 `typing` 模組 import。
+
+#### 標準型別語法
+
+Python 3.11+ 使用內建型別作為泛型型別：
+
+- **串列**: `list[T]`
+- **字典**: `dict[K, V]`
+- **集合**: `set[T]`
+- **元組**: `tuple[T1, T2]`
+- **聯合型別**: `T1 | T2`
+- **可選型別**: `T | None`
+
+#### typing 模組適用範圍
+
+以下型別無內建替代，從 `typing` 模組 import：
+
+- `Callable` - 函數型別
+- `Protocol` - 結構子型別
+- `TypeVar` - 泛型型別變數
+- `ParamSpec` - 參數規格變數
+- `Self` - 當前類別實例
+
+#### 推薦做法
+
+```python
+# 優先從 typing import 必要的特殊型別
+from typing import Callable, Protocol
+
+def process_items(
+    items: list[str],
+    config: dict[str, int] | None = None,
+    callback: Callable[[str], bool] | None = None
+) -> dict[str, int]:
+    if config is None:
+        config = {}
+    return {"count": len(items), **config}
+
+# Protocol 定義結構子型別
+class Drawable(Protocol):
+    def draw(self) -> None: ...
+
+def render(obj: Drawable) -> None:
+    obj.draw()
+```
+
+#### 型別註解自檢清單
+
+撰寫型別註解前確認：
+- [ ] 使用 `list[T]` 等內建泛型語法
+- [ ] 使用 `T1 | T2` 聯合型別語法
+- [ ] 僅在無內建替代時才從 `typing` import
+- [ ] 型別註解清晰表達意圖，提升可讀性
+
+💡 **原理說明**：
+- PEP 585（Python 3.9+）允許內建容器型別作為泛型使用
+- PEP 604（Python 3.10+）引入 `X | Y` 聯合型別語法，語意直觀
+- 減少 `from typing import ...` 行數，讓 import 區塊更乾淨
+- 標準語法是 Python 官方推薦方向，與運算子語意一致
 
 ### Python 命令執行約束
 
