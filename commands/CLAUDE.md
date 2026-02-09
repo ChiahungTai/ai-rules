@@ -51,24 +51,27 @@ ls -la /Users/ctai/Github/ai-rules/commands/
 ```
 
 包含以下自定義命令：
-- `/analysis-plan` - 技術分析計劃生成 (18549 bytes)
-- `/code-review` - 程式碼審查和品質檢查 (21892 bytes)
-- `/commit-message` - Git 提交訊息生成 (4067 bytes)
-- `/design-plan` - 設計計劃制定 (19985 bytes)
-- `/design2prompt` - 設計轉提示詞轉換 (16860 bytes)
-- `/distill-claude` - Claude 對話內容蒸餾 (16860 bytes)
-- `/distill-spec` - 規格蒸餾和提煉 (20081 bytes)
-- `/doc-hierarchy` - 通用 CLAUDE.md 階層文檔生成器 (23084 bytes)
-- `/doc-quality-checker` - 文檔品質檢查 (22636 bytes)
-- `/docs-manager` - 文檔管理和整理 (23579 bytes)
-- `/error-diagnose` - 錯誤診斷和解決方案 (18879 bytes)
-- `/explain` - 技術概念、架構設計或流程解釋 (30389 bytes)
-- `/execution-plan` - 執行計劃和任務分解 (14555 bytes)
-- `/lessons` - 經驗教訓提取和知識蒸餾 (12463 bytes)
-- `/milestone` - 對話里程碑記錄和重啟管理 (2285 bytes)
-- `/parallel-task` - 智能並行任務協調器 (9895 bytes)
-- `/story-design` - 用戶故事和功能設計 (13812 bytes)
-- `/worktree/*` - Git Worktree 管理命令集 (子目錄結構)
+- `/analysis-plan` - 技術分析計劃生成
+- `/code-review` - 程式碼審查和品質檢查
+- `/claude:clean` - 清理 CLAUDE.md 中不必要的元資訊
+- `/claude:distill` - 蒸餾 CLAUDE.md，提煉核心精華
+- `/claude:sync` - 檢查 CLAUDE.md 與程式碼的同步性
+- `/commit-message` - Git 提交訊息生成
+- `/design-plan` - 設計計劃制定
+- `/design2prompt` - 設計轉提示詞轉換
+- `/distill-spec` - 規格蒸餾和提煉
+- `/doc-hierarchy` - 通用 CLAUDE.md 階層文檔生成器
+- `/doc-quality-checker` - 文檔品質檢查
+- `/docs-manager` - 文檔管理和整理
+- `/error-diagnose` - 錯誤診斷和解決方案
+- `/explain` - 技術概念、架構設計或流程解釋
+- `/execution-plan` - 執行計劃和任務分解
+- `/lessons` - 經驗教訓提取和知識蒸餾
+- `/lint-fix` - 執行 ruff 和 mypy 檢查並自動修正問題
+- `/milestone` - 對話里程碑記錄和重啟管理
+- `/parallel-task` - 智能並行任務協調器
+- `/story-design` - 用戶故事和功能設計
+- `/worktree/*` - Git Worktree 管理命令集（子目錄結構）
 
 ### 命令載入和執行流程
 ```
@@ -95,7 +98,12 @@ AI 調用 SlashCommand("/command args")
 
 ## 當前專案 Commands 參考
 
-> **AI 使用指南**: 以下是本專案中可立即使用的 18 個自定義 slash commands，所有命令都透過符號連結架構實現 Git 版本控制和跨專案共享。
+> **AI 使用指南**: 以下是本專案中可立即使用的 22+ 個自定義 slash commands，所有命令都透過符號連結架構實現 Git 版本控制和跨專案共享。
+
+### CLAUDE.md 專用命令
+- `/claude:clean` - 清理 CLAUDE.md 元資訊（版本、日期等）
+- `/claude:distill` - 蒸餾精簡 CLAUDE.md，提煉核心精華
+- `/claude:sync` - 檢查 CLAUDE.md 與程式碼同步性（支援 --clean, --all）
 
 ### 核心系統命令
 - `/explain` - 技術概念、架構設計或流程解釋
@@ -108,16 +116,19 @@ AI 調用 SlashCommand("/command args")
 - `/code-review` - 程式碼審查和品質檢查
 - `/design-plan` - 軟體設計計劃制定
 - `/execution-plan` - 執行計劃和任務分解
+- `/lint-fix` - ruff 和 mypy 自動修正
 
 ### Git 工作流程命令
 - `/commit-message` - Git 提交訊息生成
-- `/worktree:done` - Git Worktree 分支合併和清理
-- `/worktree/*` - Git Worktree 相關操作（子命令）
+- `/worktree:create` - 建立新的 Git Worktree
+- `/worktree:status` - 列出所有 Git Worktrees 狀態
+- `/worktree:cleanup` - 智能清理 Git Worktrees
+- `/worktree:done` - 合併 Git Worktree 分支並清理
 
 ### 文檔管理命令
-- `/distill-claude` - Claude 對話內容蒸餾
 - `/doc-quality-checker` - 文檔品質檢查
 - `/docs-manager` - 文檔管理和整理
+- `/distill-spec` - 規格蒸餾和提煉
 
 ### 錯誤處理和診斷
 - `/error-diagnose` - 錯誤診斷和解決方案
@@ -126,7 +137,6 @@ AI 調用 SlashCommand("/command args")
 ### 設計和規劃工具
 - `/story-design` - 用戶故事和功能設計
 - `/design2prompt` - 設計轉提示詞轉換
-- `/distill-spec` - 規格蒸餾和提煉
 
 ### Claude Code 內建命令參考
 - `/agents:config-manager` - Agent 配置管理器
