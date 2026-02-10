@@ -42,15 +42,7 @@ permission-mode: "acceptEdits"
 
 ## 📋 執行流程
 
-### 步驟 1: 發現 CLAUDE.md
-
-```bash
-# 單檔案模式
-Read $TARGET_CLAUDE_MD
-
-# 遞歸模式
-Glob "**/CLAUDE.md" $TARGET_DIR
-```
+See @./_common/recursive-discovery.md for recursive discovery logic.
 
 ### 步驟 2: 讀取並分析
 
@@ -180,6 +172,9 @@ Read $TARGET_CLAUDE_MD
 ```
 
 ### 遞歸模式輸出
+See @./_common/recursive-output.md for recursive output format template.
+
+### 遞歸清理檢查報告範例
 
 ```
 ## 遞歸清理檢查報告
@@ -228,7 +223,10 @@ Read $TARGET_CLAUDE_MD
 
 ## 🎯 執行約束
 
-### 必須遵守
+### 遞歸處理約束
+See @./_common/recursive-constraints.md
+
+### clean 專屬約束
 - **報告先行**：先報告發現，再詢問是否執行
 - **可還原**：清理前建議備份
 - **保留核心**：絕不刪除規則和約束內容
