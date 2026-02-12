@@ -2,6 +2,8 @@
 
 > **🔗 Symbolic Link 說明**: `~/.claude/CLAUDE.md` 是一個 symbolic link，連結目標為 `ai-rules/ai-development-guide.md`
 
+> **🔴 強烈警告**: AI 寫作或修改 CLAUDE.md 時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。這些資訊對 AI 無價值且造成誤導。詳細約束請參考 `@~/.claude/rules/_ai-behavior-constraints.md`
+
 **適用範圍**: 所有軟體開發專案（量化交易專案優先）
 **AI 系統**: Claude Code、KiloCode、Gemini 等
 **核心理念**: 品質導向 + 智能協作 + 持續演化
