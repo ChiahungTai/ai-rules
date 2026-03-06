@@ -8,20 +8,6 @@
 
 > **核心原則**：使用清晰明確的命名，避免誤導開發工具。
 
-### 推薦做法：使用清晰的命名前綴
-
-```python
-# Demo 程式使用 demo_ 前綴
-# 檔案: examples/demo.py
-def demo_worker_task():
-    ...
-
-# 測試程式才使用 test_ 前綴
-# 檔案: tests/test_worker.py
-def test_worker_task():
-    ...
-```
-
 ### 命名規範
 
 | 類型 | 規範 | 範例 |
@@ -34,26 +20,33 @@ def test_worker_task():
 | **實驗/範例檔案** | **禁止 `test_` 前綴** | ❌ `test_shioaji.py` ✅ `demo_shioaji.py` |
 | Private 方法 | `_` 前綴 | `_internal_method()` |
 
+### 範例
+
+```python
+# Demo 程式使用 demo_ 前綴（檔案: examples/demo.py）
+def demo_worker_task():
+    ...
+
+# 測試程式才使用 test_ 前綴（檔案: tests/test_worker.py）
+def test_worker_task():
+    ...
+```
+
 ---
 
 ## import 管理標準
 
-> **核心原則**：import 語句必須在檔案頂部（toplevel）加入。
+> **核心原則**：import 語句必須在檔案頂部（toplevel）。
 
-### toplevel import 原則
+### 強制規則
 
-import 語句必須在檔案頂部加入，不得在函數或類內部 import
+- **必須**：import 語句在檔案頂部
+- **例外**：避免循環依賴、條件性依賴、延遲載入
 
-### 允許局部 import 的例外情況
-
-- 避免循環依賴（circular import）
-- 條件性依賴（optional dependencies）
-- 延遲載入以減少啟動時間
-
-### 推薦做法
+### 範例
 
 ```python
-# 檔案頂部
+# ✅ 正確：檔案頂部 import
 from pathlib import Path
 
 def process_data(file_path: Path | None = None) -> dict:
@@ -67,31 +60,11 @@ def process_data(file_path: Path | None = None) -> dict:
 
 > **核心原則**：`__init__.py` 應保持精簡，只暴露公開 API，避免 circular import。
 
-### ❌ 錯誤做法：塞太多東西到 `__init__.py`
+### 絕對約束
 
-```python
-# __init__.py 超過 50 行，有很多 from xxx import yyy
-from .module_a import ClassA
-from .module_b import ClassB
-from .module_c import func_c
-from .module_d import ClassD
-from .utils import helper1, helper2, helper3
-# ... 很多 import
-
-# 這會導致：
-# 1. 啟動時載入所有模組（影響性能）
-# 2. 高 circular import 風險
-# 3. 難以追蹤依賴關係
-```
-
-### ✅ 正確做法：只暴露公開 API
-
-```python
-# __init__.py 保持精簡（通常 < 20 行）
-from .core import PublicAPI
-
-__all__ = ["PublicAPI"]
-```
+- **檔案行數**：< 50 行（不含空行和註解）
+- **內容限制**：只包含真正需要公開的 API
+- **強制要求**：使用 `__all__` 明確宣告公開 API
 
 ### 判斷標準
 
@@ -101,26 +74,21 @@ __all__ = ["PublicAPI"]
 | 加入後會讓 `__init__.py` 超過 50 行嗎？ | 是 → 不要加，用完整路徑 import |
 | 加入後造成 circular import 嗎？ | 是 → 重構模組結構或用 TYPE_CHECKING |
 
-### 推薦的 import 方式
+### 推薦做法
 
 ```python
-# ❌ 依賴 __init__.py（容易 circular import）
+# ❌ 錯誤：依賴 __init__.py（容易 circular import）
 from package import ClassA, ClassB, ClassC
 
-# ✅ 使用完整路徑（清晰、避免 circular）
+# ✅ 正確：使用完整路徑（清晰、避免 circular）
 from package.module_a import ClassA
 from package.module_b import ClassB
-from package.module_c import ClassC
+
+# ✅ 正確的 __init__.py（精簡、只暴露公開 API）
+from .core import PublicAPI
+
+__all__ = ["PublicAPI"]
 ```
-
-### `__init__.py` 自檢清單
-
-撰寫 `__init__.py` 前確認：
-- [ ] 檔案行數 < 50 行（不含空行和註解）
-- [ ] 只包含真正需要公開的 API
-- [ ] 不會造成 circular import
-- [ ] 使用 `__all__` 明確宣告公開 API
-- [ ] 內部實作細節不暴露
 
 ---
 
@@ -128,31 +96,19 @@ from package.module_c import ClassC
 
 > **核心原則**：優先使用內建型別語法，僅在必要時從 `typing` 模組 import。
 
-### 標準型別語法
+### 標準型別語法（內建）
 
-Python 3.11+ 使用內建型別作為泛型型別：
-
-- **串列**: `list[T]`
-- **字典**: `dict[K, V]`
-- **集合**: `set[T]`
-- **元組**: `tuple[T1, T2]`
-- **聯合型別**: `T1 | T2`
-- **可選型別**: `T | None`
+- `list[T]`, `dict[K, V]`, `set[T]`, `tuple[T1, T2]`
+- `T1 | T2`（聯合型別）, `T | None`（可選型別）
 
 ### typing 模組適用範圍
 
-以下型別無內建替代，從 `typing` 模組 import：
+僅以下型別從 `typing` import：
+- `Callable`, `Protocol`, `TypeVar`, `ParamSpec`, `Self`
 
-- `Callable` - 函數型別
-- `Protocol` - 結構子型別
-- `TypeVar` - 泛型型別變數
-- `ParamSpec` - 參數規格變數
-- `Self` - 當前類別實例
-
-### 推薦做法
+### 範例
 
 ```python
-# 優先從 typing import 必要的特殊型別
 from typing import Callable, Protocol
 
 def process_items(
@@ -172,47 +128,33 @@ def render(obj: Drawable) -> None:
     obj.draw()
 ```
 
-### 型別註解自檢清單
-
-撰寫型別註解前確認：
-- [ ] 使用 `list[T]` 等內建泛型語法
-- [ ] 使用 `T1 | T2` 聯合型別語法
-- [ ] 僅在無內建替代時才從 `typing` import
-- [ ] 型別註解清晰表達意圖，提升可讀性
-
 ---
 
 ## Python 命令執行約束
 
 > **核心原則**：所有 Python 指令必須使用 `uv run` 執行。
 
-### 必須使用的標準模式
+### 強制模式
 
-所有 Python 命令都遵循此模式：
+**所有 Python 命令都遵循此模式**：
 ```bash
 uv run [python/pytest/其他] [參數]
 ```
 
-### 正確做法
+### 正確範例
 
 ```bash
 # 執行 Python 腳本
 uv run python script.py
 
 # 執行測試
-uv run pytest
-
-# 執行特定測試檔案
 uv run pytest tests/test_example.py -v
 
 # 執行模組
 uv run python -m module_name
-
-# 套件管理後執行
-uv run pip install requests && uv run python script.py
 ```
 
-### ❌ 禁止使用的模式
+### ❌ 絕對禁止
 
 ```bash
 timeout 60 uv run python script.py  # ❌ timeout 會干擾 uv 環境管理
@@ -222,10 +164,26 @@ python script.py  # ❌ 未使用 uv 管理環境
 python3 script.py  # ❌ 未使用 uv 管理環境
 ```
 
-### 執行命令前自檢清單
+---
 
-在執行任何 Python 命令前確認：
-- [ ] 以 `uv run` 開頭
-- [ ] 不包含 `timeout`/`gtimeout`
-- [ ] 不包含 `PYTHONPATH`
-- [ ] 不直接使用 `python`（沒有 uv run）
+## 執行前自檢清單
+
+在執行任何 Python 相關操作前確認：
+
+### 命名與 import
+- [ ] Demo 檔案使用 `demo_` 前綴，測試檔案使用 `test_` 前綴
+- [ ] import 語句在檔案頂部（除非符合例外條件）
+- [ ] `__init__.py` < 50 行，使用 `__all__` 宣告公開 API
+
+### 型別註解
+- [ ] 使用 `list[T]`, `T1 | T2` 等內建型別語法
+- [ ] 僅在必要時從 `typing` import（Callable, Protocol 等）
+
+### 命令執行
+- [ ] 所有 Python 命令以 `uv run` 開頭
+- [ ] 不包含 `timeout`/`gtimeout`/`PYTHONPATH`
+- [ ] 不直接使用 `python` 或 `python3`
+
+---
+
+> 💡 **核心哲學**: 清晰命名、頂部 import、精簡 `__init__.py`、內建型別優先、強制 `uv run`。這些約束確保程式碼可讀性、避免循環依賴、維持環境隔離。
