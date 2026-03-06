@@ -10,12 +10,11 @@
 
 **簡單就是美** - 直接使用 Mermaid 預設配置，確保在所有環境下的最大相容性。
 
-**基於實際經驗的核心理念**：
+**核心理念**：
 - 預設主題已經非常成熟且通用，無需自定義配置
 - 移除所有 `%%{init: {...}}%%` 配置，避免 Dark/Light Theme 相容性問題
 - 專注於圖表內容而非樣式調整
 - 實用主義優於完美主義
-- 通用性比客製化更重要
 
 ---
 
@@ -29,18 +28,16 @@
 
 ## Mermaid 配置約束
 
-### 黃金法則
+### 🔥 黃金法則
 
-**🔥 黃金法則：直接使用預設配置，不加任何 %%{init: {...}}%%**
+**直接使用預設配置，不加任何 %%{init: {...}}%%**
 
-根據實戰經驗，移除所有自定義配置可以：
 - ✅ 避免 Dark/Light Theme 相容性問題
 - ✅ 確保在所有環境下的通用性
 - ✅ 減少維護成本和複雜度
 - ✅ 專注於圖表內容本身
 
-### 禁止的配置
-
+**❌ 禁止的配置**：
 ```mermaid
 %% ❌ 絕對禁止使用 init 配置
 %%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#ff0000' }}}%%
@@ -48,10 +45,8 @@ flowchart TD
     A[開始] --> B[結束]
 ```
 
-### 正確的使用方式
-
+**✅ 正確的使用方式**：
 ```mermaid
-%% ✅ 直接使用預設配置，不添加任何 init
 flowchart TD
     A[開始] --> B[結束]
 ```
@@ -63,13 +58,10 @@ flowchart TD
 ### Dark/Light Theme 相容性約束
 
 **❌ 絕對禁止的配色**（會在特定主題下消失）：
-
-| 顏色        | 問題         | 原因                     |
-|-------------|--------------|--------------------------|
-| `#000000`   | 純黑         | 在 Dark Theme 完全看不到  |
-| `#ffffff`   | 純白         | 在 Light Theme 看不清楚   |
-| `#808080`   | 中灰         | 對比度不足               |
-| `#333333`   | 深灰         | 在 Dark Theme 難以辨識    |
+- `#000000` - 純黑（在 Dark Theme 完全看不到）
+- `#ffffff` - 純白（在 Light Theme 看不清楚）
+- `#808080` - 中灰（對比度不足）
+- `#333333` - 深灰（在 Dark Theme 難以辨識）
 
 **✅ 安全的配色方案**（通過雙主題測試）：
 
@@ -85,29 +77,22 @@ flowchart TD
 #### 🔥 黃金法則：底色+文字色必須同時指定
 
 **✅ 正確用法**：必須同時指定 `fill` (底色) 和 `color` (文字色)
-
 ```mermaid
 flowchart TD
     A[開始] --> B[成功]
-
-    %% ✅ 底色+文字色同時指定
     style B fill:#10b981,color:#ffffff
 ```
 
 **❌ 錯誤用法**：只指定單一顏色
-
 ```mermaid
 flowchart TD
     A[開始] --> B[警告]
-
-    %% 🚫 缺少文字色，對比度無法保證
     style B fill:#f59e0b
 ```
 
 #### 📏 數量限制：絕對不超過 3 個組件
 
 **✅ 正確**：最多 3 個組件使用 style
-
 ```mermaid
 flowchart TD
     A[開始] --> B[檢查]
@@ -116,29 +101,11 @@ flowchart TD
 
     style C fill:#10b981,color:#ffffff
     style D fill:#ef4444,color:#ffffff
-    %% 總共2個，未超過限制
-```
-
-**❌ 錯誤**：超過 3 個組件
-
-```mermaid
-flowchart TD
-    A[步驟1] --> B[步驟2]
-    B --> C[步驟3]
-    C --> D[步驟4]
-    D --> E[步驟5]
-
-    style A fill:#3b82f6,color:#ffffff
-    style B fill:#f59e0b,color:#000000
-    style C fill:#10b981,color:#ffffff
-    %% 🚫 第4個 - 超過限制！
-    style D fill:#ef4444,color:#ffffff
 ```
 
 #### 🎯 優先使用 Emoji 替代顏色
 
 **推薦做法**：使用 Emoji 強調，減少顏色使用
-
 ```mermaid
 flowchart TD
     A["開始 ✅"] --> B["檢查數據 ⚠️"]
@@ -146,28 +113,33 @@ flowchart TD
     C -->|是| D["處理成功 🎉"]
     C -->|否| E["記錄錯誤 ❌"]
 
-    %% 只有失敗和成功需要顏色強調
     style D fill:#10b981,color:#ffffff
     style E fill:#ef4444,color:#ffffff
 ```
 
-### 註解符號規範
+---
+
+## 註解符號規範
 
 **⚠️ 常見錯誤**：AI 經常混淆註解符號
 
-**✅ 正確的 Mermaid 註解符號**：
+**🔥 註解規則**：
+- ✅ **只使用 `%%`**：Mermaid 語法中唯一的註解符號
+- ✅ **獨立註解**：必須獨占一行，完全不能與程式碼同行
+- ❌ **絕對禁止行末註解**：`style A %% 註解` 會造成 Lexical Error
+- ❌ **絕對禁止混合註解**：`%% style A %% 註解` 會造成 Lexical Error
+- ❌ **絕對禁止其他符號**：`//`、`#`、`/* */` 在 Mermaid 中不是註解
 
+**✅ 正確的 Mermaid 註解**：
 ```mermaid
 flowchart TD
     A[開始] --> B[結束]
 
     %% 這是正確的註解符號
-    %% 這也是正確的
     style B fill:#10b981,color:#ffffff
 ```
 
 **❌ 錯誤的註解符號**：
-
 ```mermaid
 flowchart TD
     A[開始] --> B[結束]
@@ -176,13 +148,6 @@ flowchart TD
     # 這是 Python/Bash 的註解，不是 Mermaid 的
     /* 這是 CSS/C 語言的註解，不是 Mermaid 的 */
 ```
-
-**🔥 註解規則**：
-- ✅ **只使用 `%%`**：Mermaid 語法中唯一的註解符號
-- ✅ **獨立註解**：必須獨占一行，完全不能與程式碼同行
-- ❌ **絕對禁止行末註解**：`style A %% 註解` 會造成 Lexical Error
-- ❌ **絕對禁止混合註解**：`%% style A %% 註解` 會造成 Lexical Error
-- ❌ **絕對禁止其他符號**：`//`、`#`、`/* */` 在 Mermaid 中不是註解
 
 ---
 
