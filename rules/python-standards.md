@@ -1,6 +1,8 @@
 # Python 程式設計規範
 
 > **自動載入**: 此檔案位於 `~/.claude/rules/`，會自動載入到所有會話
+>
+> **開發環境**: MacBook Pro M1 Max (macOS Darwin 24.6.0)
 
 ---
 
@@ -157,12 +159,18 @@ uv run python -m module_name
 ### ❌ 絕對禁止
 
 ```bash
-timeout 60 uv run python script.py  # ❌ timeout 會干擾 uv 環境管理
-gtimeout 30s uv run pytest  # ❌ gtimeout 有跨平台問題
-PYTHONPATH=$PWD uv run python script.py  # ❌ 破壞環境隔離
+timeout 60 uv run python script.py  # ❌ macOS 預設沒有 timeout 命令
+gtimeout 30s uv run pytest  # ❌ gtimeout 有跨平台相容性問題
+PYTHONPATH=$PWD uv run python script.py  # ❌ 破壞 uv 環境隔離
 python script.py  # ❌ 未使用 uv 管理環境
 python3 script.py  # ❌ 未使用 uv 管理環境
 ```
+
+### macOS 平台相容性說明
+
+- **`timeout` 命令**: macOS 預設不包含 `timeout` 命令（這是 GNU coreutils 的一部分）
+- **`gtimeout` 命令**: 需要額外安裝 coreutils，且與 `uv run` 配合使用有問題
+- **超時控制**: 由 AI 系統根據實際需求自行處理
 
 ---
 
