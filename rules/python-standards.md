@@ -174,6 +174,42 @@ python3 script.py  # ❌ 未使用 uv 管理環境
 
 ---
 
+## 專案安裝模式（Editable Install）
+
+> **核心原則**：使用 UV 管理的專案應安裝為 editable mode，確保模組可從任何路徑 import。
+
+### 強制安裝時機
+
+以下情況**必須先執行** `uv pip install -e .`：
+
+| 情境 | 症狀 | 解決方案 |
+|------|------|----------|
+| `examples/` 腳本 import 失敗 | `ModuleNotFoundError: No module named 'project_name'` | `uv pip install -e .` |
+| 從子目錄執行腳本 | 找不到上層模組 | `uv pip install -e .` |
+| 多入口點專案 | 不同目錄的腳本互相 import | `uv pip install -e .` |
+
+### 正確範例
+
+```bash
+# ✅ 正確：首次安裝 editable mode
+uv pip install -e .
+
+# ✅ 正確：之後直接執行
+uv run python examples/demo_script.py
+
+# ❌ 錯誤：跳過安裝直接執行
+uv run python examples/demo_script.py  # ModuleNotFoundError
+```
+
+### 安裝驗證
+
+```bash
+# 確認專案已安裝
+uv pip list | grep <project-name>
+```
+
+---
+
 ## 執行前自檢清單
 
 在執行任何 Python 相關操作前確認：
@@ -191,6 +227,10 @@ python3 script.py  # ❌ 未使用 uv 管理環境
 - [ ] 所有 Python 命令以 `uv run` 開頭
 - [ ] 不包含 `timeout`/`gtimeout`/`PYTHONPATH`
 - [ ] 不直接使用 `python` 或 `python3`
+- [ ] 遇到 ModuleNotFoundError 時，先確認 `uv pip install -e .` 已執行
+
+### 專案狀態
+- [ ] 專案已安裝為 editable mode（首次開發或遇到 import 錯誤時確認）
 
 ---
 
