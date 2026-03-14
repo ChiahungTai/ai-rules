@@ -220,9 +220,14 @@
 
 **必須使用的標準模式**：`uv run [python/pytest/其他] [參數]`
 
-**❌ 禁止使用的模式**：
-- `timeout 60 uv run python script.py`（timeout 會干擾 uv 環境管理）
-- `gtimeout 30s uv run pytest`（gtimeout 有跨平台問題）
+**❌ 禁止使用外部 timeout 命令**：
+- `timeout 60 uv run python script.py`（macOS 不支援）
+- `gtimeout 30s uv run pytest`（跨平台問題）
+
+**✅ 允許應用程式內部 --timeout 參數**：
+- `uv run python app.py --timeout 60000`（應用程式自己處理，跨平台相容）
+
+**❌ 其他禁止模式**：
 - `PYTHONPATH=$PWD uv run python script.py`（破壞環境隔離）
 - `python script.py`（未使用 uv 管理環境）
 

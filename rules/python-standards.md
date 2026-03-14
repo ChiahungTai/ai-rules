@@ -156,7 +156,7 @@ uv run pytest tests/test_example.py -v
 uv run python -m module_name
 ```
 
-### ❌ 絕對禁止
+### ❌ 絕對禁止：外部 timeout 命令
 
 ```bash
 timeout 60 uv run python script.py  # ❌ macOS 預設沒有 timeout 命令
@@ -166,11 +166,19 @@ python script.py  # ❌ 未使用 uv 管理環境
 python3 script.py  # ❌ 未使用 uv 管理環境
 ```
 
+### ✅ 允許：應用程式內部 --timeout 參數
+
+```bash
+# ✅ 應用程式自己處理 timeout，跨平台相容、優雅可控
+uv run python examples/demo_app.py --port 5007 --timeout 60000
+uv run python scripts/long_running_task.py --timeout 300
+```
+
 ### macOS 平台相容性說明
 
-- **`timeout` 命令**: macOS 預設不包含 `timeout` 命令（這是 GNU coreutils 的一部分）
-- **`gtimeout` 命令**: 需要額外安裝 coreutils，且與 `uv run` 配合使用有問題
-- **超時控制**: 由 AI 系統根據實際需求自行處理
+- **外部 `timeout` 命令**: macOS 預設不包含（GNU coreutils），禁止使用
+- **應用程式內部 `--timeout`**: 跨平台相容，優先採用此做法
+- **設計建議**: 需要超時控制時，在應用程式內部用 `argparse` 實現 `--timeout` 參數
 
 ---
 
