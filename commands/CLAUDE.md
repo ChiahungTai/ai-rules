@@ -52,7 +52,9 @@ ls -la /Users/ctai/Github/ai-rules/commands/
 
 包含以下自定義命令：
 - `/analysis-plan` - 技術分析計劃生成
-- `/code-review` - 程式碼審查和品質檢查
+- `/code-review` - 程式碼審查（簡單入口）
+- `/parallel-code-review` - 智能並行代碼審查（完整框架）
+- `/consistency` - 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度）
 - `/claude:clean` - 清理 CLAUDE.md 中不必要的元資訊
 - `/claude:distill` - 蒸餾 CLAUDE.md，提煉核心精華
 - `/claude:sync` - 檢查 CLAUDE.md 與程式碼的同步性
@@ -98,7 +100,7 @@ AI 調用 SlashCommand("/command args")
 
 ## 當前專案 Commands 參考
 
-> **AI 使用指南**: 以下是本專案中可立即使用的 22+ 個自定義 slash commands，所有命令都透過符號連結架構實現 Git 版本控制和跨專案共享。
+> **AI 使用指南**: 以下是本專案中可立即使用的 25+ 個自定義 slash commands，所有命令都透過符號連結架構實現 Git 版本控制和跨專案共享。
 
 ### CLAUDE.md 專用命令
 - `/claude:clean` - 清理 CLAUDE.md 元資訊（版本、日期等）
@@ -113,7 +115,8 @@ AI 調用 SlashCommand("/command args")
 
 ### 開發流程命令
 - `/analysis-plan` - 技術分析計劃生成
-- `/code-review` - 程式碼審查和品質檢查
+- `/code-review` - 程式碼審查（簡單入口）
+- `/parallel-code-review` - 智能並行代碼審查（完整框架）
 - `/design-plan` - 軟體設計計劃制定
 - `/execution-plan` - 執行計劃和任務分解
 - `/lint-fix` - ruff 和 mypy 自動修正
@@ -126,7 +129,8 @@ AI 調用 SlashCommand("/command args")
 - `/worktree:done` - 合併 Git Worktree 分支並清理
 
 ### 文檔管理命令
-- `/doc-quality-checker` - 文檔品質檢查
+- `/consistency` - 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度）
+- `/doc-quality-checker` - 多 Agent 文檔品質分析（複雜版）
 - `/docs-manager` - 文檔管理和整理
 - `/distill-spec` - 規格蒸餾和提煉
 

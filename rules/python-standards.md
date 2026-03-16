@@ -108,6 +108,29 @@ __all__ = ["PublicAPI"]
 僅以下型別從 `typing` import：
 - `Callable`, `Protocol`, `TypeVar`, `ParamSpec`, `Self`
 
+### TYPE_CHECKING 使用限制
+
+> **核心原則**：TYPE_CHECKING 容易被 AI 濫用，使用前必須得到使用者同意。
+
+**🔴 強制約束**：
+- AI **不得主動**使用 `TYPE_CHECKING` 解決循環依賴
+- 必須先詢問使用者是否同意使用
+- 優先考慮其他解決方案（重構模組結構、延遲 import）
+
+**常見濫用模式**：
+```python
+# ❌ AI 常見的過度使用
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from module_a import ClassA  # 不必要地複雜化
+```
+
+**正確使用時機**（需使用者同意）：
+- 真正無法避免的循環依賴
+- 僅用於型別提示，不影響運行時行為
+- 經過使用者明確同意
+
 ### 範例
 
 ```python
@@ -230,6 +253,7 @@ uv pip list | grep <project-name>
 ### 型別註解
 - [ ] 使用 `list[T]`, `T1 | T2` 等內建型別語法
 - [ ] 僅在必要時從 `typing` import（Callable, Protocol 等）
+- [ ] 使用 `TYPE_CHECKING` 前已得到使用者同意
 
 ### 命令執行
 - [ ] 所有 Python 命令以 `uv run` 開頭
