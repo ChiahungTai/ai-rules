@@ -98,6 +98,19 @@ __all__ = ["PublicAPI"]
 
 > **核心原則**：優先使用內建型別語法，僅在必要時從 `typing` 模組 import。
 
+### ❌ 禁止使用 `from __future__ import annotations`
+
+Python 3.11+ 已原生支援 PEP 563（延遲註解評估）和 PEP 585（泛型型別），此 import 完全多餘。
+
+```python
+# ❌ 錯誤：Python 3.11+ 不需要
+from __future__ import annotations
+
+# ✅ 正確：直接使用內建型別語法
+def process(items: list[str]) -> dict[str, int]:
+    ...
+```
+
 ### 標準型別語法（內建）
 
 - `list[T]`, `dict[K, V]`, `set[T]`, `tuple[T1, T2]`
@@ -251,6 +264,7 @@ uv pip list | grep <project-name>
 - [ ] `__init__.py` < 50 行，使用 `__all__` 宣告公開 API
 
 ### 型別註解
+- [ ] 不使用 `from __future__ import annotations`（Python 3.11+ 已原生支援）
 - [ ] 使用 `list[T]`, `T1 | T2` 等內建型別語法
 - [ ] 僅在必要時從 `typing` import（Callable, Protocol 等）
 - [ ] 使用 `TYPE_CHECKING` 前已得到使用者同意
