@@ -2,7 +2,7 @@
 description: "簡化版文檔品質檢查器 - 檢查自洽性、矛盾性、順序、自包含、內容精準度"
 usage: "/consistency <文檔路徑>"
 argument-hint: "要檢查的文檔路徑（單一檔案）"
-allowed-tools: ["Read", "Grep", "Glob"]
+allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 
 # /consistency - 簡化版文檔品質檢查器
@@ -40,8 +40,19 @@ allowed-tools: ["Read", "Grep", "Glob"]
 
 ## 📋 執行流程
 
+### 步驟 0: 決定檢查目標
+
+**如果用戶指定了文檔路徑**（`$ARGUMENTS` 非空）→ 直接檢查該文檔，跳過此步驟。
+
+**如果未指定文檔路徑** → 依序嘗試：
+1. `git diff --name-only` — 檢查未 commit 的變更文檔
+2. `git diff --cached --name-only` — 檢查已 staged 但未 commit 的文檔
+3. `git diff --name-only HEAD~1 HEAD` — 檢查最近一次 commit 修改的文檔
+
+從上述結果中篩選 `.md` 檔案，作為本次檢查目標。若無任何 `.md` 檔案，提示用戶並結束。
+
 ### 步驟 1: 讀取文檔
-完整讀取用戶指定的文檔內容。
+完整讀取目標文檔內容。
 
 ### 步驟 2: 執行五維度檢查
 依序檢查上述五個維度，記錄發現的問題。
@@ -118,13 +129,17 @@ allowed-tools: ["Read", "Grep", "Glob"]
 - **快速執行**: 不啟動多 Agent，直接分析
 - **簡潔輸出**: 報告精簡但資訊完整
 - **可執行建議**: 提供具體的改善方向
+- **Git 感知**: 未指定文檔時自動從 git diff 或最近 commit 決定檢查目標
 
 ---
 
 ## 📝 使用範例
 
 ```bash
-# 檢查單一文檔
+# 自動偵測：優先檢查未 commit 的 .md，其次檢查最近 commit 的 .md
+/consistency
+
+# 檢查指定文檔
 /consistency CLAUDE.md
 
 # 檢查指定路徑的文檔
