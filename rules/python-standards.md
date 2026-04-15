@@ -74,7 +74,7 @@ def process_data(file_path: Path | None = None) -> dict:
 |------|------|
 | 這個類別/函數需要被外部直接 import 嗎？ | 是 → 可以加入 `__init__.py` |
 | 加入後會讓 `__init__.py` 超過 50 行嗎？ | 是 → 不要加，用完整路徑 import |
-| 加入後造成 circular import 嗎？ | 是 → 重構模組結構或用 TYPE_CHECKING |
+| 加入後造成 circular import 嗎？ | 是 → 重構模組結構（避免 circular import） |
 
 ### 推薦做法
 
@@ -123,26 +123,30 @@ def process(items: list[str]) -> dict[str, int]:
 
 ### TYPE_CHECKING 使用限制
 
-> **核心原則**：TYPE_CHECKING 容易被 AI 濫用，使用前必須得到使用者同意。
+> **核心原則**：從架構上避免 circular import，不要用 `TYPE_CHECKING` 當便捷修復。
 
 **🔴 強制約束**：
-- AI **不得主動**使用 `TYPE_CHECKING` 解決循環依賴
-- 必須先詢問使用者是否同意使用
-- 優先考慮其他解決方案（重構模組結構、延遲 import）
+- **不要使用** `TYPE_CHECKING`
+- 遇到 circular import 時，**重構模組結構**才是正確解法
+- `TYPE_CHECKING` 只是掩蓋架構問題，不是解決問題
 
-**常見濫用模式**：
+**AI 常見錯誤**：
 ```python
-# ❌ AI 常見的過度使用
+# ❌ AI 常見的便捷修復（掩蓋架構問題）
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from module_a import ClassA  # 不必要地複雜化
+    from module_a import ClassA  # circular import 被掩蓋，問題仍在
+
+# ✅ 正確：重構模組結構，從根本解決 circular import
+# 方式 1：提取共用介面到獨立模組
+# 方式 2：使用完整路徑 import（from package.module import Class）
+# 方式 3：重新劃分模組職責，消除循環依賴
 ```
 
-**正確使用時機**（需使用者同意）：
-- 真正無法避免的循環依賴
-- 僅用於型別提示，不影響運行時行為
-- 經過使用者明確同意
+**唯一例外**（極罕見，需使用者明確同意）：
+- 第三方套件架構限制，無法從模組結構解決
+- 經過使用者明確同意才能使用
 
 ### 範例
 
@@ -267,7 +271,7 @@ uv pip list | grep <project-name>
 - [ ] 不使用 `from __future__ import annotations`（Python 3.11+ 已原生支援）
 - [ ] 使用 `list[T]`, `T1 | T2` 等內建型別語法
 - [ ] 僅在必要時從 `typing` import（Callable, Protocol 等）
-- [ ] 使用 `TYPE_CHECKING` 前已得到使用者同意
+- [ ] 不使用 `TYPE_CHECKING`（從架構解決 circular import）
 
 ### 命令執行
 - [ ] 所有 Python 命令以 `uv run` 開頭
