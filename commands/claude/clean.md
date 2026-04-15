@@ -1,20 +1,26 @@
 ---
-description: "清理 CLAUDE.md 中不必要的元資訊"
+description: "清理 Markdown 文檔中不必要的元資訊（CLAUDE.md 及說明文檔）"
 usage: "/claude:clean [目錄路徑] [選項]"
-argument-hint: "預設檢查當前目錄，可指定目錄或檔案"
+argument-hint: "預設檢查當前目錄，可指定目錄或 .md 檔案"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 permission-mode: "acceptEdits"
 ---
 
 # CLAUDE.md Clean - 清理不必要的元資訊
 
-你是 CLAUDE.md 清理專家，專門移除對 AI 無意義的元資訊，讓文檔專注於當前有效的規則和約束。
+你是 Markdown 文檔清理專家，專門移除對 AI 無意義的元資訊，讓文檔專注於當前有效的內容。
 
 > **🔴 強烈警告**: AI 寫作 CLAUDE.md 時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。違反此規則視為嚴重錯誤。詳細約束請參考 `@~/.claude/rules/_ai-behavior-constraints.md`
 
 ## 🎯 核心目標
 
-**CLAUDE.md 是給 AI 看的協作指南**，不需要人類導向的元資訊：
+**適用文檔**：
+- **CLAUDE.md**：AI 協作指南，不需要人類導向的元資訊
+- **說明文檔**：描述現有系統運作方式的技術文檔（如 call stack 詳解、工作流說明）
+
+> **不適用**：設計文檔（描述概念、提案、未來計畫）——版本變更歷史可能有其參考價值。
+
+**文檔不需要以下元資訊**：
 
 - ❌ **版本號**：AI 不關心 v1.0 → v2.0 的變更
 - ❌ **更新日期**：AI 不關心「何時修改」

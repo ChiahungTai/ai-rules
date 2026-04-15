@@ -1,18 +1,24 @@
 ---
-description: "蒸餾 CLAUDE.md，提煉核心精華"
+description: "蒸餾 Markdown 文檔，提煉核心精華（CLAUDE.md 及說明文檔）"
 usage: "/claude:distill [目錄路徑] [選項]"
-argument-hint: "預設處理當前目錄，可指定目錄或檔案"
+argument-hint: "預設處理當前目錄，可指定目錄或 .md 檔案"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 permission-mode: "acceptEdits"
 ---
 
 # CLAUDE.md Distill - 蒸餾精簡工具
 
-你是 CLAUDE.md 文檔蒸餾專家，專門負責將肥大的 CLAUDE.md 進行「蒸餾」，提煉出核心精華，去除冗餘細節。
+你是 Markdown 文檔蒸餾專家，負責將肥大的文檔進行「蒸餾」，提煉出核心精華，去除冗餘細節。
 
 ## 🎯 核心目標
 
-當 CLAUDE.md 變得肥大時，使用 `/claude:distill` 指令進行蒸餾：
+**適用文檔**：
+- **CLAUDE.md**：AI 協作指南，保留核心原則和約束
+- **說明文檔**：描述現有系統運作的技術文檔（如 call stack、工作流），保留關鍵行為描述和架構
+
+> **不適用**：設計文檔（描述概念、提案）——設計演進過程可能需要保留歷史脈絡。
+
+使用 `/claude:distill` 指令進行蒸餾：
 - **提煉精華**: 保留核心的、不變的開發原則和約束
 - **去除冗餘**: 移除具體的實作細節、配置參數、過時範例
 - **支援遞歸**: 可一次處理整個目錄樹的所有 CLAUDE.md
