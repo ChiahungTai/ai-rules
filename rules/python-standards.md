@@ -64,7 +64,7 @@ def process_data(file_path: Path | None = None) -> dict:
 
 ### 絕對約束
 
-- **檔案行數**：< 50 行（不含空行和註解）
+- **檔案行數**：< 100 行（不含空行和註解）
 - **內容限制**：只包含真正需要公開的 API
 - **強制要求**：使用 `__all__` 明確宣告公開 API
 
@@ -73,7 +73,7 @@ def process_data(file_path: Path | None = None) -> dict:
 | 問題 | 決策 |
 |------|------|
 | 這個類別/函數需要被外部直接 import 嗎？ | 是 → 可以加入 `__init__.py` |
-| 加入後會讓 `__init__.py` 超過 50 行嗎？ | 是 → 不要加，用完整路徑 import |
+| 加入後會讓 `__init__.py` 超過 100 行嗎？ | 是 → 不要加，用完整路徑 import |
 | 加入後造成 circular import 嗎？ | 是 → 重構模組結構（避免 circular import） |
 
 ### 推薦做法
@@ -206,6 +206,23 @@ python script.py  # ❌ 未使用 uv 管理環境
 python3 script.py  # ❌ 未使用 uv 管理環境
 ```
 
+### ⚠️ 建議避免：python -c 內聯腳本
+
+`python -c` 可用於簡短指令，但以下情況建議改寫為 `.py` 檔案：
+- **複合命令**：`cd /tmp && uv run python -c '...'` 會改變 prefix，導致權限匹配失敗
+- **長程式碼**：多行邏輯寫成檔案更易於 debug 和重複使用
+- **複雜引號**：多層巢狀引號可能造成 shell 解析問題
+
+```bash
+# ✅ 允許：簡短測試
+uv run python -c "print('hello')"
+uv run python -c "import sys; print(sys.version)"
+
+# ⚠️ 建議改寫為檔案：多行邏輯或複雜操作
+# 先寫入 scripts/check_data.py，再執行：
+uv run python scripts/check_data.py
+```
+
 ### ✅ 允許：應用程式內部 --timeout 參數
 
 ```bash
@@ -265,7 +282,7 @@ uv pip list | grep <project-name>
 ### 命名與 import
 - [ ] Demo 檔案使用 `demo_` 前綴，測試檔案使用 `test_` 前綴
 - [ ] import 語句在檔案頂部（除非符合例外條件）
-- [ ] `__init__.py` < 50 行，使用 `__all__` 宣告公開 API
+- [ ] `__init__.py` < 100 行，使用 `__all__` 宣告公開 API
 
 ### 型別註解
 - [ ] 不使用 `from __future__ import annotations`（Python 3.11+ 已原生支援）
@@ -277,6 +294,7 @@ uv pip list | grep <project-name>
 - [ ] 所有 Python 命令以 `uv run` 開頭
 - [ ] 不包含 `timeout`/`gtimeout`/`PYTHONPATH`
 - [ ] 不直接使用 `python` 或 `python3`
+- [ ] `python -c` 僅用於簡短測試，多行邏輯寫成 .py 檔案
 - [ ] 遇到 ModuleNotFoundError 時，先確認 `uv pip install -e .` 已執行
 
 ### 專案狀態
