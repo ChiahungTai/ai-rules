@@ -223,6 +223,22 @@ uv run python -c "import sys; print(sys.version)"
 uv run python scripts/check_data.py
 ```
 
+### ⚠️ 建議避免：管道命令（pipe）
+
+Claude Code 的權限匹配器無法辨識包含 `|` 的命令。必須將執行和過濾拆成兩步。
+
+```bash
+# ❌ 管道命令每次都需要手動批准
+uv run python script.py 2>&1 | sed -n '/pattern/p' | head -20
+
+# ✅ 正確：分離執行和過濾
+# 步驟 1：執行寫檔（匹配權限規則）
+uv run python script.py > /tmp/output.txt 2>&1
+
+# 步驟 2：用 Read/Grep 工具過濾（不需 Bash 權限）
+# AI 使用 Read 或 Grep 工具讀取 /tmp/output.txt
+```
+
 ### ✅ 允許：應用程式內部 --timeout 參數
 
 ```bash
@@ -295,6 +311,7 @@ uv pip list | grep <project-name>
 - [ ] 不包含 `timeout`/`gtimeout`/`PYTHONPATH`
 - [ ] 不直接使用 `python` 或 `python3`
 - [ ] `python -c` 僅用於簡短測試，多行邏輯寫成 .py 檔案
+- [ ] 管道命令拆兩步：執行寫檔 → 用 Read/Grep 過濾
 - [ ] 遇到 ModuleNotFoundError 時，先確認 `uv pip install -e .` 已執行
 
 ### 專案狀態
