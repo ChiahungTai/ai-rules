@@ -52,6 +52,7 @@ ls -la /Users/ctai/Github/ai-rules/commands/
 
 包含以下自定義命令：
 - `/analysis-plan` - 技術分析計劃生成
+- `/batch-task` - 序列批次任務處理器（避免 rate limit）
 - `/code-review` - 程式碼審查（簡單入口）
 - `/parallel-code-review` - 智能並行代碼審查（完整框架）
 - `/consistency` - 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度）
@@ -108,6 +109,7 @@ AI 調用 SlashCommand("/command args")
 - `/claude:sync` - 檢查 CLAUDE.md 與程式碼同步性（支援 --clean, --all）
 
 ### 核心系統命令
+- `/batch-task` - 序列批次任務處理器（避免 rate limit）
 - `/explain` - 技術概念、架構設計或流程解釋
 - `/milestone` - 對話里程碑記錄和重啟管理
 - `/parallel-task` - 智能並行任務協調器
@@ -115,6 +117,7 @@ AI 調用 SlashCommand("/command args")
 
 ### 開發流程命令
 - `/analysis-plan` - 技術分析計劃生成
+- `/batch-task` - 序列批次任務處理器（避免 rate limit）
 - `/code-review` - 程式碼審查（簡單入口）
 - `/parallel-code-review` - 智能並行代碼審查（完整框架）
 - `/design-plan` - 軟體設計計劃制定
