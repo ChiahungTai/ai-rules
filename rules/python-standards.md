@@ -206,6 +206,42 @@ python script.py  # ❌ 未使用 uv 管理環境
 python3 script.py  # ❌ 未使用 uv 管理環境
 ```
 
+### 🔴 禁止：多行 python -c 中使用 # 註解
+
+> **核心原則**：`python -c` 是即時驗證指令，不是專案程式碼 — 註解本來就沒有價值，完全不值得冒觸發權限的風險。
+
+**機制**：Claude Code 權限匹配器將 `#` 視為注釋分隔符截斷命令，導致無法匹配允許規則。
+
+**實驗驗證結果**（2026-04-17）：
+
+| 寫法 | 結果 |
+|------|------|
+| 單行無註解 | 自動通過 |
+| 多行無註解（class、try/except、第三方 import、list comprehension） | 自動通過 |
+| 多行有 `#` 註解 | **觸發權限提示** |
+
+**🔴 強制約束**：
+- **多行 `python -c` 中禁止使用 `#` 註解**
+- 需要註解時，改寫為 `.py` 檔案
+
+```bash
+# ❌ 禁止：多行 python -c 中使用 # 註解（觸發權限提示）
+uv run python -c "
+# 這是註解
+from mosaic_alpha.common.enums import Interval
+print(Interval.DAILY)
+"
+
+# ✅ 正確：多行但無 # 註解
+uv run python -c "
+from mosaic_alpha.common.enums import Interval
+print(Interval.DAILY)
+"
+
+# ✅ 正確：需要註解時改寫為 .py 檔案
+uv run python scripts/check_data.py
+```
+
 ### ⚠️ 建議避免：python -c 內聯腳本
 
 `python -c` 可用於簡短指令，但以下情況建議改寫為 `.py` 檔案：
@@ -217,10 +253,6 @@ python3 script.py  # ❌ 未使用 uv 管理環境
 # ✅ 允許：簡短測試
 uv run python -c "print('hello')"
 uv run python -c "import sys; print(sys.version)"
-
-# ⚠️ 建議改寫為檔案：多行邏輯或複雜操作
-# 先寫入 scripts/check_data.py，再執行：
-uv run python scripts/check_data.py
 ```
 
 ### ⚠️ 建議避免：管道命令（pipe）
@@ -311,6 +343,7 @@ uv pip list | grep <project-name>
 - [ ] 不包含 `timeout`/`gtimeout`/`PYTHONPATH`
 - [ ] 不直接使用 `python` 或 `python3`
 - [ ] `python -c` 僅用於簡短測試，多行邏輯寫成 .py 檔案
+- [ ] **多行 `python -c` 中禁止使用 `#` 註解**
 - [ ] 管道命令拆兩步：執行寫檔 → 用 Read/Grep 過濾
 - [ ] 遇到 ModuleNotFoundError 時，先確認 `uv pip install -e .` 已執行
 
