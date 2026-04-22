@@ -15,6 +15,25 @@
 
 ---
 
+## 適用範圍
+
+> **核心原則**：語音通知適用於需要耗時處理的實作與審查任務，不適用於快速回覆的建議與查詢。
+
+### ✅ 適用（需要語音通知）
+
+- **實作任務**：`/implement`、功能開發、重構
+- **審查任務**：`/code-review`、`/parallel-code-review`、`/verify-review`、`/security-review`
+- **分析任務**：`/design-plan`、`/analysis-plan`、`/execution-plan`
+- **文檔處理**：`/doc-quality-checker`、`/docs-manager`
+
+### ❌ 不適用（不需要語音通知）
+
+- **建議工具**：`/commit-message`、`/explain`
+- **查詢指令**：`/help`、`/status`
+- **快速操作**：一次性回答、簡單查詢
+
+---
+
 ## 語音格式
 
 ```bash
