@@ -165,6 +165,21 @@ permission-mode: "acceptEdits"
 | **自包含** | 引用檔案/路徑存在、外部依賴可獲取 | `Bash test` 驗證 |
 | **精準度** | 技術描述正確、程式碼範例可執行 | 實際驗證 |
 
+### 角度六：依賴鏈感知同步
+
+> **核心原則**：程式碼變更不只影響同目錄的 CLAUDE.md，還會影響消費端目錄的 CLAUDE.md。
+
+當目標目錄的程式碼有變更時，必須追蹤 import 鏈找出所有消費端：
+
+| 步驟 | 說明 | 驗證方式 |
+|------|------|----------|
+| 識別變更 | 從 `git diff` 提取被修改的 class/function | diff 分析 |
+| 追蹤 import 鏈 | 搜尋哪些目錄 import 了被修改的模組 | `Grep` 搜尋 import 語句 |
+| 定位消費端 CLAUDE.md | 消費端目錄是否有 CLAUDE.md | `Glob` 搜尋 |
+| 檢查消費端文檔 | 消費端 CLAUDE.md 是否引用了已變更的 API | `Read` + `Grep` 比對 |
+
+**範例**：`datasets/ml_dataset.py` 變更 → 消費端 `rule_forge/`、`analytics/` 的 CLAUDE.md 也需要檢查是否需要同步更新。
+
 ---
 
 ## 🔧 命令介面設計
@@ -222,6 +237,20 @@ permission-mode: "acceptEdits"
 ### 步驟 1: 遞歸發現 CLAUDE.md 檔案
 
 See @./_common/recursive-discovery.md for recursive discovery logic.
+
+### 步驟 1.5: 依賴鏈擴展
+
+> **觸發條件**：目標目錄中有 `git diff` 變更的 `.py` 檔案時執行。
+
+從變更的程式碼出發，追蹤 import 鏈，將消費端目錄的 CLAUDE.md 加入檢查清單：
+
+```
+1. git diff --name-only 提取變更的 .py 檔案
+2. 對每個變更檔案，Grep 搜尋整個專案中 import 該模組的檔案
+3. 從消費端檔案路徑推導其所屬目錄
+4. 檢查消費端目錄是否有 CLAUDE.md → 有的話加入檢查清單
+5. 去重，合併到步驟 1 發現的 CLAUDE.md 清單
+```
 
 ### 步驟 2: 掃描程式碼結構
 
