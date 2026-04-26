@@ -100,15 +100,34 @@ __all__ = ["PublicAPI"]
 
 ### ❌ 禁止使用 `from __future__ import annotations`
 
-Python 3.11+ 已原生支援 PEP 563（延遲註解評估）和 PEP 585（泛型型別），此 import 完全多餘。
+**事實澄清**：PEP 563（延遲註解評估）在 Python 3.11–3.13 **並非預設**，仍需手動 import。PEP 649（透過描述器延遲評估）將於 Python 3.14 成為預設，屆時 `from __future__ import annotations` 反而會造成衝突。PEP 585（泛型型別如 `list[str]`）從 Python 3.9 起已原生支援，與 PEP 563 無關。
+
+**禁止理由**：`from __future__ import annotations` 將所有註解轉為字串，掩蓋以下結構性問題：
+
+| 問題 | 說明 |
+|------|------|
+| **隱藏缺失 import** | 註解中引用未 import 的型別不會報錯，執行時才爆炸 |
+| **掩蓋 circular import** | 因註解不會被評估，循環依賴的 import 錯誤被隱藏 |
+| **破壞 `isinstance()` / `get_type_hints()`** | 字串化的註解無法用於執行時型別檢查 |
+
+**唯一合理場景**：同檔案內的前向引用（引用同一檔案中稍後定義的型別），但用**字串註解**即可解決，無需整檔啟用。
 
 ```python
-# ❌ 錯誤：Python 3.11+ 不需要
+# ❌ 錯誤：整檔啟用，掩蓋結構問題
 from __future__ import annotations
 
-# ✅ 正確：直接使用內建型別語法
-def process(items: list[str]) -> dict[str, int]:
+def process(node: TreeNode) -> None:
     ...
+
+class TreeNode:
+    pass
+
+# ✅ 正確：字串註解處理前向引用
+def process(node: "TreeNode") -> None:
+    ...
+
+class TreeNode:
+    pass
 ```
 
 ### 標準型別語法（內建）
@@ -333,7 +352,7 @@ uv pip list | grep <project-name>
 - [ ] `__init__.py` < 100 行，使用 `__all__` 宣告公開 API
 
 ### 型別註解
-- [ ] 不使用 `from __future__ import annotations`（Python 3.11+ 已原生支援）
+- [ ] 不使用 `from __future__ import annotations`（掩蓋缺失 import 和 circular import 等結構問題）
 - [ ] 使用 `list[T]`, `T1 | T2` 等內建型別語法
 - [ ] 僅在必要時從 `typing` import（Callable, Protocol 等）
 - [ ] 不使用 `TYPE_CHECKING`（從架構解決 circular import）

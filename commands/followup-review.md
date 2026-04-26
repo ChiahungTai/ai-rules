@@ -1,7 +1,7 @@
 ---
 description: "審查者回頭驗收實作結果，確認修改合理性和不修改的合理性"
-usage: "/followup-review <審查報告與採納決策>"
-argument-hint: "貼上原始審查報告和 verify-review 的決策結果"
+usage: "/followup-review [審查報告與採納決策]"
+argument-hint: "可選：貼上原始審查報告和 verify-review 的決策結果；無參數時自動從 git 變更推斷"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 
@@ -45,9 +45,41 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 ## 📋 執行流程
 
+### 階段 0: 判斷模式
+
+根據是否提供參數，選擇執行模式：
+
+#### 無參數模式（自動驗收）
+
+> **典型場景**：Review LLM 審查後，由另一個 Implementation LLM 執行修改。無參數時優先查證實際變更。
+
+當用戶直接執行 `/followup-review` 未提供任何參數時：
+
+1. **先查證實際變更**：立即執行 `git diff` 和 `git status` 查看所有修改
+2. **讀取變更內容**：逐一讀取修改過的檔案，理解實作 AI 做了什麼
+3. **推斷對應的審查建議**：根據變更內容，推斷這些修改是為了回應哪些審查建議
+4. **主動驗收**：基於實際變更進行驗收，而非等待用戶提供審查報告
+5. **詢問遺漏**：若變更範圍超出可推斷的審查建議，向用戶確認是否有遺漏
+
+```
+無參數流程：
+git diff / git status → 讀取變更檔案 → 推斷審查對應 → 逐項驗收 → 輸出報告
+```
+
+**無參數模式的優先策略**：
+- **以實際變更為主體**：不要求用戶重新貼審查報告，直接從程式碼變更出發
+- **推斷而非假設**：從 git diff 推斷修改意圖，標記為「推斷」而非「確認」
+- **覆蓋所有變更**：不只驗收可推斷的項目，也檢查變更中是否有未預期的修改
+
+#### 有參數模式（對照驗收）
+
+當用戶提供原始審查報告和 verify-review 決策時，按標準流程執行。
+
 ### 階段 1: 收集資訊
 
-1. **解析輸入**：提取原始審查建議和 verify-review 的決策
+1. **解析輸入**：
+   - 有參數 → 提取原始審查建議和 verify-review 的決策
+   - 無參數 → 從 git 變更推斷
 2. **取得變更**：使用 `git diff` 查看實際修改內容
 
 ```bash
@@ -195,7 +227,15 @@ git diff HEAD
 
 ## 📝 使用範例
 
-### 基本用法
+### 無參數模式（推薦 — 實作 AI 已完成修改）
+
+```bash
+# 實作 AI 已根據審查建議完成修改，直接驗收
+/followup-review
+# AI 自動：git diff → 讀取變更 → 推斷對應審查 → 逐項驗收 → 輸出報告
+```
+
+### 有參數模式（附上審查報告和決策）
 
 ```bash
 /followup-review
@@ -209,23 +249,23 @@ verify-review 決策：
 2. ❌ 拒絕 - 當前寫法可讀性較好
 ```
 
-### 完整流程
+### 完整流程（Review LLM + Implementation LLM 分工）
 
 ```bash
-# 步驟 1: Code Review
+# 步驟 1: Code Review（Review LLM）
 /code-review
-# AI-Reviewer 產出審查報告
+# Review LLM 產出審查報告
 
-# 步驟 2: 評估採納
+# 步驟 2: 評估採納（Implementation LLM）
 /verify-review
-# 實作 AI 評估採納/不採納，用戶確認
+# Implementation LLM 評估採納/不採納，用戶確認
 
-# 步驟 3: 實作修改
-# 實作 AI 修改程式碼
+# 步驟 3: 實作修改（Implementation LLM）
+# Implementation LLM 根據採納決策修改程式碼
 
-# 步驟 4: 回頭驗收
+# 步驟 4: 回頭驗收（Review LLM）
 /followup-review
-# 原審查者驗收修改合理性
+# Review LLM 自動從 git diff 驗收修改合理性（無需重新貼報告）
 ```
 
 ---
