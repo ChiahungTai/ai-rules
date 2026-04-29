@@ -53,7 +53,7 @@ Methodology for autonomous implementation when user should not be disturbed. All
 | 修改檔案 | Edit/Write（acceptEdits 模式自動通過） |
 | 讀取檔案 | Read/Grep/Glob（無需權限） |
 | Python 執行 | 僅用 `uv run pytest` 和 `uv run python` |
-| python -c | 僅用於簡短無註解驗證 |
+| 內聯腳本 | `python -c`、`python3 -c`、`uv run python -c` 等一律**禁止使用 `#` 註解**（會觸發權限提示），需要註解時改寫為 `.py` 檔案 |
 | 管道命令 | 拆兩步：執行寫檔 → Read 工具過濾 |
 | 多行驗證 | 寫成 `.py` 檔案再 `uv run` |
 
