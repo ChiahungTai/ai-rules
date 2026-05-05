@@ -23,6 +23,8 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 審查 staged 變更或最近的 commits。
 
+> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `@~/.claude/rules/modern-cli-preference.md`
+
 ## 五軸審查 + 第一性原理
 
 ### 1. Correctness — 符合規格嗎？

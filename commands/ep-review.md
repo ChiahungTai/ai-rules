@@ -81,6 +81,8 @@ allowed-tools: ["Read", "Grep", "Glob"]
 
 ## 技術約束
 
+> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `@~/.claude/rules/modern-cli-preference.md`
+
 - **基於實際程式碼**：必須讀取計畫書提到的檔案，確認是否存在
 - **四維度覆蓋**：必須覆蓋完整性、Rules 合規、一致性、遺漏風險四個維度
 - **不實作**：審查階段不自動開始實作
