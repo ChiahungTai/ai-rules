@@ -1,13 +1,13 @@
 ---
 description: "從 CLAUDE.md 文檔解碼模組理解 — 生成 pseudo code 並評估編碼品質"
-usage: "/claude:doc-decode <模組路徑> [--depth A|B|C|all]"
+usage: "/claude:doc-decode <模組路徑> [--depth A|B|C|all] [--source-aided]"
 argument-hint: "模組目錄路徑（如 rule_forge）或 CLAUDE.md 檔案路徑"
-allowed-tools: ["Read", "Glob", "Grep"]
+allowed-tools: ["Read", "Glob", "Grep", "Write"]
 ---
 
 # /claude:doc-decode — CLAUDE.md Decoder
 
-你是模組知識的 Decoder，負責從 CLAUDE.md 及其引用文檔重建對模組的理解。**只看文檔，不碰 .py 檔案**。生成三層 pseudo code 並自我評估信心等級。
+你是模組知識的 Decoder，負責從 CLAUDE.md 及其引用文檔重建對模組的理解。預設模式**只看文檔**（不碰 .py），生成三層 pseudo code 並自我評估信心等級。加 `--source-aided` 時可讀取程式碼輔助重建完整理解文檔。
 
 Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md) — 讀取此檔案以理解 High Signal / Low Noise 分類標準。
 
@@ -18,16 +18,26 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 核心目標
 
-CLAUDE.md 是模組知識的 Encoder（壓縮表示）。本命令執行 **Decoder Test** — 驗證 Encoder 是否成功捕獲了本質知識，讓 LLM 能從文檔重建出八九不離十的理解。
+CLAUDE.md 是模組知識的 Encoder（壓縮表示）。本命令有兩種模式：
 
-**嚴格約束**：
-- **只讀文檔**：只讀 CLAUDE.md、.md 引用文檔、.yaml 配置。**禁止讀取 .py 檔案**
-- **唯讀操作**：不修改任何檔案
-- **誠實評估**：信心等級必須反映真實理解程度，不虛報
+**預設模式（Decoder Test）**：驗證 Encoder 是否成功捕獲了本質知識，讓 LLM 能從文檔重建出八九不離十的理解。
+
+**`--source-aided` 模式（程式碼輔助重建）**：結合文檔 + 程式碼實作，產出完整理解文檔。目標是還原程式碼的整體思考邏輯流程 — 不只是 API 列表，而是「為什麼這樣設計、怎麼串起來、關鍵決策點在哪」的完整敘事。
+
+### 模式切換約束
+
+| 約束 | 預設模式 | `--source-aided` |
+|------|---------|-------------------|
+| 讀取 .py | **禁止** | **允許**（核心價值） |
+| 寫入檔案 | **禁止** | **允許**（輸出到指定目錄） |
+| 輸出 | pseudo code + 信心評估 | 完整理解文檔（含程式碼段落） |
+| 目的 | 測試文檔品質 | 重建完整模組理解 |
 
 ---
 
-## 執行流程
+## 預設模式執行流程（Decoder Test）
+
+> 以下為預設模式（不加 `--source-aided`）的流程。`--source-aided` 模式見下方獨立章節。
 
 ### 步驟 1: READ — 文檔收集
 
@@ -138,20 +148,184 @@ metric_x = (a - b) / b * 100    # 語義說明
     🟡 中信心（50-80%）— 方向正確，細節可能偏差
     🔴 低信心（<50%）— 大量推測，很可能有誤
 
-4.2 信息缺口識別
+4.2 推測標記規範
+    Pseudo code 中的具體內容分兩類：
+    - **文檔記載**：直接從文檔原文推導的內容，正常呈現
+    - **AI 推測**：文檔未明確說明，基於上下文猜測的內容
+      → 必須用 推測: 前綴標記
+      → 適用範圍：具體數值/閾值、未記載的分支邏輯、未記載的錯誤處理
+
+    範例：
+    IF up_big_pct > baseline + 推測: 0.10 AND win_rate > 推測: 0.55:
+
+4.3 整體信心計算
+    各層信心評分 → 加權平均：
+    整體信心 = A層信心 × 0.4 + B層信心 × 0.4 + C層信心 × 0.2
+
+    各層信心估算方式：
+    - 盤點該層 pseudo code 中的項目
+    - 每個項目判斷：🟢=90%, 🟡=65%, 🔴=30%
+    - 該層信心 = 項目信心的算術平均
+
+4.4 信息缺口識別
     文檔未提及但系統推測需要的部分：
     - 列出每個缺口
     - 標記影響層級（A/B/C）
     - 標記風險（高/中/低）
 
-4.3 信息衝突
+4.5 信息衝突
     文檔內部不一致的描述
 
-4.4 編碼品質總結
+4.6 編碼品質總結
     - High Signal 覆蓋率估算
-    - 整體信心評分
+    - 整體信心評分（含計算過程）
     - 改善建議
 ```
+
+---
+
+## --source-aided 模式：程式碼輔助完整重建
+
+> 啟用條件：`/claude:doc-decode <模組路徑> --source-aided`
+
+### 設計理念
+
+預設模式是「閉卷考試」— 測試文檔是否足夠。`--source-aided` 是「開卷考試」— 結合文檔的理解框架 + 程式碼的實作細節，產出**完整的思考邏輯文檔**。
+
+目標不是 API 文檔（那是程式碼本身做的事），而是**重建模組的思考流程**：設計者如何拆解問題、每個組件為什麼存在、數據如何在組件間流動、關鍵決策點的推理過程。
+
+### 執行流程
+
+#### S1: READ — 文檔收集
+
+同預設模式的步驟 1（讀取 CLAUDE.md + 引用文檔）。文檔提供「理解框架」— 知道模組做什麼、為什麼這樣設計。
+
+#### S2: SCAN — 程式碼掃描
+
+```
+2.1 模組結構掃描
+    - Glob 掃描所有 .py 檔案
+    - 識別 class / function 定義
+    - 提取型別註解和 docstring
+
+2.2 關鍵檔案深讀
+    - 從 CLAUDE.md 的模組結構中識別核心檔案
+    - 讀取核心檔案的完整實作
+    - 追蹤 import 鏈（讀取被引用的關鍵模組）
+
+2.3 配置檔讀取
+    - .yaml 定義檔（如 setup_definitions.yaml）
+    - .toml 配置
+    - __init__.py 的公開 API 導出
+
+2.4 建立程式碼知識圖譜
+    - 哪些 class 在哪個檔案
+    - 哪些 function 被誰呼叫
+    - 數據型別在模組間如何傳遞
+```
+
+#### S3: RECONSTRUCT — 重建思考流程
+
+**這是 source-aided 的核心步驟**。不是列 API，而是用「思考流程」組織理解：
+
+```
+3.1 Pipeline 敘事
+    從使用者的視角描述完整流程：
+    「我是一根 K 線數據，我經過了哪些轉換，最終變成了什麼」
+
+3.2 關鍵演算法深潛
+    對每個核心演算法/流程：
+    - 它解決什麼問題（設計意圖）
+    - 怎麼解決（演算法邏輯）
+    - 邊界情況的處理（防禦性設計）
+    - 實際程式碼段落（10-30 行，附檔案路徑:行號）
+
+3.3 型別語義重建
+    不是列出 dataclass 欄位，而是解釋：
+    - 為什麼需要這個型別
+    - 它在流程中的哪個位置被創建和消費
+    - 相似型別的區別（如 SignalDirection vs TradeDirection）
+
+3.4 設計決策記錄
+    從程式碼中推斷設計意圖：
+    - 為什麼用 AND/OR 而不是單一條件
+    - 為什麼 YAML-driven 而不是 hard-code
+    - 為什麼拆分成這些子模組
+```
+
+#### S4: WRITE — 輸出文檔
+
+```
+4.1 確定輸出結構
+    單一模組 → 單一文檔
+    多子系統 → 按子系統拆分（每個子系統有獨立思考流程）
+
+4.2 寫入目標目錄
+    預設：ai-analysis/{module_name}/source-aided-{topic}.md
+    可透過 --output 參數指定
+
+4.3 程式碼段落嵌入規則
+    - 每段 10-30 行，聚焦單一邏輯
+    - 保留原始縮排
+    - 標註來源：// source: path/to/file.py:行號
+    - 嵌入後用一段話解釋「這段程式碼在整體流程中的角色」
+
+4.4 撰寫品質
+    - 用繁體中文 + 英文術語
+    - 遵循 signal/noise 框架（不寫可推導內容）
+    - 程式碼段落必須附帶語義解釋
+    - 不加統計資訊、版本號、日期
+```
+
+### 輸出格式（source-aided）
+
+```markdown
+# {模組名稱} — Source-Aided 理解文檔
+
+## 模組全貌
+[一段話描述模組的核心目標和設計哲學]
+
+## 思考流程：從輸入到輸出
+[Pipeline 敘事 — 以數據的視角描述完整轉換流程]
+
+## 核心子系統
+
+### {子系統 1}：{一句話職責}
+
+**設計意圖**：[為什麼需要這個子系統]
+
+**演算法邏輯**：
+[Pseudo code 或流程描述]
+
+**關鍵程式碼**：
+
+    # source: path/to/file.py:行號
+    [10-30 行核心程式碼，用縮排表示 code block]
+
+[語義解釋：這段程式碼在整體流程中做什麼、為什麼這樣寫]
+
+### {子系統 2}：{一句話職責}
+[同上結構]
+
+## 型別語義
+[關鍵型別的語義解釋、為什麼需要、在流程中的位置]
+
+## 設計決策記錄
+| 決策 | 選項 | 選擇 | 推斷理由 |
+|------|------|------|---------|
+| [決策點] | [A/B/C] | [選擇] | [從程式碼推斷的理由] |
+
+## 與其他模組的關係
+[依賴方向、數據流、整合方式]
+```
+
+### 文檔拆分規則
+
+| 情境 | 策略 |
+|------|------|
+| 模組 < 10 個 .py，單一流程 | 單一文檔 `source-aided-{module}.md` |
+| 模組有明確子系統（如 setup + filter_tree） | 按子系統拆分 `source-aided-{subsystem}.md` + 總覽 `source-aided-{module}-overview.md` |
+| 模組有獨立的配置系統 | 配置拆為獨立文檔 `source-aided-{module}-config.md` |
 
 ---
 
@@ -161,11 +335,13 @@ metric_x = (a - b) / b * 100    # 語義說明
 |------|------|
 | **無參數** | 解碼當前目錄的 CLAUDE.md |
 | **模組路徑** | 解碼指定目錄或 CLAUDE.md 檔案 |
-| **--depth A** | 只生成架構級 pseudo code |
-| **--depth B** | 只生成演算法級 pseudo code |
-| **--depth C** | 只生成資料結構級 pseudo code |
+| **--depth A** | 只生成架構級 pseudo code（預設模式專用，與 --source-aided 互斥） |
+| **--depth B** | 只生成演算法級 pseudo code（預設模式專用） |
+| **--depth C** | 只生成資料結構級 pseudo code（預設模式專用） |
 | **--depth all** | 全部三層（預設） |
-| **--recursive, -r** | 遞迴處理所有子目錄的 CLAUDE.md |
+| **--source-aided** | 程式碼輔助重建模式：讀取 .py + 文檔，產出完整理解文檔（與 --depth 互斥） |
+| **--output** | source-aided 輸出目錄（預設：`ai-analysis/{module_name}/`） |
+| **--recursive, -r** | 遞迴處理所有子目錄的 CLAUDE.md。可與 --source-aided 組合，每個子模組獨立產出文檔 |
 
 ---
 
@@ -241,6 +417,16 @@ metric = formula
 - **信息缺口數**: N 個
 - **整體評價**: [一段話總結]
 - **建議**: [具體的改善方向]
+
+### 信心計算過程
+
+| 層級 | 項目數 | 🟢 | 🟡 | 🔴 | 層信心 |
+|------|--------|----|----|----|--------|
+| A 架構 | N | X | Y | Z | X% |
+| B 演算法 | N | X | Y | Z | X% |
+| C 資料結構 | N | X | Y | Z | X% |
+
+**整體信心** = A×0.4 + B×0.4 + C×0.2 = X%
 ```
 
 ### 遞迴模式輸出
@@ -251,21 +437,26 @@ metric = formula
 
 ## 執行約束
 
-### 文檔範圍約束
+### 預設模式約束（不加 --source-aided）
 - **只讀文檔類型**: .md、.yaml、.toml（配置檔）
 - **禁止讀取**: .py、.pyx、.pxd、.json（除非是文檔引用的配置）
 - **引用追蹤深度**: 最多 2 層（CLAUDE.md → 直接引用 → 間接引用）
+- **唯讀操作**: 不修改任何檔案（Write 工具僅供 --source-aided 模式使用，預設模式下禁止呼叫）
+- **Pseudo code 品質**: 必須有足夠細節讓人判斷正確性
+- **公式**: 必須寫出完整推導
+- **型別定義**: 必須包含欄位語義
 
-### 評估誠實約束
+### --source-aided 模式約束
+- **可讀取**: .md、.yaml、.toml、.py（程式碼輔助理解）
+- **程式碼段落嵌入**: 每段 10-30 行，附 source 路徑標註
+- **不修改原始碼**: 只讀取 .py，不修改任何 .py 檔案
+- **輸出**: 只寫入 `ai-analysis/` 或 `--output` 指定目錄
+
+### 共用約束
 - 信心等級必須基於實際理解程度
-- 推測的內容必須明確標記為「推測」
+- 推測的內容必須明確標記為「推測」（含 pseudo code 中的數值/閾值）
 - 不確定時寧可標記為 🔴 也不要虛報 🟢
 - 信息缺口必須如實列出，不能假裝知道
-
-### 品質約束
-- Pseudo code 必須有足夠細節讓人判斷正確性
-- 公式必須寫出完整推導
-- 型別定義必須包含欄位語義
 
 ---
 
@@ -274,6 +465,7 @@ metric = formula
 | Command | 職責 | 關係 |
 |---------|------|------|
 | `/claude:doc-decode` | 只看文檔 → pseudo code | 本命令（Decoder Test） |
+| `/claude:doc-decode --source-aided` | 文檔 + 程式碼 → 完整理解文檔 | 本命令的輔助模式（程式碼輔助重建） |
 | `/claude:decode-compare` | 文檔理解 vs 實作比對 | 後續步驟：用本命令的 pseudo code 比對 .py |
 | `/claude:sync` | 文檔↔程式碼同步性 | 互補：sync 檢查「是否一致」，doc-decode 檢查「是否可理解」 |
 | `/claude:clean` | 清理元資訊 | 前置：先清理再 decode，避免 noise 干擾 |
@@ -281,6 +473,8 @@ metric = formula
 | `/consistency` | 文檔內部品質 | 前置：先確保文檔自洽再做 decode |
 
 > **定位**: `/claude:sync` 回答「文檔和程式碼是否同步」，`/claude:doc-decode` 回答「文檔的知識是否足夠讓人理解系統」。
+
+> **推薦工作流**: `/claude:clean`（清理 noise）→ `/claude:distill`（蒸餾 signal）→ `/claude:sync`（靜態一致性）→ `/claude:doc-decode`（理解度測試）→ `/claude:decode-compare`（精度驗證）
 
 ---
 
@@ -295,6 +489,12 @@ metric = formula
 
 # 只生成演算法級 pseudo code
 /claude:doc-decode rule_forge --depth B
+
+# 程式碼輔助重建 — 結合文檔 + .py 產出完整理解文檔
+/claude:doc-decode rule_forge --source-aided
+
+# 指定輸出目錄
+/claude:doc-decode rule_forge --source-aided --output ai-analysis/rule_forge
 
 # 遞迴解碼所有子模組
 /claude:doc-decode --recursive

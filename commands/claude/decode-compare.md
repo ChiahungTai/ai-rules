@@ -2,7 +2,7 @@
 description: "對比 doc-decode 結果與實際程式碼 — 驗證 CLAUDE.md 編碼精度"
 usage: "/claude:decode-compare <模組路徑> [--redecode] [--depth A|B|C|all] [--recursive]"
 argument-hint: "模組目錄路徑（如 rule_forge），必須包含 .py 實作"
-allowed-tools: ["Read", "Glob", "Grep", "Bash"]
+allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write"]
 ---
 
 # /claude:decode-compare — 解碼精度驗證
@@ -239,6 +239,8 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | `/consistency` | 文檔內部品質 | 前置：先確保文檔自洽再做 compare |
 
 > **定位**: `/claude:sync` 回答「文檔和程式碼是否同步」，`/claude:decode-compare` 回答「文檔的知識是否足夠讓人理解系統」。
+
+> **推薦工作流**: `/claude:clean`（清理 noise）→ `/claude:distill`（蒸餾 signal）→ `/claude:sync`（靜態一致性）→ `/claude:doc-decode`（理解度測試）→ `/claude:decode-compare`（精度驗證）
 
 ---
 

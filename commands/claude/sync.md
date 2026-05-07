@@ -53,6 +53,20 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | 類別/函數簽名 | 描述的簽名是否正確 | `Grep` 搜索實際定義 |
 | 行為描述 | 描述的行為是否與實際一致 | `Read` 程式碼內容比對 |
 | 目錄結構 | 描述的結構是否正確 | `Bash ls` 驗證 |
+| **語義正確性 spot-check** | 文檔描述的演算法行為是否準確 | 抽查 1-2 個核心函數的實作 |
+
+#### 語義正確性 spot-check 規則
+
+> **目的**：sync 是結構性檢查（有沒有），但語義錯誤（描述了但描述錯了）是最危險的文檔問題 — 因為路徑存在、class 存在、方法存在，但行為描述是錯的。
+
+**執行時機**：當文檔包含演算法/流程的具體行為描述時（如「用 X 方法排序」、「目標函數是 Y」）。
+
+**檢查方式**：
+1. 從文檔中識別描述了具體演算法行為的段落
+2. 隨機抽 1-2 個核心函數，`Read` 實際 .py 比對
+3. 比對重點：文檔描述的「方法/策略/目標函數/邏輯」是否與程式碼實作一致
+
+**範例**：文檔說「SequentialGreedyBuilder 以 Wilson CI 為目標函數」→ Read `sequential_greedy.py` 發現 `metric: str = "median"` → 標記為 ⚠️ 語義不準確。
 
 ### 角度二：涵蓋性檢查
 
@@ -477,6 +491,10 @@ fi
 #### 行為描述
 - ⚠️  "DataEngine 會自動重連" → 實際程式碼沒有自動重連邏輯
 
+#### 語義正確性 spot-check
+- ✅ "classify 使用 AND/OR 邏輯" → 實際 setup_classifier.py 確實如此
+- ⚠️ "Greedy 用 Wilson CI 排序" → 實際 metric="median"（語義不準確，來源: sequential_greedy.py:46）
+
 ### 📂 涵蓋性檢查
 
 #### 重要模組檢查
@@ -543,7 +561,8 @@ fi
 建議優先處理：
 1. 移除不存在的檔案引用
 2. 更新變更的 API 簽名
-3. 補充遺漏的模組說明
+3. 修正語義不準確的描述（spot-check 發現）
+4. 補充遺漏的模組說明
 4. 修正內部品質問題
 5. 清理元資訊
 ```
@@ -612,6 +631,8 @@ fi
 - 需要蒸餾: 1 個
 
 建議執行: `/claude:sync --recursive --clean`
+
+> 💡 當 ⚠️ 項目 ≥ 3 個時，建議執行 `/claude:decode-compare {module}` 進行深度精度驗證。
 ```
 
 ### 執行清理後輸出
@@ -668,6 +689,12 @@ fi
 
 ---
 
+### 進階驗證建議
+
+> **提示**: 當本次 sync 發現 ⚠️ 項目 ≥ 3 個時，建議執行 `/claude:decode-compare {module}` 進行深度精度驗證。sync 檢查「有沒有」，decode-compare 檢查「對不對」。
+
+---
+
 ## 🎯 執行約束
 
 ### 遞歸處理約束
@@ -717,6 +744,7 @@ fi
 - [ ] 提取了文檔中的所有引用（檔案路徑、類別、函數）
 - [ ] 驗證了檔案路徑存在性
 - [ ] 驗證了類別/函數簽名正確性（實際讀取程式碼確認）
+- [ ] 執行了語義正確性 spot-check（抽查核心演算法描述是否準確）
 - [ ] 檢查了命令涵蓋性（.md 檔案是否被記錄）
 - [ ] 檢查了程式碼涵蓋性（.py/.pyx/.pxd 檔案是否被記錄）
 
@@ -755,4 +783,4 @@ fi
 
 > 🍶 **蒸餾評估價值**: 參考 `/claude:distill` 原則，識別精華、冗餘、灰色地帶，指導內容變更決策。
 
-> ⚡ **工作流程**: `/claude:sync` 檢查 → 根據報告決定是否執行 `/claude:clean` 或 `/claude:distill`
+> ⚡ **工作流程**: `/claude:clean`（清理 noise）→ `/claude:distill`（蒸餾 signal）→ `/claude:sync`（靜態一致性）→ `/claude:doc-decode`（理解度測試）→ `/claude:decode-compare`（精度驗證）
