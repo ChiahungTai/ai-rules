@@ -26,7 +26,8 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - 逐項比對，生成差異報告
 
 **嚴格約束**：
-- **唯讀操作**：不修改任何檔案
+- **原始碼唯讀**：不修改任何 .py 檔案
+- **報告輸出**：差異報告寫入 ai-analysis/ 或指定目錄
 - **引用來源**：所有差異必須標註具體程式碼位置（檔案:行號）
 
 ---
