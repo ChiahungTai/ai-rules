@@ -1,5 +1,14 @@
 # Slash Commands 技術規範
 
+## 寫作原則
+
+> **載入時機**：Command 只在 `/invoke` 時載入，非每次 session 自動載入。Noise 容忍度比 CLAUDE.md 高，但仍應保持 signal 導向。
+
+- **引用語法**：Command 不支援 `@` transclusion。引用其他檔案一律使用 `[描述](path)` markdown link
+- **輸出格式模板**：是 command 的核心交付物規格，不算一般程式碼範例，可接受 >5 行
+- **實作程式碼**：避免在 command 中嵌入完整 bash/python 實作 — 描述「做什麼、為什麼」，讓 AI 自己決定「怎麼做」（此原則適用於 command 定義檔，技術規範文檔如本檔的範例不在此限）
+- **禁止元資訊**：版本號、更新日期、統計資訊（同 CLAUDE.md 規範）
+
 > **AI 重要提示**: 本專案採用符號連結架構將 Git 管理的 slash commands 整合到 Claude Code 系統中。個人層級的 `~/.claude/commands` 符號連結指向 `/Users/ctai/Github/ai-rules/commands`，實現版本控制、跨專案共享和即時更新。
 
 ## 系統架構

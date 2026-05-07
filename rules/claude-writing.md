@@ -97,6 +97,20 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 ```
 描述檔案內容讓 Claude 判斷何時讀取，而非無條件載入。
 
+#### CLAUDE.md — 長文件按需指引（不用 `@`）
+當目標檔案太長或 signal/noise 比例不佳，不值得 `@` 全載，但 AI 需要知道它的存在時，使用 markdown link + 內容描述。
+```markdown
+# 偶爾才需要的背景知識（debug 時才查）
+詳細 benchmark 數據和架構探索教訓見 [lessons_learnt.md](lessons_learnt.md)
+```
+
+**選擇判斷**：context 是有限資源，只載入每次對話都需要的內容。
+
+| 條件 | 語法 | 理由 |
+|------|------|------|
+| 每次對話都可能需要 + 內容精簡 | `@path` | 強制載入確保 AI 始終知道 |
+| 偶爾才需要 / 情境觸發 | `[描述](path)` | AI 按需讀取；描述越明確，觸發越準確 |
+
 ## 程式碼範例規範
 
 ### 範例格式

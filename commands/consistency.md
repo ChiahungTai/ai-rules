@@ -38,10 +38,10 @@ Signal/noise framework: [encoder-philosophy.md](claude/_common/encoder-philosoph
 - 程式碼範例是否可執行
 - 連結是否有效
 
-### 6. Signal/Noise Ratio
-- High Signal 內容比例（設計理由、架構約束、失敗教訓）
-- Low Noise 內容（API 簽名、參數表、欄位列表、完整範例 >5 行）
-- 程式碼範例是否 <= 5 行
+### 6. Signal/Noise Ratio（依 encoder-philosophy.md）
+- **High Signal 是否充分**：設計理由、架構約束、非顯而易見的選擇、模組邊界、失敗教訓
+- **Low Noise 是否存在**：API 簽名、參數表、欄位列表、完整範例 >5 行、元資訊（版本號/日期/統計）、通用知識（LLM 訓練資料已有的）
+- **引用語法是否正確**：CLAUDE.md/rules 用 `@`，Skill/Command 用 `[描述](path)`，長文件用 `[描述](path)` 而非 `@`
 
 ---
 
@@ -87,26 +87,13 @@ Signal/noise framework: [encoder-philosophy.md](claude/_common/encoder-philosoph
 #### 1. 自洽性 [✅/⚠️/❌]
 [發現的問題或「通過」]
 
-#### 2. 矛盾性 [✅/⚠️/❌]
-[發現的問題或「通過」]
-
-#### 3. 順序 [✅/⚠️/❌]
-[發現的問題或「通過」]
-
-#### 4. 自包含 [✅/⚠️/❌]
-[發現的問題或「通過」]
-
-#### 5. 內容精準度 [✅/⚠️/❌]
-[發現的問題或「通過」]
-
-#### 6. Signal/Noise Ratio [✅/⚠️/❌]
-[High Signal 比例評估、Low Noise 內容識別]
+#### 2~6. [矛盾性、順序、自包含、精準度、Signal/Noise Ratio — 格式同上]
 
 ### 問題清單
 
 | 優先級 | 類型 | 位置 | 問題描述 |
 |--------|------|------|----------|
-| 🔴/🟡/🟢 | 自洽性/矛盾性/順序/自包含/精準度/SignalNoise | 行號 | 具體問題 |
+| 🔴/🟡/🟢 | 維度名稱 | 行號 | 具體問題 |
 
 ### 改善建議
 1. [具體可執行的建議]
@@ -117,19 +104,8 @@ Signal/noise framework: [encoder-philosophy.md](claude/_common/encoder-philosoph
 ```markdown
 ## 文檔品質檢查報告
 
-**檔案**: [文檔路徑]
-**整體評分**: 100/100 ✅
-
-### 檢查結果
-
-- ✅ 自洽性：通過
-- ✅ 矛盾性：無矛盾
-- ✅ 順序：結構合理
-- ✅ 自包含：引用完整
-- ✅ 內容精準度：描述正確
-- ✅ Signal/Noise Ratio：High Signal 主導
-
-文檔品質優秀，無需修改。
+**檔案**: [文檔路徑] | **評分**: 100/100 ✅
+六維度全部通過，文檔品質優秀。
 ```
 
 ---

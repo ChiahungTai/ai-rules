@@ -1,5 +1,14 @@
 # Claude Code Skills 技術規範
 
+## 寫作原則
+
+> **載入時機**：Skill 只在語意匹配觸發時載入，非每次 session 自動載入。Noise 容忍度比 CLAUDE.md 高，但仍應保持 signal 導向。
+
+- **引用語法**：Skill 不支援 `@` transclusion。引用輔助檔案一律使用 `[描述](path)` markdown link
+- **描述檔案內容**：讓 AI 判斷何時該跟隨 link 讀取，而非無條件載入
+- **實作程式碼**：避免在 skill 中嵌入完整 bash/python 實作 — 描述「做什麼、為什麼」，讓 AI 自己決定「怎麼做」
+- **禁止元資訊**：版本號、更新日期、統計資訊（同 CLAUDE.md 規範）
+
 > **AI 重要提示**: 本專案採用符號連結架構將 Git 管理的 skills 整合到 Claude Code 系統中。個人層級的 `~/.claude/skills` 符號連結指向 `/Users/ctai/Github/ai-rules/skills`，實現版本控制、跨專案共享和即時更新。
 >
 > **AI 使用原則**: Skills 是**模型調用**的最高抽象層級機制。當處理複雜任務時，優先等待相關 skills 自動觸發；當需要特定服務時，調用對應 agents；當需要明確操作時，使用 slash commands。三者協調使用以達到最佳效果。

@@ -62,7 +62,17 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | 完整範例 (>5 行) | 30 行 end-to-end 使用流程 | 精簡為一句話描述 + `檔案:行號` 引用 |
 | 通用知識 | 「Polars 比 pandas 更快」 | 移除，LLM 訓練資料已有 |
 
-### 4. 清理後驗證：Decoder Test（dry run）
+### 4. 引用語法正確性
+
+依據 `claude-writing.md` 的引用語法規則，檢查 CLAUDE.md 中的引用是否使用了正確語法：
+
+| 情境 | 正確語法 | 錯誤語法 |
+|------|---------|---------|
+| 每次對話都需要 + 內容精簡 | `@path`（自動展開） | `[text](path)`（AI 可能不讀） |
+| 偶爾才需要 / 檔案偏長 | `[描述](path)`（按需讀取） | `@path`（浪費 context） |
+| Skill / Command 中的引用 | `[描述](path)` | `@path`（Skill 不支援 `@`） |
+
+### 5. 清理後驗證：Decoder Test（dry run）
 
 清理完成後，執行 Decoder Test 驗證 Encoder 品質：
 
@@ -88,8 +98,6 @@ Read $TARGET_CLAUDE_MD
 ```
 
 ### 步驟 3: 識別元資訊
-
-### 步驟 2: 識別元資訊
 
 檢查以下模式：
 - 版本號：`**版本**:`、`> **版本**:`
@@ -280,6 +288,7 @@ Read $TARGET_CLAUDE_MD
 - [ ] 讀取了 CLAUDE.md
 - [ ] 識別了所有不必要的元資訊
 - [ ] 識別了低 signal 內容（可推導內容、完整範例 >5 行）
+- [ ] 檢查了引用語法正確性（`@` vs `[描述](path)`）
 - [ ] 區分了應移除和可保留的資訊
 - [ ] 提供了清晰的清理報告
 - [ ] 說明了每項移除的原因

@@ -163,22 +163,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | **自包含** | 引用檔案/路徑存在、外部依賴可獲取 | `Bash test` 驗證 |
 | **精準度** | 技術描述正確、程式碼範例可執行 | 實際驗證 |
 
-### 角度六：依賴鏈感知同步
-
-> **核心原則**：程式碼變更不只影響同目錄的 CLAUDE.md，還會影響消費端目錄的 CLAUDE.md。
-
-當目標目錄的程式碼有變更時，必須追蹤 import 鏈找出所有消費端：
-
-| 步驟 | 說明 | 驗證方式 |
-|------|------|----------|
-| 識別變更 | 從 `git diff` 提取被修改的 class/function | diff 分析 |
-| 追蹤 import 鏈 | 搜尋哪些目錄 import 了被修改的模組 | `Grep` 搜尋 import 語句 |
-| 定位消費端 CLAUDE.md | 消費端目錄是否有 CLAUDE.md | `Glob` 搜尋 |
-| 檢查消費端文檔 | 消費端 CLAUDE.md 是否引用了已變更的 API | `Read` + `Grep` 比對 |
-
-**範例**：`datasets/ml_dataset.py` 變更 → 消費端 `rule_forge/`、`analytics/` 的 CLAUDE.md 也需要檢查是否需要同步更新。
-
-### 角度七：Signal/Noise Ratio 評估
+### 角度六：Signal/Noise Ratio 評估
 
 > **核心原則**：CLAUDE.md 是 Encoder（壓縮知識表示），品質取決於 signal/noise ratio，不是長度。
 
@@ -194,6 +179,36 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - ❌ 需蒸餾：High Signal < 40%，或有大量 Low Noise
 
 **建議動作**：signal/noise ratio 不足時，建議執行 `/claude:distill` 進行 signal/noise 分離。
+
+### 角度七：引用語法正確性
+
+> **核心原則**：`@` 是強制載入（每次 session 都付代價），`[描述](path)` 是按需讀取。選錯語法會導致 AI context 浪費或知識缺失。
+
+| 檢查項目 | 說明 | 判斷方式 |
+|---------|------|----------|
+| `@` 濫用 | 用 `@` 引用長文件或偶爾需要的內容 | 檢查 `@` 引用的檔案行數和內容性質 |
+| markdown link 漏用 | 該用 `@` 的核心約束卻用了 `[text](path)` | 檢查每次對話都需要的引用是否用了 `@` |
+| Skill/Command 誤用 `@` | Skill 不支援 `@` transclusion | 檢查 command/skill 檔案中是否有 `@` |
+
+**修正建議**：
+- 每次對話都需要 + 內容精簡 → 改用 `@path`
+- 偶爾才需要 / 檔案偏長 → 改用 `[描述](path)`
+- Skill / Command 中的引用 → 必須用 `[描述](path)`
+
+### 角度八：消費端文檔連鎖影響
+
+> **核心原則**：程式碼變更不只影響同目錄的 CLAUDE.md，還會影響消費端目錄的 CLAUDE.md 和其他相關 .md 文檔。
+
+當目標目錄的程式碼有變更時，必須追蹤 import 鏈找出所有消費端：
+
+| 步驟 | 說明 | 驗證方式 |
+|------|------|----------|
+| 識別變更 | 從 `git diff` 提取被修改的 class/function | diff 分析 |
+| 追蹤 import 鏈 | 搜尋哪些目錄 import 了被修改的模組 | `rg` 搜尋 import 語句 |
+| 定位消費端文檔 | 消費端目錄是否有 CLAUDE.md 或相關 .md | `Glob` 搜尋 |
+| 檢查連鎖影響 | 消費端文檔是否引用了已變更的 API | `Read` + `rg` 比對 |
+
+**範例**：`rule_forge/` 的核心 class 變更 → 不只 `rule_forge/CLAUDE.md`，連 `examples/rule_forge/CLAUDE.md` 和引用該 API 的說明文檔也需要檢查同步性。
 
 ---
 
@@ -270,13 +285,13 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 ### 步驟 2: 掃描程式碼結構
 
 ```bash
-# 識別重要檔案和目錄（使用括號包裝 -o 條件）
-find $TARGET_DIR \( -name "*.py" -o -name "*.pyx" -o -name "*.pxd" \) -type f | head -20
-find $TARGET_DIR -type d -maxdepth 2
+# 識別重要檔案和目錄
+fd -e py -e pyx -e pxd . $TARGET_DIR | head -20
+fd -t d . $TARGET_DIR --max-depth 2
 
-# 掃描公開 API（分別指定 --include 或使用 find）
-grep -r "^def " $TARGET_DIR --include="*.py" --include="*.pyx" --include="*.pxd"
-grep -r "^class " $TARGET_DIR --include="*.py" --include="*.pyx" --include="*.pxd"
+# 掃描公開 API
+rg "^def " -t py $TARGET_DIR
+rg "^class " -t py $TARGET_DIR
 ```
 
 ### 步驟 3: 提取文檔引用
@@ -683,6 +698,12 @@ fi
 - [ ] 檢查了自包含（引用完整、依賴可獲取）
 - [ ] 檢查了精準度（技術描述、程式碼可執行）
 - [ ] 評估了 Signal/Noise Ratio（High Signal 比例、Low Noise 識別）
+- [ ] 檢查了引用語法正確性（`@` vs `[描述](path)` 選擇）
+
+### 連鎖影響檢查
+- [ ] 追蹤了 import 鏈找出消費端目錄
+- [ ] 檢查了消費端 CLAUDE.md 是否需要同步更新
+- [ ] 檢查了其他相關 .md 文檔（examples/、docs/ 等）是否需要同步更新
 
 ### 清理與蒸餾
 - [ ] 檢查了元資訊（--clean 選項）
