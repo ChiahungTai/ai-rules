@@ -137,21 +137,19 @@ Logger 提供補充細節（print 沒說的），不重複 print 的摘要。
 ## init_logging 配置
 
 ```python
-from nautilus_trader.common.component import init_logging
-from nautilus_trader.common.enums import LogLevel
+from mosaic_alpha.common.logging import init_logging_with_defaults
 
-try:
-    log_guard = init_logging(
-        level_stdout=LogLevel.OFF,
-        level_file=LogLevel.DEBUG,
-        file_name="mosaic",
-        directory="/tmp/mosaic_logs",
-        max_file_size=10_000_000,
-        max_backup_count=3,
-    )
-except RuntimeError:
-    pass  # NT init_logging 是 process-level singleton，重複呼叫會拋 RuntimeError
+log_config = init_logging_with_defaults()
+# 內部自動處理：
+#   - stdout=OFF, file=DEBUG
+#   - file_name 從 sys.argv[0] 自動偵測
+#   - directory 從 MOSAIC_LOG_PATH 環境變數讀取
+#   - max_file_size=0（不 rotation，檔名可預測）
+#   - RuntimeError（重複初始化）自動處理
+# 自動印出：[LOG] {log_path} (init at {ts})
 ```
+
+路徑解析優先順序：`directory 參數` > `MOSAIC_LOG_PATH 環境變數` > `/tmp/mosaic_logs/`
 
 ---
 
