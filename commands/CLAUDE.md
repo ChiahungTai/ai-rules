@@ -63,9 +63,6 @@ ls -la /Users/ctai/Github/ai-rules/commands/
 - `/design-plan` - 設計計劃制定
 - `/design2prompt` - 設計轉提示詞轉換
 - `/distill-spec` - 規格蒸餾和提煉
-- `/doc-hierarchy` - 通用 CLAUDE.md 階層文檔生成器
-- `/doc-quality-checker` - 文檔品質檢查
-- `/docs-manager` - 文檔管理和整理
 - `/error-diagnose` - 錯誤診斷和解決方案
 - `/explain` - 技術概念、架構設計或流程解釋
 - `/execution-plan` - 執行計劃和任務分解
@@ -113,7 +110,6 @@ AI 調用 SlashCommand("/command args")
 - `/explain` - 技術概念、架構設計或流程解釋
 - `/milestone` - 對話里程碑記錄和重啟管理
 - `/parallel-task` - 智能並行任務協調器
-- `/doc-hierarchy` - 通用 CLAUDE.md 階層文檔生成器
 
 ### 開發流程命令
 - `/analysis-plan` - 技術分析計劃生成
@@ -133,8 +129,6 @@ AI 調用 SlashCommand("/command args")
 
 ### 文檔管理命令
 - `/consistency` - 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度）
-- `/doc-quality-checker` - 多 Agent 文檔品質分析（複雜版）
-- `/docs-manager` - 文檔管理和整理
 - `/distill-spec` - 規格蒸餾和提煉
 
 ### 錯誤處理和診斷
