@@ -117,7 +117,7 @@ class ComponentFactory:
 
 ### 段落分析行為規範
 
-> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `@~/.claude/rules/modern-cli-preference.md`
+> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `modern-cli-preference.md`（已自動載入）
 
 - **深度分析**: 基於 `/spec` 規格摘要進行深度分析
 - **依賴識別**: 識別段落間的依賴關係

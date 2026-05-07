@@ -55,30 +55,47 @@ permission-mode: "acceptEdits"
 
 ## 內容規範
 
-### 應該包含
-- **核心原則**: 為什麼做、不可妥協的約束
-- **執行約束**: 必須遵守的規則
-- **AI 導航**: 重要檔案和 API 簡要描述
-- **實作範例**: 可執行的使用範例
+> **核心理念**: CLAUDE.md 是模組知識的 Encoder（壓縮表示）。品質標準是 Signal/Noise ratio — 保留從程式碼猜不到的知識，移除可推導的內容。詳細框架見 `commands/claude/_common/encoder-philosophy.md`。
 
-### 應該避免
-- **版本號**: `> **版本**: 2.0`
-- **更新日期**: `> **更新日期**: 2025-01-01`
-- **歷史變更**: `## 變歷史` 或 `## Changelog`
-- **統計資訊**: `行數: 387`, `字數: 5234`
+### 應該包含（High Signal）
+- **設計理由**: 為什麼這樣做而非那樣做
+- **架構約束**: 不可妥協的設計限制
+- **非顯而易見的選擇**: 看起來反直覺但有意義的決策
+- **模組邊界**: 這個模組不做什麼
+- **失敗教訓**: 從實際 debugging 經驗得到的規則
+- **執行約束**: 必須遵守的規則
+
+### 應該避免（Low Noise）
+- **可推導內容**: API 簽名、參數表、欄位列表（從程式碼可直接推導）
+- **完整範例**: 超過 5 行的程式碼範例（精簡為一句話 + 源碼引用）
+- **元資訊**: 版本號、更新日期、統計資訊、Changelog
 - **過時範例**: 無法實際執行的範例
 
-### 引用語法
+### 引用語法（依檔案類型選擇）
+
+#### CLAUDE.md / rules/ — `@` 自動展開
+`@` 是 CLAUDE.md 專用的 transclusion 機制，啟動時自動展開內容。
 ```markdown
 # 相對路徑（相對於當前檔案）
-See @./_common/recursive-discovery.md
+@docs/architecture.md
 
 # 絕對路徑（個人層級）
-See @~/.claude/my-instructions.md
+@~/.claude/rules/_ai-behavior-constraints.md
 
 # 專案根目錄相對路徑
-See @../../rules/self-consistency.md
+@../../rules/self-consistency.md
 ```
+
+#### Skill / Command — markdown link 按需讀取
+Skills 不支持 `@` transclusion。使用 markdown link 讓 Claude 知道何時讀取 supporting files。
+```markdown
+# 相對路徑（相對於 SKILL.md 所在目錄）
+Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
+
+# 引用其他 command
+參考: [clean.md](./clean.md)
+```
+描述檔案內容讓 Claude 判斷何時讀取，而非無條件載入。
 
 ## 程式碼範例規範
 

@@ -371,7 +371,7 @@ def group_files_for_analysis(file_paths):
 
 ## 執行邏輯
 
-> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `@~/.claude/rules/modern-cli-preference.md`
+> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `modern-cli-preference.md`（已自動載入）
 
 ### 簡化決策流程
 ```

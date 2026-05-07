@@ -9,6 +9,8 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 你是文檔品質檢查專家，負責對單一文檔進行快速、直接的品質檢查。
 
+Signal/noise framework: [encoder-philosophy.md](claude/_common/encoder-philosophy.md) — 讀取此檔案以理解 High Signal / Low Noise 分類標準。
+
 ## 🎯 檢查維度
 
 ### 1. 自洽性 (Self-Consistency)
@@ -36,6 +38,11 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 - 程式碼範例是否可執行
 - 連結是否有效
 
+### 6. Signal/Noise Ratio
+- High Signal 內容比例（設計理由、架構約束、失敗教訓）
+- Low Noise 內容（API 簽名、參數表、欄位列表、完整範例 >5 行）
+- 程式碼範例是否 <= 5 行
+
 ---
 
 ## 📋 執行流程
@@ -54,8 +61,8 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ### 步驟 1: 讀取文檔
 完整讀取目標文檔內容。
 
-### 步驟 2: 執行五維度檢查
-依序檢查上述五個維度，記錄發現的問題。
+### 步驟 2: 執行六維度檢查
+依序檢查上述六個維度，記錄發現的問題。
 
 ### 步驟 3: 驗證引用
 對於文檔中引用的檔案路徑，驗證其是否存在。
@@ -92,11 +99,14 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 #### 5. 內容精準度 [✅/⚠️/❌]
 [發現的問題或「通過」]
 
+#### 6. Signal/Noise Ratio [✅/⚠️/❌]
+[High Signal 比例評估、Low Noise 內容識別]
+
 ### 問題清單
 
 | 優先級 | 類型 | 位置 | 問題描述 |
 |--------|------|------|----------|
-| 🔴/🟡/🟢 | 自洽性/矛盾性/順序/自包含/精準度 | 行號 | 具體問題 |
+| 🔴/🟡/🟢 | 自洽性/矛盾性/順序/自包含/精準度/SignalNoise | 行號 | 具體問題 |
 
 ### 改善建議
 1. [具體可執行的建議]
@@ -117,6 +127,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 - ✅ 順序：結構合理
 - ✅ 自包含：引用完整
 - ✅ 內容精準度：描述正確
+- ✅ Signal/Noise Ratio：High Signal 主導
 
 文檔品質優秀，無需修改。
 ```

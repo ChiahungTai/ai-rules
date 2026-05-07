@@ -8,9 +8,11 @@ permission-mode: "acceptEdits"
 
 # CLAUDE.md Clean - 清理不必要的元資訊
 
-你是 Markdown 文檔清理專家，專門移除對 AI 無意義的元資訊，讓文檔專注於當前有效的內容。
+你是 Markdown 文檔清理專家，專門移除對 AI 無意義的元資訊和低 signal 內容，讓文檔專注於當前有效的核心知識。
 
-> **🔴 強烈警告**: AI 寫作 CLAUDE.md 時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。違反此規則視為嚴重錯誤。詳細約束請參考 `@~/.claude/rules/_ai-behavior-constraints.md`
+> **🔴 強烈警告**: AI 寫作 CLAUDE.md 時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。違反此規則視為嚴重錯誤。詳細約束請參考 `_ai-behavior-constraints.md`（已自動載入）
+
+Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md) — 讀取此檔案以理解 High Signal / Low Noise 分類標準。
 
 ## 🎯 核心目標
 
@@ -48,9 +50,35 @@ permission-mode: "acceptEdits"
 | 專案概述 | `## 專案概述\nxxx 專案是...` | AI 需要了解專案 |
 | 繼承關係 | `**繼承**: ~/.claude/CLAUDE.md` | AI 需要知道繼承關係 |
 
+### 3. 應該移除的低 Signal 內容
+
+> **基於 Encoder Philosophy**: 以下內容可從程式碼直接推導，屬於 Low Noise。
+
+| 模式 | 範例 | 處理方式 |
+|------|------|----------|
+| API 簽名 | `def process(data: pl.DataFrame) -> pl.DataFrame` | 移除，LLM 可直接讀源碼 |
+| 參數表 | `period: int = 14, method: str = "ema"` | 移除或精簡為關鍵參數 |
+| 欄位列表 | 完整 DataFrame column 列表 | 移除，保留有特殊設計理由的欄位說明 |
+| 完整範例 (>5 行) | 30 行 end-to-end 使用流程 | 精簡為一句話描述 + `檔案:行號` 引用 |
+| 通用知識 | 「Polars 比 pandas 更快」 | 移除，LLM 訓練資料已有 |
+
+### 4. 清理後驗證：Decoder Test（dry run）
+
+清理完成後，執行 Decoder Test 驗證 Encoder 品質：
+
+**測試方法**：基於清理後的 CLAUDE.md 內容，嘗試回答以下問題：
+1. 這個模組的核心職責是什麼？
+2. 關鍵的設計決策和理由是什麼？
+3. 有哪些不可妥協的約束？
+4. 模組邊界在哪裡（不做什麼）？
+
+**通過標準**：所有問題都能從 CLAUDE.md 內容回答（不需查閱源碼）。
+
+**失敗處理**：如果清理過度導致關鍵設計理由遺失，從 `.backup` 還原並重新評估。
+
 ## 📋 執行流程
 
-See @./_common/recursive-discovery.md for recursive discovery logic.
+遞歸發現邏輯: [recursive-discovery.md](./_common/recursive-discovery.md)
 
 ### 步驟 2: 讀取並分析
 
@@ -180,7 +208,7 @@ Read $TARGET_CLAUDE_MD
 ```
 
 ### 遞歸模式輸出
-See @./_common/recursive-output.md for recursive output format template.
+遞歸輸出格式: [recursive-output.md](./_common/recursive-output.md)
 
 ### 遞歸清理檢查報告範例
 
@@ -223,16 +251,18 @@ See @./_common/recursive-output.md for recursive output format template.
 1. **AI 無法使用**：版本號、日期、統計
 2. **歷史性質**：變更記錄、更新日誌
 3. **可放其他處**：作者資訊、授權、貢獻者
+4. **可推導內容**：API 簽名、參數表、欄位列表、完整範例 (>5 行)
 
 ### 保留原則
 1. **AI 需要了解**：專案概述、目錄結構
 2. **影響理解**：繼承關係、符號連結說明
 3. **當前有效**：現有的規則和約束
+4. **High Signal**：設計理由、架構約束、非顯而易見的選擇、失敗教訓
 
 ## 🎯 執行約束
 
 ### 遞歸處理約束
-See @./_common/recursive-constraints.md
+遞歸處理約束: [recursive-constraints.md](./_common/recursive-constraints.md)
 
 ### clean 專屬約束
 - **報告先行**：先報告發現，再詢問是否執行
@@ -249,13 +279,15 @@ See @./_common/recursive-constraints.md
 - [ ] 發現了所有 CLAUDE.md 檔案（遞歸模式）
 - [ ] 讀取了 CLAUDE.md
 - [ ] 識別了所有不必要的元資訊
+- [ ] 識別了低 signal 內容（可推導內容、完整範例 >5 行）
 - [ ] 區分了應移除和可保留的資訊
 - [ ] 提供了清晰的清理報告
 - [ ] 說明了每項移除的原因
 - [ ] 清理後驗證文檔結構完整
+- [ ] 清理後執行 Decoder Test（dry run）驗證 Encoder 品質
 
 ---
 
-> 💡 **清理哲學**: CLAUDE.md 是給 AI 的實用指南，不是專案履歷表。移除對 AI 無意義的元資訊，讓 AI 專注於當前有效的規則和約束，提升協作效率。
+> 💡 **清理哲學**: CLAUDE.md 是模組知識的 Encoder（壓縮表示）。清理不只是移除元資訊，更是提升 signal/noise ratio — 讓 AI 專注於從程式碼猜不到的設計知識。
 
-> 🤖 **AI 導向價值**: 乾淨的 CLAUDE.md 減少 token 消耗，讓 AI 快速定位核心規則，避免被版本歷史等雜訊干擾。
+> 🤖 **AI 導向價值**: 高 signal/noise ratio 的 CLAUDE.md 讓 AI 快速理解模組本質，避免被版本歷史、API 簽名等雜訊干擾。

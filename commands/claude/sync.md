@@ -10,6 +10,8 @@ permission-mode: "acceptEdits"
 
 你是 Markdown 文檔同步檢查專家，負責驗證文檔與實際程式碼的一致性、涵蓋性，以及文檔內部品質。
 
+Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md) — 讀取此檔案以理解 High Signal / Low Noise 分類標準。
+
 ## 🎯 核心目標
 
 **適用文檔**：
@@ -62,7 +64,7 @@ permission-mode: "acceptEdits"
 
 ### 角度三：元資訊檢查（整合 /claude:clean）
 
-> **參考**: `@./clean.md`
+> **參考**: [clean.md](./clean.md)
 
 #### 應該移除的元資訊
 
@@ -84,33 +86,33 @@ permission-mode: "acceptEdits"
 
 ### 角度四：蒸餾評估（整合 /claude:distill，--all 選項）
 
-> **參考**: `@./distill.md`
+> **參考**: [distill.md](./distill.md)
 
-#### 精華 vs 冗餘 vs 灰色地帶分類
+#### Signal / Noise 分類
 
-**✅ 應該保留的「精華」**：
-- 核心原則/約束、絕對約束、設計哲學、開發鐵律
-- 🤖 AI 導航資訊（目錄結構、核心 API 描述）
-- 架構圖、核心表格、使用範例（< 15 行）、檢查清單
+**✅ High Signal（保留）**：
+- 設計理由、架構約束、非顯而易見的選擇
+- 模組邊界、失敗教訓
+- 核心原則/約束、高層級架構圖
 
-**❌ 應該蒸餾掉的「冗餘」**：
-- 過時範例、重複說明、冗長歷史、環境特定、教學細節
+**❌ Low Noise（蒸餾）**：
+- API 簽名、參數表、欄位列表
+- 完整範例 (>5 行)、過時範例、重複說明
 
 **⚠️ 灰色地帶（預設保留）**：
 
 | 內容類型 | 保留條件 | 移除條件 |
 |---------|---------|---------|
-| 範例程式碼 | 展示核心 API | 過時、重複、> 20 行 |
-| 檢查清單 | 行為約束、決策要點 | 顯而易見、過於細節 |
-| 配置參數 | 影響行為的關鍵參數 | 很少修改的環境參數 |
-| 表格 | 模組職責、組件對照 | 過時資訊、重複內容 |
+| 範例程式碼 | <= 5 行，展示關鍵用法 | > 5 行或過時 |
+| 檢查清單 | 行為約束、決策要點 | 顯而易見 |
+| 表格 | 模組職責、組件對照 | 過時、重複 |
 
-#### 實作細節處理策略
+#### Low Noise 處理策略
 
-> **核心原則**：蒸餾不是「直接刪除」，而是「提煉精華」。
+> **核心原則**：蒸餾 = signal/noise 分離，不是直接刪除。
 
-**❌ 直接移除**：詳細程式碼步驟、過多配置參數列表、版本變更歷史
-**✅ 簡潔描述替代**：重要設計概念（為什麼）、關鍵機制的一句話總結、指向源碼位置的引用
+**❌ 直接移除**：API 簽名、完整欄位列表、版本變更歷史
+**✅ 簡潔描述替代**：重要設計概念（為什麼）+ `檔案:行號` 引用
 
 ---
 
@@ -120,31 +122,27 @@ permission-mode: "acceptEdits"
 
 ### 新增內容時
 
-**✅ 應該新增**（參考 distill 精華原則）：
-- 核心原則/約束、絕對約束、設計哲學
-- AI 導航資訊（目錄結構、核心 API 描述）
-- 架構圖、核心表格、使用範例（< 15 行）
+**✅ 應該新增**（High Signal）：
+- 設計理由、架構約束、非顯而易見的選擇
+- 模組邊界、失敗教訓
+- 核心原則/約束、高層級架構圖
 
-**❌ 不應該新增**（參考 clean 元資訊原則）：
-- 版本號、更新日期、歷史變更
-- 統計資訊（行數、字數）
-- 過時範例、重複說明、教學細節
+**❌ 不應該新增**（Low Noise）：
+- API 簽名、參數表、欄位列表
+- 完整範例 (>5 行)
+- 元資訊（版本號、更新日期、統計）
 
 ### 刪除內容時
 
-**✅ 應該刪除**（參考 clean 原則）：
+**✅ 應該刪除**（Low Noise + 元資訊）：
+- API 簽名、完整欄位列表
 - 版本號、更新日期、生效日期
-- 歷史變更章節（## 變更歷史、## Changelog）
-- 統計資訊
-
-**✅ 應該刪除**（參考 distill 冗餘原則）：
-- 過時範例、重複說明、冗長歷史
-- 環境特定配置、教學細節
+- 歷史變更章節、統計資訊
+- 過時範例、重複說明
 
 **⚠️ 謹慎評估**（灰色地帶，預設保留）：
-- 範例程式碼（檢查是否展示核心 API）
+- 範例程式碼 <= 5 行（檢查是否展示關鍵用法）
 - 檢查清單（檢查是否為行為約束）
-- 配置參數（檢查是否影響關鍵行為）
 
 ### 修改內容時
 
@@ -179,6 +177,23 @@ permission-mode: "acceptEdits"
 | 檢查消費端文檔 | 消費端 CLAUDE.md 是否引用了已變更的 API | `Read` + `Grep` 比對 |
 
 **範例**：`datasets/ml_dataset.py` 變更 → 消費端 `rule_forge/`、`analytics/` 的 CLAUDE.md 也需要檢查是否需要同步更新。
+
+### 角度七：Signal/Noise Ratio 評估
+
+> **核心原則**：CLAUDE.md 是 Encoder（壓縮知識表示），品質取決於 signal/noise ratio，不是長度。
+
+| 檢查項目 | 說明 | 判斷方式 |
+|---------|------|----------|
+| High Signal 內容比例 | 設計理由、架構約束、失敗教訓佔比 | 估算 high signal 行數 / 總行數 |
+| Low Noise 內容 | API 簽名、參數表、欄位列表、完整範例 >5 行 | 識別並標記 |
+| 程式碼範例長度 | 每個範例是否 <= 5 行 | 逐個檢查 |
+
+**評估標準**：
+- ✅ 良好：High Signal >= 60%，無 Low Noise 內容
+- ⚠️ 需改善：High Signal 40-60%，或有少量 Low Noise
+- ❌ 需蒸餾：High Signal < 40%，或有大量 Low Noise
+
+**建議動作**：signal/noise ratio 不足時，建議執行 `/claude:distill` 進行 signal/noise 分離。
 
 ---
 
@@ -236,7 +251,7 @@ permission-mode: "acceptEdits"
 
 ### 步驟 1: 遞歸發現 CLAUDE.md 檔案
 
-See @./_common/recursive-discovery.md for recursive discovery logic.
+遞歸發現邏輯: [recursive-discovery.md](./_common/recursive-discovery.md)
 
 ### 步驟 1.5: 依賴鏈擴展
 
@@ -468,6 +483,22 @@ fi
 #### 精準度 [✅/⚠️/❌]
 [發現的問題或「通過」]
 
+### 📡 Signal/Noise Ratio 評估
+
+#### High Signal 內容
+- 設計理由: N 處
+- 架構約束: N 處
+- 失敗教訓: N 處
+
+#### Low Noise 內容
+- API 簽名: N 處
+- 參數表: N 處
+- 完整範例 >5 行: N 處
+
+#### 評估結果
+- Signal/Noise Ratio: [X]% [✅/⚠️/❌]
+- 💡 建議動作: [保持現狀 / 執行 /claude:distill]
+
 ### 📊 總結
 - 程式碼一致性: X%
 - 涵蓋性: Y%
@@ -483,7 +514,7 @@ fi
 ```
 
 ### 遞歸模式輸出
-See @./_common/recursive-output.md for recursive output format template.
+遞歸輸出格式: [recursive-output.md](./_common/recursive-output.md)
 
 ### 遞歸同步檢查報告範例
 
@@ -598,7 +629,7 @@ See @./_common/recursive-output.md for recursive output format template.
 ## 🎯 執行約束
 
 ### 遞歸處理約束
-See @./_common/recursive-constraints.md
+遞歸處理約束: [recursive-constraints.md](./_common/recursive-constraints.md)
 
 ### 同步檢查專屬約束
 - **實際驗證**: 必須開啟程式碼檔案確認，不猜測
@@ -651,6 +682,7 @@ See @./_common/recursive-constraints.md
 - [ ] 檢查了順序（章節編號、標題層級）
 - [ ] 檢查了自包含（引用完整、依賴可獲取）
 - [ ] 檢查了精準度（技術描述、程式碼可執行）
+- [ ] 評估了 Signal/Noise Ratio（High Signal 比例、Low Noise 識別）
 
 ### 清理與蒸餾
 - [ ] 檢查了元資訊（--clean 選項）

@@ -166,7 +166,7 @@ allowed-tools: ["Read", "Grep", "Glob"]
 
 ### 強制執行
 
-> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `@~/.claude/rules/modern-cli-preference.md`
+> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `modern-cli-preference.md`（已自動載入）
 
 1. **必須查證實際程式碼**：不能基於推測評估
 2. **必須進行第一性原理分析**：不能盲從建議

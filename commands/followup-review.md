@@ -205,7 +205,7 @@ git diff HEAD
 
 ### 強制執行
 
-> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `@~/.claude/rules/modern-cli-preference.md`
+> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `modern-cli-preference.md`（已自動載入）
 
 1. **必須查證實際程式碼**：用 `git diff` 和 `Read` 確認實際變更
 2. **必須逐項驗收**：每個建議都必須有驗收結論
