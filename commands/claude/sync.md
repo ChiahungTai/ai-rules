@@ -282,6 +282,26 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 5. 去重，合併到步驟 1 發現的 CLAUDE.md 清單
 ```
 
+### 步驟 1.6: Sub-doc 擴展
+
+> **觸發條件**：CLAUDE.md 中引用了同目錄或相鄰目錄的 `.md` 子文件時執行。
+
+從 CLAUDE.md 的 markdown link 引用出發，發現子文件並分類，將「說明文檔」加入檢查清單：
+
+```
+1. 從 CLAUDE.md 提取所有 markdown link 引用的 .md 檔案
+   - 格式: [描述](path/to/doc.md) 或 [描述](doc.md)
+   - 排除外部 URL（http/https）
+   - 排除 @ transclusion（已強制載入，不需額外檢查）
+2. 驗證引用的 .md 檔案是否存在
+3. 分類為「說明文檔」或「設計文檔」：
+   - 說明文檔：描述 API、資料結構、流程、call stack → 加入檢查清單
+   - 設計文檔：描述概念、提案、未來計畫 → 跳過
+4. 合併到檢查清單，標記為 sub-doc（優先級同父 CLAUDE.md）
+```
+
+**Sub-doc 檢查範圍**：對說明文檔執行角度一（程式碼一致性）和角度五（內部品質），不重複涵蓋性檢查（由父 CLAUDE.md 統一負責）。
+
 ### 步驟 2: 掃描程式碼結構
 
 ```bash
@@ -555,6 +575,13 @@ fi
 - 元資訊: ✅ 乾淨
 - 蒸餾評估: ✅ 精華為主
 
+**Sub-doc**: src/condition_system.md（說明文檔）
+- 程式碼一致性: ⚠️ 85%（1 個型別引用過時）
+- 內部品質: ✅ 95/100
+
+**Sub-doc**: src/filter_tree_design_v1.md（設計文檔）
+- ⏭️ 跳過（設計文檔，不檢查程式碼一致性）
+
 **檔案**: src/core/CLAUDE.md
 - 程式碼一致性: ⚠️ 80%（2 個 API 簽名變更）
 - 涵蓋性: ✅ 85%
@@ -684,6 +711,8 @@ fi
 
 ### 程式碼同步檢查
 - [ ] 發現了所有 CLAUDE.md 檔案（遞歸模式）
+- [ ] 從 CLAUDE.md 提取了 sub-doc 引用，分類為說明文檔/設計文檔
+- [ ] 對說明文檔執行了程式碼一致性檢查（設計文檔跳過）
 - [ ] 掃描了程式碼結構和重要檔案（Python/Cython）
 - [ ] 提取了文檔中的所有引用（檔案路徑、類別、函數）
 - [ ] 驗證了檔案路徑存在性
