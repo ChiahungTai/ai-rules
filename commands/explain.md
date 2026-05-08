@@ -1,6 +1,6 @@
 ---
-description: 解釋技術概念、架構設計或流程
-usage: /explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>
+description: "解釋技術概念、架構設計或流程。可指定 @目錄或 @檔案讓 AI 先讀再解釋，支援 console（即時）和 md（寫檔）兩種輸出模式。"
+usage: "/explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 ---
 
 # 智能解釋系統

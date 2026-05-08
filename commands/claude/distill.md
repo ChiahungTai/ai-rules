@@ -1,7 +1,7 @@
 ---
-description: "蒸餾 Markdown 文檔，提煉核心精華（CLAUDE.md 及說明文檔）"
+description: "蒸餾 Markdown 文檔，提煉核心精華，移除可推導內容"
 usage: "/claude:distill [目錄路徑] [選項]"
-argument-hint: "預設處理當前目錄，可指定目錄或 .md 檔案"
+argument-hint: "/claude:distill [目錄路徑] [--recursive] — 預設處理當前目錄，可指定目錄或 .md 檔案"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 permission-mode: "acceptEdits"
 ---

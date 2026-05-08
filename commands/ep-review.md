@@ -1,5 +1,5 @@
 ---
-description: "審查 Execution Plan 合理性 — 完整性、規範合規、一致性、遺漏風險"
+description: "審查 Execution Plan 合理性（完整性、規範合規、一致性、遺漏風險）。/ep-review <EP路徑>"
 usage: "/ep-review <Execution Plan 路徑>"
 argument-hint: "<Execution Plan 檔案路徑>"
 allowed-tools: ["Read", "Grep", "Glob"]

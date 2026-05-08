@@ -1,7 +1,7 @@
 ---
-description: "檢查 Markdown 文檔與程式碼同步性及內部品質（CLAUDE.md 及說明文檔）"
+description: "檢查 Markdown 文檔與程式碼同步性及內部品質"
 usage: "/claude:sync [目錄路徑] [選項]"
-argument-hint: "預設檢查當前目錄，可指定目錄或 .md 檔案"
+argument-hint: "/claude:sync [目錄路徑] [--recursive] — 預設檢查當前目錄，可指定目錄或 .md 檔案"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 permission-mode: "acceptEdits"
 ---
@@ -255,6 +255,11 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 # 7. 預覽模式（不實際修改）
 /claude:sync --dry-run
 /claude:sync --recursive --dry-run
+
+# 8. 增量模式（只檢查 git 變更涉及的檔案）
+/claude:sync --changed-since "2026-05-08"
+/claude:sync --changed-since HEAD~5
+/claude:sync --recursive --changed-since "yesterday"
 ```
 
 ### 參數說明
@@ -265,6 +270,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | **檔案路徑** | 檢查指定的 `CLAUDE.md` 檔案 |
 | **目錄路徑** | 檢查指定目錄下的 `CLAUDE.md`（僅該層） |
 | **--recursive, -r** | 遞歸檢查所有子目錄的 `CLAUDE.md` |
+| **--changed-since** | 增量模式：只檢查 git 變更涉及的檔案（如 `--changed-since "2026-05-08"` 或 `--changed-since HEAD~5`） |
 | **--skip-consistency** | 跳過內部品質檢查（自洽性、矛盾性等） |
 | **--dry-run** | 預覽模式，顯示結果但不執行修改 |
 | **--verbose** | 顯示詳細檢查過程 |
@@ -284,16 +290,31 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ### 步驟 1.5: 依賴鏈擴展
 
-> **觸發條件**：目標目錄中有 `git diff` 變更的 `.py` 檔案時執行。
+> **觸發條件**：目標目錄中有 `git diff` 變更的 `.py` 檔案時執行。或使用 `--changed-since` 參數。
 
 從變更的程式碼出發，追蹤 import 鏈，將消費端目錄的 CLAUDE.md 加入檢查清單：
 
 ```
 1. git diff --name-only 提取變更的 .py 檔案
+   - 無 --changed-since → git diff HEAD
+   - 有 --changed-since → git log --since="$SINCE" --name-only --pretty=format:
 2. 對每個變更檔案，Grep 搜尋整個專案中 import 該模組的檔案
 3. 從消費端檔案路徑推導其所屬目錄
 4. 檢查消費端目錄是否有 CLAUDE.md → 有的話加入檢查清單
 5. 去重，合併到步驟 1 發現的 CLAUDE.md 清單
+```
+
+**--changed-since 增量模式**：
+
+當指定 `--changed-since` 時，步驟 1 只掃描 git 變更涉及的目錄，而非全部目錄。這大幅縮小檢查範圍，適合 daily-maintain 的 Phase 1 使用。
+
+```
+增量模式流程：
+1. git log --since="$SINCE" --name-only --pretty=format: → 取得變更檔案清單
+2. 過濾 .py 和 .md 檔案
+3. 映射到所屬模組目錄
+4. 只對這些目錄執行 sync 檢查
+5. 步驟 1.5 的依賴鏈擴展仍然執行（確保消費端也被檢查）
 ```
 
 ### 步驟 1.6: Sub-doc 擴展
@@ -565,6 +586,47 @@ fi
 4. 補充遺漏的模組說明
 5. 修正內部品質問題
 6. 清理元資訊
+```
+
+### Sync Summary（結構化結論，供 daily-maintain 消費）
+
+> **設計理念**：保留 sync 的完整人類可讀報告（Layer 1），同時在報告末尾附加結構化結論（Layer 2），讓 daily-maintain Phase 4 可以直接消費 sync 的發現。
+
+```
+---
+
+## Sync Summary
+
+module: {module_name}
+inconsistencies:
+  - type: outdated_description
+    location: CLAUDE.md:{行號}
+    detail: "描述的 FilterTreePipeline 已重構為 Pipeline v2"
+    confidence: high
+    source: filter_tree_pipeline.py:{行號}
+  - type: missing_reference
+    location: CLAUDE.md:{行號}
+    detail: "新模組 condition_auditor.py 未在 CLAUDE.md 提及"
+    confidence: high
+    source: condition_auditor.py:1
+  - type: signature_changed
+    location: CLAUDE.md:{行號}
+    detail: "evaluate() 新增參數 strict_mode"
+    confidence: high
+    source: setup_classifier.py:{行號}
+coverage_gaps:
+  - file: new_module.py
+    location: CLAUDE.md:(未提及)
+    detail: "新增的 .py 檔案未記錄"
+metadata_issues:
+  - type: version_number
+    location: CLAUDE.md:{行號}
+signal_noise:
+  ratio: 65%
+  status: acceptable
+  low_noise_items: 3
+sync_score: {X}%
+needs_update: true/false
 ```
 
 ### 遞歸模式輸出

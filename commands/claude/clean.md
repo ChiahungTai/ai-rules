@@ -1,7 +1,7 @@
 ---
-description: "清理 Markdown 文檔中不必要的元資訊（CLAUDE.md 及說明文檔）"
+description: "清理 Markdown 文檔中不必要的元資訊（版本號、日期、統計、Changelog）"
 usage: "/claude:clean [目錄路徑] [選項]"
-argument-hint: "預設檢查當前目錄，可指定目錄或 .md 檔案"
+argument-hint: "/claude:clean [目錄路徑] [--recursive] — 預設處理當前目錄，可指定目錄或 .md 檔案"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 permission-mode: "acceptEdits"
 ---

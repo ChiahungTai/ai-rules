@@ -1,5 +1,5 @@
 ---
-description: "簡化版文檔品質檢查器 - 檢查自洽性、矛盾性、順序、自包含、內容精準度"
+description: "文檔品質檢查器（自洽性、矛盾性、順序、自包含、精準度）。/consistency <文檔路徑>"
 usage: "/consistency <文檔路徑>"
 argument-hint: "要檢查的文檔路徑（單一檔案）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]

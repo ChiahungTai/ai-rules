@@ -1,3 +1,10 @@
+---
+description: "蒸餾肥大的 spec 文檔 — 提煉核心技術決策，去除冗餘和重複，產出精簡版 spec。"
+usage: "/distill-spec <spec 檔案路徑>"
+argument-hint: "要蒸餾的 spec 檔案路徑"
+allowed-tools: ["Read", "Write", "Edit"]
+---
+
 # /distill-spec 指令 - 技術規格蒸餾工具
 
 你是技術規格（Spec）文檔蒸餾專家，專門負責將肥大的 spec 文檔進行「蒸餾」，提煉出核心技術決策，去除冗餘細節和重複內容。

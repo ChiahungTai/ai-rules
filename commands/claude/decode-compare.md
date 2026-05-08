@@ -1,7 +1,7 @@
 ---
-description: "對比 doc-decode 結果與實際程式碼 — 驗證 CLAUDE.md 編碼精度"
-usage: "/claude:decode-compare <模組路徑> [--redecode] [--depth A|B|C|all] [--recursive]"
-argument-hint: "模組目錄路徑（如 rule_forge），必須包含 .py 實作"
+description: "對比文檔理解與實際程式碼，驗證精確度"
+usage: "/claude:decode-compare <路徑> [--redecode] [--depth A|B|C|all] [--recursive]"
+argument-hint: "/claude:decode-compare <模組路徑 或 source-docs輸出目錄> [--redecode] [--recursive] — 模組路徑（如 rule_forge）或 source-docs 目錄（如 source-docs/rule_forge/）"
 allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write"]
 ---
 
@@ -27,12 +27,54 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 **嚴格約束**：
 - **原始碼唯讀**：不修改任何 .py 檔案
-- **報告輸出**：差異報告寫入 ai-analysis/ 或指定目錄
+- **報告輸出**：差異報告寫入 decode-docs/ 或指定目錄
 - **引用來源**：所有差異必須標註具體程式碼位置（檔案:行號）
 
 ---
 
 ## 執行流程
+
+### 步驟 0: PATH RESOLVE — 路徑解析
+
+**自動偵測輸入路徑類型**，決定後續流程。
+
+```
+判斷邏輯：
+
+1. 掃描 $INPUT_PATH 目錄內容
+   - 含 .py 檔案 → 判定為「模組路徑」
+   - 含 .md 檔案（且無 .py）→ 判定為「輸出目錄」
+
+2. 模組路徑模式（標準流程）
+   - TARGET_DIR = $INPUT_PATH
+   - 直接進入步驟 1（DECODE）
+
+3. 輸出目錄模式（自動解析）
+   - 支援的目錄格式：source-docs/、decode-docs/
+   - 從目錄結構推導模組路徑：
+     a. 目錄名即模組名（如 source-docs/rule_forge/ → rule_forge）
+     b. 在專案中搜尋對應模組：
+        fd -t d {module_name} --max-depth 3
+     c. 比對 CLAUDE.md 中的模組映射表
+   - 讀取輸出目錄中的 .md 作為 pseudo code 基準
+   - TARGET_DIR = 解析出的模組路徑
+   - 跳過步驟 1（已有 pseudo code），直接進入步驟 2（SCAN）
+   - 若帶 --redecode → 忽略已有 pseudo code，從步驟 1 重新執行
+   - 若帶 --subsystem → 只讀取指定子系統文檔，只比對對應 .py
+```
+
+**路徑解析範例**：
+
+| 輸入 | 偵測結果 | TARGET_DIR | 從哪步開始 |
+|------|---------|------------|-----------|
+| `mosaic_alpha/rule_forge` | 模組路徑（含 .py） | 同輸入 | 步驟 1 |
+| `source-docs/rule_forge/` | 輸出目錄（含 .md） | `rule_forge` | 步驟 2 |
+| `source-docs/rule_forge/ --subsystem filter-tree` | 輸出目錄 + 子系統 | `rule_forge` | 步驟 2（只比對 filter-tree 相關 .py） |
+
+**錯誤處理**：
+- 無法解析模組路徑 → 報告錯誤，請使用者明確指定模組路徑
+- 輸出目錄中無 .md → 退回標準流程（視為模組路徑）
+- fd 搜尋返回多個候選 → 優先選擇含 CLAUDE.md 的目錄；仍有歧義則報告請使用者指定
 
 ### 步驟 1: DECODE — 文檔解碼
 
@@ -108,8 +150,26 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 ```
 4.1 精度總覽（按層級統計）
 4.2 詳細差異清單（每項含程式碼引用）
-4.3 編碼改善建議（優先級排序）
-4.4 整體評價
+4.3 精度門檻自動標記
+4.4 編碼改善建議（優先級排序）
+4.5 整體評價
+```
+
+#### 精度門檻自動標記
+
+```
+精度計算後，自動標記需要 CLAUDE.md 更新的項目：
+
+精度 ≥ 90% → ✅ 品質優良，無需動作
+精度 70-89% → 🟡 可接受，建議改善
+精度 < 70% → 🔴 需要更新 CLAUDE.md
+  → 標記所有 ❌ 和 🔍 項目為「CLAUDE.md needs update」
+  → 每項附帶：
+    - 影響層級（A/B/C）
+    - 程式碼引用（file.py:行號）
+    - 建議動作（在 CLAUDE.md 的哪裡加入什麼）
+
+此標記供 daily-maintain Phase 4 消費。
 ```
 
 ---
@@ -120,6 +180,8 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 |------|------|
 | **模組路徑** | 必填，要比對的模組目錄 |
 | **--redecode** | 強制重新執行 decode（不復用之前的理解） |
+| **--source-docs** | 從 source-docs/ 目錄讀取已有的 pseudo code（跳過步驟 1） |
+| **--subsystem** | 只比對指定子系統（如 `--subsystem filter-tree`），需搭配 source-docs 路徑 |
 | **--depth A** | 只比對架構級 |
 | **--depth B** | 只比對演算法級 |
 | **--depth C** | 只比對資料結構級 |
@@ -223,6 +285,12 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 # 強制重新 decode（不復用之前的理解）
 /claude:decode-compare rule_forge --redecode
+
+# 從 source-docs 讀取已有 pseudo code，增量比對
+/claude:decode-compare source-docs/rule_forge/
+
+# 增量比對：只比對 filter-tree 子系統
+/claude:decode-compare source-docs/rule_forge/ --subsystem filter-tree
 
 # 遞迴比對所有子模組
 /claude:decode-compare --recursive

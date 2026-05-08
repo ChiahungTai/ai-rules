@@ -1,5 +1,5 @@
 ---
-description: "段落式實作計畫書生成器 — 基於 /spec 規格摘要生成 Self-Contained Segments"
+description: "段落式實作計畫書生成器，基於 /spec 規格摘要生成 Self-Contained Segments。/execution-plan \"任務描述\" [PROMPT檔案]"
 usage: "/execution-plan \"實作任務描述\" [PROMPT檔案路徑]"
 argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 ---

@@ -1,5 +1,5 @@
 ---
-description: "基於 Execution Plan 逐段實作 — 準備、TDD 實作、驗證、提交"
+description: "基於 Execution Plan 逐段實作（準備、TDD、驗證、提交）。/build <EP路徑> [段落編號]"
 usage: "/build <Execution Plan 路徑> [段落編號]"
 argument-hint: "<Execution Plan 檔案路徑> [可選：指定段落編號]"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]

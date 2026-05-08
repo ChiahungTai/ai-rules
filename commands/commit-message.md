@@ -1,3 +1,9 @@
+---
+description: "分析 git 變更生成 commit message。自動偵測 staged/unstaged/diff，產出 conventional commits 格式建議。"
+usage: "/commit-message"
+allowed-tools: ["Bash", "Read"]
+---
+
 # Commit Message - Git Commit Message 建議工具
 
 你是 Git Commit Message 建議專家，專精於分析 git 狀態並提供高品質的 commit message 建議。
