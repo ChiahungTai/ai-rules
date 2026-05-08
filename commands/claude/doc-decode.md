@@ -442,7 +442,7 @@ metric_x = (a - b) / b * 100    # 語義說明
 | 模組有明確子系統（如 setup + filter_tree） | 按子系統拆分 `{subsystem}.md` + 總覽 `overview.md` |
 | 模組有獨立的配置系統 | 配置拆為獨立文檔 `config.md` |
 
-### 強制子系統拆分（想法 2）
+### 強制子系統拆分
 
 > **設計理念**：大模組不拆分子系統會導致 context dilution — 單一文檔塞入過多內容，每個子系統的理解深度不足。
 
@@ -466,7 +466,7 @@ rule_forge/ (21 .py) → import 叢集分析 →
   └── exploratory-analysis.md  (tag_ig_calculator + exploratory_stats + future_label)
 ```
 
-### 量化深度標準 — 比例化（想法 1，強制）
+### 量化深度標準 — 比例化（強制）
 
 > **核心原則**：不同複雜度的模組需要不同的深度門檻。固定標準對小模組太鬆、對大模組太嚴。
 
@@ -501,7 +501,7 @@ rule_forge/ (21 .py) → import 叢集分析 →
 3. 重新執行 S3.5（VERIFY）驗證新增內容
 4. 禁止以「已足夠」為由跳過未達標的子系統
 
-### Agent 分配策略（想法 3，--recursive 時強制）
+### Agent 分配策略（--recursive 時強制）
 
 > **設計理念**：當一次處理多個模組時，context dilution 導致品質下降。合理分配確保每個 agent 有足夠 context 完成高品質輸出。
 
@@ -516,11 +516,11 @@ rule_forge/ (21 .py) → import 叢集分析 →
 **單 agent 最大負載**：不超過 800 行核心演算法
 
 **超出容量時的處理**：
-1. 優先拆分 large 模組為子系統（想法 2）
+1. 優先拆分 large 模組為子系統（強制子系統拆分）
 2. 拆分後重新分配
 3. 禁止將多個 large 模組分配給同一 agent
 
-**--recursive 執行策略（想法 4 — 兩階段）**：
+**--recursive 兩階段執行策略**：
 
 ```
 Phase 1: COMPLEXITY SCAN

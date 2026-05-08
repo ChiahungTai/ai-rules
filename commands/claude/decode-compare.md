@@ -1,7 +1,7 @@
 ---
 description: "對比文檔理解與實際程式碼，驗證精確度"
-usage: "/claude:decode-compare <路徑> [--redecode] [--depth A|B|C|all] [--recursive]"
-argument-hint: "/claude:decode-compare <模組路徑 或 source-docs輸出目錄> [--redecode] [--recursive] — 模組路徑（如 rule_forge）或 source-docs 目錄（如 source-docs/rule_forge/）"
+usage: "/claude:decode-compare <路徑> [--redecode] [--source-docs] [--subsystem NAME] [--depth A|B|C|all] [--recursive]"
+argument-hint: "/claude:decode-compare <模組路徑 或 source-docs輸出目錄> [--redecode] [--source-docs] [--subsystem NAME] [--recursive] — 模組路徑（如 rule_forge）或 source-docs 目錄（如 source-docs/rule_forge/）"
 allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write"]
 ---
 

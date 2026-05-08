@@ -391,9 +391,9 @@ for path in "${references[file_paths]}"; do
     fi
 done
 
-# 驗證類別/函數（分別指定 --include）
+# 驗證類別/函數
 for name in "${references[class_names]}"; do
-    if grep -r "class $name" $TARGET_DIR --include="*.py" --include="*.pyx" --include="*.pxd"; then
+    if rg -q "class $name" -t py $TARGET_DIR; then
         echo "✅ $name"
     else
         echo "⚠️  $name 未找到"
@@ -405,7 +405,7 @@ done
 
 ```bash
 # 重要！掃描所有命令檔案，檢查是否被記錄
-ALL_COMMAND_FILES=$(find $TARGET_DIR -name "*.md" -type f | grep -v "CLAUDE.md")
+ALL_COMMAND_FILES=$(fd -e md . $TARGET_DIR --exclude CLAUDE.md)
 
 for cmd_file in $ALL_COMMAND_FILES; do
     # 推導命令名稱
@@ -414,7 +414,7 @@ for cmd_file in $ALL_COMMAND_FILES; do
     cmd_name=$(echo "$cmd_file" | sed "s|$TARGET_DIR||" | sed 's|\.md$||' | sed 's|^/|/|')
 
     # 檢查是否在 CLAUDE.md 中
-    if grep -q "$cmd_name" "$CLAUDE_MD"; then
+    if rg -q "$cmd_name" "$CLAUDE_MD"; then
         echo "✅ $cmd_name 已記錄"
     else
         echo "❌ $cmd_name 未記錄"
@@ -426,13 +426,13 @@ done
 
 ```bash
 # 如果目錄中有程式碼檔案，檢查是否被記錄
-CODE_FILES=$(find $TARGET_DIR \( -name "*.py" -o -name "*.pyx" -o -name "*.pxd" \) -type f 2>/dev/null)
+CODE_FILES=$(fd -e py -e pyx -e pxd . $TARGET_DIR)
 if [ -n "$CODE_FILES" ]; then
     echo ""
     echo "### 程式碼檔案涵蓋性檢查"
     for code_file in $CODE_FILES; do
         filename=$(basename "$code_file")
-        if grep -q "$filename" "$CLAUDE_MD"; then
+        if rg -q "$filename" "$CLAUDE_MD"; then
             echo "✅ $filename 已記錄"
         else
             echo "⚠️  $filename 未記錄"

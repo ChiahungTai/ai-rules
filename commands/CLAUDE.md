@@ -66,6 +66,7 @@ ls -la /Users/ctai/Github/ai-rules/commands/
 - `/parallel-code-review` - 智能並行代碼審查（完整框架）
 - `/consistency` - 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度）
 - `/claude:clean` - 清理 CLAUDE.md 中不必要的元資訊
+- `/claude:daily-maintain` - 每日自動化 CLAUDE.md 維護（增量偵測、重建理解文檔、更新 CLAUDE.md、morning report）
 - `/claude:distill` - 蒸餾 CLAUDE.md，提煉核心精華
 - `/claude:sync` - 檢查 CLAUDE.md 與程式碼的同步性
 - `/commit-message` - Git 提交訊息生成
