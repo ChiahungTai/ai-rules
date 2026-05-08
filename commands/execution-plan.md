@@ -183,6 +183,12 @@ class ComponentFactory:
 - **品質保證**: [整體品質檢查清單]
 ```
 
+### 輸出路徑
+
+- **預設位置**: `ai-analysis/execution-plans/`
+- **檔名**: 從任務描述自動衍生（kebab-case，如 `feature-x-ep.md`）
+- **目錄自動建立**: 若 `ai-analysis/execution-plans/` 不存在，先建立
+
 ### 交付物要求
 - **單一實作計畫書**: 包含所有段落設計
 - **Self-Contained 段落**: 每個段落獨立可執行

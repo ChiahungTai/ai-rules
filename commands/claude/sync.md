@@ -224,6 +224,31 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 **範例**：`rule_forge/` 的核心 class 變更 → 不只 `rule_forge/CLAUDE.md`，連 `examples/rule_forge/CLAUDE.md` 和引用該 API 的說明文檔也需要檢查同步性。
 
+### 角度九：導航有效性檢查
+
+> **核心原則**：CLAUDE.md 的終極價值是讓 AI 從「概念」定位到「程式碼」。讀完 CLAUDE.md 後，AI 應能在 3 秒內回答「這個概念在哪裡實作？」。
+
+**判斷標準**：抽取 3-5 個關鍵概念，驗證每個概念是否有指向具體檔案、class 或 function 的導航路徑。若無法從文檔定位到程式碼，標記為導航缺口。
+
+| 檢查維度 | 說明 | 驗證方式 |
+|---------|------|----------|
+| **概念→程式碼連結** | 文檔引入的概念是否有檔案路徑或 class/function 名稱的指引 | 抽取 3-5 個關鍵概念，驗證是否能在 CLAUDE.md 中找到對應的程式碼位置（檔案名、class 名、或 function 名） |
+| **職責→檔案對應** | 文檔描述的每項職責是否指向具體檔案 | 對照檔案結構表或模組描述，驗證每項提到的職責都有對應的檔案指引 |
+| **跨模組依賴導航** | 外部模組引用是否具體到 class/function（不只是模組名） | 檢查 CLAUDE.md 中提到的外部模組依賴，驗證是否有「哪個 class/function」的指引，而非只寫模組名 |
+| **資料流可追蹤性** | 多步驟流程中，step 間的 input/output 是否可追蹤 | 當文檔描述了多步驟流程時，驗證：(1) 每個 step 有入口 function 的指引；(2) step 間的產出型別有描述；(3) 下游 step 的輸入來源可追蹤。無多步驟流程的模組標 N/A |
+
+**導航 Decoder Test**：
+
+基於 CLAUDE.md 內容，嘗試回答以下導航問題（不查閱源碼）：
+
+| 問題 | 通過標準 |
+|------|---------|
+| 「我要修改 X 的邏輯，打開哪個檔案？」 | 能定位到具體檔案名 |
+| 「Y 這個概念在哪裡實作？」 | 能指向檔案 + class 或 function 名 |
+| 「Z 的上游資料從哪來？」 | 能追蹤到上游步驟和產出型別 |
+
+**失敗處理**：若導航問題無法從 CLAUDE.md 回答，標記為導航缺口（navigation gap），建議補充概念→程式碼的對應指引。
+
 ---
 
 ## 🔧 命令介面設計
@@ -486,6 +511,17 @@ fi
 - 連結是否有效
 ```
 
+### 步驟 10: 導航有效性檢查（預設執行）
+
+```
+1. 從 CLAUDE.md 抽取 3-5 個關鍵概念
+2. 驗證每個概念是否有指向具體檔案、class 或 function 的導航路徑
+3. 對照職責描述與檔案結構，驗證每項職責有對應的檔案指引
+4. 檢查跨模組依賴是否具體到 class/function（不只是模組名）
+5. 對多步驟流程驗證 step 間 input/output 可追蹤性（無流程標 N/A）
+6. 執行導航 Decoder Test：不查源碼，嘗試回答 3 個導航問題
+```
+
 ---
 
 ## 📊 輸出格式
@@ -573,19 +609,45 @@ fi
 - Signal/Noise Ratio: [X]% [✅/⚠️/❌]
 - 💡 建議動作: [保持現狀 / 執行 /claude:distill]
 
+### 🧭 導航有效性檢查
+
+#### 概念→程式碼連結
+抽查概念: [概念A, 概念B, 概念C]
+- ✅ [概念A]: → `module/file.py:ClassName`
+- ❌ [概念B]: 無檔案或 class 指引（導航缺口）
+- ✅ [概念C]: → `module/file.py` + function 名
+
+#### 職責→檔案對應
+- ✅ [職責A]: 指向 file_a.py
+- ⚠️ [職責B]: 有描述但無檔案指引
+
+#### 跨模組依賴導航
+- ✅ [依賴A]: 具體到 `other_module.ClassName`
+- ❌ [依賴B]: 只寫模組名，缺少 class/function 指引
+
+#### 資料流可追蹤性 [✅/⚠️/❌/N/A]
+[多步驟流程的 step 間銜接驗證結果，無流程標 N/A]
+
+#### 導航 Decoder Test
+- Q1「修改 X 打開哪個檔案？」: [✅ 可回答 / ❌ 無法定位]
+- Q2「Y 在哪裡實作？」: [✅ 可回答 / ❌ 無法定位]
+- Q3「Z 的上游從哪來？」: [✅ 可回答 / ❌ 無法定位]
+
 ### 📊 總結
 - 程式碼一致性: X%
 - 涵蓋性: Y%
-- 內部品質: Z/100
+- 導航有效性: Z% [✅/⚠️/❌]
+- 內部品質: W/100
 - 元資訊: 需要清理
 
 建議優先處理：
 1. 移除不存在的檔案引用
 2. 更新變更的 API 簽名
 3. 修正語義不準確的描述（spot-check 發現）
-4. 補充遺漏的模組說明
-5. 修正內部品質問題
-6. 清理元資訊
+4. 補充導航缺口（概念→程式碼連結缺失處）
+5. 補充遺漏的模組說明
+6. 修正內部品質問題
+7. 清理元資訊
 ```
 
 ### Sync Summary（結構化結論，供 daily-maintain 消費）
@@ -621,6 +683,15 @@ coverage_gaps:
 metadata_issues:
   - type: version_number
     location: CLAUDE.md:{行號}
+navigation_gaps:
+  - concept: "{概念名稱}"
+    location: CLAUDE.md:{行號}
+    detail: "提到概念但無檔案/class 指引"
+    confidence: high
+  - dependency: "{跨模組依賴}"
+    location: CLAUDE.md:{行號}
+    detail: "只寫模組名，缺少具體 class/function 指引"
+    confidence: medium
 signal_noise:
   ratio: 65%
   status: acceptable
@@ -818,6 +889,13 @@ needs_update: true/false
 - [ ] 檢查了精準度（技術描述、程式碼可執行）
 - [ ] 評估了 Signal/Noise Ratio（High Signal 比例、Low Noise 識別）
 - [ ] 檢查了引用語法正確性（`@` vs `[描述](path)` 選擇）
+
+### 導航有效性檢查（預設執行）
+- [ ] 抽取了 3-5 個關鍵概念，驗證每個概念是否有程式碼位置指引
+- [ ] 對照職責描述與檔案結構，驗證每項職責有對應的檔案指引
+- [ ] 檢查了跨模組依賴是否具體到 class/function（不只是模組名）
+- [ ] 對多步驟流程驗證了 step 間 input/output 可追蹤性（無流程的模組標 N/A）
+- [ ] 執行了導航 Decoder Test（3 個導航問題，不查源碼）
 
 ### 連鎖影響檢查
 - [ ] 追蹤了 import 鏈找出消費端目錄

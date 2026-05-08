@@ -186,7 +186,7 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 ```
 1.1 對每個受影響模組執行 sync 邏輯（帶 --changed-since $LAST_RUN）
     讀取 CLAUDE.md + 對應 .py
-    8 角度檢查（code consistency, coverage, metadata, distillation, internal quality, signal/noise, reference syntax, consumer chain）
+    9 角度檢查（code consistency, coverage, metadata, distillation, internal quality, signal/noise, reference syntax, consumer chain, navigation effectiveness）
 
 1.2 收集不一致
     每項標記：
