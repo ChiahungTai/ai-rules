@@ -143,11 +143,77 @@ permission-mode: "acceptEdits"
 3. **Agent 職責**：每個 Agent 執行完整 TDD 循環（RED → GREEN → REFACTOR → 驗證）
 4. **Wave 間序列**：同一 wave 所有 Agent 完成後 → 整合驗證 → Commit → 下一 wave
 
-Agent 執行約束：
+##### Agent Context 邊界
+
+Agent 擁有獨立的 context window，與主對話和其他 Agent 完全隔離：
+
+| 內容 | Agent 可見 | 說明 |
+|------|-----------|------|
+| CLAUDE.md / rules/ | ✅ | 專案指令自動載入 |
+| 工作目錄 | ✅ | 繼承主對話 CWD |
+| 主對話歷史 | ❌ | EP 準備階段的分析結論、架構決策完全看不到 |
+| 其他 Agent 結果 | ❌ | 各 Agent 獨立 context |
+| EP 準備結論 | ❌ | 除非主 LLM 在 prompt 中明確傳遞 |
+
+**因此：主 LLM 傳給 Agent 的 prompt 是 Agent 理解任務的唯一來源。** CLAUDE.md 提供規範，但不提供任務上下文。
+
+##### 主 LLM 的 Prompt 結構
+
+主 LLM 啟動 Agent 時，prompt 必須包含以下欄位，確保 Agent 能獨立完成任務：
+
+```markdown
+## 任務：段落 {N} — {段落名稱}
+
+### EP 段落內容
+{完整貼上該段落的 Context、Pseudo Code、驗證策略、核心要點}
+
+### 準備階段結論
+- 現有程式碼狀態：{相關檔案的當前實作摘要}
+- 架構決策：{準備階段做出的關鍵決策及理由}
+- 技術選型確認：{使用的套件、API、模式}
+
+### 語義約束
+- {與其他段落的共享假設，或「無」}
+
+### 相關檔案路徑
+- 必讀：{Agent 應先讀取的檔案清單}
+- 可修改：{Agent 有權修改的檔案範圍}
+- 禁止修改：{共用檔案，由主 Agent 統一處理}
+```
+
+##### Agent 啟動後的 Context 收集流程
+
+Agent 收到 prompt 後，按以下順序建立 context：
+
+1. **讀取 EP 段落** — prompt 中已包含，確認理解
+2. **讀取相關檔案** — 按 prompt 中的「必讀」清單逐一讀取
+3. **讀取相關 CLAUDE.md** — 修改目錄及上層目錄的 CLAUDE.md（如存在）
+4. **確認現有程式碼狀態** — 與 prompt 中的「準備階段結論」交叉驗證
+5. **發現不一致時** — 以實際程式碼為準，記錄偏差
+
+##### Skills 處理策略
+
+Agent 不會自動載入主對話的 skills。採用以下策略：
+
+- **`test-driven-development`**、**`incremental-implementation`**：在 prompt 中明確指示 Agent invoke 這些 skills
+- **`debugging-and-error-recovery`**：Agent 遇到錯誤時自行 invoke
+- **`autonomous-execution`**：在 prompt 中明確指示 Agent invoke
+
+Prompt 中的指示範例：
+```
+執行前先 invoke 以下 skills 載入方法論：
+- test-driven-development
+- incremental-implementation
+- autonomous-execution
+```
+
+##### Agent 執行約束
+
 - 每個 Agent 只負責一個段落，遵循完整的 TDD 流程
-- Agent 之間不共享狀態，透過 EP Context 提供所有必要資訊
+- Agent 之間不共享狀態，所有必要資訊透過 prompt 傳遞
 - 共用檔案（如 `__init__.py`）的修改統一由主 Agent 在 wave 間處理，Agent 僅負責段落專屬檔案
 - 主 Agent 監控 Agent 結果，失敗時記錄 ⚠️ 並繼續下一 wave
+- Agent 發現語義約束衝突時，立即回報主 Agent，不自行決定
 
 TDD 的執行細節（怎麼寫測、怎麼寫最少程式碼、怎麼重構）遵循 `test-driven-development` skill。
 範圍紀律和簡潔優先遵循 `incremental-implementation` skill。
