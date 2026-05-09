@@ -387,6 +387,53 @@ metric_x = (a - b) / b * 100    # 語義說明
     - 不加統計資訊、版本號、日期
 ```
 
+### --subsystem 模式：子系統級增量重建
+
+> **啟用條件**：`/claude:doc-decode <模組路徑> --source-aided --subsystem <子系統列表>`
+
+**設計理念**：daily-maintain Phase 0.5 已識別受影響的子系統。只重建變更的子系統，跳過未變更的子系統，大幅節省 context 和 token。
+
+**觸發條件**：
+- 必須搭配 `--source-aided` 和 `--output`（指向既有 source-docs/ 目錄）
+- 子系統列表逗號分隔：`--subsystem trend,oscillator`
+
+**執行流程**：
+
+```
+1. 讀取 --output 目錄的既有子系統清單
+   （從 overview.md 或目錄結構推導）
+
+2. 對每個指定子系統執行 S1→S2→S3（同 source-aided 標準流程）
+   - S1: 讀取 CLAUDE.md + 引用文檔
+   - S2: 只讀取該子系統相關的 .py（不讀其他子系統的 .py）
+   - S3: 重建該子系統的理解文檔
+   - S3.5: 交叉驗證
+
+3. 跳過未指定的子系統（保留既有 source-docs 不動）
+
+4. Overview 輕量同步
+   讀取每個受影響子系統文檔的 summary 段落
+   比對 overview.md 中的對應段落
+   → 有差異則 Edit 更新（不改寫整份 overview.md）
+   不重新讀 .py（summary 來源於子系統文檔，非程式碼直接提取）
+```
+
+**約束**：
+- 跳過的子系統文檔**完全不被觸及**（不讀、不改）
+- Overview 同步是增量 Edit，不是全量重寫
+- 若 overview.md 不存在或格式異常 → 降級為全模組重建
+
+**輸出**：
+```
+[subsystem-mode] Rebuilding 2/5 subsystems for rule_forge
+  ✅ trend.md (重建)
+  ✅ oscillator.md (重建)
+  ⏭️ condition-system.md (跳過)
+  ⏭️ filter-tree.md (跳過)
+  ⏭️ backbone-pipeline.md (跳過)
+  ✅ overview.md (輕量同步, 2 處更新)
+```
+
 ### 輸出格式（source-aided）
 
 ```markdown
@@ -589,6 +636,7 @@ Phase 2: DECODE
 | **--source-aided** | 程式碼輔助重建模式：讀取 .py + 文檔，產出完整理解文檔（與 --depth 互斥） |
 | **--output** | 輸出目錄（預設模式：`decode-docs/`，source-aided：`source-docs/`） |
 | **--recursive, -r** | 遞迴處理所有子目錄的 CLAUDE.md。可與 --source-aided 組合，每個子模組獨立產出文檔 |
+| **--subsystem** | 只重建指定子系統（逗號分隔，如 `--subsystem trend,oscillator`），跳過其他子系統。僅 source-aided 模式，需搭配 `--output` 指向既有 source-docs/ 目錄 |
 | **--max-agents N** | 平行 agent 上限（預設 4，避免 rate limit） |
 
 ---

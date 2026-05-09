@@ -117,22 +117,55 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 0.5.1 讀取上次執行時間
     從 source-docs/.last-run 讀取（無則用 git log -1 --format=%ci）
 
-0.5.2 Git 變更偵測
+0.5.2 Git 變更偵測（.py + CLAUDE.md）
     git log --since="$LAST_RUN" --name-only --pretty=format:
-    過濾 .py 檔案，映射到所屬模組
+    過濾 .py 和 CLAUDE.md，分類變更
 
-    映射規則：
+    變更分類：
+
+    | 變更類型 | 判斷方式 | 處理策略 |
+    |---------|---------|---------|
+    | .py 修改 | git diff 中有 ± 行 | 子系統級重建（UC1） |
+    | .py 刪除 | git diff 中只有 - 行 | 清理 source-docs 殘留引用（UC6） |
+    | .py 新增 | git diff 中只有 + 行 | 全模組重建（UC4） |
+    | CLAUDE.md 修改 | 路徑匹配 CLAUDE.md | 定向修正 source-docs（UC2） |
+
+    映射規則（.py → 模組）：
     mosaic_alpha/rule_forge/engine.py → rule_forge
     mosaic_alpha/common/enums.py → common
-    mosaic_alpha/rule_forge/types.py → rule_forge
 
-0.5.3 比對既有 source-docs
+    輸出：每個受影響模組的變更類型 + 受影響子系統清單
+
+0.5.3 .py 修改 — 子系統級偵測
     對每個受影響模組：
     - 讀 source-docs/{module}/overview.md 的子系統清單
     - 比對 git 變更的 .py 屬於哪個子系統
     - 標記需要重建的子系統
 
-    輸出：受影響模組清單 + 受影響子系統清單
+0.5.4 .py 刪除 — source-docs 殘留清理
+    對每個被刪除的 .py：
+    rg "source:.*{deleted_file}" source-docs/{module}/
+    → 移除對應的程式碼段落（獨立 Edit，git diff 精確到行）
+    → 若某子系統文件的所有 source 段落都來自已刪除檔案 → 標記過時
+
+0.5.5 .py 新增 — 全模組重建
+    新增 .py 改變模組結構（import 圖可能改變）
+    → 該模組標記 "needs full decode"（不做子系統級判斷）
+
+0.5.6 CLAUDE.md 修改 — 定向修正模式
+    當模組只有 CLAUDE.md 變更、無 .py 變更時：
+    - 標記為 "claude-md-only change"
+    - 不觸發 doc-decode（.py 沒變，逐字抄錄段落仍正確）
+    - 改用定向修正：讀 CLAUDE.md diff → 更新 source-docs 對應段落
+      - 設計決策新增/修正 → 更新 source-docs 的「設計決策記錄」段落
+      - 描述修正 → 更新 source-docs 中對應描述
+      - 結構重組（少見）→ 降級為全模組重建
+
+0.5.7 source-docs dirty 偵測
+    git diff --name-only source-docs/
+    → 有 uncommitted changes 的檔案 → 跳過處理，記入 morning report 提醒
+
+    輸出：受影響模組清單（含變更類型）+ 受影響子系統清單 + dirty 檔案清單
 ```
 
 ### Phase 0.7: RIPPLE ANALYSIS — 連鎖影響偵測（--ripple 模式）
@@ -178,7 +211,25 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
       → datasets (uses Interval) [新增至處理清單]
     ```
 
-    輸出：擴展後的受影響模組清單（嵌入 morning report）
+0.7.5 段落級 ripple 掃描（受影響模組）
+    對 0.7.3 加入處理清單的下游模組：
+    對每個 HIGH 影響的變更，識別受影響的型別/函數名稱，
+    grep source-docs 中引用該名稱的段落，定位到行級：
+
+    rg "{TypeName}" source-docs/{module}/
+
+    輸出段落級定位：
+    ```
+    common/enums.py Interval 新增值 [HIGH]
+      → source-docs/ui/overview.md:53 (Interval 使用場景)
+      → source-docs/ui/kchart-rendering.md:786 (kline_num 映射)
+      → source-docs/rule_forge/condition-system.md:34 (Interval condition)
+      → 建議人工 review 這 3 個段落
+    ```
+
+    不自動更新 — 只標記為「需要 review」嵌入 morning report。
+
+    輸出：擴展後的受影響模組清單 + 段落級定位（嵌入 morning report）
 ```
 
 ### Phase 1: SYNC — 同步性檢查
@@ -203,9 +254,21 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 
 ### Phase 2: DOC-DECODE — 理解文檔重建
 
-> **核心步驟**。按 Phase 0 分配啟動 parallel agents。
+> **核心步驟**。按 Phase 0.5 分類結果分流處理。
 
 ```
+2.0 變更類型分流
+
+    根據 Phase 0.5 的分類，每個受影響模組走不同路徑：
+
+    | Phase 0.5 分類 | Phase 2 處理方式 | 說明 |
+    |----------------|----------------|------|
+    | .py 修改（有子系統清單） | doc-decode --source-aided --subsystem {列表} | 子系統級增量 |
+    | .py 刪除（已在 0.5.4 清理） | 跳過 | 殘留引用已在 Phase 0.5 清理 |
+    | .py 新增 | doc-decode --source-aided（全模組重建） | 結構變了，需全量 |
+    | CLAUDE.md-only 變更 | 定向修正（見 2.5） | .py 沒變，不跑 doc-decode |
+    | source-docs dirty | 跳過，記入 morning report | 保留手動編輯 |
+
 2.1 啟動 Agent Pool
     按 --max-agents N 啟動 N 個 agent
 
@@ -216,16 +279,42 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
     | medium | 2 模組/agent | 一次 decode 整個模組 |
     | small | 3 模組/agent | 一次 decode 整個模組 |
 
-2.2 每個 Agent 執行 doc-decode --source-aided 邏輯
+2.2 子系統增量重建（UC1）
+    對 .py 修改的模組，傳遞 Phase 0.5 的受影響子系統清單：
+    doc-decode {module} --source-aided --output source-docs/{module}/ --subsystem {子系統列表}
 
-    遵循 doc-decode.md 的完整流程（S1→S2→S3）。
-    品質標準見執行約束（比例化深度標準、強制子系統拆分、覆蓋清單）。
+    遵循 doc-decode.md 的 --subsystem 模式流程（S1→S2→S3 + overview 輕量同步）。
+    未指定的子系統文檔不被觸及。
 
-2.3 寫入 source-docs/
+2.3 全模組重建（UC4）
+    對 .py 新增的模組，執行完整 doc-decode：
+    doc-decode {module} --source-aided --output source-docs/{module}/
+
+2.4 寫入 source-docs/
     模組文檔 → source-docs/{module}/
     知識圖譜 → source-docs/dependency-graph.md（僅 --full 時重建）
 
-2.4 更新 .last-run
+2.5 CLAUDE.md 定向修正（UC2）
+    當模組只有 CLAUDE.md 變更、無 .py 變更時：
+
+    2.5.1 讀取 CLAUDE.md diff
+        git diff HEAD~{n}..HEAD -- {module}/CLAUDE.md
+
+    2.5.2 分類變更
+        | 變更類型 | 處理方式 |
+        |---------|---------|
+        | 新增設計決策段落 | 新增到 source-docs 的「設計決策記錄」段落 |
+        | 修正描述 | 更新 source-docs 中對應描述 |
+        | 刪除內容 | 從 source-docs 移除對應內容 |
+        | 結構重組（章節大幅調整） | 降級為全模組重建（跑 2.3） |
+
+    2.5.3 執行定向修正
+        對每項變更：Read source-docs 對應檔案 → Edit 精確替換
+
+    不讀取 .py（逐字抄錄段落仍正確）。
+    品質標準：只修正 CLAUDE.md 變更對應的段落，不改其他內容。
+
+2.6 更新 .last-run
     寫入 source-docs/.last-run = 當前時間戳
 ```
 
@@ -255,6 +344,15 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
     - 影響層級（A/B/C）
     - 程式碼引用（file.py:行號）
     - 建議動作（在 CLAUDE.md 的哪裡加入什麼）
+
+3.4 產出 ACTION（UC6）
+    遵循 decode-compare §步驟 5 的 ACTION 格式，產出可執行的修改建議：
+    - High Signal ACTION → 自動套用（Phase 4 處理）
+    - Medium Signal ACTION → 標記為 ⚠️ 建議修改（morning report）
+    - Low Noise 項目 → 跳過
+
+    ACTION 來源：decode-compare 的 Step 5（Signal/Noise 過濾 + 修改文字生成）
+    輸出嵌入 Phase 3 報告，供 Phase 4 消費。
 ```
 
 ### Phase 4: CLAUDE.md UPDATE — 知識更新
@@ -263,8 +361,10 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 
 ```
 4.1 合併改善來源
-    Phase 1（sync 不一致）+ Phase 3（decode-compare 缺口）
-    → 統一改善清單
+    三個來源統一為改善清單：
+    - Phase 1（sync 不一致）
+    - Phase 3（decode-compare 缺口）
+    - Phase 3 ACTION（High Signal → 自動套用，Medium Signal → 建議修改）
 
 4.2 修改分類（安全邊界）
 

@@ -1,7 +1,7 @@
 ---
 description: "對比文檔理解與實際程式碼，驗證精確度"
-usage: "/claude:decode-compare <路徑> [--redecode] [--source-docs] [--subsystem NAME] [--depth A|B|C|all] [--recursive]"
-argument-hint: "/claude:decode-compare <模組路徑 或 source-docs輸出目錄> [--redecode] [--source-docs] [--subsystem NAME] [--recursive] — 模組路徑（如 rule_forge）或 source-docs 目錄（如 source-docs/rule_forge/）"
+usage: "/claude:decode-compare <路徑> [--redecode] [--subsystem NAME] [--depth A|B|C|all] [--recursive]"
+argument-hint: "/claude:decode-compare <模組路徑 或輸出目錄> [--redecode] [--subsystem NAME] [--recursive] — 模組路徑（如 rule_forge）、decode-docs/（純文檔理解）或 source-docs/（source-aided）"
 allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write"]
 ---
 
@@ -56,20 +56,27 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
      b. 在專案中搜尋對應模組：
         fd -t d {module_name} --max-depth 3
      c. 比對 CLAUDE.md 中的模組映射表
-   - 讀取輸出目錄中的 .md 作為 pseudo code 基準
+   - 讀取輸出目錄中的 .md 作為比對基準
    - TARGET_DIR = 解析出的模組路徑
-   - 跳過步驟 1（已有 pseudo code），直接進入步驟 2（SCAN）
-   - 若帶 --redecode → 忽略已有 pseudo code，從步驟 1 重新執行
+   - 跳過步驟 1（已有比對基準），直接進入步驟 2（SCAN）
+   - 若帶 --redecode → 忽略已有比對基準，從步驟 1 重新執行
    - 若帶 --subsystem → 只讀取指定子系統文檔，只比對對應 .py
+
+4. 基準來源偵測（source-aided 自動推導）
+   - 路徑含 source-docs/ → SOURCE_AIDED=true（基準來自 source-aided 模式）
+   - 路徑含 decode-docs/ → SOURCE_AIDED=false（基準來自純文檔解碼）
+   - 模組路徑（步驟 1 自行 DECODE）→ SOURCE_AIDED=false
+   - SOURCE_AIDED 影響報告標註，不影響比對流程（Step 2-5 相同）
 ```
 
 **路徑解析範例**：
 
-| 輸入 | 偵測結果 | TARGET_DIR | 從哪步開始 |
-|------|---------|------------|-----------|
-| `mosaic_alpha/rule_forge` | 模組路徑（含 .py） | 同輸入 | 步驟 1 |
-| `source-docs/rule_forge/` | 輸出目錄（含 .md） | `rule_forge` | 步驟 2 |
-| `source-docs/rule_forge/ --subsystem filter-tree` | 輸出目錄 + 子系統 | `rule_forge` | 步驟 2（只比對 filter-tree 相關 .py） |
+| 輸入 | 偵測結果 | TARGET_DIR | SOURCE_AIDED | 從哪步開始 |
+|------|---------|------------|--------------|-----------|
+| `mosaic_alpha/rule_forge` | 模組路徑（含 .py） | 同輸入 | false | 步驟 1 |
+| `decode-docs/rule_forge/` | 輸出目錄（純文檔解碼） | `rule_forge` | false | 步驟 2 |
+| `source-docs/rule_forge/` | 輸出目錄（source-aided） | `rule_forge` | true | 步驟 2 |
+| `source-docs/rule_forge/ --subsystem filter-tree` | 輸出目錄 + 子系統 | `rule_forge` | true | 步驟 2（只比對 filter-tree 相關 .py） |
 
 **錯誤處理**：
 - 無法解析模組路徑 → 報告錯誤，請使用者明確指定模組路徑
@@ -255,8 +262,7 @@ ACTION 按「導航影響力」排序：
 |------|------|
 | **模組路徑** | 必填，要比對的模組目錄 |
 | **--redecode** | 強制重新執行 decode（不復用之前的理解） |
-| **--source-docs** | 從 source-docs/ 目錄讀取已有的 pseudo code（跳過步驟 1） |
-| **--subsystem** | 只比對指定子系統（如 `--subsystem filter-tree`），需搭配 source-docs 路徑 |
+| **--subsystem** | 只比對指定子系統（如 `--subsystem filter-tree`），需搭配輸出目錄路徑 |
 | **--depth A** | 只比對架構級 |
 | **--depth B** | 只比對演算法級 |
 | **--depth C** | 只比對資料結構級 |
@@ -271,7 +277,7 @@ ACTION 按「導航影響力」排序：
 ```markdown
 ## Decode Compare Report — {module_name}
 
-**比對基準**: doc-decode pseudo code（來自 CLAUDE.md + N 個引用文檔）
+**比對基準**: doc-decode 輸出（{純文檔解碼 | source-aided}，來自 CLAUDE.md + N 個引用文檔）
 **比對目標**: N 個 .py 檔案
 **掃描檔案**: [列出實際讀取的 .py 檔案]
 
@@ -384,7 +390,10 @@ ACTION 按「導航影響力」排序：
 # 強制重新 decode（不復用之前的理解）
 /claude:decode-compare rule_forge --redecode
 
-# 從 source-docs 讀取已有 pseudo code，增量比對
+# 從 decode-docs 讀取純文檔解碼結果，比對實際程式碼
+/claude:decode-compare decode-docs/rule_forge/
+
+# 從 source-docs 讀取 source-aided 結果，比對實際程式碼
 /claude:decode-compare source-docs/rule_forge/
 
 # 增量比對：只比對 filter-tree 子系統
