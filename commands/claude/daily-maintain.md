@@ -1,14 +1,14 @@
 ---
-description: "每日自動化 CLAUDE.md 維護 — 增量偵測變更、重建理解文檔、更新 CLAUDE.md、產出 morning report"
-usage: "/claude:daily-maintain [--full] [--ripple] [--max-agents N] [--dry-run] [--modules a,b,c]"
-argument-hint: "/claude:daily-maintain — 自動偵測模式（有 source-docs/ → incremental，無 → full）"
+description: "每日自動化 CLAUDE.md 維護 — 掃描、修正、重建、驗證、產出 morning report"
+usage: "/claude:daily-maintain [--full] [--max-agents N] [--dry-run] [--modules a,b,c]"
+argument-hint: "/claude:daily-maintain — 自動掃描修正全部模組，--full 強制全部重建 source-docs"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash", "Agent"]
 permission-mode: "acceptEdits"
 ---
 
 # /claude:daily-maintain — 每日自動化 CLAUDE.md 維護
 
-你是 CLAUDE.md 知識管理自動化引擎，負責在夜間排程中增量偵測程式碼變更、重建理解文檔、更新 CLAUDE.md，並產出 morning report 供用戶起床後 review。
+你是 CLAUDE.md 知識管理自動化引擎。核心目標：**讓 CLAUDE.md 保持準確**。透過 source-docs 中間層驗證文檔品質，自動修正過時描述，產出 morning report 供用戶 review。
 
 Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
@@ -23,17 +23,39 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 
 **讓 CLAUDE.md 活著**：不是寫完就過時的靜態文檔，而是隨程式碼演化的活知識庫。
 
+**三層資料流**：
+
+```
+.py（程式碼真相）
+  ↓ doc-decode
+source-docs/（詳細理解中間層）
+  ↓ decode-compare 驗證 + 找缺口
+CLAUDE.md（壓縮知識 — 最終目標）
+```
+
 **操作模式**：
 
 | 模式 | 觸發條件 | 行為 |
 |------|---------|------|
-| **Full Rebuild** | `source-docs/{module}/` 不存在，或 `--full` | 全部模組完整 decode + compare + update |
-| **Daily Incremental** | `source-docs/` 已存在，有 git 變更 | 只處理受影響的模組和子系統 |
+| **Default** | 預設（無參數） | 掃描全部模組 → 定向修正（source-docs + CLAUDE.md）→ 重建過時模組 → morning report |
+| **Full Rebuild** | `--full` | 全部模組強制重建 source-docs + Full Compare + update |
+
+**Use Case 對照表**：
+
+| # | 場景 | 判斷方式 | 該做什麼 |
+|---|------|---------|---------|
+| UC1 | 全新專案，無 source-docs | source-docs/ 不存在 | Full doc-decode → verify → CLAUDE.md |
+| UC2 | 每日跑，有 .py 變更 | source-docs 過時 | 自動重建受影響 source-docs → verify → CLAUDE.md |
+| UC3 | source-docs 剛建好 | source-docs 新鮮 | 定向修正（不重建）→ verify → CLAUDE.md |
+| UC4 | 沒有任何變更 | 全部新鮮 + 無新 commits | 全部跳過，只更新 .last-run |
+| UC5 | 大重構後 | `--full` | 全部模組重建 source-docs |
+| UC6 | .py 被刪除 | git diff 偵測 | 清理 source-docs 引用 → verify → CLAUDE.md |
+| UC7 | 手動改了 CLAUDE.md | 只有 CLAUDE.md diff | 定向修正 source-docs（反向同步） |
 
 **核心約束**：
 - **CLAUDE.md 是關鍵資產**：每個修改都是獨立 Edit 操作（不是整檔重寫），確保 git diff 精確到行
 - **autonomous-execution 模式**：夜間執行不問問題，所有決策記錄在 morning report
-- **可追蹤性**：每個 CLAUDE.md 改動都附帶 sync 或 decode-compare 的具體發現作為理由
+- **可追蹤性**：每個 CLAUDE.md 改動都附帶 decode-compare 的具體發現作為理由
 
 ---
 
@@ -42,6 +64,7 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 ```
 專案目錄/
 ├── source-docs/                    ← 理解文檔（doc-decode 產出）
+│   ├── .last-run                   ← 上次執行時間戳
 │   ├── dependency-graph.md         ← 模組依賴知識圖譜
 │   ├── rule_forge/
 │   │   ├── overview.md
@@ -51,7 +74,6 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 │       └── overview.md
 ├── ai-analysis/
 │   └── daily-report/
-│       ├── 2026-05-08.md
 │       └── 2026-05-09.md
 └── mosaic_alpha/
     └── rule_forge/
@@ -60,272 +82,268 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 
 ---
 
-## 執行流程（7 Phases）
+## 執行流程
 
-### Phase 0: COMPLEXITY SCAN — 模組掃描與 Agent 分配
+### Phase 0: SCAN — 模組掃描 + 新鮮度檢查 + 決策樹
 
-> **設計理念**：兩階段執行策略 — 先掃描複雜度再分配 agent。
+> **設計理念**：先判斷每個模組需要做什麼，再分配 agent。避免對新鮮的 source-docs 做無意義的重建。
 
 ```
 0.1 模組發現
     fd -e py . mosaic_alpha/ --max-depth 2
     識別所有含 CLAUDE.md 或 .py 的模組目錄
 
-0.2 模組分類（每個模組）
-    統計：
-    - .py 檔案數量
-    - 核心演算法函數數量（有非 trivial 邏輯的 def）
-    - 既有的 source-docs 子系統數
+0.2 新鮮度檢查（每個有 source-docs 的模組）
 
-    分類標準：
-    | 分類 | .py 數 | 核心演算法 | 子系統 |
-    |------|--------|-----------|--------|
-    | large | > 8 | > 15 | > 2 |
-    | medium | 4-8 | 5-15 | 1-2 |
-    | small | < 4 | < 5 | 0-1 |
+    對每個模組，比較 source-docs 和 .py 的最後修改時間。
+    使用 epoch timestamp（%at）確保數值比較可靠，避免 ISO 字串比較問題。
 
-0.3 Agent 分配策略
+    source_doc_ts = git log -1 --format="%at" -- "source-docs/mosaic_alpha/{module}/"
+    py_ts = git log -1 --format="%at" -- "mosaic_alpha/{module}/"
 
-    分配規則：
-    | 模組類型 | Agent 配額 |
-    |---------|-----------|
-    | large | 1 agent 專用 |
-    | medium | 2 模組共用 1 agent |
-    | small | 3 模組共用 1 agent |
+    注意：必須只看 .py 檔案（不含 CLAUDE.md），否則文檔 commit 會干擾判斷。
 
-    單 agent 最大負載：不超過 800 行核心演算法
-    超出時：優先拆分 large 模組為子系統（強制子系統拆分）
+    if source_doc_ts >= py_ts → FRESH（source-docs 比 .py 新）
+    else → STALE（source-docs 比 .py 舊，需要重建）
 
-    若 --max-agents N：
-    - 按 N 調整分配（N=4 → 最多 4 agent 並行）
-    - 多餘模組排隊等候
+    commit 級別比較即可，不需要行級別精確。
 
-0.4 模式偵測
+0.3 變更偵測（.py + CLAUDE.md）
 
-    if --full → 全部模組標記 "needs full decode"
-    elif source-docs/ 不存在 → 全部模組標記 "needs full decode"
-    else → 進入 Phase 0.5（增量偵測）
+    0.3.1 讀取上次執行時間
+        從 source-docs/.last-run 讀取
 
-    輸出：Agent 分配表 + 模組處理清單
+        Fallback 鏈（.last-run 不存在時）：
+        1. 當日 commits → git log --since="YYYY-MM-DD 00:00:00"
+           - 有當日 commits → 使用當日第一筆 commit 時間戳作為 LAST_RUN
+           - 記錄「首次執行（偵測到 N 筆當日 commits）」
+        2. 無當日 commits → 報告「首次執行，無當日變更」
+           → 只執行 Phase 3（Morning Report）+ 寫入 .last-run
+           → 不觸發 Phase 1-2
+
+    0.3.2 Git 變更偵測（.py + CLAUDE.md）
+        git log --since="$LAST_RUN" --name-only --pretty=format:
+        過濾 .py 和 CLAUDE.md，分類變更
+
+        變更分類：
+
+        | 變更類型 | 判斷方式 | 處理策略 |
+        |---------|---------|---------|
+        | .py 修改 | git diff 中有 ± 行 | 子系統級重建 |
+        | .py 刪除 | git diff 中只有 - 行 | 清理 source-docs 殘留引用 |
+        | .py 新增 | git diff 中只有 + 行 | 全模組重建 |
+        | CLAUDE.md 修改 | 路徑匹配 CLAUDE.md | 定向修正 source-docs（反向同步） |
+
+        映射規則（.py → 模組）：
+        mosaic_alpha/rule_forge/engine.py → rule_forge
+        mosaic_alpha/common/enums.py → common
+
+    0.3.3 .py 修改 — 子系統級偵測
+        對每個受影響模組：
+        - 讀 source-docs/{module}/overview.md 的子系統清單
+        - 比對 git 變更的 .py 屬於哪個子系統
+        - 標記需要重建的子系統
+
+    0.3.4 .py 刪除 — source-docs 殘留清理
+        對每個被刪除的 .py：
+        rg "source:.*{deleted_file}" source-docs/{module}/
+        → 移除對應的程式碼段落（獨立 Edit，git diff 精確到行）
+        → 若某子系統文件的所有 source 段落都來自已刪除檔案 → 標記過時
+
+    0.3.5 .py 新增 — 全模組重建
+        新增 .py 改變模組結構（import 圖可能改變）
+        → 該模組標記 "needs full decode"（不做子系統級判斷）
+
+    0.3.6 CLAUDE.md 修改 — 反向同步
+        當模組只有 CLAUDE.md 變更、無 .py 變更時：
+        - 標記為 "claude-md-only change"
+        - 不觸發 doc-decode（.py 沒變，逐字抄錄段落仍正確）
+        - 改用定向修正：讀 CLAUDE.md diff → 更新 source-docs 對應段落
+          - 設計決策新增/修正 → 更新 source-docs 的「設計決策記錄」段落
+          - 描述修正 → 更新 source-docs 中對應描述
+          - 結構重組（少見）→ 降級為全模組重建
+
+    0.3.7 source-docs dirty 偵測
+        git diff --name-only source-docs/
+        → 有 uncommitted changes 的檔案 → 跳過處理，記入 morning report 提醒
+
+0.4 決策樹
+
+    if --full → 全部模組標記 "needs full decode"（不管新鮮度，全部重建 source-docs）
+
+    else:（預設 — 全自動）
+      對每個模組，根據新鮮度自動選擇處理方式：
+
+      | 新鮮度 | 處理方式 |
+      |--------|---------|
+      | 過時（source-docs 比 .py 舊） | 重建 source-docs（doc-decode）→ Full Compare |
+      | 新鮮（source-docs 比 .py 新） | 定向修正（Quick Scan + sync）→ 不重建 |
+      | 無 source-docs | Full doc-decode → Full Compare |
+      | Quick Scan 發現引用斷裂 | 定向 Edit 修正 source-docs（不重建） |
+      | Sync 發現 CLAUDE.md 過時 | 定向 Edit 修正 CLAUDE.md |
+
+0.5 Agent 分配
+
+    簡化策略：將需要處理的模組平分給 --max-agents 個 agent。
+    預設 max-agents = 4。
+
+    分配原則：
+    - Quick Scan 模組全部在主線程執行（輕量，不需要 agent）
+    - CLAUDE.md sync 模組（Phase 0.6）分配給 agent（每模組 3-5 min，可並行）
+    - Full Compare 模組分配給 agent（每模組 10-20 min，需要並行）
+    - 需要 full decode 的模組（較重）分配到不同 agent
+    - 單 agent 一次處理 1-3 個模組
+
+    輸出：Agent 分配表 + 每個模組的決策（skip / quick / rebuild / full-compare）
 ```
 
-### Phase 0.5: CHANGE DETECTION — 增量變更偵測
+### Phase 0.5: QUICK SCAN — source-docs 引用完整性（預設執行）
 
-> **僅 Daily Incremental 模式執行**。Full Rebuild 跳過。
+> **預設執行**。用 rg/fd 抽查 source-docs 的引用是否仍指向真實程式碼。
 
 ```
-0.5.1 讀取上次執行時間
-    從 source-docs/.last-run 讀取（無則用 git log -1 --format=%ci）
+0.5.1 檔案引用驗證
+    從 source-docs 提取所有引用的 .py 檔名：
+    rg -o "source: ([\w/]+\.py):\d" source-docs/{module}/ --no-filename -r '$1' | sort -u
 
-0.5.2 Git 變更偵測（.py + CLAUDE.md）
+    對每個檔名，用 fd 確認存在：
+    fd "^{filename}$" mosaic_alpha/ --max-depth 4
+
+0.5.2 Class/Type 引用驗證
+    從 source-docs 提取 PascalCase 名稱：
+    rg -o "\x60([A-Z][A-Za-z]+)\x60.*\x60([\w/]+\.py):(\d+)\x60" \
+       source-docs/{module}/ --no-filename -r '$1' | sort -u
+
+    對每個名稱，用 rg 確認 class 定義存在：
+    rg "class {Name}" mosaic_alpha/ -l
+
+0.5.3 結果判定
+    全部 ✅ → 引用完整，記錄在 morning report
+    有 ❌ → 定向 Edit 修正 source-docs（引用斷裂直接修）
+    ❌ 數量多 → 標記模組為需要重建（進 Phase 1）
+```
+
+### Phase 0.6: CLAUDE.md SYNC — commit 驅動語義驗證（預設執行）
+
+> **預設執行**。用 sync --changed-since 只檢查今天 commit 涉及的 CLAUDE.md，抓語義過時和導航缺口。
+
+```
+0.6.1 取得變更範圍
+
+    讀取 source-docs/.last-run 取得上次執行時間（LAST_RUN）。
+    Fallback：當日第一筆 commit 時間。
+
     git log --since="$LAST_RUN" --name-only --pretty=format:
-    過濾 .py 和 CLAUDE.md，分類變更
+    過濾 .py 和 CLAUDE.md，映射到模組目錄。
 
-    變更分類：
+0.6.2 執行 sync --changed-since
 
-    | 變更類型 | 判斷方式 | 處理策略 |
-    |---------|---------|---------|
-    | .py 修改 | git diff 中有 ± 行 | 子系統級重建（UC1） |
-    | .py 刪除 | git diff 中只有 - 行 | 清理 source-docs 殘留引用（UC6） |
-    | .py 新增 | git diff 中只有 + 行 | 全模組重建（UC4） |
-    | CLAUDE.md 修改 | 路徑匹配 CLAUDE.md | 定向修正 source-docs（UC2） |
+    對每個受影響的模組目錄，執行 sync 核心層：
+    - 角度一：導航有效性（概念→程式碼連結、導航 Decoder Test）
+    - 角度二：程式碼一致性（檔案路徑、class/function、語義 spot-check）
+    - 角度七：Signal/Noise Ratio
 
-    映射規則（.py → 模組）：
-    mosaic_alpha/rule_forge/engine.py → rule_forge
-    mosaic_alpha/common/enums.py → common
+    不執行品質層（--quality）或完整層（--all），保持輕量。
 
-    輸出：每個受影響模組的變更類型 + 受影響子系統清單
+0.6.3 收集 ACTION items
 
-0.5.3 .py 修改 — 子系統級偵測
-    對每個受影響模組：
-    - 讀 source-docs/{module}/overview.md 的子系統清單
-    - 比對 git 變更的 .py 屬於哪個子系統
-    - 標記需要重建的子系統
+    sync 產出的 Sync Summary ACTION 供 Phase 3 消費：
+    - 導航缺口 → 自動補充 CLAUDE.md
+    - 語義不準確 → 自動修正 CLAUDE.md
+    - Low Noise 項 → 跳過
 
-0.5.4 .py 刪除 — source-docs 殘留清理
-    對每個被刪除的 .py：
-    rg "source:.*{deleted_file}" source-docs/{module}/
-    → 移除對應的程式碼段落（獨立 Edit，git diff 精確到行）
-    → 若某子系統文件的所有 source 段落都來自已刪除檔案 → 標記過時
-
-0.5.5 .py 新增 — 全模組重建
-    新增 .py 改變模組結構（import 圖可能改變）
-    → 該模組標記 "needs full decode"（不做子系統級判斷）
-
-0.5.6 CLAUDE.md 修改 — 定向修正模式
-    當模組只有 CLAUDE.md 變更、無 .py 變更時：
-    - 標記為 "claude-md-only change"
-    - 不觸發 doc-decode（.py 沒變，逐字抄錄段落仍正確）
-    - 改用定向修正：讀 CLAUDE.md diff → 更新 source-docs 對應段落
-      - 設計決策新增/修正 → 更新 source-docs 的「設計決策記錄」段落
-      - 描述修正 → 更新 source-docs 中對應描述
-      - 結構重組（少見）→ 降級為全模組重建
-
-0.5.7 source-docs dirty 偵測
-    git diff --name-only source-docs/
-    → 有 uncommitted changes 的檔案 → 跳過處理，記入 morning report 提醒
-
-    輸出：受影響模組清單（含變更類型）+ 受影響子系統清單 + dirty 檔案清單
+    無變更的模組 → 跳過 sync，記錄在 morning report
 ```
 
-### Phase 0.7: RIPPLE ANALYSIS — 連鎖影響偵測（--ripple 模式）
+### Phase 1: FIX & REBUILD — 定向修正 + 重建過時 source-docs
 
-> **僅 --ripple 模式執行**。需要 `source-docs/dependency-graph.md` 存在。
-
-```
-0.7.1 讀取 dependency-graph.md
-    取得 Semantic Dependencies 表和 Ripple Impact Rules
-
-0.7.2 逐檔精細分析
-
-    對每個 git 變更的 .py：
-    git diff HEAD~{n}..HEAD -- {file_path}
-
-    讀取 diff 內容，分類變更類型：
-
-    | 變更類型 | 判斷方式 | 影響等級 | Ripple 範圍 |
-    |---------|---------|---------|------------|
-    | 新增 class/function | +^class / +^def | 低 | 僅同模組 |
-    | 新增 import 行 | +^from / +^import | 中 | 被 import 的模組 |
-    | 修改函數 signature | -def... → +def... 參數不同 | 高 | 所有 import 此函數的模組 |
-    | 修改 dataclass 欄位 | class 內 +- 欄位 | 高 | 同上 |
-    | 修改 Enum 值 | enum class 內 +- 成員 | 高 | 所有使用此 Enum 的模組 |
-    | 修改演算法邏輯 | 函數內部改動但 signature 不變 | 中 | 同模組子系統 |
-    | 刪除 class/function | -^class / -^def | 極高 | 全部下游 |
-    | YAML 定義變更 | +/-.yaml 內容 | 中 | 對應子系統 |
-
-0.7.3 交叉比對 dependency graph
-    對每個 HIGH/極高 影響的變更：
-    - 查詢 dependency-graph.md 的「被依賴」欄
-    - 將受影響的下游模組加入處理清單
-
-0.7.4 產出 ripple 報告
-    ```
-    Ripple Impact Analysis:
-    rule_forge/types.py — ConditionFilter 新增欄位 [HIGH]
-      → analytics (imports ConditionFilter) [新增至處理清單]
-      → engine (imports ConditionFilter) [新增至處理清單]
-    common/enums.py — Interval 新增 "2h" [HIGH]
-      → indicators (uses Interval) [新增至處理清單]
-      → features (uses Interval) [新增至處理清單]
-      → datasets (uses Interval) [新增至處理清單]
-    ```
-
-0.7.5 段落級 ripple 掃描（受影響模組）
-    對 0.7.3 加入處理清單的下游模組：
-    對每個 HIGH 影響的變更，識別受影響的型別/函數名稱，
-    grep source-docs 中引用該名稱的段落，定位到行級：
-
-    rg "{TypeName}" source-docs/{module}/
-
-    輸出段落級定位：
-    ```
-    common/enums.py Interval 新增值 [HIGH]
-      → source-docs/ui/overview.md:53 (Interval 使用場景)
-      → source-docs/ui/kchart-rendering.md:786 (kline_num 映射)
-      → source-docs/rule_forge/condition-system.md:34 (Interval condition)
-      → 建議人工 review 這 3 個段落
-    ```
-
-    不自動更新 — 只標記為「需要 review」嵌入 morning report。
-
-    輸出：擴展後的受影響模組清單 + 段落級定位（嵌入 morning report）
-```
-
-### Phase 1: SYNC — 同步性檢查
+> **自動處理所有模組**。過時模組重建 source-docs，新鮮模組只做定向修正。
 
 ```
-1.1 對每個受影響模組執行 sync 邏輯（帶 --changed-since $LAST_RUN）
-    讀取 CLAUDE.md + 對應 .py
-    9 角度檢查（code consistency, coverage, metadata, distillation, internal quality, signal/noise, reference syntax, consumer chain, navigation effectiveness）
+1.0 變更類型分流
 
-1.2 收集不一致
-    每項標記：
-    - type: outdated_description / missing_reference / metadata / ...
-    - location: CLAUDE.md:行號
-    - detail: 具體差異
-    - confidence: high / medium
-    - source: file.py:行號（程式碼證據）
+    根據 Phase 0 的決策，每個模組走不同路徑：
 
-1.3 輸出 Sync Report（兩層）
-    Layer 1: 完整報告（人類可讀，嵌入 morning report）
-    Layer 2: Sync Summary（結論摘要，供 Phase 4 消費）
-```
+    | Phase 0 決策 | Phase 1 處理方式 |
+    |-------------|-----------------|
+    | needs full decode（無 source-docs / .py 新增） | doc-decode 全模組 |
+    | needs subsystem rebuild（.py 修改） | doc-decode --subsystem {列表} |
+    | needs cleanup（.py 刪除） | 清理引用（已在 Phase 0.3.4 完成） |
+    | claude-md-only（反向同步） | 定向修正 source-docs（見 1.4） |
+    | skip / verify-only | 跳過 |
 
-### Phase 2: DOC-DECODE — 理解文檔重建
-
-> **核心步驟**。按 Phase 0.5 分類結果分流處理。
-
-```
-2.0 變更類型分流
-
-    根據 Phase 0.5 的分類，每個受影響模組走不同路徑：
-
-    | Phase 0.5 分類 | Phase 2 處理方式 | 說明 |
-    |----------------|----------------|------|
-    | .py 修改（有子系統清單） | doc-decode --source-aided --subsystem {列表} | 子系統級增量 |
-    | .py 刪除（已在 0.5.4 清理） | 跳過 | 殘留引用已在 Phase 0.5 清理 |
-    | .py 新增 | doc-decode --source-aided（全模組重建） | 結構變了，需全量 |
-    | CLAUDE.md-only 變更 | 定向修正（見 2.5） | .py 沒變，不跑 doc-decode |
-    | source-docs dirty | 跳過，記入 morning report | 保留手動編輯 |
-
-2.1 啟動 Agent Pool
+1.1 啟動 Agent Pool
     按 --max-agents N 啟動 N 個 agent
 
-    Agent 分配策略：
-    | 模組類型 | Agent 配額 | 內部策略 |
-    |---------|-----------|---------|
-    | large | 1 agent 專用 | 內部拆子系統，逐系統 decode |
-    | medium | 2 模組/agent | 一次 decode 整個模組 |
-    | small | 3 模組/agent | 一次 decode 整個模組 |
-
-2.2 子系統增量重建（UC1）
-    對 .py 修改的模組，傳遞 Phase 0.5 的受影響子系統清單：
-    doc-decode {module} --source-aided --output source-docs/{module}/ --subsystem {子系統列表}
+1.2 子系統增量重建
+    對 .py 修改的模組，傳遞 Phase 0 的受影響子系統清單：
+    doc-decode {module} --output source-docs/{module}/ --subsystem {子系統列表}
 
     遵循 doc-decode.md 的 --subsystem 模式流程（S1→S2→S3 + overview 輕量同步）。
     未指定的子系統文檔不被觸及。
 
-2.3 全模組重建（UC4）
-    對 .py 新增的模組，執行完整 doc-decode：
-    doc-decode {module} --source-aided --output source-docs/{module}/
+1.3 全模組重建
+    對 .py 新增或無 source-docs 的模組，執行完整 doc-decode：
+    doc-decode {module} --output source-docs/{module}/
 
-2.4 寫入 source-docs/
-    模組文檔 → source-docs/{module}/
-    知識圖譜 → source-docs/dependency-graph.md（僅 --full 時重建）
-
-2.5 CLAUDE.md 定向修正（UC2）
+1.4 CLAUDE.md 反向同步（UC7）
     當模組只有 CLAUDE.md 變更、無 .py 變更時：
 
-    2.5.1 讀取 CLAUDE.md diff
+    1.4.1 讀取 CLAUDE.md diff
         git diff HEAD~{n}..HEAD -- {module}/CLAUDE.md
 
-    2.5.2 分類變更
+    1.4.2 分類變更
         | 變更類型 | 處理方式 |
         |---------|---------|
         | 新增設計決策段落 | 新增到 source-docs 的「設計決策記錄」段落 |
         | 修正描述 | 更新 source-docs 中對應描述 |
         | 刪除內容 | 從 source-docs 移除對應內容 |
-        | 結構重組（章節大幅調整） | 降級為全模組重建（跑 2.3） |
+        | 結構重組（章節大幅調整） | 降級為全模組重建（跑 1.3） |
 
-    2.5.3 執行定向修正
+    1.4.3 執行定向修正
         對每項變更：Read source-docs 對應檔案 → Edit 精確替換
 
     不讀取 .py（逐字抄錄段落仍正確）。
     品質標準：只修正 CLAUDE.md 變更對應的段落，不改其他內容。
 
-2.6 更新 .last-run
+1.5 寫入 .last-run
     寫入 source-docs/.last-run = 當前時間戳
 ```
 
-### Phase 3: DECODE-COMPARE — 精度驗證
+---
+
+### Phase 2: VERIFY — decode-compare 驗證
+
+> **核心步驟**。驗證所有有 source-docs 的模組，產出 CLAUDE.md 的 ACTION items。這是 daily-maintain 產出 CLAUDE.md 更新建議的主要來源。
 
 ```
-3.1 對每個重建的模組執行 decode-compare 邏輯
-    讀取 source-docs/{module}/ 的 pseudo code
-    比對對應 .py 實作
+2.0 驗證範圍
 
-3.2 計算精度
+    對所有有 source-docs 的模組執行驗證（不限於 Phase 1 重建的模組）。
+    根據模組新鮮度選擇驗證深度：
+
+    | 模組狀態 | 驗證方式 | 理由 |
+    |---------|---------|------|
+    | 已重建（Phase 1 doc-decode） | decode-compare（Full Compare） | 需確認重建品質 |
+    | 已新建（首次 doc-decode） | decode-compare（Full Compare） | 首次驗證 |
+    | 未重建（FRESH） | 跳過 | Phase 0.5 Quick Scan + Phase 0.6 sync 已驗證 |
+
+2.1 未重建模組 → 跳過驗證
+
+    Phase 0.5 Quick Scan + Phase 0.6 sync 已驗證，不需要 Full Compare。
+    Phase 0.5 發現的引用斷裂已在 Phase 1 定向修正。
+    直接記錄在 morning report 即可。
+
+2.2 Full Compare（已重建/已新建模組）
+
+    執行 decode-compare（預設模式）：
+    - 讀取 source-docs/{module}/ 的所有 .md
+    - 比對對應 .py 實作
+    - 三層比對（A 架構 / B 演算法 / C 資料結構）
+    - 標記每項為 ✅ 正確 / ⚠️ 部分差異 / ❌ 理解錯誤 / 🔍 信息缺失
+
+2.3 計算精度（僅 Full Compare）
+
     精度 = (✅ + ⚠️×0.5) / (✅ + ⚠️ + ❌ + 🔍) × 100%
 
     按層級統計：
@@ -335,109 +353,135 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
     | B 演算法 | | | | | X% |
     | C 資料結構 | | | | | X% |
 
-3.3 識別 CLAUDE.md 改善點（遵循 decode-compare §精度門檻自動標記）
+2.4 精度門檻判斷（僅 Full Compare）
+
     精度 ≥ 90% → ✅ 品質優良，無需動作
     精度 70-89% → 🟡 可接受，建議改善
     精度 < 70% → 🔴 需要更新 CLAUDE.md
+
     全部 ❌ 和 🔍 → 標記具體改善建議
     每項附帶：
     - 影響層級（A/B/C）
     - 程式碼引用（file.py:行號）
     - 建議動作（在 CLAUDE.md 的哪裡加入什麼）
 
-3.4 產出 ACTION（UC6）
-    遵循 decode-compare §步驟 5 的 ACTION 格式，產出可執行的修改建議：
-    - High Signal ACTION → 自動套用（Phase 4 處理）
-    - Medium Signal ACTION → 標記為 ⚠️ 建議修改（morning report）
-    - Low Noise 項目 → 跳過
+2.5 產出 ACTION items（Signal/Noise 過濾）
 
-    ACTION 來源：decode-compare 的 Step 5（Signal/Noise 過濾 + 修改文字生成）
-    輸出嵌入 Phase 3 報告，供 Phase 4 消費。
+    遵循 decode-compare §步驟 4 的 ACTION 格式：
+
+    | 信號等級 | 處理方式 | 說明 |
+    |---------|---------|------|
+    | High Signal | 自動套用（Phase 3 處理） | 設計理由缺失、導航缺口、行為描述錯誤 |
+    | Medium Signal | 標記 ⚠️ 建議修改（morning report） | 語義修正、流程描述補充 |
+    | Low Noise | 跳過 | API 簽名、參數值（從程式碼可推導） |
+
+    ACTION 格式：
+    ```
+    ACTION N: [操作類型] [優先級]
+    目標位置: CLAUDE.md [章節/行號]
+    操作: [新增/修改]
+    [可直接貼入的 CLAUDE.md 修改文字]
+    信號等級: High/Medium | 驗證來源: file.py:行號
+    ```
+
+    輸出：ACTION items 清單（供 Phase 3 消費）
 ```
 
-### Phase 4: CLAUDE.md UPDATE — 知識更新
+---
 
-> **核心安全機制**：每個修改都是獨立 Edit 操作，git diff 精確到行。
+### Phase 3: UPDATE + REPORT — CLAUDE.md 更新 + 日報
 
-```
-4.1 合併改善來源
-    三個來源統一為改善清單：
-    - Phase 1（sync 不一致）
-    - Phase 3（decode-compare 缺口）
-    - Phase 3 ACTION（High Signal → 自動套用，Medium Signal → 建議修改）
-
-4.2 修改分類（安全邊界）
-
-    ✅ 可以自動修改：
-    - 修正過時描述（程式碼已變更但描述未更新）
-    - 補充型別關係（相似型別的用途區別）
-    - 修正引用語法（@ vs [描述](path)）
-    - 更新 pipeline 編排描述
-    - 移除可推導內容（API 簽名、參數表）
-    - 更新模組職責描述（與實際 .py 對齊）
-
-    ⚠️ 只建議不自動修改（標記在 morning report）：
-    - 新增「設計理由」段落
-    - 新增「失敗教訓」規則
-    - 刪除現有「原則」或「約束」段落
-    - 修改架構約束描述
-    - 任何涉及「為什麼這樣做」的內容
-
-4.3 逐項執行 Edit
-    對每個 ✅ 項目：
-    - Read CLAUDE.md 取得當前內容
-    - Edit 精確替換（不是整檔重寫）
-    - 記錄修改理由（來自哪個 phase 的哪個發現）
-
-4.4 Decoder Test 驗證
-    修改完成後，對每個更新的 CLAUDE.md 執行 dry run Decoder Test：
-    1. 這個模組的核心職責是什麼？
-    2. 關鍵的設計決策和理由是什麼？
-    3. 有哪些不可妥協的約束？
-    4. 模組邊界在哪裡（不做什麼）？
-    全部通過 → 完成
-    有失敗 → 標記 ⚠️，記錄在 morning report
-```
-
-### Phase 5: CONSISTENCY CHECK — 自洽性驗證
+> **CLAUDE.md 是最終目標**。根據 Phase 2 的 ACTION items 更新 CLAUDE.md，然後產出 morning report。
 
 ```
-5.1 對每個更新的 CLAUDE.md 執行 /consistency 邏輯
+3.1 CLAUDE.md 更新
+
+    3.1.1 合併 ACTION items
+        來源：Phase 2 的 decode-compare 發現
+        分類：High Signal（自動套用）+ Medium Signal（建議）
+
+    3.1.2 修改分類（安全邊界）
+
+        ✅ 可以自動修改：
+        - 修正過時描述（程式碼已變更但描述未更新）
+        - 補充型別關係（相似型別的用途區別）
+        - 修正引用語法（@ vs [描述](path)）
+        - 更新 pipeline 編排描述
+        - 移除可推導內容（API 簽名、參數表）
+        - 更新模組職責描述（與實際 .py 對齊）
+
+        ⚠️ 只建議不自動修改（標記在 morning report）：
+        - 新增「設計理由」段落
+        - 新增「失敗教訓」規則
+        - 刪除現有「原則」或「約束」段落
+        - 修改架構約束描述
+        - 任何涉及「為什麼這樣做」的內容
+
+    3.1.3 逐項執行 Edit
+        對每個 ✅ 項目：
+        - Read CLAUDE.md 取得當前內容
+        - Edit 精確替換（不是整檔重寫）
+        - 記錄修改理由（來自 Phase 2 的哪個 ACTION）
+
+    3.1.4 Decoder Test 驗證
+        修改完成後，對每個更新的 CLAUDE.md 執行 dry run Decoder Test：
+        1. 這個模組的核心職責是什麼？
+        2. 關鍵的設計決策和理由是什麼？
+        3. 有哪些不可妥協的約束？
+        4. 模組邊界在哪裡（不做什麼）？
+        全部通過 → 完成
+        有失敗 → 標記 ⚠️，記錄在 morning report
+
+3.2 一致性檢查
+
+    對每個更新的 CLAUDE.md：
     - 術語一致性
     - 章節結構
     - 引用完整性
     - 前後邏輯
     - 格式規範
 
-5.2 修正發現的問題
-    格式問題可以直接修正
-    邏輯問題標記 ⚠️
+    格式問題直接修正。
+    邏輯問題標記 ⚠️。
+
+3.3 Morning Report
+
+    3.3.1 寫入 ai-analysis/daily-report/{YYYY-MM-DD}.md
+    3.3.2 同時 print 到對話（精簡版）
+
+    3.3.3 問題分類（⚠️ 未解決問題）
+
+        每個未解決問題必須標注修復方式：
+
+        | 修復方式 | 適用情境 | 實際動作 |
+        |---------|---------|---------|
+        | CLAUDE.md 定向修正 | 導航缺口、過時描述 | 直接 Edit CLAUDE.md |
+        | source-docs 定向修正 | 引用斷裂、已刪除檔案引用 | 直接 Edit source-docs |
+        | 自動重建 | 過時模組需要完整重建 | 下次執行時自動處理（doc-decode） |
+        | --full | 大重構後 | 全部重建 |
+
+        ⚠️ 大部分 source-docs 問題用定向 Edit 即可，不需要 --full。
+        只有 .py 大量變更導致 source-docs 大面積過時時才需要 --full。
 ```
 
-### Phase 6: MORNING REPORT — 日報產出
-
-```
-6.1 寫入 ai-analysis/daily-report/{YYYY-MM-DD}.md
-6.2 同時 print 到對話（精簡版）
-
-報告格式：
-```
+#### Morning Report 格式
 
 ```markdown
 # Morning Report — {YYYY-MM-DD}
 
-**執行模式**: Daily Incremental / Full Rebuild
+**執行模式**: Default / Full Rebuild
 **執行時間**: {start} → {end}（耗時 {duration}）
 **處理模組**: N 個（{模組列表}）
 
 ---
 
-## 處理摘要
+## 決策摘要
 
-| 模組 | 類型 | Phase 1 Sync | Phase 2 Decode | Phase 3 精度 | Phase 4 更新 |
-|------|------|-------------|---------------|-------------|-------------|
-| rule_forge | large | 3 issues | 6 files | 87% | 5 edits |
-| indicators | medium | 1 issue | 2 files | 92% | 2 edits |
+| 模組 | 處理方式 | Phase 1 | Phase 2 | Phase 3 |
+|------|---------|---------|---------|---------|
+| rule_forge | 重建 source-docs | 7 files rebuilt | Full Compare: 87% | 5 edits |
+| indicators | 定向修正 | skip | Quick Scan: ✅ | — |
+| common | 跳過（無變更） | skip | Quick Scan: ✅ | — |
 
 ## CLAUDE.md 變更摘要
 
@@ -445,7 +489,7 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 
 | 模組 | CLAUDE.md 位置 | 修改類型 | 來源 | 修改摘要 |
 |------|---------------|---------|------|---------|
-| rule_forge | :45 | 過時描述更新 | sync:rule_forge/engine.py:122 | Pipeline v2 描述更新 |
+| rule_forge | :45 | 過時描述更新 | compare:engine.py:122 | Pipeline v2 描述更新 |
 | rule_forge | :78 | 補充型別關係 | compare:types.py:56 | ConditionFilter vs ObservationFilter 區別 |
 
 ### ⚠️ 建議修改（{N} 項）— 需要您確認
@@ -454,15 +498,7 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 |---|------|---------------|------|------|------|
 | 1 | rule_forge | (新增) | 新增「FilterTree 的 sequential greedy 設計理由」 | decode-compare 發現此為非顯而易見的設計決策 | compare:sequential_greedy.py:45 |
 
-## Ripple Impact（--ripple 模式）
-
-{Phase 0.7 的 ripple 報告}
-
-## Phase 1: Sync 詳細發現
-
-{Phase 1 的完整報告}
-
-## Phase 3: Decode-Compare 精度報告
+## Phase 2: Decode-Compare 精度報告
 
 {每個模組的精度總覽表}
 
@@ -475,13 +511,25 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 
 ## ⚠️ 未解決問題
 
-| # | 問題 | 嚴重性 | 建議動作 |
-|---|------|--------|---------|
-| 1 | indicators CLAUDE.md 缺少 overflow 檢查的約束描述 | 中 | 手動補充設計理由 |
+| # | 問題 | 嚴重性 | 修復方式 | 建議動作 |
+|---|------|--------|---------|---------|
+| 1 | indicators source-docs 引用不存在的 ATDDef | 低 | source-docs 定向修正 | 移除引用（Edit） |
+| 2 | adapters source-docs 引用已刪除的 .py | 低 | source-docs 定向修正 | 移除引用（Edit） |
+| 3 | datasets CLAUDE.md 缺少 ExportConfig 導航 | 低 | CLAUDE.md 定向修正 | 補充導航（Edit） |
+| 4 | 4 個過時模組 source-docs 需要重建 | 中 | 自動重建 | 下次 .py 變更時自動處理 |
+
+**修復方式分類**：
+- **CLAUDE.md 定向修正**：導航缺口、過時描述 → 直接 Edit，不需要任何模式
+- **source-docs 定向修正**：引用斷裂、已刪除檔案 → 直接 Edit source-docs，不需要重建
+- **自動重建**：過時模組需要完整重建 source-docs（doc-decode）
+- **--full**：大重構後全部打掉重練
 
 ## 下次建議
 
 - {根據本次發現的改善建議}
+- ⚠️ 不要對所有問題一律建議 --full：
+  - 大部分 source-docs 問題 → 定向 Edit 即可
+  - 只有 source-docs 大面積過時（.py 大量變更後）才需要 --full
 ```
 
 ---
@@ -490,9 +538,8 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 
 | 參數 | 說明 |
 |------|------|
-| **無參數** | 自動偵測模式：有 source-docs/ → incremental，無 → full |
-| **--full** | 強制全部重建（忽略 source-docs/ 狀態） |
-| **--ripple** | 啟用連鎖影響偵測（需要 dependency-graph.md） |
+| **無參數** | 全自動：掃描 + 定向修正 + 重建過時模組 → morning report |
+| **--full** | 強制全部重建 source-docs（大重構後使用） |
 | **--max-agents N** | 平行 agent 上限（預設 4，避免 rate limit） |
 | **--dry-run** | 只產出 Phase 0 計劃，不實際執行 |
 | **--modules a,b,c** | 只處理指定模組（除錯用） |
@@ -503,10 +550,10 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 
 | Command | 在 daily-maintain 中的角色 |
 |---------|--------------------------|
-| `/claude:sync` | Phase 1：偵測文檔-程式碼不一致 |
-| `/claude:doc-decode --source-aided` | Phase 2：重建理解文檔 |
-| `/claude:decode-compare` | Phase 3：驗證編碼精度 |
-| `/consistency` | Phase 5：驗證 CLAUDE.md 自洽性 |
+| `/claude:decode-compare --quick` | Phase 0.5：Quick Scan source-docs 引用完整性（rg/fd） |
+| `/claude:sync --changed-since` | Phase 0.6：CLAUDE.md 語義驗證（commit 驅動） |
+| `/claude:doc-decode` | Phase 1：重建過時模組的 source-docs |
+| `/claude:decode-compare` | Phase 2：Full Compare 完整三層比對（重建後的模組） |
 | `/claude:clean` | **不屬於 daily workflow** — 特殊處理工具 |
 | `/claude:distill` | **不屬於 daily workflow** — 特殊處理工具 |
 
@@ -531,8 +578,8 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 ### 安全機制
 
 - **每個 CLAUDE.md 修改都是獨立 Edit**：git diff 精確到行
-- **執行前 git stash 或 commit**：確保可 rollback
-- **修改理由追蹤**：每個 Edit 附帶 sync/compare 的具體發現
+- **執行前確認 working tree clean**：確保可 rollback
+- **修改理由追蹤**：每個 Edit 附帶 decode-compare 的具體發現
 - **Decoder Test 驗證**：修改後自動驗證品質
 
 ### 比例化深度標準
@@ -544,7 +591,7 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 最低程式碼段落 = max(6, round(核心演算法函數數量 × 0.8))
 ```
 
-未達標 → 回到 S2 補讀，禁止以「已足夠」為由跳過。
+未達標 → 回到 Phase 1 補讀，禁止以「已足夠」為由跳過。
 
 ### 強制子系統拆分
 
@@ -554,24 +601,24 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 輸出：每個子系統獨立文檔 + overview.md
 ```
 
-### Agent 分配策略
-
-```
-large 模組（>8 .py）：1 agent 專用
-medium 模組（4-8 .py）：2 模組/agent
-small 模組（<4 .py）：3 模組/agent
-單 agent 最大負載：800 行核心演算法
-```
-
 ---
 
 ## 使用範例
 
 ```bash
+# 每日：全自動掃描 + 修正（預設，約 30-60 min）
 /claude:daily-maintain
+
+# 大重構後：全部重建 source-docs
 /claude:daily-maintain --full
-/claude:daily-maintain --ripple --max-agents 6
+
+# 只重建特定模組的 source-docs
+/claude:daily-maintain --full --modules rule_forge
+
+# 只看計劃不執行
 /claude:daily-maintain --dry-run
+
+# 只處理特定模組
 /claude:daily-maintain --modules rule_forge,indicators
 ```
 
@@ -580,9 +627,9 @@ small 模組（<4 .py）：3 模組/agent
 ## 與 /loop 排程整合
 
 ```bash
-/loop /claude:daily-maintain --ripple
+# 每日：全自動（預設）
+/loop /claude:daily-maintain
 
-排程建議：每日凌晨 1:00 執行
 用戶起床後：
 1. 查看 ai-analysis/daily-report/{date}.md
 2. git diff 檢查 CLAUDE.md 變更
@@ -591,4 +638,4 @@ small 模組（<4 .py）：3 模組/agent
 
 ---
 
-> **維護哲學**: CLAUDE.md 的價值在於持續演化。daily-maintain 不是「一次寫完」的工具，而是「每天保持最新」的知識管理系統。品質由比例化標準保證，安全由 git diff + morning report 保證，效率由增量偵測 + parallel agents 保證。
+> **維護哲學**: CLAUDE.md 的價值在於持續演化。daily-maintain 是一站式維護引擎：掃描全部模組 → 定向修正小問題（Edit）→ 自動重建過時模組（doc-decode）→ Full Compare 驗證品質 → morning report。一個指令搞定，不需要額外跑其他模式。大重構後才需要 `--full` 強制全部重建。

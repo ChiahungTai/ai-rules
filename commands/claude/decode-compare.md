@@ -1,7 +1,7 @@
 ---
 description: "對比文檔理解與實際程式碼，驗證精確度"
-usage: "/claude:decode-compare <路徑> [--redecode] [--subsystem NAME] [--recursive]"
-argument-hint: "/claude:decode-compare <輸出目錄> [--redecode] [--subsystem NAME] [--recursive] — source-docs/ 目錄（如 source-docs/rule_forge/）"
+usage: "/claude:decode-compare <路徑> [--quick] [--redecode] [--subsystem NAME] [--recursive]"
+argument-hint: "/claude:decode-compare <輸出目錄> [--quick] [--redecode] [--subsystem NAME] [--recursive] — --quick 為輕量驗證（rg/fd），預設為完整三層比對"
 allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write"]
 ---
 
@@ -21,9 +21,13 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 對比 `/claude:doc-decode` 產出的 source-docs/ 與實際 .py 實作，量化理解文檔的精度。回答核心問題：**「source-docs 的描述與實際程式碼有多一致？」**
 
 **操作模式**：
-- 讀取 source-docs/ 中的理解文檔作為比對基準
-- 掃描實際 .py 檔案
-- 逐項比對，生成差異報告 + ACTION
+
+| 模式 | 觸發 | 做法 | 成本 |
+|------|------|------|------|
+| **Quick Scan** | `--quick` | rg/fd 抽查引用完整性（秒級） | 極低 |
+| **Full Compare** | 預設 | 讀取 .py 逐項三層比對（分鐘級） | 高 |
+
+Quick Scan 用於 FRESH 模組的日常巡檢；Full Compare 用於 STALE 模組或首次驗證。
 
 **嚴格約束**：
 - **原始碼唯讀**：不修改任何 .py 檔案
@@ -69,6 +73,54 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - 無法解析模組路徑 → 報告錯誤，請使用者明確指定模組路徑
 - 輸出目錄中無 .md → 錯誤：目錄中找不到理解文檔
 - fd 搜尋返回多個候選 → 優先選擇含 CLAUDE.md 的目錄；仍有歧義則報告請使用者指定
+
+### 步驟 0.5: QUICK SCAN — 輕量引用完整性驗證（--quick 模式）
+
+> **僅 --quick 模式執行**。用 rg/fd 抽查 source-docs 的引用是否仍指向真實程式碼，不讀取 .py 內容。
+
+```
+0.5.1 檔案引用驗證
+    從 source-docs 提取所有引用的 .py 檔名：
+    rg -o "source: ([\w/]+\.py):\d" source-docs/{module}/ --no-filename -r '$1' | sort -u
+
+    對每個檔名，用 fd 確認存在：
+    fd "^{filename}$" mosaic_alpha/ --max-depth 4
+
+    結果：✅ 全部存在 或 ❌ {file} NOT FOUND
+
+0.5.2 Class/Type 引用驗證
+    從 source-docs 提取 PascalCase 名稱（導航引用格式）：
+    rg -o "\x60([A-Z][A-Za-z]+)\x60.*\x60([\w/]+\.py):(\d+)\x60" \
+       source-docs/{module}/ --no-filename -r '$1' | sort -u
+
+    對每個名稱，用 rg 確認 class 定義存在：
+    rg "class {Name}" mosaic_alpha/ -l
+
+    結果：✅ {Name} found in {file} 或 ❌ {Name} NOT FOUND
+
+    注意：TypeVar、Protocol、type alias 不是 class 定義，
+    若 rg "class {Name}" 找不到，改用 rg "{Name} =" 做二次確認。
+
+0.5.3 行號有效性驗證（抽樣）
+    從 source-docs 提取 # source: file.py:NN 行號：
+    rg -o "source: ([\w/]+\.py):(\d+)" source-docs/{module}/ \
+       --no-filename -r '$1:$2' | sort -u | shuf -n 10
+
+    對每個抽樣的 file:line，用 rg 確認行號不超過檔案總行數：
+    wc -l mosaic_alpha/**/{file}
+
+    結果：✅ {file}:{line} valid 或 ❌ {file}:{line} exceeds {total_lines}
+
+0.5.4 結果判定
+
+    | 結果 | 判定 | 建議 |
+    |------|------|------|
+    | 全部 ✅ | 引用完整，低風險 | 無需 Full Compare |
+    | 有 ❌ 但 ≤ 2 | 少量引用過時 | 針對性修正 source-docs |
+    | 有 ❌ 且 > 2 | 引用大面積過時 | 觸發 Full Compare |
+
+    Quick Scan 完成 → 產出簡要報告 → 結束（不進入步驟 1-4）
+```
 
 ### 步驟 1: SCAN — 掃描實際程式碼
 
@@ -155,7 +207,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
     - 程式碼引用（file.py:行號）
     - 建議動作（在 CLAUDE.md 的哪裡加入什麼）
 
-此標記供 daily-maintain Phase 4 消費。
+此標記供 daily-maintain Phase 3 消費。
 ```
 
 ### 步驟 4: ACTION — 產出可執行的 CLAUDE.md 修改
@@ -240,6 +292,7 @@ ACTION 按「導航影響力」排序：
 | 參數 | 說明 |
 |------|------|
 | **輸出目錄** | 必填，要比對的 source-docs/ 目錄 |
+| **--quick** | Quick Scan 模式：只用 rg/fd 驗證引用完整性，不讀取 .py 內容 |
 | **--redecode** | 先執行 doc-decode 重建，再比對 |
 | **--subsystem** | 只比對指定子系統（如 `--subsystem filter-tree`） |
 | **--recursive, -r** | 遞迴處理所有子目錄 |
@@ -248,6 +301,43 @@ ACTION 按「導航影響力」排序：
 ---
 
 ## 輸出格式
+
+### Quick Scan 輸出（--quick）
+
+```markdown
+## Quick Scan Report — {module_name}
+
+**模式**: Quick Scan（rg/fd 引用完整性驗證）
+**檢查時間**: {timestamp}
+
+### 檔案引用（{total} 個）
+
+| 狀態 | 檔案 |
+|------|------|
+| ✅ | {file1.py}, {file2.py}, ... |
+| ❌ | {missing.py} — NOT FOUND |
+
+### Class 引用（{total} 個）
+
+| 狀態 | Class | 位置 |
+|------|-------|------|
+| ✅ | {ClassName} | {file.py}:{line} |
+| ❌ | {ClassName} | NOT FOUND |
+
+### 行號抽樣（{sampled}/{total} 個）
+
+| 狀態 | 引用 | 說明 |
+|------|------|------|
+| ✅ | {file.py}:{line} | valid |
+| ❌ | {file.py}:{line} | exceeds {total_lines} |
+
+### 結論
+
+**判定**: ✅ 引用完整 / ⚠️ 少量過時 / ❌ 需要重建
+**建議**: [無需動作 / 針對性修正 / 觸發 Full Compare]
+```
+
+### Full Compare 輸出（預設）
 
 ```markdown
 ## Decode Compare Report — {module_name}
@@ -356,10 +446,10 @@ ACTION 按「導航影響力」排序：
 ## 使用範例
 
 ```bash
-# 對比 rule_forge 模組
-/claude:decode-compare source-docs/rule_forge/
+# Quick Scan：輕量引用完整性驗證（秒級）
+/claude:decode-compare source-docs/rule_forge/ --quick
 
-# 比對 source-docs 與實際程式碼
+# Full Compare：完整三層比對（預設）
 /claude:decode-compare source-docs/rule_forge/
 
 # 強制重新 decode 再比對
@@ -370,6 +460,9 @@ ACTION 按「導航影響力」排序：
 
 # 遞迴比對所有子模組
 /claude:decode-compare --recursive
+
+# Quick Scan 所有模組（daily-maintain 推薦用法）
+/claude:decode-compare --recursive --quick
 ```
 
 ---
