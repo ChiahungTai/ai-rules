@@ -114,8 +114,8 @@ AI 調用 SlashCommand("/command args")
 - `/claude:clean` - 清理 CLAUDE.md 元資訊（版本、日期等）
 - `/claude:distill` - 蒸餾精簡 CLAUDE.md，提煉核心精華
 - `/claude:sync` - 檢查 CLAUDE.md 與程式碼同步性（支援 --clean, --all）
-- `/claude:doc-decode` - 從 CLAUDE.md 解碼模組理解，生成三層 pseudo code（架構/演算法/資料結構）
-- `/claude:decode-compare` - 對比文檔解碼結果與實際程式碼，驗證編碼精度
+- `/claude:doc-decode` - 從 CLAUDE.md + 程式碼重建模組理解文檔（source-docs/）
+- `/claude:decode-compare` - 對比 source-docs/ 與實際程式碼，驗證精度
 
 ### 核心系統命令
 - `/batch-task` - 序列批次任務處理器（避免 rate limit）

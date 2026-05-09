@@ -1,7 +1,7 @@
 ---
 description: "對比文檔理解與實際程式碼，驗證精確度"
-usage: "/claude:decode-compare <路徑> [--redecode] [--subsystem NAME] [--depth A|B|C|all] [--recursive]"
-argument-hint: "/claude:decode-compare <模組路徑 或輸出目錄> [--redecode] [--subsystem NAME] [--recursive] — 模組路徑（如 rule_forge）、decode-docs/（純文檔理解）或 source-docs/（source-aided）"
+usage: "/claude:decode-compare <路徑> [--redecode] [--subsystem NAME] [--recursive]"
+argument-hint: "/claude:decode-compare <輸出目錄> [--redecode] [--subsystem NAME] [--recursive] — source-docs/ 目錄（如 source-docs/rule_forge/）"
 allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write"]
 ---
 
@@ -18,16 +18,15 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 核心目標
 
-對比 `/claude:doc-decode` 生成的 pseudo code 與實際 .py 實作，量化 CLAUDE.md 的編碼效果。回答核心問題：**「只看 CLAUDE.md，LLM 能理解多少？」**
+對比 `/claude:doc-decode` 產出的 source-docs/ 與實際 .py 實作，量化理解文檔的精度。回答核心問題：**「source-docs 的描述與實際程式碼有多一致？」**
 
 **操作模式**：
-- 先內嵌執行 doc-decode 流程（只看文檔 → 生成 pseudo code）
-- 再掃描實際 .py 檔案
-- 逐項比對，生成差異報告
+- 讀取 source-docs/ 中的理解文檔作為比對基準
+- 掃描實際 .py 檔案
+- 逐項比對，生成差異報告 + ACTION
 
 **嚴格約束**：
 - **原始碼唯讀**：不修改任何 .py 檔案
-- **報告輸出**：差異報告寫入 decode-docs/ 或指定目錄
 - **引用來源**：所有差異必須標註具體程式碼位置（檔案:行號）
 
 ---
@@ -42,15 +41,10 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 判斷邏輯：
 
 1. 掃描 $INPUT_PATH 目錄內容
-   - 含 .py 檔案 → 判定為「模組路徑」
    - 含 .md 檔案（且無 .py）→ 判定為「輸出目錄」
+   - 含 .py 檔案 → 錯誤：decode-compare 只接受 source-docs/ 目錄
 
-2. 模組路徑模式（標準流程）
-   - TARGET_DIR = $INPUT_PATH
-   - 直接進入步驟 1（DECODE）
-
-3. 輸出目錄模式（自動解析）
-   - 支援的目錄格式：source-docs/、decode-docs/
+2. 輸出目錄模式
    - 從目錄結構推導模組路徑：
      a. 目錄名即模組名（如 source-docs/rule_forge/ → rule_forge）
      b. 在專案中搜尋對應模組：
@@ -58,40 +52,25 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
      c. 比對 CLAUDE.md 中的模組映射表
    - 讀取輸出目錄中的 .md 作為比對基準
    - TARGET_DIR = 解析出的模組路徑
-   - 跳過步驟 1（已有比對基準），直接進入步驟 2（SCAN）
-   - 若帶 --redecode → 忽略已有比對基準，從步驟 1 重新執行
+   - 直接進入步驟 1（SCAN）
+   - 若帶 --redecode → 先執行 doc-decode 重建 source-docs，再比對
    - 若帶 --subsystem → 只讀取指定子系統文檔，只比對對應 .py
-
-4. 基準來源偵測（source-aided 自動推導）
-   - 路徑含 source-docs/ → SOURCE_AIDED=true（基準來自 source-aided 模式）
-   - 路徑含 decode-docs/ → SOURCE_AIDED=false（基準來自純文檔解碼）
-   - 模組路徑（步驟 1 自行 DECODE）→ SOURCE_AIDED=false
-   - SOURCE_AIDED 影響報告標註，不影響比對流程（Step 2-5 相同）
 ```
 
 **路徑解析範例**：
 
-| 輸入 | 偵測結果 | TARGET_DIR | SOURCE_AIDED | 從哪步開始 |
-|------|---------|------------|--------------|-----------|
-| `mosaic_alpha/rule_forge` | 模組路徑（含 .py） | 同輸入 | false | 步驟 1 |
-| `decode-docs/rule_forge/` | 輸出目錄（純文檔解碼） | `rule_forge` | false | 步驟 2 |
-| `source-docs/rule_forge/` | 輸出目錄（source-aided） | `rule_forge` | true | 步驟 2 |
-| `source-docs/rule_forge/ --subsystem filter-tree` | 輸出目錄 + 子系統 | `rule_forge` | true | 步驟 2（只比對 filter-tree 相關 .py） |
+| 輸入 | 偵測結果 | TARGET_DIR | 從哪步開始 |
+|------|---------|------------|-----------|
+| `source-docs/rule_forge/` | 輸出目錄 | `rule_forge` | 步驟 1 |
+| `source-docs/rule_forge/ --subsystem filter-tree` | 輸出目錄 + 子系統 | `rule_forge` | 步驟 1（只比對 filter-tree 相關 .py） |
 
 **錯誤處理**：
+- 輸入含 .py → 錯誤：請指定 source-docs/ 目錄
 - 無法解析模組路徑 → 報告錯誤，請使用者明確指定模組路徑
-- 輸出目錄中無 .md → 退回標準流程（視為模組路徑）
+- 輸出目錄中無 .md → 錯誤：目錄中找不到理解文檔
 - fd 搜尋返回多個候選 → 優先選擇含 CLAUDE.md 的目錄；仍有歧義則報告請使用者指定
 
-### 步驟 1: DECODE — 文檔解碼
-
-**先執行完整的 `/claude:doc-decode` 流程**，產生三層 pseudo code 作為比對基準。
-
-流程與 `/claude:doc-decode` 完全一致：READ → DECODE → PSEUDO → VERIFY。
-
-**重要**：此步驟**只看文檔**，尚未讀取任何 .py 檔案。生成的 pseudo code 代表「純文檔理解」。
-
-### 步驟 2: SCAN — 掃描實際程式碼
+### 步驟 1: SCAN — 掃描實際程式碼
 
 讀取模組目錄下的 .py 檔案，提取實作事實。
 
@@ -105,21 +84,21 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
     rg "^def " -t py $TARGET_DIR
 
 2.3 關鍵檔案深入讀取
-    根據步驟 1 的 pseudo code 決定需要讀取哪些 .py
+    根據 source-docs 中的內容判斷需要深入讀取哪些 .py
     優先讀取：engine.py, types.py, 核心演算法檔案
 
 2.4 型別註解和 docstring 提取
     讀取 dataclass 定義、型別註解、docstring
 ```
 
-### 步驟 3: COMPARE — 逐項比對
+### 步驟 2: COMPARE — 逐項比對
 
 #### Level A: 架構級比對
 
 | 比對項目 | 驗證方式 |
 |---------|---------|
 | 模組劃分 | 文檔描述的檔案是否存在？職責是否匹配？ |
-| 數據流方向 | pseudo code 的數據流方向是否與 import 鏈一致？ |
+| 數據流方向 | 理解文檔的數據流方向是否與 import 鏈一致？ |
 | 依賴關係 | 文檔描述的 import 依賴是否準確？ |
 | Pipeline 流程 | 步驟順序是否與實際呼叫鏈一致？ |
 
@@ -127,7 +106,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 | 比對項目 | 驗證方式 |
 |---------|---------|
-| 函數邏輯步驟 | pseudo code 的步驟是否匹配實際函數實作？ |
+| 函數邏輯步驟 | 理解文檔的步驟是否匹配實際函數實作？ |
 | 條件判斷 | IF/ELSE 分支是否準確？ |
 | 計算公式 | 公式推導是否與程式碼中的計算一致？ |
 | YAML 解析流程 | 配置檔案的解析邏輯是否準確？ |
@@ -137,11 +116,11 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 | 比對項目 | 驗證方式 |
 |---------|---------|
-| dataclass 欄位 | pseudo code 的欄位名稱和型別是否準確？ |
-| Enum 值 | pseudo code 的 enum 值是否完整？ |
+| dataclass 欄位 | 理解文檔的欄位名稱和型別是否準確？ |
+| Enum 值 | 理解文檔的 enum 值是否完整？ |
 | 公式實作 | 公式推導是否與程式碼中的計算一致？ |
 | YAML 格式 | 文檔描述的 YAML 結構是否與實際檔案一致？ |
-| 方法簽名 | pseudo code 的方法是否存在於實際類別中？ |
+| 方法簽名 | 理解文檔的方法是否存在於實際類別中？ |
 
 #### 標記系統
 
@@ -152,14 +131,14 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | ❌ 理解錯誤 | 與實作相反或嚴重偏離 | 邏輯方向錯誤或結構理解反了 |
 | 🔍 信息缺失 | 文檔完全未提及 | 實作中存在但文檔無對應描述 |
 
-### 步驟 4: REPORT — 差異報告
+### 步驟 3: REPORT — 差異報告
 
 ```
-4.1 精度總覽（按層級統計）
-4.2 詳細差異清單（每項含程式碼引用）
-4.3 精度門檻自動標記
-4.4 編碼改善建議（優先級排序）
-4.5 整體評價
+3.1 精度總覽（按層級統計）
+3.2 詳細差異清單（每項含程式碼引用）
+3.3 精度門檻自動標記
+3.4 編碼改善建議（優先級排序）
+3.5 整體評價
 ```
 
 #### 精度門檻自動標記
@@ -179,13 +158,13 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 此標記供 daily-maintain Phase 4 消費。
 ```
 
-### 步驟 5: ACTION — 產出可執行的 CLAUDE.md 修改
+### 步驟 4: ACTION — 產出可執行的 CLAUDE.md 修改
 
-> **設計理念**：decode-compare 的終極目標不是「報告問題」，而是「修復問題」。Step 5 將發現的差異轉化為可直接 copy-paste 的 CLAUDE.md 修改文字。
+> **設計理念**：decode-compare 的終極目標不是「報告問題」，而是「修復問題」。Step 4 將發現的差異轉化為可直接 copy-paste 的 CLAUDE.md 修改文字。
 >
-> **與 Step 4 的分工**：Step 4 的建議是高層分析（分類和優先級排序），本步驟將 High Signal 項目轉化為可直接貼入 CLAUDE.md 的修改文字。Low Noise 項目不產出 ACTION。
+> **與 Step 3 的分工**：Step 3 的建議是高層分析（分類和優先級排序），本步驟將 High Signal 項目轉化為可直接貼入 CLAUDE.md 的修改文字。Low Noise 項目不產出 ACTION。
 
-#### 5.1 Signal/Noise 過濾
+#### 4.1 Signal/Noise 過濾
 
 不是所有差異都值得寫入 CLAUDE.md。過濾規則：
 
@@ -200,7 +179,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 **判斷原則**：如果這個知識「從程式碼猜不到」→ High Signal → 產出修改。如果只是 API 簽名或參數值 → Low Noise → 跳過。
 
-#### 5.2 修改文字生成
+#### 4.2 修改文字生成
 
 對每個 High Signal 差異，產出可直接 copy-paste 的 CLAUDE.md 文字：
 
@@ -238,7 +217,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 **驗證來源**: file.py:行號
 ```
 
-#### 5.3 Signal/Noise 標記原則
+#### 4.3 Signal/Noise 標記原則
 
 每個 ACTION 必須標記信號等級：
 
@@ -246,7 +225,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - **Medium Signal**：語義修正、流程描述補充 → **建議執行**
 - **Low Noise**：API 簽名更新、參數值修正 → **跳過**（這些應由 sync 處理）
 
-#### 5.4 導航優先排序
+#### 4.4 導航優先排序
 
 ACTION 按「導航影響力」排序：
 1. 導航缺口補充（概念→程式碼映射缺失）→ 最高優先
@@ -260,14 +239,10 @@ ACTION 按「導航影響力」排序：
 
 | 參數 | 說明 |
 |------|------|
-| **模組路徑** | 必填，要比對的模組目錄 |
-| **--redecode** | 強制重新執行 decode（不復用之前的理解） |
-| **--subsystem** | 只比對指定子系統（如 `--subsystem filter-tree`），需搭配輸出目錄路徑 |
-| **--depth A** | 只比對架構級 |
-| **--depth B** | 只比對演算法級 |
-| **--depth C** | 只比對資料結構級 |
-| **--depth all** | 全部三層（預設） |
-| **--recursive, -r** | 遞迴處理所有子目錄的 CLAUDE.md |
+| **輸出目錄** | 必填，要比對的 source-docs/ 目錄 |
+| **--redecode** | 先執行 doc-decode 重建，再比對 |
+| **--subsystem** | 只比對指定子系統（如 `--subsystem filter-tree`） |
+| **--recursive, -r** | 遞迴處理所有子目錄 |
 | **--max-agents N** | 平行 agent 上限（預設 4，避免 rate limit） |
 
 ---
@@ -277,7 +252,7 @@ ACTION 按「導航影響力」排序：
 ```markdown
 ## Decode Compare Report — {module_name}
 
-**比對基準**: doc-decode 輸出（{純文檔解碼 | source-aided}，來自 CLAUDE.md + N 個引用文檔）
+**比對基準**: doc-decode 輸出（source-docs/，來自 CLAUDE.md + N 個引用文檔 + M 個 .py）
 **比對目標**: N 個 .py 檔案
 **掃描檔案**: [列出實際讀取的 .py 檔案]
 
@@ -363,7 +338,7 @@ ACTION 按「導航影響力」排序：
 
 ### 比對公平性約束
 - **寬鬆認定**：命名差異（如 `range_pct` vs `amplitude_pct`）不算錯誤，只要語義一致
-- **抽象容忍**：pseudo code 省略的實作細節不算信息缺失，只標記文檔完全未提及的概念
+- **抽象容忍**：理解文檔省略的實作細節不算信息缺失，只標記文檔完全未提及的概念
 - **推導合理**：從文檔可合理推導出的理解算 ✅，不需要文檔逐字描述
 
 ### 引用來源約束
@@ -382,19 +357,13 @@ ACTION 按「導航影響力」排序：
 
 ```bash
 # 對比 rule_forge 模組
-/claude:decode-compare mosaic_alpha/rule_forge
-
-# 只比對演算法級
-/claude:decode-compare rule_forge --depth B
-
-# 強制重新 decode（不復用之前的理解）
-/claude:decode-compare rule_forge --redecode
-
-# 從 decode-docs 讀取純文檔解碼結果，比對實際程式碼
-/claude:decode-compare decode-docs/rule_forge/
-
-# 從 source-docs 讀取 source-aided 結果，比對實際程式碼
 /claude:decode-compare source-docs/rule_forge/
+
+# 比對 source-docs 與實際程式碼
+/claude:decode-compare source-docs/rule_forge/
+
+# 強制重新 decode 再比對
+/claude:decode-compare source-docs/rule_forge/ --redecode
 
 # 增量比對：只比對 filter-tree 子系統
 /claude:decode-compare source-docs/rule_forge/ --subsystem filter-tree
@@ -409,8 +378,8 @@ ACTION 按「導航影響力」排序：
 
 | Command | 職責 | 關係 |
 |---------|------|------|
-| `/claude:doc-decode` | 只看文檔 → pseudo code | 本命令的步驟 1 |
-| `/claude:decode-compare` | 文檔理解 vs 實作比對 | 本命令（完整流程） |
+| `/claude:doc-decode` | 文檔 + 程式碼 → source-docs | 前置：產出比對基準 |
+| `/claude:decode-compare` | source-docs vs 實作比對 | 本命令 |
 | `/claude:sync` | 文檔↔程式碼同步性 | 互補：sync 檢查「是否一致」，compare 檢查「理解是否準確」 |
 | `/consistency` | 文檔內部品質 | 前置：先確保文檔自洽再做 compare |
 
