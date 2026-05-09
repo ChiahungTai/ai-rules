@@ -58,6 +58,7 @@ permission-mode: "acceptEdits"
 > **核心理念**: CLAUDE.md 是模組知識的 Encoder（壓縮表示）。品質標準是 Signal/Noise ratio — 保留從程式碼猜不到的知識，移除可推導的內容。詳細框架見 `commands/claude/_common/encoder-philosophy.md`。
 
 ### 應該包含（High Signal）
+- **導航指引**: 每個關鍵概念必須附帶 `file.py:ClassOrFunction` 指引，讓 LLM 能從概念直接定位到程式碼（判斷：文檔引入了概念但 LLM 不知道去哪裡找 → 導航缺口）
 - **設計理由**: 為什麼這樣做而非那樣做
 - **架構約束**: 不可妥協的設計限制
 - **非顯而易見的選擇**: 看起來反直覺但有意義的決策
@@ -137,8 +138,49 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - **markdown**: Markdown 格式範例
 - 無語言標籤時使用純文字
 
+## 導航優先原則
+
+> **核心理念**: CLAUDE.md 的首要價值是讓 LLM 從「概念」定位到「程式碼」。導航失敗 = 理解失敗，LLM 找不到程式碼就無法正確工作。
+
+### 概念→程式碼映射
+
+每個 CLAUDE.md 引入的關鍵概念（設計決策、核心演算法、資料結構）都必須附帶導航指引：
+
+```markdown
+✅ 有導航：CLAUDE.md 提到「台灣證券分類器」→ 指向 security_type_classifier.py:TWSecurityClassifier
+❌ 無導航：CLAUDE.md 提到「證券分類」→ 只有檔案名，不知道核心 class 是什麼
+```
+
+### 導航語法
+
+```markdown
+- **設計決策描述** → `file.py:ClassName` 或 `file.py:function_name()`
+```
+
+箭頭 `→` 後接具體的檔案路徑和 class/function 名稱。避免只寫檔案名不寫 class/function。
+
+### 導航覆蓋範圍
+
+| 內容類型 | 導航要求 |
+|---------|---------|
+| 關鍵設計決策 | 必須附帶 `→ file.py:Class` |
+| 模組職責表 | 每列至少有檔案名，核心職責附 class 名 |
+| 跨模組依賴 | 具體到 `module.ClassName`，不只寫模組名 |
+| Pipeline 步驟 | 每個步驟指向入口 function |
+| 資料流描述 | 標注產出型別和下游消費者 |
+
+### 導航 Decoder Test（自檢）
+
+寫完 CLAUDE.md 後，不查源碼，嘗試回答：
+1. 「我要修改 X 的邏輯，打開哪個檔案？」→ 能定位到具體檔案名？
+2. 「Y 這個概念在哪裡實作？」→ 能指向檔案 + class 或 function 名？
+3. 「Z 的上游資料從哪來？」→ 能追蹤到上游步驟和產出型別？
+
+任一問題無法回答 → 補充導航指引。
+
 ## 品質標準
 
+- **導航優先**: 每個關鍵概念都有程式碼位置指引
 - **簡潔**: 避免冗餘描述，專注核心信息
 - **明確**: 避免模糊詞彙（「大概」「可能」「應該」）
 - **可操作**: 提供具體執行步驟和範例

@@ -45,7 +45,42 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 🚀 檢查項目
 
-### 角度一：程式碼一致性
+> **執行分層**：預設只執行核心層（最關鍵的三個角度）。用 `--quality` 加入品質層，`--all` 執行全部。
+>
+> | 層級 | 包含角度 | 參數 |
+> |------|---------|------|
+> | **核心層** | 導航有效性 + 程式碼一致性 + Signal/Noise | 預設 |
+> | **品質層** | + 內部品質 + 元資訊 + 引用語法 | `--quality` |
+> | **完整層** | + 涵蓋性 + 連鎖影響 + 蒸餾評估 | `--all` |
+>
+> **設計理由**：CLAUDE.md 的價值金字塔 — 導航（LLM 找到程式碼）→ 理解（LLM 知道為什麼）→ 品質（LLM 高效消費）。導航層做不好，其他檢查都沒意義。
+
+### 角度一：導航有效性（核心層，最重要）
+
+> **核心原則**：CLAUDE.md 的終極價值是讓 AI 從「概念」定位到「程式碼」。讀完 CLAUDE.md 後，AI 應能在 3 秒內回答「這個概念在哪裡實作？」。
+
+**判斷標準**：抽取 3-5 個關鍵概念，驗證每個概念是否有指向具體檔案、class 或 function 的導航路徑。若無法從文檔定位到程式碼，標記為導航缺口。
+
+| 檢查維度 | 說明 | 驗證方式 |
+|---------|------|----------|
+| **概念→程式碼連結** | 文檔引入的概念是否有檔案路徑或 class/function 名稱的指引 | 抽取 3-5 個關鍵概念，驗證是否能在 CLAUDE.md 中找到對應的程式碼位置（檔案名、class 名、或 function 名） |
+| **職責→檔案對應** | 文檔描述的每項職責是否指向具體檔案 | 對照檔案結構表或模組描述，驗證每項提到的職責都有對應的檔案指引 |
+| **跨模組依賴導航** | 外部模組引用是否具體到 class/function（不只是模組名） | 檢查 CLAUDE.md 中提到的外部模組依賴，驗證是否有「哪個 class/function」的指引，而非只寫模組名 |
+| **資料流可追蹤性** | 多步驟流程中，step 間的 input/output 是否可追蹤 | 當文檔描述了多步驟流程時，驗證：(1) 每個 step 有入口 function 的指引；(2) step 間的產出型別有描述；(3) 下游 step 的輸入來源可追蹤。無多步驟流程的模組標 N/A |
+
+**導航 Decoder Test**：
+
+基於 CLAUDE.md 內容，嘗試回答以下導航問題（不查閱源碼）：
+
+| 問題 | 通過標準 |
+|------|---------|
+| 「我要修改 X 的邏輯，打開哪個檔案？」 | 能定位到具體檔案名 |
+| 「Y 這個概念在哪裡實作？」 | 能指向檔案 + class 或 function 名 |
+| 「Z 的上游資料從哪來？」 | 能追蹤到上游步驟和產出型別 |
+
+**失敗處理**：若導航問題無法從 CLAUDE.md 回答，標記為導航缺口（navigation gap），產出可執行的 CLAUDE.md 修改建議（見 Sync Summary ACTION 段落）。
+
+### 角度二：程式碼一致性（核心層）
 
 | 檢查項目 | 說明 | 驗證方式 |
 |---------|------|----------|
@@ -68,7 +103,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 **範例**：文檔說「SequentialGreedyBuilder 以 Wilson CI 為目標函數」→ Read `sequential_greedy.py` 發現 `metric: str = "median"` → 標記為 ⚠️ 語義不準確。
 
-### 角度二：涵蓋性檢查
+### 角度三：涵蓋性檢查（完整層，--all）
 
 | 檢查項目 | 說明 | 驗證方式 |
 |---------|------|----------|
@@ -76,7 +111,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | API 完整性 | 公開 API 是否都有記錄 | `Grep` 搜索 `def`/`class` |
 | 規範覆蓋 | 重要規範是否被記錄 | 檢查配置檔案 |
 
-### 角度三：元資訊檢查（整合 /claude:clean）
+### 角度四：元資訊檢查（品質層，--quality）
 
 > **參考**: [clean.md](./clean.md)
 
@@ -98,7 +133,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | 專案概述 | `## 專案概述\nxxx 專案是...` | AI 需要了解專案 |
 | 繼承關係 | `**繼承**: ~/.claude/CLAUDE.md` | AI 需要知道繼承關係 |
 
-### 角度四：蒸餾評估（整合 /claude:distill，--all 選項）
+### 角度五：蒸餾評估（完整層，--all）
 
 > **參考**: [distill.md](./distill.md)
 
@@ -167,7 +202,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ---
 
-### 角度五：內部品質檢查（預設執行）
+### 角度六：內部品質檢查（品質層，--quality）
 
 | 檢查維度 | 說明 | 驗證方式 |
 |---------|------|----------|
@@ -177,7 +212,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | **自包含** | 引用檔案/路徑存在、外部依賴可獲取 | `Bash test` 驗證 |
 | **精準度** | 技術描述正確、程式碼範例可執行 | 實際驗證 |
 
-### 角度六：Signal/Noise Ratio 評估
+### 角度七：Signal/Noise Ratio 評估（核心層）
 
 > **核心原則**：CLAUDE.md 是 Encoder（壓縮知識表示），品質取決於 signal/noise ratio，不是長度。
 
@@ -194,7 +229,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 **建議動作**：signal/noise ratio 不足時，建議執行 `/claude:distill` 進行 signal/noise 分離。
 
-### 角度七：引用語法正確性
+### 角度八：引用語法正確性（品質層，--quality）
 
 > **核心原則**：`@` 是強制載入（每次 session 都付代價），`[描述](path)` 是按需讀取。選錯語法會導致 AI context 浪費或知識缺失。
 
@@ -209,7 +244,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - 偶爾才需要 / 檔案偏長 → 改用 `[描述](path)`
 - Skill / Command 中的引用 → 必須用 `[描述](path)`
 
-### 角度八：消費端文檔連鎖影響
+### 角度九：消費端文檔連鎖影響（完整層，--all）
 
 > **核心原則**：程式碼變更不只影響同目錄的 CLAUDE.md，還會影響消費端目錄的 CLAUDE.md 和其他相關 .md 文檔。
 
@@ -223,31 +258,6 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | 檢查連鎖影響 | 消費端文檔是否引用了已變更的 API | `Read` + `rg` 比對 |
 
 **範例**：`rule_forge/` 的核心 class 變更 → 不只 `rule_forge/CLAUDE.md`，連 `examples/rule_forge/CLAUDE.md` 和引用該 API 的說明文檔也需要檢查同步性。
-
-### 角度九：導航有效性檢查
-
-> **核心原則**：CLAUDE.md 的終極價值是讓 AI 從「概念」定位到「程式碼」。讀完 CLAUDE.md 後，AI 應能在 3 秒內回答「這個概念在哪裡實作？」。
-
-**判斷標準**：抽取 3-5 個關鍵概念，驗證每個概念是否有指向具體檔案、class 或 function 的導航路徑。若無法從文檔定位到程式碼，標記為導航缺口。
-
-| 檢查維度 | 說明 | 驗證方式 |
-|---------|------|----------|
-| **概念→程式碼連結** | 文檔引入的概念是否有檔案路徑或 class/function 名稱的指引 | 抽取 3-5 個關鍵概念，驗證是否能在 CLAUDE.md 中找到對應的程式碼位置（檔案名、class 名、或 function 名） |
-| **職責→檔案對應** | 文檔描述的每項職責是否指向具體檔案 | 對照檔案結構表或模組描述，驗證每項提到的職責都有對應的檔案指引 |
-| **跨模組依賴導航** | 外部模組引用是否具體到 class/function（不只是模組名） | 檢查 CLAUDE.md 中提到的外部模組依賴，驗證是否有「哪個 class/function」的指引，而非只寫模組名 |
-| **資料流可追蹤性** | 多步驟流程中，step 間的 input/output 是否可追蹤 | 當文檔描述了多步驟流程時，驗證：(1) 每個 step 有入口 function 的指引；(2) step 間的產出型別有描述；(3) 下游 step 的輸入來源可追蹤。無多步驟流程的模組標 N/A |
-
-**導航 Decoder Test**：
-
-基於 CLAUDE.md 內容，嘗試回答以下導航問題（不查閱源碼）：
-
-| 問題 | 通過標準 |
-|------|---------|
-| 「我要修改 X 的邏輯，打開哪個檔案？」 | 能定位到具體檔案名 |
-| 「Y 這個概念在哪裡實作？」 | 能指向檔案 + class 或 function 名 |
-| 「Z 的上游資料從哪來？」 | 能追蹤到上游步驟和產出型別 |
-
-**失敗處理**：若導航問題無法從 CLAUDE.md 回答，標記為導航缺口（navigation gap），建議補充概念→程式碼的對應指引。
 
 ---
 
@@ -277,11 +287,14 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 /claude:sync --all
 /claude:sync -a
 
-# 7. 預覽模式（不實際修改）
+# 7. 品質層（加入內部品質 + 引用語法檢查）
+/claude:sync --quality
+
+# 8. 預覽模式（不實際修改）
 /claude:sync --dry-run
 /claude:sync --recursive --dry-run
 
-# 8. 增量模式（只檢查 git 變更涉及的檔案）
+# 9. 增量模式（只檢查 git 變更涉及的檔案）
 /claude:sync --changed-since "2026-05-08"
 /claude:sync --changed-since HEAD~5
 /claude:sync --recursive --changed-since "yesterday"
@@ -296,7 +309,9 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | **目錄路徑** | 檢查指定目錄下的 `CLAUDE.md`（僅該層） |
 | **--recursive, -r** | 遞歸檢查所有子目錄的 `CLAUDE.md` |
 | **--changed-since** | 增量模式：只檢查 git 變更涉及的檔案（如 `--changed-since "2026-05-08"` 或 `--changed-since HEAD~5`） |
-| **--skip-consistency** | 跳過內部品質檢查（自洽性、矛盾性等） |
+| **--skip-consistency** | 跳過內部品質檢查（僅搭配 `--quality` / `--all` 時生效） |
+| **--quality** | 加入品質層檢查（內部品質 + 元資訊 + 引用語法） |
+| **--all, -a** | 完整層（全部 9 個角度 + 清理 + 蒸餾） |
 | **--dry-run** | 預覽模式，顯示結果但不執行修改 |
 | **--verbose** | 顯示詳細檢查過程 |
 
@@ -360,7 +375,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 4. 合併到檢查清單，標記為 sub-doc（優先級同父 CLAUDE.md）
 ```
 
-**Sub-doc 檢查範圍**：對說明文檔執行角度一（程式碼一致性）和角度五（內部品質），不重複涵蓋性檢查（由父 CLAUDE.md 統一負責）。
+**Sub-doc 檢查範圍**：對說明文檔執行角度二（程式碼一致性）和角度六（內部品質），不重複涵蓋性檢查（由父 CLAUDE.md 統一負責）。
 
 ### 步驟 2: 掃描程式碼結構
 
@@ -480,7 +495,7 @@ fi
 # 蒸餾精簡 CLAUDE.md
 ```
 
-### 步驟 9: 內部品質檢查（預設執行，除非 --skip-consistency）
+### 步驟 9: 內部品質檢查（品質層，--quality）
 
 ```markdown
 ## 五維度檢查流程
@@ -511,7 +526,9 @@ fi
 - 連結是否有效
 ```
 
-### 步驟 10: 導航有效性檢查（預設執行）
+### 步驟 10: 導航有效性檢查（核心層，最重要）
+
+> 導航是 sync 最核心的檢查。其他步驟發現的問題（路徑不存在、簽名不對）最終都轉化為導航修復。
 
 ```
 1. 從 CLAUDE.md 抽取 3-5 個關鍵概念
@@ -520,6 +537,7 @@ fi
 4. 檢查跨模組依賴是否具體到 class/function（不只是模組名）
 5. 對多步驟流程驗證 step 間 input/output 可追蹤性（無流程標 N/A）
 6. 執行導航 Decoder Test：不查源碼，嘗試回答 3 個導航問題
+7. 對每個導航缺口產出 ACTION 修改建議（見 Sync Summary ACTION）
 ```
 
 ---
@@ -698,6 +716,41 @@ signal_noise:
   low_noise_items: 3
 sync_score: {X}%
 needs_update: true/false
+
+### Sync Summary ACTION（可執行的 CLAUDE.md 修改）
+
+> **設計理念**：sync 不只報告問題，還要產出可直接 copy-paste 的修改。只有 High Signal 項目（導航缺口、語義錯誤、設計決策缺失）才產出 ACTION。Low Noise 項目（API 簽名、參數值）跳過。
+
+```yaml
+actions:
+  - type: add_navigation
+    target: "CLAUDE.md:{章節名}"
+    concept: "{概念名稱}"
+    text: |
+      - **{概念描述}** → `file.py:ClassName`
+    signal_level: high
+    reason: "導航缺口：概念無程式碼指引"
+
+  - type: fix_description
+    target: "CLAUDE.md:{行號}"
+    old: "{現有不正確文字}"
+    new: "{修正後文字}"
+    signal_level: high
+    reason: "語義不準確"
+    source: "file.py:{行號}"
+
+  - type: add_design_decision
+    target: "CLAUDE.md:{章節名}"
+    text: |
+      - **{設計決策名稱}**：{一句話理由} → `file.py:ClassName`
+    signal_level: high
+    reason: "設計決策缺失（從程式碼猜不到）"
+
+  - type: remove_noise
+    target: "CLAUDE.md:{行號}"
+    text: "{應移除的 Low Noise 內容}"
+    signal_level: low
+    reason: "API 簽名/參數表，從程式碼可推導"
 ```
 
 ### 遞歸模式輸出
@@ -869,7 +922,16 @@ needs_update: true/false
 
 ## 🎯 品質檢查清單
 
-### 程式碼同步檢查
+### 核心層檢查（預設執行）
+
+#### 導航有效性（角度一，最重要）
+- [ ] 抽取了 3-5 個關鍵概念，驗證每個概念是否有程式碼位置指引
+- [ ] 對照職責描述與檔案結構，驗證每項職責有對應的檔案指引
+- [ ] 檢查了跨模組依賴是否具體到 class/function（不只是模組名）
+- [ ] 對多步驟流程驗證了 step 間 input/output 可追蹤性（無流程的模組標 N/A）
+- [ ] 執行了導航 Decoder Test（3 個導航問題，不查源碼）
+
+#### 程式碼一致性（角度二）
 - [ ] 發現了所有 CLAUDE.md 檔案（遞歸模式）
 - [ ] 從 CLAUDE.md 提取了 sub-doc 引用，分類為說明文檔/設計文檔
 - [ ] 對說明文檔執行了程式碼一致性檢查（設計文檔跳過）
@@ -878,34 +940,39 @@ needs_update: true/false
 - [ ] 驗證了檔案路徑存在性
 - [ ] 驗證了類別/函數簽名正確性（實際讀取程式碼確認）
 - [ ] 執行了語義正確性 spot-check（抽查核心演算法描述是否準確）
-- [ ] 檢查了命令涵蓋性（.md 檔案是否被記錄）
-- [ ] 檢查了程式碼涵蓋性（.py/.pyx/.pxd 檔案是否被記錄）
 
-### 內部品質檢查（預設執行）
+#### Signal/Noise Ratio（角度七）
+- [ ] 評估了 Signal/Noise Ratio（High Signal 比例、Low Noise 識別）
+
+### 品質層檢查（--quality）
+
+#### 內部品質（角度六）
 - [ ] 檢查了自洽性（術語統一、定義吻合）
 - [ ] 檢查了矛盾性（規則衝突、範例矛盾）
 - [ ] 檢查了順序（章節編號、標題層級）
 - [ ] 檢查了自包含（引用完整、依賴可獲取）
 - [ ] 檢查了精準度（技術描述、程式碼可執行）
-- [ ] 評估了 Signal/Noise Ratio（High Signal 比例、Low Noise 識別）
+
+#### 元資訊（角度四）
+- [ ] 檢查了元資訊（--clean 選項）
+
+#### 引用語法（角度八）
 - [ ] 檢查了引用語法正確性（`@` vs `[描述](path)` 選擇）
 
-### 導航有效性檢查（預設執行）
-- [ ] 抽取了 3-5 個關鍵概念，驗證每個概念是否有程式碼位置指引
-- [ ] 對照職責描述與檔案結構，驗證每項職責有對應的檔案指引
-- [ ] 檢查了跨模組依賴是否具體到 class/function（不只是模組名）
-- [ ] 對多步驟流程驗證了 step 間 input/output 可追蹤性（無流程的模組標 N/A）
-- [ ] 執行了導航 Decoder Test（3 個導航問題，不查源碼）
+### 完整層檢查（--all）
 
-### 連鎖影響檢查
+#### 涵蓋性（角度三）
+- [ ] 檢查了命令涵蓋性（.md 檔案是否被記錄）
+- [ ] 檢查了程式碼涵蓋性（.py/.pyx/.pxd 檔案是否被記錄）
+
+#### 蒸餾評估（角度五）
+- [ ] 執行了清理（--clean 或 --all）
+- [ ] 執行了蒸餾（--all）
+
+#### 連鎖影響（角度九）
 - [ ] 追蹤了 import 鏈找出消費端目錄
 - [ ] 檢查了消費端 CLAUDE.md 是否需要同步更新
 - [ ] 檢查了其他相關 .md 文檔（examples/、docs/ 等）是否需要同步更新
-
-### 清理與蒸餾
-- [ ] 檢查了元資訊（--clean 選項）
-- [ ] 執行了清理（--clean 或 --all）
-- [ ] 執行了蒸餾（--all）
 
 ### 報告與備份
 - [ ] 提供了完整的檢查報告（含具體位置和證據）

@@ -172,6 +172,81 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 此標記供 daily-maintain Phase 4 消費。
 ```
 
+### 步驟 5: ACTION — 產出可執行的 CLAUDE.md 修改
+
+> **設計理念**：decode-compare 的終極目標不是「報告問題」，而是「修復問題」。Step 5 將發現的差異轉化為可直接 copy-paste 的 CLAUDE.md 修改文字。
+>
+> **與 Step 4 的分工**：Step 4 的建議是高層分析（分類和優先級排序），本步驟將 High Signal 項目轉化為可直接貼入 CLAUDE.md 的修改文字。Low Noise 項目不產出 ACTION。
+
+#### 5.1 Signal/Noise 過濾
+
+不是所有差異都值得寫入 CLAUDE.md。過濾規則：
+
+| 差異類型 | 信號等級 | 處理方式 |
+|---------|---------|---------|
+| 架構級設計決策缺失（🔍 A 級） | High Signal | 產出新增段落 |
+| 演算法行為描述不準確（⚠️ B 級） | High Signal | 產出修正文字 |
+| 導航缺口（概念無程式碼指引） | High Signal | 產出導航補充 |
+| 流程描述不完整 / 語義微小偏差 | Medium Signal | 產出補充文字（建議執行） |
+| 資料結構細節差異（⚠️ C 級） | Low Noise | 標記但跳過（從程式碼可推導） |
+| 命名差異但語義一致 | Low Noise | 跳過 |
+
+**判斷原則**：如果這個知識「從程式碼猜不到」→ High Signal → 產出修改。如果只是 API 簽名或參數值 → Low Noise → 跳過。
+
+#### 5.2 修改文字生成
+
+對每個 High Signal 差異，產出可直接 copy-paste 的 CLAUDE.md 文字：
+
+```markdown
+### CLAUDE.md 修改建議（可執行）
+
+#### ACTION 1: 新增設計決策 [🟡 優先級]
+**目標位置**: CLAUDE.md「關鍵設計決策」章節
+**操作**: 新增以下段落
+
+- **{概念名稱}**：{一句話設計理由} → `{file.py:ClassOrFunction}`
+
+**信號等級**: High Signal（設計理由，從程式碼猜不到）
+**驗證來源**: file.py:行號
+
+---
+
+#### ACTION 2: 修正導航缺口 [🟡 優先級]
+**目標位置**: CLAUDE.md:{行號}（{章節名}）
+**操作**: 將現有文字改為
+
+- **{現有描述}** → `file.py:ClassName`
+
+**信號等級**: High Signal（導航指引，概念→程式碼映射）
+**驗證來源**: file.py:行號
+
+---
+
+#### ACTION 3: 修正行為描述 [🔴 優先級]
+**目標位置**: CLAUDE.md:{行號}
+**現有文字**: "{不正確的描述}"
+**修正文字**: "{正確的描述}"
+
+**信號等級**: High Signal（語義正確性）
+**驗證來源**: file.py:行號
+```
+
+#### 5.3 Signal/Noise 標記原則
+
+每個 ACTION 必須標記信號等級：
+
+- **High Signal**：設計理由、架構約束、非顯而易見的選擇、導航指引 → **必須執行**
+- **Medium Signal**：語義修正、流程描述補充 → **建議執行**
+- **Low Noise**：API 簽名更新、參數值修正 → **跳過**（這些應由 sync 處理）
+
+#### 5.4 導航優先排序
+
+ACTION 按「導航影響力」排序：
+1. 導航缺口補充（概念→程式碼映射缺失）→ 最高優先
+2. 設計決策新增（包含導航指引）→ 高優先
+3. 行為描述修正 → 中優先
+4. Low Noise 項目 → 不產出 ACTION
+
 ---
 
 ## 參數說明
@@ -244,6 +319,28 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | 🔴 | [高影響缺口] | A/B/C | N | [具體建議：在 CLAUDE.md 的哪裡加入什麼] |
 | 🟡 | [中影響缺口] | A/B/C | N | [具體建議] |
 | 🟢 | [低影響缺口] | A/B/C | N | [具體建議] |
+
+### CLAUDE.md 修改建議（可執行）
+
+> 以下修改文字可直接 copy-paste 到 CLAUDE.md。已通過 Signal/Noise 過濾，只包含 High Signal 內容。
+
+#### ACTION 1: [操作類型] [優先級]
+**目標位置**: CLAUDE.md [章節/行號]
+**操作**: [新增/修改/刪除]
+
+[可直接貼入的 CLAUDE.md 文字]
+
+**信號等級**: High/Medium | **驗證來源**: file.py:行號
+
+---
+
+#### ACTION 2: [操作類型] [優先級]
+[同上格式]
+
+---
+
+#### Low Noise 項目（不建議加入 CLAUDE.md）
+- [項目]: 原因（從程式碼可推導 / API 簽名細節 / 參數值）
 
 ### 整體評價
 
