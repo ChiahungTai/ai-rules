@@ -515,6 +515,8 @@ rule_forge/ (21 .py) → import 叢集分析 →
 
 **單 agent 最大負載**：不超過 800 行核心演算法
 
+**預設平行上限**：4 個 agent（避免 rate limit）。可透過 `--max-agents N` 調整。分配規則計算出的 agent 數量若超過上限，多出的模組排隊等 agent 空出後再啟動。
+
 **超出容量時的處理**：
 1. 優先拆分 large 模組為子系統（強制子系統拆分）
 2. 拆分後重新分配
@@ -587,6 +589,7 @@ Phase 2: DECODE
 | **--source-aided** | 程式碼輔助重建模式：讀取 .py + 文檔，產出完整理解文檔（與 --depth 互斥） |
 | **--output** | 輸出目錄（預設模式：`decode-docs/`，source-aided：`source-docs/`） |
 | **--recursive, -r** | 遞迴處理所有子目錄的 CLAUDE.md。可與 --source-aided 組合，每個子模組獨立產出文檔 |
+| **--max-agents N** | 平行 agent 上限（預設 4，避免 rate limit） |
 
 ---
 

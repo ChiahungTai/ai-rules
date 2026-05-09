@@ -1,6 +1,6 @@
 ---
 description: "每日自動化 CLAUDE.md 維護 — 增量偵測變更、重建理解文檔、更新 CLAUDE.md、產出 morning report"
-usage: "/claude:daily-maintain [--full] [--ripple] [--parallel-agents N] [--dry-run] [--modules a,b,c]"
+usage: "/claude:daily-maintain [--full] [--ripple] [--max-agents N] [--dry-run] [--modules a,b,c]"
 argument-hint: "/claude:daily-maintain — 自動偵測模式（有 source-docs/ → incremental，無 → full）"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash", "Agent"]
 permission-mode: "acceptEdits"
@@ -96,7 +96,7 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
     單 agent 最大負載：不超過 800 行核心演算法
     超出時：優先拆分 large 模組為子系統（強制子系統拆分）
 
-    若 --parallel-agents N：
+    若 --max-agents N：
     - 按 N 調整分配（N=4 → 最多 4 agent 並行）
     - 多餘模組排隊等候
 
@@ -207,7 +207,7 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 
 ```
 2.1 啟動 Agent Pool
-    按 --parallel-agents N 啟動 N 個 agent
+    按 --max-agents N 啟動 N 個 agent
 
     Agent 分配策略：
     | 模組類型 | Agent 配額 | 內部策略 |
@@ -393,7 +393,7 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 | **無參數** | 自動偵測模式：有 source-docs/ → incremental，無 → full |
 | **--full** | 強制全部重建（忽略 source-docs/ 狀態） |
 | **--ripple** | 啟用連鎖影響偵測（需要 dependency-graph.md） |
-| **--parallel-agents N** | 並行 agent 數量（預設 4） |
+| **--max-agents N** | 平行 agent 上限（預設 4，避免 rate limit） |
 | **--dry-run** | 只產出 Phase 0 計劃，不實際執行 |
 | **--modules a,b,c** | 只處理指定模組（除錯用） |
 
@@ -470,7 +470,7 @@ small 模組（<4 .py）：3 模組/agent
 ```bash
 /claude:daily-maintain
 /claude:daily-maintain --full
-/claude:daily-maintain --ripple --parallel-agents 6
+/claude:daily-maintain --ripple --max-agents 6
 /claude:daily-maintain --dry-run
 /claude:daily-maintain --modules rule_forge,indicators
 ```

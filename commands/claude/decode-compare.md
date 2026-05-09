@@ -187,6 +187,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | **--depth C** | 只比對資料結構級 |
 | **--depth all** | 全部三層（預設） |
 | **--recursive, -r** | 遞迴處理所有子目錄的 CLAUDE.md |
+| **--max-agents N** | 平行 agent 上限（預設 4，避免 rate limit） |
 
 ---
 
