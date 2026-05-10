@@ -130,10 +130,18 @@ class TreeNode:
     pass
 ```
 
-### 標準型別語法（內建）
+### ❌ 禁止使用的 deprecated 別名（Python 3.12+）
 
-- `list[T]`, `dict[K, V]`, `set[T]`, `tuple[T1, T2]`
-- `T1 | T2`（聯合型別）, `T | None`（可選型別）
+Python 3.12 已正式 deprecate `typing` 中的泛型別名，3.14 將移除。AI（尤其是較舊模型）常自動補上這些舊寫法。
+
+| 禁止 | 正確 | PEP |
+|------|------|-----|
+| `List[T]` | `list[T]` | PEP 585 (3.9+) |
+| `Dict[K, V]` | `dict[K, V]` | PEP 585 (3.9+) |
+| `Set[T]` | `set[T]` | PEP 585 (3.9+) |
+| `Tuple[T1, T2]` | `tuple[T1, T2]` | PEP 585 (3.9+) |
+| `Optional[T]` | `T \| None` | PEP 604 (3.10+) |
+| `Union[T1, T2]` | `T1 \| T2` | PEP 604 (3.10+) |
 
 ### typing 模組適用範圍
 
