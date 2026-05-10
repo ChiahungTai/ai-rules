@@ -20,37 +20,43 @@
 
 ---
 
-## fd 語法對照（取代 find）
+## fd 常用語法
 
-| 用途 | find | fd |
-|------|------|-----|
-| 搜尋副檔名 | `find . -name "*.py"` | `fd -e py` |
-| 排除目錄 | `-not -path "*/test*"` | `-E test` |
-| 搜尋子目錄 | `find path -name "*.py"` | `fd -e py . path` |
-| 只取檔名 | `-exec basename {} \;` | `-x basename` |
-| 全路徑匹配 | 預設行為 | `--full-path` |
+```
+fd <pattern>              # 搜尋檔名（當前目錄遞迴）
+fd -e py                  # 搜尋所有 .py 檔案
+fd -e py . src/           # 搜尋 src/ 下的 .py 檔案
+fd "test_" -e py          # 搜尋 test_ 開頭的 .py
+fd -t d                   # 只搜尋目錄
+fd -t f                   # 只搜尋檔案（預設）
+fd -e py -x wc -l         # 對每個結果執行指令
+fd -E test -E vendor      # 排除 test/ 和 vendor/
+fd --max-depth 3          # 限制深度
+```
 
-### fd 注意事項
-
-- `fd <pattern> <path>` 中 pattern 匹配檔名，不是路徑
-- 搜尋特定目錄用 `fd . <dir>`，不是 `fd <dir>`
+- `fd <pattern> <path>` 中 pattern 匹配**檔名**，不是路徑
+- 搜尋特定目錄：`fd . <dir>`（`.` 表示匹配所有檔名，第二個參數是路徑）
+- **常見錯誤**：`fd src/` 是搜尋檔名包含 `src/` 的檔案，不是搜尋 src/ 目錄
 
 ---
 
-## rg 語法對照（取代 grep）
+## rg 常用語法
 
-| 用途 | grep | rg |
-|------|------|-----|
-| 遞迴搜尋 | `grep -r "pattern" .` | `rg "pattern"` |
-| 限定副檔名 | `grep -r --include="*.py"` | `rg -t py` |
-| 排除目錄 | `grep -r --exclude-dir=node_modules` | 預設遵守 `.gitignore` |
-| 只印檔名 | `grep -rl "pattern"` | `rg -l "pattern"` |
-| 顯示行號 | `grep -rn "pattern"` | 預設顯示 |
-| 固定字串 | `grep -rF "exact"` | `rg -F "exact"` |
-| 正則匹配 | `grep -rE "pat.*tern"` | `rg "pat.*tern"`（預設） |
+```
+rg "pattern"              # 遞迴搜尋（當前目錄）
+rg "pattern" src/         # 限定搜尋 src/ 目錄
+rg "pattern" file.py      # 搜尋單一檔案
+rg -t py "pattern"        # 只搜 .py 檔案
+rg -l "pattern"           # 只印檔名
+rg -c "pattern"           # 印每檔匹配數
+rg -F "exact string"      # 固定字串（不走正則）
+rg -n "pattern"           # 印行號（預設行為，可省略）
+rg --no-filename "pat"    # 不印檔名（用於提取內容）
+rg -o "pattern"           # 只印匹配部分
+rg -o -r '$1' "(\w+)\.py" # 捕獲群組替換輸出
+rg "pattern" -A 3         # 印匹配行 + 後 3 行
+```
 
-### rg 注意事項
-
-- `rg` 預設使用正則表達式，固定字串用 `-F`
-- 預設遵守 `.gitignore`，搜尋被忽略的檔案需加 `--no-ignore`
-- 輸出格式比 grep 更豐富，通常不需要額外格式化
+- `rg` 預設正則匹配，固定字串用 `-F`
+- 預設遵守 `.gitignore`，搜尋被忽略的檔案加 `--no-ignore`
+- `rg "pattern" <dir>` 限定目錄搜尋，`rg "pattern" <file>` 限定單檔
