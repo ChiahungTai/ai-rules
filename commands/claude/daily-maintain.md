@@ -50,7 +50,7 @@ CLAUDE.md（壓縮知識 — 最終目標）
 | UC4 | 沒有任何變更 | 全部新鮮 + 無新 commits | 全部跳過，只更新 .last-run |
 | UC5 | 大重構後 | `--full` | 全部模組重建 source-docs |
 | UC6 | .py 被刪除 | git diff 偵測 | 清理 source-docs 引用 → verify → CLAUDE.md |
-| UC7 | 手動改了 CLAUDE.md | 只有 CLAUDE.md diff | 定向修正 source-docs（反向同步） |
+| UC7 | 手動改了 CLAUDE.md | 有 CLAUDE.md diff（不論 .py 是否變更） | 語義映射 → 定向修正或 subsystem rebuild（見 §0.3.6） |
 
 **核心約束**：
 - **CLAUDE.md 是關鍵資產**：每個修改都是獨立 Edit 操作（不是整檔重寫），確保 git diff 精確到行
@@ -132,7 +132,7 @@ CLAUDE.md（壓縮知識 — 最終目標）
         | .py 修改 | git diff 中有 ± 行 | 子系統級重建 |
         | .py 刪除 | git diff 中只有 - 行 | 清理 source-docs 殘留引用 |
         | .py 新增 | git diff 中只有 + 行 | 全模組重建 |
-        | CLAUDE.md 修改 | 路徑匹配 CLAUDE.md | 定向修正 source-docs（反向同步） |
+        | CLAUDE.md 修改 | 路徑匹配 CLAUDE.md | 語義映射 → 決定策略（見 §0.3.6） |
 
         映射規則（.py → 模組）：
         mosaic_alpha/rule_forge/engine.py → rule_forge
@@ -154,14 +154,38 @@ CLAUDE.md（壓縮知識 — 最終目標）
         新增 .py 改變模組結構（import 圖可能改變）
         → 該模組標記 "needs full decode"（不做子系統級判斷）
 
-    0.3.6 CLAUDE.md 修改 — 反向同步
-        當模組只有 CLAUDE.md 變更、無 .py 變更時：
-        - 標記為 "claude-md-only change"
-        - 不觸發 doc-decode（.py 沒變，逐字抄錄段落仍正確）
-        - 改用定向修正：讀 CLAUDE.md diff → 更新 source-docs 對應段落
-          - 設計決策新增/修正 → 更新 source-docs 的「設計決策記錄」段落
-          - 描述修正 → 更新 source-docs 中對應描述
-          - 結構重組（少見）→ 降級為全模組重建
+    0.3.6 CLAUDE.md 修改 — 反向同步 + source-docs 映射
+        若模組已被 §0.3.5 標記為 full decode，則跳過本節（全模組重建已涵蓋）。
+
+        當模組有 CLAUDE.md 變更時（不論是否同時有 .py 變更）：
+
+        Step 1: 提取 CLAUDE.md 變更語義
+            git diff HEAD~{n}..HEAD -- {module}/CLAUDE.md
+            對每個變更段落，識別語義類別：
+            - 渲染描述變更（如 "三條虛線" → "帶狀填滿"）
+            - 圖層映射變更（如 p_bottom → p_top）
+            - 型別/參數變更（如閾值 0.30 → 30）
+            - 設計決策新增/修正
+            - 模組結構變更
+
+        Step 2: 映射到 source-docs 子系統
+            對每個語義變更，搜尋 source-docs/{module}/ 中是否有對應描述：
+            rg "{關鍵詞}" source-docs/{module}/ -l
+
+            結果分類：
+            - 找到對應 → 標記該子系統為 "needs subsystem rebuild"
+            - 找不到 → 跳過（CLAUDE.md 新增的內容，source-docs 沒有）
+
+        Step 3: 決定更新策略
+            | 情境 | 策略 |
+            |------|------|
+            | 僅 CLAUDE.md 變更，無 .py 變更 | 定向 Edit source-docs（逐項修正） |
+            | CLAUDE.md + .py 同時變更，映射到 source-docs 子系統 | doc-decode --subsystem {受影響子系統} |
+            | 結構重組（CLAUDE.md 大幅調整） | 降級為全模組重建 |
+
+        核心邏輯：CLAUDE.md 變更是 source-docs 過時的領先指標。
+        當 CLAUDE.md 更新了描述，代表程式碼行為已變更，
+        對應的 source-docs 子系統也需要同步更新。
 
     0.3.7 source-docs dirty 偵測
         git diff --name-only source-docs/
@@ -181,6 +205,7 @@ CLAUDE.md（壓縮知識 — 最終目標）
       | 無 source-docs | Full doc-decode → Full Compare |
       | Quick Scan 發現引用斷裂 | 定向 Edit 修正 source-docs（不重建） |
       | Sync 發現 CLAUDE.md 過時 | 定向 Edit 修正 CLAUDE.md |
+      | CLAUDE.md 變更映射到 source-docs 子系統（§0.3.6） | doc-decode --subsystem {受影響子系統} |
 
 0.5 Agent 分配
 
@@ -269,7 +294,7 @@ CLAUDE.md（壓縮知識 — 最終目標）
     | needs full decode（無 source-docs / .py 新增） | doc-decode 全模組 |
     | needs subsystem rebuild（.py 修改） | doc-decode --subsystem {列表} |
     | needs cleanup（.py 刪除） | 清理引用（已在 Phase 0.3.4 完成） |
-    | claude-md-only（反向同步） | 定向修正 source-docs（見 1.4） |
+    | claude-md-driven（反向同步 / subsystem rebuild） | 見 1.4 |
     | skip / verify-only | 跳過 |
 
 1.1 啟動 Agent Pool
@@ -286,25 +311,28 @@ CLAUDE.md（壓縮知識 — 最終目標）
     對 .py 新增或無 source-docs 的模組，執行完整 doc-decode：
     doc-decode {module} --output source-docs/{module}/
 
-1.4 CLAUDE.md 反向同步（UC7）
-    當模組只有 CLAUDE.md 變更、無 .py 變更時：
+1.4 CLAUDE.md 驅動 source-docs 更新
+    當 Phase 0.3.6 映射出 CLAUDE.md 變更影響 source-docs 子系統時：
 
-    1.4.1 讀取 CLAUDE.md diff
-        git diff HEAD~{n}..HEAD -- {module}/CLAUDE.md
+    1.4.1 僅 CLAUDE.md 變更（無 .py 變更）→ 定向 Edit
+        對每項 CLAUDE.md 變更：
+        - 讀 CLAUDE.md diff 識別語義變更
+        - rg 搜尋 source-docs/{module}/ 中對應描述
+        - Read source-docs 對應檔案 → Edit 精確替換
 
-    1.4.2 分類變更
-        | 變更類型 | 處理方式 |
-        |---------|---------|
-        | 新增設計決策段落 | 新增到 source-docs 的「設計決策記錄」段落 |
-        | 修正描述 | 更新 source-docs 中對應描述 |
-        | 刪除內容 | 從 source-docs 移除對應內容 |
-        | 結構重組（章節大幅調整） | 降級為全模組重建（跑 1.3） |
+        不讀取 .py（逐字抄錄段落仍正確）。
+        品質標準：只修正 CLAUDE.md 變更對應的段落，不改其他內容。
 
-    1.4.3 執行定向修正
-        對每項變更：Read source-docs 對應檔案 → Edit 精確替換
+    1.4.2 CLAUDE.md + .py 同時變更 → doc-decode --subsystem
+        CLAUDE.md 變更揭示了程式碼行為已改變的具體面向，
+        精準定位需要重建的 source-docs 子系統：
 
-    不讀取 .py（逐字抄錄段落仍正確）。
-    品質標準：只修正 CLAUDE.md 變更對應的段落，不改其他內容。
+        doc-decode {module} --output source-docs/{module}/ --subsystem {受影響子系統}
+
+        範例：CLAUDE.md Feature→Condition 表更新了 BB 描述（"三條虛線" → "帶狀填滿"）
+        → 映射到 conditions-simple.md 的 BB render 段落
+        → doc-decode conditions --subsystem conditions-simple
+        （此為 conditions 模組範例，其他模組同理）
 
 1.5 寫入 .last-run
     寫入 source-docs/.last-run = 當前時間戳
