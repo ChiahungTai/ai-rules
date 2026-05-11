@@ -67,6 +67,7 @@ print(f"[LOG] rg 'fit_model.*(start|metric|warn|error)' {log_path}")
 | `[WARN]` | 異常但可繼續 | 數值偏低、資料不足、非致命問題 |
 | `[FAIL]` | 失敗 | 函式拋出異常或無法完成 |
 | `[LOG]` | rg 搜尋指引 | 指引 AI 用 rg 查詢詳細 log |
+| `[ACTION]` | UI 操作事件 | 使用者 UI 操作（選取、切換、調整），供 LLM 理解上下文 |
 
 ### 決策規則
 
@@ -156,7 +157,7 @@ log_config = init_logging_with_defaults()
 ## 執行自檢清單
 
 - [ ] print 只用於 state transition，不用於中間步驟
-- [ ] print 使用 `[OK]`/`[WARN]`/`[FAIL]`/`[LOG]` status tag（不使用 `[INFO]`）
+- [ ] print 使用 `[OK]`/`[WARN]`/`[FAIL]`/`[LOG]`/`[ACTION]` status tag（不使用 `[INFO]`）
 - [ ] 需要深挖時，print 附帶 `[LOG] rg 'pattern' {log_path}`
 - [ ] Logger message 以 `action_name: ` 統一 prefix 開頭
 - [ ] Logger 不重複 print 的摘要，提供補充細節
