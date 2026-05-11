@@ -67,7 +67,44 @@ print(f"[LOG] rg 'fit_model.*(start|metric|warn|error)' {log_path}")
 | `[WARN]` | 異常但可繼續 | 數值偏低、資料不足、非致命問題 |
 | `[FAIL]` | 失敗 | 函式拋出異常或無法完成 |
 | `[LOG]` | rg 搜尋指引 | 指引 AI 用 rg 查詢詳細 log |
-| `[ACTION]` | UI 操作事件 | 使用者 UI 操作（選取、切換、調整），供 LLM 理解上下文 |
+| `[ACTION]` | UI 操作事件 | 使用者 UI 操作（選取、切換、調整），供 LLM 理解上下文。由 ui 元件層 log，不重複 |
+
+### [LOG] 路徑只印一次
+
+`[LOG] rg 'pattern' {log_path}` 中的 log 路徑在同一 session 內不變，每次都印是浪費 token。
+
+```python
+# ✅ 正確：class variable 追蹤是否已印過
+class UIActionLogger:
+    _log_path_printed = False
+
+    def log(self, action, summary, context=None):
+        print(f"[ACTION] #{seq} {action}: {summary}")
+        if self._log_path is not None and not UIActionLogger._log_path_printed:
+            print(f"[LOG] rg 'ui_action.*seq={seq}' {self._log_path}")
+            UIActionLogger._log_path_printed = True
+```
+
+### [ACTION] 分層原則
+
+**ui 元件層 log，app 層不重複。** 如果互動來自 `mosaic_alpha/ui` 的元件（Tabulator、Panel），由元件 log；只有 app 直接操作 Bokeh/Panel 時才由 app 層 log。
+
+```python
+# ✅ 正確：元件擁有互動，元件 log
+class SwingTriagePanel:
+    def _handle_selection(self, event):
+        self._action_log.log("select_swing", f"{swing_id}")
+
+# ❌ 錯誤：app 層重複 log 同一事件
+class TrajectoryViewerApp:
+    def _on_swing_selected(self, row):
+        self._action_log.log("select_swing", f"{row['swing_id']}")  # 重複
+
+# ✅ 正確：app 直接操作 Panel widget，由 app log
+class TrajectoryViewerApp:
+    def _on_instrument_change(self, event):
+        self._action_log.log("switch_instrument", f"->{new_code}")
+```
 
 ### 決策規則
 
@@ -158,6 +195,8 @@ log_config = init_logging_with_defaults()
 
 - [ ] print 只用於 state transition，不用於中間步驟
 - [ ] print 使用 `[OK]`/`[WARN]`/`[FAIL]`/`[LOG]`/`[ACTION]` status tag（不使用 `[INFO]`）
+- [ ] `[LOG]` 路徑同一 session 只印一次（避免重複浪費 token）
+- [ ] `[ACTION]` 由 ui 元件層 log，app 層不重複
 - [ ] 需要深挖時，print 附帶 `[LOG] rg 'pattern' {log_path}`
 - [ ] Logger message 以 `action_name: ` 統一 prefix 開頭
 - [ ] Logger 不重複 print 的摘要，提供補充細節
