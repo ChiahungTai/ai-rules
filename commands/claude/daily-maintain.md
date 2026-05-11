@@ -26,12 +26,14 @@ Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-ex
 **三層資料流**：
 
 ```
-.py（程式碼真相）
-  ↓ doc-decode
-source-docs/（詳細理解中間層）
+CLAUDE.md（理解框架 — 知道什麼重要）+ .py（程式碼真相 — 知道實際怎麼做）
+  ↓ doc-decode（雙輸入：CLAUDE.md 定優先級，.py 提供真相）
+source-docs/（詳細理解中間層 — 驗證層，非消費層）
   ↓ decode-compare 驗證 + 找缺口
-CLAUDE.md（壓縮知識 — 最終目標）
+CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
 ```
+
+> **關鍵認知**：LLM 使用 CLAUDE.md 協助開發和分析，不會直接讀 source-docs。source-docs 是驗證中間層，存在目的是協助判斷 CLAUDE.md 品質。因此 doc-decode 必須從 CLAUDE.md 出發（知道什麼重要），再用 .py 驗證（確認是否準確），才能產出有意義的 source-docs。
 
 **操作模式**：
 
@@ -282,7 +284,7 @@ CLAUDE.md（壓縮知識 — 最終目標）
 
 ### Phase 1: FIX & REBUILD — 定向修正 + 重建過時 source-docs
 
-> **自動處理所有模組**。過時模組重建 source-docs，新鮮模組只做定向修正。
+> **CLAUDE.md 品質是唯一目標**。source-docs 是驗證中間層，LLM 使用 CLAUDE.md 協助開發，不會直接讀 source-docs。因此 doc-decode 必須從 CLAUDE.md 出發，才能判斷 CLAUDE.md 描述是否準確。
 
 ```
 1.0 變更類型分流
@@ -294,27 +296,69 @@ CLAUDE.md（壓縮知識 — 最終目標）
     | needs full decode（無 source-docs / .py 新增） | doc-decode 全模組 |
     | needs subsystem rebuild（.py 修改） | doc-decode --subsystem {列表} |
     | needs cleanup（.py 刪除） | 清理引用（已在 Phase 0.3.4 完成） |
-    | claude-md-driven（反向同步 / subsystem rebuild） | 見 1.4 |
+    | claude-md-driven（反向同步 / subsystem rebuild） | 見 1.5 |
     | skip / verify-only | 跳過 |
 
-1.1 啟動 Agent Pool
-    按 --max-agents N 啟動 N 個 agent
+1.1 CLAUDE.md 優先原則（強制）
 
-1.2 子系統增量重建
+    ⚠️ doc-decode 的輸入是 CLAUDE.md + .py，不是只有 .py。
+    CLAUDE.md 提供「理解框架」（知道什麼重要），.py 提供「程式碼真相」（知道實際怎麼做）。
+    跳過 CLAUDE.md 等於丟掉「什麼值得記錄」的指引。
+
+    每個 Phase 1 agent 啟動時，必須依序執行：
+
+    S1: READ CLAUDE.md（強制第一步）
+        1. 讀取目標模組的 CLAUDE.md
+        2. 追蹤 @ 引用和 markdown link 引用的文檔
+        3. 提取「理解框架」：
+           - 模組定位和核心職責
+           - 關鍵設計決策（為什麼這樣做）
+           - 不可妥協的約束
+           - CLAUDE.md 標注為重要的 class/function（導航目標）
+        4. 建立記錄優先級清單：
+           - CLAUDE.md 提到的設計決策 → source-docs 必須有完整支撐
+           - CLAUDE.md 的導航指引 → source-docs 必須覆蓋對應 .py
+           - CLAUDE.md 未提及的 → source-docs 可選記錄
+
+    S2: SCAN .py
+        讀取變更的 .py 檔案，比對 CLAUDE.md 的理解框架。
+
+    S3: RECONSTRUCT source-docs
+        基於 CLAUDE.md 的理解框架 + .py 的程式碼真相，更新 source-docs。
+
+    Agent Prompt 模板（每個 Phase 1 agent 必須包含）：
+    ┌────────────────────────────────────────────────────────────┐
+    │ 1. 【強制】先讀取 {module}/CLAUDE.md 建立理解框架          │
+    │    - 模組定位、設計決策、約束、導航目標                     │
+    │    - 追蹤 @ 引用和 markdown link                           │
+    │ 2. 讀取變更的 .py 檔案                                     │
+    │ 3. 讀取現有 source-docs                                    │
+    │ 4. 以 CLAUDE.md 為優先級指引，更新 source-docs             │
+    │    - CLAUDE.md 提到的設計決策 → 確認 source-docs 有支撐    │
+    │    - CLAUDE.md 的導航目標 → 確認 source-docs 有覆蓋        │
+    │ 5. Edit 更新 source-docs（不是整檔重寫）                   │
+    └────────────────────────────────────────────────────────────┘
+
+1.2 啟動 Agent Pool
+    按 --max-agents N 啟動 N 個 agent，每個 agent 必須遵循 §1.1 的模板。
+
+1.3 子系統增量重建
     對 .py 修改的模組，傳遞 Phase 0 的受影響子系統清單：
     doc-decode {module} --output source-docs/{module}/ --subsystem {子系統列表}
 
-    遵循 doc-decode.md 的 --subsystem 模式流程（S1→S2→S3 + overview 輕量同步）。
+    遵循 §1.1 的 S1→S2→S3 流程 + overview 輕量同步。
     未指定的子系統文檔不被觸及。
 
-1.3 全模組重建
+1.4 全模組重建
     對 .py 新增或無 source-docs 的模組，執行完整 doc-decode：
     doc-decode {module} --output source-docs/{module}/
 
-1.4 CLAUDE.md 驅動 source-docs 更新
+    同樣遵循 §1.1 的 S1→S2→S3 流程（先讀 CLAUDE.md）。
+
+1.5 CLAUDE.md 驅動 source-docs 更新
     當 Phase 0.3.6 映射出 CLAUDE.md 變更影響 source-docs 子系統時：
 
-    1.4.1 僅 CLAUDE.md 變更（無 .py 變更）→ 定向 Edit
+    1.5.1 僅 CLAUDE.md 變更（無 .py 變更）→ 定向 Edit
         對每項 CLAUDE.md 變更：
         - 讀 CLAUDE.md diff 識別語義變更
         - rg 搜尋 source-docs/{module}/ 中對應描述
@@ -323,7 +367,7 @@ CLAUDE.md（壓縮知識 — 最終目標）
         不讀取 .py（逐字抄錄段落仍正確）。
         品質標準：只修正 CLAUDE.md 變更對應的段落，不改其他內容。
 
-    1.4.2 CLAUDE.md + .py 同時變更 → doc-decode --subsystem
+    1.5.2 CLAUDE.md + .py 同時變更 → doc-decode --subsystem
         CLAUDE.md 變更揭示了程式碼行為已改變的具體面向，
         精準定位需要重建的 source-docs 子系統：
 
@@ -334,7 +378,7 @@ CLAUDE.md（壓縮知識 — 最終目標）
         → doc-decode conditions --subsystem conditions-simple
         （此為 conditions 模組範例，其他模組同理）
 
-1.5 寫入 .last-run
+1.6 寫入 .last-run
     寫入 source-docs/.last-run = 當前時間戳
 ```
 
