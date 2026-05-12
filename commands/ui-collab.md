@@ -1,5 +1,6 @@
 ---
 description: "UI-LLM 協作模式 — 啟動 UI 並監控操作日誌"
+when_to_use: "Launch the Backbone Trajectory Viewer UI and monitor [ACTION] logs so the LLM can understand user UI interactions in real time."
 usage: "/ui-collab"
 argument-hint: "無參數"
 allowed-tools: ["Bash", "Read", "Monitor"]

@@ -1,5 +1,6 @@
 ---
 description: "段落式實作計畫書生成器，基於 /spec 規格摘要生成 Self-Contained Segments。/execution-plan \"任務描述\" [PROMPT檔案]"
+when_to_use: "Generate a segmented Execution Plan from a spec. Creates self-contained segments with context, pseudo code, validation strategy, and dependency anchors."
 usage: "/execution-plan \"實作任務描述\" [PROMPT檔案路徑]"
 argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 ---

@@ -1,9 +1,9 @@
 ---
 description: "深度工作模式 - 用戶離開時的自主實作引擎，AI 全力發揮、慢慢思考、完整交付"
+when_to_use: "Autonomous implementation mode for when the user is away. Full-power, self-directed execution with deep thinking, error self-healing, and complete delivery."
 usage: "/deep-work <任務描述 或 Execution Plan 路徑>"
 argument-hint: "任務描述 | Execution Plan 檔案路徑"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
-permission-mode: "acceptEdits"
 ---
 
 # /deep-work - 深度工作模式

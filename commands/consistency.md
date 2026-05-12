@@ -1,5 +1,8 @@
 ---
 description: "文檔品質檢查器（自洽性、矛盾性、順序、自包含、精準度）。/consistency <文檔路徑>"
+when_to_use: "Check a single Markdown document for internal quality: self-consistency, contradictions, ordering, self-containedness, accuracy, and signal/noise ratio."
+context: fork
+agent: Explore
 usage: "/consistency <文檔路徑>"
 argument-hint: "要檢查的文檔路徑（單一檔案）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]

@@ -209,24 +209,28 @@ disable-model-invocation: false
 ```yaml
 ---
 description: "執行程式碼性能分析和優化建議"
+when_to_use: "Run performance profiling when users report slow code or ask about optimization."
 usage: "/performance [檔案路徑] [分析類型]"
 argument-hint: "檔案路徑和可選的分析類型"
 allowed-tools: ["Read", "Grep", "Bash"]
 model: "sonnet"
 disable-model-invocation: false
-permission-mode: "default"
 ---
 ```
 
 ### 參數詳細說明
 
 - `description`: 命令功能的簡潔描述，用於命令列表顯示
+- `when_to_use`: 補充觸發情境描述，與 description 合併計入 1,536 字元上限
 - `usage`: 命令使用語法範例
 - `argument-hint`: 參數提示信息，指導用戶輸入格式
 - `allowed-tools`: 該命令允許使用的工具列表
 - `model`: 執行時使用的 Claude 模型 (sonnet/opus/haiku)
+- `context`: 設為 `fork` 可在獨立 subagent context 中執行
+- `agent`: 搭配 `context: fork` 使用，指定 subagent 類型（如 Explore、Plan）
+- `effort`: 控制推理深度
+- `hooks`: 命令執行前後的 hook 腳本
 - `disable-model-invocation`: 是否禁用模型調用
-- `permission-mode`: 檔案操作權限級別 (default/acceptEdits/bypassPermissions)
 
 ## 參數處理機制
 
@@ -310,11 +314,9 @@ allowed-tools: ["Read", "Write", "Edit"]
 
 # 開發權限
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep"]
-permission-mode: "acceptEdits"
 
 # 完整系統權限
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Task"]
-permission-mode: "bypassPermissions"
 ---
 ```
 
@@ -592,9 +594,6 @@ ls ~/.claude/commands/ | head -5
 ```yaml
 # 檢查 allowed-tools 配置
 allowed-tools: ["Read", "Write"]  # 確保包含必要工具
-
-# 檢查 permission-mode 設定
-permission-mode: "acceptEdits"  # 必要時提升權限
 ```
 
 #### Frontmatter 語法錯誤

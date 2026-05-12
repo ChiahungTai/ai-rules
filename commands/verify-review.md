@@ -1,5 +1,6 @@
 ---
 description: "評估其他 AI 的審查建議，基於第一性原理決定是否採納。/verify-review <ai1: 建議 [ai2: 建議]"
+when_to_use: "Evaluate AI review suggestions using first-principles reasoning against actual code. Decide adopt/reject/needs-confirmation before making changes."
 usage: "/verify-review < ai1: 建議全文 [ai2: 建議全文]"
 argument-hint: "貼上其他 AI 的審查建議，格式：ai1: ... 或 ai1: ... ai2: ..."
 allowed-tools: ["Read", "Grep", "Glob"]

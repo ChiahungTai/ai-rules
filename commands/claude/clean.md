@@ -1,9 +1,9 @@
 ---
 description: "清理 Markdown 文檔中不必要的元資訊（版本號、日期、統計、Changelog）"
+when_to_use: "Remove unnecessary metadata (version numbers, dates, statistics, changelogs) and low-signal content from CLAUDE.md files. Use to improve signal/noise ratio."
 usage: "/claude:clean [目錄路徑] [選項]"
 argument-hint: "/claude:clean [目錄路徑] [--recursive] — 預設處理當前目錄，可指定目錄或 .md 檔案"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
-permission-mode: "acceptEdits"
 ---
 
 # CLAUDE.md Clean - 清理不必要的元資訊

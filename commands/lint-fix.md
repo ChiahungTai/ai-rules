@@ -1,9 +1,9 @@
 ---
 description: "執行 ruff 和 mypy 檢查並自動修正問題"
+when_to_use: "Run ruff format, ruff check --fix, and mypy on Python files. Use after writing or modifying Python code to enforce style and type conventions."
 usage: "/lint-fix [檔案或目錄路徑]"
 argument-hint: "預設檢查當前目錄，可指定檔案或目錄"
 allowed-tools: ["Bash", "Read", "Edit", "Grep"]
-permission-mode: "acceptEdits"
 ---
 
 # Lint Fix - Python 程式碼品質自動修正工具

@@ -1,5 +1,6 @@
 ---
 description: "結構化需求討論（User Story 挖掘、假設浮出、技術選型、邊界定義），為 EP 做準備。/spec [需求描述]"
+when_to_use: "Structure a feature requirement into a spec document with User Story, assumptions, tech choices, and boundaries. Use before /execution-plan."
 usage: "/spec [需求描述]"
 argument-hint: "你要做什麼功能或改變"
 ---

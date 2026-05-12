@@ -1,5 +1,6 @@
 ---
 description: "快速提醒 LLM 最常忘記的規則 — 避免權限提示卡關"
+when_to_use: "Remind the LLM of rules most frequently violated: no # in python -c, use rg/fd not grep/find, always uv run, no sed for code, split pipe commands."
 usage: "/rules-reminder"
 allowed-tools: ["Read"]
 ---

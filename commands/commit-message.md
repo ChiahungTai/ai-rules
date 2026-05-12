@@ -1,5 +1,6 @@
 ---
 description: "分析 git 變更生成 commit message。自動偵測 staged/unstaged/diff，產出 conventional commits 格式建議。"
+when_to_use: "Generate a conventional commit message from current git changes. Use when you have uncommitted changes and are ready to commit."
 usage: "/commit-message"
 allowed-tools: ["Bash", "Read"]
 ---

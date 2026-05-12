@@ -1,9 +1,9 @@
 ---
 description: "基於 Execution Plan 逐段實作（準備、TDD、驗證、提交）。/build <EP路徑> [段落編號]"
+when_to_use: "Implement an Execution Plan segment-by-segment using TDD. Use after /ep-review and /verify-review. Supports parallel agents with --max-agents."
 usage: "/build <Execution Plan 路徑> [段落編號]"
 argument-hint: "<Execution Plan 檔案路徑> [段落編號] [--max-agents N]"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
-permission-mode: "acceptEdits"
 ---
 
 # /build — 基於 Execution Plan 逐段實作

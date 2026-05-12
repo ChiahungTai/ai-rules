@@ -1,6 +1,7 @@
 ---
 name: batch-task
 description: 'Sequential batch task processor - processes subtasks one at a time to avoid rate limits'
+when_to_use: "Process multiple subtasks sequentially (one agent at a time) to avoid rate limits. Use when you need batch processing but parallel execution is not feasible."
 ---
 
 # Batch-Task - 序列批次任務處理器

@@ -1,5 +1,6 @@
 ---
 description: "第一性原理代碼審查 — 未 commit 的 code，多找相關程式碼確認實作合理性"
+when_to_use: "Review uncommitted code changes before committing. Use after /build or after writing new code to validate correctness, architecture, and security."
 usage: "/code-review [選項]"
 argument-hint: "[可選：指定檔案或範圍]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]

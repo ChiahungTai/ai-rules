@@ -1,5 +1,6 @@
 ---
 description: "審查者回頭驗收實作結果，確認修改合理性和不修改的合理性。/followup-review [審查報告]（無參數則從 git 變更推斷）"
+when_to_use: "Verify that code changes from a previous review were implemented correctly. Use after /verify-review decisions have been applied."
 usage: "/followup-review [審查報告與採納決策]"
 argument-hint: "可選：貼上原始審查報告和 verify-review 的決策結果；無參數時自動從 git 變更推斷"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]

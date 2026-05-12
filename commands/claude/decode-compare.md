@@ -1,5 +1,6 @@
 ---
 description: "對比文檔理解與實際程式碼，驗證精確度"
+when_to_use: "Compare source-docs/ documentation against actual Python code to verify encoding precision. Supports --quick scan and full three-level comparison."
 usage: "/claude:decode-compare <路徑> [--quick] [--redecode] [--subsystem NAME] [--recursive]"
 argument-hint: "/claude:decode-compare <輸出目錄> [--quick] [--redecode] [--subsystem NAME] [--recursive] — --quick 為輕量驗證（rg/fd），預設為完整三層比對"
 allowed-tools: ["Read", "Glob", "Grep", "Bash", "Write"]

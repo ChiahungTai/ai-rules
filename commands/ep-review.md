@@ -1,5 +1,8 @@
 ---
 description: "審查 Execution Plan 合理性（完整性、規範合規、一致性、遺漏風險）。/ep-review <EP路徑>"
+when_to_use: "Review an Execution Plan for completeness, rules compliance, internal consistency, and omission risks before implementation begins."
+context: fork
+agent: Explore
 usage: "/ep-review <Execution Plan 路徑>"
 argument-hint: "<Execution Plan 檔案路徑>"
 allowed-tools: ["Read", "Grep", "Glob"]
