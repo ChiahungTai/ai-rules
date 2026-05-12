@@ -1,9 +1,9 @@
 ---
 description: "檢查 Markdown 文檔與程式碼同步性及內部品質"
+when_to_use: "Check CLAUDE.md synchronization with code: navigation validity, code consistency, signal/noise ratio. Supports --recursive, --changed-since, --quality."
 usage: "/claude:sync [目錄路徑] [選項]"
 argument-hint: "/claude:sync [目錄路徑] [--recursive] — 預設檢查當前目錄，可指定目錄或 .md 檔案"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
-permission-mode: "acceptEdits"
 ---
 
 # CLAUDE.md Sync - 程式碼同步與品質檢查工具
@@ -12,7 +12,7 @@ permission-mode: "acceptEdits"
 
 Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md) — 讀取此檔案以理解 High Signal / Low Noise 分類標準。
 
-## 🎯 核心目標
+## 核心目標
 
 **適用文檔**：
 - **CLAUDE.md**：AI 協作指南，必須與程式碼保持同步
@@ -39,265 +39,110 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - **內部品質**: 文檔自洽、無矛盾、結構合理、內容精準
 - **實際驗證**: 開啟相關程式碼確認，而非只檢查文檔本身
 
-> **💡 定位說明**: `/claude:sync` 是「檢查與報告」工具，參考 clean 和 distill 的原則來判斷問題。如需實際清理或蒸餾，請執行 `/claude:clean` 或 `/claude:distill`。
+> **定位說明**: `/claude:sync` 是「檢查與報告」工具，參考 clean 和 distill 的原則來判斷問題。如需實際清理或蒸餾，請執行 `/claude:clean` 或 `/claude:distill`。
 
 ---
 
-## 🚀 檢查項目
+## 檢查項目
 
-> **執行分層**：預設只執行核心層（最關鍵的三個角度）。用 `--quality` 加入品質層，`--all` 執行全部。
->
-> | 層級 | 包含角度 | 參數 |
-> |------|---------|------|
-> | **核心層** | 導航有效性 + 程式碼一致性 + Signal/Noise | 預設 |
-> | **品質層** | + 內部品質 + 元資訊 + 引用語法 | `--quality` |
-> | **完整層** | + 涵蓋性 + 連鎖影響 + 蒸餾評估 | `--all` |
->
-> **設計理由**：CLAUDE.md 的價值金字塔 — 導航（LLM 找到程式碼）→ 理解（LLM 知道為什麼）→ 品質（LLM 高效消費）。導航層做不好，其他檢查都沒意義。
+### 執行分層
 
-### 角度一：導航有效性（核心層，最重要）
+預設只執行核心層（最關鍵的三個角度）。用 `--quality` 加入品質層，`--all` 執行全部。
 
-> **核心原則**：CLAUDE.md 的終極價值是讓 AI 從「概念」定位到「程式碼」。讀完 CLAUDE.md 後，AI 應能在 3 秒內回答「這個概念在哪裡實作？」。
+| 層級 | 包含角度 | 參數 |
+|------|---------|------|
+| **核心層** | 導航有效性 + 程式碼一致性 + Signal/Noise | 預設 |
+| **品質層** | + 內部品質 + 元資訊 + 引用語法 | `--quality` |
+| **完整層** | + 涵蓋性 + 連鎖影響 + 蒸餾評估 | `--all` |
 
-**判斷標準**：抽取 3-5 個關鍵概念，驗證每個概念是否有指向具體檔案、class 或 function 的導航路徑。若無法從文檔定位到程式碼，標記為導航缺口。
+**設計理由**：CLAUDE.md 的價值金字塔 — 導航（LLM 找到程式碼）→ 理解（LLM 知道為什麼）→ 品質（LLM 高效消費）。導航層做不好，其他檢查都沒意義。
 
-| 檢查維度 | 說明 | 驗證方式 |
-|---------|------|----------|
-| **概念→程式碼連結** | 文檔引入的概念是否有檔案路徑或 class/function 名稱的指引 | 抽取 3-5 個關鍵概念，驗證是否能在 CLAUDE.md 中找到對應的程式碼位置（檔案名、class 名、或 function 名） |
-| **職責→檔案對應** | 文檔描述的每項職責是否指向具體檔案 | 對照檔案結構表或模組描述，驗證每項提到的職責都有對應的檔案指引 |
-| **跨模組依賴導航** | 外部模組引用是否具體到 class/function（不只是模組名） | 檢查 CLAUDE.md 中提到的外部模組依賴，驗證是否有「哪個 class/function」的指引，而非只寫模組名 |
-| **資料流可追蹤性** | 多步驟流程中，step 間的 input/output 是否可追蹤 | 當文檔描述了多步驟流程時，驗證：(1) 每個 step 有入口 function 的指引；(2) step 間的產出型別有描述；(3) 下游 step 的輸入來源可追蹤。無多步驟流程的模組標 N/A |
+### 9 個檢查角度概覽
 
-**導航 Decoder Test**：
+| 角度 | 層級 | 一行摘要 |
+|------|------|---------|
+| 1. 導航有效性 | 核心 | CLAUDE.md 是否讓 AI 從概念定位到程式碼（最重要） |
+| 2. 程式碼一致性 | 核心 | 檔案路徑、簽名、行為描述是否與實際程式碼一致 |
+| 3. 涵蓋性 | 完整 | 核心模組和公開 API 是否被文檔記錄 |
+| 4. 元資訊 | 品質 | 是否存在版本號、日期等對 AI 無意義的內容 |
+| 5. 蒸餾評估 | 完整 | Signal/Noise ratio 是否健康 |
+| 6. 內部品質 | 品質 | 自洽、無矛盾、結構合理、內容精準 |
+| 7. Signal/Noise Ratio | 核心 | High Signal 佔比是否足夠 |
+| 8. 引用語法 | 品質 | `@` vs `[描述](path)` 選擇是否正確 |
+| 9. 連鎖影響 | 完整 | 程式碼變更是否影響消費端文檔 |
 
-基於 CLAUDE.md 內容，嘗試回答以下導航問題（不查閱源碼）：
-
-| 問題 | 通過標準 |
-|------|---------|
-| 「我要修改 X 的邏輯，打開哪個檔案？」 | 能定位到具體檔案名 |
-| 「Y 這個概念在哪裡實作？」 | 能指向檔案 + class 或 function 名 |
-| 「Z 的上游資料從哪來？」 | 能追蹤到上游步驟和產出型別 |
-
-**失敗處理**：若導航問題無法從 CLAUDE.md 回答，標記為導航缺口（navigation gap），產出可執行的 CLAUDE.md 修改建議（見 Sync Summary ACTION 段落）。
-
-### 角度二：程式碼一致性（核心層）
-
-| 檢查項目 | 說明 | 驗證方式 |
-|---------|------|----------|
-| 檔案路徑引用 | 文檔中的路徑是否存在 | `Bash test -f` |
-| 類別/函數簽名 | 描述的簽名是否正確 | `Grep` 搜索實際定義 |
-| 行為描述 | 描述的行為是否與實際一致 | `Read` 程式碼內容比對 |
-| 目錄結構 | 描述的結構是否正確 | `Bash ls` 驗證 |
-| **語義正確性 spot-check** | 文檔描述的演算法行為是否準確 | 抽查 1-2 個核心函數的實作 |
-
-#### 語義正確性 spot-check 規則
-
-> **目的**：sync 是結構性檢查（有沒有），但語義錯誤（描述了但描述錯了）是最危險的文檔問題 — 因為路徑存在、class 存在、方法存在，但行為描述是錯的。
-
-**執行時機**：當文檔包含演算法/流程的具體行為描述時（如「用 X 方法排序」、「目標函數是 Y」）。
-
-**檢查方式**：
-1. 從文檔中識別描述了具體演算法行為的段落
-2. 隨機抽 1-2 個核心函數，`Read` 實際 .py 比對
-3. 比對重點：文檔描述的「方法/策略/目標函數/邏輯」是否與程式碼實作一致
-
-**範例**：文檔說「SequentialGreedyBuilder 以 Wilson CI 為目標函數」→ Read `sequential_greedy.py` 發現 `metric: str = "median"` → 標記為 ⚠️ 語義不準確。
-
-### 角度三：涵蓋性檢查（完整層，--all）
-
-| 檢查項目 | 說明 | 驗證方式 |
-|---------|------|----------|
-| 重要模組遺漏 | 核心模組是否被記錄 | 掃描目錄結構 |
-| API 完整性 | 公開 API 是否都有記錄 | `Grep` 搜索 `def`/`class` |
-| 規範覆蓋 | 重要規範是否被記錄 | 檢查配置檔案 |
-
-### 角度四：元資訊檢查（品質層，--quality）
-
-> **參考**: [clean.md](./clean.md)
-
-#### 應該移除的元資訊
-
-| 模式 | 範例 | 原因 |
-|------|------|------|
-| 版本號 | `> **版本**: 2.0` | AI 不關心版本歷史 |
-| 更新日期 | `> **更新日期**: 2025-01-01` | AI 只需要當前規則 |
-| 歷史變更 | `## 變更歷史\n - v1.0: ...` | 應放 CHANGELOG.md |
-| 統計資訊 | `行數: 387`, `字數: 5234` | 對 AI 無意義 |
-| 生效日期 | `> **生效日期**: 2025-01-01` | 不影響規則內容 |
-
-#### 可以保留的資訊
-
-| 模式 | 範例 | 原因 |
-|------|------|------|
-| 符號連結說明 | `🔗 Symbolic Link: ...` | 解釋檔案結構 |
-| 專案概述 | `## 專案概述\nxxx 專案是...` | AI 需要了解專案 |
-| 繼承關係 | `**繼承**: ~/.claude/CLAUDE.md` | AI 需要知道繼承關係 |
-
-### 角度五：蒸餾評估（完整層，--all）
-
-> **參考**: [distill.md](./distill.md)
-
-#### Signal / Noise 分類
-
-**✅ High Signal（保留）**：
-- 設計理由、架構約束、非顯而易見的選擇
-- 模組邊界、失敗教訓
-- 核心原則/約束、高層級架構圖
-
-**❌ Low Noise（蒸餾）**：
-- API 簽名、參數表、欄位列表
-- 完整範例 (>5 行)、過時範例、重複說明
-
-**⚠️ 灰色地帶（預設保留）**：
-
-| 內容類型 | 保留條件 | 移除條件 |
-|---------|---------|---------|
-| 範例程式碼 | <= 5 行，展示關鍵用法 | > 5 行或過時 |
-| 檢查清單 | 行為約束、決策要點 | 顯而易見 |
-| 表格 | 模組職責、組件對照 | 過時、重複 |
-
-#### Low Noise 處理策略
-
-> **核心原則**：蒸餾 = signal/noise 分離，不是直接刪除。
-
-**❌ 直接移除**：API 簽名、完整欄位列表、版本變更歷史
-**✅ 簡潔描述替代**：重要設計概念（為什麼）+ `檔案:行號` 引用
+完整定義和判斷標準：[sync-check-angles.md](./_common/sync-check-angles.md)
 
 ---
 
-## 📝 內容變更評估原則
+## 內容變更評估原則
 
 > **核心目標**：當需要新增、刪除、修改 CLAUDE.md 內容時，參考以下原則判斷。
 
 ### 新增內容時
 
-**✅ 應該新增**（High Signal）：
+**應該新增**（High Signal）：
 - 設計理由、架構約束、非顯而易見的選擇
 - 模組邊界、失敗教訓
 - 核心原則/約束、高層級架構圖
 
-**❌ 不應該新增**（Low Noise）：
+**不應該新增**（Low Noise）：
 - API 簽名、參數表、欄位列表
 - 完整範例 (>5 行)
 - 元資訊（版本號、更新日期、統計）
 
 ### 刪除內容時
 
-**✅ 應該刪除**（Low Noise + 元資訊）：
+**應該刪除**（Low Noise + 元資訊）：
 - API 簽名、完整欄位列表
 - 版本號、更新日期、生效日期
 - 歷史變更章節、統計資訊
 - 過時範例、重複說明
 
-**⚠️ 謹慎評估**（灰色地帶，預設保留）：
+**謹慎評估**（灰色地帶，預設保留）：
 - 範例程式碼 <= 5 行（檢查是否展示關鍵用法）
 - 檢查清單（檢查是否為行為約束）
 
 ### 修改內容時
 
-**✅ 應該簡潔描述替代**（參考 distill 實作細節處理策略）：
+**應該簡潔描述替代**（參考 distill 實作細節處理策略）：
 - 詳細程式碼步驟 → 一句話總結 + 源碼引用
 - 過多配置參數列表 → 關鍵參數 + 配置檔引用
 - 版本變更歷史 → 簡化的「已移除」列表
 
 ---
 
-### 角度六：內部品質檢查（品質層，--quality）
-
-| 檢查維度 | 說明 | 驗證方式 |
-|---------|------|----------|
-| **自洽性** | 術語統一、前後描述一致、定義與使用吻合 | 文檔內容比對 |
-| **矛盾性** | 規則衝突、範例與說明矛盾 | 邏輯分析 |
-| **順序** | 章節編號連續、標題層級正確（不跳級） | 結構掃描 |
-| **自包含** | 引用檔案/路徑存在、外部依賴可獲取 | `Bash test` 驗證 |
-| **精準度** | 技術描述正確、程式碼範例可執行 | 實際驗證 |
-
-### 角度七：Signal/Noise Ratio 評估（核心層）
-
-> **核心原則**：CLAUDE.md 是 Encoder（壓縮知識表示），品質取決於 signal/noise ratio，不是長度。
-
-| 檢查項目 | 說明 | 判斷方式 |
-|---------|------|----------|
-| High Signal 內容比例 | 設計理由、架構約束、失敗教訓佔比 | 估算 high signal 行數 / 總行數 |
-| Low Noise 內容 | API 簽名、參數表、欄位列表、完整範例 >5 行 | 識別並標記 |
-| 程式碼範例長度 | 每個範例是否 <= 5 行 | 逐個檢查 |
-
-**評估標準**：
-- ✅ 良好：High Signal >= 60%，無 Low Noise 內容
-- ⚠️ 需改善：High Signal 40-60%，或有少量 Low Noise
-- ❌ 需蒸餾：High Signal < 40%，或有大量 Low Noise
-
-**建議動作**：signal/noise ratio 不足時，建議執行 `/claude:distill` 進行 signal/noise 分離。
-
-### 角度八：引用語法正確性（品質層，--quality）
-
-> **核心原則**：`@` 是強制載入（每次 session 都付代價），`[描述](path)` 是按需讀取。選錯語法會導致 AI context 浪費或知識缺失。
-
-| 檢查項目 | 說明 | 判斷方式 |
-|---------|------|----------|
-| `@` 濫用 | 用 `@` 引用長文件或偶爾需要的內容 | 檢查 `@` 引用的檔案行數和內容性質 |
-| markdown link 漏用 | 該用 `@` 的核心約束卻用了 `[text](path)` | 檢查每次對話都需要的引用是否用了 `@` |
-| Skill/Command 誤用 `@` | Skill 不支援 `@` transclusion | 檢查 command/skill 檔案中是否有 `@` |
-
-**修正建議**：
-- 每次對話都需要 + 內容精簡 → 改用 `@path`
-- 偶爾才需要 / 檔案偏長 → 改用 `[描述](path)`
-- Skill / Command 中的引用 → 必須用 `[描述](path)`
-
-### 角度九：消費端文檔連鎖影響（完整層，--all）
-
-> **核心原則**：程式碼變更不只影響同目錄的 CLAUDE.md，還會影響消費端目錄的 CLAUDE.md 和其他相關 .md 文檔。
-
-當目標目錄的程式碼有變更時，必須追蹤 import 鏈找出所有消費端：
-
-| 步驟 | 說明 | 驗證方式 |
-|------|------|----------|
-| 識別變更 | 從 `git diff` 提取被修改的 class/function | diff 分析 |
-| 追蹤 import 鏈 | 搜尋哪些目錄 import 了被修改的模組 | `rg` 搜尋 import 語句 |
-| 定位消費端文檔 | 消費端目錄是否有 CLAUDE.md 或相關 .md | `Glob` 搜尋 |
-| 檢查連鎖影響 | 消費端文檔是否引用了已變更的 API | `Read` + `rg` 比對 |
-
-**範例**：`rule_forge/` 的核心 class 變更 → 不只 `rule_forge/CLAUDE.md`，連 `examples/rule_forge/CLAUDE.md` 和引用該 API 的說明文檔也需要檢查同步性。
-
----
-
-## 🔧 命令介面設計
+## 命令介面設計
 
 ### 基本用法
 
 ```bash
-# 1. 檢查當前目錄的 CLAUDE.md
+# 檢查當前目錄的 CLAUDE.md
 /claude:sync
 
-# 2. 檢查指定檔案
+# 檢查指定檔案
 /claude:sync src/core/CLAUDE.md
 
-# 3. 檢查指定目錄（僅該目錄層級）
-/claude:sync src/core
-
-# 4. 遞歸檢查所有子目錄的 CLAUDE.md
+# 遞歸檢查所有子目錄的 CLAUDE.md
 /claude:sync --recursive
 /claude:sync -r
 
-# 5. 遞歸檢查 + 清理元資訊
+# 遞歸檢查 + 清理元資訊
 /claude:sync --recursive --clean
-/claude:sync -rc
 
-# 6. 完整處理（檢查 + 清理 + 蒸餾）
+# 完整處理（檢查 + 清理 + 蒸餾）
 /claude:sync --all
 /claude:sync -a
 
-# 7. 品質層（加入內部品質 + 引用語法檢查）
+# 品質層（加入內部品質 + 引用語法檢查）
 /claude:sync --quality
 
-# 8. 預覽模式（不實際修改）
+# 預覽模式（不實際修改）
 /claude:sync --dry-run
-/claude:sync --recursive --dry-run
 
-# 9. 增量模式（只檢查 git 變更涉及的檔案）
+# 增量模式（只檢查 git 變更涉及的檔案）
 /claude:sync --changed-since "2026-05-08"
 /claude:sync --changed-since HEAD~5
-/claude:sync --recursive --changed-since "yesterday"
 ```
 
 ### 參數說明
@@ -308,580 +153,58 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | **檔案路徑** | 檢查指定的 `CLAUDE.md` 檔案 |
 | **目錄路徑** | 檢查指定目錄下的 `CLAUDE.md`（僅該層） |
 | **--recursive, -r** | 遞歸檢查所有子目錄的 `CLAUDE.md` |
-| **--changed-since** | 增量模式：只檢查 git 變更涉及的檔案（如 `--changed-since "2026-05-08"` 或 `--changed-since HEAD~5`） |
+| **--changed-since** | 增量模式：只檢查 git 變更涉及的檔案 |
 | **--skip-consistency** | 跳過內部品質檢查（僅搭配 `--quality` / `--all` 時生效） |
 | **--quality** | 加入品質層檢查（內部品質 + 元資訊 + 引用語法） |
 | **--all, -a** | 完整層（全部 9 個角度 + 清理 + 蒸餾） |
 | **--dry-run** | 預覽模式，顯示結果但不執行修改 |
 | **--verbose** | 顯示詳細檢查過程 |
 
-> **💡 工作流程建議**：
+> **工作流程建議**：
 > 1. 執行 `/claude:sync` 檢查問題
 > 2. 根據報告決定是否執行 `/claude:clean`（清理元資訊）
 > 3. 根據報告決定是否執行 `/claude:distill`（蒸餾精簡）
 
 ---
 
-## 📋 執行流程
+## 執行流程
 
-### 步驟 1: 遞歸發現 CLAUDE.md 檔案
+### 步驟概覽
+
+| 步驟 | 名稱 | 觸發條件 |
+|------|------|---------|
+| 1 | 遞歸發現 CLAUDE.md | 預設執行 |
+| 1.5 | 依賴鏈擴展 | 目標目錄有 git diff 變更的 .py 檔案，或使用 --changed-since |
+| 1.6 | Sub-doc 擴展 | CLAUDE.md 引用了 .md 子文件 |
+| 2 | 掃描程式碼結構 | 預設執行 |
+| 3 | 提取文檔引用 | 預設執行 |
+| 4 | 驗證一致性 | 預設執行 |
+| 5 | 命令涵蓋性檢查 | --all |
+| 6 | 程式碼涵蓋性檢查 | --all |
+| 7 | 清理元資訊 | --clean |
+| 8 | 蒸餾 | --all |
+| 9 | 內部品質檢查 | --quality |
+| 10 | 導航有效性檢查 | 預設執行（最重要） |
+
+步驟 1-10 的詳細實作邏輯（含 pseudo code、驗證方式、增量模式流程）：[sync-implementation-steps.md](./_common/sync-implementation-steps.md)
 
 遞歸發現邏輯: [recursive-discovery.md](./_common/recursive-discovery.md)
 
-### 步驟 1.5: 依賴鏈擴展
-
-> **觸發條件**：目標目錄中有 `git diff` 變更的 `.py` 檔案時執行。或使用 `--changed-since` 參數。
-
-從變更的程式碼出發，追蹤 import 鏈，將消費端目錄的 CLAUDE.md 加入檢查清單：
-
-```
-1. git diff --name-only 提取變更的 .py 檔案
-   - 無 --changed-since → git diff HEAD
-   - 有 --changed-since → git log --since="$SINCE" --name-only --pretty=format:
-2. 對每個變更檔案，Grep 搜尋整個專案中 import 該模組的檔案
-3. 從消費端檔案路徑推導其所屬目錄
-4. 檢查消費端目錄是否有 CLAUDE.md → 有的話加入檢查清單
-5. 去重，合併到步驟 1 發現的 CLAUDE.md 清單
-```
-
-**--changed-since 增量模式**：
-
-當指定 `--changed-since` 時，步驟 1 只掃描 git 變更涉及的目錄，而非全部目錄。這大幅縮小檢查範圍，適合 daily-maintain 的 Phase 1 使用。
-
-```
-增量模式流程：
-1. git log --since="$SINCE" --name-only --pretty=format: → 取得變更檔案清單
-2. 過濾 .py 和 .md 檔案
-3. 映射到所屬模組目錄
-4. 只對這些目錄執行 sync 檢查
-5. 步驟 1.5 的依賴鏈擴展仍然執行（確保消費端也被檢查）
-```
-
-### 步驟 1.6: Sub-doc 擴展
-
-> **觸發條件**：CLAUDE.md 中引用了同目錄或相鄰目錄的 `.md` 子文件時執行。
-
-從 CLAUDE.md 的 markdown link 引用出發，發現子文件並分類，將「說明文檔」加入檢查清單：
-
-```
-1. 從 CLAUDE.md 提取所有 markdown link 引用的 .md 檔案
-   - 格式: [描述](path/to/doc.md) 或 [描述](doc.md)
-   - 排除外部 URL（http/https）
-   - 排除 @ transclusion（已強制載入，不需額外檢查）
-2. 驗證引用的 .md 檔案是否存在
-3. 分類為「說明文檔」或「設計文檔」：
-   - 說明文檔：描述 API、資料結構、流程、call stack → 加入檢查清單
-   - 設計文檔：描述概念、提案、未來計畫 → 跳過
-4. 合併到檢查清單，標記為 sub-doc（優先級同父 CLAUDE.md）
-```
-
-**Sub-doc 檢查範圍**：對說明文檔執行角度二（程式碼一致性）和角度六（內部品質），不重複涵蓋性檢查（由父 CLAUDE.md 統一負責）。
-
-### 步驟 2: 掃描程式碼結構
-
-```bash
-# 識別重要檔案和目錄
-fd -e py -e pyx -e pxd . $TARGET_DIR | head -20
-fd -t d . $TARGET_DIR --max-depth 2
-
-# 掃描公開 API
-rg "^def " -t py $TARGET_DIR
-rg "^class " -t py $TARGET_DIR
-```
-
-### 步驟 3: 提取文檔引用
-
-```python
-# 從 CLAUDE.md 提取引用
-def extract_references(content: str) -> dict:
-    """提取文檔中的引用"""
-
-    references = {
-        "file_paths": [],      # 檔案路徑
-        "class_names": [],     # 類別名稱
-        "function_names": [],  # 函數名稱
-        "modules": [],         # 模組名稱
-    }
-
-    # 提取檔案路徑
-    import re
-    file_patterns = r'`[\w/.-]+/[\w/.-]+\.(py|yaml|toml)`|`[\w/.-]+/`'
-    references["file_paths"] = re.findall(file_patterns, content)
-
-    # 提取類別名稱
-    class_patterns = r'\*\*[\w]+\*\*|`[\w]+`[\s]*類|class\s+[\w]+'
-    references["class_names"] = re.findall(class_patterns, content)
-
-    # 提取函數名稱
-    func_patterns = r'`[\w]+\(\)`|function\s+[\w]+|函數\s+[\w]+'
-    references["function_names"] = re.findall(func_patterns, content)
-
-    return references
-```
-
-### 步驟 4: 驗證一致性
-
-```bash
-# 驗證檔案路徑
-for path in "${references[file_paths]}"; do
-    if [ -f "$path" ]; then
-        echo "✅ $path"
-    else
-        echo "❌ $path 不存在"
-    fi
-done
-
-# 驗證類別/函數
-for name in "${references[class_names]}"; do
-    if rg -q "class $name" -t py $TARGET_DIR; then
-        echo "✅ $name"
-    else
-        echo "⚠️  $name 未找到"
-    fi
-done
-```
-
-### 步驟 5: 命令涵蓋性檢查
-
-```bash
-# 重要！掃描所有命令檔案，檢查是否被記錄
-ALL_COMMAND_FILES=$(fd -e md . $TARGET_DIR --exclude CLAUDE.md)
-
-for cmd_file in $ALL_COMMAND_FILES; do
-    # 推導命令名稱
-    # e.g., "worktree/status.md" -> "/worktree:status"
-    # e.g., "claude/clean.md" -> "/claude:clean"
-    cmd_name=$(echo "$cmd_file" | sed "s|$TARGET_DIR||" | sed 's|\.md$||' | sed 's|^/|/|')
-
-    # 檢查是否在 CLAUDE.md 中
-    if rg -q "$cmd_name" "$CLAUDE_MD"; then
-        echo "✅ $cmd_name 已記錄"
-    else
-        echo "❌ $cmd_name 未記錄"
-    fi
-done
-```
-
-### 步驟 6: 程式碼涵蓋性檢查
-
-```bash
-# 如果目錄中有程式碼檔案，檢查是否被記錄
-CODE_FILES=$(fd -e py -e pyx -e pxd . $TARGET_DIR)
-if [ -n "$CODE_FILES" ]; then
-    echo ""
-    echo "### 程式碼檔案涵蓋性檢查"
-    for code_file in $CODE_FILES; do
-        filename=$(basename "$code_file")
-        if rg -q "$filename" "$CLAUDE_MD"; then
-            echo "✅ $filename 已記錄"
-        else
-            echo "⚠️  $filename 未記錄"
-        fi
-    done
-fi
-```
-
-### 步驟 7: 清理元資訊（--clean 選項）
-
-```bash
-# 呼叫 /claude:clean 功能
-# 移除版本號、日期、統計等元資訊
-```
-
-### 步驟 8: 蒸餾（--all 選項）
-
-```bash
-# 呼叫 /claude:distill 功能
-# 蒸餾精簡 CLAUDE.md
-```
-
-### 步驟 9: 內部品質檢查（品質層，--quality）
-
-```markdown
-## 五維度檢查流程
-
-### 9.1 自洽性檢查
-- 術語使用是否統一（相同概念是否用相同詞彙）
-- 前後描述是否一致
-- 定義與使用是否吻合
-
-### 9.2 矛盾性檢查
-- 是否存在互相矛盾的陳述
-- 規則之間是否有衝突
-- 範例與說明是否矛盾
-
-### 9.3 順序檢查
-- 章節編號是否連續
-- 標題層級是否正確（`#` → `##` → `###`，不跳級）
-- 內容組織是否合理
-
-### 9.4 自包含檢查
-- 引用的檔案/路徑是否存在（已在前面的步驟驗證）
-- 外部依賴是否可獲取
-- 讀者是否需要額外資訊才能理解
-
-### 9.5 精準度檢查
-- 技術描述是否正確
-- 程式碼範例是否可執行
-- 連結是否有效
-```
-
-### 步驟 10: 導航有效性檢查（核心層，最重要）
-
-> 導航是 sync 最核心的檢查。其他步驟發現的問題（路徑不存在、簽名不對）最終都轉化為導航修復。
-
-```
-1. 從 CLAUDE.md 抽取 3-5 個關鍵概念
-2. 驗證每個概念是否有指向具體檔案、class 或 function 的導航路徑
-3. 對照職責描述與檔案結構，驗證每項職責有對應的檔案指引
-4. 檢查跨模組依賴是否具體到 class/function（不只是模組名）
-5. 對多步驟流程驗證 step 間 input/output 可追蹤性（無流程標 N/A）
-6. 執行導航 Decoder Test：不查源碼，嘗試回答 3 個導航問題
-7. 對每個導航缺口產出 ACTION 修改建議（見 Sync Summary ACTION）
-```
-
 ---
 
-## 📊 輸出格式
+## 輸出格式
 
-### 單檔案檢查輸出
+6 組輸出格式模板（單檔案報告、Sync Summary、ACTION、遞歸報告、清理後、--all 完整處理）：[sync-output-templates.md](./_common/sync-output-templates.md)
 
-```
-## CLAUDE.md 同步檢查報告
-
-檔案: /path/to/CLAUDE.md（範例）
-
-### 📋 程式碼一致性檢查
-
-#### 檔案路徑引用
-- ✅ src/core/engine.py
-- ✅ src/core/config.py
-- ❌ src/legacy/old_module.py（檔案不存在）
-
-#### 類別/函數簽名
-- ✅ DataEngine
-- ✅ process_data()
-- ⚠️  validate_input()（簽名已變更：現在需要 config 參數）
-
-#### 行為描述
-- ⚠️  "DataEngine 會自動重連" → 實際程式碼沒有自動重連邏輯
-
-#### 語義正確性 spot-check
-- ✅ "classify 使用 AND/OR 邏輯" → 實際 setup_classifier.py 確實如此
-- ⚠️ "Greedy 用 Wilson CI 排序" → 實際 metric="median"（語義不準確，來源: sequential_greedy.py:46）
-
-### 📂 涵蓋性檢查
-
-#### 重要模組檢查
-掃描目錄: /path/to/src/
-- ✅ src/core/CLAUDE.md
-- ⚠️  src/api/（未記錄在主文檔）
-- ⚠️  src/utils/（未記錄在主文檔）
-
-#### 公開 API 檢查
-發現 N 個公開函數，文檔記錄 M 個
-- ⚠️  遺漏: helper_function(), validate_config(), get_status()
-
-### 🧹 元資訊檢查（整合 /claude:clean）
-- ❌ 發現版本號: vX.Y
-- ❌ 發現更新日期: YYYY-MM-DD
-- ✅ 可保留: 符號連結說明、專案概述、繼承關係
-- 💡 建議執行 `/claude:sync --clean` 或 `--all` 清理
-
-### 🍶 蒸餾評估（整合 /claude:distill，--all 選項）
-- ✅ 精華: N 個核心原則、M 個架構圖
-- ❌ 冗餘: K 個過時範例、L 個重複說明
-- ⚠️ 灰色地帶: P 個（預設保留）
-- 💡 建議執行 `/claude:sync --all` 完整處理
-
-### 📝 內部品質檢查
-
-#### 自洽性 [✅/⚠️/❌]
-[發現的問題或「通過」]
-
-#### 矛盾性 [✅/⚠️/❌]
-[發現的問題或「通過」]
-
-#### 順序 [✅/⚠️/❌]
-[發現的問題或「通過」]
-
-#### 自包含 [✅/⚠️/❌]
-[發現的問題或「通過」]
-
-#### 精準度 [✅/⚠️/❌]
-[發現的問題或「通過」]
-
-### 📡 Signal/Noise Ratio 評估
-
-#### High Signal 內容
-- 設計理由: N 處
-- 架構約束: N 處
-- 失敗教訓: N 處
-
-#### Low Noise 內容
-- API 簽名: N 處
-- 參數表: N 處
-- 完整範例 >5 行: N 處
-
-#### 評估結果
-- Signal/Noise Ratio: [X]% [✅/⚠️/❌]
-- 💡 建議動作: [保持現狀 / 執行 /claude:distill]
-
-### 🧭 導航有效性檢查
-
-#### 概念→程式碼連結
-抽查概念: [概念A, 概念B, 概念C]
-- ✅ [概念A]: → `module/file.py:ClassName`
-- ❌ [概念B]: 無檔案或 class 指引（導航缺口）
-- ✅ [概念C]: → `module/file.py` + function 名
-
-#### 職責→檔案對應
-- ✅ [職責A]: 指向 file_a.py
-- ⚠️ [職責B]: 有描述但無檔案指引
-
-#### 跨模組依賴導航
-- ✅ [依賴A]: 具體到 `other_module.ClassName`
-- ❌ [依賴B]: 只寫模組名，缺少 class/function 指引
-
-#### 資料流可追蹤性 [✅/⚠️/❌/N/A]
-[多步驟流程的 step 間銜接驗證結果，無流程標 N/A]
-
-#### 導航 Decoder Test
-- Q1「修改 X 打開哪個檔案？」: [✅ 可回答 / ❌ 無法定位]
-- Q2「Y 在哪裡實作？」: [✅ 可回答 / ❌ 無法定位]
-- Q3「Z 的上游從哪來？」: [✅ 可回答 / ❌ 無法定位]
-
-### 📊 總結
-- 程式碼一致性: X%
-- 涵蓋性: Y%
-- 導航有效性: Z% [✅/⚠️/❌]
-- 內部品質: W/100
-- 元資訊: 需要清理
-
-建議優先處理：
-1. 移除不存在的檔案引用
-2. 更新變更的 API 簽名
-3. 修正語義不準確的描述（spot-check 發現）
-4. 補充導航缺口（概念→程式碼連結缺失處）
-5. 補充遺漏的模組說明
-6. 修正內部品質問題
-7. 清理元資訊
-```
-
-### Sync Summary（結構化結論，供 daily-maintain 消費）
-
-> **設計理念**：保留 sync 的完整人類可讀報告（Layer 1），同時在報告末尾附加結構化結論（Layer 2），讓 daily-maintain Phase 4 可以直接消費 sync 的發現。
-
-```
----
-
-## Sync Summary
-
-module: {module_name}
-inconsistencies:
-  - type: outdated_description
-    location: CLAUDE.md:{行號}
-    detail: "描述的 FilterTreePipeline 已重構為 Pipeline v2"
-    confidence: high
-    source: filter_tree_pipeline.py:{行號}
-  - type: missing_reference
-    location: CLAUDE.md:{行號}
-    detail: "新模組 condition_auditor.py 未在 CLAUDE.md 提及"
-    confidence: high
-    source: condition_auditor.py:1
-  - type: signature_changed
-    location: CLAUDE.md:{行號}
-    detail: "evaluate() 新增參數 strict_mode"
-    confidence: high
-    source: setup_classifier.py:{行號}
-coverage_gaps:
-  - file: new_module.py
-    location: CLAUDE.md:(未提及)
-    detail: "新增的 .py 檔案未記錄"
-metadata_issues:
-  - type: version_number
-    location: CLAUDE.md:{行號}
-navigation_gaps:
-  - concept: "{概念名稱}"
-    location: CLAUDE.md:{行號}
-    detail: "提到概念但無檔案/class 指引"
-    confidence: high
-  - dependency: "{跨模組依賴}"
-    location: CLAUDE.md:{行號}
-    detail: "只寫模組名，缺少具體 class/function 指引"
-    confidence: medium
-signal_noise:
-  ratio: 65%
-  status: acceptable
-  low_noise_items: 3
-sync_score: {X}%
-needs_update: true/false
-
-### Sync Summary ACTION（可執行的 CLAUDE.md 修改）
-
-> **設計理念**：sync 不只報告問題，還要產出可直接 copy-paste 的修改。只有 High Signal 項目（導航缺口、語義錯誤、設計決策缺失）才產出 ACTION。Low Noise 項目（API 簽名、參數值）跳過。
-
-```yaml
-actions:
-  - type: add_navigation
-    target: "CLAUDE.md:{章節名}"
-    concept: "{概念名稱}"
-    text: |
-      - **{概念描述}** → `file.py:ClassName`
-    signal_level: high
-    reason: "導航缺口：概念無程式碼指引"
-
-  - type: fix_description
-    target: "CLAUDE.md:{行號}"
-    old: "{現有不正確文字}"
-    new: "{修正後文字}"
-    signal_level: high
-    reason: "語義不準確"
-    source: "file.py:{行號}"
-
-  - type: add_design_decision
-    target: "CLAUDE.md:{章節名}"
-    text: |
-      - **{設計決策名稱}**：{一句話理由} → `file.py:ClassName`
-    signal_level: high
-    reason: "設計決策缺失（從程式碼猜不到）"
-
-  - type: remove_noise
-    target: "CLAUDE.md:{行號}"
-    text: "{應移除的 Low Noise 內容}"
-    signal_level: low
-    reason: "API 簽名/參數表，從程式碼可推導"
-```
-
-### 遞歸模式輸出
 遞歸輸出格式: [recursive-output.md](./_common/recursive-output.md)
-
-### 遞歸同步檢查報告範例
-
-```
-## 遞歸同步檢查報告
-
-目錄: /path/to/project
-發現 CLAUDE.md: 5 個
-
-### 🔴 Critical（專案根目錄）
-**檔案**: CLAUDE.md
-- 程式碼一致性: ✅ 90%
-- 涵蓋性: ⚠️ 75%
-- 內部品質: ⚠️ 85/100（2 個矛盾問題）
-- 元資訊: ❌ 需要清理（版本號、日期）
-- 蒸餾評估: ⚠️ 3 個冗餘、2 個灰色地帶
-
-### 🟠 High（主要模組）
-**檔案**: src/CLAUDE.md
-- 程式碼一致性: ✅ 95%
-- 涵蓋性: ✅ 90%
-- 內部品質: ✅ 95/100
-- 元資訊: ✅ 乾淨
-- 蒸餾評估: ✅ 精華為主
-
-**Sub-doc**: src/condition_system.md（說明文檔）
-- 程式碼一致性: ⚠️ 85%（1 個型別引用過時）
-- 內部品質: ✅ 95/100
-
-**Sub-doc**: src/filter_tree_design_v1.md（設計文檔）
-- ⏭️ 跳過（設計文檔，不檢查程式碼一致性）
-
-**檔案**: src/core/CLAUDE.md
-- 程式碼一致性: ⚠️ 80%（2 個 API 簽名變更）
-- 涵蓋性: ✅ 85%
-- 內部品質: ✅ 90/100
-- 元資訊: ❌ 有版本號
-- 蒸餾評估: ⚠️ 1 個過時範例
-
-### 🟡 Medium（子模組）
-**檔案**: src/core/utils/CLAUDE.md
-- 程式碼一致性: ✅ 100%
-- 涵蓋性: ⚠️ 70%（遺漏 helper 函數）
-- 內部品質: ⚠️ 80/100（術語不一致）
-- 元資訊: ✅ 乾淨
-
-### 🟢 Low（測試）
-**檔案**: tests/CLAUDE.md
-- 程式碼一致性: ✅ 95%
-- 涵蓋性: ✅ 90%
-- 內部品質: ✅ 100/100
-- 元資訊: ✅ 乾淨
-
-### 📊 整體統計
-- 檔案數量: 5 個
-- 平均程式碼一致性: 90%
-- 平均涵蓋性: 82%
-- 平均內部品質: 90/100
-- 需要清理: 2 個
-- 需要蒸餾: 1 個
-
-建議執行: `/claude:sync --recursive --clean`
-
-> 💡 當 ⚠️ 項目 ≥ 3 個時，建議執行 `/claude:decode-compare {module}` 進行深度精度驗證。
-```
-
-### 執行清理後輸出
-
-```
-## CLAUDE.md 同步檢查 + 清理完成
-
-檔案: /path/to/CLAUDE.md（範例）
-
-### ✅ 檢查完成
-- 一致性: X%（已報告問題）
-- 涵蓋性: Y%（已報告遺漏）
-
-### 🧹 清理完成
-- 移除版本號: vX.Y
-- 移除更新日期: YYYY-MM-DD
-- 移除歷史章節: 無
-- 移除統計資訊: 無
-
-### 📄 處理結果
-- 原始行數: N 行
-- 清理後: M 行 (-Z%)
-- 備份檔案: CLAUDE.md.backup
-```
-
-### --all 完整處理輸出
-
-```
-## CLAUDE.md 完整處理（檢查 + 清理 + 蒸餾）
-
-檔案: /path/to/CLAUDE.md（範例）
-
-### 步驟 1: 同步檢查
-- 一致性問題: N 項
-- 涵蓋性遺漏: M 項
-- 元資訊問題: K 項
-
-### 步驟 2: 清理元資訊
-- 移除版本號、日期
-- 移除統計資訊
-- X 行 → Y 行
-
-### 步驟 3: 蒸餾精簡
-- 識別精華: N 個核心原則
-- 移除冗餘: M 個實作細節
-- Y 行 → Z 行
-
-### ✅ 最終結果
-- 原始: X 行
-- 處理後: Z 行 (-P%)
-- 備份: CLAUDE.md.backup (原始)
-- 備份: CLAUDE.md.pre-distill.md (清理後)
-```
-
----
 
 ### 進階驗證建議
 
-> **提示**: 當本次 sync 發現 ⚠️ 項目 ≥ 3 個時，建議執行 `/claude:decode-compare {module}` 進行深度精度驗證。sync 檢查「有沒有」，decode-compare 檢查「對不對」。
+> 當本次 sync 發現 ⚠️ 項目 >= 3 個時，建議執行 `/claude:decode-compare {module}` 進行深度精度驗證。sync 檢查「有沒有」，decode-compare 檢查「對不對」。
 
 ---
 
-## 🎯 執行約束
+## 執行約束
 
 ### 遞歸處理約束
 遞歸處理約束: [recursive-constraints.md](./_common/recursive-constraints.md)
@@ -899,7 +222,7 @@ actions:
 
 ---
 
-## 💡 使用建議
+## 使用建議
 
 ### 定期檢查
 1. **每週執行**: `/claude:sync --recursive` 檢查同步性
@@ -920,7 +243,7 @@ actions:
 
 ---
 
-## 🎯 品質檢查清單
+## 品質檢查清單
 
 ### 核心層檢查（預設執行）
 
@@ -980,14 +303,6 @@ actions:
 
 ---
 
-> 💡 **同步哲學**: CLAUDE.md 是活文檔，必須與程式碼同步演進。定期檢查同步性，確保 AI 協作時獲得準確的資訊，避免過時文檔導致誤導。
+> **同步哲學**: CLAUDE.md 是活文檔，必須與程式碼同步演進。定期檢查同步性，確保 AI 協作時獲得準確的資訊。
 
-> 🔍 **涵蓋性價值**: 完整的文檔涵蓋讓 AI 更全面理解專案，減少「不知道有這個功能」的情況，提升開發效率和準確性。
-
-> 📝 **內部品質價值**: 文檔自洽、無矛盾、結構合理，讓 AI 能正確理解規則，避免因文檔問題導致的錯誤決策。
-
-> 🧹 **元資訊評估價值**: 參考 `/claude:clean` 原則，識別對 AI 無意義的元資訊，減少 token 消耗。
-
-> 🍶 **蒸餾評估價值**: 參考 `/claude:distill` 原則，識別精華、冗餘、灰色地帶，指導內容變更決策。
-
-> ⚡ **工作流程**: `/claude:clean`（清理 noise）→ `/claude:distill`（蒸餾 signal）→ `/claude:sync`（靜態一致性）→ `/claude:doc-decode`（理解度測試）→ `/claude:decode-compare`（精度驗證）
+> **工作流程**: `/claude:clean`（清理 noise）→ `/claude:distill`（蒸餾 signal）→ `/claude:sync`（靜態一致性）→ `/claude:doc-decode`（理解度測試）→ `/claude:decode-compare`（精度驗證）

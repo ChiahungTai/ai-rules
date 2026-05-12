@@ -1,5 +1,6 @@
 ---
 description: "蒸餾肥大的 spec 文檔 — 提煉核心技術決策，去除冗餘和重複，產出精簡版 spec。"
+when_to_use: "Distill a bloated spec document by extracting core technical decisions, removing redundancy and contradictions, producing a condensed version."
 usage: "/distill-spec <spec 檔案路徑>"
 argument-hint: "要蒸餾的 spec 檔案路徑"
 allowed-tools: ["Read", "Write", "Edit"]
@@ -53,11 +54,6 @@ specs/                     specs/
 └── ...                    ├── watchlist-spec.md           # 蒸餾後的精華版本
                            └── ...
 ```
-
-**蒸餾過程說明**:
-1. **蒸餾前**: 原始 spec.md 包含所有累積的內容
-2. **蒸餾中**: 建立備份檔案，保護原始內容
-3. **蒸餾後**: spec.md 被精華版本覆蓋，備份檔案保留
 
 **注意**: 只處理指定的 spec 文檔，不涉及其他目錄或檔案。
 
@@ -147,7 +143,6 @@ specs/                     specs/
 
 ```
 🔥 開始蒸餾 ai-specs/modules/watchlist-spec.md...
-   📊 原料狀態: 523 行，8 個主要章節
    ⚠️  檢測到冗餘濃度過高，建議執行蒸餾提純
 
 ⚗️  分析文檔品質...
@@ -170,7 +165,7 @@ specs/                     specs/
    ✓ 蒸餾提煉完成
    ✓ 自洽性檢查通過
 
-✨ specs/modules/watchlist-spec.md 蒸餾完成！純度提升，決策清晰。
+✨ specs/modules/watchlist-spec.md 蒸餾完成！
 
 📥 原料備份位置: specs/modules/watchlist-spec.md.backup
 🔄 如需還原: cp specs/modules/watchlist-spec.md.backup specs/modules/watchlist-spec.md
@@ -180,275 +175,17 @@ specs/                     specs/
 
 ## 📄 內容分類規則
 
-### 精華識別模式
+### 分類型摘要
 
-```markdown
-# 精華內容特徵（高沸點，需要保留）
-## 🎯 架構決策
-## ⚖️ Tradeoff 分析
-## 📋 決策背景
-## 🔧 核心技術規格
-## ✅ 關鍵驗收標準
-## 🔄 版本相容性政策
-## 🚫 替代方案考量
-```
+| 分類型 | 說明 | 預設動作 | 上下文 |
+|--------|------|----------|--------|
+| **essence** | 架構決策、Tradeoff 分析、性能要求 | keep | 高保留優先級 |
+| **impurity** | 重複描述、過時規格、細碎參數、冗長範例 | remove | 低保留優先級 |
+| **conflict** | 版本矛盾、相反技術選擇、衝突約束 | resolve | 最高優先處理 |
+| **uncertain** | 邊界情況，無法自動判斷 | review | 需人工確認 |
+| **context_preserve** | API 規格等可簡化但需保留核心定義的內容 | condense | 中等保留 |
 
-### 雜質識別模式
-
-```markdown
-# 雜質內容特徵（低沸點，可以蒸發）
-### 重複規格描述
-### 過時版本資訊
-### 具體配置參數
-### 冗長程式碼範例
-### 臨時技術選擇
-### 詳細環境設定
-### 重複檢查項目
-```
-
-### 矛盾識別模式
-
-```markdown
-# 矛盾內容特徵（需要解決）
-- 版本號不一致
-- 相反的技術選擇
-- 衝突的性能要求
-- 矛盾的約束條件
-- 不一致的命名規範
-```
-
-### 蒸餾分餾邏輯（含技術決策脈絡分析）
-
-```python
-def analyze_spec_context(content: str, section_title: str) -> dict:
-    """
-    技術規格文檔脈絡分析 - 理解設計意圖和決策背景
-
-    回傳:
-    - spec_type: "architecture_decision", "api_specification", "performance_requirement", "implementation_detail"
-    - design_intent: 設計意圖分析
-    - decision_context: 決策上下文
-    - false_positive_risk: False Positive 風險評估
-    """
-
-    spec_contexts = {
-        "architecture_decision": {
-            "keywords": ["架構", "設計", "選擇", "tradeoff", "取捨", "權衡"],
-            "patterns": ["## 架構決策", "## 設計選擇", "## 技術選型"],
-            "characteristics": "高層次技術決策，包含權衡分析",
-            "preserve_priority": "high"
-        },
-        "api_specification": {
-            "keywords": ["API", "介面", "端點", "簽名", "規格"],
-            "patterns": ["## API 介面", "## 端點定義", "## 規格說明"],
-            "characteristics": "具體介面定義和規格描述",
-            "preserve_priority": "medium-high"
-        },
-        "performance_requirement": {
-            "keywords": ["性能", "基準", "指標", "延遲", "吞吐量"],
-            "patterns": ["## 性能要求", "## 基準", "## 指標"],
-            "characteristics": "性能相關的要求和基準",
-            "preserve_priority": "high"
-        },
-        "implementation_detail": {
-            "keywords": ["實作", "具體", "參數", "配置", "範例"],
-            "patterns": ["## 實作細節", "## 配置說明", "## 範例"],
-            "characteristics": "具體實作細節和配置參數",
-            "preserve_priority": "low-medium"
-        }
-    }
-
-    # 分析上下文類型
-    context_scores = {}
-    for ctx_type, indicators in spec_contexts.items():
-        score = 0
-        for kw in indicators["keywords"]:
-            if kw in content:
-                score += content.count(kw) * 2
-        for pattern in indicators["patterns"]:
-            if pattern in content:
-                score += 3
-        context_scores[ctx_type] = score
-
-    # 判斷主要上下文
-    if max(context_scores.values()) > 0:
-        primary_context = max(context_scores, key=context_scores.get)
-    else:
-        primary_context = "implementation_detail"  # 預設為實作細節
-
-    return {
-        "spec_type": primary_context,
-        "context_description": spec_contexts[primary_context]["characteristics"],
-        "preserve_priority": spec_contexts[primary_context]["preserve_priority"],
-        "all_scores": context_scores
-    }
-
-def enhanced_classify_spec_content(content: str, section_title: str, context_info: dict) -> dict:
-    """
-    增強蒸餾分餾邏輯 - 結合技術決策脈絡分析
-
-    參數:
-    - content: 內容文本
-    - section_title: 章節標題
-    - context_info: 技術規格脈絡分析結果
-
-    回傳:
-    {
-        "type": "essence/impurity/conflict/uncertain/context_preserve",
-        "priority": "high/medium/low",
-        "action": "keep/merge/resolve/remove/condense",
-        "reason": "決策原因說明"
-    }
-    """
-
-    spec_type = context_info["spec_type"]
-    preserve_priority = context_info["preserve_priority"]
-
-    # 基於上下文調整分類策略
-    context_rules = {
-        "architecture_decision": {
-            "preserve_keywords": ["決策", "選擇", "tradeoff", "權衡", "原因", "背景"],
-            "impunity_keywords": ["具體範例", "配置細節", "實作參數"],
-            "default_action": "keep",
-            "rationale": "架構決策包含重要權衡分析，應予保留"
-        },
-        "api_specification": {
-            "preserve_keywords": ["核心", "關鍵", "重要", "主要", "必要"],
-            "impunity_keywords": ["過時範例", "詳細範例", "配置範例"],
-            "default_action": "condense",  # 縮減而非移除
-            "rationale": "API 規格可簡化但核心介面定義需保留"
-        },
-        "performance_requirement": {
-            "preserve_keywords": ["基準", "指標", "要求", "目標", "關鍵"],
-            "impunity_keywords": ["具體測試數據", "詳細配置", "實作細節"],
-            "default_action": "keep",
-            "rationale": "性能要求是重要的約束條件"
-        },
-        "implementation_detail": {
-            "preserve_keywords": ["關鍵", "必要", "核心", "重要"],
-            "impunity_keywords": ["具體參數", "詳細範例", "配置值", "過時版本"],
-            "default_action": "distill",
-            "rationale": "實作細節通常可以簡化"
-        }
-    }
-
-    rules = context_rules.get(spec_type, context_rules["implementation_detail"])
-
-    # 檢查保留關鍵詞
-    preserve_score = sum(1 for kw in rules["preserve_keywords"] if kw in content)
-    impunity_score = sum(1 for kw in rules["impunity_keywords"] if kw in content)
-
-    # 判斷邏輯
-    if preserve_score > impunity_score * 1.3:
-        return {
-            "type": "essence",
-            "priority": "high",
-            "action": "keep",
-            "reason": rules["rationale"]
-        }
-    elif impunity_score > preserve_score * 1.3 and spec_type != "architecture_decision":
-        return {
-            "type": "impurity",
-            "priority": "medium",
-            "action": "remove",
-            "reason": rules["rationale"]
-        }
-    elif spec_type in ["api_specification", "implementation_detail"]:
-        return {
-            "type": "context_preserve",
-            "priority": "medium",
-            "action": rules["default_action"],
-            "reason": rules["rationale"]
-        }
-    else:
-        return {
-            "type": "uncertain",
-            "priority": "low",
-            "action": "review",
-            "reason": "需要人工判斷的邊界情況"
-        }
-
-def classify_spec_content(content: str, section_title: str = "") -> dict:
-    """
-    主蒸餾分餾邏輯 - 整合傳統關鍵詞分析和現代技術決策脈絡分析
-
-    回傳:
-    {
-        "type": "essence/impurity/conflict/uncertain/context_preserve",
-        "priority": "high/medium/low",
-        "action": "keep/merge/resolve/remove/condense",
-        "context_analysis": "上下文分析結果",
-        "reason": "決策原因"
-    }
-    """
-
-    # 第一步：技術規格脈絡分析
-    context_info = analyze_spec_context(content, section_title)
-
-    # 第二步：矛盾檢測（優先級最高）
-    conflict_keywords = [
-        "矛盾", "不一致", "衝突", "相反",
-        "但是之前", "然而現在", "與此不同",
-        "version", "版本", "舊版", "新版"  # 版本矛盾
-    ]
-
-    conflict_score = sum(1 for kw in conflict_keywords if kw.lower() in content.lower())
-    if conflict_score > 0:
-        return {
-            "type": "conflict",
-            "priority": "high",
-            "action": "resolve",
-            "context_analysis": context_info,
-            "reason": "檢測到潛在矛盾或版本不一致"
-        }
-
-    # 第三步：增強分類決策
-    enhanced_result = enhanced_classify_spec_content(content, section_title, context_info)
-    enhanced_result["context_analysis"] = context_info
-
-    # 第四步：傳統關鍵詞分析（作為備用驗證）
-    if enhanced_result["type"] in ["essence", "impurity"]:
-        return enhanced_result
-
-    # 備用傳統邏輯（僅作最後驗證）
-    decision_keywords = [
-        "決策", "選擇", "tradeoff", "取捨", "權衡",
-        "架構", "設計", "原因", "背景", "動機",
-        "替代方案", "考量", "分析"
-    ]
-
-    spec_keywords = [
-        "核心 API", "關鍵介面", "性能基準",
-        "驗收標準", "相容性", "版本政策"
-    ]
-
-    impurity_keywords = [
-        "具體參數", "詳細範例", "配置值",
-        "臨時決定", "過時版本", "重複描述"
-    ]
-
-    essence_score = sum(1 for kw in decision_keywords + spec_keywords if kw in content)
-    impurity_score = sum(1 for kw in impurity_keywords if kw in content)
-
-    if essence_score > impurity_score * 1.5:
-        return {
-            "type": "essence",
-            "priority": "high",
-            "action": "keep",
-            "context_analysis": context_info,
-            "reason": "傳統關鍵詞分析確認為精華內容"
-        }
-    elif impurity_score > essence_score * 1.5:
-        return {
-            "type": "impurity",
-            "priority": "medium",
-            "action": "remove",
-            "context_analysis": context_info,
-            "reason": "傳統關鍵詞分析確認為雜質內容"
-        }
-    else:
-        return enhanced_result  # 返回之前的分析結果
-```
+分類邏輯的完整 pseudo code 和模式列表：[distill-spec-classification.md](./claude/_common/distill-spec-classification.md)
 
 ---
 
@@ -472,7 +209,6 @@ def classify_spec_content(content: str, section_title: str = "") -> dict:
 
 ### 重要架構模式
 - **模式 1**: [模式描述]
-- **模式 2**: [模式描述]
 
 ## 🔧 核心技術規格
 
@@ -561,5 +297,3 @@ def classify_spec_content(content: str, section_title: str = "") -> dict:
 ---
 
 > 💡 **蒸餾哲學**: 讓 spec 文檔成為高純度的技術決策指南，如同一瓶精緻的蒸餾酒，濃縮了最寶貴的架構智慧。蒸餾過程確保開發團隊能快速理解關鍵決策，而不被重複細節干擾。
-
-> 🤖 **AI 協作價值**: 蒸餾後的 spec 文檔對 AI 協作開發極具價值。清晰的架構決策和 Tradeoff 分析讓 AI 能準確理解技術選擇背景，避免提出不切實際的建議。
