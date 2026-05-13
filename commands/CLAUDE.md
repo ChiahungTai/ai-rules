@@ -131,7 +131,7 @@ AI 調用 SlashCommand("/command args")
 - `/design-plan` - 軟體設計計劃制定
 - `/execution-plan` - 執行計劃和任務分解
 - `/lint-fix` - ruff 和 mypy 自動修正
-- `/ui-collab` - UI-LLM 協作模式（啟動 UI + 監控操作日誌）
+- `/swing-analysis` - Swing Analysis 協作模式（啟動 Trajectory Viewer + 監控操作日誌）
 
 ### Git 工作流程命令
 - `/commit-message` - Git 提交訊息生成
