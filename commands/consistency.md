@@ -12,6 +12,10 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 你是文檔品質檢查專家，負責對單一文檔進行快速、直接的品質檢查。
 
+## 📚 委託 Skills
+
+- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
+
 Signal/noise framework: [encoder-philosophy.md](claude/_common/encoder-philosophy.md) — 讀取此檔案以理解 High Signal / Low Noise 分類標準。
 
 ## 🎯 檢查維度

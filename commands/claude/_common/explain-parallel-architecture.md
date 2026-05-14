@@ -44,6 +44,12 @@ skill: "parallel-processing" "分析解釋任務：$USER_TASK"
 
 ### 第二步：執行策略選擇
 
+每個 Task 的 prompt 必須包含：
+```
+執行前先 invoke 以下 skill 載入規則：
+- rules-reminder
+```
+
 ```bash
 if skill.recommend_parallel:
     execute_parallel_explain(skill.recommendations)

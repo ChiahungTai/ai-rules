@@ -24,6 +24,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 實作時自動載入以下 skills，提供 HOW 的方法論：
 
+- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
 - **`test-driven-development`** — TDD 循環（RED → GREEN → REFACTOR）、測試寫作規範
 - **`incremental-implementation`** — 範圍紀律、簡潔優先、漸進式交付、反合理化
 - **`debugging-and-error-recovery`** — demo 執行失敗時的系統化除錯
@@ -197,6 +198,7 @@ Agent 收到 prompt 後，按以下順序建立 context：
 
 Agent 不會自動載入主對話的 skills。採用以下策略：
 
+- **`rules-reminder`**：在 prompt 中明確指示 Agent invoke，確保 Agent 遵守 rg/fd、禁止 sed 等規則
 - **`test-driven-development`**、**`incremental-implementation`**：在 prompt 中明確指示 Agent invoke 這些 skills
 - **`debugging-and-error-recovery`**：Agent 遇到錯誤時自行 invoke
 - **`autonomous-execution`**：在 prompt 中明確指示 Agent invoke
@@ -204,6 +206,7 @@ Agent 不會自動載入主對話的 skills。採用以下策略：
 Prompt 中的指示範例：
 ```
 執行前先 invoke 以下 skills 載入方法論：
+- rules-reminder
 - test-driven-development
 - incremental-implementation
 - autonomous-execution
