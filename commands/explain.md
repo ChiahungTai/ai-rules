@@ -197,9 +197,13 @@ skill: "mermaid"
 
 ---
 
-## 執行邏輯
+## 📚 委託 Skills
 
-> **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `modern-cli-preference.md`（已自動載入）
+- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
+
+---
+
+## 執行邏輯
 
 ### 決策流程
 ```

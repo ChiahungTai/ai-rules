@@ -18,6 +18,7 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 
 生成計畫書時自動載入以下 skill，提供 HOW 的方法論：
 
+- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
 - **`planning-and-task-breakdown`** — 依賴圖分析、垂直切片、task sizing、checkpoint 機制、反合理化
 
 ---
@@ -127,8 +128,6 @@ class ComponentFactory:
 - **驗證自足性**: 每個段落有獨立的驗證策略
 
 ### 段落分析行為規範
-
-> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `modern-cli-preference.md`（已自動載入）
 
 - **深度分析**: 基於 `/spec` 規格摘要進行深度分析
 - **依賴識別**: 識別段落間的依賴關係

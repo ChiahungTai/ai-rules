@@ -16,6 +16,7 @@ allowed-tools: ["Read", "Grep", "Glob"]
 
 審查時自動載入以下 skill，提供結構化審查的方法論模式：
 
+- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
 - **`code-review-and-quality`** — 多維度審查方法論、問題分類模式
 
 ---
@@ -85,8 +86,6 @@ allowed-tools: ["Read", "Grep", "Glob"]
 ---
 
 ## 技術約束
-
-> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `modern-cli-preference.md`（已自動載入）
 
 - **基於實際程式碼**：必須讀取計畫書提到的檔案，確認是否存在
 - **四維度覆蓋**：必須覆蓋完整性、Rules 合規、一致性、遺漏風險四個維度

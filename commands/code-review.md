@@ -14,6 +14,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 審查時自動載入：
 
+- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
 - **`code-review-and-quality`** — 五軸審查方法論（correctness, readability, architecture, security, performance）
 - **`security-and-hardening`** — 安全審查細節
 - **`performance-optimization`** — 效能審查細節
@@ -23,8 +24,6 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ## 審查範圍
 
 審查 staged 變更或最近的 commits。
-
-> 🔧 **搜尋約束**：`fd` 取代 `find`、`rg` 取代 `grep`。詳見 `modern-cli-preference.md`（已自動載入）
 
 ## 五軸審查 + 第一性原理
 
