@@ -68,6 +68,7 @@ print(f"[LOG] rg 'fit_model.*(start|metric|warn|error)' {log_path}")
 | `[FAIL]` | 失敗 | 函式拋出異常或無法完成 |
 | `[LOG]` | rg 搜尋指引 | 指引 AI 用 rg 查詢詳細 log |
 | `[ACTION]` | UI 操作事件 | 使用者 UI 操作（選取、切換、調整），供 LLM 理解上下文。由 ui 元件層 log，不重複 |
+| `[progress]` | 週期性心跳 | 長時間運作任務的定期進度回報（如回測每 N bars），非 state transition |
 
 ### [LOG] 路徑只印一次
 
