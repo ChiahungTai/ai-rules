@@ -70,6 +70,26 @@ permission-mode: "acceptEdits"
 - **慣例映射**: 專案特定的約定和語義映射（判斷：名稱推導不出語義 → High Signal）
 - **可複用基礎設施**: 其他模組可能會複用的 utilities、base classes、protocols（判斷：如果另一個模組的 EP 設計新功能時會想複用 → 值得記錄）。格式：`path/to/file.py:ClassName` — 用途簡述
 
+#### 可複用基礎設施段落規範
+
+**段落結構**（放置位置：Navigation Table 之後、Core API 之前）：
+```markdown
+## 可複用基礎設施
+
+**{誰應該看這裡}。{一句話 scope}。**
+
+- `file.py:ClassName` — 一句話用途
+```
+
+**跨模組標記**（讓消費端 agent 知道「這不是本模組獨佔的」）：
+- `**X 也繼承**` — 定義在此，但其他模組也使用（如 `**conditions 也繼承**`）
+- `**跨模組 Protocol**` — 其他模組可以去實作的介面
+- `繼承 other_module/path.py:Class` — 原始定義在他處，本模組是消費端
+
+**Runtime API 存取模式**：當模組的核心工廠/入口回傳的物件有重要的下游 API 時（如 `create_backtest_engine()` 回傳的 BacktestEngine 的 post-run 提取方法），在「可複用基礎設施」之後以簡短表格記錄常用存取模式。判斷：工廠函式的回傳值在 2+ 個消費端被以相同模式使用 → 值得記錄。
+
+**頂層索引**（專案根 CLAUDE.md）：精選 8-12 項高頻使用項 + 子模組連結，不重複子模組的完整列表。格式：`- module/file.py:Class — 用途 → [module](module/CLAUDE.md)`
+
 ### 應該避免（Low Noise）
 - **可推導內容**: API 簽名、參數表、欄位列表（從程式碼可直接推導）
 - **完整範例**: 超過 5 行的程式碼範例（精簡為一句話 + 源碼引用）

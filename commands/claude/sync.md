@@ -253,6 +253,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - [ ] 檢查了跨模組依賴是否具體到 class/function（不只是模組名）
 - [ ] 對多步驟流程驗證了 step 間 input/output 可追蹤性（無流程的模組標 N/A）
 - [ ] 執行了導航 Decoder Test（3 個導航問題，不查源碼）
+- [ ] 檢查了「可複用基礎設施」可發現性（跨模組共用的 Protocol/ABC/Registry 是否有專屬段落或明確標記；判斷：一個 class 被多個模組 import → 應有 `## 可複用基礎設施` 段落或跨模組標記）
 
 #### 程式碼一致性（角度二）
 - [ ] 發現了所有 CLAUDE.md 檔案（遞歸模式）

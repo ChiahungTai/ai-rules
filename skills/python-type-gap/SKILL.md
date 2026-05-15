@@ -61,7 +61,7 @@ stubs/
 
 ### Partial Stubs 關鍵約束
 
-- **`__init__.pyi` 必須有 `__getattr__ → Any`**：確保 top-level 屬性（如 `pa.schema`、`pa.Table`）透傳到已安裝套件的型別。如果沒有它，mypy 會用 stubs 的 `__init__.pyi` 完全取代 site-packages 的型別資訊，導致已正確標註的型別全部變成 Any
+- **`__init__.pyi` 必須有 `__getattr__ → Any`**：確保 top-level 屬性（如 `pa.schema`、`pa.Table`）透傳到已安裝套件的型別資訊。如果沒有它，mypy 會用 stubs 的 `__init__.pyi` 完全取代 site-packages 的型別資訊，導致已正確標註的型別全部變成 Any
 - **只補缺口的子模組**：不需要為整個套件寫完整 stubs
 - **只 stub 用到的函式**：先 `rg 'pc\.\w+' mosaic_alpha/ -t py --no-filename -o > /tmp/usage.txt`，再用 `sort -u /tmp/usage.txt` 找出實際用量
 
@@ -141,3 +141,114 @@ ignore_errors = true
 | 不存在的模組 | `fd -t d -d 1 . mosaic_alpha/` 確認 | 直接刪除整個 override |
 | 第三方 blanket ignore | 套件已有 `py.typed` | 移除，改用 Layer 1-3 |
 | UI framework ignore | Panel/Bokeh 的 runtime metaprogramming | 保留，加註解 |
+
+## disable_error_code 縮窄食譜
+
+當 `ignore_errors = true` 被替換為 `disable_error_code = [...]` 後，每個 error code 都應驗證是否為「不可修復的第三方缺口」。以下食譜記錄各 error code 的分類和修復方式。
+
+### 可修復的 Error Codes（不應全局壓制）
+
+| Error Code | 修復方式 | 範例 |
+|-----------|---------|------|
+| `str-bytes-safe` | `float()` / `str()` 包裹 polars 回傳值後再用 f-string | `f"{float(df['close'].mean()):.2f}"` |
+| `assignment` | 型別加寬（`dict[str, object]`）、isinstance narrowing、中間變數重新命名 | `stats: dict[str, object] = ...` |
+| `no-any-return` | `float()` / `int()` 包裹返回值；複雜型別用 local `# type: ignore[no-any-return]` | `return float(self.config.initial_capital + self.realized_pnl)` |
+| `valid-type` | 修正錯誤的型別名稱（`any` → `Any`）或移除 module as type | `-> dict[str, Any]` |
+| `call-arg` | 第三方 API kwargs 缺口用 local `# type: ignore[call-arg]` | `figure(x_axis_type="datetime")  # type: ignore[call-arg]` |
+| `type-arg` | 為 bare generic 加型別參數 | `dict` → `dict[str, Any]`、`list` → `list[str]` |
+| `return-value` | `float()` 包裹 `Any` 返回值給 `.sort(key=...)` | `.sort(key=lambda x: float(x["avg_ret"]))` |
+
+### 不可修復的 Error Codes（第三方缺口，需全局壓制）
+
+| Error Code | 來源 | 說明 |
+|-----------|------|------|
+| `no-untyped-def` | Demo 函式缺參數標註 | 範例程式不要求完整標註 |
+| `no-untyped-call` | Shioaji / Panel 未標註函式 | 呼叫未標註的第三方 API |
+| `operator` | Polars `Any` 算術 | `Any + float` 無法靜態解析 |
+| `union-attr` | Polars 寬聯合型別 stubs | `.mean()` 回傳 `int \| float \| date \| ... \| None` |
+| `arg-type` | Polars `Any` / NautilusCatalog union | `get_bars()` 回傳 `pd.DataFrame \| pl.DataFrame` |
+| `attr-defined` | NT / Bokeh 動態屬性 | `config.initial_capital` 等 runtime 動態生成的屬性 |
+
+### 修復模式速查
+
+#### `str-bytes-safe` — f-string 中的 `Any` 值
+
+當 polars 方法回傳 `Any`（因為 `.mean()` / `.std()` 等回傳寬聯合型別），直接在 f-string 中格式化會觸發 `str-bytes-safe`。
+
+```python
+mean_val = df["close"].mean()  # mypy sees Any (Polars stubs gap); runtime: int | float | date | None
+print(f"mean={mean_val:.2f}")  # ❌ str-bytes-safe
+
+print(f"mean={float(mean_val):.2f}")  # ✅ float() 包裹
+print(f"range={str(df['datetime'].min())}")  # ✅ str() 包裹（日期型）
+```
+
+#### `type-arg` — bare generic 加型別參數
+
+```python
+def get_stats() -> dict:           # ❌ bare dict
+def get_stats() -> dict[str, Any]: # ✅ 加型別參數
+
+def load_data() -> list:              # ❌ bare list
+def load_data() -> list[dict[str, Any]]: # ✅ 巢狀也加
+
+from collections import deque
+buf: deque = deque()       # ❌
+buf: deque[Any] = deque()  # ✅
+```
+
+需要時加 `from typing import Any`。
+
+#### `assignment` — 型別加寬與 narrowing
+
+```python
+# NautilusCatalog union 回傳 → 加寬型別
+interval_dfs: dict[str, pl.DataFrame | pd.DataFrame] = {}
+
+# dict[str, object] 回傳 → 用 int(float(...)) 鏈式轉換
+val = int(float(stats.get("count", 0)))  # float(object) → arg-type (suppressed), int(float) → legal
+
+# isinstance narrowing
+df = df_real if isinstance(df_real, pd.DataFrame) else df_real.to_pandas()
+```
+
+#### `no-any-return` — 包裹或 local ignore
+
+```python
+# 簡單型別 → explicit conversion
+def get_equity(self) -> float:
+    return float(self.config.initial_capital + self.realized_pnl)
+
+# 複雜型別（DataFrame / dict）→ local ignore
+def load_data(self) -> pl.DataFrame:
+    return self.catalog.get_bars(...)  # type: ignore[no-any-return]
+```
+
+#### `call-arg` — 第三方 API kwargs
+
+```python
+fig = figure(
+    width=700, height=400,
+    x_axis_type="datetime",  # Bokeh stubs 不認這個 kwarg
+)  # type: ignore[call-arg]
+```
+
+#### `return-value` — sort key 中的 `Any`
+
+```python
+# dict[str, Any] 取出的值是 Any，sort key 期望 comparable type
+candidates.sort(key=lambda x: x["avg_ret"])       # ❌ return-value
+candidates.sort(key=lambda x: float(x["avg_ret"])) # ✅ float() 包裹
+```
+
+### 驗證流程
+
+從 `disable_error_code` 中逐個移除 error code 的標準流程：
+
+1. 暫時從 `disable_error_code` 移除目標 code
+2. `uv run mypy examples/ --no-error-summary > /tmp/mypy.txt`
+3. `rg -F "[code-name]" /tmp/mypy.txt | wc -l` 計數
+4. 分類：可修復（用食譜）vs 不可修復（保留壓制）
+5. 可修復的用 agent 並行處理（按檔案分組）
+6. 修完後驗證 `uv run mypy examples/` 零錯誤
+7. 確認 `uv run ruff check examples/` 通過

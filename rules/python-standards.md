@@ -146,7 +146,24 @@ Python 3.12 已正式 deprecate `typing` 中的泛型別名，3.14 將移除。A
 ### typing 模組適用範圍
 
 僅以下型別從 `typing` import：
-- `Callable`, `Protocol`, `TypeVar`, `ParamSpec`, `Self`
+- `Callable`, `Protocol`, `TypeVar`, `ParamSpec`, `Self`, `Any`
+
+### `Any` 使用規範
+
+> **核心原則**：能用具體型別就用具體型別，`Any` 只用在外部邊界。
+
+**允許使用 Any 的場合**：
+- JSON 解析、DB row 等動態資料（value 型別不固定）
+- 與缺乏型別註解的第三方庫互動
+- **必須加註解釋為什麼需要 Any**
+
+```python
+# ❌ 濫用：內部邏輯用 Any
+def process(data: Any) -> Any: ...
+
+# ✅ 合理：外部邊界 + 加註解
+results: list[dict[str, Any]] = []  # JSON 解析結果，value 型別不固定
+```
 
 ### TYPE_CHECKING 使用限制
 
@@ -364,6 +381,7 @@ uv pip list | grep <project-name>
 - [ ] 使用 `list[T]`, `T1 | T2` 等內建型別語法
 - [ ] 僅在必要時從 `typing` import（Callable, Protocol 等）
 - [ ] 不使用 `TYPE_CHECKING`（從架構解決 circular import）
+- [ ] `Any` 只用在外部邊界（JSON、第三方庫），且加註解說明
 
 ### 命令執行
 - [ ] 所有 Python 命令以 `uv run` 開頭
