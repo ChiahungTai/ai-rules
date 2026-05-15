@@ -55,7 +55,7 @@ permission-mode: "acceptEdits"
 
 ## 內容規範
 
-> **核心理念**: CLAUDE.md 是模組知識的 Encoder（壓縮表示）。品質標準是 Signal/Noise ratio — 保留從程式碼猜不到的知識，移除可推導的內容。詳細框架見 `commands/claude/_common/encoder-philosophy.md`。
+> **核心理念**: CLAUDE.md 是模組知識的 Encoder（壓縮表示）。品質標準是 Signal/Noise ratio — 保留從程式碼猜不到的知識，移除可推導的內容。詳細框架見 [encoder-philosophy.md](../commands/claude/_common/encoder-philosophy.md)。
 
 ### 應該包含（High Signal）
 - **導航指引**: 每個關鍵概念必須附帶 `file.py:ClassOrFunction` 指引，讓 LLM 能從概念直接定位到程式碼（判斷：文檔引入了概念但 LLM 不知道去哪裡找 → 導航缺口）
@@ -68,7 +68,7 @@ permission-mode: "acceptEdits"
 - **型別關係**: 相似型別的用途區別和使用場景（判斷：兩個型別名字相似但職責不同 → 它們的區別是 High Signal）
 - **Pipeline 編排**: 多步驟流程的順序和數據銜接點（判斷：從單一函數看不到的全局流程 → High Signal）
 - **慣例映射**: 專案特定的約定和語義映射（判斷：名稱推導不出語義 → High Signal）
-- **可複用基礎設施**: 其他模組可能會複用的 utilities、base classes、protocols（判斷：如果另一個模組的 EP 設計新功能時會想複用 → 值得記錄。格式：`path/to/file.py` — 用途簡述）
+- **可複用基礎設施**: 其他模組可能會複用的 utilities、base classes、protocols（判斷：如果另一個模組的 EP 設計新功能時會想複用 → 值得記錄）。格式：`path/to/file.py:ClassName` — 用途簡述
 
 ### 應該避免（Low Noise）
 - **可推導內容**: API 簽名、參數表、欄位列表（從程式碼可直接推導）

@@ -18,7 +18,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 - **不趕時間**：充分思考架構、權衡、邊界情況後再動手
 - **不交半成品**：每個功能必須完整實作、測試通過、Demo 可跑
 
-自主決策、錯誤自癒、權限最小化、完成報告等方法論遵循 `autonomous-execution` skill。
+自主決策、錯誤自癒、權限最小化、完成報告等方法論遵循 [autonomous-execution](../skills/autonomous-execution/SKILL.md) skill。
 
 ---
 
@@ -72,7 +72,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 - **Write 降級**：Edit 失敗兩次後，改用 Write 整檔覆寫
 - **遵循 rules**：遵守所有 `~/.claude/rules/` 中的規範
 
-權限最小化策略和錯誤自癒流程遵循 `autonomous-execution` skill。
+權限最小化策略和錯誤自癒流程遵循 [autonomous-execution](../skills/autonomous-execution/SKILL.md) skill。
 
 ### 階段 4：驗證（Verify Everything）
 
@@ -118,13 +118,13 @@ uv run python scripts/verify_import.py
 
 ## 輸出格式
 
-完成報告格式遵循 `autonomous-execution` skill 的 Completion Report 模板。
+完成報告格式遵循 [autonomous-execution](../skills/autonomous-execution/SKILL.md) skill 的 Completion Report 模板。
 
 ---
 
 ## 自主決策框架
 
-決策策略和不自行處理邊界遵循 `autonomous-execution` skill。
+決策策略和不自行處理邊界遵循 [autonomous-execution](../skills/autonomous-execution/SKILL.md) skill。
 
 ---
 

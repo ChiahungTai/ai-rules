@@ -13,7 +13,7 @@ argument-hint: "你要做什麼功能或改變"
 
 實作時自動載入以下 skill，提供 HOW 的方法論：
 
-- **`spec-driven-development`** — 假設浮出機制、邊界定義（Always/Ask/Never）、成功條件量化、反合理化
+- [spec-driven-development](../skills/spec-driven-development/SKILL.md) — 假設浮出機制、邊界定義（Always/Ask/Never）、成功條件量化、反合理化
 
 ---
 
@@ -46,19 +46,19 @@ argument-hint: "你要做什麼功能或改變"
 
 1. 讀取相關 CLAUDE.md，了解專案架構和約束
 2. 讀取需求涉及的核心檔案，理解現有實作
-3. 盤點可複用元件：從 CLAUDE.md 的可複用基礎設施描述和 `rg` 搜尋現有元件，
-   記錄到規格摘要的「現有基礎設施」欄位（格式：`path/to/file.py` — 用途簡述）
+3. 盤點現有基礎設施：從 CLAUDE.md 的可複用基礎設施描述和 `rg` 搜尋現有元件，
+   記錄到規格摘要的「現有基礎設施」欄位（格式：`path/to/file.py:ClassName` — 用途簡述）
 4. 基於實際程式碼列出假設，標註來源
 
-假設浮出的格式和強制確認機制遵循 `spec-driven-development` skill。
+假設浮出的格式和強制確認機制遵循 [spec-driven-development](../skills/spec-driven-development/SKILL.md) skill。
 
 ### 階段 3：量化成功條件
 
-將模糊需求轉為可驗證的目標。量化方法遵循 `spec-driven-development` skill 的「Reframe instructions as success criteria」模式。
+將模糊需求轉為可驗證的目標。量化方法遵循 [spec-driven-development](../skills/spec-driven-development/SKILL.md) skill 的「Reframe instructions as success criteria」模式。
 
 ### 階段 4：定義邊界
 
-三層分類的框架遵循 `spec-driven-development` skill 的 Boundaries 機制：
+三層分類的框架遵循 [spec-driven-development](../skills/spec-driven-development/SKILL.md) skill 的 Boundaries 機制：
 
 ```
 Always（一定做）：
@@ -142,7 +142,7 @@ Never（不做）：
 - [約束 2]
 
 ### 現有基礎設施
-- `path/to/file.py` — 用途簡述
+- `path/to/file.py:ClassName` — 用途簡述
 - 無相關基礎設施
 
 ### 技術決策

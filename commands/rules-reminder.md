@@ -7,8 +7,8 @@ allowed-tools: ["Read"]
 
 # /rules-reminder — 最常被忘記的規則
 
-載入 `rules-reminder` skill，提供 LLM 最常犯的六條規則。
+載入 [rules-reminder](../skills/rules-reminder/SKILL.md) skill，提供 LLM 最常犯的六條規則。
 
 ## 📚 委託 Skills
 
-- **`rules-reminder`** — `#` 是毒藥、`grep`/`find` 是禁區、`uv run` 是王道、`sed` 是地雷、`|` 是陷阱、簡體字是違規
+- [rules-reminder](../skills/rules-reminder/SKILL.md) — `#` 是毒藥、`grep`/`find` 是禁區、`uv run` 是王道、`sed` 是地雷、`|` 是陷阱、簡體字是違規

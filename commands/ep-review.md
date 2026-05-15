@@ -16,8 +16,8 @@ allowed-tools: ["Read", "Grep", "Glob"]
 
 審查時自動載入以下 skill，提供結構化審查的方法論模式：
 
-- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
-- **`code-review-and-quality`** — 多維度審查方法論、問題分類模式
+- [rules-reminder](../skills/rules-reminder/SKILL.md) — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
+- [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) — 多維度審查方法論、問題分類模式
 
 ---
 

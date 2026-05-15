@@ -18,8 +18,8 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 
 生成計畫書時自動載入以下 skill，提供 HOW 的方法論：
 
-- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
-- **`planning-and-task-breakdown`** — 依賴圖分析、垂直切片、task sizing、checkpoint 機制、反合理化
+- [rules-reminder](../skills/rules-reminder/SKILL.md) — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
+- [planning-and-task-breakdown](../skills/planning-and-task-breakdown/SKILL.md) — 依賴圖分析、垂直切片、task sizing、checkpoint 機制、反合理化
 
 ---
 
@@ -47,7 +47,7 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 - **基礎設施盤點**: 設計 pseudo code 前的必做步驟，優先複用現有元件
   1. 讀取目標目錄及上層的 CLAUDE.md，留意「可複用基礎設施」和導航指引
   2. `rg "關鍵詞" --type py -l` 搜尋相關元件
-  3. 列出可複用元件（格式：`path/to/file.py` — 用途簡述），或寫「無」
+  3. 列出可複用元件（格式：`path/to/file.py:ClassName` — 用途簡述），或寫「無」
   4. 若 `/spec` 規格摘要已有「現有基礎設施」欄位，直接繼承並補充
 - **依賴錨點**: EP 對現有程式碼的引用錨定（防止 EP drift）
   無則寫「無」。有則列出每個引用的 `file:line` + 當前值，格式：
@@ -123,7 +123,7 @@ class ComponentFactory:
 
 ### 段落劃分原則
 
-依賴圖分析、垂直切片策略、task sizing 指導原則遵循 `planning-and-task-breakdown` skill。
+依賴圖分析、垂直切片策略、task sizing 指導原則遵循 [planning-and-task-breakdown](../skills/planning-and-task-breakdown/SKILL.md) skill。
 
 段落劃分的 EP 專屬約束：
 - **功能完整性**: 每個段落構成一個完整的功能

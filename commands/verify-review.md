@@ -12,7 +12,7 @@ allowed-tools: ["Read", "Grep", "Glob"]
 
 ## 📚 委託 Skills
 
-- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
+- [rules-reminder](../skills/rules-reminder/SKILL.md) — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
 
 ## 🎯 核心目標
 

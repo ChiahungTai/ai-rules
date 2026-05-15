@@ -177,7 +177,7 @@ def process(data: dict[str, int | float]) -> list[str]:
 
 ### 優先級 6：第三方套件 Type Gap
 
-當第三方套件的 type annotations 不完整時，遵循 `python-type-gap` skill 的四層處理策略（Type Narrowing → Project Stubs → `# type: ignore[code]` → pyproject.toml Override）。
+當第三方套件的 type annotations 不完整時，遵循 [python-type-gap](../skills/python-type-gap/SKILL.md) skill 的四層處理策略（Type Narrowing → Project Stubs → `# type: ignore[code]` → pyproject.toml Override）。
 
 ## 📋 輸出格式
 
@@ -220,7 +220,7 @@ def process(data: dict[str, int | float]) -> list[str]:
 ### 處理 `# type: ignore` 時
 - `warn_unused_ignores = true` 會標記不必要的
 - 每個被標記的都應該檢查是否真的需要
-- **遵循 `python-type-gap` skill 的四層策略**，`# type: ignore` 是最後手段
+- **遵循 [python-type-gap](../skills/python-type-gap/SKILL.md) skill 的四層策略**，`# type: ignore` 是最後手段
 - 必須指定 error code（如 `[no-untyped-call]`、`[operator]`），不用裸 `# type: ignore`
 - 只用於第三方套件的 gap，不用於我們自己程式碼的型別問題
 
@@ -232,7 +232,7 @@ def process(data: dict[str, int | float]) -> list[str]:
 - [ ] 檢查了濫用的 TYPE_CHECKING
 - [ ] 識別了舊式 typing 慣例
 - [ ] 檢查了裸型別缺參數（`type-arg`：裸 `list`/`dict`）
-- [ ] 第三方 type gap 遵循 `python-type-gap` skill 四層策略
+- [ ] 第三方 type gap 遵循 [python-type-gap](../skills/python-type-gap/SKILL.md) skill 四層策略
 - [ ] 每個 `# type: ignore` 都有指定 error code
 - [ ] 檢查了 pyproject.toml overrides 是否仍必要
 - [ ] 提供了具體的修正建議

@@ -189,7 +189,7 @@ skill: "mermaid"
 ## 智能並行處理
 
 檔案數量 >= 5 時，自動啟動 Skill-First 並行處理架構：
-1. 使用 `parallel-processing` skill 分析並行可行性
+1. 使用 [parallel-processing](../skills/parallel-processing/SKILL.md) skill 分析並行可行性
 2. Skill 返回建議：是否並行、最優 Task 數量、分組策略
 3. 按建議執行，整合結果生成統一報告
 
@@ -199,7 +199,7 @@ skill: "mermaid"
 
 ## 📚 委託 Skills
 
-- **`rules-reminder`** — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
+- [rules-reminder](../skills/rules-reminder/SKILL.md) — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
 
 ---
 
