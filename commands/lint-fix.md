@@ -147,6 +147,13 @@ def get_indicators(self) -> list[IndicatorDef]: ...
 def build_config(self) -> dict[str, Any]: ...
 ```
 
+#### ignore_errors 模組仍應修 type-arg
+
+即使 `pyproject.toml` 有 `ignore_errors = true`（Layer 4），修 type-arg 和 no-untyped-def 仍然有價值：
+1. 未來可能移除 ignore_errors（當套件改善型別支援時）
+2. IDE（PyCharm、VS Code）使用 pyright/pylance，不讀 mypy overrides
+3. 正確的型別標註幫助人類理解程式碼
+
 ### 優先級 5：濫用 Any
 
 #### ❌ 錯誤做法：動不動就用 Any

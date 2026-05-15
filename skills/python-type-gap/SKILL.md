@@ -50,9 +50,18 @@ stubs/
 - **有 `py.typed` + `__getattr__ → Any`，但特定子模組缺 stubs** → partial stubs 只補缺口子模組，`__init__.pyi` 用 `__getattr__ → Any` 透傳（如 pyarrow）
 - **有 `py.typed` 且大部分可用，缺口的子模組也能用 `# type: ignore` 解決** → 看缺口數量決定，3+ 處用 stubs，1-2 處用 `# type: ignore[code]`
 
+### 何時不該寫 Partial Stubs（直接走 Layer 4）
+
+以下情境寫 stubs 的成本遠高於收益，`ignore_errors = true` 是務實選擇：
+
+- 套件使用深度繼承鏈（3+ 層，如 Markdown → HTML → Panel）
+- 缺口分散在數十個不同 class 的 `__init__` 參數
+- stubs 需覆蓋的 class 數量 > 20
+- 每個 class 只需修 1-2 個 type-arg → 成本/收益比太差
+
 ### Partial Stubs 關鍵約束
 
-- **`__init__.pyi` 必須有 `__getattr__ → Any`**：確保 top-level 屬性（如 `pa.schema`、`pa.Table`）透傳到已安裝套件的型別
+- **`__init__.pyi` 必須有 `__getattr__ → Any`**：確保 top-level 屬性（如 `pa.schema`、`pa.Table`）透傳到已安裝套件的型別。如果沒有它，mypy 會用 stubs 的 `__init__.pyi` 完全取代 site-packages 的型別資訊，導致已正確標註的型別全部變成 Any
 - **只補缺口的子模組**：不需要為整個套件寫完整 stubs
 - **只 stub 用到的函式**：先 `rg 'pc\.\w+' mosaic_alpha/ -t py --no-filename -o > /tmp/usage.txt`，再用 `sort -u /tmp/usage.txt` 找出實際用量
 
