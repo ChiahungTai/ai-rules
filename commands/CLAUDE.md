@@ -69,7 +69,8 @@ ls -la /Users/ctai/Github/ai-rules/commands/
 - `/claude:daily-maintain` - 每日自動化 CLAUDE.md 維護（增量偵測、重建理解文檔、更新 CLAUDE.md、morning report）
 - `/claude:distill` - 蒸餾 CLAUDE.md，提煉核心精華
 - `/claude:sync` - 檢查 CLAUDE.md 與程式碼的同步性
-- `/commit-message` - Git 提交訊息生成
+- `/commit` - Commit 入口（lint 閘門 + message 生成 + 用戶確認）
+- `/commit-message` - 僅生成 commit message（輕量替代）
 - `/design-plan` - 設計計劃制定
 - `/design2prompt` - 設計轉提示詞轉換
 - `/distill-spec` - 規格蒸餾和提煉
@@ -134,7 +135,8 @@ AI 調用 SlashCommand("/command args")
 - `/swing-analysis` - Swing Analysis 協作模式（啟動 Trajectory Viewer + 監控操作日誌）
 
 ### Git 工作流程命令
-- `/commit-message` - Git 提交訊息生成
+- `/commit` - Commit 入口（lint 閘門 + 繁中 message + 用戶確認後提交）
+- `/commit-message` - 僅生成 commit message 建議（不執行 commit）
 - `/worktree:create` - 建立新的 Git Worktree
 - `/worktree:status` - 列出所有 Git Worktrees 狀態
 - `/worktree:cleanup` - 智能清理 Git Worktrees

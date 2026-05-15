@@ -89,4 +89,4 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ### 後續命令
 - `/claude:sync` — 同步 CLAUDE.md 與程式碼
 - `/consistency` — 文檔品質檢查
-- `/commit-message` — 生成提交訊息
+- `/commit` — 提交變更（lint 閘門 + message 生成 + 用戶確認）

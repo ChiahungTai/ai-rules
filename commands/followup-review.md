@@ -284,7 +284,7 @@ verify-review 決策：
 
 ### 後續命令
 - 若有未通過項目 → 實作 AI 修正後再次 `/followup-review`
-- 若全部通過 → `/commit-message` 生成提交訊息
+- 若全部通過 → `/commit` 提交變更
 
 ---
 

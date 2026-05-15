@@ -145,7 +145,7 @@ uv run python scripts/verify_import.py
 
 ### 後續命令（用戶回來後）
 - `/code-review` - 審查深度工作的成果
-- `/commit-message` - 生成提交訊息
+- `/commit` - 提交變更（lint 閘門 + message 生成 + 用戶確認）
 - `/claude:sync` - 同步 CLAUDE.md
 
 ---

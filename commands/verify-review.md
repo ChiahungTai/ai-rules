@@ -273,7 +273,7 @@ AI2 建議: [建議 B]（與 A 矛盾）
 
 ### 後續命令
 - `/claude:sync` - 修改完成後同步 CLAUDE.md
-- `/commit-message` - 生成 Git 提交訊息
+- `/commit` - 提交變更（lint 閘門 + message 生成 + 用戶確認）
 
 ---
 
