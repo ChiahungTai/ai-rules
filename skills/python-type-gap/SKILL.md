@@ -103,9 +103,23 @@ stubs/
 
 判斷標準：
 - **無 `py.typed`** → stubs 有效（如 shioaji）
-- **有 `py.typed` 但缺口多** → partial stubs 有效（如 nautilus_trader）
+- **有 `py.typed` 但缺口多** → partial stubs 有效（如 nautilus_trader）。**前提**：必須提供完整的中間 `__init__.pyi`（含 `__getattr__ → Any`），空的 `__init__.pyi` 會完全取代真實模組，殺死所有 re-export
+- **有 `py.typed` + 特定泛型 class 造成 `type-arg` 錯誤** → partial stubs 將泛型 class 定義為 non-generic（如 Bokeh GlyphRenderer）
 - **有 `py.typed` + `__getattr__ → Any`，但特定子模組缺 stubs** → partial stubs 只補缺口子模組，`__init__.pyi` 用 `__getattr__ → Any` 透傳（如 pyarrow）
 - **有 `py.typed` 且大部分可用，缺口的子模組也能用 `# type: ignore` 解決** → 看缺口數量決定，3+ 處用 stubs，1-2 處用 `# type: ignore[code]`
+
+### `mypy_path` 覆蓋機制
+
+`pyproject.toml` 中的 `mypy_path = "stubs"` 會讓 stubs 目錄中的檔案**完全取代**對應的真實套件型別資訊，即使套件有 `py.typed`。
+
+這意味著：
+- 空 `__init__.pyi` 會殺死真實模組的所有 re-export（所有符號變成不可見）
+- 必須用 `__getattr__(name: str) -> Any` 透傳未覆蓋的符號
+- 必須明確 re-export 需要覆蓋的符號（如 `from bokeh.models.renderers import GlyphRenderer as GlyphRenderer`）
+
+### `*` import 陷阱
+
+`from X import *` 不保證 re-export 所有符號。Bokeh 的 `__init__.py` 用 `from .glyph_renderer import *` 但 `*` 只導出 `__all__` 列出的符號。在 stubs 中需要明確 `as` import 確保 re-export。
 
 ### 何時不該寫 Partial Stubs（直接走 Layer 4）
 
@@ -212,7 +226,7 @@ ignore_errors = true
 | `no-any-return` | `float()` / `int()` 包裹返回值；複雜型別用 local `# type: ignore[no-any-return]` | `return float(self.config.initial_capital + self.realized_pnl)` |
 | `valid-type` | 修正錯誤的型別名稱（`any` → `Any`）或移除 module as type | `-> dict[str, Any]` |
 | `call-arg` | 第三方 API kwargs 缺口用 local `# type: ignore[call-arg]` | `figure(x_axis_type="datetime")  # type: ignore[call-arg]` |
-| `type-arg` | 為 bare generic 加型別參數 | `dict` → `dict[str, Any]`、`list` → `list[str]` |
+| `type-arg` | 為 bare generic 加型別參數；Bokeh GlyphRenderer 等深層泛型用 partial stubs 定義為 non-generic | `dict` → `dict[str, Any]`、GlyphRenderer stub: non-generic class |
 | `return-value` | `float()` 包裹 `Any` 返回值給 `.sort(key=...)` | `.sort(key=lambda x: float(x["avg_ret"]))` |
 
 ### 不可修復的 Error Codes（第三方缺口，需全局壓制）
@@ -224,7 +238,7 @@ ignore_errors = true
 | `union-attr` | Polars 寬聯合型別 stubs | `.mean()` 回傳 `int \| float \| date \| ... \| None` |
 | `arg-type` | Polars `Any` / NautilusCatalog union / Bokeh kwargs | `get_bars()` 回傳 `pd.DataFrame \| pl.DataFrame`；Bokeh `figure()` kwargs 不匹配 |
 | `attr-defined` | NT / Bokeh / Panel 動態屬性 | `config.initial_capital` 等 runtime 動態生成的屬性 |
-| `type-arg` | Bokeh GlyphRenderer 等深層泛型 | 套件泛型參數過於複雜，標註成本遠高於收益 |
+| `type-arg` | 其他第三方泛型（非 GlyphRenderer） | 套件泛型參數過於複雜，標註成本遠高於收益 |
 | `assignment` | Bokeh Property 型別系統 | Panel 的 Parameter 和 Bokeh 的 Property 型別系統與靜態分析不兼容 |
 | `misc` | Panel Parameterized 子類 | Panel 的 `Parameterized` 基類回傳 `Any`，子類化時 mypy 無法推斷 |
 
@@ -257,6 +271,38 @@ buf: deque[Any] = deque()  # ✅
 ```
 
 需要時加 `from typing import Any`。
+
+#### `type-arg` — Bokeh GlyphRenderer deep generic via partial stubs
+
+當第三方套件的 class 是 `Generic[T]` 但消費端不關心具體型別參數時，可用 partial stubs 將其定義為 non-generic。
+
+**`stubs/bokeh/models/renderers.pyi`**:
+```python
+from typing import Any
+
+class GlyphRenderer:
+    """Non-generic stub for Bokeh's GlyphRenderer[GlyphType]."""
+    data_source: Any
+    glyph: Any
+    visible: bool
+    name: str | None
+    level: str
+    view: Any
+    def __init__(self, **kwargs: Any) -> None: ...
+```
+
+**`stubs/bokeh/models/__init__.pyi`**:
+```python
+from typing import Any
+from bokeh.models.renderers import GlyphRenderer as GlyphRenderer
+def __getattr__(name: str) -> Any: ...
+```
+
+**`stubs/bokeh/__init__.pyi`**:
+```python
+from typing import Any
+def __getattr__(name: str) -> Any: ...
+```
 
 #### `assignment` — 型別加寬與 narrowing
 
