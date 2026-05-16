@@ -1,6 +1,6 @@
 ---
 name: python-type-gap
-description: Handles third-party package type annotation gaps using a four-layer strategy: isinstance narrowing, project stubs, precise type ignore, pyproject.toml override. Use when mypy reports errors from third-party code, when writing stubs, when reviewing # type: ignore usage, or when cleaning up pyproject.toml mypy overrides.
+description: Handles third-party package type annotation gaps using a four-layer strategy: isinstance narrowing (union + inheritance chain), project stubs, precise type ignore, pyproject.toml override. Use when mypy reports errors from third-party code, when writing stubs, when reviewing # type: ignore usage, when cleaning up pyproject.toml mypy overrides, or when troubleshooting why overload doesn't fix argument type errors.
 ---
 
 # Python Type Gap — 第三方套件型別缺口的四層處理策略
@@ -28,6 +28,63 @@ df_pd = df.to_pandas()  # mypy 知道 df 是 pl.DataFrame
 ```
 
 原理：mypy 在 union type 上找不到一致的方法簽名時會報錯。`isinstance` 讓 mypy 收窄為單一型別，方法解析不再衝突。附帶好處：runtime 真的會驗證型別。
+
+### 繼承鏈窄化（Inheritance Chain Narrowing）
+
+適用：變數靜態型別是基底類別，但實際持有子類別（有額外欄位/方法）。
+
+```python
+ # 問題：Recipe.labeling_params 是 LabelingParams | None，基底沒有 interval
+ # DualMAParams 子類才有 interval: Interval
+ ohlcv_df = catalog.get_bars(
+     instruments[0],
+     interval=recipe.labeling_params.interval,  # type: ignore[arg-type] — 不得已
+ )
+
+ # ✅ 正確：assert isinstance 讓 mypy 知道是子類型別
+ params = recipe.labeling_params
+ assert isinstance(params, DualMAParams)
+ ohlcv_df = catalog.get_bars(
+     instruments[0],
+     interval=params.interval,  # mypy 推斷為 Interval，無需 suppress
+ )
+```
+
+原理：`isinstance` / `assert isinstance` 觸發 mypy 的型別窄化（type narrowing），將靜態型別從 `LabelingParams | None` 收窄為 `DualMAParams`。mypy 就能正確解析 `params.interval: Interval`。**不需要 `Interval()` 包裹，不需要 `# type: ignore`**。
+
+### `@overload` vs `isinstance` — 解決不同的問題
+
+兩者解決不同層面的型別推斷問題，互不替代：
+
+| 技術 | 解決什麼 | 範例 |
+|------|---------|------|
+| `@overload` | 回傳值型別推斷 | `format="polars"` → 回傳 `pl.DataFrame` |
+| `isinstance` | 引數型別窄化 | `params.interval` 從 `Any` → `Interval` |
+
+```python
+ # @overload 解決回傳值（IDE 知道 ohlcv_df 是 pl.DataFrame）
+ def get_bars(self, code: str, interval: Interval, *, format: Literal["polars"] = "polars") -> pl.DataFrame: ...
+
+ # isinstance 解決引數（mypy 知道 params.interval 是 Interval，不是 Any）
+ params = recipe.labeling_params
+ assert isinstance(params, DualMAParams)
+ catalog.get_bars(code, interval=params.interval)  # OK
+```
+
+關鍵認知：加了 overload 後 `arg-type` 仍然可能報錯，因為 overload 只影響回傳值推斷。引數型別仍需 caller 端的型別窄化。
+
+### PoC 驗證方法論
+
+遇到「不確定 mypy 是否能推斷」的情況，寫最小 PoC 驗證：
+
+```bash
+ 1. 建立最小重現（/tmp/poc_typing.py），只包含相關型別定義和呼叫
+ 2. 用 uv run mypy /tmp/poc_typing.py --strict 驗證
+ 3. 逐一嘗試各方案（isinstance / cast / type: ignore），確認哪個零錯誤
+ 4. 選擇最乾淨的方案套用到實際程式碼
+```
+
+判斷標準：isinstance > assert isinstance > cast > type: ignore（優先順序由高到低）。
 
 ## Layer 2：Project Stubs（推薦）
 
@@ -162,12 +219,14 @@ ignore_errors = true
 
 | Error Code | 來源 | 說明 |
 |-----------|------|------|
-| `no-untyped-def` | Demo 函式缺參數標註 | 範例程式不要求完整標註 |
-| `no-untyped-call` | Shioaji / Panel 未標註函式 | 呼叫未標註的第三方 API |
+| `no-untyped-call` | Shioaji / Panel / Bokeh 未標註函式 | 呼叫未標註的第三方 API |
 | `operator` | Polars `Any` 算術 | `Any + float` 無法靜態解析 |
 | `union-attr` | Polars 寬聯合型別 stubs | `.mean()` 回傳 `int \| float \| date \| ... \| None` |
-| `arg-type` | Polars `Any` / NautilusCatalog union | `get_bars()` 回傳 `pd.DataFrame \| pl.DataFrame` |
-| `attr-defined` | NT / Bokeh 動態屬性 | `config.initial_capital` 等 runtime 動態生成的屬性 |
+| `arg-type` | Polars `Any` / NautilusCatalog union / Bokeh kwargs | `get_bars()` 回傳 `pd.DataFrame \| pl.DataFrame`；Bokeh `figure()` kwargs 不匹配 |
+| `attr-defined` | NT / Bokeh / Panel 動態屬性 | `config.initial_capital` 等 runtime 動態生成的屬性 |
+| `type-arg` | Bokeh GlyphRenderer 等深層泛型 | 套件泛型參數過於複雜，標註成本遠高於收益 |
+| `assignment` | Bokeh Property 型別系統 | Panel 的 Parameter 和 Bokeh 的 Property 型別系統與靜態分析不兼容 |
+| `misc` | Panel Parameterized 子類 | Panel 的 `Parameterized` 基類回傳 `Any`，子類化時 mypy 無法推斷 |
 
 ### 修復模式速查
 
