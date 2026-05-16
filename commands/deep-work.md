@@ -170,6 +170,11 @@ uv run python scripts/verify_import.py
 
 ## 執行約束
 
+### Agent Spawn 規則
+
+當使用 Agent tool 時，每個 Agent prompt 開頭必須加上 `/rules-reminder` 的六條規則摘要：
+`#` 是毒藥、`rg/fd` 取代 `grep/find`、`uv run` 是王道、`sed` 是地雷、管道拆兩步、繁體中文
+
 ### 強制執行
 1. **必須深度思考**：動手前先充分理解
 2. **必須寫測試**：核心邏輯必須有單元測試

@@ -202,6 +202,9 @@ Phase 3: UPDATE ── CLAUDE.md 更新 + Morning Report
     將 in-scope 模組平分給 --max-agents 個 agent（預設 4）。
     Compare（Phase 1）每模組 3-5 min，可並行。
     Decode（Phase 2）每模組 10-20 min，分配到不同 agent。
+
+    ⚠️ 所有 Agent prompt 開頭必須加上 /rules-reminder 的六條規則摘要：
+    `#` 是毒藥、`rg/fd` 取代 `grep/find`、`uv run` 是王道、`sed` 是地雷、管道拆兩步、繁體中文
 ```
 
 ---

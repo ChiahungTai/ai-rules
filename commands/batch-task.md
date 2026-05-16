@@ -34,6 +34,7 @@ when_to_use: "Process multiple subtasks sequentially (one agent at a time) to av
 ### 第二步：逐一序列執行
 
 **嚴格遵守以下規則**：
+- 每個 Agent prompt 開頭必須加上 `/rules-reminder` 的六條規則摘要（`#` 是毒藥、`rg/fd` 取代 `grep/find`、`uv run` 是王道、`sed` 是地雷、管道拆兩步、繁體中文）
 - 每則訊息**最多一個** Agent 呼叫
 - 等待 Agent 回傳結果後，再啟動下一個
 - 不得使用 `run_in_background: true`
