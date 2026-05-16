@@ -7,7 +7,7 @@
 ```markdown
 # Morning Report — {YYYY-MM-DD}
 
-**執行模式**: Default / Full Rebuild
+**執行模式**: Default / Full Audit
 **執行時間**: {start} → {end}（耗時 {duration}）
 **處理模組**: N 個（{模組列表}）
 
@@ -40,6 +40,30 @@
 
 {每個模組的精度總覽表}
 
+## CLAUDE.md Gap Report（--full 專用）
+
+### CLAUDE.md 覆蓋度評分
+
+| 模組 | A 架構 | B 演算法 | C 資料結構 | D 基礎設施 | 整體 |
+|------|--------|---------|-----------|-----------|------|
+| rule_forge | 92% | 85% | 90% | 70% | 84% |
+
+### 知識缺口（{N} 項）
+
+| 模組 | 缺口類型 | 遺漏內容 | 來源 | 建議動作 |
+|------|---------|---------|------|---------|
+| rule_forge | 設計理由 | FilterTree 為何用 greedy | engine.py:45 | 新增段落 |
+
+### 基礎設施缺口（{N} 項）
+
+| 遺漏項 | 被使用次數 | 使用模組 | 建議動作 |
+|--------|----------|---------|---------|
+| ConditionParser | 3 | conditions, adapters, datasets | 加入「可複用基礎設施」 |
+
+### 跨模組重複造輪子風險
+
+{哪些被複用的 class 沒記錄在基礎設施中，EP/build agent 可能重造輪子的項目}
+
 ## Decoder Test 結果
 
 | 模組 | 職責 | 設計決策 | 約束 | 邊界 | 通過 |
@@ -60,7 +84,7 @@
 - **CLAUDE.md 定向修正**：導航缺口、過時描述 → 直接 Edit，不需要任何模式
 - **source-docs 定向修正**：引用斷裂、已刪除檔案 → 直接 Edit source-docs，不需要重建
 - **自動重建**：過時模組需要完整重建 source-docs（doc-decode）
-- **--full**：大重構後全部打掉重練
+- **--full**：CLAUDE.md 完整性審計（含基礎設施覆蓋檢查）
 
 ## 下次建議
 
@@ -68,4 +92,17 @@
 - ⚠️ 不要對所有問題一律建議 --full：
   - 大部分 source-docs 問題 → 定向 Edit 即可
   - 只有 source-docs 大面積過時（.py 大量變更後）才需要 --full
+
+## 耗時記錄
+
+| Phase | 耗時 | 備註 |
+|-------|------|------|
+| Phase 0 SCAN | Xs | |
+| Phase 0.5 Quick Scan | Xs | |
+| Phase 0.6 CLAUDE.md Sync | Xs | |
+| Phase 1 Fix & Rebuild | Xs | 每模組明細 |
+| Phase 2 Verify | Xs | 每模組明細 |
+| Phase 2.5 Gap Report | Xs | --full 專用 |
+| Phase 3 Update + Report | Xs | |
+| **總計** | **Xs** | |
 ```

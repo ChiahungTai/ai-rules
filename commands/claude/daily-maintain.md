@@ -2,26 +2,26 @@
 description: "每日自動化 CLAUDE.md 維護 — 掃描、修正、重建、驗證、產出 morning report"
 when_to_use: "Automated daily CLAUDE.md maintenance: scan modules, fix stale docs, rebuild source-docs, verify accuracy, produce morning report. Runs autonomously."
 usage: "/claude:daily-maintain [--full] [--max-agents N] [--dry-run] [--modules a,b,c]"
-argument-hint: "/claude:daily-maintain — 自動掃描修正全部模組，--full 強制全部重建 source-docs"
+argument-hint: "/claude:daily-maintain — 自動掃描修正全部模組，--full 執行 CLAUDE.md 完整性審計（含 Layer D 基礎設施覆蓋）"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash", "Agent"]
 ---
 
 # /claude:daily-maintain — 每日自動化 CLAUDE.md 維護
 
-你是 CLAUDE.md 知識管理自動化引擎。核心目標：**讓 CLAUDE.md 保持準確**。透過 source-docs 中間層驗證文檔品質，自動修正過時描述，產出 morning report 供用戶 review。
+你是 CLAUDE.md 知識管理自動化引擎。核心目標：**讓 CLAUDE.md 保持準確且完整**。透過 source-docs 中間層驗證文檔品質，自動修正過時描述，識別知識缺口（特別是可複用基礎設施的遺漏），產出 morning report 供用戶 review。
 
 Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 遞迴發現邏輯: [recursive-discovery.md](./_common/recursive-discovery.md)
 遞迴處理約束: [recursive-constraints.md](./_common/recursive-constraints.md)
 
-Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-execution/SKILL.md) — 讀取此檔案以理解夜間自主執行的決策框架。
+Autonomous execution: [autonomous-execution SKILL.md](../../skills/autonomous-execution/SKILL.md) — 夜間排程的決策框架：不問問題、所有判斷記錄在 morning report、Don't-Self-Decide Boundaries。
 
 ---
 
 ## 核心目標
 
-**讓 CLAUDE.md 活著**：不是寫完就過時的靜態文檔，而是隨程式碼演化的活知識庫。
+**CLAUDE.md 持續演化**：不是寫完就過時的靜態文檔，而是隨程式碼演化的活知識庫。
 
 **三層資料流**：
 
@@ -35,12 +35,14 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
 
 > **關鍵認知**：LLM 使用 CLAUDE.md 協助開發和分析，不會直接讀 source-docs。source-docs 是驗證中間層，存在目的是協助判斷 CLAUDE.md 品質。因此 doc-decode 必須從 CLAUDE.md 出發（知道什麼重要），再用 .py 驗證（確認是否準確），才能產出有意義的 source-docs。
 
+這個三層架構的**真正目的**不是產出 source-docs，而是**反向驗證 CLAUDE.md 的完整性**。decode 把 CLAUDE.md 解壓回詳細理解，compare 找出 .py 中存在但 CLAUDE.md 沒 encode 的知識缺口。source-docs 是中間產物，CLAUDE.md Gap Report 才是目標。
+
 **操作模式**：
 
 | 模式 | 觸發條件 | 行為 |
 |------|---------|------|
 | **Default** | 預設（無參數） | 掃描全部模組 → 定向修正（source-docs + CLAUDE.md）→ 重建過時模組 → morning report |
-| **Full Rebuild** | `--full` | 全部模組強制重建 source-docs + Full Compare + update |
+| **Full Audit** | `--full` | CLAUDE.md 完整性審計：全部模組強制重建 source-docs + Full Compare（含 Layer D 基礎設施覆蓋）+ CLAUDE.md Gap Report |
 
 **Use Case 對照表**：
 
@@ -50,7 +52,7 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
 | UC2 | 每日跑，有 .py 變更 | source-docs 過時 | 自動重建受影響 source-docs → verify → CLAUDE.md |
 | UC3 | source-docs 剛建好 | source-docs 新鮮 | 定向修正（不重建）→ verify → CLAUDE.md |
 | UC4 | 沒有任何變更 | 全部新鮮 + 無新 commits | 全部跳過，只更新 .last-run |
-| UC5 | 大重構後 | `--full` | 全部模組重建 source-docs |
+| UC5 | 大重構後 / 需審計 CLAUDE.md 完整性 | `--full` | CLAUDE.md 完整性審計（含基礎設施覆蓋檢查） |
 | UC6 | .py 被刪除 | git diff 偵測 | 清理 source-docs 引用 → verify → CLAUDE.md |
 | UC7 | 手動改了 CLAUDE.md | 有 CLAUDE.md diff（不論 .py 是否變更） | 語義映射 → 定向修正或 subsystem rebuild（見 §0.3.6） |
 
@@ -195,7 +197,7 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
 
 0.4 決策樹
 
-    if --full → 全部模組標記 "needs full decode"（不管新鮮度，全部重建 source-docs）
+    if --full → 全部模組標記 "needs full decode" + "needs infrastructure audit"（不管新鮮度，執行 CLAUDE.md 完整性審計）
 
     else:（預設 — 全自動）
       對每個模組，根據新鮮度自動選擇處理方式：
@@ -315,13 +317,26 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
            - 關鍵設計決策（為什麼這樣做）
            - 不可妥協的約束
            - CLAUDE.md 標注為重要的 class/function（導航目標）
-        4. 建立記錄優先級清單：
+        4. 提取「可複用基礎設施」清單：
+           - CLAUDE.md 的「可複用基礎設施」段落列出的 class/function
+           - 跨模組標記（**X 也繼承**、**跨模組 Protocol**）
+           - 建立預期清單：這些 class 在 source-docs 中應有完整支撐
+        5. 建立記錄優先級清單：
            - CLAUDE.md 提到的設計決策 → source-docs 必須有完整支撐
            - CLAUDE.md 的導航指引 → source-docs 必須覆蓋對應 .py
+           - CLAUDE.md 的可複用基礎設施 → source-docs 必須覆蓋
            - CLAUDE.md 未提及的 → source-docs 可選記錄
 
     S2: SCAN .py
         讀取變更的 .py 檔案，比對 CLAUDE.md 的理解框架。
+
+        S2a（--full 專用）：跨模組 import 分析
+            搜尋其他模組中 import 本模組的 class/function：
+            rg "from {module}(\.\w+)? import" mosaic_alpha/ -t py --no-filename -o
+
+            建立「實際被複用」清單：
+            - 出現在 2+ 個模組的 import → 確認為可複用基礎設施
+            - 與 S1 提取的 CLAUDE.md 清單比對 → 找出遺漏
 
     S3: RECONSTRUCT source-docs
         基於 CLAUDE.md 的理解框架 + .py 的程式碼真相，更新 source-docs。
@@ -331,11 +346,14 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
     │ 1. 【強制】先讀取 {module}/CLAUDE.md 建立理解框架          │
     │    - 模組定位、設計決策、約束、導航目標                     │
     │    - 追蹤 @ 引用和 markdown link                           │
+    │    - 提取「可複用基礎設施」清單和跨模組標記                 │
     │ 2. 讀取變更的 .py 檔案                                     │
+    │    - (--full) 執行跨模組 import 分析，找出被複用的項目      │
     │ 3. 讀取現有 source-docs                                    │
     │ 4. 以 CLAUDE.md 為優先級指引，更新 source-docs             │
     │    - CLAUDE.md 提到的設計決策 → 確認 source-docs 有支撐    │
     │    - CLAUDE.md 的導航目標 → 確認 source-docs 有覆蓋        │
+    │    - CLAUDE.md 的可複用基礎設施 → 確認 source-docs 有覆蓋  │
     │ 5. Edit 更新 source-docs（不是整檔重寫）                   │
     └────────────────────────────────────────────────────────────┘
 
@@ -408,14 +426,21 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
 
 2.2 Full Compare（已重建/已新建模組）
 
-    執行 decode-compare（預設模式）：
+    執行 decode-compare（預設模式）— 負責 A/B/C 三層：
     - 讀取 source-docs/{module}/ 的所有 .md
     - 比對對應 .py 實作
-    - 三層比對（A 架構 / B 演算法 / C 資料結構）
+    - 三層比對：
+      - A 架構：模組結構、職責劃分、依賴關係
+      - B 演算法：核心邏輯、計算流程、邊界處理
+      - C 資料結構：型別定義、資料模型、序列化
     - 標記每項為 ✅ 正確 / ⚠️ 部分差異 / ❌ 理解錯誤 / 🔍 信息缺失
+
+    Layer D 基礎設施覆蓋（--full 專用）由 Phase 2.5 基於 S2a 跨模組 import 分析結果處理，
+    不走 decode-compare（Layer D 需要跨模組上下文，decode-compair 只做單模組比對）。
 
 2.3 計算精度（僅 Full Compare）
 
+    decode-compare A/B/C 三層精度：
     精度 = (✅ + ⚠️×0.5) / (✅ + ⚠️ + ❌ + 🔍) × 100%
 
     按層級統計：
@@ -424,6 +449,8 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
     | A 架構 | | | | | X% |
     | B 演算法 | | | | | X% |
     | C 資料結構 | | | | | X% |
+
+    Layer D 精度由 Phase 2.5 單獨計算（基礎設施覆蓋率 = 已記錄 / 實際被複用 × 100%）。
 
 2.4 精度門檻判斷（僅 Full Compare）
 
@@ -459,6 +486,52 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
     輸出：ACTION items 清單（供 Phase 3 消費）
 ```
 
+### Phase 2.5: GAP REPORT — CLAUDE.md 完整性審計（--full 專用）
+
+> **--full 的核心產出**。根據 decode-compare + Layer D 結果，產出 CLAUDE.md 完整性審計報告。重點是 CLAUDE.md 遺漏了什麼，不是 source-docs 品質。
+
+```
+2.5.1 知識缺口（來自 decode-compare 的 🔍 信息缺失）
+    .py 中存在的重要知識，但 CLAUDE.md（透過 source-docs 間接驗證）沒有 encode：
+    - 缺少的設計理由
+    - 缺少的架構約束
+    - 缺少的型別關係說明
+    - 缺少的 Pipeline 編排描述
+    - 缺少的慣例映射
+
+2.5.2 基礎設施缺口（來自 Layer D）
+    被 2+ 個模組使用但 CLAUDE.md 未記錄在「可複用基礎設施」的 class/function：
+    - 遺漏項：被 import 但 CLAUDE.md 沒有記錄
+    - 過時標記：CLAUDE.md 有標記但程式碼已變更
+    - 缺少跨模組標記：有記錄但沒標注哪些模組也使用
+
+2.5.3 Gap Report 格式
+
+    內層格式範例以 indent 表示（非獨立 code block）：
+
+        ## CLAUDE.md Gap Report — {module}
+
+        ### 知識缺口（{N} 項）
+        | 缺口類型 | 遺漏內容 | 來源 | 建議動作 |
+        |---------|---------|------|---------|
+        | 設計理由 | ... | file.py:行號 | 新增段落 |
+
+        ### 基礎設施缺口（{N} 項）
+        | 遺漏項 | 被使用次數 | 使用模組 | 建議動作 |
+        |--------|----------|---------|---------|
+        | ClassName | 3 | module_a, module_b | 加入「可複用基礎設施」 |
+
+        ### 精度摘要
+        | 層級 | ✅ | ⚠️ | ❌ | 🔍 | 精度 |
+        |------|----|----|----|----|------|
+        | A 架構 | | | | | X% |
+        | B 演算法 | | | | | X% |
+        | C 資料結構 | | | | | X% |
+        | D 基礎設施 | | | | | X% |
+
+    輸出：各模組的 Gap Report（供 Phase 3 消費 + 納入 morning report）
+```
+
 ---
 
 ### Phase 3: UPDATE + REPORT — CLAUDE.md 更新 + 日報
@@ -481,6 +554,8 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
         - 更新 pipeline 編排描述
         - 移除可推導內容（API 簽名、參數表）
         - 更新模組職責描述（與實際 .py 對齊）
+        - 補充「可複用基礎設施」遺漏項（Layer D 發現的缺口，加一句話描述）
+        - 補充跨模組標記（**X 也繼承**、**跨模組 Protocol**）
 
         ⚠️ 只建議不自動修改（標記在 morning report）：
         - 新增「設計理由」段落
@@ -534,6 +609,26 @@ CLAUDE.md（壓縮知識 — 最終目標，品質是唯一指標）
 
         ⚠️ 大部分 source-docs 問題用定向 Edit 即可，不需要 --full。
         只有 .py 大量變更導致 source-docs 大面積過時時才需要 --full。
+
+    3.3.4 --full 專用：CLAUDE.md Gap Report 摘要
+        當 --full 模式執行時，morning report 必須包含：
+        1. 各模組的 Gap Report 摘要（知識缺口 + 基礎設施缺口）
+        2. 整體 CLAUDE.md 覆蓋度評分（各層級精度的加權平均）
+        3. 建議的 CLAUDE.md 更新項目（含優先級）
+        4. 跨模組重複造輪子風險：哪些被複用的 class 沒記錄在基礎設施中
+
+    3.3.5 耗時記錄
+        記錄各 Phase 的執行時間（特別是 --full 模式）：
+        - Phase 0 SCAN: Xs
+        - Phase 0.5 Quick Scan: Xs
+        - Phase 0.6 CLAUDE.md Sync: Xs
+        - Phase 1 Fix & Rebuild: Xs（每模組）
+        - Phase 2 Verify: Xs（每模組）
+        - Phase 2.5 Gap Report: Xs（--full）
+        - Phase 3 Update + Report: Xs
+        - **總計**: Xs
+
+        目的：追蹤 --full 效能，評估基礎設施覆蓋檢查是否適合加入預設模式。
 ```
 
 #### Morning Report 格式
@@ -547,7 +642,7 @@ Morning report 格式模板：[morning-report-template.md](./_common/morning-rep
 | 參數 | 說明 |
 |------|------|
 | **無參數** | 全自動：掃描 + 定向修正 + 重建過時模組 → morning report |
-| **--full** | 強制全部重建 source-docs（大重構後使用） |
+| **--full** | CLAUDE.md 完整性審計：全部重建 source-docs + 四層比對（含 Layer D 基礎設施覆蓋）+ Gap Report |
 | **--max-agents N** | 平行 agent 上限（預設 4，避免 rate limit） |
 | **--dry-run** | 只產出 Phase 0 計劃，不實際執行 |
 | **--modules a,b,c** | 只處理指定模組（除錯用） |
@@ -561,7 +656,7 @@ Morning report 格式模板：[morning-report-template.md](./_common/morning-rep
 | `/claude:decode-compare --quick` | Phase 0.5：Quick Scan source-docs 引用完整性（rg/fd） |
 | `/claude:sync --changed-since` | Phase 0.6：CLAUDE.md 語義驗證（commit 驅動） |
 | `/claude:doc-decode` | Phase 1：重建過時模組的 source-docs |
-| `/claude:decode-compare` | Phase 2：Full Compare 完整三層比對（重建後的模組） |
+| `/claude:decode-compare` | Phase 2：Full Compare 三層比對 A/B/C（重建後的模組）；Layer D 由 Phase 2.5 處理 |
 | `/claude:clean` | **不屬於 daily workflow** — 特殊處理工具 |
 | `/claude:distill` | **不屬於 daily workflow** — 特殊處理工具 |
 
@@ -617,10 +712,10 @@ Morning report 格式模板：[morning-report-template.md](./_common/morning-rep
 # 每日：全自動掃描 + 修正（預設，約 30-60 min）
 /claude:daily-maintain
 
-# 大重構後：全部重建 source-docs
+# CLAUDE.md 完整性審計（含基礎設施覆蓋檢查）
 /claude:daily-maintain --full
 
-# 只重建特定模組的 source-docs
+# 只審計特定模組
 /claude:daily-maintain --full --modules rule_forge
 
 # 只看計劃不執行
@@ -646,4 +741,4 @@ Morning report 格式模板：[morning-report-template.md](./_common/morning-rep
 
 ---
 
-> **維護哲學**: CLAUDE.md 的價值在於持續演化。daily-maintain 是一站式維護引擎：掃描全部模組 → 定向修正小問題（Edit）→ 自動重建過時模組（doc-decode）→ Full Compare 驗證品質 → morning report。一個指令搞定，不需要額外跑其他模式。大重構後才需要 `--full` 強制全部重建。
+> **維護哲學**: CLAUDE.md 的價值在於持續演化。daily-maintain 是一站式維護引擎：掃描全部模組 → 定向修正小問題（Edit）→ 自動重建過時模組（doc-decode）→ Full Compare 驗證品質 → morning report。一個指令搞定，不需要額外跑其他模式。`--full` 執行 CLAUDE.md 完整性審計（含 Layer D 基礎設施覆蓋檢查），重點是找出 CLAUDE.md 的知識缺口和可複用基礎設施的遺漏，不是重建 source-docs。
