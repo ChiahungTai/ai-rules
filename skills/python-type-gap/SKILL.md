@@ -1,6 +1,6 @@
 ---
 name: python-type-gap
-description: Handles third-party package type annotation gaps using a four-layer strategy: isinstance narrowing (union + inheritance chain), project stubs, precise type ignore, pyproject.toml override. Use when mypy reports errors from third-party code, when writing stubs, when reviewing # type: ignore usage, when cleaning up pyproject.toml mypy overrides, or when troubleshooting why overload doesn't fix argument type errors.
+description: Handles third-party package type annotation gaps using a four-layer strategy: isinstance narrowing (union + inheritance chain), project stubs, precise per-line type ignore (default for all code), pyproject.toml override (last resort — only no-untyped-call and operator for examples/scripts). Use when mypy reports errors from third-party code, when writing stubs, when reviewing # type: ignore usage, when deciding between per-line vs module-level suppress, or when troubleshooting why overload doesn't fix argument type errors.
 ---
 
 # Python Type Gap — 第三方套件型別缺口的四層處理策略
@@ -92,6 +92,8 @@ df_pd = df.to_pandas()  # mypy 知道 df 是 pl.DataFrame
 
 **前置檢查**：先用 `fd 'py.typed' .venv/.../package/` 確認套件是否已有型別支援（替換 `.../package/` 為實際套件路徑如 `.venv/lib/python3.12/site-packages/polars/`）。
 
+在你的專案根目錄建立 `stubs/` 目錄（透過 `pyproject.toml` 的 `mypy_path = "stubs"` 啟用），目錄結構按需建立。以下為範例：
+
 ```
 stubs/
 ├── nautilus_trader/    # NT 有 py.typed 但部分子模組缺口多 → stubs 補缺口
@@ -105,6 +107,8 @@ stubs/
 - **無 `py.typed`** → stubs 有效（如 shioaji）
 - **有 `py.typed` 但缺口多** → partial stubs 有效（如 nautilus_trader）。**前提**：必須提供完整的中間 `__init__.pyi`（含 `__getattr__ → Any`），空的 `__init__.pyi` 會完全取代真實模組，殺死所有 re-export
 - **有 `py.typed` + 特定泛型 class 造成 `type-arg` 錯誤** → partial stubs 將泛型 class 定義為 non-generic（如 Bokeh GlyphRenderer）
+- **msgspec Struct 基底 class**（如 NT StrategyConfig）→ stub 加 `__init_subclass__` 和 `__init__(**kwargs)`（見下方模式）
+- **有 `py.typed` 但 mypy 對 dataclass 繼承處理有 bug**（如 Bokeh `figure` 的 `InitVar` 不傳播）→ re-import 繼承：從真實 stub import class，子類化只覆寫有問題的方法（見下方模式）
 - **有 `py.typed` + `__getattr__ → Any`，但特定子模組缺 stubs** → partial stubs 只補缺口子模組，`__init__.pyi` 用 `__getattr__ → Any` 透傳（如 pyarrow）
 - **有 `py.typed` 且大部分可用，缺口的子模組也能用 `# type: ignore` 解決** → 看缺口數量決定，3+ 處用 stubs，1-2 處用 `# type: ignore[code]`
 
@@ -121,9 +125,9 @@ stubs/
 
 `from X import *` 不保證 re-export 所有符號。Bokeh 的 `__init__.py` 用 `from .glyph_renderer import *` 但 `*` 只導出 `__all__` 列出的符號。在 stubs 中需要明確 `as` import 確保 re-export。
 
-### 何時不該寫 Partial Stubs（直接走 Layer 4）
+### 何時不該寫 Partial Stubs（直接走 Layer 3 per-line）
 
-以下情境寫 stubs 的成本遠高於收益，`ignore_errors = true` 是務實選擇：
+以下情境寫 stubs 的成本遠高於收益，per-line suppress 是務實選擇：
 
 - 套件使用深度繼承鏈（3+ 層，如 Markdown → HTML → Panel）
 - 缺口分散在數十個不同 class 的 `__init__` 參數
@@ -136,9 +140,55 @@ stubs/
 - **只補缺口的子模組**：不需要為整個套件寫完整 stubs
 - **只 stub 用到的函式**：先 `rg 'pc\.\w+' mosaic_alpha/ -t py --no-filename -o > /tmp/usage.txt`，再用 `sort -u /tmp/usage.txt` 找出實際用量
 
-## Layer 3：精確的 `# type: ignore`
+### msgspec Struct 基底 class stub 模式
 
-適用：Layer 1-2 都不適用，且是單一呼叫點的第三方 gap。
+適用：`msgspec.Struct` 或類似動態 metaclass 基底 class（如 NautilusTrader 的 `StrategyConfig`），子類別用 `frozen=True` 或定義自己的屬性。mypy 看不到 metaclass 生成的 `__init_subclass__` 和 `__init__` 簽名，導致大量 `call-arg`。
+
+```python
+# stubs/nautilus_trader/trading/config.pyi
+from typing import Any
+
+class StrategyConfig:
+    # 暴露子類別常用屬性為 Any
+    instrument_id: Any
+    bar_type: Any
+    trade_size: Any
+
+    # 關鍵：讓 mypy 認識 frozen=True 是合法的 class keyword
+    def __init_subclass__(cls, *, frozen: bool = False, **kwargs: Any) -> None: ...
+    # 關鍵：讓 mypy 認識任意 kwargs 建構子（msgspec Struct 動態生成 __init__）
+    def __init__(self, **kwargs: Any) -> None: ...
+```
+
+**效果**：2 行 stub 一次消除所有 `StrategyConfig` 相關的 `call-arg`（class `frozen=True` 定義 + 建構子呼叫）。實測消除 21 處 per-line suppress。
+
+**為什麼不用 `*args`**：msgspec Struct 的 `__init__` 是 keyword-only（`def __init__(self, *, field1=..., field2=...)`），`**kwargs` 是正確近似。
+
+### Re-import 繼承 stub 模式
+
+適用：套件有完整的 `.pyi` 型別資訊（`py.typed`），但 mypy 對特定模式處理有 bug（如 `@dataclass` 繼承鏈中的 `InitVar` 不傳播）。**關鍵區別**：不能用 bare class 替換（會丟失所有方法型別），必須從真實 stub 繼承再覆寫。
+
+```python
+# stubs/bokeh/plotting/__init__.pyi
+from typing import Any
+
+from bokeh.plotting._figure import figure as _BokehFigure
+
+def __getattr__(name: str) -> Any: ...
+
+class figure(_BokehFigure):
+    def __init__(self, **kwargs: Any) -> None: ...
+```
+
+**效果**：`figure` 繼承 Bokeh 真實 stub 的完整 GlyphAPI（100+ glyph methods），只覆寫 `__init__(**kwargs)` 修好 mypy 的 `call-arg`。實測消除 6 處 per-line suppress，零新增錯誤。
+
+**何時用 msgspec Struct vs re-import 繼承**：
+- **msgspec Struct**（bare class）：套件**無**型別資訊 → stub 是唯一型別來源，定義 bare class + `__init__(**kwargs)` 即可
+- **re-import 繼承**：套件**有**完整型別資訊但 mypy 處理有 bug → 必須繼承保留型別，只覆寫有問題的方法
+
+## Layer 3：精確的 `# type: ignore`（所有程式碼的預設選擇）
+
+適用：Layer 1-2 都不適用時的預設方案。**所有程式碼（包含 adapters、examples、生產碼）的第三方 gap 都應先用 per-line suppress。**
 
 ```python
 # ✅ 精確到具體 error code + 第三方 gap
@@ -150,7 +200,44 @@ pq.write_table(  # type: ignore[no-untyped-call]
 約束：
 - 必須指定 error code（`[no-untyped-call]`、`[operator]`），不用裸 `# type: ignore`
 - 只用於第三方套件的 gap，不用於我們自己程式碼的型別問題
-- 如果同一模組出現 3+ 個 `# type: ignore`，考慮 Layer 4
+- **即使是 adapter/膠水碼，也應用 per-line 而非 module-level**（見 Facade 模式）
+
+### 為什麼 per-line 是預設選擇（即使只有 1 處）
+
+| 優勢 | 說明 |
+|------|------|
+| **最小 blast radius** | 只影響單行，不會隱藏同模組其他位置的型別問題 |
+| **`warn_unused_ignores`** | pyproject.toml 設定後，mypy 自動偵測 stale suppress（第三方修復後自動暴露） |
+| **可審計** | `rg "# type: ignore" mosaic_alpha/` 即可列出所有 suppress，每個都有明確位置 |
+| **不掩蓋新問題** | module-level disable 會靜默隱藏同模組內未來新增程式碼的同類型錯誤 |
+
+**`warn_unused_ignores` 重要限制**：只對 per-line `# type: ignore[code]` 有效，**不適用於** module-level `disable_error_code`。這是 per-line 的關鍵優勢 — 第三方修復後自動暴露 stale suppress。
+
+### Facade / Wrapper 模式
+
+當 adapter 模組大量呼叫第三方 API 時，正確做法是在 adapter 內部用 per-line suppress 隔離第三方缺口，而 adapter 的公開 API 保持正確的型別標註。消費端（使用 adapter 的程式碼）不會被 suppress 污染。
+
+```python
+# ✅ adapter 內部：per-line suppress 隔離第三方缺口
+class ShioajiDataClient:
+    def get_bars(self, code: str, interval: Interval) -> pl.DataFrame:
+        raw = self._api.bars(  # type: ignore[no-untyped-call]
+            code, interval=interval.value,
+        )
+        return self._to_polars(raw)  # 回傳值有正確型別
+
+# ✅ 消費端：完全不受 suppress 影響
+client = ShioajiDataClient(...)
+df = client.get_bars("2330", Interval.DAILY)  # mypy 知道 df 是 pl.DataFrame
+```
+
+**原則**：adapter 的公開方法是型別安全的邊界。第三方 API 的型別缺陷停留在 adapter 內部，不外溢。
+
+### Polars 特別技巧
+
+- 移除 `*args` 的 `[]`：`select([col("a")])` → `select(col("a"))`（Polars `select()` 接受 positional args，加 `[]` 會觸發 `arg-type`）
+- 顯式標註異構 dict：`result: dict[str, Any] = {...}` 避免 mypy 推導為 `dict[str, int]` 後因後續賦值衝突
+- **不要 wrapper**：Polars 的 fluent API（`df.select().filter().sort()`）不適合 facade 包裝，會破壞鏈式呼叫
 
 ### `no-any-return` 的替代技巧
 
@@ -167,21 +254,122 @@ return bars
 
 ## Layer 4：pyproject.toml Override（最後手段）
 
-適用：整個子模組的 type gap 無法用上述方法解決。
+### Module-level disable 的根本風險
+
+`disable_error_code` 是 module-level 設定，它會**遮蓋同模組內所有同類型錯誤**，包含你自己新增的程式碼。這是核心問題：
+
+```
+在 adapter 模組加了 disable_error_code = ["untyped-decorator"]
+→ 之後在同一模組新增程式碼，如果也犯了 untyped-decorator 錯
+→ mypy 不會報錯，因為 module-level 設定遮蓋了它
+→ 型別安全退化，且沒有任何機制會警告你
+```
+
+相比之下，per-line `# type: ignore[code]`：
+- 只忽略那 1 行，新增程式碼犯同類型錯 → mypy **正常報錯**
+- `warn_unused_ignores = true` 可以偵測 stale suppress → module-level 沒有這個機制
+
+**結論**：即使模組有大量第三方 API 呼叫，也應該用 per-line suppress（Layer 3）搭配 Facade 模式，而非 module-level disable。
+
+### 只有兩種 error code 可以考慮 module-level
+
+| Error Code | 允許 module-level 的理由 | 適用範圍 |
+|-----------|------------------------|---------|
+| `no-untyped-call` | `no-untyped-call` 只警告「你呼叫了無型別函式」，不檢查引數或回傳值。真正的型別錯誤會被其他 check 抓住：回傳值賦值觸發 `assignment`、引數傳遞觸發 `arg-type`、屬性存取觸發 `attr-defined`。壓制 `no-untyped-call` 不會遮蓋這些 downstream check | examples/、scripts/、ui/ |
+| `operator` | Polars 算術的本質限制（`Any + float` 無法靜態解析） | **僅限** examples/ 等非 production code |
+
+其他所有 error code（`arg-type`、`call-arg`、`untyped-decorator`、`attr-defined`、`assignment`、`misc` 等）一律用 per-line suppress，**不可** module-level。
+
+### Per-line vs Module-level 決策樹
+
+```
+是第三方套件的型別缺口嗎？
+├─ 否 → 修自己的程式碼（不是 type gap 問題）
+└─ 是
+    ├─ 能用 isinstance narrowing？ → Layer 1
+    ├─ 能用 stubs 補缺口？ → Layer 2（一次修好所有呼叫點）
+    ├─ 大部分情況 → Layer 3（per-line `# type: ignore[code]`）
+    │   └─ adapter 模組用 Facade 模式：內部 per-line，公開 API 型別安全
+    └─ 只有 no-untyped-call 或 operator？
+        ├─ 是，且在 examples/scripts/ui → Layer 4（`disable_error_code`）
+        └─ 否，或在 production code → 回到 Layer 3（per-line）
+```
+
+Layer 4 通用約束：
+- `disable_error_code` 優先於 `ignore_errors = true`（精準壓制 > 全面忽略）
+
+### 合理使用案例
 
 ```toml
-# UI framework 的 runtime metaprogramming 本質不可靜態型別化
+# ✅ Examples 目錄 — 100% demo 膠水碼，只有 no-untyped-call 和 operator
+[[tool.mypy.overrides]]
+module = ["examples.*", "mosaic_alpha.examples.*"]
+strict = true
+disable_error_code = ["no-untyped-call", "operator"]
+
+# ❌ 過度壓制 — 即使在 examples 也不應一口氣加這麼多
+[[tool.mypy.overrides]]
+module = ["examples.*"]
+strict = true
+disable_error_code = ["operator", "no-untyped-call", "union-attr", "call-arg", "misc", "attr-defined", "arg-type"]
+# union-attr, call-arg, misc, attr-defined, arg-type 應用 per-line suppress
+```
+
+### 反模式：在 adapter 用 module-level 壓制 arg-type 等錯誤
+
+```toml
+# ❌ 反模式：adapter 用 module-level 壓制 arg-type
+# 原因：遮蓋同模組內未來新增程式碼的 arg-type 錯誤
+[[tool.mypy.overrides]]
+module = "mosaic_alpha.adapters.sj.data"
+strict = true
+disable_error_code = ["arg-type", "untyped-decorator"]
+
+# ✅ 正確：adapter 內部用 per-line suppress（Layer 3）+ Facade 模式
+# adapter 的公開方法有正確型別標註，消費端不受影響
+# @raw_shioaji.on_tick_stk_v1()  # type: ignore[untyped-decorator]
+# self._api.set_order_callback(cb)  # type: ignore[arg-type]
+```
+
+### 反模式：在生產碼用 module-level disable
+
+```toml
+# ❌ 反模式：生產碼用 module-level disable
+# 原因：會靜默隱藏同模組內未來新增程式碼的型別錯誤
+[[tool.mypy.overrides]]
+module = "mosaic_alpha.common.logging"
+strict = true
+disable_error_code = ["call-arg"]
+
+# ✅ 正確：補 stubs（Layer 2）或 per-line suppress（Layer 3）
+# stubs/nautilus_trader/common/component.pyi 加上缺失的 kwarg
+# 或 init_logging(component_levels=...)  # type: ignore[call-arg]
+```
+
+### UI 模組的特殊情況
+
+UI 模組（`mosaic_alpha.ui.*`）本質上是 Bokeh/Panel 的整合膠水碼，但仍然包含業務邏輯（K 線圖渲染策略、特徵顯示邏輯）。
+
+**允許 module-level 的**：
+- **`no-untyped-call`**：Panel/Bokeh 建構子大量未標註，且 `assignment`/`arg-type` 等其他 check 間接覆蓋
+
+**必須 per-line 的**：
+- **`call-arg`、`arg-type`**：隱藏 UI 邏輯中的型別問題風險高
+- **`misc`**：Panel Parameterized 子類問題，但只應在實際觸發的行 suppress
+- **`assignment`**：Bokeh Property 型別過嚴，但需要逐一確認
+
+```toml
+# ✅ UI 模組 — 只壓制 no-untyped-call
 [[tool.mypy.overrides]]
 module = "mosaic_alpha.ui.*"
-strict = false
-allow_untyped_defs = true
-allow_untyped_calls = true
-ignore_errors = true
+strict = true
+disable_error_code = ["no-untyped-call"]
 ```
 
 約束：
+- **只壓制 `no-untyped-call`**：UI 模組不需要 `operator`（Bokeh/Panel 不涉及 Polars 算術）
 - 必須加註解說明為什麼需要（不能只寫「ignore」）
-- 定期 re-evaluate 是否仍需要
+- 定期 re-evaluate 是否仍需要（第三方修復後可能不再需要）
 - 不用於可以被 Layer 1-3 解決的問題
 
 ### 不推薦：全域寬鬆設定
@@ -217,6 +405,8 @@ ignore_errors = true
 
 當 `ignore_errors = true` 被替換為 `disable_error_code = [...]` 後，每個 error code 都應驗證是否為「不可修復的第三方缺口」。以下食譜記錄各 error code 的分類和修復方式。
 
+**重要前提**：此食譜適用於所有程式碼。生產碼中的 suppress 使用 per-line `# type: ignore[code]`（Layer 3）；只有 `no-untyped-call` 和 `operator` 可考慮 module-level（Layer 4），且僅限 examples/scripts/ui。
+
 ### 可修復的 Error Codes（不應全局壓制）
 
 | Error Code | 修復方式 | 範例 |
@@ -229,18 +419,27 @@ ignore_errors = true
 | `type-arg` | 為 bare generic 加型別參數；Bokeh GlyphRenderer 等深層泛型用 partial stubs 定義為 non-generic | `dict` → `dict[str, Any]`、GlyphRenderer stub: non-generic class |
 | `return-value` | `float()` 包裹 `Any` 返回值給 `.sort(key=...)` | `.sort(key=lambda x: float(x["avg_ret"]))` |
 
-### 不可修復的 Error Codes（第三方缺口，需全局壓制）
+### 不可修復的 Error Codes（第三方缺口）
 
-| Error Code | 來源 | 說明 |
-|-----------|------|------|
-| `no-untyped-call` | Shioaji / Panel / Bokeh 未標註函式 | 呼叫未標註的第三方 API |
-| `operator` | Polars `Any` 算術 | `Any + float` 無法靜態解析 |
-| `union-attr` | Polars 寬聯合型別 stubs | `.mean()` 回傳 `int \| float \| date \| ... \| None` |
-| `arg-type` | Polars `Any` / NautilusCatalog union / Bokeh kwargs | `get_bars()` 回傳 `pd.DataFrame \| pl.DataFrame`；Bokeh `figure()` kwargs 不匹配 |
-| `attr-defined` | NT / Bokeh / Panel 動態屬性 | `config.initial_capital` 等 runtime 動態生成的屬性 |
-| `type-arg` | 其他第三方泛型（非 GlyphRenderer） | 套件泛型參數過於複雜，標註成本遠高於收益 |
-| `assignment` | Bokeh Property 型別系統 | Panel 的 Parameter 和 Bokeh 的 Property 型別系統與靜態分析不兼容 |
-| `misc` | Panel Parameterized 子類 | Panel 的 `Parameterized` 基類回傳 `Any`，子類化時 mypy 無法推斷 |
+以下 error code 源自第三方套件的型別缺陷，無法透過修改我們的程式碼解決。但根據遮蓋風險，處理方式不同：
+
+#### 可 module-level 壓制（間接覆蓋安全）
+
+| Error Code | 來源 | 說明 | 允許 module-level 的理由 |
+|-----------|------|------|------------------------|
+| `no-untyped-call` | Shioaji / Panel / Bokeh 未標註函式 | 呼叫未標註的第三方 API | 只警告「呼叫了無型別函式」，真正的型別錯誤由 `assignment`、`arg-type`、`attr-defined` 等 downstream check 覆蓋 |
+| `operator` | Polars `Any` 算術 | `Any + float` 無法靜態解析 | **僅限** examples/ 等非 production code |
+
+#### 必須 per-line suppress（遮蓋風險高）
+
+| Error Code | 來源 | 說明 | 為什麼不能 module-level |
+|-----------|------|------|----------------------|
+| `union-attr` | Polars 寬聯合型別 stubs | `.mean()` 回傳 `int \| float \| date \| ... \| None` | 遮蓋自己新增屬性存取的型別錯誤 |
+| `arg-type` | Polars `Any` / NautilusCatalog union / Bokeh kwargs | `get_bars()` 回傳 `pd.DataFrame \| pl.DataFrame`；Bokeh `figure()` kwargs 不匹配 | 遮蓋引數型別錯誤，風險最高 |
+| `attr-defined` | NT / Bokeh / Panel 動態屬性 | `config.initial_capital` 等 runtime 動態生成的屬性 | 遮蓋拼字錯誤或不存在屬性 |
+| `type-arg` | 其他第三方泛型（非 GlyphRenderer） | 套件泛型參數過於複雜 | 遮蓋缺少型別參數的問題 |
+| `assignment` | Bokeh Property 型別系統 | Panel 的 Parameter 和 Bokeh 的 Property 型別系統與靜態分析不兼容 | 遮蓋賦值型別不匹配 |
+| `misc` | Panel Parameterized 子類 | Panel 的 `Parameterized` 基類回傳 `Any`，子類化時 mypy 無法推斷 | 遮蓋子類定義的各種型別問題 |
 
 ### 修復模式速查
 
