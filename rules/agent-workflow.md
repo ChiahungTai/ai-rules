@@ -98,6 +98,13 @@ git worktree remove <worktree-path> --force
 git branch -D <worktree-branch>
 ```
 
+### 成功 Agent 的 Worktree 處理
+
+Agent 完成後，worktree 會由系統自動處理：
+- **Agent 未修改檔案** → worktree 自動清理
+- **Agent 有修改** → worktree 保留，主 session 讀取結果後手動清理（`git worktree remove`）
+- **Agent 因路徑問題編輯了主 worktree** → worktree 為空會被自動清理，但變更已在主 worktree 中
+
 ### 何時用 `isolation: "worktree"`
 
 - **PoC 驗證**：不確定方案是否可行，用 worktree 隔離，失敗自動清理
@@ -108,6 +115,7 @@ git branch -D <worktree-branch>
 
 - **純研究**：只 Read/Grep，不修改檔案 → foreground Agent 即可
 - **單檔案修改**：在主 session 直接做更簡單
+- **Agent 需要修改主 worktree 已有檔案**：isolation 產生副本需手動合併。改動少時直接不用 isolation 更簡單
 
 ### Agent spawn 範例
 
@@ -128,6 +136,20 @@ Agent({
 
 **關鍵約束**：`model` 參數必須是查表結果。主 session 是 opus 時 Agent 降為 sonnet，主 session 是 haiku 時 Agent 用 haiku。
 
+### Prompt 路徑紀律
+
+**Agent 在 worktree 中，CWD 是 worktree 目錄。Prompt 中必須用相對路徑，不要用主 worktree 的絕對路徑。**
+
+```
+# ❌ 錯誤：給主 worktree 的絕對路徑 → Agent 會編輯主 worktree 而非 worktree
+prompt: "修改 /Users/ctai/Github/project/src/main.py"
+
+# ✅ 正確：用相對路徑 → Agent 在自己的 CWD 中操作
+prompt: "修改 src/main.py"
+```
+
+如果 prompt 中必須引用主 worktree 的檔案（只讀不寫），在 prompt 中標註絕對路徑為「只讀參考，用 Read 讀取」。
+
 ---
 
 ## PoC → Implement 流程
@@ -137,10 +159,18 @@ Agent({
    ├─ 失敗 → worktree 自動清理，回到主 session 討論
    └─ 成功 → 拿到 path + branch，讀取結果確認可行
 
-2. 確認方向後實作
+2. 審查 Agent 產出（不要假設 Agent 寫的程式碼是正確的）
+   ├─ 跑測試驗證
+   ├─ 檢查測試是否真的觸發了被測路徑（常見問題：mock/default 資料讓測試走了 happy path）
+   ├─ /code-review 審查品質
+   └─ 修正 Agent 的設計瑕疵（常見：邊界條件、錯誤處理、命名）
+
+3. 確認方向後實作
    ├─ 小範圍 → 主 session 直接做
    └─ 大範圍 → 再 spawn Agent 平行實作（或用 /batch）
 ```
+
+**Agent 產出品質預期**：核心邏輯通常正確（~80%），但細節（邊界條件、錯誤處理、命名）常需主 session 修正。任務越明確、spec 越清楚，Agent 效率越好。
 
 ---
 
@@ -169,6 +199,8 @@ spawn Agent 前確認：
 - [ ] 需要修改檔案的 Agent 是否需要 `isolation: "worktree"`
 - [ ] Agent prompt 包含足夠的 context（Agent 看不到主對話歷史）
 - [ ] Agent prompt 包含 `/rules-reminder` 指引（Agent 看不到 auto-loaded rules）
+- [ ] Agent prompt 使用相對路徑（不用主 worktree 的絕對路徑，避免編輯錯目標）
 - [ ] Uncommitted changes：Agent 是否需要看到？需要 → 先 commit
 - [ ] Branch：當前 branch 是否正確？不正確 → 先 checkout
 - [ ] 失敗 Agent 留下的 worktrees/branches 已清理（`git worktree list` 確認）
+- [ ] Agent 產出 commit 前需用戶確認（參見 commit-consent.md）

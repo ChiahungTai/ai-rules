@@ -78,3 +78,22 @@ AI: "我已分析 `src/core/engine.py:122-184`，該函式預期回傳 non-empty
 - [ ] 有簡明的問題描述
 - [ ] 有具體的範例
 - [ ] 有原理說明
+
+---
+
+## 工作目錄紀律
+
+> **核心原則**：留在當前工作目錄操作，不 cd 到其他 repo。
+
+### 強制規則
+
+- **不 cd 到其他 repo**：工作目錄是 Claude Code 啟動時的 Primary working directory，不要 cd 到其他 repo 或 worktree 去做 git 操作
+- **需要讀取其他 repo**：用 `Read` 工具或 `git -C <path>` 讀取，不需要 cd
+- **需要執行其他 repo 的命令**：用 `git -C <path>` 或完整路徑，不 cd && command
+
+### 為什麼
+
+同一個 repo 可能在不同目錄有 worktree（如 `mosaic_alpha/` 是主 repo，`mosaic_alpha_offline_backtesting/` 是同一 repo 的 worktree）。cd 到錯的目錄會造成：
+- 在錯的 worktree commit 或修改
+- git 狀態混亂（兩個目錄共享同一個 git repo，操作會互相影響）
+- Agent worktree 建立在非預期的位置
