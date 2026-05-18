@@ -70,7 +70,16 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 1. **建構段落依賴圖**：掃描每個段落的「依賴關係」和「語義約束」
 2. **識別可平行段落**：無依賴鏈 + 無語義約束關聯的段落可平行
-3. **套用 --max-agents 限制**：若用戶傳入 `--max-agents N`（N > 1），可平行段落數量上限為 N
+3. **套用 max-agents 限制**：
+   - 從系統提示詞偵測自身 GLM 模型，查下表決定 Agent 模型和並發上限：
+     | 主 session GLM 模型 | Agent 模型 | 並發上限 |
+     |--------------------|-----------|---------|
+     | `glm-4.7` (haiku) | haiku | 1 |
+     | `glm-5.1` (sonnet) | sonnet | 4 |
+     | `glm-5-turbo` (opus) | sonnet（降級） | 1 |
+   - 用戶傳入 `--max-agents N` 時，實際上限 = `min(N, 查表上限)`
+   - 未傳入時，預設上限 = 查表的並發上限
+   - spawn Agent 前印出 `[Agent] model=X, max=N, current=M` 確認
 4. **有語義約束的段落強制序列**：即使無依賴鏈，共享語義約束的段落必須序列執行
 
 輸出格式：
@@ -138,9 +147,9 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 #### 執行模式選擇
 
-**未傳入 --max-agents 或所有段落有依賴/語義約束**：序列執行（現有流程）
+**未傳入 --max-agents 或 MAX_CONCURRENT_AGENTS=0 或所有段落有依賴/語義約束**：序列執行（現有流程）
 
-**--max-agents > 1 且有可平行段落**：
+**max-agents > 1 且有可平行段落**（max-agents 由 `--max-agents` 參數與 `MAX_CONCURRENT_AGENTS` 環境變數取較小值決定）：
 
 1. **依賴圖分層**：按依賴順序分為多個 wave
 2. **同 wave 平行**：無語義約束關聯的段落 → 啟動平行 Agent（上限 max-agents）

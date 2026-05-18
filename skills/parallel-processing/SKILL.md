@@ -436,6 +436,63 @@ other → content-analyzer         # 通用分析器
 
 ---
 
+## Agent Worktree 隔離模式
+
+### Agent tool 的 `isolation: "worktree"`
+
+Agent tool 支援 `isolation: "worktree"` 參數，讓 Agent 在獨立 git worktree 中執行：
+
+- **沒改任何東西 → worktree 自動清理**
+- **有改動 → 回傳 path 和 branch**，可後續合併
+
+### 何時用 worktree 隔離
+
+| 場景 | 隔離 | 說明 |
+|------|------|------|
+| PoC 驗證 | `isolation: "worktree"` | 失敗零污染 |
+| 平行實作（修改檔案） | `isolation: "worktree"` | 避免多 Agent 衝突 |
+| 純研究（Read/Grep） | 不需要 | 不修改檔案，foreground Agent 即可 |
+
+### `/batch` 命令
+
+Claude Code 內建的 `/batch` 命令適用於大規模改動（20+ 檔案）：
+- 自動研究 codebase → 拆成 5-30 個獨立單元
+- 每個單元在獨立 worktree 中 spawn background agent
+- 自動實作 + 測試 + 開 PR
+
+---
+
+## 降級策略
+
+基於 `MAX_CONCURRENT_AGENTS` 和 `AGENT_MODEL` 環境變數（settings.json `env` 區塊，即時生效）。
+
+### Rate Limit 對照表
+
+主 session 模型對應 GLM 模型與 rate limit（2-3 terminal 共用下的安全上限）：
+
+| Claude 模型 | GLM 模型 | Rate Limit | 安全上限 |
+|------------|---------|-----------|---------|
+| haiku | glm-4.7 | 2 | **1** |
+| sonnet | glm-5.1 | 10 | **4** |
+| opus | glm-5-turbo | 1 | **1** |
+
+### 並發策略
+
+| `MAX_CONCURRENT_AGENTS` | 策略 | 適用模型 |
+|------------------------|------|---------|
+| `0` 或未設定 | 純主 session，不 spawn Agent | 任何 |
+| `1` | 序列，一次一個 Agent | opus / haiku |
+| `2` | 小規模並行 | sonnet 保守策略 |
+| `4`（預設） | 完全並行 | sonnet |
+
+### 模型降級
+
+**opus（glm-5-turbo）rate limit 只有 1，Agent 不應使用 opus。** 主 session 用 opus 時，`AGENT_MODEL` 應設為 `sonnet`。
+
+讀取方式：`echo $MAX_CONCURRENT_AGENTS` 和 `echo $AGENT_MODEL`
+
+---
+
 ## ⚠️ 重要技術限制
 
 ### ✅ Claude Code 真正並行處理
