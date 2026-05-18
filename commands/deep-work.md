@@ -42,7 +42,9 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
    - 評估每個方案的權衡
    - 選擇最佳方案並記錄理由
 
-4. **輸出思考筆記**（簡短，不囉嗦）：
+4. **Examples 盤點**：掃描專案中的 example/demo 檔案（常見模式：`demo_*.py`、`examples/**/*.py`、`scripts/demo_*.py`、`notebooks/*.ipynb`），建立 `{module} → [example paths]` 映射表。後續段落級驗證和收尾驗證都以此表為準
+
+5. **輸出思考筆記**（簡短，不囉嗦）：
    ```markdown
    ## 深度思考筆記
 
@@ -85,7 +87,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 1. **語法檢查**：確認無語法錯誤
 2. **Import 檢查**：確認所有 import 有效
 3. **單元測試**：`uv run pytest <test_file> -v`
-4. **Demo 驗證**：`uv run python <demo_file>` （若有 Demo）
+4. **Examples 驗證**：查映射表，若段落修改的模組被任何 example 引用 → `uv run python <example_path>` 執行驗證（**強制**）
 5. **標記完成**：TaskUpdate 設為 completed
 
 #### python -c 使用約束
@@ -109,10 +111,12 @@ uv run python scripts/verify_import.py
 
 **目標**：確保交付品質。
 
-1. **全量測試**：`uv run pytest` 跑所有相關測試
-2. **CLAUDE.md 同步**：檢查修改目錄及上層的 CLAUDE.md 是否需要更新
-3. **程式碼品質**：移除除錯用程式碼、確認命名規範
-4. **生成摘要報告**
+1. **全量 Lint**：`uv run ruff check --fix . && uv run ruff format .`
+2. **全量測試**：`uv run pytest` 跑所有相關測試
+3. **Examples 全量驗證**：基於映射表，執行所有 example/demo 檔案，逐一 `uv run python <path>`，輸出通過/失敗報告
+4. **CLAUDE.md 同步**：檢查修改目錄及上層的 CLAUDE.md 是否需要更新
+5. **程式碼品質**：移除除錯用程式碼、確認命名規範
+6. **生成摘要報告**
 
 ---
 
@@ -147,6 +151,14 @@ uv run python scripts/verify_import.py
 - `/code-review` - 審查深度工作的成果
 - `/commit` - 提交變更（lint 閘門 + message 生成 + 用戶確認）
 - `/claude:sync` - 同步 CLAUDE.md
+
+### 搭配工具
+
+- **`/goal`** — 設定完成條件，Claude 跨 turn 持續實作直到條件滿足。啟動 `/deep-work` 後設定：
+  ```
+  /goal all TaskCreate tasks completed, uv run pytest exits 0, uv run ruff check . is clean, uv run mypy . is clean, all demo scripts run without error
+  ```
+  搭配 auto mode 效果最佳：auto mode 免逐工具確認，`/goal` 免逐 turn 確認。
 
 ---
 
