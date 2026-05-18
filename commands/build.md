@@ -147,9 +147,13 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 #### 執行模式選擇
 
-**未傳入 --max-agents 或 MAX_CONCURRENT_AGENTS=0 或所有段落有依賴/語義約束**：序列執行（現有流程）
+**Pre-flight**：決定平行執行前，檢查：
+- 是否有 uncommitted changes 是 Agent 的 dependency？有 → 先 commit（WIP 也可）
+- 當前 branch 是否正確？不正確 → 先 checkout 到正確 branch
 
-**max-agents > 1 且有可平行段落**（max-agents 由 `--max-agents` 參數與 `MAX_CONCURRENT_AGENTS` 環境變數取較小值決定）：
+**未傳入 --max-agents 或查表上限=0 或所有段落有依賴/語義約束**：序列執行（現有流程）
+
+**max-agents > 1 且有可平行段落**（max-agents 由 `--max-agents` 參數與查表上限取較小值決定）：
 
 1. **依賴圖分層**：按依賴順序分為多個 wave
 2. **同 wave 平行**：無語義約束關聯的段落 → 啟動平行 Agent（上限 max-agents）

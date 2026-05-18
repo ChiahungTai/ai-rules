@@ -56,6 +56,48 @@
 
 ## Worktree 隔離
 
+### Pre-flight 檢查（spawn 前）
+
+**Worktree 基於 committed state 建立，看不到 uncommitted changes。**
+
+spawn Agent 前必須確認：
+
+1. **Uncommitted dependency check**：
+   - Agent 任務是否依賴目前工作區的 uncommitted changes？
+   - 是 → **先 commit**（WIP 也可），再 spawn Agent
+   - 否 → 直接 spawn
+
+2. **Branch check**：
+   - 當前 branch 是否是 Agent 任務的正確 base？
+   - 不是 → 先 commit + checkout 到正確 branch，或從正確 branch 建立 feature branch
+
+3. **多 Agent 協作**：
+   - 先把前置工作 commit 到 feature branch
+   - 再從該 branch spawn 多個 Agent（每個 Agent 都能看到前置工作的成果）
+
+```
+典型流程：
+1. 在 tagging branch 開發 S1、S2（uncommitted）
+2. git checkout -b feat/wave-scalars tagging
+3. git commit（commit S2 成果）
+4. spawn Agent A + B（從 feat/wave-scalars，都看得到 S2）
+```
+
+### 失敗 Agent Cleanup
+
+Agent 失敗後可能留下 orphaned worktrees 和 branches：
+
+```bash
+# 列出所有 worktrees
+git worktree list
+
+# 清理失敗的 worktrees
+git worktree remove <worktree-path> --force
+
+# 刪除對應 branches
+git branch -D <worktree-branch>
+```
+
 ### 何時用 `isolation: "worktree"`
 
 - **PoC 驗證**：不確定方案是否可行，用 worktree 隔離，失敗自動清理
@@ -127,3 +169,6 @@ spawn Agent 前確認：
 - [ ] 需要修改檔案的 Agent 是否需要 `isolation: "worktree"`
 - [ ] Agent prompt 包含足夠的 context（Agent 看不到主對話歷史）
 - [ ] Agent prompt 包含 `/rules-reminder` 指引（Agent 看不到 auto-loaded rules）
+- [ ] Uncommitted changes：Agent 是否需要看到？需要 → 先 commit
+- [ ] Branch：當前 branch 是否正確？不正確 → 先 checkout
+- [ ] 失敗 Agent 留下的 worktrees/branches 已清理（`git worktree list` 確認）

@@ -1,8 +1,8 @@
 ---
-description: "第一性原理代碼審查 — 未 commit 的 code，多找相關程式碼確認實作合理性"
+description: "第一性原理代碼審查 — 未 commit 的 code 或指定 branch，多找相關程式碼確認實作合理性"
 when_to_use: "Review uncommitted code changes before committing. Use after /build or after writing new code to validate correctness, architecture, and security."
-usage: "/code-review [選項]"
-argument-hint: "[可選：指定檔案或範圍]"
+usage: "/code-review [branch] [base]"
+argument-hint: "[可選：branch 名稱] [可選：base branch]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 
@@ -23,7 +23,31 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 ## 審查範圍
 
+### 預設模式（無參數）
+
 審查 staged 變更或最近的 commits。
+
+```bash
+git diff
+git diff --cached
+git status
+```
+
+### Branch 審查模式
+
+用戶傳入 branch 名稱時，審查該 branch 相對於 base 的所有變更：
+
+| 用法 | 實際執行 | 場景 |
+|------|---------|------|
+| `/code-review` | `git diff` + `git diff --cached` | 審查 uncommitted（預設） |
+| `/code-review feat/xxx` | `git diff HEAD...feat/xxx` | 審查 feature branch（base = 當前 branch） |
+| `/code-review feat/xxx main` | `git diff main...feat/xxx` | 審查 feature branch（指定 base） |
+
+**判斷邏輯**：
+1. 解析 `$ARGUMENTS`：第一個參數 = target branch，第二個參數 = base branch
+2. 只有一個參數 → base = 當前 branch（`HEAD`）
+3. 兩個參數 → base = 第二個參數
+4. 無參數 → 預設模式（uncommitted changes）
 
 ## 五軸審查 + 第一性原理
 
