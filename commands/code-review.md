@@ -12,10 +12,13 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 ## 📚 委託 Skills
 
-審查時自動載入：
+審查時載入：
 
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
 - [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) — 五軸審查方法論（correctness, readability, architecture, security, performance）
+
+按需讀取（僅在對應軸發現問題時）：
+
 - [security-and-hardening](../skills/security-and-hardening/SKILL.md) — 安全審查細節
 - [performance-optimization](../skills/performance-optimization/SKILL.md) — 效能審查細節
 
