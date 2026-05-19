@@ -116,6 +116,8 @@ class ComponentFactory:
          ↓
     Self-Contained Segment 設計
          ↓
+    Dry Run 驗證（Explore 下游消費者）
+         ↓
     段落式實作計畫書生成
          ↓
     段落式執行和驗證
@@ -157,6 +159,36 @@ class ComponentFactory:
 - [ ] 語義約束已顯式標記（共享假設不可隱含）
 - [ ] 基礎設施盤點已完成（盤點現有可複用元件，無相關則寫「無」）
 - [ ] 依賴錨點已標記（引用現有程式碼的 file:line + 當前值，無引用則寫「無」）
+
+### Dry Run 驗證
+
+EP 草稿完成後、寫入檔案前，用 Explore Agent 模擬驗證設計可行性。
+
+**目的**：如果 EP 中的 pseudo code 真的實作了，能不能如預期運作？有沒有漏想的地方？
+
+**前置盤點**（不 spawn Agent，直接 rg）：
+1. 盤點 EP 中所有「即將修改的現有函式/類別/模組」
+2. 如果 EP 提出**新增或改變參數型別**（如 `str` → `enum`），先 `rg "class.*相關名稱" --type py` 確認專案中是否已有適用的 enum/protocol/dataclass
+
+**執行方式**：
+spawn Explore Agent（background）對每個修改標的驗證以下項目：
+
+1. **Call Stack 可行性**：pseudo code 的每一步能否真的跑通？型別、參數、回傳值對得上嗎？
+2. **Pattern Alignment（最重要）**：不只看 interface 是否相容，還看 **usage pattern** 是否一致。具體來說：
+   - 搜尋每個修改標的的所有 callers
+   - 觀察 callers 的**呼叫模式**（傳入什麼資料？filter 後才呼叫？直接傳混合資料？）
+   - 如果 EP 的設計假設了某種 pattern（如「一次處理混合方向」），但所有 callers 都用另一種 pattern（如「先 filter 再分別呼叫」），EP 的設計應改為配合實際 pattern
+3. **下游依賴發現**：有沒有 EP 完全沒提到的 callers？特別注意：
+   - demo / examples 中的重複實作（常見：demo 有自己的 inline scoring 而非呼叫 library function）
+   - 跨模組呼叫 private methods（`_` 前綴）的耦合
+4. **邊界條件**：空 DataFrame、null 值、缺少欄位等情境有沒有漏考慮？
+
+發現設計缺口時，補強 EP 草稿後再輸出。
+
+```
+[Agent] model=sonnet, max=4, current=0
+Explore(Dry run: EP 段落 N 設計可行性驗證)
+```
 
 ---
 
