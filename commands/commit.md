@@ -25,11 +25,9 @@ allowed-tools: ["Bash", "Read"]
 ### 階段 1：Lint 閘門（快速 pass/fail）
 
 ```bash
-uv run ruff check $ARGUMENTS
-uv run mypy $ARGUMENTS
+uv run ruff check --fix .
+uv run mypy .
 ```
-
-無參數時檢查當前目錄全部檔案。
 
 - **通過** → 繼續階段 2
 - **不通過** → 提示用戶先跑 `/lint-fix` 修正，中止流程
@@ -174,6 +172,3 @@ gh pr create --title "..." --body "..."
 ### 前置命令
 - `/lint-fix` — lint 閘門不通過時的修正工具
 - `/code-review` — commit 前的程式碼審查
-
-### 相關命令
-- `/commit-message` — 舊版（只建議不執行），保留作為輕量替代

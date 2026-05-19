@@ -145,7 +145,6 @@ uv run python scripts/verify_import.py
 
 ### 前置命令（可搭配使用）
 - `/execution-plan` - 先生成計畫書，再用 `/deep-work` 執行
-- `/design-plan` - 先做設計，再深度實作
 
 ### 後續命令（用戶回來後）
 - `/code-review` - 審查深度工作的成果
@@ -170,9 +169,6 @@ uv run python scripts/verify_import.py
 
 # 基於 Execution Plan
 /deep-work docs/execution-plan.md
-
-# 基於 Design Plan
-/deep-work docs/design-plan.md
 
 # 簡單明確的實作任務
 /deep-work 重構 data_loader.py，將 CSV 和 Parquet 載入邏輯分離為獨立函數

@@ -116,13 +116,8 @@ when_to_use: "Process multiple subtasks sequentially (one agent at a time) to av
 - **進度回報**：每完成一個子任務，簡要回報進度
 - **錯誤處理**：子任務失敗時記錄錯誤，繼續執行下一個（除非是關鍵任務）
 
-## 與 /parallel-task 的選擇指南
+## 何時使用 /batch-task
 
-| 情境 | 使用 /batch-task | 使用 /parallel-task |
-|------|-----------------|-------------------|
-| 近期常觸發 rate limit | ✅ | |
-| 任務數量少（< 5 個子任務） | ✅ | |
-| 不急於完成，穩定優先 | ✅ | |
-| 大規模處理，需要加速 | | ✅ |
-| Rate limit 不是問題 | | ✅ |
-| 明確需要最佳效能 | | ✅ |
+- 近期常觸發 rate limit
+- 任務數量少（< 5 個子任務）
+- 不急於完成，穩定優先

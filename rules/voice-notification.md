@@ -21,10 +21,10 @@
 
 ### ✅ 適用（需要語音通知）
 
-- **實作任務**：`/implement`、功能開發、重構
-- **審查任務**：`/code-review`、`/parallel-code-review`、`/verify-review`、`/security-review`
-- **分析任務**：`/design-plan`、`/analysis-plan`、`/execution-plan`
-- **文檔處理**：`/doc-quality-checker`、`/docs-manager`
+- **實作任務**：`/build`、`/deep-work`、功能開發、重構
+- **審查任務**：`/code-review`、`/ep-review`、`/verify-review`、`/followup-review`
+- **分析任務**：`/spec`、`/execution-plan`
+- **文檔處理**：`/claude:distill`、`/claude:sync`、`/consistency`
 
 ### ❌ 不適用（不需要語音通知）
 
