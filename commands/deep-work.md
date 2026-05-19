@@ -203,7 +203,6 @@ uv run python scripts/verify_import.py
 
 ### 遵循的 Rules
 - `python-standards.md` - Python 程式設計規範
-- `code-edit-constraints.md` - 編輯約束（Read before Edit）
+- `code-edit-constraints.md` - 編輯約束（Read before Edit、禁止 sed）
 - `quality-constraints.md` - 品質約束（完整交付）
 - `voice-notification.md` - 語音通知
-- `sed-warning.md` - 禁止 sed 修改程式碼

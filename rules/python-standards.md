@@ -1,400 +1,68 @@
+---
+paths:
+  - "**/*.py"
+---
+
 # Python 程式設計規範
 
-> **自動載入**: 此檔案位於 `~/.claude/rules/`，會自動載入到所有會話
->
-> **開發環境**: MacBook Pro M1 Max (macOS Darwin 24.6.0)
+## 命名約定
 
----
+- Demo 檔案用 `demo_` 前綴（`demo_shioaji.py`），禁止用 `test_` 前綴
+- 測試檔案用 `test_` 前綴（`test_main.py`）
 
-## 正向命名約定
+## `__init__.py` 設計
 
-> **核心原則**：使用清晰明確的命名，避免誤導開發工具。
+- < 100 行，只暴露公開 API，用 `__all__` 宣告
+- 消費端用完整路徑 import（`from package.module import Class`），不依賴 `__init__.py`
 
-### 命名規範
+## 型別註解（Python 3.11+）
 
-| 類型 | 規範 | 範例 |
-|------|------|------|
-| 檔案 | snake_case | `main.py`, `test_example.py` |
-| 變數/函式 | snake_case | `user_name`, `calculate_total()` |
-| 類別 | PascalCase | `DataProcessor`, `ApiClient` |
-| 常數 | UPPER_SNAKE_CASE | `MAX_RETRIES`, `API_BASE_URL` |
-| 測試檔案 | `test_` 前綴 | `test_main.py` |
-| **實驗/範例檔案** | **禁止 `test_` 前綴** | ❌ `test_shioaji.py` ✅ `demo_shioaji.py` |
-| Private 方法 | `_` 前綴 | `_internal_method()` |
+### ❌ 禁止 `from __future__ import annotations`
 
-### 範例
+將所有註解轉為字串，掩蓋缺失 import 和 circular import。前向引用用字串註解：`def process(node: "TreeNode") -> None:`
 
-```python
-# Demo 程式使用 demo_ 前綴（檔案: examples/demo.py）
-def demo_worker_task():
-    ...
+### ❌ 禁止 deprecated typing 別名
 
-# 測試程式才使用 test_ 前綴（檔案: tests/test_worker.py）
-def test_worker_task():
-    ...
-```
-
----
-
-## import 管理標準
-
-> **核心原則**：import 語句必須在檔案頂部（toplevel）。
-
-### 強制規則
-
-- **必須**：import 語句在檔案頂部
-- **例外**：避免循環依賴、條件性依賴、延遲載入
-
-### 範例
-
-```python
-# ✅ 正確：檔案頂部 import
-from pathlib import Path
-
-def process_data(file_path: Path | None = None) -> dict:
-    # 實際邏輯
-    ...
-```
-
----
-
-## `__init__.py` 設計原則
-
-> **核心原則**：`__init__.py` 應保持精簡，只暴露公開 API，避免 circular import。
-
-### 絕對約束
-
-- **檔案行數**：< 100 行（不含空行和註解）
-- **內容限制**：只包含真正需要公開的 API
-- **強制要求**：使用 `__all__` 明確宣告公開 API
-
-### 判斷標準
-
-| 問題 | 決策 |
+| 禁止 | 正確 |
 |------|------|
-| 這個類別/函數需要被外部直接 import 嗎？ | 是 → 可以加入 `__init__.py` |
-| 加入後會讓 `__init__.py` 超過 100 行嗎？ | 是 → 不要加，用完整路徑 import |
-| 加入後造成 circular import 嗎？ | 是 → 重構模組結構（避免 circular import） |
+| `List[T]`, `Dict[K,V]`, `Set[T]`, `Tuple[T1,T2]` | `list[T]`, `dict[K,V]`, `set[T]`, `tuple[T1,T2]` |
+| `Optional[T]`, `Union[T1,T2]` | `T \| None`, `T1 \| T2` |
 
-### 推薦做法
+AI（尤其舊模型）常自動補上舊寫法，必須修正。
 
-```python
-# ❌ 錯誤：依賴 __init__.py（容易 circular import）
-from package import ClassA, ClassB, ClassC
+### typing 模組僅 import：Callable, Protocol, TypeVar, ParamSpec, Self, Any
 
-# ✅ 正確：使用完整路徑（清晰、避免 circular）
-from package.module_a import ClassA
-from package.module_b import ClassB
+### ❌ 禁止 `TYPE_CHECKING`
 
-# ✅ 正確的 __init__.py（精簡、只暴露公開 API）
-from .core import PublicAPI
+Circular import 是架構問題，重構模組結構才是解法。`TYPE_CHECKING` 只是掩蓋問題。
 
-__all__ = ["PublicAPI"]
-```
+### `Any` 使用
 
----
+只用在外部邊界（JSON 解析、第三方庫），加註解說明理由。
 
-## 型別註解標準（Python 3.11+）
+## Python 命令執行
 
-> **核心原則**：優先使用內建型別語法，僅在必要時從 `typing` 模組 import。
-
-### ❌ 禁止使用 `from __future__ import annotations`
-
-**事實澄清**：PEP 563（延遲註解評估）在 Python 3.11–3.13 **並非預設**，仍需手動 import。PEP 649（透過描述器延遲評估）將於 Python 3.14 成為預設，屆時 `from __future__ import annotations` 反而會造成衝突。PEP 585（泛型型別如 `list[str]`）從 Python 3.9 起已原生支援，與 PEP 563 無關。
-
-**禁止理由**：`from __future__ import annotations` 將所有註解轉為字串，掩蓋以下結構性問題：
-
-| 問題 | 說明 |
-|------|------|
-| **隱藏缺失 import** | 註解中引用未 import 的型別不會報錯，執行時才爆炸 |
-| **掩蓋 circular import** | 因註解不會被評估，循環依賴的 import 錯誤被隱藏 |
-| **破壞 `isinstance()` / `get_type_hints()`** | 字串化的註解無法用於執行時型別檢查 |
-
-**唯一合理場景**：同檔案內的前向引用（引用同一檔案中稍後定義的型別），但用**字串註解**即可解決，無需整檔啟用。
-
-```python
-# ❌ 錯誤：整檔啟用，掩蓋結構問題
-from __future__ import annotations
-
-def process(node: TreeNode) -> None:
-    ...
-
-class TreeNode:
-    pass
-
-# ✅ 正確：字串註解處理前向引用
-def process(node: "TreeNode") -> None:
-    ...
-
-class TreeNode:
-    pass
-```
-
-### ❌ 禁止使用的 deprecated 別名（Python 3.12+）
-
-Python 3.12 已正式 deprecate `typing` 中的泛型別名，3.14 將移除。AI（尤其是較舊模型）常自動補上這些舊寫法。
-
-| 禁止 | 正確 | PEP |
-|------|------|-----|
-| `List[T]` | `list[T]` | PEP 585 (3.9+) |
-| `Dict[K, V]` | `dict[K, V]` | PEP 585 (3.9+) |
-| `Set[T]` | `set[T]` | PEP 585 (3.9+) |
-| `Tuple[T1, T2]` | `tuple[T1, T2]` | PEP 585 (3.9+) |
-| `Optional[T]` | `T \| None` | PEP 604 (3.10+) |
-| `Union[T1, T2]` | `T1 \| T2` | PEP 604 (3.10+) |
-
-### typing 模組適用範圍
-
-僅以下型別從 `typing` import：
-- `Callable`, `Protocol`, `TypeVar`, `ParamSpec`, `Self`, `Any`
-
-### `Any` 使用規範
-
-> **核心原則**：能用具體型別就用具體型別，`Any` 只用在外部邊界。
-
-**允許使用 Any 的場合**：
-- JSON 解析、DB row 等動態資料（value 型別不固定）
-- 與缺乏型別註解的第三方庫互動
-- **必須加註解釋為什麼需要 Any**
-
-```python
-# ❌ 濫用：內部邏輯用 Any
-def process(data: Any) -> Any: ...
-
-# ✅ 合理：外部邊界 + 加註解
-results: list[dict[str, Any]] = []  # JSON 解析結果，value 型別不固定
-```
-
-### TYPE_CHECKING 使用限制
-
-> **核心原則**：從架構上避免 circular import，不要用 `TYPE_CHECKING` 當便捷修復。
-
-**🔴 強制約束**：
-- **不要使用** `TYPE_CHECKING`
-- 遇到 circular import 時，**重構模組結構**才是正確解法
-- `TYPE_CHECKING` 只是掩蓋架構問題，不是解決問題
-
-**AI 常見錯誤**：
-```python
-# ❌ AI 常見的便捷修復（掩蓋架構問題）
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from module_a import ClassA  # circular import 被掩蓋，問題仍在
-
-# ✅ 正確：重構模組結構，從根本解決 circular import
-# 方式 1：提取共用介面到獨立模組
-# 方式 2：使用完整路徑 import（from package.module import Class）
-# 方式 3：重新劃分模組職責，消除循環依賴
-```
-
-**唯一例外**（極罕見，需使用者明確同意）：
-- 第三方套件架構限制，無法從模組結構解決
-- 經過使用者明確同意才能使用
-
-### 範例
-
-```python
-from typing import Callable, Protocol
-
-def process_items(
-    items: list[str],
-    config: dict[str, int] | None = None,
-    callback: Callable[[str], bool] | None = None
-) -> dict[str, int]:
-    if config is None:
-        config = {}
-    return {"count": len(items), **config}
-
-# Protocol 定義結構子型別
-class Drawable(Protocol):
-    def draw(self) -> None: ...
-
-def render(obj: Drawable) -> None:
-    obj.draw()
-```
-
----
-
-## Python 命令執行約束
-
-> **核心原則**：所有 Python 指令必須使用 `uv run` 執行。
-
-### 強制模式
-
-**所有 Python 命令都遵循此模式**：
-```bash
-uv run [python/pytest/其他] [參數]
-```
-
-### 正確範例
+### 強制 `uv run`
 
 ```bash
-# 執行 Python 腳本
 uv run python script.py
-
-# 執行測試
 uv run pytest tests/test_example.py -v
-
-# 執行模組
-uv run python -m module_name
 ```
 
-### ❌ 絕對禁止：外部 timeout 命令
+禁止：`python`、`python3`、`PYTHONPATH=$PWD`、外部 `timeout`/`gtimeout`（macOS 無此命令）
+
+### 🔴 禁止：多行 `python -c` 中使用 `#` 註解
+
+Claude Code 權限匹配器將 `#` 視為注釋截斷命令，觸發權限提示。需要註解時改寫為 `.py` 檔案。
+
+### 管道命令拆兩步
 
 ```bash
-timeout 60 uv run python script.py  # ❌ macOS 預設沒有 timeout 命令
-gtimeout 30s uv run pytest  # ❌ gtimeout 有跨平台相容性問題
-PYTHONPATH=$PWD uv run python script.py  # ❌ 破壞 uv 環境隔離
-python script.py  # ❌ 未使用 uv 管理環境
-python3 script.py  # ❌ 未使用 uv 管理環境
-```
-
-### 🔴 禁止：多行 python -c 中使用 # 註解
-
-> **核心原則**：`python -c` 是即時驗證指令，不是專案程式碼 — 註解本來就沒有價值，完全不值得冒觸發權限的風險。
-
-**機制**：Claude Code 權限匹配器將 `#` 視為注釋分隔符截斷命令，導致無法匹配允許規則。
-
-**實驗驗證結果**（2026-04-17）：
-
-| 寫法 | 結果 |
-|------|------|
-| 單行無註解 | 自動通過 |
-| 多行無註解（class、try/except、第三方 import、list comprehension） | 自動通過 |
-| 多行有 `#` 註解 | **觸發權限提示** |
-
-**🔴 強制約束**：
-- **多行 `python -c` 中禁止使用 `#` 註解**
-- 需要註解時，改寫為 `.py` 檔案
-
-```bash
-# ❌ 禁止：多行 python -c 中使用 # 註解（觸發權限提示）
-uv run python -c "
-# 這是註解
-from mosaic_alpha.common.enums import Interval
-print(Interval.DAILY)
-"
-
-# ✅ 正確：多行但無 # 註解
-uv run python -c "
-from mosaic_alpha.common.enums import Interval
-print(Interval.DAILY)
-"
-
-# ✅ 正確：需要註解時改寫為 .py 檔案
-uv run python scripts/check_data.py
-```
-
-### ⚠️ 建議避免：python -c 內聯腳本
-
-`python -c` 可用於簡短指令，但以下情況建議改寫為 `.py` 檔案：
-- **複合命令**：`cd /tmp && uv run python -c '...'` 會改變 prefix，導致權限匹配失敗
-- **長程式碼**：多行邏輯寫成檔案更易於 debug 和重複使用
-- **複雜引號**：多層巢狀引號可能造成 shell 解析問題
-
-```bash
-# ✅ 允許：簡短測試
-uv run python -c "print('hello')"
-uv run python -c "import sys; print(sys.version)"
-```
-
-### ⚠️ 建議避免：管道命令（pipe）
-
-Claude Code 的權限匹配器無法辨識包含 `|` 的命令。必須將執行和過濾拆成兩步。
-
-```bash
-# ❌ 管道命令每次都需要手動批准
-uv run python script.py 2>&1 | sed -n '/pattern/p' | head -20
-
-# ✅ 正確：分離執行和過濾
-# 步驟 1：執行寫檔（匹配權限規則）
 uv run python script.py > /tmp/output.txt 2>&1
-
-# 步驟 2：用 Read/Grep 工具過濾（不需 Bash 權限）
-# AI 使用 Read 或 Grep 工具讀取 /tmp/output.txt
 ```
 
-### ✅ 允許：應用程式內部 --timeout 參數
+用 Read/Grep 工具過濾，不使用 `|` 管道（權限匹配器無法辨識）。
 
-```bash
-# ✅ 應用程式自己處理 timeout，跨平台相容、優雅可控
-uv run python examples/demo_app.py --port 5007 --timeout 60000
-uv run python scripts/long_running_task.py --timeout 300
-```
+## Editable Install
 
-### macOS 平台相容性說明
-
-- **外部 `timeout` 命令**: macOS 預設不包含（GNU coreutils），禁止使用
-- **應用程式內部 `--timeout`**: 跨平台相容，優先採用此做法
-- **設計建議**: 需要超時控制時，在應用程式內部用 `argparse` 實現 `--timeout` 參數
-
----
-
-## 專案安裝模式（Editable Install）
-
-> **核心原則**：使用 UV 管理的專案應安裝為 editable mode，確保模組可從任何路徑 import。
-
-### 強制安裝時機
-
-以下情況**必須先執行** `uv pip install -e .`：
-
-| 情境 | 症狀 | 解決方案 |
-|------|------|----------|
-| `examples/` 腳本 import 失敗 | `ModuleNotFoundError: No module named 'project_name'` | `uv pip install -e .` |
-| 從子目錄執行腳本 | 找不到上層模組 | `uv pip install -e .` |
-| 多入口點專案 | 不同目錄的腳本互相 import | `uv pip install -e .` |
-
-### 正確範例
-
-```bash
-# ✅ 正確：首次安裝 editable mode
-uv pip install -e .
-
-# ✅ 正確：之後直接執行
-uv run python examples/demo_script.py
-
-# ❌ 錯誤：跳過安裝直接執行
-uv run python examples/demo_script.py  # ModuleNotFoundError
-```
-
-### 安裝驗證
-
-```bash
-# 確認專案已安裝
-uv pip list | grep <project-name>
-```
-
----
-
-## 執行前自檢清單
-
-在執行任何 Python 相關操作前確認：
-
-### 命名與 import
-- [ ] Demo 檔案使用 `demo_` 前綴，測試檔案使用 `test_` 前綴
-- [ ] import 語句在檔案頂部（除非符合例外條件）
-- [ ] `__init__.py` < 100 行，使用 `__all__` 宣告公開 API
-
-### 型別註解
-- [ ] 不使用 `from __future__ import annotations`（掩蓋缺失 import 和 circular import 等結構問題）
-- [ ] 使用 `list[T]`, `T1 | T2` 等內建型別語法
-- [ ] 僅在必要時從 `typing` import（Callable, Protocol 等）
-- [ ] 不使用 `TYPE_CHECKING`（從架構解決 circular import）
-- [ ] `Any` 只用在外部邊界（JSON、第三方庫），且加註解說明
-
-### 命令執行
-- [ ] 所有 Python 命令以 `uv run` 開頭
-- [ ] 不包含 `timeout`/`gtimeout`/`PYTHONPATH`
-- [ ] 不直接使用 `python` 或 `python3`
-- [ ] `python -c` 僅用於簡短測試，多行邏輯寫成 .py 檔案
-- [ ] **多行 `python -c` 中禁止使用 `#` 註解**
-- [ ] 管道命令拆兩步：執行寫檔 → 用 Read/Grep 過濾
-- [ ] 遇到 ModuleNotFoundError 時，先確認 `uv pip install -e .` 已執行
-
-### 專案狀態
-- [ ] 專案已安裝為 editable mode（首次開發或遇到 import 錯誤時確認）
-
----
-
-> 💡 **核心哲學**: 清晰命名、頂部 import、精簡 `__init__.py`、內建型別優先、強制 `uv run`。這些約束確保程式碼可讀性、避免循環依賴、維持環境隔離。
+遇到 `ModuleNotFoundError` 時先確認 `uv pip install -e .` 已執行。

@@ -1,6 +1,9 @@
-# CLAUDE.md 撰寫規範
+---
+paths:
+  - "**/*.md"
+---
 
-> **自動載入**: 此檔案位於 `~/.claude/rules/`，會自動載入到所有會話
+# CLAUDE.md 撰寫規範
 
 > **🔴 強烈警告**: AI 寫作 CLAUDE.md 時**絕對禁止**加入統計資訊、版本號、更新日期等元資訊。詳細說明請參考 `@~/.claude/rules/_ai-behavior-constraints.md`
 
