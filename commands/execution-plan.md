@@ -5,258 +5,100 @@ usage: "/execution-plan \"實作任務描述\" [PROMPT檔案路徑]"
 argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 ---
 
-# Execution Plan - 段落式實作計畫書生成器
+# /execution-plan — 段落式實作計畫書生成器
 
-為軟體開發專案生成**段落式實作計畫書**，基於 `/spec` 的規格摘要，執行分段實作與品質保證。
+基於 `/spec` 的規格摘要，生成段落式實作計畫書。
 
-## 使用方式
-```bash
-/execution-plan "實作任務描述" [可選：PROMPT檔案路徑]
-```
-
-## 📚 委託 Skills
-
-生成計畫書時自動載入以下 skill，提供 HOW 的方法論：
-
-- [rules-reminder](../skills/rules-reminder/SKILL.md) — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed`、管道拆兩步等 Bash 規則
-- [planning-and-task-breakdown](../skills/planning-and-task-breakdown/SKILL.md) — 依賴圖分析、垂直切片、task sizing、checkpoint 機制、反合理化
+委託 Skills：
+- [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則
+- [planning-and-task-breakdown](../skills/planning-and-task-breakdown/SKILL.md) — 依賴圖分析、垂直切片、task sizing
 
 ---
 
-## 🎯 核心概念：Self-Contained Segment
+## 核心概念：Self-Contained Segment
 
-每個實作段落都是**完全獨立的功能單元**，AI 只需讀取該段落就能完成實作，無需依賴其他段落。
+每個段落都是**完全獨立的功能單元**，AI 只需讀取該段落就能完成實作。
 
-**Self-Contained 特徵**：
-- **Context 獨立**: 包含所需的所有背景資訊和依賴
-- **功能完整**: 段落內容構成一個完整的功能
-- **驗證自足**: 包含完整的測試和驗證策略
-- **執行獨立**: 可以獨立實施而不影響其他段落
+特徵：Context 獨立 / 功能完整 / 驗證自足 / 執行獨立
 
 ---
 
-## 📋 段落設計標準
+## 段落設計標準
 
-### 每個段落必須包含的要素
+每個段落必須包含：
 
-#### 1. 段落概要 (Context)
-- **背景資訊**: 基於 `/spec` 的規格摘要
-- **依賴關係**: 與其他段落的依賴和整合點
-- **語義約束**: 與其他段落共享的隱含假設（型別定義、命名慣例、架構決策）
-  無則寫「無」，有則寫「與 S{N} 共享 [具體假設]」（必須引用段落編號）
-- **基礎設施盤點**: 設計 pseudo code 前的必做步驟，優先複用現有元件
-  1. 讀取目標目錄及上層的 CLAUDE.md，留意「可複用基礎設施」和導航指引
-  2. `rg "關鍵詞" --type py -l` 搜尋相關元件
-  3. 列出可複用元件（格式：`path/to/file.py:ClassName` — 用途簡述），或寫「無」
-  4. 若 `/spec` 規格摘要已有「現有基礎設施」欄位，直接繼承並補充
-- **依賴錨點**: EP 對現有程式碼的引用錨定（防止 EP drift）
-  無則寫「無」。有則列出每個引用的 `file:line` + 當前值，格式：
-  ```
-  - `function_name` 簽名 → `path/to/file.py:123`（param: Type）
-  - 常數引用 → `path/to/file.py:45`（CONST_NAME = value）
-  ```
-  `/build` 執行前會驗證錨點是否仍有效，drift 時先更新 EP 再實作
-- **技術選型**: 確定的技術方案和工具
-- **成功標準**: 明確的完成檢查清單
+### 1. Context
 
-#### 2. 核心實作要點
-- **主要類別**: 需要實現的核心類別和介面
-- **關鍵方法**: 重要方法的實現要點和邏輯
-- **設計決策**: 重要的技術決策和理由
-- **整合方式**: 與現有系統的整合方法
+- **背景資訊**：基於 `/spec` 規格摘要
+- **依賴關係**：與其他段落的依賴和整合點
+- **語義約束**：與其他段落共享的隱含假設（型別定義、命名慣例、架構決策）。無則寫「無」，有則寫「與 S{N} 共享 [具體假設]」
+- **基礎設施盤點**：設計 pseudo code 前的必做步驟（讀 CLAUDE.md 可複用基礎設施 → `rg` 搜尋相關元件 → 列出可複用元件或寫「無」）
+- **依賴錨點**：EP 對現有程式碼的引用錨定（格式：`function_name` → `path/to/file.py:123`）。`/build` 執行前驗證錨點，drift 時先更新 EP
+- **技術選型** + **成功標準**
 
-#### 3. 程式碼框架 (Pseudo Code)
-- **類別結構**: 主要類別的完整 Pseudo Code
-- **方法實現**: 重要方法的實現框架
-- **Call Stack**: 完整的函數調用鏈
-- **錯誤處理**: 例外處理和驗證邏輯
+### 2. 核心實作要點
 
-##### 檔案結構展示方式
-使用類似檔案樹的方式展示，而非抽象的 mermaid 圖表：
-```
-[project_name]/
-├── [module_name]/
-│   ├── core_class.py              # 核心系統組件
-│   ├── feature_a.py                # 功能組件 A
-│   └── feature_b.py                # 功能組件 B
-```
+主要類別、關鍵方法、設計決策、整合方式
 
-##### 空殼 class 設計方式
-提供詳細註解的 class 結構，讓人掃讀就能理解設計意圖：
-```python
-class ComponentFactory:
-    """
-    統一組件創建入口，解決段落式實作的依賴問題
-    設計目標：提供高性能的資源管理策略
-    """
-    def __init__(self, config: Dict[str, Any]):
-        """配置驅動初始化，支援策略設定"""
-        pass
+### 3. Pseudo Code
 
-    def create_component(self, name: str, data: pd.DataFrame,
-                        strategy: str = 'optimized') -> Component:
-        """創建組件，內建性能優化策略"""
-        pass
-```
+類別結構 + 方法實現 + Call Stack + 錯誤處理。檔案結構用樹狀展示（非 mermaid）。空殼 class 用詳細註解標示設計意圖。
 
-#### 4. 驗證策略
-- **Examples 設計**: 可執行的範例程式碼
-- **測試計畫**: 單元測試和集成測試策略
-- **完成檢查**: 具體的完成標準驗證
-- **整合測試**: 與其他段落的整合驗證
+### 4. 驗證策略
+
+Examples 設計 + 測試計畫 + 完成檢查 + 整合測試
 
 ---
 
-## 🚀 執行流程
+## 段落劃分原則
 
-```
-/spec 規格摘要
-         ↓
-    智能段落分析和劃分
-         ↓
-    Self-Contained Segment 設計
-         ↓
-    Dry Run 驗證（Explore 下游消費者）
-         ↓
-    段落式實作計畫書生成
-         ↓
-    段落式執行和驗證
-```
+依賴圖分析、垂直切片、task sizing 遵循 [planning-and-task-breakdown](../skills/planning-and-task-breakdown/SKILL.md)。
 
-### 段落劃分原則
-
-依賴圖分析、垂直切片策略、task sizing 指導原則遵循 [planning-and-task-breakdown](../skills/planning-and-task-breakdown/SKILL.md) skill。
-
-段落劃分的 EP 專屬約束：
-- **功能完整性**: 每個段落構成一個完整的功能
-- **依賴獨立性**: 最小化段落間的依賴關係
-- **語義顯式化**: 段落間共享的隱含假設必須顯式標記，供 /build 平行執行時判斷安全性
-- **實作可行性**: 每個段落有明確的實作路徑
-- **驗證自足性**: 每個段落有獨立的驗證策略
-
-### 段落分析行為規範
-
-- **深度分析**: 基於 `/spec` 規格摘要進行深度分析
-- **依賴識別**: 識別段落間的依賴關係
-- **可行性評估**: 評估每個段落的實作可行性
-- **結構化設計**: 使用統一的段落設計框架
-- **完整性檢查**: 確保每個段落包含所有必要要素
+EP 專屬約束：
+- **語義顯式化**：段落間共享的隱含假設必須顯式標記
+- **驗證自足性**：每段有獨立驗證策略
 
 ---
 
-## 📋 段落設計檢查清單
+## 段落設計檢查清單
 
-每個設計完成的段落必須通過：
-
-- [ ] 段落標題明確且獨立
-- [ ] Context 包含所有必要背景資訊
-- [ ] 核心實作要點清晰具體
-- [ ] Pseudo Code 提供完整實作框架
-- [ ] Examples 設計涵蓋主要使用場景
-- [ ] 驗證策略完整且可執行
-- [ ] 完成檢查標準明確可測量
-- [ ] 與其他段落整合點清晰定義
-- [ ] 語義約束已顯式標記（共享假設不可隱含）
-- [ ] 基礎設施盤點已完成（盤點現有可複用元件，無相關則寫「無」）
-- [ ] 依賴錨點已標記（引用現有程式碼的 file:line + 當前值，無引用則寫「無」）
-
-### Dry Run 驗證
-
-EP 草稿完成後、寫入檔案前，用 Explore Agent 模擬驗證設計可行性。
-
-**目的**：如果 EP 中的 pseudo code 真的實作了，能不能如預期運作？有沒有漏想的地方？
-
-**前置盤點**（不 spawn Agent，直接 rg）：
-1. 盤點 EP 中所有「即將修改的現有函式/類別/模組」
-2. 如果 EP 提出**新增或改變參數型別**（如 `str` → `enum`），先 `rg "class.*相關名稱" --type py` 確認專案中是否已有適用的 enum/protocol/dataclass
-
-**執行方式**：
-spawn Explore Agent（background）對每個修改標的驗證以下項目：
-
-1. **Call Stack 可行性**：pseudo code 的每一步能否真的跑通？型別、參數、回傳值對得上嗎？
-2. **Pattern Alignment（最重要）**：不只看 interface 是否相容，還看 **usage pattern** 是否一致。具體來說：
-   - 搜尋每個修改標的的所有 callers
-   - 觀察 callers 的**呼叫模式**（傳入什麼資料？filter 後才呼叫？直接傳混合資料？）
-   - 如果 EP 的設計假設了某種 pattern（如「一次處理混合方向」），但所有 callers 都用另一種 pattern（如「先 filter 再分別呼叫」），EP 的設計應改為配合實際 pattern
-3. **下游依賴發現**：有沒有 EP 完全沒提到的 callers？特別注意：
-   - demo / examples 中的重複實作（常見：demo 有自己的 inline scoring 而非呼叫 library function）
-   - 跨模組呼叫 private methods（`_` 前綴）的耦合
-4. **邊界條件**：空 DataFrame、null 值、缺少欄位等情境有沒有漏考慮？
-
-發現設計缺口時，補強 EP 草稿後再輸出。
-
-```
-[Agent] model=sonnet, max=4, current=0
-Explore(Dry run: EP 段落 N 設計可行性驗證)
-```
+- [ ] 標題明確且獨立
+- [ ] Context 包含所有必要背景
+- [ ] Pseudo Code 具體可執行
+- [ ] 驗證策略完整可執行
+- [ ] 整合點清晰定義
+- [ ] 語義約束已顯式標記
+- [ ] 基礎設施盤點已完成
+- [ ] 依賴錨點已標記
 
 ---
 
-## 📊 輸出標準
+## Dry Run 驗證
 
-### 計畫書標準結構
+EP 草稿完成後、寫入前，spawn Explore Agent 驗證：
 
-```markdown
-# Execution Plan - [專案名稱]
+1. **Call Stack 可行性**：pseudo code 每步能否跑通？
+2. **Pattern Alignment（最重要）**：EP 設計假設的 usage pattern 是否與 callers 實際 pattern 一致？
+3. **下游依賴發現**：有沒有 EP 沒提到的 callers？
+4. **邊界條件**：空值、null、缺少欄位等
 
-## 🎯 實作總覽
-- **基於設計**: `/spec` 規格摘要
-- **段落策略**: Self-Contained Segment 分段實作
-- **品質保證**: Examples 驅動驗證
-
-## 📋 段落劃分策略
-### 段落 1: [段落名稱]
-#### Context
-[背景資訊和依賴關係]
-**語義約束**: [與其他段落共享的假設，無則寫「無」]
-**基礎設施盤點**: [可複用元件列表，或「無」]
-**依賴錨點**: [引用現有程式碼的 file:line + 當前值，無則寫「無」]
-
-#### 核心實作要點
-[主要類別和關鍵方法]
-
-#### 程式碼框架
-[Pseudo Code 設計]
-
-#### 驗證策略
-[Examples 和測試計畫]
-
-### 段落 2: [段落名稱]
-[重複相同結構]
-
-## 🔄 整合策略
-- **段落間依賴**: [依賴關係說明]
-- **語義約束映射**: [哪些段落間有共享假設，無則寫「無」]
-- **依賴錨點 drift check**: `/build` 執行每段前，驗證該段依賴錨點的 file:line 是否仍與 EP 描述一致。drift 時先更新 EP 再實作，避免基於過時假設寫碼
-- **整合測試**: [整合驗證計畫]
-- **品質保證**: [整體品質檢查清單]
-```
-
-### 輸出路徑
-
-- **預設位置**: `ai-analysis/execution-plans/`
-- **檔名**: 從任務描述自動衍生（kebab-case，如 `feature-x-ep.md`）
-- **目錄自動建立**: 若 `ai-analysis/execution-plans/` 不存在，先建立
-
-### 交付物要求
-- **單一實作計畫書**: 包含所有段落設計
-- **Self-Contained 段落**: 每個段落獨立可執行
-- **完整驗證策略**: Examples + 測試計畫
-- **整合計畫**: 段落間整合和驗證策略
+發現缺口時補強 EP 再輸出。
 
 ---
 
-## 📚 與其他命令的協作
+## 輸出
 
-### 流程位置
+- **位置**：`ai-analysis/execution-plans/`
+- **檔名**：從任務描述自動衍生（kebab-case）
+- **結構**：實作總覽 → 段落劃分策略 → 各段落（Context → 要點 → Pseudo Code → 驗證）→ 整合策略
+
+---
+
+## 流程位置
+
 ```
 /spec → /execution-plan → /ep-review → /verify-review → /build → /code-review
 ```
 
-### 前置命令
-- `/spec` — 提供規格摘要（需求、User Story、技術決策、邊界）
-
-### 後續命令
-- `/ep-review` — 審查計畫書合理性
-- `/verify-review` — 評估審查建議，修正計畫書
-- `/build` — 基於計畫書逐段實作
+前置：`/spec`
+後續：`/ep-review` → `/verify-review` → `/build`
