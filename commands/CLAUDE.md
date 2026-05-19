@@ -48,6 +48,10 @@
 - `/claude:decode-compare` — 對比 source-docs 與程式碼，驗證精度
 - `/claude:daily-maintain` — 每日自動化 CLAUDE.md 維護（compare-first）
 
+### 日常工具
+
+- `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要）
+
 ### 其他
 
 - `/explain` — 技術概念、架構設計或流程解釋（console / md 模式）
