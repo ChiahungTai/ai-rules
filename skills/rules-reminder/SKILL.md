@@ -5,6 +5,8 @@ description: Enforces the most frequently violated Claude Code rules to prevent 
 
 # Rules Reminder — 最常被忘記的規則
 
+> **典型觸發情境**：使用者看到 LLM 用了 `find`/`grep`，或多行 `python -c` 中用了 `#` 註解，這些都會觸發權限提示卡關。立即停下手邊動作，改用 `fd`/`rg`，或移除 `#` 註解。
+
 以下是 LLM 最常犯、每次都會觸發權限提示的錯誤。**現在起嚴格遵守，不再犯。**
 
 ---
@@ -132,3 +134,7 @@ uv run python script.py > /tmp/output.txt 2>&1
 > **`#` 是毒藥、`grep`/`find` 是禁區、`uv run` 是王道、`sed` 是地雷、`|` 是陷阱、`簡體字是違規`**
 
 每次寫 Bash 命令前，默念這六條。
+
+---
+
+> **再次提醒**：你可能剛才用了 `find`/`grep`，或多行 `python -c` 裡寫了 `#` 註解。這些都是系統硬限制，無法被任何 allow 規則覆蓋。**現在起只用 `fd`/`rg`，多行 `python -c` 不加 `#`。**

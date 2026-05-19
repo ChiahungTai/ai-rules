@@ -17,6 +17,39 @@
 
 ---
 
+## 衝突寫法處理（禁止混合）
+
+> **核心原則**：程式庫中存在兩種矛盾寫法時，選擇一種，不要混合。
+
+### 強制規則
+
+- **禁止混合寫法**：兩種矛盾寫法「各照顧一點」的結果比任何一種原始寫法都更難維護
+- **選擇並說明**：選擇較新或測試較完整的寫法，說明理由，標記另一種待清理
+- **發現就標記**：遇到矛盾寫法時主動回報，不要默默自行融合
+
+### 範例
+
+```python
+# ❌ 錯誤：混合兩種錯誤處理風格（部份用 try/except，部份用 assert）
+def process(data):
+    assert data is not None
+    try:
+        result = transform(data)
+    except ValueError:
+        return None
+    assert result > 0
+    return result
+
+# ✅ 正確：統一使用一種風格（此處選擇 crash-only，符合專案哲學）
+def process(data):
+    assert data is not None
+    result = transform(data)
+    assert result > 0
+    return result
+```
+
+---
+
 ## 向後相容確認機制
 
 只有影響以下情況時才需要確認向後相容：
@@ -56,6 +89,14 @@
 1. **停止重試**：不要用相同的 old_string 再試
 2. **重新 Read**：讀取檔案確認當前狀態
 3. **確認 old_string**：確保匹配的文字確實存在於檔案中
+
+### 連續同類錯誤處理
+
+寫出的程式碼反覆出現同類錯誤時，必須停下改變策略：
+
+- **連續 2 次 Edit 失敗** → 停下改用 Write 工具整檔覆寫
+- **連續 3 次同類語法/邏輯錯誤** → 停下，用 `uv run python -c "compile(...)"` 或 `uv run ruff check` 驗證，確認修正方向正確後再繼續
+- **禁止盲目重試**：不改變策略的反覆嘗試是浪費時間
 
 ### Edit 失敗時的降級策略
 

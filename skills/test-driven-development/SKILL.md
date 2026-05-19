@@ -294,6 +294,34 @@ describe('TaskService', () => {
 | Snapshot abuse | Large snapshots nobody reviews, break on any change | Use snapshots sparingly and review every change |
 | No test isolation | Tests pass individually but fail together | Each test sets up and tears down its own state |
 | Mocking everything | Tests pass but production breaks | Prefer real implementations > fakes > stubs > mocks. Mock only at boundaries where real deps are slow or non-deterministic |
+| Green-light tests with no business value | Tests hardcode expected values or test trivial execution, not intent | Tests must encode WHY behavior matters (see below) |
+
+## Tests Verify Intent, Not Just Behavior
+
+Every test must encode **why** the behavior matters, not just **what** it does. A test that can't fail when business logic changes is a broken test.
+
+**What makes a test worthless:**
+- Hardcoding the expected value that the function also hardcodes
+- Testing that a function "returns something" without constraining what
+- A test that still passes after the business rule it supposedly validates has changed
+
+```typescript
+// Worthless: both the function and the test hardcode 'John'
+function getUserName(): string {
+  return 'John';
+}
+it('returns user name', () => {
+  expect(getUserName()).toBe('John'); // proves nothing
+});
+
+// Meaningful: test encodes the business rule (user from config)
+it('reads user name from config', () => {
+  const config = { user: 'Alice' };
+  expect(getUserName(config)).toBe('Alice'); // would fail if logic changes
+});
+```
+
+**Rule of thumb:** If you can't write a test that fails when the business logic changes, either the function is wrong or the test is wrong.
 
 ## Browser Testing with DevTools
 
