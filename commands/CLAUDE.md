@@ -430,7 +430,7 @@ description: "Commands 與 Skills 協調使用"
 
 # 複雜決策：使用 Skills
 # AI 會自動判斷何時使用 Skill 而非 Command
-skill: parallel-processing
+skill: agent-workflow
 
 # 混合使用：Command 觸發，Skill 處理
 Trigger complex analysis workflow...

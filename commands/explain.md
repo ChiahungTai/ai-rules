@@ -26,7 +26,7 @@ usage: "/explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 ### 批次檔案分析
 - **目錄掃描**: 自動分析整個目錄結構和內容
-- **智能並行**: 使用 parallel-processing skill 自動判斷並行可行性
+- **智能並行**: 檔案數量多時自動使用 Agent tool 並行分析
 - **智能關聯**: 自動發現檔案間的關聯性和依賴關係
 
 ### 深度分析
@@ -188,10 +188,10 @@ skill: "mermaid"
 
 ## 智能並行處理
 
-檔案數量 >= 5 時，自動啟動 Skill-First 並行處理架構：
-1. 使用 [parallel-processing](../skills/parallel-processing/SKILL.md) skill 分析並行可行性
-2. Skill 返回建議：是否並行、最優 Task 數量、分組策略
-3. 按建議執行，整合結果生成統一報告
+檔案數量 >= 5 時，使用 Agent tool 並行處理：
+1. 按檔案關聯性分組
+2. 每組 spawn 一個 Agent 進行分析
+3. 整合結果生成統一報告
 
 詳細的平行處理架構、檔案分組邏輯和視覺化處理階段，見 [explain-parallel-architecture.md](./claude/_common/explain-parallel-architecture.md)。
 

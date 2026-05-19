@@ -31,7 +31,7 @@
 ### 第一步：Skill 可行性分析
 
 ```bash
-skill: "parallel-processing" "分析解釋任務：$USER_TASK"
+skill: "agent-workflow" "平行分析解釋任務：$USER_TASK"
 
 # skill 返回決策結果
 {
