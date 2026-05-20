@@ -150,6 +150,18 @@
 
 ---
 
+## Summary Instructions（/compact 壓縮策略）
+
+> **觸發時機**：`/compact` 手動或自動壓縮對話時，此區塊引導 compactor 保留關鍵資訊。
+
+When summarizing this conversation, always preserve:
+- File paths that have been read or modified
+- Test results and error messages
+- Decisions made and the reasoning behind them
+- Current task objective and pending items
+
+---
+
 > 💡 **協作哲學**：高品質的 AI 協作需要平衡嚴謹性與靈活性。本指南提供指導原則而非死板規則，鼓勵根據實際情況做出專業判斷。
 
 > 🤖 **AI 協作價值**：AI 作為智能協作夥伴，需要在專業能力和適應性之間找到平衡，為用戶提供既有價值又實用的建議。

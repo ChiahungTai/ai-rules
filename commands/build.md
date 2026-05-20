@@ -28,6 +28,8 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 快速確認 EP 品質，**僅嚴重矛盾才停下**，其餘自行判斷並記錄。
 
+**強制輸出**：快檢完成後必須印出 `## EP 快檢：✅ 可實作` 或 `## EP 快檢：⚠️ N 項自行補充`。不得靜默跳過。
+
 **前置流程確認**（僅記錄，不因此停下）：`/spec → /execution-plan → /ep-review → /verify-review → /build`
 
 **EP 品質快掃**：

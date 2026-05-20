@@ -5,10 +5,10 @@
 > 違反 = 權限提示卡關。每次都遵守。
 
 - `fd` 取代 `find`，`rg` 取代 `grep`
-- 多行 `python -c` 禁止 `#` 註解
+- 多行 `python -c` 中換行後禁止 `#` 註解（newline + `#` 觸發權限提示）
 - 所有 Python 命令用 `uv run` 前綴
 - 禁止 `sed` 修改 `.py`/`.md`/`.yaml`/`.json`/`.toml`
-- 管道 `|` 改拆兩步（寫檔 → Read/rg 讀取）
+- 禁止 `$VAR`、`$(cmd)` 等 shell 展開（觸發 simple_expansion / command_subshell / subshell 偵測）。需要變數時用具體值或寫 `.py` 檔案
 - 輸出使用繁體中文 + 英文術語
 
-口訣：`#` 是毒藥、`rg`/`fd` 取代 `grep`/`find`、`uv run` 是王道、`sed` 是地雷、管道拆兩步、繁體中文
+口訣：`#` 是毒藥、`$` 是禁區、`rg`/`fd` 取代 `grep`/`find`、`uv run` 是王道、`sed` 是地雷、繁體中文

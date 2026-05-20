@@ -1,6 +1,6 @@
 ---
 name: rules-reminder
-description: Enforces the most frequently violated Claude Code rules to prevent permission prompts. Use when writing any Bash command. Covers: rg/fd instead of grep/find, no # in python -c, uv run for Python, no sed for code, split pipe commands, Traditional Chinese output.
+description: Enforces the most frequently violated Claude Code rules to prevent permission prompts. Use when writing any Bash command. Covers: rg/fd instead of grep/find, no # after newline in python -c, no $ shell expansion, uv run for Python, no sed for code, Traditional Chinese output.
 ---
 
 # Rules Reminder — 最常被忘記的規則
@@ -13,7 +13,7 @@ description: Enforces the most frequently violated Claude Code rules to prevent 
 
 ## 1. 多行 `python -c` 禁止 `#` 註解
 
-Claude Code 權限匹配器將 `#` 視為註解截斷命令，導致無法匹配允許規則。
+Claude Code 偵測到引號內「換行後接 `#`」會觸發權限提示（"Newline followed by # inside a quoted argument can hide arguments from path validation"）。`#` 緊接開頭引號不觸發，但換行後的 `#` 會。
 
 ```bash
 # ❌ 禁止 — 觸發權限提示
@@ -96,18 +96,26 @@ sed -i 's/old/new/g' README.md
 
 ---
 
-## 5. 管道命令拆兩步
+## 5. 禁止 `$` shell 展開
 
-Claude Code 權限匹配器無法辨識 `|` 管道。
+Claude Code 偵測到 `$` 開頭的結構會觸發權限提示：
 
 ```bash
-# ❌ 禁止 — 每次都要手動批准
-uv run python script.py | grep "pattern"
+# ❌ 禁止 — 觸發 simple_expansion
+echo $HOME
+cat $TMPDIR/file.txt
 
-# ✅ 正確 — 執行寫檔 → 用 Read/Grep 工具過濾
-uv run python script.py > /tmp/output.txt 2>&1
-# 然後用 Read 或 rg 讀取 /tmp/output.txt
+# ❌ 禁止 — 觸發 command_substitution
+echo $(date)
+python3 -c "$(echo 'print(1)')"
+
+# ✅ 正確 — 用具體值或寫 .py 檔案
+echo "/Users/ctai"
+cat /tmp/file.txt
+uv run python scripts/check.py
 ```
+
+**規則**：bash 命令中**不使用 `$VAR`、`$(cmd)`**。需要變數時用具體值或寫成 `.py` 檔案。
 
 ---
 
@@ -131,10 +139,10 @@ uv run python script.py > /tmp/output.txt 2>&1
 
 ## 記憶口訣
 
-> **`#` 是毒藥、`grep`/`find` 是禁區、`uv run` 是王道、`sed` 是地雷、`|` 是陷阱、`簡體字是違規`**
+> **`#` 是毒藥、`$` 是禁區、`grep`/`find` 是禁區、`uv run` 是王道、`sed` 是地雷、`簡體字是違規`**
 
 每次寫 Bash 命令前，默念這六條。
 
 ---
 
-> **再次提醒**：你可能剛才用了 `find`/`grep`，或多行 `python -c` 裡寫了 `#` 註解。這些都是系統硬限制，無法被任何 allow 規則覆蓋。**現在起只用 `fd`/`rg`，多行 `python -c` 不加 `#`。**
+> **再次提醒**：你可能剛才用了 `find`/`grep`，或多行 `python -c` 裡寫了 `#` 註解，或在 bash 命令中用了 `$VAR`/`$(cmd)`。這些都會觸發權限提示。**現在起只用 `fd`/`rg`，多行 `python -c` 不加 `#`，bash 中不碰 `$`。**

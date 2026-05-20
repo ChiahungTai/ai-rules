@@ -51,17 +51,9 @@ uv run pytest tests/test_example.py -v
 
 禁止：`python`、`python3`、`PYTHONPATH=$PWD`、外部 `timeout`/`gtimeout`（macOS 無此命令）
 
-### 🔴 禁止：多行 `python -c` 中使用 `#` 註解
+### 🔴 禁止：多行 `python -c` 中換行後使用 `#` 註解
 
-Claude Code 權限匹配器將 `#` 視為注釋截斷命令，觸發權限提示。需要註解時改寫為 `.py` 檔案。
-
-### 管道命令拆兩步
-
-```bash
-uv run python script.py > /tmp/output.txt 2>&1
-```
-
-用 Read/Grep 工具過濾，不使用 `|` 管道（權限匹配器無法辨識）。
+Claude Code 偵測引號內「換行後接 `#`」會觸發權限提示。`#` 緊接開頭引號（`"# comment\n..."`）不觸發，但換行後的 `#`（`"\n# comment\n..."`）會。需要註解時改寫為 `.py` 檔案。
 
 ## Editable Install
 

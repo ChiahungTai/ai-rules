@@ -131,7 +131,7 @@ claude --permission-mode auto -p "fix all lint errors"
 - [ ] 已印出 `[Agent] model=X, max=N, current=M`
 - [ ] 當前 Agent 數量未超過上限
 - [ ] 任務確實需要 Agent
-- [ ] Prompt 包含足夠 context + 相對路徑 + rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules，必須在 prompt 開頭明確寫入：`fd` 取代 `find`、`rg` 取代 `grep`、`uv run` 前綴 Python、禁止 `sed` 修改 `.py/.md`、管道 `|` 拆兩步、輸出繁體中文）
+- [ ] Prompt 包含足夠 context + 相對路徑 + rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules，必須在 prompt 開頭明確寫入：`fd` 取代 `find`、`rg` 取代 `grep`、`uv run` 前綴 Python、禁止 `sed` 修改 `.py/.md`、禁止 `$` shell 展開、輸出繁體中文）
 - [ ] Uncommitted changes：需要 → 先 commit；Branch：不正確 → 先 checkout
 - [ ] 失敗 Agent 的 worktrees 已清理（`git worktree list`）
 - [ ] Agent 產出 commit 前需用戶確認（[commit-consent](../../rules/commit-consent.md)）
