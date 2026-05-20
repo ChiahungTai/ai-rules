@@ -19,6 +19,8 @@ Every public behavior — including undocumented quirks, error message text, tim
 
 Trust internal code. Validate at system edges: API route handlers, form submissions, external service responses, environment variable loading.
 
+**Where NOT to validate**: between internal functions that share type contracts, in utilities called by already-validated code, on data from your own database. Over-validating internally adds noise and hides the real boundary.
+
 **Third-party API responses are untrusted data.** Always validate their shape before using them in logic or decisions.
 
 ### Prefer Addition Over Modification

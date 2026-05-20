@@ -42,6 +42,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 遵循現有模式還是引入新模式？模組邊界乾淨？
 
 ### 4. Security — 輸入驗證、密碼安全、權限檢查
+diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [security-and-hardening](../skills/security-and-hardening/SKILL.md)
 
 ### 5. Performance — 無 N+1 查詢、無無界操作
 

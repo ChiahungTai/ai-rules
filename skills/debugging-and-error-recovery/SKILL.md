@@ -24,7 +24,13 @@ Work through in order. Do not skip steps.
 
 ### 1. Reproduce
 
-Make the failure happen reliably. If you can't reproduce it, you can't fix it with confidence. For non-reproducible bugs: check timing, environment, and state dependencies.
+Make the failure happen reliably. If you can't reproduce it, you can't fix it with confidence.
+
+**Non-reproducible bug decision tree**：
+- **Timing-dependent?** → Add timestamps to logs, try artificial delays to widen race windows
+- **Environment-dependent?** → Compare versions, OS, env vars, data state (empty vs populated)
+- **State-dependent?** → Check leaked state between tests, global variables, shared caches; run in isolation
+- **Truly random?** → Add defensive logging, set up alert for error signature, document conditions
 
 ### 2. Localize
 
