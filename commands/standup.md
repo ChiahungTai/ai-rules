@@ -62,7 +62,7 @@ fd -e jsonl . ~/.claude/projects/ --max-depth 2 --changed-within 1d
 ## 輸出格式
 
 ```markdown
-## ☀️ Standup — {YYYY-MM-DD}
+## ☀️ Standup — {YYYY-MM-DD HH:mm}
 
 ### 昨日 Commits（{N} 個）
 - `{hash}` **type(scope)**: description

@@ -45,18 +45,31 @@ fd --max-depth 3          # 限制深度
 ```
 rg "pattern"              # 遞迴搜尋（當前目錄）
 rg "pattern" src/         # 限定搜尋 src/ 目錄
-rg "pattern" file.py      # 搜尋單一檔案
+rg "pattern" file.py      # 搜尋單一檔案（路徑已知時直接指定）
 rg -t py "pattern"        # 只搜 .py 檔案
+rg -g "*.pyx" "pattern"   # glob 搜尋（--type py 不含 .pyx/.rs）
+rg -g "!test*" "pattern"  # 排除匹配 test* 的檔案
 rg -l "pattern"           # 只印檔名
-rg -c "pattern"           # 印每檔匹配數
 rg -F "exact string"      # 固定字串（不走正則）
-rg -n "pattern"           # 印行號（預設行為，可省略）
 rg --no-filename "pat"    # 不印檔名（用於提取內容）
-rg -o "pattern"           # 只印匹配部分
-rg -o -r '$1' "(\w+)\.py" # 捕獲群組替換輸出
-rg "pattern" -A 3         # 印匹配行 + 後 3 行
+rg -o -r '$1' "(\w+)\.py" # 捕獲群組替換輸出（$1 是 rg 語法，非 shell expansion）
+```
+
+## 搜尋策略
+
+- **找檔案**：`rg -l "pattern"` 或 `fd` — 只需檔名
+- **看內容**：`rg --heading -A 3 "pattern" src/` — 多檔搜尋省 token
+- **單檔搜尋**：`rg "pattern" file.py` — 路徑已知時直接指定，不需遞迴
+- **跨語言搜尋**：`rg -g "*.py" -g "*.pyx" -g "*.rs" "pattern"` — 補足 `--type` 不涵蓋的副檔名
+
+## --heading 省 token
+
+多檔搜尋時加 `--heading`，檔名只在開頭印一次（預設每行重複完整路徑，浪費 token）：
+
+```
+rg --heading -A 2 "fn name" src/
 ```
 
 - `rg` 預設正則匹配，固定字串用 `-F`
 - 預設遵守 `.gitignore`，搜尋被忽略的檔案加 `--no-ignore`
-- `rg "pattern" <dir>` 限定目錄搜尋，`rg "pattern" <file>` 限定單檔
+- `-g` glob 比 `--type` 更靈活，支援任意副檔名和排除模式

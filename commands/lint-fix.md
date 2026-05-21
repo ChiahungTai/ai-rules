@@ -59,10 +59,9 @@ def process_data(data):
 ```
 
 #### 判斷標準
-1. **檢查 pyproject.toml 的 per-file-ignores**：如果專案已設定例外，尊重專案配置
-2. **分析是否真的有 circular import**：
-   - 大部分情況沒有，AI 只是偷懶
-   - 如果真的有，建議討論架構重構
+1. **預設假設：不是 circular import**。AI 常偷懶放在函數內，99% 只是偷懶，不是真的有循環依賴
+2. **真的遇到 circular import 時**：正確解法是重構目錄結構（調整 parent-child 關係），不是局部 import。局部 import 只掩蓋問題
+3. **檢查 pyproject.toml 的 per-file-ignores**：如果專案已設定例外，尊重專案配置
 
 ### 優先級 2：`__init__.py` 太肥
 
