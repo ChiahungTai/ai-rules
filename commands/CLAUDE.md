@@ -16,7 +16,7 @@
 ### 核心開發流程
 
 ```
-/spec → /execution-plan → /ep-review → /judge-review → /build → /code-review → /commit
+/spec → /execution-plan → /ep-review → /judge-review → /build（含 Agent Review）→ [/code-review] → /commit
 ```
 
 - `/spec` — 結構化需求討論（User Story、假設、技術選型、邊界）

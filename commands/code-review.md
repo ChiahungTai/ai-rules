@@ -76,7 +76,7 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 ## 流程位置
 
 ```
-/spec → /execution-plan → /ep-review → /judge-review → /build → /code-review → /commit
+/spec → /execution-plan → /ep-review → /judge-review → /build（含 Agent Review）→ /code-review → /commit
 ```
 
 後續：`/claude:sync` → `/consistency` → `/commit`

@@ -95,7 +95,7 @@ uv run mypy .
 ## 流程位置
 
 ```
-/build → /code-review → /commit
+/build（含 Agent Review）→ [/code-review] → /commit
 ```
 
 前置：`/lint-fix`（lint 不通過時）、`/code-review`

@@ -99,9 +99,29 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 全量 Lint + mypy + pytest + Examples 全量驗證
 
+### 階段 3.5：Agent Review Cycle
+
+**Writer/Reviewer 分離**：用獨立 Agent context 做品質閘門，避免主 LLM 審查自己的 code。
+
+#### 3.5a. Spawn Code Review Agent
+
+Spawn Agent（subagent_type: "Explore"，read-only by design），prompt 包含：
+- `git diff` 範圍（所有 build 產出的變更）
+- EP 完成度稽核：讀 EP 段落表，對比 git diff，列出 Done / Skipped / Partial
+- 標準 code-review 方法論（引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md)）
+- 相關檔案路徑（必讀）
+
+#### 3.5b. 主 LLM — /judge-review
+
+用 Skill tool invoke `judge-review`，傳入 Agent 的 review findings。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認。
+
+#### 3.5c. 主 LLM — Apply Changes
+
+根據 judge-review 的 ✅ 採納清單修改 code。修改完跑 `ruff check --fix && ruff format`。
+
 ### 階段 4：完成報告
 
-輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）
+輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要
 
 ---
 
@@ -127,9 +147,9 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 ## 與其他命令的協作
 
 ```
-/spec → /execution-plan → /ep-review → /judge-review → /build → /code-review → /commit
+/spec → /execution-plan → /ep-review → /judge-review → /build（含 Agent Review）→ [/code-review] → /commit
 ```
 
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。
 
-> **所有變更尚未 commit。** 請執行 `/code-review` 後再 `/commit`。
+> **Agent Review Cycle 已完成。** 可直接 `/commit`；如需額外審查可跑獨立 `/code-review`。

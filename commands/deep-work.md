@@ -64,9 +64,22 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 1. `uv run ruff check --fix . && uv run ruff format .`
 2. `uv run pytest`
 3. Examples 全量驗證
-4. CLAUDE.md 同步檢查
-5. 移除除錯用程式碼
-6. 生成摘要報告
+4. **Agent Review Cycle**（見下方）
+5. CLAUDE.md 同步檢查
+6. 移除除錯用程式碼
+7. 生成摘要報告
+
+#### Agent Review Cycle
+
+**Writer/Reviewer 分離**：用戶不在場，Agent Review 是唯一的品質閘門。
+
+1. **Spawn Code Review Agent**（subagent_type: "Explore"，read-only by design），prompt 包含：
+   - `git diff` 範圍（所有 deep-work 產出的變更）
+   - EP 完成度稽核（如有 EP）：讀 EP 段落表，對比 git diff，列出 Done / Skipped / Partial
+   - 標準 code-review 方法論（引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md)）
+   - 相關檔案路徑（必讀）
+2. **主 LLM — /judge-review**：用 Skill tool invoke `judge-review`，傳入 Agent 的 review findings。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認
+3. **主 LLM — Apply Changes**：根據 judge-review 的 ✅ 採納清單修改 code。修改完跑 `ruff check --fix && ruff format`
 
 ---
 
@@ -121,6 +134,8 @@ Agent prompt 開頭加上 /rules-reminder 六條規則摘要：
 ## 與其他命令的協作
 
 前置：`/execution-plan`（先生成計畫書）
-後續：`/code-review` → `/commit` → `/claude:sync`
+後續：`/commit` → `/claude:sync`
+
+> **Agent Review Cycle 已完成。** 可直接 `/commit`；如需額外審查可跑獨立 `/code-review`。
 
 **搭配 `/goal`**：`/goal all TaskCreate tasks completed, uv run pytest exits 0, ruff clean, mypy clean, all demos run`
