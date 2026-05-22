@@ -15,7 +15,7 @@
 - **展示再確認**：commit 前展示變更摘要和建議的 commit message
 - **等待確認**：用戶必須明確回覆「commit」「確認」「OK」等肯定詞
 - **未確認不 commit**：未收到確認 → 不執行 git commit，不繼續下一步
-- **適用所有命令**：包含 `/build`、`/code-review`、`/verify-review`、`/lint-fix` 等
+- **適用所有命令**：包含 `/build`、`/code-review`、`/judge-review`、`/lint-fix` 等
 
 ---
 
@@ -27,7 +27,7 @@
 |------|---------|
 | `/build` 段落完成 | 展示結果，不 auto-commit |
 | `/code-review` 發現問題並修正 | 展示修正，等待用戶確認 |
-| `/verify-review` 採納建議 | 展示變更，等待用戶確認 |
+| `/judge-review` 採納建議 | 展示變更，等待用戶確認 |
 | `/commit` 用戶主動觸發 | 展示 message，等待用戶確認 |
 
 ---

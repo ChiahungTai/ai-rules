@@ -1,8 +1,8 @@
 ---
 description: "審查者回頭驗收實作結果，確認修改合理性和不修改的合理性。/followup-review [審查報告]（無參數則從 git 變更推斷）"
-when_to_use: "Verify that code changes from a previous review were implemented correctly. Use after /verify-review decisions have been applied."
+when_to_use: "Verify that code changes from a previous review were implemented correctly. Use after /judge-review decisions have been applied."
 usage: "/followup-review [審查報告與採納決策]"
-argument-hint: "可選：貼上原始審查報告和 verify-review 的決策結果；無參數時自動從 git 變更推斷"
+argument-hint: "可選：貼上原始審查報告和 judge-review 的決策結果；無參數時自動從 git 變更推斷"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ---
 
@@ -39,7 +39,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 ### 有參數模式
 
-提供原始審查報告和 verify-review 決策 → 按標準流程對照驗收。
+提供原始審查報告和 judge-review 決策 → 按標準流程對照驗收。
 
 ### 逐項驗收
 
@@ -80,12 +80,12 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 ## 流程位置
 
-前置：`/code-review` → `/verify-review` → 實作 AI 完成修改
+前置：`/code-review` → `/judge-review` → 實作 AI 完成修改
 後續：未通過 → 再次修正 → `/followup-review`；全部通過 → `/commit`
 
 ### 完整流程
 
 ```
-/code-review（Review LLM）→ /verify-review（Implementation LLM）
+/code-review（Review LLM）→ /judge-review（Implementation LLM）
 → 實作修改 → /followup-review（Review LLM 驗收）
 ```

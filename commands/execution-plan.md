@@ -97,8 +97,8 @@ EP 草稿完成後、寫入前，spawn Explore Agent 驗證：
 ## 流程位置
 
 ```
-/spec → /execution-plan → /ep-review → /verify-review → /build → /code-review
+/spec → /execution-plan → /ep-review → /judge-review → /build → /code-review
 ```
 
 前置：`/spec`
-後續：`/ep-review` → `/verify-review` → `/build`
+後續：`/ep-review` → `/judge-review` → `/build`

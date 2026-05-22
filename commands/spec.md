@@ -86,5 +86,5 @@ Never（不做）：[列表]
 ## 流程位置
 
 ```
-/spec → /execution-plan → /ep-review → /verify-review → /build → /code-review
+/spec → /execution-plan → /ep-review → /judge-review → /build → /code-review
 ```

@@ -1,6 +1,6 @@
 ---
 description: "基於 Execution Plan 逐段實作（準備、TDD、驗證、提交）。/build <EP路徑> [段落編號]"
-when_to_use: "Implement an Execution Plan segment-by-segment using TDD. Use after /ep-review and /verify-review. Supports parallel agents with --max-agents."
+when_to_use: "Implement an Execution Plan segment-by-segment using TDD. Use after /ep-review and /judge-review. Supports parallel agents with --max-agents."
 usage: "/build <Execution Plan 路徑> [段落編號]"
 argument-hint: "<Execution Plan 檔案路徑> [段落編號] [--max-agents N]"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
@@ -10,7 +10,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 基於 Execution Plan 進行逐段實作。每個段落都是 Self-Contained Segment，獨立實作、測試、驗證。
 
-**自主實作模式**：EP 已經過 `/ep-review` 和 `/verify-review` 充分審查，實作階段自主執行。自主決策、錯誤自癒遵循 [autonomous-execution](../skills/autonomous-execution/SKILL.md)。
+**自主實作模式**：EP 已經過 `/ep-review` 和 `/judge-review` 充分審查，實作階段自主執行。自主決策、錯誤自癒遵循 [autonomous-execution](../skills/autonomous-execution/SKILL.md)。
 
 委託 Skills（實作時提供方法論）：
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則
@@ -30,7 +30,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 **強制輸出**：快檢完成後必須印出 `## EP 快檢：✅ 可實作` 或 `## EP 快檢：⚠️ N 項自行補充`。不得靜默跳過。
 
-**前置流程確認**（僅記錄，不因此停下）：`/spec → /execution-plan → /ep-review → /verify-review → /build`
+**前置流程確認**（僅記錄，不因此停下）：`/spec → /execution-plan → /ep-review → /judge-review → /build`
 
 **EP 品質快掃**：
 
@@ -127,7 +127,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 ## 與其他命令的協作
 
 ```
-/spec → /execution-plan → /ep-review → /verify-review → /build → /code-review → /commit
+/spec → /execution-plan → /ep-review → /judge-review → /build → /code-review → /commit
 ```
 
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。
