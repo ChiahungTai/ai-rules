@@ -95,7 +95,9 @@ uv run mypy .
 ## 流程位置
 
 ```
-/build（含 Agent Review）→ [/code-review] → /commit
+/build（含 Agent Review）→ [/code-review（含 commit message）] → /commit
 ```
 
 前置：`/lint-fix`（lint 不通過時）、`/code-review`
+
+**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析），直接進入階段 1（Lint）→ 階段 4（確認）→ 階段 5（提交）。

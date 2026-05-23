@@ -73,10 +73,40 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 
 ---
 
+## Commit Message 產生
+
+審查完成後，基於已分析的 diff 直接產生 commit message。
+
+**格式**：`<type>(<scope>): <description>`
+
+**語言規範**：
+
+| 部分 | 語言 | 範例 |
+|------|------|------|
+| type | 英文 | `feat`, `fix`, `refactor` |
+| scope | 英文 | `data`, `commands`, `ui` |
+| description | **繁體中文**（術語保留英文） | `新增 DataGateway 統一數據介面` |
+| body | 繁體中文 + 英文術語 | 說明為什麼這樣改 |
+
+**type 對應審查結論**：
+
+| 審查判斷 | type | 說明 |
+|----------|------|------|
+| 新功能、新模組 | `feat` | 新增能力 |
+| 修正邏輯錯誤、安全問題 | `fix` | 修正既有問題 |
+| 架構調整、模式統一 | `refactor` | 不改行為的結構改善 |
+| 效能改善 | `perf` | 回應 Performance 軸發現 |
+| 測試補充 | `test` | 回應 Correctness 軸發現 |
+| 文檔、CLAUDE.md | `docs` | 文檔同步 |
+
+**產生時機**：審查結論為「無 Critical 問題」或「用戶確認 Critical 可接受」時才產生。有未解決 Critical 問題 → 只輸出審查報告，不產生 commit message。
+
+---
+
 ## 流程位置
 
 ```
-/spec → /execution-plan（含 EP Review）→ /build（含 Agent Review）→ /code-review → /commit
+/spec → /execution-plan（含 EP Review）→ /build（含 Agent Review）→ /code-review（含 commit message）→ /commit
 ```
 
-後續：`/claude:sync` → `/consistency` → `/commit`
+後續：用戶確認 commit message → `/commit`（跳過階段 2 分析，直接執行 lint + commit）
