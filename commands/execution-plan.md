@@ -73,16 +73,33 @@ EP 專屬約束：
 
 ---
 
-## Dry Run 驗證
+## EP Review Cycle
 
-EP 草稿完成後、寫入前，spawn Explore Agent 驗證：
+**Writer/Reviewer 分離**：用獨立 Agent context 審查 EP，避免主 LLM 審查自己的計畫。合併 Dry Run（技術可行性）和四維度審查（計畫品質）為一次 Agent spawn。
 
-1. **Call Stack 可行性**：pseudo code 每步能否跑通？
-2. **Pattern Alignment（最重要）**：EP 設計假設的 usage pattern 是否與 callers 實際 pattern 一致？
-3. **下游依賴發現**：有沒有 EP 沒提到的 callers？
-4. **邊界條件**：空值、null、缺少欄位等
+### Agent 審查
 
-發現缺口時補強 EP 再輸出。
+Spawn Agent（subagent_type: "Explore"，read-only by design），prompt 包含：
+- EP 完整內容
+- Dry Run 驗證：
+  1. **Call Stack 可行性**：pseudo code 每步能否跑通？
+  2. **Pattern Alignment（最重要）**：EP 設計假設的 usage pattern 是否與 callers 實際 pattern 一致？
+  3. **下游依賴發現**：有沒有 EP 沒提到的 callers？
+  4. **邊界條件**：空值、null、缺少欄位等
+- 四維度審查（引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md)）：
+  1. **完整性**：每段有驗收標準？檔案完整列出？依賴遺漏？邊界考量？
+  2. **Rules 合規**：命名、code-edit-constraints、_ai-behavior-constraints、CLAUDE.md 更新需求
+  3. **內部一致性**：段落間依賴順序、同一檔案修改矛盾、技術方案一致、語義約束標記
+  4. **遺漏風險**：Demo、測試、`__init__.py`、配置檔案、受影響模組
+- 相關檔案路徑（必讀）
+
+### 主 LLM — /judge-review
+
+用 Skill tool invoke `judge-review`，傳入 Agent 的 review findings。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認。
+
+### 主 LLM — Apply Changes
+
+根據 judge-review 的 ✅ 採納清單修正 EP。
 
 ---
 
@@ -97,8 +114,8 @@ EP 草稿完成後、寫入前，spawn Explore Agent 驗證：
 ## 流程位置
 
 ```
-/spec → /execution-plan → /ep-review → /judge-review → /build → /code-review
+/spec → /execution-plan（含 EP Review）→ /build（含 Agent Review）→ [/code-review] → /commit
 ```
 
 前置：`/spec`
-後續：`/ep-review` → `/judge-review` → `/build`
+後續：`/build`（如需額外審查可跑獨立 `/ep-review` 或 `/judge-review`）
