@@ -30,6 +30,17 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 ---
 
+## Lint 預檢
+
+對 modified files 執行 `ruff check --select F401,PLC0415`，結果併入審查報告。
+
+| Rule | 抓什麼 | 唯一合理例外 |
+|------|--------|-------------|
+| F401 | unused import（LLM 重構後殘留） | `__all__` 用途、optional dependency try/except |
+| PLC0415 | import 不在檔案頂部（LLM 偷懶） | circular import avoidance |
+
+---
+
 ## 五軸審查 + 第一性原理
 
 ### 1. Correctness — 符合規格嗎？
