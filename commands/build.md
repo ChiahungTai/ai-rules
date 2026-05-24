@@ -93,11 +93,11 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 #### 驗證
 
-每段完成後：`ruff check --fix && ruff format` → `mypy .` → `pytest <test> -v` → Examples 驗證
+每段完成後：`ruff check --fix && ruff format` → `mypy .` → `pytest <test> -v`（背景跑）→ Examples 驗證
 
 ### 階段 3：整合驗證
 
-全量 Lint + mypy + pytest + Examples 全量驗證
+全量 Lint + mypy + pytest（背景跑）+ Examples 全量驗證
 
 ### 階段 3.5：Agent Review Cycle
 

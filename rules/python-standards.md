@@ -49,7 +49,8 @@ uv run python script.py
 uv run pytest tests/test_example.py -v
 ```
 
-禁止：`python`、`python3`、`PYTHONPATH=$PWD`、外部 `timeout`/`gtimeout`（macOS 無此命令）
+- **pytest 一律背景跑**（`run_in_background: true`），不論從哪個 command 或 context 觸發
+- 禁止：`python`、`python3`、`PYTHONPATH=$PWD`、外部 `timeout`/`gtimeout`（macOS 無此命令）
 
 ### 🔴 禁止：多行 `python -c` 中換行後使用 `#` 註解
 

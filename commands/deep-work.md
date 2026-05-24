@@ -56,13 +56,13 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 每段完成後：
 1. 語法檢查
 2. Import 檢查
-3. `uv run pytest <test_file> -v`
+3. `uv run pytest <test_file> -v`（背景跑）
 4. **Examples 驗證**（強制）：查映射表，若模組被 example 引用 → `uv run python <example_path>`
 
 ### 階段 5：收尾
 
 1. `uv run ruff check --fix . && uv run ruff format .`
-2. `uv run pytest`
+2. `uv run pytest`（背景跑）
 3. Examples 全量驗證
 4. **Agent Review Cycle**（見下方）
 5. CLAUDE.md 同步檢查
