@@ -96,6 +96,17 @@ DEAD CODE IDENTIFIED:
 - **Don't accept deferred cleanup promises.** "I'll clean it up later" never happens.
 - **Accept override gracefully.** If the author has full context and disagrees, defer.
 
+## Reviewer Self-Verification
+
+Every claim in a review must be verified against actual code. Unverified claims waste the author's time and erode trust in reviews.
+
+- **Claiming a file/directory exists** → Read it first
+- **Claiming a naming conflict** → Check the import chain (is it actually a Python package? does the import work?)
+- **Claiming a dependency order problem** → Trace the execution order across segments/files
+- **Claiming something is missing** → Verify it doesn't exist elsewhere or under a different name
+
+If you cannot verify a claim with the tools available, label it explicitly as **unverified** rather than stating it as fact.
+
 ## Multi-Model Review Pattern
 
 Different models have different blind spots. For important reviews, use separate sessions:
