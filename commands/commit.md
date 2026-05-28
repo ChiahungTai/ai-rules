@@ -49,7 +49,18 @@ uv run mypy .
 
 深度理解：檔案層級（模組、功能區域）+ 程式碼層級（業務邏輯）+ 變更類型（feat/fix/refactor/perf/test/docs/style/chore）
 
-### 階段 3：生成 Commit Message
+### 階段 3：UC 狀態確認
+
+**大型/中型變更時執行，小型變更跳過。**
+
+1. 識別變更涉及的領域目錄
+2. 檢查該目錄的 USE-CASES.md：是否有 UC 狀態需要更新？
+3. 在 commit message 展示後，提示用戶確認：
+   - 「本次變更是否需要更新 UC 狀態？」
+   - 如果需要，提醒執行 `/uc-status` 或手動更新
+4. **不自動修改 USE-CASES.md**（本命令只負責提醒）
+
+### 階段 4：生成 Commit Message
 
 **格式**：`<type>(<scope>): <description>`
 
@@ -62,17 +73,17 @@ uv run mypy .
 | description | **繁體中文**（術語保留英文） | `新增 DataGateway 統一數據介面` |
 | body | 繁體中文 + 英文術語 | 說明為什麼這樣改 |
 
-### 階段 4：用戶確認
+### 階段 5：用戶確認
 
-展示變更摘要 + 建議 commit message → **等待用戶明確確認**。
+展示變更摘要 + 建議 commit message + UC 狀態提醒（如適用）→ **等待用戶明確確認**。
 
 **遵守 `commit-consent` rule**：未收到確認絕不執行 git commit。
 
-### 階段 5：執行 Commit
+### 階段 6：執行 Commit
 
 確認後 `git add` + `git commit`（含 `Co-Authored-By: Claude`）
 
-### 階段 6：選配分支操作
+### 階段 7：選配分支操作
 
 - `--push`：`git push`
 - `--rebase <branch>`：fetch + rebase + push
@@ -100,4 +111,4 @@ uv run mypy .
 
 前置：`/lint-fix`（lint 不通過時）、`/code-review`
 
-**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析），直接進入階段 1（Lint）→ 階段 4（確認）→ 階段 5（提交）。
+**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析）和階段 3（UC 狀態確認），直接進入階段 1（Lint）→ 階段 5（確認）→ 階段 6（提交）。

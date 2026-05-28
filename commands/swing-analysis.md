@@ -44,9 +44,17 @@ uv run python -u examples/rule_forge/demo_backbone_trajectory_viewer.py
 | `generate` | 點擊 Generate | 使用者觸發重新分析 | — |
 | `rebuild_ui` | UI 重建完成 | 數據載入完成，可互動 | — |
 
-## Phase 5：輔助查詢（MLDataset）
+## Phase 5：輔助查詢（MLDataset + 經典技術分析）
 
 使用者討論過程中常需要查詢歷史技術指標（RSI、MA 等）。**必須使用 MLDataset 已計算的資料，禁止重算指標。**
+
+### 分析視角要求
+
+討論股票走勢時，LLM 的分析必須遵循深層思考框架（見 `~/.claude/rules/deep-thinking.md`）：
+
+1. **先從經典 TA 出發**（Dow Theory 趨勢結構、Elliott Wave 波段位置、Wyckoff 階段、Darvas Box 突破/跌破、Bollinger Bands 頻寬/回歸、Support/Resistance 關鍵價位、Volume 量價關係）
+2. **再疊加量化指標**（MLDataset 的 RSI、MACD、ATR 等）
+3. **最後整合判斷**：列出各理論的共識與歧異，供用戶判斷
 
 ### 為什麼用 MLDataset
 

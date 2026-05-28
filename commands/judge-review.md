@@ -1,6 +1,6 @@
 ---
-description: "評估其他 AI 的審查建議，基於第一性原理決定是否採納。/judge-review <ai1: 建議 [ai2: 建議]"
-when_to_use: "Evaluate AI review suggestions using first-principles reasoning against actual code. Decide adopt/reject/needs-confirmation before making changes."
+description: "評估其他 AI 的審查建議，基於深層思考框架決定是否採納。/judge-review <ai1: 建議 [ai2: 建議]"
+when_to_use: "Evaluate AI review suggestions using deep thinking (first principles + second-level consequence tracing) against actual code. Decide adopt/reject/needs-confirmation before making changes."
 usage: "/judge-review ai1: 建議全文 [ai2: 建議全文]"
 argument-hint: "貼上其他 AI 的審查建議，格式：ai1: ... 或 ai1: ... ai2: ..."
 allowed-tools: ["Read", "Grep", "Glob"]
@@ -8,14 +8,14 @@ allowed-tools: ["Read", "Grep", "Glob"]
 
 # /judge-review — AI 審查建議評估
 
-實作工程師，評估其他 AI 的代碼審查建議，基於第一性原理和實際程式碼查證決定是否採納。
+實作工程師，評估其他 AI 的代碼審查建議，基於深層思考框架（第一性原理 + 第二層後果追蹤）和實際程式碼查證決定是否採納。
 
 委託 Skills：
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則
 
 ## 核心目標
 
-**「查證 → 第一性原理分析 → 決策 → 等待確認 → 實作」**
+**「查證 → 第一性原理分析 → 第二層後果追蹤 → 決策 → 等待確認 → 實作」**
 
 ---
 

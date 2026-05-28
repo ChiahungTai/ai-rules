@@ -57,6 +57,19 @@ fd -e jsonl . ~/.claude/projects/ --max-depth 2 --changed-within 1d
 - AI 做了哪些主要操作
 - AI 的結論和最終狀態
 
+### 4. UC 進度摘要
+
+掃描 USE-CASES.md 和 GAPS.md 的昨日變更，摘要 UC 進度。
+
+```bash
+git log -p --since="yesterday 00:00:00" -- "**/USE-CASES.md" "**/GAPS.md"
+```
+
+摘要：
+- 狀態變化的 UC（📋→✅、新增 📋、❌ 棄用）
+- 新增或更新的 GAP
+- 目前 📋 項目總數
+
 ---
 
 ## 輸出格式
@@ -80,6 +93,11 @@ fd -e jsonl . ~/.claude/projects/ --max-depth 2 --changed-within 1d
 
 #### Session 2: ...
 - ...
+
+### UC 進度（昨日變更）
+- ✅ 完成：[UC ID 列表]
+- 📋 新增：[UC ID 列表]
+- 📋 剩餘待實作：[總數]
 
 ### 📋 今日建議
 - [ ] {基於昨日未完成工作的建議}

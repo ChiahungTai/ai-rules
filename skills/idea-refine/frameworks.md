@@ -47,6 +47,21 @@ Break the idea down to its fundamental truths, then rebuild from there:
 
 **Best for:** Breaking out of incremental thinking. When every idea feels like a small improvement on the status quo.
 
+## Second Level Thinking
+
+After first principles generates a solution, trace its consequences forward:
+
+1. **First-order consequence**: What happens directly if we do this?
+2. **Second-order consequence**: What does *that* lead to? ("And then what?")
+3. **If I'm wrong**: What's the worst case? Can we reverse it?
+4. **Consensus vs. divergence**: What would most people/things do? How is this different?
+
+**Why it complements first principles**: First principles generates solutions that are correct in isolation. Second level thinking catches solutions that fail when they interact with a complex system (e.g., Tesla's "production hell" — the manufacturing redesign was correct from physics but failed in real factory conditions).
+
+**Rule**: Second level analysis is mandatory for all decisions. Deeper tracing (3rd, 4th level) is optional — the LLM judges based on decision impact.
+
+**Best for:** Validating first-principles solutions before committing. One-way door decisions (irreversible). Stock analysis (tracing consensus/divergence across technical theories).
+
 ## Jobs to Be Done (JTBD)
 
 Focus on what the user is trying to accomplish, not what they say they want:

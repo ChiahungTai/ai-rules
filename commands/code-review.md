@@ -1,6 +1,6 @@
 ---
 description: "第一性原理代碼審查。/code-review [branch] [base]"
-when_to_use: "Review uncommitted changes or a feature branch using five-axis methodology and first-principles reasoning."
+when_to_use: "Review uncommitted changes or a feature branch using multi-axis methodology and first-principles reasoning."
 usage: "/code-review [target-branch] [base-branch]"
 argument-hint: "無參數審查 uncommitted / branch 名稱審查該 branch"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]
@@ -12,7 +12,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 委託 Skills：
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則
-- [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) — 五軸審查方法論
+- [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) — 六軸審查方法論
 
 按需讀取：
 - [security-and-hardening](../skills/security-and-hardening/SKILL.md) — 安全審查細節
@@ -41,7 +41,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 ---
 
-## 五軸審查 + 第一性原理
+## 六軸審查 + 第一性原理
 
 ### 1. Correctness — 符合規格嗎？
 邊界情況、測試充分性
@@ -57,11 +57,21 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 
 ### 5. Performance — 無 N+1 查詢、無無界操作
 
-### 第一性原理層面
+### 6. UC Coverage — 滿足 Use Case 描述嗎？
+大型/中型變更時審查：
+- 實作是否涵蓋 UC 描述的所有行為？
+- 是否有 UC 引用的行為在 diff 中沒有對應實作？
+- EP 段落引用的 UC ID 是否與 USE-CASES.md 一致？
+小型變更（bug fix）跳過此軸。
+
+### 第一性原理 + 第二層思考
 - **讀相關程式碼**：不只看 diff，讀取被修改檔案引用的其他模組
 - **確認實作合理性**：為什麼這樣寫？有沒有更簡單的方式？
 - **驗證假設**：修改是否基於對現有程式碼的正確理解？
+- **追蹤後果**：這個修改的下游影響是什麼？依賴模組是否受影響？
 - **審查者自證**：提出問題前必須用 Read/Grep 查證宣稱。聲稱檔案存在 → 讀它；聲稱命名衝突 → 查 import 鏈；聲稱依賴順序有問題 → 追蹤執行順序。無法查證的宣稱標注「未驗證」
+
+深層思考框架見 `~/.claude/rules/deep-thinking.md`
 
 ---
 

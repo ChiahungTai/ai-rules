@@ -38,6 +38,16 @@ tail -f <背景任務output路徑> | grep --line-buffered "\[ACTION\]\|\[FAIL\]\
 4. **上下文感知**：回答前先讀 action log + 相關分析檔案
 5. **記錄**：討論結束後寫入 `llm-discussions/`
 
+## 領域感知
+
+當 UI 涉及股票分析（Trajectory Viewer、K 線圖等），LLM 的分析必須遵循深層思考框架的股票分析視角（見 `~/.claude/rules/deep-thinking.md`）：
+
+- **Layer 1（必備）**：先從經典技術分析理論出發（Dow Theory、Elliott Wave、Wyckoff、Darvas Box、Bollinger Bands、Support/Resistance、Volume、Trend）
+- **Layer 2（疊加）**：再疊加系統計算的指標（indicators/）和結構（structure/）
+- **Layer 3（整合）**：列出各理論的共識與歧異，讓用戶判斷
+
+未經 Layer 1 直接跳到 Layer 2 數值判斷（如「RSI=75 所以超買」）是錯誤的分析流程。
+
 ## 討論記錄
 
 討論結束後（使用者明確結束或 session 結束前），將結論寫入：

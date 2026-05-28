@@ -5,11 +5,11 @@ description: Conducts multi-axis code review. Use before merging any change. Use
 
 # Code Review and Quality
 
-Five-axis review with quality gates. Every change gets reviewed before merge — no exceptions.
+Six-axis review with quality gates. Every change gets reviewed before merge — no exceptions.
 
 **Approve when the change definitely improves overall code health**, even if it isn't perfect. Don't block because it isn't exactly how you would have written it.
 
-## The Five-Axis Review
+## The Six-Axis Review
 
 ### 1. Correctness
 - Matches spec/task requirements?
@@ -47,6 +47,15 @@ For detailed profiling, read [performance-optimization](../performance-optimizat
 - Missing pagination on list endpoints?
 - Large objects created in hot paths?
 
+### 6. UC Coverage
+
+For projects using UC-Driven Development, verify implementation against USE-CASES.md.
+
+- Does implementation cover all UC-defined behaviors?
+- Are UC-referenced behaviors present in the diff?
+- EP segment UC IDs match USE-CASES.md?
+- Skip for small changes (bug fix, docs)
+
 ## Review Process
 
 ### Step 1: Understand Context
@@ -60,7 +69,7 @@ Tests reveal intent and coverage:
 - Would they catch a regression?
 
 ### Step 3: Review Implementation
-Walk through code with the five axes.
+Walk through code with the six axes.
 
 ### Step 4: Categorize Findings
 

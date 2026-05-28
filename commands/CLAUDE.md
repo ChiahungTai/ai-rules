@@ -16,17 +16,18 @@
 ### 核心開發流程
 
 ```
-/spec → /execution-plan（含 EP Review）→ /build（含 Agent Review）→ [/code-review（含 commit message）] → /commit
+/spec（含 UC 定義）→ /execution-plan（引用 UC ID）→ /build（含 Agent Review + UC 狀態更新）
+  → /code-review（六軸，含 UC 覆蓋度）→ /commit（含 UC 狀態確認）
 ```
 
-- `/spec` — 結構化需求討論（User Story、假設、技術選型、邊界）
+- `/spec` — 結構化需求討論（User Story、假設、UC 定義、技術選型、邊界）
 - `/execution-plan` — 段落式實作計畫書，基於 /spec 生成 Self-Contained Segments（含 EP Review Cycle）
 - `/ep-review` — 審查 Execution Plan 合理性（已內建於 `/execution-plan`，可獨立使用）
-- `/judge-review` — 評估其他 AI 的審查建議，基於第一性原理決定採納與否
-- `/build` — 基於 Execution Plan 逐段實作（TDD）
-- `/code-review` — 第一性原理代碼審查
+- `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
+- `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新）
+- `/code-review` — 六軸代碼審查（含 UC 覆蓋度）
 - `/followup-review` — 審查者回頭驗收實作結果
-- `/commit` — Commit 入口（lint 閘門 → message → 確認）
+- `/commit` — Commit 入口（lint 閘門 → UC 狀態確認 → message → 確認）
 
 ### 自主實作
 
@@ -51,7 +52,8 @@
 
 ### 日常工具
 
-- `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要）
+- `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要、UC 進度）
+- `/uc-status` — USE-CASES / GAPS 跨領域狀態掃描（全局進度儀表板）
 
 ### 其他
 
