@@ -33,7 +33,7 @@ fd "GAPS.md" <掃描根目錄> --type f
 對每個 USE-CASES.md，提取 title line 的狀態標記。
 
 **兩種標記格式**（向下相容）：
-- 標準格式：`### ✅ D-01: title — file.py`（狀態在前，優先）
+- 標準格式：`### ✅ D-01: title — path/file.py`（狀態在前，路徑為專案相對路徑）
 - 舊格式：`### B-01: title 🔧 library`（狀態在後）
 
 **狀態分類**：

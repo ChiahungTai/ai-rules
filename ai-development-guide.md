@@ -124,7 +124,9 @@
 | ❌ | 已棄用 |
 | 🔧 | Library 已實作，尚無 UC 入口（回溯盤點過渡狀態） |
 
-標題格式：`### ✅ UC-ID: 簡述 — 實作位置`
+標題格式：`### ✅ UC-ID: 簡述 — 專案相對路徑`
+
+實作位置必須使用**專案根目錄相對路徑**（如 `mosaic_alpha/data/fetchers/twse_api.py`、`scripts/data_management/sync_market_data.py`），禁止只寫檔名。理由：USE-CASES.md 的讀者是 AI agent，裸檔名無法定位程式碼。
 
 ### 四種開發情境
 
