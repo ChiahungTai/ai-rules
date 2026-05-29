@@ -53,7 +53,7 @@
 ### 日常工具
 
 - `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要、UC 進度）
-- `/uc-status` — USE-CASES / GAPS 跨領域狀態掃描（全局進度儀表板）
+- `/uc-status` — USE-CASES 跨領域狀態掃描（全局進度儀表板）
 
 ### 其他
 
