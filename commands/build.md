@@ -19,6 +19,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 - [debugging-and-error-recovery](../skills/debugging-and-error-recovery/SKILL.md) — 系統化除錯
 - [autonomous-execution](../skills/autonomous-execution/SKILL.md) — 自主決策框架
 - [python-type-gap](../skills/python-type-gap/SKILL.md) — 第三方套件 type gap（mypy 失敗時）
+- [agent-workflow](../skills/agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 規範
 
 ---
 
@@ -103,20 +104,51 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 ### 階段 4：Agent Review Cycle
 
 **Writer/Reviewer 分離**：用獨立 Agent context 做品質閘門，避免主 LLM 審查自己的 code。
+**適應式多 Agent Review**：依模型並發上限和變更複雜度決定 spawn 幾個 review agent。
 
-#### 4a. Spawn Code Review Agent
+#### Step 1: 偵測模型 → 查表
 
-Spawn Agent（subagent_type: "Explore"，read-only by design），prompt 包含：
+從系統提示詞偵測 GLM 模型，查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md) 決定 max-agents。
+印出確認：`[Review Agent] model=X, max=N`
+
+#### Step 2: Adaptive Agent 數量
+
+**max-agents = 1**（haiku/opus）→ 跳至下方「單一 Agent Prompt（Fallback）」。
+
+**max-agents > 1**（如 sonnet = 4）→ 根據變更特徵啟用維度：
+
+| 維度 Agent | 審查項目 | 啟用條件 | 優先級 |
+|-----------|---------|---------|--------|
+| EP 合規 | EP 完成度稽核：Done / Skipped / Partial | **always**（有 EP 時） | P0 |
+| 正確性 | 邏輯 bugs、邊界案例、error handling | 變更 ≥ 3 files | P1 |
+| 架構與安全 | 設計模式、耦合、安全性 | 變更 ≥ 5 files 或含 API changes | P2 |
+
+啟用維度數 > max-agents → 從低優先級（P2 起）合併至前一個 agent（不丟棄任何維度）。
+
+#### Step 3: 平行 Spawn
+
+同時 spawn 所有啟用的 review agents（subagent_type: "Explore"，read-only by design）。
+
+每個 agent prompt 包含：
+- `git diff` 範圍（所有 build 產出的變更）
+- 該維度的檢查項目清單（如上表）
+- 相關檔案路徑（必讀）
+- 引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) 方法論
+- rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
+
+#### 單一 Agent Prompt（Fallback，max-agents = 1）
+
+Spawn Agent（subagent_type: "Explore"），prompt 包含：
 - `git diff` 範圍（所有 build 產出的變更）
 - EP 完成度稽核：讀 EP 段落表，對比 git diff，列出 Done / Skipped / Partial
 - 標準 code-review 方法論（引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md)）
 - 相關檔案路徑（必讀）
 
-#### 4b. 主 LLM — /judge-review
+#### 主 LLM — /judge-review
 
-用 Skill tool invoke `judge-review`，傳入 Agent 的 review findings。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認。
+用 Skill tool invoke `judge-review`，傳入**所有 agent 的 review findings**（合併）。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認。
 
-#### 4c. 主 LLM — Apply Changes
+#### 主 LLM — Apply Changes
 
 根據 judge-review 的 ✅ 採納清單修改 code。修改完跑 `ruff check --fix && ruff format`。
 
