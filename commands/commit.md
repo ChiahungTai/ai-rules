@@ -49,6 +49,24 @@ uv run mypy .
 
 深度理解：檔案層級（模組、功能區域）+ 程式碼層級（業務邏輯）+ 變更類型（feat/fix/refactor/perf/test/docs/style/chore）
 
+### 階段 2.5：引用同步掃描
+
+**當變更包含 `rules/`、`skills/`、`commands/` 下的 .md 檔案時執行，否則跳過。**
+
+目的：修改 A 後，掃描是否有 B/C/D 引用了 A 但沒同步更新。
+
+掃描範圍（按變更檔案類型）：
+
+| 變更檔案 | 掃描目標 | 搜尋方式 |
+|---------|---------|---------|
+| `commands/*.md` | `commands/CLAUDE.md` 索引 | `rg "command名" commands/CLAUDE.md` |
+| `commands/claude/*.md` | `commands/CLAUDE.md` 索引 + 引用此命令的其他 .md | `rg "命令名或檔名" rules/ skills/ commands/` |
+| `skills/*/SKILL.md` | `skills/CLAUDE.md` 索引 + 引用此 skill 的 commands | `rg "skill名" commands/ rules/` |
+| `rules/*.md` | 引用此 rule 的 commands 和 skills | `rg "rule名或檔名" commands/ skills/` |
+| `ai-development-guide.md` | 所有引用 guide 定義的 commands（如 UC 狀態 emoji） | `rg "具體定義文字" commands/` |
+
+輸出：列出需檢查的檔案（不是要求全部更新，是提醒檢查是否需要更新）。用戶在階段 5 確認時一併判斷。
+
 ### 階段 3：UC 狀態確認
 
 **大型/中型變更時執行，小型變更跳過。**
@@ -111,4 +129,4 @@ uv run mypy .
 
 前置：`/lint-fix`（lint 不通過時）、`/code-review`
 
-**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析）和階段 3（UC 狀態確認），直接進入階段 1（Lint）→ 階段 5（確認）→ 階段 6（提交）。
+**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描）和階段 3（UC 狀態確認），直接進入階段 1（Lint）→ 階段 5（確認）→ 階段 6（提交）。

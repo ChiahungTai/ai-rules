@@ -72,6 +72,8 @@ permission-mode: "acceptEdits"
 - **Pipeline 編排**: 多步驟流程的順序和數據銜接點（判斷：從單一函數看不到的全局流程 → High Signal）
 - **慣例映射**: 專案特定的約定和語義映射（判斷：名稱推導不出語義 → High Signal）
 - **可複用基礎設施**: 其他模組可能會複用的 utilities、base classes、protocols（判斷：如果另一個模組的 EP 設計新功能時會想複用 → 值得記錄）。格式：`path/to/file.py:ClassName` — 用途簡述
+- **負空間指導**: 「不要做什麼」— LLM 無法自行推導不做的事（如「API 內部函數之間不要加驗證」）
+- **行為校準**: 判斷尺度 — LLM 不會自行產生的校準原則（如「拒絕≠錯誤」）
 
 #### 可複用基礎設施段落規範
 
