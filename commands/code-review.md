@@ -3,7 +3,7 @@ description: "第一性原理代碼審查。/code-review [branch] [base]"
 when_to_use: "Review uncommitted changes or a feature branch using multi-axis methodology and first-principles reasoning."
 usage: "/code-review [target-branch] [base-branch]"
 argument-hint: "無參數審查 uncommitted / branch 名稱審查該 branch"
-allowed-tools: ["Read", "Grep", "Glob", "Bash"]
+allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 ---
 
 # /code-review — 第一性原理代碼審查
@@ -17,6 +17,8 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 按需讀取：
 - [security-and-hardening](../skills/security-and-hardening/SKILL.md) — 安全審查細節
 - [performance-optimization](../skills/performance-optimization/SKILL.md) — 效能審查細節
+
+Workflow 審查協調：[workflow-review-pattern.md](claude/_common/workflow-review-pattern.md)（Ultracode 下平行六軸審查）
 
 ---
 
@@ -38,6 +40,54 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 |------|--------|-------------|
 | F401 | unused import（LLM 重構後殘留） | `__all__` 用途、optional dependency try/except |
 | PLC0415 | import 不在檔案頂部（LLM 偷懶） | circular import avoidance |
+
+---
+
+## 審查模式選擇
+
+偵測 effort level 和模型並發上限（查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md)）。
+
+**A. Workflow 模式**（effort = ultracode/xhigh 且 max-agents > 1）：
+
+使用 Workflow tool，參照 [workflow-review-pattern.md](claude/_common/workflow-review-pattern.md) 腳本骨架。
+
+| Workflow Phase | 說明 | Agent 數量 |
+|----------------|------|-----------|
+| Review | 平行 spawn 軸 agents（最多 6） | ≤ max-agents |
+| Verify | Critical findings → 3 verifier + ≥2/3 quorum | 3 × critical |
+
+**啟用軸**：
+
+| 軸 Agent | 審查項目 | 啟用條件 | 優先級 |
+|----------|---------|---------|--------|
+| Correctness | 邏輯 bugs、邊界案例、測試充分性 | **always** | P0 |
+| Readability | 命名、控制流、避免過早抽象 | **always** | P0 |
+| Architecture | 設計模式、模組邊界 | 變更 ≥ 3 files | P1 |
+| Security | 輸入驗證、權限檢查 | diff 含 HTTP/auth/credential | P1 |
+| Performance | N+1、無界操作 | 變更 ≥ 5 files | P2 |
+| UC Coverage | UC 行為覆蓋 | 大型/中型變更 | P2 |
+
+啟用軸數 > max-agents → 從低優先級（P2 起）合併至前一個 agent（不丟棄任何軸）。
+
+每個 Review agent prompt 包含：
+- `git diff` 範圍
+- 該軸的檢查項目清單（如上表）
+- 相關檔案路徑（必讀）
+- 方法論引用（code-review-and-quality；Security 軸額外引用 security-and-hardening）
+- rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
+- schema: DimensionVerdict（定義在 workflow-review-pattern.md）
+
+Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → 分三級（Critical/Important/Suggestion）→ Demo/Examples 影響檢查 → commit message 產生。
+
+印出確認：`[Code Review Mode] effort=ultracode, workflow=true, max=N`
+
+**B. Agent Tool 模式**（Fallback，max-agents = 1 但 effort = ultracode/xhigh）：
+
+單一 Explore agent 做所有啟用軸（Writer/Reviewer 分離效果）。印出確認：`[Code Review Mode] effort=ultracode, workflow=false, agent=true`
+
+**C. Main LLM 模式**（effort < ultracode）：
+
+Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mode] effort=standard, workflow=false`
 
 ---
 

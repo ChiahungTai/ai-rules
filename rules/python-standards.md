@@ -32,6 +32,12 @@ AI（尤其舊模型）常自動補上舊寫法，必須修正。
 
 ### typing 模組僅 import：Callable, Protocol, TypeVar, ParamSpec, Self, Any
 
+### `Self` 優先於字串前向引用
+
+當方法回傳**自身 class 或 subclass 實例**時，用 `Self` 取代字串註解 `"ClassName"`。適用情境：`@classmethod` 回傳 `cls(...)`、`__enter__` 回傳 self、`copy()` 回傳同型別實例。
+
+字串前向引用 `"OtherClass"` 僅用於引用**其他** class，`Self` 無法表達此語義。
+
 ### ❌ 禁止 `TYPE_CHECKING`
 
 Circular import 是架構問題，重構模組結構才是解法。`TYPE_CHECKING` 只是掩蓋問題。
