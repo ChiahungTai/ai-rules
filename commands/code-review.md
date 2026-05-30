@@ -77,7 +77,7 @@ Workflow 審查協調：[workflow-review-pattern.md](claude/_common/workflow-rev
 - rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
 - schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
-Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → 分三級（Critical/Important/Suggestion）→ Demo/Examples 影響檢查 → commit message 產生。
+Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → 分三級（Critical/Important/Suggestion）→ Demo/Lab 影響檢查 → commit message 產生。
 
 印出確認：`[Code Review Mode] effort=ultracode, workflow=true, max=N`
 
@@ -125,12 +125,12 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 
 ---
 
-## Demo/Examples 影響檢查
+## Demo/Lab 影響檢查
 
-不向後相容原則下，API 變更必須同步更新所有 demo/examples：
+不向後相容原則下，API 變更必須同步更新所有消費端：
 1. 識別變更的 class/function
-2. 搜尋 `demo_*.py` 和 `examples/*.py` 是否 import 被修改模組
-3. 驗證受影響的 demo 是否需要更新
+2. 搜尋 `demo_*.py`、`lab/`、`examples/` 是否 import 被修改模組
+3. 驗證受影響的消費端是否需要更新
 
 ---
 
