@@ -64,9 +64,9 @@ Workflow 審查協調：[workflow-review-pattern.md](claude/_common/workflow-rev
 | EP 元素 | TDD 步驟 | 說明 |
 |---------|---------|------|
 | Context | 開始前讀取 | 理解背景 |
-| 驗證策略 | RED | 照設計寫測試 |
+| 驗證策略 | RED | 讀 EP 測試類型 → 分類情境 → 寫對應測試（詳 TDD skill EP Integration） |
 | Pseudo Code | GREEN | 照設計實作 |
-| 核心要點 | REFACTOR | 檢查覆蓋 |
+| 核心要點 | REFACTOR | 對 EP 完成檢查逐項驗證 |
 
 #### 平行模式
 
