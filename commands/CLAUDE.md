@@ -54,6 +54,7 @@
 
 - `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要、UC 進度）
 - `/uc-status` — USE-CASES 跨領域狀態掃描（全局進度儀表板）
+- `/uc-sync` — USE-CASES.md 同步與品質檢查（狀態-實作一致性、路徑有效性、Domain-First 合規）
 
 ### 其他
 
