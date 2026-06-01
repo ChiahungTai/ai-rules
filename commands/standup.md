@@ -70,6 +70,23 @@ git log -p --since="yesterday 00:00:00" -- "**/USE-CASES.md"
 - 新增或更新的 GAP
 - 目前 📋 項目總數
 
+### 5. 測試品質摘要
+
+引用 [/audit-test](./audit-test.md) 的 Daily Scan 結果（若有）。摘要測試健康度。
+
+偵測昨夜排程報告（路徑：`/Users/ctai/logs/claude-sync-{YYYYMMDD}.log`）。若有，從「階段 3：Audit-Test」段落提取：
+- 健康度評分趨勢
+- Critical / Important 發現數量
+- 與前次 scan 比較的變化
+
+若無排程報告，對昨日變更的 test files 做 Quick Scan：
+
+```bash
+git log --name-only --since="yesterday 00:00:00" --pretty=format: -- "tests/" | sort -u
+```
+
+對變更的 test files 快速檢查反模式（幽靈斷言、空殼覆蓋、過度 mock）。
+
 ---
 
 ## 輸出格式
@@ -98,6 +115,11 @@ git log -p --since="yesterday 00:00:00" -- "**/USE-CASES.md"
 - ✅ 完成：[UC ID 列表]
 - 📋 新增：[UC ID 列表]
 - 📋 剩餘待實作：[總數]
+
+### 測試品質
+- 健康度：XX%（或「無昨夜報告，Quick Scan 結果如下」）
+- 🔴 Critical：N / 🟡 Important：N / 💡 Suggestion：N
+- 變化：{與前次比較}
 
 ### 📋 今日建議
 - [ ] {基於昨日未完成工作的建議}

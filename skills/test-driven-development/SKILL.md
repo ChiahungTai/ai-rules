@@ -98,6 +98,27 @@ For anything that runs in a browser, combine unit tests with runtime verificatio
 
 - **Ground Truth Pattern**：昂貴計算只做一次（session-scoped fixture），後續測試比對基準值。適用：特徵計算、統計指標。
 - **Golden Master Pattern**：持久化預期值到 JSON/檔案。首次執行記錄並 skip，後續執行比對。適用：標籤生成、複雜轉換邏輯。
+- **Real-World Fixture Pattern**：用真實市場數據的精確值作為 test fixture。
+
+#### Real-World Fixture Pattern
+
+適用於數學轉換邏輯的 regression guard 和域特定 edge case 文件化。
+
+**適用場景**：
+- 數學轉換邏輯（adj 計算、特徵計算）— 精確值提供可追溯 ground truth
+- 域特定 edge case 文件化（除權息、減資、混合事件）— 人造數據無法重現的邊界
+- 需要可追溯 ground truth 的計算驗證
+
+**不適用場景**：
+- 業務邏輯測試（語義比精確值重要）
+- 經常變動的數據（fixture 會持續過時）
+
+**選材原則**：
+- 每種邊界類型至少一個代表（如：除權息、減資、混合事件）
+- fixture 方法名即說明（`_make_3041_capital_reduction_daily`）
+- docstring 記錄事件的 domain context（ratio、日期、影響）
+
+**與 Ground Truth 的區別**：Ground Truth 是「從系統產出抓基準」，Real-World Fixture 是「從真實世界抓基準」。前者基準可能錯，後者基準來自可驗證的外部事實。
 
 ## EP Integration
 
