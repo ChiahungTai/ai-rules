@@ -80,6 +80,8 @@
 - **🟡 中等風險**（新功能、演算法優化、性能改進）→ 核心功能測試 + 經驗分析
 - **🟢 低風險**（樣式、文檔、配置）→ 至少執行一次確保無語法錯誤
 
+> 詳細執行規範（禁止行為、流程、起源證據）見 `~/.claude/rules/must-execute-before-complete.md`；漸進式驗證流程（QUICK → REPRESENTATIVE → ALL）見 `~/.claude/rules/progressive-validation.md`
+
 ### 務實評估約束
 
 > **核心原則**：提供相對複雜度評估和風險分析，不預測絕對時間。
@@ -128,7 +130,7 @@
 
 標題格式：`### ✅ UC-ID: 簡述 — 專案相對路徑`
 
-實作位置必須使用**專案根目錄相對路徑**（如 `mosaic_alpha/data/fetchers/twse_api.py`、`scripts/data_management/sync_market_data.py`），禁止只寫檔名。理由：USE-CASES.md 的讀者是 AI agent，裸檔名無法定位程式碼。
+實作位置必須使用**專案根目錄相對路徑**（如 `mosaic_alpha/data/fetchers/twse_api.py`、`mosaic_alpha/workflows/pipeline.py`），禁止只寫檔名。理由：USE-CASES.md 的讀者是 AI agent，裸檔名無法定位程式碼。
 
 ### 四種開發情境
 
@@ -153,6 +155,77 @@
 | **中型**（功能優化、新 API） | 更新既有 UC 描述或狀態 | 不需新建 UC，但需更新 |
 | **小型**（bug fix、文檔） | 不需要 UC | 不影響系統行為 |
 
+### UC 放置原則（Domain-First）
+
+> **核心原則**：USE-CASES.md 放在**主要實作所在的 library 模組目錄**，不放在使用者入口層（如 scripts/）。理由：USE-CASES.md 的核心消費者是 AI agent，AI agent 在 library 層工作時需要直接看到能力索引。
+
+**UC 分類**：
+
+| 層級 | 定義 | 歸屬 |
+|------|------|------|
+| **Domain UC** | 單一 library 模組的能力描述 | 該 library 模組的 `USE-CASES.md` |
+| **Workflow UC** | 跨 library 模組的端到端流程 | `workflows/USE-CASES.md`（編排層） |
+| **Consumer Domain UC** | Domain UC + 跨域依賴（主要邏輯在一個模組，但引用其他模組） | 主要 library 模組的 `USE-CASES.md`，標記「領域依賴」 |
+
+**判定流程**（按順序判斷，命中即停止）：
+
+1. UC 的主要邏輯跨越多個模組？→ **Workflow UC** → `workflows/USE-CASES.md`
+2. UC 有跨域依賴但主要邏輯在一個模組？→ **Consumer Domain UC** → 主要 library 模組，標記「領域依賴」
+3. UC 的主要邏輯在一個模組內？→ **Domain UC** → 主要 library 模組的 USE-CASES.md
+
+**Domain UC 格式**（每個 UC 描述單一領域的能力）：
+
+```markdown
+### ✅ D-18: 每日增量 K 線更新 — mosaic_alpha/data/daily_update/coordinator.py
+
+- **能力**: 從 TWSE/TPEX API 增量更新日 K 線至 Catalog
+- **入口**: CLI `daily-update` / library `run_daily_update()`
+- **領域依賴**: calendar（交易日判斷）、fetchers（API 取得）
+- **下游消費者**: WF-01（每日工作流）
+```
+
+**Workflow UC 格式**（引用 Domain UC，不重複描述）：
+
+```markdown
+### ✅ WF-01: 每日工作流 — mosaic_alpha/workflows/pipeline.py
+
+- **編排流程**:
+  1. DataPhase: D-31（DailyClosePipeline）→ 數據更新
+  2. FeaturePhase: DS-01（MLDataset 組裝）→ 特徵計算
+  3. AnalysisPhase: W-01/W-02（可插拔 WatchlistMethod）→ 選股排名
+  4. PersistPhase: 結果持久化
+- **跨領域依賴**: D-31, DS-01, W-01, W-02
+- **觸發**: Launchd 15:30（收盤後）
+```
+
+**跨域依賴處理**：
+- Domain UC 的跨域依賴用「領域依賴」欄位標記（引用其他 UC ID）
+- Workflow UC 的步驟引用 Domain UC ID（不重複描述能力細節）
+- UC 不重複原則：同一行為只在一個 USE-CASES.md 定義
+
+**Pipeline vs Workflow 區分**：
+- **Pipeline** = 域內步驟編排（步驟全在同一 domain）。UC 放在該 domain 的 USE-CASES.md
+- **Workflow** = 跨域流程編排（步驟跨越多個 domain）。UC 放在 `workflows/USE-CASES.md`
+- 技術上可共用 Pipeline 基類（如 `common/pipeline.py:Pipeline`），區別在語意層面
+- **域以程式碼目錄為準**：同一 `mosaic_alpha/` 子目錄視為同一域，不以外部系統邊界為準
+
+**scripts/ 定位**：scripts/ 是 thin wrapper 層（CLI 入口），**不放 USE-CASES.md**。scripts/ 的 CLAUDE.md 作為導航索引，指向 library 模組的 USE-CASES.md。
+
+### CLAUDE.md 與 USE-CASES.md 合作
+
+兩者是同一領域的兩個正交視角，放在同一個模組目錄下讓 AI 在同一 context 中同時看到。
+
+| 文件 | 職責 | 視角 |
+|------|------|------|
+| `CLAUDE.md` | 架構知識（怎麼做的 + 為什麼） | 縱切面 |
+| `USE-CASES.md` | 能力索引（能做什麼 + 做了沒） | 橫切面 |
+
+**銜接機制**：
+
+1. **CLAUDE.md → USE-CASES.md 導航**：每個模組的 CLAUDE.md 包含「USE-CASES 導航」段落（UC ID → 實作位置對照表），讓 AI 從架構視角跳到能力視角
+2. **USE-CASES.md → CLAUDE.md 引用**：UC 條目的實作路徑指向 CLAUDE.md 記錄的模組
+3. **模組觸發器**：Root CLAUDE.md 的「模組觸發器」同時觸發 CLAUDE.md 和 USE-CASES.md
+
 ### Command Pipeline 整合
 
 ```
@@ -162,18 +235,20 @@
 
 | Command | UC 職責 |
 |---------|--------|
-| `/spec` | 啟動時掃描相關 UC；定義新 UC 條目（📋）或更新既有 UC |
+| `/spec` | 啟動時掃描相關 **library 模組**的 USE-CASES.md；定義新 UC 或更新既有 UC |
 | `/execution-plan` | EP 段落引用 UC ID（如「實作 D-31」） |
-| `/build` | 段落完成後更新 UC 狀態（📋→✅）；未完成段落更新 USE-CASES.md 條目（內嵌細節） |
-| `/code-review` | 第六軸：UC 覆蓋度（實作是否滿足 UC 描述） |
+| `/build` | 段落完成後更新**同模組** USE-CASES.md 狀態（📋→✅）；未完成段落內嵌細節 |
+| `/code-review` | 第六軸：UC 覆蓋度（實作是否滿足 **library 模組目錄** USE-CASES.md 的 UC 描述） |
 | `/commit` | 大型/中型變更時提示確認 UC 狀態更新 |
 | `/standup` | UC 進度摘要（狀態變化、新增、關閉） |
-| `/uc-status` | 全局進度掃描（USE-CASES 跨領域儀表板） |
+| `/uc-status` | 全局進度掃描（掃描 **library 模組目錄**下所有 USE-CASES.md） |
 
 ### 文件放置
 
-- `USE-CASES.md`：按領域/模組目錄放置，每個 UC 有唯一 ID（如 D-01、B-06）
-- 全局進度：`/uc-status` 掃描所有 USE-CASES.md
+- `USE-CASES.md`：放在**主要實作所在的 library 模組目錄**（如 `mosaic_alpha/data/USE-CASES.md`），每個 UC 有唯一 ID
+- `workflows/USE-CASES.md`：跨域 Workflow UC 的歸宿（如 `mosaic_alpha/workflows/USE-CASES.md`）
+- **禁止放在 scripts/**：scripts/ 是 thin wrapper，不放 USE-CASES.md
+- 全局進度：`/uc-status` 掃描 library 目錄下所有 USE-CASES.md
 
 ---
 

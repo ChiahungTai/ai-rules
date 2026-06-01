@@ -32,6 +32,17 @@ Make the failure happen reliably. If you can't reproduce it, you can't fix it wi
 - **State-dependent?** → Check leaked state between tests, global variables, shared caches; run in isolation
 - **Truly random?** → Add defensive logging, set up alert for error signature, document conditions
 
+### No Guessing
+
+**未經驗證的假設是猜測，不是診斷。**
+
+- 懷疑某個值不對 → 加 LOG 印出來確認，不要猜
+- 懷疑某個流程沒走到 → 加 LOG 在入口和出口確認
+- 懷疑型別轉換出錯 → 加 `type()` LOG 確認
+- 修改前先確認問題存在：用 LOG 或小程式驗證問題可重現
+- 禁止連續猜測超過 2 次：連續 2 次猜測失敗 → 停下改策略，加 LOG 驗證假設
+- 寧可寫 3 行驗證腳本，也不要 3 段文字分析「可能是什麼原因」
+
 ### 2. Localize
 
 Narrow down which layer: UI, API, database, build tooling, external service, or the test itself. Use `git bisect` for regression bugs.

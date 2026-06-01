@@ -28,6 +28,20 @@ Every test must encode **why** the behavior matters. A test that can't fail when
 
 **Rule**: If you can't write a test that fails when the business logic changes, either the function is wrong or the test is wrong.
 
+## 測試反模式自檢
+
+寫完每個測試後，確認沒有踩入以下陷阱：
+
+| 反模式 | 辨識特徵 | 修正 |
+|--------|---------|------|
+| **幽靈斷言** | 標題說測 X，但 body 只有 `assert result is not None` | 斷言具體業務值 |
+| **同義反覆** | function 和 test 都 hardcode 同一個值，證明不了任何事 | 用獨立計算或業務規則驗證 |
+| **空殼覆蓋** | 有 test function 但用 `@skip` 跳過或 body 只有 `pass` | 要麼刪要麼補實作 |
+| **過度 mock** | test file 中 mock 數量 > assert 數量 | 改用繼承式 mock 或 real impl |
+| **標題不符** | test 名稱暗示測某行為，但 assert 驗證的是另一件事 | 名稱和斷言必須一致 |
+
+**自檢時機**：每個 test function 寫完後立即對照此表。RED 階段就該發現反模式，不要等到 GREEN。
+
 ## Test What Matters
 
 - **State over interactions**: Assert on outcomes, not on which methods were called. Interaction tests break on refactor.

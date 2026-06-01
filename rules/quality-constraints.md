@@ -113,6 +113,22 @@ def process_trading_data(data):
 - 功能沒驗證邊界案例卻說「功能完成」
 - 用隔離的單元測試通過就宣稱「功能完成」— 功能是給特定消費端用的，必須在該消費端上下文中驗證
 
+### 消費端驗證模式
+
+功能是給特定消費端用的，單元測試通過不等於功能可用。必須在**實際消費端上下文**中驗證。
+
+**判斷方式**：功能的主要消費者是誰？在那個消費者的完整流程中跑一次。
+
+| 功能類型 | 消費端 | 驗證方式 |
+|---------|--------|---------|
+| scoring / ranking 函數 | watchlist pipeline | 用 pipeline 真實資料跑一次完整流程 |
+| 新 Feature | 使用該 Feature 的下游 pipeline | 跑整個 `tests/unit_tests/features/`（跨模組交互） |
+| 除權息調整邏輯 | catalog + indicators | 真實除權息股票做日/週/月 K 驗證 |
+| DB schema 變更 | 整個 data pipeline | 從 fetch → transform → write → read 全跑一次 |
+| Pipeline Step | 上層 Pipeline | 在 Pipeline 完整流程中跑，不只測單一 Step |
+
+**跨模組影響擴散**：修改共用模組（如 `_validate_output`、`fill_null`、`column_metadata`）時，影響會跨測試檔案（parity test、interaction test、consistency test）。必須跑整個受影響目錄而非單一檔案。例如：修改 `features/column_metadata.py` 的預設值，可能同時影響 parity test（欄位比對）、interaction test（Feature 組合）、consistency test（跨 Interval 一致性），三者分在不同測試檔案中。
+
 ---
 
 ## 多步驟任務檢查點

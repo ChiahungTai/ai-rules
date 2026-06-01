@@ -186,7 +186,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 **UC-Driven Development 的品質閘門。大型/中型變更必須執行。**
 
 1. **讀取 EP 中引用的 UC ID**（來自段落 Context 的 UC 引用欄位）
-2. **更新 USE-CASES.md**：
+2. **更新對應 library 模組的 USE-CASES.md**：
    - 已完成的 UC：📋→✅，附專案相對路徑；若原在「待實作」章節，搬到對應的正確章節
    - 部分完成的 UC：📋→🔧，內嵌剩餘細節（前置條件、設計要點、測試計畫 — 測試類型分佈 + 情境覆蓋 + 已知風險，不寫數量）
    - 進行中的 UC：🔧→🟡（如 backfill 正在跑）

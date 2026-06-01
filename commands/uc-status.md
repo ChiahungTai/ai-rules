@@ -2,13 +2,13 @@
 description: "USE-CASES 跨領域狀態掃描。/uc-status [路徑]"
 when_to_use: "Check USE-CASES completion status across the project. Use for project-wide progress overview."
 usage: "/uc-status [路徑]"
-argument-hint: "/uc-status — 掃描專案根目錄；/uc-status scripts/data_management — 掃描單一領域"
+argument-hint: "/uc-status — 掃描專案根目錄；/uc-status mosaic_alpha/data — 掃描單一領域"
 allowed-tools: ["Read", "Bash"]
 ---
 
 # /uc-status — USE-CASES 跨領域狀態掃描
 
-USE-CASES 全局進度報告。掃描所有 USE-CASES.md，產出跨領域完成度儀表板。
+USE-CASES 全局進度報告。掃描 library 模組目錄下所有 USE-CASES.md，產出跨領域完成度儀表板。
 
 方法論定義見 [ai-development-guide.md](../ai-development-guide.md) 的「UC-Driven Development」章節。
 
@@ -25,7 +25,7 @@ USE-CASES 全局進度報告。掃描所有 USE-CASES.md，產出跨領域完成
 fd "USE-CASES.md" <掃描根目錄> --type f
 ```
 
-排除 `_archive/`、`node_modules/`、`.venv/`。
+排除 `_archive/`、`node_modules/`、`.venv/`、`scripts/`。
 
 ### 步驟 2：解析 USE-CASES.md
 
@@ -68,7 +68,7 @@ fd "USE-CASES.md" <掃描根目錄> --type f
 
 | 領域 | ✅ Done | 📋 Todo | ❌ Deprecated | 🔧 Library | 🟡 WIP | 🟢 Partial | 完成率 |
 |------|---------|---------|---------------|------------|--------|------------|--------|
-| data_management (D) | 25 | 2 | 0 | 2 | 0 | 3 | 83% |
+| data (D) | 25 | 2 | 0 | 2 | 0 | 3 | 83% |
 | backtesting (B) | 2 | 0 | 0 | 8 | 0 | 0 | 20% |
 | ... | ... | ... | ... | ... | ... | ... | ... |
 | **Total** | **XX** | **XX** | **XX** | **XX** | **XX** | **XX** | **XX%** |
@@ -77,8 +77,8 @@ fd "USE-CASES.md" <掃描根目錄> --type f
 
 | UC ID | 領域 | 描述 | 狀態 |
 |-------|------|------|------|
-| D-31 | data_management | DailyUpdate Pipeline 化 | 📋 |
-| D-36 | data_management | 同步已發行股數 | 🔧 |
+| D-31 | data | DailyUpdate Pipeline 化 | 📋 |
+| D-36 | data | 同步已發行股數 | 🔧 |
 | ... | ... | ... | ... |
 
 ### ⚠️ 一致性問題

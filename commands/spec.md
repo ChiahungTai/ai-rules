@@ -43,12 +43,12 @@ User Story 格式：
 
 **UC 是開發的驅動層，不是事後追蹤。大型/中型變更必須在此階段定義或更新 UC。**
 
-1. **掃描相關 USE-CASES.md**：搜尋需求涉及的領域目錄，確認是否已有相關 UC
+1. **掃描相關 USE-CASES.md**：搜尋需求涉及的 library 模組目錄（非 scripts/），確認是否已有相關 UC
 2. **判斷變更規模**：
 
 | 規模 | UC 行為 |
 |------|--------|
-| 大型 | 在對應領域 USE-CASES.md 新增 UC 條目（📋）。新領域則建立 USE-CASES.md 骨架（UC ID prefix + 狀態標記說明） |
+| 大型 | 在對應 **library 模組**的 USE-CASES.md 新增 UC 條目（📋）。新領域則在 library 模組目錄建立 USE-CASES.md 骨架（UC ID prefix + 狀態標記說明） |
 | 中型 | 更新既有 UC 的描述或狀態 |
 | 小型 | 跳過（bug fix、文檔不需要 UC） |
 

@@ -54,6 +54,7 @@ For projects using UC-Driven Development, verify implementation against USE-CASE
 - Does implementation cover all UC-defined behaviors?
 - Are UC-referenced behaviors present in the diff?
 - EP segment UC IDs match USE-CASES.md?
+- UC references point to library module directory USE-CASES.md (not scripts/)?
 - Skip for small changes (bug fix, docs)
 
 ## Review Process

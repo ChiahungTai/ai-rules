@@ -59,7 +59,7 @@ fd -e jsonl . ~/.claude/projects/ --max-depth 2 --changed-within 1d
 
 ### 4. UC 進度摘要
 
-掃描 USE-CASES.md 的昨日變更，摘要 UC 進度。
+掃描 library 模組目錄下 USE-CASES.md 的昨日變更，摘要 UC 進度。
 
 ```bash
 git log -p --since="yesterday 00:00:00" -- "**/USE-CASES.md"

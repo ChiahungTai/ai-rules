@@ -112,6 +112,7 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 - 實作是否涵蓋 UC 描述的所有行為？
 - 是否有 UC 引用的行為在 diff 中沒有對應實作？
 - EP 段落引用的 UC ID 是否與 USE-CASES.md 一致？
+- UC 引用是否指向 library 模組目錄的 USE-CASES.md（非 scripts/）？
 小型變更（bug fix）跳過此軸。
 
 ### 第一性原理 + 第二層思考
