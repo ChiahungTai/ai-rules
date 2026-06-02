@@ -180,6 +180,7 @@
 
 - **能力**: 從 TWSE/TPEX API 增量更新日 K 線至 Catalog
 - **入口**: CLI `daily-update` / library `run_daily_update()`
+- **消費場景**: 每日例行全量更新、回補多天（逐日呼叫）
 - **領域依賴**: calendar（交易日判斷）、fetchers（API 取得）
 - **下游消費者**: WF-01（每日工作流）
 ```
@@ -194,6 +195,7 @@
   2. FeaturePhase: DS-01（MLDataset 組裝）→ 特徵計算
   3. AnalysisPhase: W-01/W-02（可插拔 WatchlistMethod）→ 選股排名
   4. PersistPhase: 結果持久化
+- **消費場景**: 每日例行全 pipeline、改 ranking 用 --date 重跑歷史、改 Feature 用 --rebuild-features 重算
 - **跨領域依賴**: D-31, DS-01, W-01, W-02
 - **觸發**: Launchd 15:30（收盤後）
 ```
@@ -226,6 +228,36 @@
 2. **USE-CASES.md → CLAUDE.md 引用**：UC 條目的實作路徑指向 CLAUDE.md 記錄的模組
 3. **模組觸發器**：Root CLAUDE.md 的「模組觸發器」同時觸發 CLAUDE.md 和 USE-CASES.md
 
+### Scenario Matrix：EP 規劃期的消費場景思考
+
+> **核心原則**：EP 規劃時強制思考「使用者會遇到哪些情境」，避免實作完成才發現漏掉錯誤路徑或邊界案例。矩陣是 EP 的規劃工具，產出後提煉成 UC 的「消費場景」欄位。
+
+**為什麼放 EP 而非 /spec**：/spec 不一定每次都跑（小型/中型變更可能跳過），但 EP 是中大型變更的必經關卡，作為強制思考點覆蓋率更高。
+
+**Scenario Matrix 格式**（EP 內的表格區段）：
+
+| # | 場景 | 觸發 | 預期行為 | Checkpoint | 對應 UC |
+|---|------|------|---------|------------|---------|
+| SM-1 | 每日例行 | launchd / 手動 | Full pipeline | 無（從頭算） | WF-01 |
+| SM-2 | 改 ranking 重跑歷史 | 手動 --date | 讀 snapshot → Analysis → JSON | snapshot | WF-01（部分） |
+| SM-3 | 缺 snapshot 且未加 --rebuild-features | 錯誤操作 | assert fail + 提示 | — | — |
+
+**欄位含義**：
+- **場景**：使用者想做的事（意圖導向，非操作步驟）
+- **觸發**：CLI flag、外部事件、錯誤操作
+- **預期行為**：系統該怎麼反應（happy path、error path 都算）
+- **Checkpoint**：從哪個狀態恢復（無、catalog、snapshot）
+- **對應 UC**：本場景引用的 UC ID（可能對應多個 UC，或僅部分步驟）
+
+**必須涵蓋的場景類型**：
+- Happy path（正常使用）
+- 錯誤操作（缺參數、缺前置條件）
+- 邊界案例（空資料、跨日、回補多天）
+- 效能期待差異（秒級、幾十秒、慢、線性放大）
+
+**散到 UC 的「消費場景」欄位**：
+EP 完成後，每個 UC 的「消費場景」欄位從矩陣提煉自包含描述（不引用 EP/SM 編號，因為 EP 可能歸檔或刪除）。例：SM-1/SM-2 → WF-01 的「消費場景」寫成「每日例行全 pipeline、改 ranking 用 --date 重跑歷史」。
+
 ### Command Pipeline 整合
 
 ```
@@ -236,8 +268,8 @@
 | Command | UC 職責 |
 |---------|--------|
 | `/spec` | 啟動時掃描相關 **library 模組**的 USE-CASES.md；定義新 UC 或更新既有 UC |
-| `/execution-plan` | EP 段落引用 UC ID（如「實作 D-31」） |
-| `/build` | 段落完成後更新**同模組** USE-CASES.md 狀態（📋→✅）；未完成段落內嵌細節 |
+| `/execution-plan` | EP 段落引用 UC ID（如「實作 D-31」）；大型/中型變更須產出 Scenario Matrix |
+| `/build` | 段落完成後更新**同模組** USE-CASES.md 狀態（📋→✅）；從 EP Scenario Matrix 提煉「消費場景」寫入 UC；未完成段落內嵌細節 |
 | `/code-review` | 第六軸：UC 覆蓋度（實作是否滿足 **library 模組目錄** USE-CASES.md 的 UC 描述） |
 | `/commit` | 大型/中型變更時提示確認 UC 狀態更新 |
 | `/standup` | UC 進度摘要（狀態變化、新增、關閉） |

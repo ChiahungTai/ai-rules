@@ -21,7 +21,7 @@
 ```
 
 - `/spec` — 結構化需求討論（User Story、假設、UC 定義、技術選型、邊界）
-- `/execution-plan` — 段落式實作計畫書，基於 /spec 生成 Self-Contained Segments（含 EP Review Cycle）
+- `/execution-plan` — 段落式實作計畫書，基於 /spec 生成 Self-Contained Segments（含 Scenario Matrix + EP Review Cycle）
 - `/ep-review` — 審查 Execution Plan 合理性（已內建於 `/execution-plan`，可獨立使用）
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
 - `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新）
