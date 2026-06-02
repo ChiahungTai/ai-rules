@@ -144,11 +144,39 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 ---
 
+## 收尾步驟（所有功能段落完成後必做）
+
+> **核心原則**：EP 必須包含收尾段，列出所有功能段落完成後的強制收尾動作。`/build` 階段 5 執行。未完成收尾不得宣稱 EP 實作完成。
+
+每個 EP 的收尾段必須包含以下三項：
+
+### 1. USE-CASES.md 更新
+
+- 將 EP 引用的 UC 狀態從 📋 更新為 ✅（或 🔧/🟡）
+- 已完成 UC 搬到正確章節（不留在「待實作」區）
+- 清理暫時性資訊（前置條件、測試計畫），保留已知限制和結果摘要
+
+### 2. CLAUDE.md 更新
+
+- 檢查受影響模組目錄的 CLAUDE.md，確認架構描述反映變更
+- 新增/修改：模組職責、導航指引、可複用基礎設施
+- 遵循 [claude-writing.md](../rules/claude-writing.md) 品質標準（Signal/Noise ratio、導航優先）
+
+### 3. /audit-test
+
+- 執行 `/audit-test` 對新增/修改的測試進行品質稽核
+- 確認無反模式、覆蓋對稱性合理、mock 健康度良好
+- 稽核結果附於 `/build` 完成報告
+
+**小型變更**（bug fix）：僅執行 /audit-test，跳過 UC 和 CLAUDE.md 更新。
+
+---
+
 ## 輸出
 
 - **位置**：`ai-analysis/execution-plans/`
 - **檔名**：從任務描述自動衍生（kebab-case）
-- **結構**：實作總覽 → 段落劃分策略 → 各段落（Context → 要點 → Pseudo Code → 驗證）→ 整合策略
+- **結構**：實作總覽 → 段落劃分策略 → 各段落（Context → 要點 → Pseudo Code → 驗證）→ 整合策略 → 收尾步驟
 
 ---
 

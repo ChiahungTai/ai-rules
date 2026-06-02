@@ -181,20 +181,35 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 根據 judge-review 的 ✅ 採納清單修改 code。修改完跑 `ruff check --fix && ruff format`。
 
-### 階段 5：UC 狀態更新
+### 階段 5：收尾步驟（EP 強制）
 
-**UC-Driven Development 的品質閘門。大型/中型變更必須執行。**
+**執行 EP 收尾段定義的三項動作。未完成不得宣稱實作完成。**
+
+**讀取 EP 收尾段**：EP 結構末段的「收尾步驟」定義了本 EP 的具體收尾範圍。讀取後按以下三項執行：
+
+#### 5a. USE-CASES.md 更新（大型/中型變更）
 
 1. **讀取 EP 中引用的 UC ID**（來自段落 Context 的 UC 引用欄位）
 2. **更新對應 library 模組的 USE-CASES.md**：
    - 已完成的 UC：📋→✅，附專案相對路徑；若原在「待實作」章節，搬到對應的正確章節
    - 部分完成的 UC：📋→🔧，內嵌剩餘細節（前置條件、設計要點、測試計畫 — 測試類型分佈 + 情境覆蓋 + 已知風險，不寫數量）
    - 進行中的 UC：🔧→🟡（如 backfill 正在跑）
-3. **小型變更**（bug fix）：跳過此階段
+
+#### 5b. CLAUDE.md 更新（大型/中型變更）
+
+1. **識別受影響模組**：從 git diff 中找出變更檔案所在目錄及上層目錄的 CLAUDE.md
+2. **檢查更新需求**：變更是否影響 CLAUDE.md 中描述的架構、模組職責、導航指引、可複用基礎設施
+3. **更新**：新增/修改受影響段落，遵循 [claude-writing.md](../rules/claude-writing.md) 品質標準（Signal/Noise ratio、導航優先、禁止元資訊）
+
+#### 5c. /audit-test（所有變更）
+
+執行 `/audit-test` 對新增/修改的測試進行品質稽核。稽核結果附於完成報告。
+
+**小型變更**（bug fix）：僅執行 5c（/audit-test），跳過 5a、5b。
 
 ### 階段 6：完成報告
 
-輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + UC 狀態變更摘要
+輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + UC 狀態變更摘要 + /audit-test 稽核結果
 
 ---
 
@@ -207,6 +222,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 3. 每段必須 TDD（RED → GREEN → REFACTOR）
 4. 每段必須獨立驗證（ruff + mypy + pytest）
 5. 禁止 `from __future__ import annotations`
+6. 必須執行收尾步驟（階段 5）：大型/中型 → UC 更新 + CLAUDE.md 更新 + /audit-test；小型 → /audit-test
 
 ### 禁止
 
@@ -214,6 +230,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 - ❌ 使用 `sed` 修改程式碼
 - ❌ 段落範圍外修改
 - ❌ 中間狀態提交破損程式碼
+- ❌ 跳過收尾步驟宣稱完成
 
 ---
 
