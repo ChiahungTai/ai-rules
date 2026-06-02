@@ -21,7 +21,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "Workf
 - [python-type-gap](../skills/python-type-gap/SKILL.md) — 第三方套件 type gap（mypy 失敗時）
 - [agent-workflow](../skills/agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 規範
 
-Workflow 審查協調：[workflow-review-pattern.md](claude/_common/workflow-review-pattern.md)（Ultracode 下 Phase 4 使用）
+Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)（Ultracode 下 Phase 4 使用）
 
 ---
 
@@ -53,7 +53,7 @@ Workflow 審查協調：[workflow-review-pattern.md](claude/_common/workflow-rev
 ### 階段 1：準備
 
 1. 讀取 Execution Plan，識別段落結構、依賴關係
-2. 查證現有程式碼，驗證依賴錨點
+2. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）
 3. **Examples 盤點**：掃描 `demo_*.py`、`examples/**/*.py` 等，建立 `{module} → [example paths]` 映射表
 4. 檢查清單：Examples 映射表 ✓ | 測試檔案 ✓ | CLAUDE.md 同步 ✓ | 依賴完整 ✓
 
@@ -119,7 +119,7 @@ Workflow 審查協調：[workflow-review-pattern.md](claude/_common/workflow-rev
 
 **A. Workflow 模式**（effort = ultracode/xhigh 且 max-agents > 1）：
 
-使用 Workflow tool，參照 [workflow-review-pattern.md](claude/_common/workflow-review-pattern.md) 腳本骨架。
+使用 Workflow tool，參照 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md) 腳本骨架。
 
 **啟用維度**（沿用下表 Agent Tool 模式的維度定義和啟用條件）：
 
@@ -194,7 +194,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
    - 已完成的 UC：📋→✅，附專案相對路徑；若原在「待實作」章節，搬到對應的正確章節
    - 部分完成的 UC：📋→🔧，內嵌剩餘細節（前置條件、設計要點、測試計畫 — 測試類型分佈 + 情境覆蓋 + 已知風險，不寫數量）
    - 進行中的 UC：🔧→🟡（如 backfill 正在跑）
-3. **從 EP Scenario Matrix 提煉「消費場景」寫入 UC**：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 SM 編號，因為 EP 可能歸檔），填入 UC 的「消費場景」欄位
+3. **從 EP Scenario Matrix 提煉「消費場景」寫入 UC**：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號，因為 EP 可能歸檔或刪除），填入 UC 的「消費場景」欄位
 
 #### 5b. CLAUDE.md 更新（大型/中型變更）
 

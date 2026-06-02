@@ -30,7 +30,7 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 
 **何時需要**：大型/中型變更必填；小型變更（bug fix、文檔）跳過。
 
-**格式**（放在 EP 的「段落劃分策略」之前，作為 top-level 區段）：
+**格式**（放在 EP 的「段落劃分原則」之前，作為 top-level 區段）：
 
 | # | 場景 | 觸發 | 預期行為 | Checkpoint | 對應 UC |
 |---|------|------|---------|------------|---------|
@@ -102,7 +102,7 @@ EP 專屬約束：
 - [ ] 語義約束已顯式標記
 - [ ] 基礎設施盤點已完成
 - [ ] 依賴錨點已標記
-- [ ] Scenario Matrix 已填寫（大型/中型變更；涵蓋 happy path、錯誤操作、邊界、效能差異）
+- [ ] Scenario Matrix 已填寫（大型/中型變更；涵蓋 happy path、錯誤操作、邊界、效能期待差異）
 
 ---
 
@@ -180,7 +180,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 - 將 EP 引用的 UC 狀態從 📋 更新為 ✅（或 🔧/🟡）
 - 已完成 UC 搬到正確章節（不留在「待實作」區）
 - 清理暫時性資訊（前置條件、測試計畫），保留已知限制和結果摘要
-- **從 EP Scenario Matrix 提煉「消費場景」寫入對應 UC**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 SM 編號），填入 UC 的「消費場景」欄位
+- **從 EP Scenario Matrix 提煉「消費場景」寫入對應 UC**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號，因為 EP 可能歸檔或刪除），填入 UC 的「消費場景」欄位
 
 ### 2. CLAUDE.md 更新
 
@@ -202,7 +202,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 - **位置**：`ai-analysis/execution-plans/`
 - **檔名**：從任務描述自動衍生（kebab-case）
-- **結構**：實作總覽 → 段落劃分策略 → 各段落（Context → 要點 → Pseudo Code → 驗證）→ 整合策略 → 收尾步驟
+- **結構**：實作總覽 → Scenario Matrix → 段落劃分原則 → 各段落（Context → 要點 → Pseudo Code → 驗證）→ 整合策略 → 收尾步驟
 
 ---
 

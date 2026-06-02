@@ -16,7 +16,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — `rg`/`fd` 取代 `grep`/`find`、禁止 `sed` 等 Bash 規則
 
-Signal/noise framework: [encoder-philosophy.md](claude/_common/encoder-philosophy.md) — 讀取此檔案以理解 High Signal / Low Noise 分類標準。
+Signal/noise framework: [encoder-philosophy.md](./claude/_common/encoder-philosophy.md) — 讀取此檔案以理解 High Signal / Low Noise 分類標準。
 
 ## 🎯 檢查維度
 
