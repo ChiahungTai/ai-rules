@@ -123,4 +123,4 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 
 > **同步哲學**: CLAUDE.md 是活文檔，必須與程式碼同步演進。當 sync 發現 ⚠️ ≥ 3 個時，建議執行 `/claude:decode-compare {module}` 深度驗證。
 
-> **工作流**: `/claude:clean` → `/claude:distill` → `/claude:sync` → `/claude:doc-decode` → `/claude:decode-compare`
+> **工作流**: `/claude:clean` → `/claude:distill` → `/claude:sync`

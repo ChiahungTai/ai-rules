@@ -47,9 +47,7 @@
 - `/claude:clean` — 清理 Markdown 元資訊
 - `/claude:distill` — 蒸餾文檔，提煉核心精華
 - `/claude:sync` — 檢查文檔與程式碼同步性
-- `/claude:doc-decode` — 從 CLAUDE.md + 程式碼重建理解文檔（source-docs/）
-- `/claude:decode-compare` — 對比 source-docs 與程式碼，驗證精度
-- `/claude:daily-maintain` — 每日自動化 CLAUDE.md 維護（compare-first）
+- `/claude:daily-maintain` — 每日維護三合一（dep-graph 掃描 + CLAUDE.md sync + USE-CASES sync），支援 `--init` 初始生成、`--only` 指定階段
 
 ### 日常工具
 
