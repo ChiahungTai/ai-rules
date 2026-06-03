@@ -21,9 +21,20 @@ usage: "/explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 - **批次檔案分析**：`@dir` 自動分析目錄結構，檔案 ≥ 5 時自動 Agent 並行
 - **深度分析**：根據內容類型套用對應框架（論文/文章/程式碼）。詳見 [explain-deep-analysis.md](./claude/_common/explain-deep-analysis.md)
 
+## 無參數行為
+
+未提供任何參數時，自動解釋**當前 repo 尚未 commit 的變更**：
+
+1. 執行 `git diff` + `git diff --cached` 取得未暫存與已暫存的變更
+2. 以 Console 模式（ASCII）解釋每個變更的意圖、影響範圍、關聯模組
+3. 無變更時輸出「工作目錄乾淨，無未 commit 變更」
+
+此行為等同於 `/explain @git-diff`，但不需要使用者記憶語法。
+
 ## 使用方式
 
 ```bash
+/explain                                    # 無參數 → 解釋未 commit 變更
 /explain 微服務架構                         # Console 模式
 /explain md Kubernetes 叢集管理              # MD 模式 → ai-analysis/reports/
 /explain @src/components/                   # 目錄分析
@@ -54,9 +65,11 @@ usage: "/explain [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 ## 決策流程
 
 ```
-用戶輸入 → 指定 md?
-  是 → MD 模式（Mermaid）→ 檔案數 ≥ 5? → 並行處理
-  否 → Console 模式（ASCII）→ 檔案數 ≥ 5? → 並行處理
+用戶輸入 → 有參數?
+  否 → Console 模式：解釋 git diff（未 commit 變更）
+  是 → 指定 md?
+    是 → MD 模式（Mermaid）→ 檔案數 ≥ 5? → 並行處理
+    否 → Console 模式（ASCII）→ 檔案數 ≥ 5? → 並行處理
 ```
 
 委託 Skills：
