@@ -33,7 +33,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 **強制輸出**：快檢完成後必須印出 `## EP 快檢：✅ 可實作` 或 `## EP 快檢：⚠️ N 項自行補充`。不得靜默跳過。
 
-**前置流程確認**（僅記錄，不因此停下）：`/spec → /execution-plan（含 EP Review）→ /build`
+**前置流程確認**（僅記錄，不因此停下）：`/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build`
 
 **EP 品質快掃**：
 
@@ -238,7 +238,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 ## 與其他命令的協作
 
 ```
-/spec → /execution-plan（含 EP Review）→ /build（含 Agent Review）→ [/code-review] → /commit
+/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ [/code-review] → /commit
 ```
 
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。

@@ -252,8 +252,8 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 ## 流程位置
 
 ```
-/spec → /execution-plan（含 EP Review）→ /build（含 Agent Review）→ [/code-review] → /commit
+/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ [/code-review] → /commit
 ```
 
 前置：`/spec`
-後續：`/build`（如需額外審查可跑獨立 `/ep-review` 或 `/judge-review`）
+後續：`/ep-validate`（可選，高技術風險時）→ `/build`（如需額外審查可跑獨立 `/ep-review` 或 `/judge-review`）

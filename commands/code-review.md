@@ -180,7 +180,7 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 ## 流程位置
 
 ```
-/spec → /execution-plan（含 EP Review）→ /build（含 Agent Review）→ /code-review（含 commit message）→ /commit
+/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ /code-review（含 commit message）→ /commit
 ```
 
 後續：用戶確認 commit message → `/commit`（跳過階段 2 分析，直接執行 lint + commit）

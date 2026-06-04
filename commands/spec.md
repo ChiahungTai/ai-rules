@@ -110,5 +110,5 @@ Never（不做）：[列表]
 ## 流程位置
 
 ```
-/spec（含 UC 定義）→ /execution-plan（含 EP Review）→ /build（含 Agent Review + UC 更新）→ /code-review → /commit
+/spec（含 UC 定義）→ /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review + UC 更新）→ /code-review → /commit
 ```
