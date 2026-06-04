@@ -45,6 +45,7 @@
 
 ### CLAUDE.md 維護
 
+- `/claude:init` — 為任意專案自動產生 CLAUDE.md（bottom-up，從子模組到 Root）
 - `/claude:clean` — 清理 Markdown 元資訊
 - `/claude:distill` — 蒸餾文檔，提煉核心精華
 - `/claude:sync` — 檢查文檔與程式碼同步性
