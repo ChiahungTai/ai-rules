@@ -12,29 +12,29 @@ allowed-tools: ["Bash", "Read", "Edit", "Grep"]
 
 ## 🎯 核心目標
 
-1. **自動修正 AI 寫 code 的常見壞習慣**
-2. **強制執行 Python 3.12+ 的現代型別慣例**
+1. **自動修正 AI 寫 code 的常見壞習慣**（ruff）
+2. **強制執行 Python 3.12+ 的現代型別慣例**（mypy）
 3. **減少 code review 時的重複工作**
 
 ## 🚀 執行流程
 
-### 1. Ruff 自動修正
-```bash
-# 自動修正可修正的問題（尊重 pyproject.toml 的 per-file-ignores）
-uv run ruff check --fix $ARGUMENTS
-```
+> **🔴 強制規則：三步都必須依序執行。ruff 無錯誤不代表可以跳過 mypy。mypy 檢查結果是後續「問題分析」的輸入，沒跑 mypy 就無法分析型別問題。**
 
-### 2. Ruff 格式化
+### Phase 1: Ruff 自動修正（auto-fix）
+
 ```bash
-# 格式化程式碼（含 import 排序）
+uv run ruff check --fix $ARGUMENTS
 uv run ruff format $ARGUMENTS
 ```
 
-### 3. MyPy 型別檢查
+### Phase 2: MyPy 型別檢查（check + 人工分析）
+
 ```bash
-# 執行型別檢查（warn_unused_ignores 會抓濫用的 # type: ignore）
 uv run mypy $ARGUMENTS
 ```
+
+- mypy 不會 auto-fix，輸出做為下方「問題分析與建議」的輸入
+- **即使 Phase 1 零錯誤，Phase 2 仍必須執行** — 型別問題和 lint 問題是正交的
 
 ## 🔍 問題分析與建議
 
