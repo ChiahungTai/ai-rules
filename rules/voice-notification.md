@@ -28,7 +28,7 @@
 
 ### ❌ 不適用（不需要語音通知）
 
-- **建議工具**：`/commit-message`、`/explain`
+- **建議工具**：`/commit-message`、`/illustrate`
 - **查詢指令**：`/help`、`/status`
 - **快速操作**：一次性回答、簡單查詢
 

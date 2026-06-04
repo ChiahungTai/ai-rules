@@ -20,7 +20,7 @@ CLAUDE.md 是給 AI 的協作指南，應專注於**核心原則**和**執行約
 
 ### 命令命名（slash commands）
 - 格式: `/{category}:{action}` 或 `/{action}`
-- 範例: `/claude:clean`, `/commit-message`, `/explain`
+- 範例: `/claude:clean`, `/commit-message`, `/illustrate`
 - 使用小寫和連字線，不用底線
 
 ## 結構規範

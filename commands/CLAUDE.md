@@ -58,5 +58,5 @@
 
 ### 其他
 
-- `/explain` — 技術概念、架構設計或流程解釋（console / md 模式）
+- `/illustrate` — 技術概念、架構設計或流程圖解（console / md 模式）
 - `/swing-analysis` — Swing Analysis 協作模式（Trajectory Viewer + 日誌監控）

@@ -1,13 +1,13 @@
-# Explain 使用範例
+# Illustrate 使用範例
 
-> **引用情境**: 需要理解 `/explain` 各模式的實際輸出格式和效果時參考。
+> **引用情境**: 需要理解 `/illustrate` 各模式的實際輸出格式和效果時參考。
 
 ---
 
 ## 範例 1: 單一概念解釋（Console 模式）
 
 ```bash
-/explain Docker 容器化
+/illustrate Docker 容器化
 ```
 
 輸出：
@@ -31,7 +31,7 @@ Docker 將應用程式打包成輕量級、可移植的容器
 ## 範例 2: 目錄智能分析（多檔案，自動並行）
 
 ```bash
-/explain @src/ @config/ @docs/
+/illustrate @src/ @config/ @docs/
 ```
 
 系統檢測到 15+ 檔案，自動啟動多個 Tasks 並行處理。
@@ -70,7 +70,7 @@ Docker 將應用程式打包成輕量級、可移植的容器
 ## 範例 3: MD 檔案深度分析
 
 ```bash
-/explain md @architecture/ @database-schema.sql
+/illustrate md @architecture/ @database-schema.sql
 ```
 
 輸出完整 Markdown 報告，結構如下：
