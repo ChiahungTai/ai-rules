@@ -57,6 +57,11 @@
 - `/uc-status` — USE-CASES 跨領域狀態掃描（全局進度儀表板）
 - `/uc-sync` — USE-CASES.md 同步與品質檢查（狀態-實作一致性、路徑有效性、Domain-First 合規）
 
+### 依賴升級（收盤後執行）
+
+- `/upgrade-nt` — 升級 NautilusTrader（breaking changes 掃描 + 跨 worktree 一致性 + SJ external API 測試）
+- `/upgrade-sj` — 升級 Shioaji（breaking changes 掃描 + Volume 單位驗證 + SJ external API 測試）
+
 ### 其他
 
 - `/illustrate` — 技術概念、架構設計或流程圖解（console / md 模式）
