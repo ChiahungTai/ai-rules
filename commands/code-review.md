@@ -1,14 +1,14 @@
 ---
-description: "第一性原理代碼審查。/code-review [branch] [base]"
-when_to_use: "Review uncommitted changes or a feature branch using multi-axis methodology and first-principles reasoning."
+description: "深層思考代碼審查。/code-review [branch] [base]"
+when_to_use: "Review uncommitted changes or a feature branch using multi-axis methodology and deep-thinking (first-principles + second-level consequence tracing)."
 usage: "/code-review [target-branch] [base-branch]"
 argument-hint: "無參數審查 uncommitted / branch 名稱審查該 branch"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 ---
 
-# /code-review — 第一性原理代碼審查
+# /code-review — 深層思考代碼審查
 
-基於第一性原理審查尚未 commit 的 code。不只是看改了什麼，更要讀相關程式碼確認**為什麼這樣改**。
+基於深層思考審查尚未 commit 的 code。不只是看改了什麼，更要讀相關程式碼確認**為什麼這樣改**。
 
 委託 Skills：
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則
@@ -91,7 +91,7 @@ Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mod
 
 ---
 
-## 六軸審查 + 第一性原理
+## 六軸審查 + 深層思考
 
 ### 1. Correctness — 符合規格嗎？
 邊界情況、測試充分性
@@ -116,7 +116,7 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 - 實作是否涵蓋 UC「消費場景」欄位描述的所有情境（happy path、錯誤操作、邊界、效能期待差異）？
 小型變更（bug fix）跳過此軸。
 
-### 第一性原理 + 第二層思考
+### 深層思考（第一性原理 + 第二層思考）
 - **讀相關程式碼**：不只看 diff，讀取被修改檔案引用的其他模組
 - **確認實作合理性**：為什麼這樣寫？有沒有更簡單的方式？
 - **驗證假設**：修改是否基於對現有程式碼的正確理解？

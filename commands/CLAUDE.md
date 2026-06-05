@@ -22,11 +22,11 @@
 
 - `/spec` — 結構化需求討論（User Story、假設、UC 定義、技術選型、邊界）
 - `/execution-plan` — 段落式實作計畫書，基於 /spec 生成 Self-Contained Segments（含 Scenario Matrix + EP Review Cycle）
-- `/ep-review` — 審查 Execution Plan 合理性（已內建於 `/execution-plan`，可獨立使用）
+- `/ep-review` — 深層思考審查 Execution Plan 合理性（已內建於 `/execution-plan`，可獨立使用）
 - `/ep-validate` — POC 驅動的 EP 技術假設驗證（高技術風險 EP 的動態驗證）
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
 - `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新）
-- `/code-review` — 六軸代碼審查（含 UC 覆蓋度）
+- `/code-review` — 深層思考六軸代碼審查（含 UC 覆蓋度）
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → UC 狀態確認 → message → 確認）
 

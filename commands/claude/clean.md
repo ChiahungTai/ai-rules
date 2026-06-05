@@ -36,7 +36,6 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 | 模式 | 範例 | 原因 |
 |------|------|------|
-| 版本號 | `> **版本**: 2.0` | AI 不關心版本歷史 |
 | 更新日期 | `> **更新日期**: 2025-01-01` | AI 只需要當前規則 |
 | 歷史變更 | `## 變更歷史\n - v1.0: ...` | 應放 CHANGELOG.md |
 | 統計資訊 | `行數: 387`, `字數: 5234` | 對 AI 無意義 |
