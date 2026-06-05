@@ -59,9 +59,12 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - `--init`：從零產出所有段落
 - 維護模式：只更新受影響的段落，保留既有語義描述
 
+**Mermaid 暗色主題**：所有 ````mermaid` 區塊必須在第一行加入 `%%{init: {'theme': 'dark'}}%%`，禁止使用 `style ... fill:` 淺色系填色。
+
 **UC Graph 章節**：在 dep-graph.md 中新增 UC graph section，用 `uc_edges` 資料繪製 UC→UC 依賴圖（虛線箭頭）：
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 graph LR
   subgraph Domain UC
     D-14["D-14: 每日收盤 Pipeline"]
