@@ -1,6 +1,38 @@
 # Sync 實作步驟詳細定義
 
-> **載入時機**: 僅在 `/claude:sync` 執行時按需讀取。本檔案定義步驟 1-10 的詳細實作邏輯。
+> **載入時機**: 僅在 `/claude:sync` 執行時按需讀取。本檔案定義步驟 0.5-10.5 的詳細實作邏輯。
+
+---
+
+## 步驟 0.5: Snapshot 載入
+
+> **觸發條件**：專案根目錄存在 `.project-snapshot.json` 時執行。無 snapshot 時跳過，所有 snapshot 相關步驟降級為獨立模式。
+
+從 `.project-snapshot.json` 載入預計算的知識快照，供後續步驟使用：
+
+```
+1. 偵測專案根目錄是否有 .project-snapshot.json
+2. 如果存在：
+   a. 讀取 JSON
+   b. 驗證 schema_version >= 2（否則視為舊格式，只取 modules/edges）
+   c. Staleness 檢查：如果 scan_timestamp 超過 24 小時，
+      記錄警告 "[WARN] snapshot is stale, recommend /scan-project first"，
+      不阻塞後續步驟（資料可能過時但仍有參考價值）
+   d. 提取以下資料供後續步驟使用：
+      - modules + edges → 步驟 1.5 依賴鏈擴展（精確取代 naive grep）
+      - claude_md_registry → 步驟 4 驗證一致性（預計算的模組邊界）
+      - uc_registry → 步驟 10.5 交叉驗證（UC ID 集合）
+      - cross_validation → 步驟 10.5（預計算的 X6/X7/X-path 問題）
+3. 如果不存在：記錄 "running without snapshot"，後續步驟用傳統方式
+```
+
+**Snapshot 資料消費對照**：
+
+| 步驟 | 消費的 snapshot 資料 | 取代的傳統方式 |
+|------|---------------------|---------------|
+| 1.5 依賴鏈擴展 | `edges[]` | naive grep import chain |
+| 4 驗證一致性 | `claude_md_registry[]` | 逐一 Read CLAUDE.md |
+| 10.5 交叉驗證 | `cross_validation[]` + `uc_registry[]` | 無（新增能力） |
 
 ---
 
@@ -20,7 +52,9 @@
 1. git diff --name-only 提取變更的 .py 檔案
    - 無 --changed-since → git diff HEAD
    - 有 --changed-since → git log --since="$SINCE" --name-only --pretty=format:
-2. 對每個變更檔案，Grep 搜尋整個專案中 import 該模組的檔案
+2. 對每個變更檔案，搜尋消費端：
+   - 有 snapshot → 直接查 edges[]（精確、快速）
+   - 無 snapshot → Grep 搜尋整個專案中 import 該模組的檔案
 3. 從消費端檔案路徑推導其所屬目錄
 4. 檢查消費端目錄是否有 CLAUDE.md → 有的話加入檢查清單
 5. 去重，合併到步驟 1 發現的 CLAUDE.md 清單
@@ -238,4 +272,48 @@ fi
 5. 對多步驟流程驗證 step 間 input/output 可追蹤性（無流程標 N/A）
 6. 執行導航 Decoder Test：不查源碼，嘗試回答 3 個導航問題
 7. 對每個導航缺口產出 ACTION 修改建議（見 Sync Summary ACTION）
+```
+
+---
+
+## 步驟 10.5: 交叉驗證（vs Snapshot）
+
+> **觸發條件**：`.project-snapshot.json` 存在時執行。無 snapshot 時跳過。
+
+消費步驟 0.5 載入的 snapshot 資料，執行跨 artifact 交叉驗證（角度 10-12）。
+
+```
+1. 消費 cross_validation[] 中的預計算結果：
+   - X-path 問題：UC 路徑不存在 → 轉為角度 2（程式碼一致性）的具體案例
+   - X6 問題：模組缺 CLAUDE.md → 轉為角度 11（模組覆蓋缺口）
+   - X7 問題：斷裂 UC 引用 → 轉為角度 12（幽靈 UC 引用）的佐證
+   - X-unique 問題：重複 UC ID → 標記為 critical
+
+2. 角度 10：dep-graph 矛盾（X1）
+   - 遍歷 claude_md_registry[]
+   - 對每個有 declared_not_depend_on 的 CLAUDE.md
+   - 比對 edges[] 中是否有對應的 import edge
+   - 有矛盾 → 標記 [X1] critical
+
+3. 角度 11：模組覆蓋缺口（X6）
+   - 遍歷 modules[]（file_count >= 3）
+   - 檢查 claude_md_registry[] 中是否有對應模組
+   - 缺少 CLAUDE.md → 標記 [X6] important
+
+4. 角度 12：幽靈 UC 引用（X8）
+   - 收集 uc_registry[] 中所有 uc_id 形成有效集合
+   - 遍歷 claude_md_registry[].referenced_uc_ids
+   - 引用的 UC ID 不在有效集合中 → 標記 [X8] important
+   - 額外檢查：搜尋 _archive/ 中是否有匹配的 UC（已歸檔）
+```
+
+**輸出格式**：
+
+```markdown
+### Cross-Validation (vs Snapshot)
+
+- [X1] data/CLAUDE.md 宣告 "Does NOT depend on strategies" 但 edges 有 data→strategies
+- [X6] Module 'services' (12 files) 缺少 CLAUDE.md
+- [X8] root/CLAUDE.md 引用 TE-01，但 uc_registry 中不存在（可能在 _archive/）
+- [X-path] D-15 路徑 data/fetchers/industry.py 不存在
 ```

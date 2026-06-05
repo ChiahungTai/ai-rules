@@ -49,7 +49,7 @@
 - `/claude:clean` — 清理 Markdown 元資訊
 - `/claude:distill` — 蒸餾文檔，提煉核心精華
 - `/claude:sync` — 檢查文檔與程式碼同步性
-- `/claude:daily-maintain` — 每日維護三合一（dep-graph 掃描 + CLAUDE.md sync + USE-CASES sync），支援 `--init` 初始生成、`--only` 指定階段
+- `/claude:daily-maintain` — 每日維護四合一（統一快照 + sync + uc-sync + 健康報告），支援 `--init`、`--only`
 
 ### 日常工具
 

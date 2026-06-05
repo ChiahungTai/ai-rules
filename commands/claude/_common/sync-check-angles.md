@@ -1,6 +1,6 @@
 # Sync 檢查角度完整定義
 
-> **載入時機**: 僅在 `/claude:sync` 執行時按需讀取。本檔案定義 9 個檢查角度的判斷標準和驗證方式。
+> **載入時機**: 僅在 `/claude:sync` 執行時按需讀取。本檔案定義 12 個檢查角度的判斷標準和驗證方式。
 
 ---
 
@@ -184,3 +184,63 @@
 | 檢查連鎖影響 | 消費端文檔是否引用了已變更的 API | `Read` + `rg` 比對 |
 
 **範例**：`rule_forge/` 的核心 class 變更 → 不只 `rule_forge/CLAUDE.md`，連 `examples/rule_forge/CLAUDE.md` 和引用該 API 的說明文檔也需要檢查同步性。
+
+---
+
+## 角度十：dep-graph 矛盾（完整層，--all）
+
+> **核心原則**：CLAUDE.md 宣告的 "Does NOT depend on" 必須與實際 import 依賴一致。宣告不依賴但實際有 import 是最危險的文檔問題 — 因為它讓 AI 誤判模組邊界。
+
+**前置條件**：需要 `.project-snapshot.json`（由 `/scan-project` 產出）。無 snapshot 時跳過此角度。
+
+| 檢查項 | 說明 | 驗證方式 |
+|--------|------|----------|
+| X1 矛盾 | CLAUDE.md 宣告 "Does NOT depend on X" 但 dep-graph 有 import edge → X | 比對 `claude_md_registry[].declared_not_depend_on` vs `edges[]` |
+| X1 缺失宣告 | dep-graph 顯示模組 A 大量依賴模組 B，但 CLAUDE.md 未宣告邊界 | 分析 `edges[]` 中模組間依賴密度 |
+
+**判斷標準**：
+
+- **critical**：明確宣告 "Does NOT depend on" 但有 import edge（矛盾）
+- **suggestion**：高耦合模組對（fan_out > 5）但無 Module Boundaries 段落
+
+**範例**：`data/CLAUDE.md` 宣告 "Does NOT depend on: strategies" 但 dep-graph 顯示 `data.indicators` import `strategies.signal_gen` → 標記為 X1 矛盾。
+
+---
+
+## 角度十一：模組覆蓋缺口（完整層，--all）
+
+> **核心原則**：dep-graph 中有明確邊界的模組（≥ 3 個檔案）應有對應的 CLAUDE.md。缺少 CLAUDE.md 的模組對 AI 是知識黑洞。
+
+**前置條件**：需要 `.project-snapshot.json`。無 snapshot 時跳過此角度。
+
+| 檢查項 | 說明 | 驗證方式 |
+|--------|------|----------|
+| X6 缺口 | dep-graph 有模組但無 CLAUDE.md | 比對 `modules[]` vs `claude_md_registry[]` |
+| X6 小模組 | 模組 < 3 個檔案，CLAUDE.md 非必要 | 過濾 `file_count < 3` |
+
+**判斷標準**：
+
+- **important**：模組 ≥ 3 個檔案但無 CLAUDE.md
+- **suggestion**：模組 1-2 個檔案，無 CLAUDE.md 可接受
+
+**與角度三（涵蓋性）的區別**：角度三檢查「文檔是否記錄了核心模組」，角度十一用 dep-graph 精確資料驗證「哪些模組缺少文檔」。
+
+---
+
+## 角度十二：幽靈 UC 引用（完整層，--all）
+
+> **核心原則**：CLAUDE.md 中引用的 UC ID 必須存在於某個 USE-CASES.md。引用已刪除或歸檔的 UC ID 會讓 AI 在不存在的知識上做判斷。
+
+**前置條件**：需要 `.project-snapshot.json`。無 snapshot 時跳過此角度。
+
+| 檢查項 | 說明 | 驗證方式 |
+|--------|------|----------|
+| X8 幽靈引用 | CLAUDE.md 提到的 UC ID 不在 `uc_registry[]` 中 | 比對 `claude_md_registry[].referenced_uc_ids` vs `uc_registry[].uc_id` |
+| X8 archive 殘留 | UC ID 曾存在但已歸檔（移到 `_archive/`） | 搜尋 `_archive/` 目錄中的 USE-CASES.md |
+
+**判斷標準**：
+
+- **important**：CLAUDE.md 引用的 UC ID 完全不存在（可能從未定義或已刪除）
+- **suggestion**：UC ID 存在於 `_archive/`（已歸檔），CLAUDE.md 引用需更新
+
+**與角度三（涵蓋性）的區別**：角度三檢查「功能是否有記錄」，角度十二檢查「記錄的引用是否指向存在的知識」。
