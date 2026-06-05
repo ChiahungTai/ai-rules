@@ -67,8 +67,12 @@ def _find_package_root(project_root: Path) -> Path | None:
 STATUS_EMOJIS = {"✅", "📋", "🔧", "❌", "🟡", "🟢"}
 
 # Match: ### ✅ D-14: 每日收盤完整流程 Pipeline — mosaic_alpha/data/daily_close/
+# NOTE: Only use em-dash (—) / en-dash (–) as title↔path separator.
+# Regular hyphens (-) appear in compound words (Region-aware, Cross-Interval)
+# and must NOT be treated as separators.
+# Path extraction uses the LAST em/en dash to handle titles with multiple dashes.
 UC_TITLE_RE = re.compile(
-    r"^###\s+([✅📋🔧❌🟡🟢])\s+([A-Za-z]+-\d+):\s+(.+?)\s*(?:[—–-]\s*(.+))?$"
+    r"^###\s+([✅📋🔧❌🟡🟢])\s+([A-Za-z]+-\d+):\s+(.+)$"
 )
 
 # Match UC IDs in cross-reference fields
@@ -124,7 +128,18 @@ def _parse_single_uc_file(uc_file: Path, project_root: Path) -> list[dict]:
             if current_entry:
                 entries.append(current_entry)
 
-            status, uc_id, title, path_str = m.groups()
+            status, uc_id, remaining = m.groups()
+            # Split on LAST em-dash (—) or en-dash (–) to separate title from path.
+            # Regular hyphens (-) in compound words are NOT separators.
+            last_em = remaining.rfind("—")  # — em-dash
+            last_en = remaining.rfind("–")  # – en-dash
+            last_dash = max(last_em, last_en)
+            if last_dash >= 0:
+                title = remaining[:last_dash].strip()
+                path_str = remaining[last_dash + 1:].strip()
+            else:
+                title = remaining.strip()
+                path_str = ""
             # Collect cross-refs from remaining lines until next ### or end
             current_entry = {
                 "uc_id": uc_id,
@@ -320,21 +335,48 @@ def run_cross_validation(
     claude_md_modules = {e["module"] for e in claude_md_registry}
 
     # X-path: UC code_path does not exist
+    # Status-aware: 📋 (planned) and ❌ (deprecated) UCs are skipped.
+    # Non-file paths (no '/' in string) are skipped (config conventions, Makefile targets).
+    _PATH_MARKERS = re.compile(
+        r"[（(](?:NEW|removed|已棄用|待建立|deprecated)[）)]", re.IGNORECASE
+    )
+
     for entry in uc_registry:
-        if not entry["path"]:
+        path_str = entry.get("path", "")
+        status = entry.get("status", "")
+
+        # Skip UCs where missing file is expected
+        if status in ("📋", "❌"):
             continue
-        full_path = project_root / entry["path"]
-        if not full_path.exists():
-            findings.append({
-                "check_id": "X-path",
-                "severity": "critical",
-                "detail": (
-                    f"UC {entry['uc_id']} path {entry['path']} "
-                    f"does not exist (defined in {entry['source_file']})"
-                ),
-                "uc_id": entry["uc_id"],
-                "path": entry["path"],
-            })
+
+        if not path_str:
+            continue
+
+        # Skip non-file paths (conceptual references with no directory separator)
+        if "/" not in path_str:
+            continue
+
+        # Strip markers like （NEW）, （removed）, etc.
+        clean_path = _PATH_MARKERS.sub("", path_str).strip()
+
+        # Handle multi-paths separated by " + "
+        single_paths = [
+            p.strip() for p in clean_path.split(" + ") if p.strip()
+        ]
+
+        for single_path in single_paths:
+            full_path = project_root / single_path
+            if not full_path.exists():
+                findings.append({
+                    "check_id": "X-path",
+                    "severity": "critical",
+                    "detail": (
+                        f"UC {entry['uc_id']} path {single_path} "
+                        f"does not exist (defined in {entry['source_file']})"
+                    ),
+                    "uc_id": entry["uc_id"],
+                    "path": single_path,
+                })
 
     # X6: Module in dep-graph but no CLAUDE.md
     for mod_name, mod_data in modules.items():
