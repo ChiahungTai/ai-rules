@@ -195,6 +195,10 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
    - 部分完成的 UC：📋→🔧，內嵌剩餘細節（前置條件、設計要點、測試計畫 — 測試類型分佈 + 情境覆蓋 + 已知風險，不寫數量）
    - 進行中的 UC：🔧→🟡（如 backfill 正在跑）
 3. **從 EP Scenario Matrix 提煉「消費場景」寫入 UC**：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號，因為 EP 可能歸檔或刪除），填入 UC 的「消費場景」欄位
+4. **更新 UC-BACKLOG.md 狀態**（如果 EP 有「Backlog 關聯」且 UC-BACKLOG.md 存在）：
+   - 讀取 EP「Backlog 關聯」列出的 BACKLOG item IDs
+   - 對每個 BACKLOG item，檢查其引用的所有 UC 狀態（從對應的 USE-CASES.md，不限本次更新的）
+   - 更新 UC-BACKLOG.md 中對應 item 的狀態：所有引用 UC ✅ → item 標為完成；部分 ✅ → 標記進度
 
 #### 5b. CLAUDE.md 更新（大型/中型變更）
 

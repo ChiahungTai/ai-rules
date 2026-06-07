@@ -126,6 +126,10 @@ graph LR
 - 路徑有效性
 - Domain-First 合規（UC 放在主要實作模組目錄）
 - 跨引用完整性
+- **UC-BACKLOG 一致性**（如果 UC-BACKLOG.md 存在）：
+  - BACKLOG item 標 📋 但其引用的所有 UC 都已 ✅ → 報告「狀態不一致：P0-X 全部 UC 已完成，但 BACKLOG 仍標 📋」
+  - BACKLOG item 標 ✅ 但其引用的 UC 有 📋/🔧 → 報告「狀態不一致：P0-X 有未完成 UC」
+  - 報告每個 BACKLOG item 的完成進度（如「P0-1: 2/3 UCs ✅」）
 
 ---
 

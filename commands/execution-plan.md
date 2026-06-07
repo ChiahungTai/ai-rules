@@ -41,10 +41,20 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 | 更新既有 UC | 既有 UC 的能力擴展或行為改變 | 標記 UC ID + 改變摘要，後續段落引用 |
 | 無影響 | 既有 UC 不受影響 | 標記「無 UC 變更」即可 |
 
-3. **輸出格式**（放在 EP 的 top-level，段落之前）：
+3. **掃描 UC-BACKLOG.md 關聯**（如果存在）：
+   - 搜尋專案根目錄的 `UC-BACKLOG.md`
+   - 找出本次 EP 對應的 BACKLOG item（Track P / Track A 的 item ID + 名稱）
+   - EP 可能對應多個 BACKLOG item，全部列出
+
+4. **輸出格式**（放在 EP 的 top-level，段落之前）：
 
 ```markdown
 ## UC 盤點
+
+### Backlog 關聯
+- [UC-BACKLOG.md 存在時] 列出相關 BACKLOG item ID + 名稱（如 P0-1 每日自動啟停、A1-1 MKT-01 AD Line）
+- [UC-BACKLOG.md 不存在時] 提醒用戶：目前無 UC-BACKLOG.md，建議確認是否需要建立。如本次變更為大型/中型，建議先建立 UC-BACKLOG.md 追蹤進度
+- 無對應 BACKLOG item 時寫「無」
 
 ### 掃描範圍
 - [列出掃描的 USE-CASES.md 路徑]
@@ -60,7 +70,7 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 | D-35 | 📋 | [能力描述] | [library 模組相對路徑] |
 ```
 
-4. **段落引用**：每個段落的 Context 必須引用此處盤點的 UC ID（如「實作 D-35」「更新 D-18」）
+5. **段落引用**：每個段落的 Context 必須引用此處盤點的 UC ID（如「實作 D-35」「更新 D-18」）
 
 **為什麼放這裡**：UC 放在段落深處時，AI 傾向跳過或事後補寫。強制在 EP 最前面盤點，確保 UC 在段落設計之前就存在，段落才能正確引用。
 
@@ -135,7 +145,7 @@ EP 專屬約束：
 
 ## 段落設計檢查清單
 
-- [ ] UC 盤點已完成（大型/中型變更：掃描 USE-CASES.md、列出新增/更新 UC）
+- [ ] UC 盤點已完成（大型/中型變更：掃描 USE-CASES.md、列出新增/更新 UC、Backlog 關聯）
 - [ ] Scenario Matrix 已填寫（大型/中型變更；涵蓋 happy path、錯誤操作、邊界、效能期待差異）
 - [ ] 標題明確且獨立
 - [ ] Context 包含所有必要背景
