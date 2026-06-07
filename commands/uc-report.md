@@ -22,7 +22,7 @@ allowed-tools: ["Read", "Bash", "Write"]
 |------|-------------|------|------|
 | `/uc-status` | 「多少 UC 做完了？」 | 聊天 | AI agent（開發中快速看） |
 | `/uc-sync` | 「UC 索引還準確嗎？」 | 聊天 | AI agent（健康檢查） |
-| `/uc-report` | 「系統整體功能地圖長什麼樣？」 | `uc-report.md` 檔案 | 人類（坐下來審查） |
+| `/uc-report` | 「系統整體功能地圖長什麼樣？」 | `uc-coverage.md` 檔案 | 人類（坐下來審查） |
 
 ---
 

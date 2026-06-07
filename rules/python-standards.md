@@ -46,6 +46,8 @@ Circular import 是架構問題，重構模組結構才是解法。`TYPE_CHECKIN
 
 只用在外部邊界（JSON 解析、第三方庫），加註解說明理由。
 
+**查證義務**：使用 `Any` 前，必須先讀 `.venv/lib/python*/site-packages/` 中的實際源碼確認型別。很多情況下套件已有正確的回傳型別（`py.typed`），AI 偷懶不看源碼直接腦補「一定是 `Any`」是違規行為。查證流程：`fd 'py.typed' .venv/.../package/` → 有 `py.typed` 就去讀源碼找真實型別 → 只在確認無法推導時才用 `Any`。
+
 ## Python 命令執行
 
 ### 強制 `uv run`
