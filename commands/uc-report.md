@@ -54,7 +54,6 @@ test -f .project-snapshot.json && echo "SNAPSHOT_OK" || echo "NO_SNAPSHOT"
 
 | 層級 | 路徑模式 | 模組 |
 |------|---------|------|
-| L5 Workflow | `*/workflows/USE-CASES.md` | workflows |
 | L5 Analysis | `*/rule_forge/`, `*/watchlist/`, `*/strategies/`, `*/ui/` | rule_forge, watchlist, strategies, ui |
 | L4 Assembly | `*/datasets/`, `*/model/` | datasets, model |
 | L3 Compute | `*/features/`, `*/conditions/`, `*/labels/`, `*/indicators/` | features, conditions, labels, indicators |
@@ -63,22 +62,14 @@ test -f .project-snapshot.json && echo "SNAPSHOT_OK" || echo "NO_SNAPSHOT"
 
 **判定方式**：`source_file` 包含對應路徑片段即歸入該層。同一 `source_file` 的 UC 歸入同一層。
 
-### 步驟 4：Workflow 展開
-
-對每個 WF-XX 類型的 UC：
-
-1. 從 `uc_edges` 找所有 `target == WF-XX` 的邊（即哪些 UC 被 WF-XX 消費）
-2. 反向查找：從 UC 的 `downstream_consumers` 或 `cross_refs` 包含 WF-XX 的條目
-3. 展開為編排流程列表，每項標注狀態和連結
-
-### 步驟 5：待實作全景
+### 步驟 4：待實作全景
 
 過濾 `uc_registry` 中 status 為 📋/🔧/🟡 的條目。對每個待實作 UC：
 
-1. 從 `uc_edges` 找哪些 WF-XX 的消費鏈包含此 UC
-2. 標注「阻塞的 Workflow」（如果被 WF 引用）
+1. 從 `uc_edges` 找哪些 Domain UC 的消費鏈包含此 UC
+2. 標注「阻塞的功能（SYSTEM-MAP）」— 如果被 SYSTEM-MAP 功能區塊引用
 
-### 步驟 6：失效 UC
+### 步驟 5：失效 UC
 
 直接使用 `cross_validation` 中 `check_id == "X-path"` 的條目。過濾掉明顯的解析問題（path 包含中文或括號等非路徑字元），只保留真實的檔案缺失。
 
@@ -149,7 +140,6 @@ Write 到專案根目錄。格式見下方「輸出格式」。
 
 | 層級 | ✅ | 📋 | 🔧 | 🟡 | ❌ | 總計 | 完成率 |
 |------|----|----|----|----|----|----|--------|
-| L5 Workflow | X | X | X | X | X | XX | XX% |
 | L5 Analysis | X | X | X | X | X | XX | XX% |
 | L4 Assembly | X | X | X | X | X | XX | XX% |
 | L3 Compute | X | X | X | X | X | XX | XX% |
@@ -158,23 +148,6 @@ Write 到專案根目錄。格式見下方「輸出格式」。
 | **Total** | **XX** | **XX** | **XX** | **XX** | **XX** | **XX** | **XX%** |
 
 > 完成率 = ✅ / (✅ + 📋 + 🔧 + 🟡 + 🟢)，❌ 不計入分母。
-
----
-
-## L5 Workflow Layer
-
-### WF-01: DailyWorkflow — ✅
-
-- **編排流程**:
-  1. D-14 DailyClose — ✅ → [USE-CASES.md](mosaic_alpha/data/USE-CASES.md)
-  2. RF-03 FilterTree — ✅ → [USE-CASES.md](mosaic_alpha/rule_forge/USE-CASES.md)
-  3. W-01 NaiveWatchlist — ✅ → [USE-CASES.md](mosaic_alpha/watchlist/USE-CASES.md)
-  4. W-02 MLWatchlist — ✅ → [USE-CASES.md](mosaic_alpha/watchlist/USE-CASES.md)
-
-→ [USE-CASES.md](mosaic_alpha/workflows/USE-CASES.md)
-
-### WF-02: LiveTrading — 📋
-...（同上展開格式）
 
 ---
 
@@ -215,11 +188,11 @@ Write 到專案根目錄。格式見下方「輸出格式」。
 
 ## 📋 待實作全景
 
-| UC ID | 領域 | 名稱 | 狀態 | 阻塞的 Workflow |
-|-------|------|------|------|----------------|
-| WF-03 | workflows | PaperTrading | 📋 | — |
-| W-03 | watchlist | MLWatchlist V2 | 📋 | WF-01（部分） |
-| SJ-08 | adapters/sj | Tiered Subscription | 📋 | WF-02 |
+| UC ID | 領域 | 名稱 | 狀態 | 阻塞的功能 |
+|-------|------|------|------|-------------|
+| D-31 | data | TWSE API v2 | 📋 | 每日收盤 Pipeline |
+| W-03 | watchlist | MLWatchlist V2 | 📋 | Backbone Analysis |
+| SJ-08 | adapters/sj | Tiered Subscription | 📋 | Paper Trading Terminal |
 
 ---
 

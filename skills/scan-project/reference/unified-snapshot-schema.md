@@ -45,9 +45,9 @@
       "source_file": "mosaic_alpha/data/USE-CASES.md",
       "section": "每日收盤更新",
       "line_number": 42,
-      "cross_refs": ["WF-01"],
+      "cross_refs": ["D-18"],
       "domain_deps": ["D-07", "D-08"],
-      "downstream_consumers": ["WF-01"]
+      "downstream_consumers": ["D-18"]
     }
   ],
 
@@ -64,10 +64,10 @@
 
   "uc_edges": [
     {
-      "source": "WF-01",
-      "target": "D-14",
-      "type": "orchestrates",
-      "source_file": "mosaic_alpha/workflows/USE-CASES.md"
+      "source": "D-14",
+      "target": "D-07",
+      "type": "domain_dep",
+      "source_file": "mosaic_alpha/data/USE-CASES.md"
     },
     {
       "source": "D-14",
@@ -117,7 +117,7 @@
 
 | 欄位 | 型別 | 說明 |
 |------|------|------|
-| `uc_id` | string | UC 唯一識別碼（如 D-14、WF-01） |
+| `uc_id` | string | UC 唯一識別碼（如 D-14、VE-15） |
 | `status` | string | 狀態 emoji（✅📋🔧❌🟡🟢） |
 | `title` | string | UC 標題（標題行中冒號後的文字） |
 | `path` | string | 實作路徑（標題行中 — 後的文字），可能為空 |

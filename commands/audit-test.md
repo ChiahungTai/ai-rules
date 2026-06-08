@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Bash"]
 | 2 | 覆蓋對稱性 | must-execute-before-complete | Important |
 | 3 | Mock 健康度 | test-driven-development SKILL.md（Mock 階層） | Important |
 | 4 | 消費端驗證覆蓋 | quality-constraints 消費端驗證模式 | Suggestion |
-| 5 | 漸進驗證合規 | progressive-validation QUICK 集合 | Suggestion |
+| 5 | 漸進驗證合規 | progressive-validation DEPTH-MIN 集合 | Suggestion |
 
 ---
 
@@ -116,11 +116,11 @@ allowed-tools: ["Read", "Bash"]
 
 ### 角度 5：漸進驗證合規
 
-**核心原則**：測試集應有 QUICK 子集可快速確認基本邏輯。
+**核心原則**：測試集應有 DEPTH-MIN 子集可快速確認基本邏輯。
 
 | 檢查項 | 嚴重程度 | 判斷標準 |
 |--------|---------|---------|
-| 無 QUICK / smoke test marker | Suggestion | `tests/` 下無 `@pytest.mark.quick` / `@pytest.mark.smoke` 或對應 marker |
+| 無 DEPTH-MIN / smoke test marker | Suggestion | `tests/` 下無 `@pytest.mark.quick` / `@pytest.mark.smoke` 或對應 marker |
 | 全部測試都是慢速（無分層） | Suggestion | `pytest.ini` / `pyproject.toml` 無 marker 定義 |
 
 定義見 [progressive-validation](../../rules/progressive-validation.md)。

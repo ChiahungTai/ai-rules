@@ -91,21 +91,21 @@ NautilusTrader 升級指揮官。負責版本差距分析、breaking changes 影
 
 ### Phase 4: 驗證（漸進式）
 
-遵循專案的漸進式驗證策略（QUICK → REPRESENTATIVE → ALL）：
+遵循專案的漸進式驗證策略（DEPTH-MIN → DEPTH-SAMPLE → DEPTH-FULL）：
 
-**QUICK（秒級）**：
+**DEPTH-MIN（秒級）**：
 ```bash
 uv run python -c "import nautilus_trader; print(nautilus_trader.__version__)"
 uv run python -c "from nautilus_trader.config import BacktestEngineConfig; print('NT import OK')"
 ```
 
-**REPRESENTATIVE（分鐘級）**：
+**DEPTH-SAMPLE（分鐘級）**：
 ```bash
 uv run pytest tests/ -x -q --timeout=60 -k "not external_api"
 ```
 跑內部測試，排除外部 API 測試（需收盤後才跑）。
 
-**ALL（完整驗證，收盤後執行）**：
+**DEPTH-FULL（完整驗證，收盤後執行）**：
 ```bash
 uv run pytest tests/external_api/sj/ -x -q
 ```
@@ -138,9 +138,9 @@ chore(deps): upgrade nautilus-trader >=X.Y.Z
 ### 驗證結果
 | 階段 | 結果 |
 |------|------|
-| QUICK | ✅/❌ |
-| REPRESENTATIVE | ✅/❌/⏳ 待收盤 |
-| ALL (SJ external) | ⏳ 待收盤 / ✅/❌ |
+| DEPTH-MIN | ✅/❌ |
+| DEPTH-SAMPLE | ✅/❌/⏳ 待收盤 |
+| DEPTH-FULL (SJ external) | ⏳ 待收盤 / ✅/❌ |
 
 ### 跨 Worktree 一致性
 | Worktree | 版本 |

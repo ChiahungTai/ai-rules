@@ -70,10 +70,10 @@ graph LR
     D-14["D-14: 每日收盤 Pipeline"]
     D-07["D-07: TWSE API"]
   end
-  subgraph Workflow UC
-    WF-01["WF-01: 每日工作流"]
+  subgraph SYSTEM-MAP
+    daily_close["每日收盤工作流（功能區塊）"]
   end
-  WF-01 -.-> D-14
+  daily_close -.-> D-14
   D-14 -.-> D-07
 ```
 

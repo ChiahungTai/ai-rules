@@ -107,20 +107,20 @@ Shioaji release notes 通常較簡短（非結構化 changelog），需逐條判
 
 ### Phase 5: 驗證（漸進式）
 
-遵循專案的漸進式驗證策略（QUICK → REPRESENTATIVE → ALL）：
+遵循專案的漸進式驗證策略（DEPTH-MIN → DEPTH-SAMPLE → DEPTH-FULL）：
 
-**QUICK（秒級）**：
+**DEPTH-MIN（秒級）**：
 ```bash
 uv run python -c "import shioaji; print(shioaji.__version__)"
 uv run python -c "from mosaic_alpha.adapters.sj.units import sj_vol_to_internal; print('SJ import OK')"
 ```
 
-**REPRESENTATIVE（分鐘級）**：
+**DEPTH-SAMPLE（分鐘級）**：
 ```bash
 uv run pytest tests/ -x -q --timeout=60 -k "not external_api"
 ```
 
-**ALL（完整驗證，收盤後執行）**：
+**DEPTH-FULL（完整驗證，收盤後執行）**：
 ```bash
 uv run pytest tests/external_api/sj/ -x -q
 ```
@@ -160,9 +160,9 @@ chore(deps): upgrade shioaji[speed] >=X.Y.Z
 ### 驗證結果
 | 階段 | 結果 |
 |------|------|
-| QUICK | ✅/❌ |
-| REPRESENTATIVE | ✅/❌/⏳ 待收盤 |
-| ALL (SJ external) | ⏳ 待收盤 / ✅/❌ |
+| DEPTH-MIN | ✅/❌ |
+| DEPTH-SAMPLE | ✅/❌/⏳ 待收盤 |
+| DEPTH-FULL (SJ external) | ⏳ 待收盤 / ✅/❌ |
 
 ### 跨 Worktree 一致性
 | Worktree | 版本 |
