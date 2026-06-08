@@ -80,7 +80,7 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 | D-35 | 📋 | [能力描述] | [library 模組相對路徑] |
 ```
 
-5. **段落引用**：每個段落的 Context 必須引用此處盤點的 UC ID（如「實作 D-35」「更新 D-18」）
+6. **段落引用**：每個段落的 Context 必須引用此處盤點的 UC ID（如「實作 D-35」「更新 D-18」）
 
 **為什麼放這裡**：UC 放在段落深處時，AI 傾向跳過或事後補寫。強制在 EP 最前面盤點，確保 UC 在段落設計之前就存在，段落才能正確引用。
 
@@ -245,13 +245,19 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 - 清理暫時性資訊（前置條件、測試計畫），保留已知限制和結果摘要
 - **從 EP Scenario Matrix 提煉「消費場景」寫入對應 UC**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號，因為 EP 可能歸檔或刪除），填入 UC 的「消費場景」欄位
 
-### 2. CLAUDE.md 更新
+### 2. SYSTEM-MAP.md 更新（如果存在）
+
+- 根據 UC 狀態變化，更新 SYSTEM-MAP.md 中受影響功能的 life-cycle 狀態
+- 更新全域狀態統計表（如有）
+- 移除已修復的 ⚠️ 標記
+
+### 3. CLAUDE.md 更新
 
 - 檢查受影響模組目錄的 CLAUDE.md，確認架構描述反映變更
 - 新增/修改：模組職責、導航指引、可複用基礎設施
 - 遵循 [claude-writing.md](../rules/claude-writing.md) 品質標準（Signal/Noise ratio、導航優先）
 
-### 3. /audit-test
+### 4. /audit-test
 
 - 執行 `/audit-test` 對新增/修改的測試進行品質稽核
 - 確認無反模式、覆蓋對稱性合理、mock 健康度良好

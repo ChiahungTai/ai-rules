@@ -134,6 +134,7 @@ graph LR
   - SYSTEM-MAP 功能中引用的 UC ID → 驗證這些 UC 存在且狀態正確
   - 功能生命週期狀態 vs 底層 UC 狀態聚合：所有 UC ✅ 但功能標 ⚠️ 或 📋 → 報告「狀態不一致」
   - SYSTEM-MAP 中存在功能但無對應 UC → 報告「缺口：功能 X 無 UC 追蹤」
+  - **資料來源**：優先消費 Phase 1 產出的 `.project-snapshot.json`（uc_registry）；無 snapshot 時直接掃描 USE-CASES.md
 
 ---
 

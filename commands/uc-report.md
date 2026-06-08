@@ -297,7 +297,7 @@ Write 到專案根目錄。格式見下方「輸出格式」。
 - **產出位置**：`uc-coverage.md` 放專案根目錄
 - **資料來源**：`.project-snapshot.json` 優先；無 snapshot 時降級到直接掃描
 - **snapshot 時效**：`scan_timestamp` 超過 24 小時時，提示用戶先跑 `/scan-project`
-- **只寫一個檔案**：本命令只 Write `uc-coverage.md`，不修改任何其他檔案
+- **寫入檔案**：預設只 Write `uc-coverage.md`；`--sync-system-map` 時額外 Write `SYSTEM-MAP.md`
 - **繁體中文輸出**：報告使用繁體中文 + 英文術語
 - **排除目錄**：`_archive/`、`node_modules/`、`.venv/`、`scripts/`
 
