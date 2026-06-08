@@ -56,6 +56,14 @@ User Story 格式：
 4. **記錄 UC ID**：後續 EP 和 /build 會引用此 ID
 5. **消費場景欄位**：大型變更新增 UC 時可先留空，由後續 `/execution-plan` 產出 Scenario Matrix 後、`/build` 階段 5a 從矩陣提煉自包含描述填入。中型變更若影響使用情境，可於此階段直接更新既有 UC 的消費場景欄位
 
+**UC 標題行路徑格式**：有具體實作檔案時，路徑必須使用 markdown link 格式讓路徑可點擊跳轉：
+```markdown
+### ✅ UC-ID: 標題 — [`filename.py`](/project/root/path/to/filename.py)
+### 📋 UC-ID: 標題 — project/root/path/to/          （尚未實作，目錄即可）
+```
+- 顯示文字用**檔名**（簡潔），href 用 `/` 開頭的**專案根目錄相對路徑**（確保 Claude Code / VS Code / GitHub 可點擊）
+- 📋 條目若無具體檔案，保持純文字路徑即可
+
 ### 階段 4：量化成功條件
 
 將模糊需求轉為可驗證的目標。

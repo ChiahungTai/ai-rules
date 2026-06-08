@@ -128,9 +128,14 @@
 | 🟡 | 進行中（正在執行或等待前置完成） |
 | 🟢 | 部分覆蓋（有部分數據，已知限制） |
 
-標題格式：`### ✅ UC-ID: 簡述 — 專案相對路徑`
+標題格式：
 
-實作位置必須使用**專案根目錄相對路徑**（如 `mosaic_alpha/data/fetchers/twse_api.py`、`mosaic_alpha/workflows/pipeline.py`），禁止只寫檔名。理由：USE-CASES.md 的讀者是 AI agent，裸檔名無法定位程式碼。
+| 狀態 | 格式 | 說明 |
+|------|------|------|
+| ✅ | `### ✅ UC-ID: 簡述 — [`filename.py`](/專案根目錄相對路徑)` | markdown link，路徑可點擊跳轉 |
+| 📋 | `### 📋 UC-ID: 簡述 — 專案根目錄相對路徑/` | 純文字，目錄即可（尚未實作） |
+
+實作位置必須使用**專案根目錄相對路徑**（如 `/mosaic_alpha/data/fetchers/twse_api.py`），禁止只寫檔名。理由：USE-CASES.md 的讀者是 AI agent，裸檔名無法定位程式碼。✅ 條目使用 markdown link 格式（顯示文字用檔名，href 用 `/` 開頭），確保 Claude Code / VS Code / GitHub 均可點擊。
 
 ### 四種開發情境
 

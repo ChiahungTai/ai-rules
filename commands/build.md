@@ -191,7 +191,8 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 1. **讀取 EP 中引用的 UC ID**（來自段落 Context 的 UC 引用欄位）
 2. **更新對應 library 模組的 USE-CASES.md**：
-   - 已完成的 UC：📋→✅，附專案相對路徑；若原在「待實作」章節，搬到對應的正確章節
+   - 已完成的 UC：📋→✅，附專案相對路徑；若原在「待實作」章節，搬到對應的正確章節。路徑必須使用 markdown link 格式：
+     `` [`filename.py`](/project/root/path/to/filename.py) ``（顯示文字用檔名，href 用 `/` 開頭的專案根目錄相對路徑）
    - 部分完成的 UC：📋→🔧，內嵌剩餘細節（前置條件、設計要點、測試計畫 — 測試類型分佈 + 情境覆蓋 + 已知風險，不寫數量）
    - 進行中的 UC：🔧→🟡（如 backfill 正在跑）
 3. **從 EP Scenario Matrix 提煉「消費場景」寫入 UC**：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號，因為 EP 可能歸檔或刪除），填入 UC 的「消費場景」欄位
