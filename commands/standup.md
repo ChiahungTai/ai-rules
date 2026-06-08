@@ -57,7 +57,7 @@ fd -e jsonl . ~/.claude/projects/ --max-depth 2 --changed-within 1d
 - AI 做了哪些主要操作
 - AI 的結論和最終狀態
 
-### 4. UC 進度摘要
+### 4. UC 進度摘要 + SYSTEM-MAP 功能進度
 
 掃描 library 模組目錄下 USE-CASES.md 的昨日變更，摘要 UC 進度。
 
@@ -69,6 +69,17 @@ git log -p --since="yesterday 00:00:00" -- "**/USE-CASES.md"
 - 狀態變化的 UC（📋→✅、新增 📋、❌ 棄用）
 - 新增或更新的 GAP
 - 目前 📋 項目總數
+
+**SYSTEM-MAP 功能進度**（如果 SYSTEM-MAP.md 存在）：
+
+```bash
+git log -p --since="yesterday 00:00:00" -- "SYSTEM-MAP.md"
+```
+
+摘要功能級別的生命週期狀態變化：
+- 功能狀態升級或降級（如 ✅→✅🔍、📋→✅、⚠️→✅🔍）
+- 新增或移除的已知問題
+- 全域狀態統計變化
 
 ### 5. 測試品質摘要
 

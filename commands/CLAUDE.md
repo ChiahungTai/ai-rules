@@ -16,16 +16,16 @@
 ### 核心開發流程
 
 ```
-/spec（含 UC 定義）→ /execution-plan（引用 UC ID）→ [/ep-validate（可選，POC 技術驗證）]
-  → /build（含 Agent Review + UC 狀態更新）→ /code-review（六軸，含 UC 覆蓋度）→ /commit（含 UC 狀態確認）
+/spec（含 UC 定義）→ /execution-plan（引用 UC ID + SYSTEM-MAP 關聯）→ [/ep-validate（可選，POC 技術驗證）]
+  → /build（含 Agent Review + UC 狀態更新 + SYSTEM-MAP 同步）→ /code-review（六軸，含 UC 覆蓋度）→ /commit（含 UC 狀態確認）
 ```
 
 - `/spec` — 結構化需求討論（User Story、假設、UC 定義、技術選型、邊界）
-- `/execution-plan` — 段落式實作計畫書，基於 /spec 生成 Self-Contained Segments（含 Scenario Matrix + EP Review Cycle）
+- `/execution-plan` — 段落式實作計畫書，基於 /spec 生成 Self-Contained Segments（含 Scenario Matrix + EP Review Cycle），掃描 SYSTEM-MAP.md 取得功能上下文
 - `/ep-review` — 深層思考審查 Execution Plan 合理性（已內建於 `/execution-plan`，可獨立使用）
 - `/ep-validate` — POC 驅動的 EP 技術假設驗證（高技術風險 EP 的動態驗證）
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
-- `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新）
+- `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新 + SYSTEM-MAP 同步）
 - `/code-review` — 深層思考六軸代碼審查（含 UC 覆蓋度）
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → UC 狀態確認 → message → 確認）
@@ -49,14 +49,14 @@
 - `/claude:clean` — 清理 Markdown 元資訊
 - `/claude:distill` — 蒸餾文檔，提煉核心精華
 - `/claude:sync` — 檢查文檔與程式碼同步性
-- `/claude:daily-maintain` — 每日維護四合一（統一快照 + sync + uc-sync + 健康報告），支援 `--init`、`--only`
+- `/claude:daily-maintain` — 每日維護四合一（統一快照 + sync + uc-sync + SYSTEM-MAP 一致性 + 健康報告），支援 `--init`、`--only`
 
 ### 日常工具
 
-- `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要、UC 進度）
-- `/uc-status` — USE-CASES 跨領域狀態掃描（全局進度儀表板）
+- `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要、UC 進度 + SYSTEM-MAP 功能進度）
+- `/uc-status` — USE-CASES 跨領域狀態掃描（全局進度儀表板 + SYSTEM-MAP 功能級別摘要）
 - `/uc-sync` — USE-CASES.md 同步與品質檢查（狀態-實作一致性、路徑有效性、Domain-First 合規）
-- `/uc-report` — 系統能力地圖生成器（top-down 層級 + Workflow 展開 + 孤兒偵測 + 未驗證 UC + 連結，產出 uc-coverage.md）
+- `/uc-report` — 系統能力地圖生成器（top-down 層級 + Workflow 展開 + 孤兒偵測 + 未驗證 UC + 連結，產出 uc-coverage.md）；`--sync-system-map` 用 UC 狀態同步 SYSTEM-MAP.md
 - `/rebase <target>` — Worktree 分支棧 rebase（當前 branch → target，cascade 子 worktree）
 
 ### 依賴升級（收盤後執行）

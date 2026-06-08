@@ -130,6 +130,10 @@ graph LR
   - BACKLOG item 標 📋 但其引用的所有 UC 都已 ✅ → 報告「狀態不一致：P0-X 全部 UC 已完成，但 BACKLOG 仍標 📋」
   - BACKLOG item 標 ✅ 但其引用的 UC 有 📋/🔧 → 報告「狀態不一致：P0-X 有未完成 UC」
   - 報告每個 BACKLOG item 的完成進度（如「P0-1: 2/3 UCs ✅」）
+- **SYSTEM-MAP 一致性**（如果 SYSTEM-MAP.md 存在）：
+  - SYSTEM-MAP 功能中引用的 UC ID → 驗證這些 UC 存在且狀態正確
+  - 功能生命週期狀態 vs 底層 UC 狀態聚合：所有 UC ✅ 但功能標 ⚠️ 或 📋 → 報告「狀態不一致」
+  - SYSTEM-MAP 中存在功能但無對應 UC → 報告「缺口：功能 X 無 UC 追蹤」
 
 ---
 

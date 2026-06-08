@@ -93,6 +93,26 @@ fd "USE-CASES.md" <掃描根目錄> --type f
 
 - [ ] {基於 📋 項目的優先序建議}
 - [ ] {基於一致性問題的修正建議}
+- [ ] 執行 `/uc-report --sync-system-map` 同步 SYSTEM-MAP.md
+
+### 功能級別摘要（SYSTEM-MAP.md）
+
+如果專案根目錄存在 `SYSTEM-MAP.md`，附加以下摘要：
+
+```markdown
+### SYSTEM-MAP 功能概覽
+
+| 狀態 | 數量 |
+|------|------|
+| 🏃 Running | X |
+| ✅🔍 Verified | X |
+| ✅ Built | X |
+| ⚠️ Issues | X |
+| 📋 Planned | X |
+| ❌ Abandoned | X |
+
+**⚠️ 需關注**: [列出標記 ⚠️ 的功能及其問題]
+```
 ```
 
 ---

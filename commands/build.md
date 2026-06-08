@@ -201,21 +201,31 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
    - 對每個 BACKLOG item，檢查其引用的所有 UC 狀態（從對應的 USE-CASES.md，不限本次更新的）
    - 更新 UC-BACKLOG.md 中對應 item 的狀態：所有引用 UC ✅ → item 標為完成；部分 ✅ → 標記進度
 
-#### 5b. CLAUDE.md 更新（大型/中型變更）
+#### 5b. SYSTEM-MAP.md 更新（大型/中型變更）
+
+1. **讀取 SYSTEM-MAP.md**（如果存在於專案根目錄）
+2. **定位受影響的功能區塊**：根據本次更新的 UC ID，找到 SYSTEM-MAP.md 中引用這些 UC 的功能
+3. **更新功能生命週期狀態**：
+   - 所有引用 UC 都 ✅ 且測試通過 → 功能狀態升級（✅→✅🔍 或 📋→✅ Built）
+   - 有已知問題或未驗證 → 標記 ⚠️ 並附說明
+   - 移除已修復的 ⚠️ 標記
+4. **更新全域狀態統計**（如果文件尾端有統計表）
+
+#### 5c. CLAUDE.md 更新（大型/中型變更）
 
 1. **識別受影響模組**：從 git diff 中找出變更檔案所在目錄及上層目錄的 CLAUDE.md
 2. **檢查更新需求**：變更是否影響 CLAUDE.md 中描述的架構、模組職責、導航指引、可複用基礎設施
 3. **更新**：新增/修改受影響段落，遵循 [claude-writing.md](../rules/claude-writing.md) 品質標準（Signal/Noise ratio、導航優先、禁止元資訊）
 
-#### 5c. /audit-test（所有變更）
+#### 5d. /audit-test（所有變更）
 
 執行 `/audit-test` 對新增/修改的測試進行品質稽核。稽核結果附於完成報告。
 
-**小型變更**（bug fix）：僅執行 5c（/audit-test），跳過 5a、5b。
+**小型變更**（bug fix）：僅執行 5d（/audit-test），跳過 5a、5b、5c。
 
 ### 階段 6：完成報告
 
-輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + UC 狀態變更摘要 + /audit-test 稽核結果
+輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + UC 狀態變更摘要 + SYSTEM-MAP 功能狀態變更 + /audit-test 稽核結果
 
 ---
 
@@ -228,7 +238,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 3. 每段必須 TDD（RED → GREEN → REFACTOR）
 4. 每段必須獨立驗證（ruff + mypy + pytest）
 5. 禁止 `from __future__ import annotations`
-6. 必須執行收尾步驟（階段 5）：大型/中型 → UC 更新 + CLAUDE.md 更新 + /audit-test；小型 → /audit-test
+6. 必須執行收尾步驟（階段 5）：大型/中型 → UC 更新 + SYSTEM-MAP 更新 + CLAUDE.md 更新 + /audit-test；小型 → /audit-test
 
 ### 禁止
 

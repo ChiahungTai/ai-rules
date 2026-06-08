@@ -46,7 +46,12 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
    - 找出本次 EP 對應的 BACKLOG item（Track P / Track A 的 item ID + 名稱）
    - EP 可能對應多個 BACKLOG item，全部列出
 
-4. **輸出格式**（放在 EP 的 top-level，段落之前）：
+4. **掃描 SYSTEM-MAP.md 關聯**（如果存在）：
+   - 搜尋專案根目錄的 `SYSTEM-MAP.md`
+   - 找出本次 EP 影響的功能區塊及其生命週期狀態
+   - 在 EP 中標注「本次 EP 影響 SYSTEM-MAP 中的功能：X（狀態），Y（狀態）」
+
+5. **輸出格式**（放在 EP 的 top-level，段落之前）：
 
 ```markdown
 ## UC 盤點
@@ -55,6 +60,11 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 - [UC-BACKLOG.md 存在時] 列出相關 BACKLOG item ID + 名稱（如 P0-1 每日自動啟停、A1-1 MKT-01 AD Line）
 - [UC-BACKLOG.md 不存在時] 提醒用戶：目前無 UC-BACKLOG.md，建議確認是否需要建立。如本次變更為大型/中型，建議先建立 UC-BACKLOG.md 追蹤進度
 - 無對應 BACKLOG item 時寫「無」
+
+### SYSTEM-MAP 影響
+- [SYSTEM-MAP.md 存在時] 列出受影響功能 + 當前生命週期狀態（如「每日收盤 Pipeline 🏃」「Paper Trading Terminal ⚠️」）
+- [SYSTEM-MAP.md 不存在時] 提醒用戶：目前無 SYSTEM-MAP.md，建議建立
+- 無對應功能時寫「無」
 
 ### 掃描範圍
 - [列出掃描的 USE-CASES.md 路徑]

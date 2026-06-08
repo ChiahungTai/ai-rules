@@ -119,6 +119,19 @@ fd -e py . <專案 library 目錄> --type f
 
 Write 到專案根目錄。格式見下方「輸出格式」。
 
+### 步驟 10：同步 SYSTEM-MAP.md（`--sync-system-map`）
+
+僅在指定 `--sync-system-map` 且 SYSTEM-MAP.md 存在時執行。
+
+1. **讀取 SYSTEM-MAP.md**，提取所有 UC ID 引用及其所在的功能區塊
+2. **對比 UC 狀態**：從 `uc_registry` 取得每個 UC ID 的當前狀態
+3. **推導功能生命週期**：
+   - 功能內所有 UC ✅ + 測試通過 → ✅🔍 Verified
+   - 功能內所有 UC ✅ 但無整合驗證 → ✅ Built
+   - 功能有 📋/🔧 UC → 維持原狀或降級為 ⚠️
+4. **更新 SYSTEM-MAP.md** 的功能狀態標記和全域統計表
+5. **報告差異**：列出所有狀態變化（如「每日收盤 Pipeline：D-27 ✅→✅🔍」）
+
 ---
 
 ## 輸出格式
@@ -275,6 +288,7 @@ Write 到專案根目錄。格式見下方「輸出格式」。
 | **無參數** | 產出 uc-coverage.md（含總覽 + 層級 + 待實作 + 失效 UC + 未驗證 UC） |
 | **--orphans** | 額外包含孤兒程式碼偵測（模組級 + 檔案級） |
 | **--skip-test-check** | 跳過未驗證 UC 偵測（加速產出） |
+| **--sync-system-map** | 用 UC 狀態同步 SYSTEM-MAP.md 的功能生命週期狀態（步驟 10） |
 
 ---
 
@@ -298,5 +312,6 @@ Write 到專案根目錄。格式見下方「輸出格式」。
 | `/scan-project` | 產出 `/uc-report` 所需的 `.project-snapshot.json` |
 | `/claude:daily-maintain` | 可在 Phase 4 後追加 `/uc-report` 產出報表 |
 | `/standup` | 晨間可搭配 `/uc-report` 審查整體狀態 |
+| `SYSTEM-MAP.md` | `/uc-report` 是架構層級（L0-L5）；SYSTEM-MAP 是工作流層級。`--sync-system-map` 用 UC 狀態更新 SYSTEM-MAP |
 
 > **工作流**: `/scan-project`（更新 snapshot）→ `/uc-report`（產出 `uc-coverage.md`）→ 人類審查 → 針對問題跑 `/uc-sync`
