@@ -27,7 +27,7 @@ from pathlib import Path
 # Constants
 # ---------------------------------------------------------------------------
 
-UC_ID_RE = re.compile(r"\b([A-Z]+-\d+)\b")
+UC_ID_RE = re.compile(r"\b([A-Z][A-Z0-9]*-[A-Z0-9]+)\b")
 
 SKIP_DIRS_SCAN = {
     ".venv", "venv", "__pycache__", ".git", "node_modules",
@@ -41,11 +41,8 @@ ACTIVE_KANBAN_LANES = KANBAN_LANES - {"Done"}
 # Capabilities table header detection
 CAPABILITIES_HEADER_RE = re.compile(r"^##\s+Capabilities", re.MULTILINE)
 
-# Markdown table row: | col1 | col2 | col3 | col4 | [col5 ...] |
-# Captures first 4 columns; allows trailing columns (≥4 cols).
-TABLE_ROW_RE = re.compile(
-    r"^\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|(?:.*\|.*)?$"
-)
+# Markdown table row detection: starts and ends with |
+TABLE_ROW_START = re.compile(r"^\|.*\|\s*$")
 
 # YAML frontmatter block
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
@@ -146,24 +143,35 @@ def _parse_capabilities_table(
     )
 
     for line in section_text.splitlines():
-        m = TABLE_ROW_RE.match(line)
-        if not m:
+        # Parse table row using split-by-| instead of regex.
+        # This handles | inside backtick content (e.g. CLI `sync [revenue|income|all]`)
+        # by taking col1 from the left and status from the right, then
+        # reconstructing col3 (entry_point) from the middle fragments.
+        if not TABLE_ROW_START.match(line):
             continue
-        cols = [c.strip() for c in m.groups()]
+        parts = line.split("|")
+        # parts: ['', col1, col2, ..., colN, ''] (leading/trailing |)
+        if len(parts) < 5:  # need at least: '' col1 col2 col3 col4 ''
+            continue
+        col1 = parts[1].strip()          # UC ID (never contains |)
+        col2 = parts[2].strip()          # capability/能力 (never contains |)
+        col_last = parts[-2].strip()     # status/狀態 (never contains |)
+        # Reconstruct col3 by rejoining fragments — restores | inside backticks
+        col3 = "|".join(parts[3:-2]).strip()  # entry_point/入口
+
         # Skip separator rows (---)
-        if all(set(c.strip()) <= {"-", ":"} for c in cols):
+        if all(set(c.strip()) <= {"-", ":"} for c in parts[1:-1]):
             continue
         # Skip header rows
-        if cols[0].strip() == "UC ID":
+        if col1 == "UC ID":
             continue
 
-        uc_id_raw = cols[0].strip()
-        uc_id_match = UC_ID_RE.search(uc_id_raw)
+        uc_id_match = UC_ID_RE.search(col1)
         if not uc_id_match:
             continue
 
         uc_id = uc_id_match.group(1)
-        status_raw = cols[3].strip()
+        status_raw = col_last
         # Extract status emoji
         status = ""
         for ch in status_raw:
@@ -195,8 +203,8 @@ def _parse_capabilities_table(
         entries.append({
             "uc_id": uc_id,
             "module": module,
-            "capability": cols[1].strip(),
-            "entry_point": cols[2].strip(),
+            "capability": col2,
+            "entry_point": col3,
             "status": status,
             "source_claude_md": source_claude_md,
             "domain_deps": sorted(set(domain_deps)),
