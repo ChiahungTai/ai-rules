@@ -41,11 +41,16 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 | 更新既有 UC | 既有 UC 的能力擴展或行為改變 | 標記 UC ID + 改變摘要，後續段落引用 |
 | 無影響 | 既有 UC 不受影響 | 標記「無 UC 變更」即可 |
 
-3. **掃描 .kanban/Backlog/ 關聯**（如果存在）：
+3. **掃描 .kanban/Backlog/ 關聯 + 自動建卡**（如果存在）：
    - 搜尋專案根目錄的 `.kanban/Backlog/` 目錄
    - 找出本次 EP 對應的 Backlog 卡片（UC ID + 名稱）
    - EP 可能對應多張 Backlog 卡片，全部列出
-   - **Fallback**：如果專案仍使用 `UC-BACKLOG.md`（舊格式），掃描該檔案而非 .kanban/
+   - **自動建卡**（EP 產出後執行）：
+     1. 收集 EP 中所有「新增 UC」（UC 盤點 → 新增 UC 表格中的 📋 項目）
+     2. 對照 `.kanban/Backlog/` 已有卡片，篩出**缺少卡片的 UC ID**
+     3. 為每個缺少卡片的 UC ID 在 `.kanban/Backlog/` 建立卡片（格式見 `/spec` 階段 3 的 Kanban Backlog 卡片格式）
+     4. 為 EP 整體建立一張 Backlog 卡片（追蹤 EP 進度），內容引用所有相關 UC ID
+   - 無 `.kanban/` 目錄時：提醒用戶建立（`mkdir -p .kanban/{Backlog,Next-Up,In-Progress,Done}`），建立後再建卡
 
 4. **掃描 SYSTEM-MAP.md 關聯**（如果存在）：
    - 搜尋專案根目錄的 `SYSTEM-MAP.md`
@@ -58,9 +63,8 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 ## UC 盤點
 
 ### Backlog 關聯
-- [.kanban/Backlog/ 存在時] 列出相關 Backlog 卡片（UC ID + 名稱）
-- [.kanban/Backlog/ 不存在時] 提醒用戶：目前無 .kanban/Backlog/ 目錄。如本次變更為大型/中型，建議先 /spec 建立 Kanban Backlog 卡片追蹤進度
-- 無對應 Backlog 卡片時寫「無」
+- 列出相關 Backlog 卡片（UC ID + 名稱）
+- 自動建卡結果：新建 N 張卡片（列出 UC ID + 檔名）或「所有 UC 已有卡片」
 
 ### SYSTEM-MAP 影響
 - [SYSTEM-MAP.md 存在時] 列出受影響功能 + 當前生命週期狀態（如「每日收盤 Pipeline 🏃」「Paper Trading Terminal ⚠️」）
@@ -157,6 +161,7 @@ EP 專屬約束：
 ## 段落設計檢查清單
 
 - [ ] UC 盤點已完成（大型/中型變更：掃描 CLAUDE.md Capabilities + .kanban/、列出新增/更新 UC、Backlog 關聯）
+- [ ] Backlog 自動建卡已完成（新增 UC 已有對應 Backlog 卡片 + EP 整體追蹤卡片）
 - [ ] Scenario Matrix 已填寫（大型/中型變更；涵蓋 happy path、錯誤操作、邊界、效能期待差異）
 - [ ] 標題明確且獨立
 - [ ] Context 包含所有必要背景

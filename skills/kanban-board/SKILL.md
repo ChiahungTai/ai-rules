@@ -111,8 +111,8 @@ mv .kanban/Next-Up/feature-X.md .kanban/In-Progress/feature-X.md
 
 EP 段落完成後：
 
-1. 對應卡片移動到 `Review/`
-2. 全部段落完成 → 移動到 `Done/` 並加完成紀錄
+1. 提煉消費場景（暫存，供 `/commit` 使用）
+2. 全部段落完成 → `/commit` 確認後移動到 `Done/` 並加完成紀錄
 
 ### deep-work 整合
 
@@ -120,7 +120,7 @@ EP 段落完成後：
 
 1. 從 `Next-Up/` 拉第一張卡片到 `In-Progress/`
 2. 實作過程中更新卡片內容（加上決策記錄）
-3. 完成後移動到 `Review/`
+3. 完成後移動到 `Done/`
 
 ### /spec 整合
 
@@ -145,11 +145,11 @@ EP 段落完成後：
 1. **統計**：各 lane 卡片數量、本週完成數量
 2. **Backlog 整理**：標記過時卡片（超過 30 天未動）、建議刪除或拆分
 3. **優先順序**：建議 Backlog → Next-Up 的移動
-4. **WIP 健康度**：In-Progress 是否堆積、Review 是否卡住
+4. **WIP 健康度**：In-Progress 是否堆積、Next-Up 是否過長
 
 ## 注意事項
 
 - **不自動建立卡片**：除非用戶明確要求，或是在 `/spec`、`/build` 等流程中依規則建立
 - **不自動刪除卡片**：刪除前必須確認
-- **Tag 管理**：LLM 建立或更新卡片時，依 UC prefix → tag 對照表自動加入 `[tag:module]`（見專案 CLAUDE.md「Tag 慣例」）。用戶也可透過 Tasks.md 網頁 UI 手動管理 tag 顏色和自訂 tag
+- **Tag 管理**：LLM 建立或更新卡片時，依模組目錄掃描決定 tag（見專案 CLAUDE.md「Tag 慣例」）。用戶也可透過 Tasks.md 網頁 UI 手動管理 tag 顏色和自訂 tag
 - **並行安全**：看板檔案可能同時被網頁 UI 和 LLM 修改，避免同時編輯同一張卡片
