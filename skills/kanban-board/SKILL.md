@@ -51,14 +51,16 @@ fd -e md . .kanban/In-Progress/
 在對應 lane 目錄下建立 `.md` 檔案，檔名即為卡片標題：
 
 ```markdown
+[tag:module]
+
 # 卡片標題（與檔名相同）
 
 ## 目標
 [這張卡片要完成什麼]
 
 ## 相關
+- UC ID: [UC ID（如 D-14）]
 - EP: [EP 路徑或編號]
-- UC: [UC ID（如 D-14）]
 - 分支: [git branch name]
 
 ## 驗收標準
@@ -144,5 +146,5 @@ EP 段落完成後：
 
 - **不自動建立卡片**：除非用戶明確要求，或是在 `/spec`、`/build` 等流程中依規則建立
 - **不自動刪除卡片**：刪除前必須確認
-- **Tag 管理**：Tag 只能透過 Tasks.md 網頁 UI 管理（存在 config 中），LLM 不處理 Tag
+- **Tag 管理**：LLM 建立或更新卡片時，依 UC prefix → tag 對照表自動加入 `[tag:module]`（見專案 CLAUDE.md「Tag 慣例」）。用戶也可透過 Tasks.md 網頁 UI 手動管理 tag 顏色和自訂 tag
 - **並行安全**：看板檔案可能同時被網頁 UI 和 LLM 修改，避免同時編輯同一張卡片

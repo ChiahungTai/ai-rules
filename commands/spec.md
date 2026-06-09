@@ -58,6 +58,8 @@ User Story 格式：
 
 **Kanban Backlog 卡片格式**（📋 新建時使用）：
 ```markdown
+[tag:module]
+
 # [名稱]
 
 ## 目標
@@ -75,6 +77,7 @@ User Story 格式：
 ```
 - 📋 簡單（< 10 行描述）：`## 目標` 放一句話
 - 📋 詳細（≥ 10 行）：`## 目標` 放完整描述（卡片是 markdown，長度不限）
+- **Tag**：由 UC ID prefix 自動決定（見專案 CLAUDE.md「Tag 慣例」）。無 UC prefix 的卡片（如 Track cards）依「歸屬模組」欄位決定 tag
 
 ### 階段 4：量化成功條件
 
