@@ -1,60 +1,82 @@
 ---
-description: "Kanban-centric 進度儀表板。顯示 Capabilities 完成率、Kanban lane 分佈、模組 Breakdown、過時卡片。"
+description: "進度儀表板。直接讀取 .kanban/ 目錄和 CLAUDE.md Capabilities，產出進度報告。"
 usage: "/task-status [路徑]"
 argument-hint: "[專案根目錄路徑，預設當前目錄]"
 ---
 
-# /task-status — Kanban-centric 進度儀表板
+# /task-status — 進度儀表板
 
-> **角色**：Kanban 的 view layer — 把 Kanban lanes + CLAUDE.md Capabilities 翻譯成人可讀的進度表。回答「做到哪了？完成率多少？有沒有過時的卡片？」
+> **角色**：Kanban 的 view layer — 把 .kanban/ 目錄結構 + CLAUDE.md Capabilities 翻譯成人可讀的進度表。回答「做到哪了？完成率多少？有沒有過時的卡片？」
+
+---
+
+## 核心哲學
+
+**直接讀取檔案系統，不需要 snapshot registry。**
+
+| 資料來源 | 讀取方式 | 說明 |
+|---------|---------|------|
+| .kanban/ 目錄 | `fd` + `Read` | Lane = 目錄，Card = .md 檔案，檔名 = title |
+| CLAUDE.md | `fd` + `Read` | `## Capabilities` 表格的 ✅ 條目 |
+| scan fingerprint | `.project-snapshot.json` | 僅用於判斷是否需要重新掃描（可選） |
 
 ---
 
 ## 掃描流程
 
-| 步驟 | 操作 | 指令 |
+| 步驟 | 操作 | 方式 |
 |------|------|------|
-| 1 | 定位所有模組 CLAUDE.md | `fd "CLAUDE.md" mosaic_alpha/ --type f --full-path` |
-| 2 | 定位所有 Kanban 卡片 | `fd "." .kanban/ --type f --extension md` |
-| 3 | 解析 Capabilities 表格 | 從每個 CLAUDE.md 提取 `## Capabilities` 下的表格行 |
-| 4 | 解析 Kanban 卡片 | 從每張卡片提取 UC ID 欄位和所在 lane |
-| 5 | 聚合統計 | 按模組計算 ✅/📋/🟡 數量 + Kanban lane 分佈 |
-| 6 | 計算完成率 | 見下方公式 |
-| 7 | 偵測過時卡片 | Backlog > 30 天、In-Progress > 14 天 |
-| 8 | 產出 Dashboard | 見下方格式 |
+| 1 | 列出 Kanban lanes | 讀取 .kanban/ 下的子目錄（Backlog, Next-Up, In-Progress, Done） |
+| 2 | 列出每個 lane 的卡片 | `fd -e md . .kanban/{lane}/`，提取檔名（= title）和 line 1 的 `[tag:module]` |
+| 3 | 讀取 Capabilities | `fd "CLAUDE.md" mosaic_alpha/ --type f`，解析 `## Capabilities` 表格的 ✅ 數量 |
+| 4 | 偵測過時卡片 | 檔案 mtime：Backlog > 30 天、In-Progress > 14 天、Next-Up > 7 天 |
+| 5 | 聚合統計 | 按模組（tag）聚合 Kanban 卡片 + 按 CLAUDE.md 模組聚合 ✅ |
+| 6 | 產出 Dashboard | 見下方格式 |
 
-### Snapshot 消費（步驟 1.5）
+### Snapshot 輔助（可選）
 
 如果 `.project-snapshot.json` 存在且 < 24 小時：
-- 直接使用 `capabilities_registry` 取代步驟 3
-- 直接使用 `kanban_registry` 取代步驟 4
-- 否則重新掃描
+- 使用 `fingerprint` 的 counts 快速呈現總數
+- 仍需直接讀取 .kanban/ 以取得卡片標題和過時偵測
 
 ---
 
-## Capabilities 表格解析
+## Kanban 掃描邏輯
 
-- 搜尋 `## Capabilities` 標題
-- 讀取下方 markdown table（`| UC ID | 能力 | 入口 | 狀態 |`）
-- 提取每行的 UC ID 和狀態 emoji
+**Kanban 是純檔案系統**（Tasks.md Docker UI 的後端）：
 
-## Kanban 卡片解析
+| 概念 | 對應 | 範例 |
+|------|------|------|
+| Lane | `.kanban/` 子目錄 | `.kanban/Backlog/` |
+| Card | `.md` 檔案 | `.kanban/Backlog/騰落線指標.md` |
+| Title | 檔案 stem | `騰落線指標` |
+| Tag | Line 1 的 `[tag:xxx]` | `[tag:indicators]` |
+| Content | 檔案剩餘內容 | Markdown body |
 
-- 讀取每張 .kanban/{lane}/*.md 卡片
-- 從 frontmatter 或 `## 相關` 段落提取 UC ID
-- 從檔案路徑判斷 lane（`.kanban/Backlog/` → 📋，`.kanban/Next-Up/` → 🟡 等）
-- **容錯**：lane 目錄不存在時視為 0 張卡片（不報錯）
-- Done/ lane 的卡片不計入統計（已完成 → 已在 Capabilities 表格中）
+**Lanes**：`Backlog`、`Next-Up`、`In-Progress`、`Done`
+
+**Tag → 模組歸屬**：Card 的 `[tag:xxx]` 對應 `mosaic_alpha/xxx/`，用於 Module Breakdown 統計。
+
+**容錯**：lane 目錄不存在時視為 0 張卡片（不報錯）。Done/ 不計入 pending 統計。
+
+## Capabilities 解析
+
+- 掃描 `{project_root}/**/CLAUDE.md`
+- 搜尋 `## Capabilities` 標題下的 markdown table
+- 計算每個模組的 ✅ 條目數
+- 模組 = CLAUDE.md 所在目錄名
 
 ---
 
 ## 完成率公式
 
 ```
-done = count(Capabilities ✅) + count(Capabilities ✅🔍) + count(Capabilities 🏃)
-pending = count(Kanban Backlog) + count(Kanban Next-Up) + count(Kanban In-Progress) + count(Kanban Review)
+done = count(Capabilities ✅)
+pending = count(Kanban Active Lanes: Backlog + Next-Up + In-Progress)
 rate = done / (done + pending)
 ```
+
+Done/ 不計入 pending（已完成 → 已在 Capabilities 中）。
 
 ---
 
@@ -64,35 +86,30 @@ rate = done / (done + pending)
 ## Task Status Dashboard
 
 ### Kanban Overview
+
 | Lane | 數量 |
 |------|------|
 | Backlog | XX |
 | Next-Up | X |
 | In-Progress | X |
-| Review | X |
 | Done | XXX |
 
 ### Module Breakdown
-| 模組 | ✅ Capabilities | 📋 Backlog | 🟡 Active | 完成率 |
-|------|----------------|-----------|----------|--------|
-| data/ | 27 | 0 | 0 | 100% |
-| watchlist/ | 3 | 4 | 0 | 43% |
-| ... | ... | ... | ... | ... |
-| **Total** | **146** | **31** | **0** | **82%** |
+
+| 模組 | ✅ Capabilities | 📋 Kanban (by tag) | 完成率 |
+|------|----------------|-------------------|--------|
+| data/ | 27 | 2 | 93% |
+| watchlist/ | 3 | 4 | 43% |
+| ... | ... | ... | ... |
+| **Total** | **146** | **66** | — |
+
+### 🟡 Active Work（Next-Up / In-Progress）
+- .kanban/Next-Up/卡片標題.md [tag:xxx]
+- .kanban/In-Progress/卡片標題.md [tag:xxx]
 
 ### ⚠️ Stale Cards
-- .kanban/Backlog/SJ-05-xxx.md — XX days unchanged
-- .kanban/In-Progress/FE-12-xxx.md — XX days unchanged
-
-### SYSTEM-MAP Summary
-（如果 SYSTEM-MAP.md 存在，附上功能狀態摘要）
+- .kanban/Backlog/卡片標題.md — XX days unchanged
 ```
-
----
-
-## 掃描路徑
-
-`mosaic_alpha/**/CLAUDE.md`（遞迴 glob，涵蓋 nested 目錄如 `adapters/sj/CLAUDE.md`）
 
 ---
 
@@ -101,3 +118,4 @@ rate = done / (done + pending)
 - 容錯：無 .kanban/ 目錄時只顯示 Capabilities 統計，不報錯
 - 容錯：無 `## Capabilities` 的 CLAUDE.md 跳過，不報錯
 - 過時閾值：Backlog 30 天、In-Progress 14 天、Next-Up 7 天
+- 掃描路徑：`mosaic_alpha/**/CLAUDE.md`（遞迴 glob）

@@ -2,11 +2,15 @@
 """
 Unified Project Knowledge Scanner.
 
-Scans CLAUDE.md Capabilities tables, .kanban/ cards, and Python imports
-(via scan_imports.py), producing a unified snapshot for cross-artifact
-validation.
+Produces three things (no full registries — LLM reads files directly):
+1. dep_graph — AST-parsed Python import relationships
+2. findings — mechanical cross-validation issues (X-cap-path, X-tag-module, etc.)
+3. fingerprint — lightweight change detection (counts + hashes)
 
-Designed for the /scan-project skill + /claude:daily-maintain workflow.
+Internal parsing of CLAUDE.md and .kanban/ is kept for computing findings,
+but registries are NOT included in output.
+
+Designed for the /scan-project skill + /daily-maintain or /project-review workflow.
 
 Usage:
     uv run python scan_project.py --project-root . --output .project-snapshot.json
@@ -27,16 +31,20 @@ from pathlib import Path
 # Constants
 # ---------------------------------------------------------------------------
 
-UC_ID_RE = re.compile(r"\b([A-Z][A-Z0-9]*-[A-Z0-9]+)\b")
-
 SKIP_DIRS_SCAN = {
     ".venv", "venv", "__pycache__", ".git", "node_modules",
     ".mypy_cache", ".ruff_cache", ".idea", "_archive",
     ".claude", "build", "dist",
 }
 
-KANBAN_LANES = {"Backlog", "Next-Up", "In-Progress", "Review", "Done"}
+KANBAN_LANES = {"Backlog", "Next-Up", "In-Progress", "Done"}
 ACTIVE_KANBAN_LANES = KANBAN_LANES - {"Done"}
+
+# [tag:module] on first line of kanban cards
+TAG_RE = re.compile(r"\[tag:([^\]]+)\]")
+
+# EP reference in ## 相關 section
+EP_REF_RE = re.compile(r"^- EP:\s*`?([^`*\n]+)`?", re.MULTILINE)
 
 # Capabilities table header detection
 CAPABILITIES_HEADER_RE = re.compile(r"^##\s+Capabilities", re.MULTILINE)
@@ -44,8 +52,8 @@ CAPABILITIES_HEADER_RE = re.compile(r"^##\s+Capabilities", re.MULTILINE)
 # Markdown table row detection: starts and ends with |
 TABLE_ROW_START = re.compile(r"^\|.*\|\s*$")
 
-# YAML frontmatter block
-FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+# UC ID pattern (for Capabilities table parsing only)
+UC_ID_RE = re.compile(r"\b([A-Z][A-Z0-9]*-[A-Z0-9]+)\b")
 
 
 # ---------------------------------------------------------------------------
@@ -181,25 +189,6 @@ def _parse_capabilities_table(
         if not status:
             status = "✅"  # Default for Capabilities table entries
 
-        # Extract domain_deps and downstream_consumers from Capabilities section only
-        domain_deps = []
-        downstream_consumers = []
-        for text_line in section_text.splitlines():
-            if uc_id not in text_line:
-                continue
-            if any(
-                kw in text_line
-                for kw in ("領域依賴", "domain_dep", "跨領域依賴")
-            ):
-                refs = UC_ID_RE.findall(text_line)
-                domain_deps.extend(r for r in refs if r != uc_id)
-            if any(
-                kw in text_line
-                for kw in ("下游消費者", "consumed_by", "消費者")
-            ):
-                refs = UC_ID_RE.findall(text_line)
-                downstream_consumers.extend(r for r in refs if r != uc_id)
-
         entries.append({
             "uc_id": uc_id,
             "module": module,
@@ -207,8 +196,6 @@ def _parse_capabilities_table(
             "entry_point": col3,
             "status": status,
             "source_claude_md": source_claude_md,
-            "domain_deps": sorted(set(domain_deps)),
-            "downstream_consumers": sorted(set(downstream_consumers)),
         })
 
     return entries
@@ -259,7 +246,7 @@ def _parse_single_claude_md(
 
 
 # ---------------------------------------------------------------------------
-# .kanban/ card parsing
+# .kanban/ card parsing (tag-based identity)
 # ---------------------------------------------------------------------------
 
 
@@ -285,49 +272,37 @@ def parse_kanban_registry(project_root: Path) -> list[dict]:
 def _parse_kanban_card(
     card_file: Path, lane: str, project_root: Path
 ) -> dict:
-    """Parse a single Kanban card."""
+    """Parse a single Kanban card.
+
+    Card identity: title (= filename stem) + [tag:module] on line 1.
+    No YAML frontmatter, no UC ID as primary key.
+    """
     content = card_file.read_text(encoding="utf-8")
     source_rel = str(card_file.relative_to(project_root))
 
-    uc_id = ""
-    title = ""
-    has_spec = False
+    # Title: filename stem (Chinese name, e.g. "騰落線指標")
+    title = card_file.stem
 
-    # Try to parse YAML frontmatter
-    fm_match = FRONTMATTER_RE.match(content)
-    if fm_match:
-        fm_text = fm_match.group(1)
-        for line in fm_text.splitlines():
-            if line.startswith("uc_id:"):
-                uc_id = line.split(":", 1)[1].strip().strip("'\"")
-            elif line.startswith("title:"):
-                title = line.split(":", 1)[1].strip().strip("'\"")
-            elif line.startswith("spec:"):
-                has_spec = bool(line.split(":", 1)[1].strip())
+    # Tags: [tag:xxx] on first line (space-separated for multiple)
+    tags = TAG_RE.findall(content.split("\n", 1)[0]) if content else []
 
-    # Fallback: extract UC ID from filename (e.g., "SJ-05-xxx.md")
-    if not uc_id:
-        uc_match = UC_ID_RE.search(card_file.stem)
-        if uc_match:
-            uc_id = uc_match.group(1)
+    # EP reference from ## 相關 section
+    ep_match = EP_REF_RE.search(content)
+    ep_ref = ""
+    has_ep = False
+    if ep_match:
+        ep_ref = ep_match.group(1).strip()
+        has_ep = ep_ref not in ("待定", "")
 
-    # Fallback: extract title from first markdown heading
-    if not title:
-        for line in content.splitlines():
-            if line.startswith("# "):
-                title = line.lstrip("#").strip()
-                break
-    if not title:
-        title = card_file.stem
-
-    # Check if body has spec reference
-    if not has_spec:
-        has_spec = bool(re.search(r"spec[：:]", content, re.IGNORECASE))
+    # Has spec: check for spec references in body
+    has_spec = bool(re.search(r"spec[：:]", content, re.IGNORECASE))
 
     return {
-        "uc_id": uc_id,
-        "lane": lane,
         "title": title,
+        "tags": tags,
+        "lane": lane,
+        "has_ep": has_ep,
+        "ep_ref": ep_ref,
         "has_spec": has_spec,
         "source_file": source_rel,
     }
@@ -336,6 +311,33 @@ def _parse_kanban_card(
 # ---------------------------------------------------------------------------
 # Cross-validation (mechanical checks)
 # ---------------------------------------------------------------------------
+
+
+def _find_valid_tag_names(project_root: Path) -> set[str]:
+    """Find valid tag names from mosaic_alpha/ subdirectories.
+
+    Tag convention: tag name = mosaic_alpha/ subdirectory name.
+    Shorthand: adapters/sj → sj.
+    """
+    valid_tags = set()
+    pkg_root = _find_package_root(project_root)
+    if not pkg_root:
+        return valid_tags
+
+    for child in sorted(pkg_root.iterdir()):
+        if not child.is_dir():
+            continue
+        if child.name.startswith((".", "_")):
+            continue
+        if child.name in SKIP_DIRS_SCAN:
+            continue
+        valid_tags.add(child.name)
+        # Add shorthand for nested modules (e.g. adapters/sj → sj)
+        for nested in sorted(child.iterdir()):
+            if nested.is_dir() and (nested / "__init__.py").exists():
+                valid_tags.add(nested.name)
+
+    return valid_tags
 
 
 def run_cross_validation(
@@ -353,14 +355,9 @@ def run_cross_validation(
     for e in capabilities_registry:
         cap_by_id[e["uc_id"]].append(e)
 
-    cap_uc_ids = set(cap_by_id.keys())
-
-    active_kanban_by_id: dict[str, list[dict]] = defaultdict(list)
-    for e in kanban_registry:
-        if e["lane"] in ACTIVE_KANBAN_LANES:
-            active_kanban_by_id[e["uc_id"]].append(e)
-
     claude_md_modules = {e["module"] for e in claude_md_registry}
+
+    # --- Capabilities checks ---
 
     # X-cap-dup: Same UC ID in multiple CLAUDE.md Capabilities
     for uc_id, entries in cap_by_id.items():
@@ -377,43 +374,40 @@ def run_cross_validation(
                 "source_files": sources,
             })
 
-    # X-cap-kanban-conflict: Same UC ID in Capabilities and Kanban active
-    for uc_id in cap_uc_ids:
-        if uc_id in active_kanban_by_id:
-            cap_sources = [e["source_claude_md"] for e in cap_by_id[uc_id]]
-            kanban_sources = [
-                e["source_file"] for e in active_kanban_by_id[uc_id]
+    # X-cap-path: Capabilities entry_point path does not exist
+    # Entry paths may be relative to: project root, package root, or
+    # the CLAUDE.md's own directory.  Check all three before reporting.
+    pkg_root = _find_package_root(project_root)
+    for e in capabilities_registry:
+        entry = e.get("entry_point", "")
+        if not entry:
+            continue
+        # Extract first path-like segment (before any description)
+        # e.g. "CLI `mosaic data daily-close`" → skip (CLI commands)
+        # e.g. "`indicators/engine.py:apply_indicators()`" → extract path
+        path_match = re.search(r"`?([a-z_][a-z0-9_./]+\.py)", entry)
+        if path_match:
+            rel_path = path_match.group(1).split(":")[0]
+            # Candidate locations to check
+            candidates = [
+                project_root / rel_path,                   # absolute from project root
             ]
-            findings.append({
-                "check_id": "X-cap-kanban-conflict",
-                "severity": "critical",
-                "detail": (
-                    f"UC ID {uc_id} has ✅ in Capabilities but also "
-                    f"exists in Kanban active lane"
-                ),
-                "uc_id": uc_id,
-                "capabilities_source": cap_sources[0],
-                "kanban_source": kanban_sources[0],
-            })
-
-    # X-kanban-orphan: Kanban card UC ID not in capabilities (Done/ excluded)
-    for e in kanban_registry:
-        if e["lane"] == "Done":
-            continue
-        uc_id = e["uc_id"]
-        if not uc_id:
-            continue
-        if uc_id not in cap_uc_ids:
-            findings.append({
-                "check_id": "X-kanban-orphan",
-                "severity": "important",
-                "detail": (
-                    f"Kanban card {uc_id} has no matching Capabilities "
-                    f"entry (lane: {e['lane']})"
-                ),
-                "uc_id": uc_id,
-                "kanban_source": e["source_file"],
-            })
+            if pkg_root:
+                candidates.append(pkg_root / rel_path)     # under package root
+            # Relative to the CLAUDE.md's own directory
+            claude_md_dir = project_root / e["source_claude_md"].rsplit("/", 1)[0] if "/" in e["source_claude_md"] else project_root
+            candidates.append(claude_md_dir / rel_path)
+            if not any(p.exists() for p in candidates):
+                findings.append({
+                    "check_id": "X-cap-path",
+                    "severity": "important",
+                    "detail": (
+                        f"Capabilities entry path '{rel_path}' "
+                        f"does not exist (in {e['source_claude_md']})"
+                    ),
+                    "uc_id": e["uc_id"],
+                    "source_claude_md": e["source_claude_md"],
+                })
 
     # X6: Module in dep-graph but no CLAUDE.md
     for mod_name, mod_data in modules.items():
@@ -442,6 +436,51 @@ def run_cross_validation(
                 "module": mod_name,
             })
 
+    # --- Kanban checks ---
+
+    # X-tag-module: tag does not correspond to a mosaic_alpha/ subdirectory
+    valid_tags = _find_valid_tag_names(project_root)
+    if valid_tags:
+        for e in kanban_registry:
+            for tag in e.get("tags", []):
+                if tag not in valid_tags:
+                    findings.append({
+                        "check_id": "X-tag-module",
+                        "severity": "important",
+                        "detail": (
+                            f"Card '{e['title']}' has tag '{tag}' "
+                            f"which does not match any mosaic_alpha/ "
+                            f"subdirectory"
+                        ),
+                        "kanban_source": e["source_file"],
+                    })
+
+    # X-ep-ready: Next-Up/In-Progress card has EP ref but file missing
+    for e in kanban_registry:
+        if e["lane"] not in ("Next-Up", "In-Progress"):
+            continue
+        if not e.get("has_ep") or not e.get("ep_ref"):
+            continue
+        ep_ref = e["ep_ref"]
+        # EP files live under ai-analysis/ or similar directories
+        # Check common locations
+        ep_candidates = [
+            project_root / "ai-analysis" / "execution-plans" / ep_ref,
+            project_root / "ai-analysis" / "done_plans" / ep_ref,
+            project_root / ep_ref,
+        ]
+        ep_exists = any(p.exists() for p in ep_candidates)
+        if not ep_exists:
+            findings.append({
+                "check_id": "X-ep-ready",
+                "severity": "important",
+                "detail": (
+                    f"Card '{e['title']}' in {e['lane']} references "
+                    f"EP '{ep_ref}' but file not found"
+                ),
+                "kanban_source": e["source_file"],
+            })
+
     return findings
 
 
@@ -450,8 +489,59 @@ def run_cross_validation(
 # ---------------------------------------------------------------------------
 
 
+def _compute_fingerprint(
+    capabilities_registry: list[dict],
+    kanban_registry: list[dict],
+    claude_md_registry: list[dict],
+) -> dict:
+    """Compute lightweight fingerprint for change detection.
+
+    LLM reads CLAUDE.md and .kanban/ directly when it needs details.
+    The fingerprint only answers: "did something change since last scan?"
+    """
+    import hashlib
+
+    # Capabilities hash: sorted UC IDs + modules
+    cap_keys = sorted(
+        f"{e['uc_id']}:{e['module']}:{e['status']}"
+        for e in capabilities_registry
+    )
+    cap_hash = hashlib.md5("|".join(cap_keys).encode()).hexdigest()[:12]
+
+    # Kanban hash: sorted title + lane + tags
+    kanban_keys = sorted(
+        f"{e['title']}:{e['lane']}:{','.join(sorted(e['tags']))}"
+        for e in kanban_registry
+    )
+    kanban_hash = hashlib.md5("|".join(kanban_keys).encode()).hexdigest()[:12]
+
+    # Kanban by lane
+    kanban_by_lane: dict[str, int] = defaultdict(int)
+    for e in kanban_registry:
+        kanban_by_lane[e["lane"]] += 1
+
+    return {
+        "capabilities_total": len(capabilities_registry),
+        "capabilities_hash": cap_hash,
+        "kanban_total": len(kanban_registry),
+        "kanban_by_lane": dict(kanban_by_lane),
+        "kanban_hash": kanban_hash,
+        "claude_md_total": len(claude_md_registry),
+    }
+
+
 def scan_project(project_root: Path) -> dict:
-    """Run the full unified scan."""
+    """Run the full unified scan.
+
+    Produces three things:
+    1. dep_graph — AST-parsed import relationships (LLM can't do this)
+    2. findings — mechanical cross-validation issues (LLM can but expensive)
+    3. fingerprint — lightweight change detection (counts + hashes)
+
+    Internal parsing (registries) is kept for computing findings,
+    but NOT included in output. LLM reads CLAUDE.md and .kanban/
+    directly when it needs details.
+    """
     project_root = project_root.resolve()
 
     # Phase 1: Import scan (from scan_imports.py if available)
@@ -467,16 +557,16 @@ def scan_project(project_root: Path) -> dict:
         hotspots = []
         project_name = project_root.name
 
-    # Phase 2: Parse CLAUDE.md files (includes Capabilities table)
+    # Phase 2: Parse CLAUDE.md files (internal — not in output)
     claude_md_registry, capabilities_registry = parse_claude_md_registry(
         project_root
     )
 
-    # Phase 3: Parse .kanban/ cards
+    # Phase 3: Parse .kanban/ cards (internal — not in output)
     kanban_registry = parse_kanban_registry(project_root)
 
-    # Phase 4: Run mechanical cross-validation
-    cross_validation = run_cross_validation(
+    # Phase 4: Run mechanical cross-validation → findings
+    findings = run_cross_validation(
         modules,
         capabilities_registry,
         kanban_registry,
@@ -484,17 +574,22 @@ def scan_project(project_root: Path) -> dict:
         project_root,
     )
 
+    # Phase 5: Compute fingerprint for change detection
+    fingerprint = _compute_fingerprint(
+        capabilities_registry, kanban_registry, claude_md_registry
+    )
+
     return {
         "project": project_name,
         "scan_timestamp": datetime.now(tz=timezone.utc).isoformat(),
-        "schema_version": 3,
-        "modules": modules,
-        "edges": edges,
-        "hotspots": hotspots,
-        "capabilities_registry": capabilities_registry,
-        "kanban_registry": kanban_registry,
-        "claude_md_registry": claude_md_registry,
-        "cross_validation": cross_validation,
+        "schema_version": 5,
+        "dep_graph": {
+            "modules": modules,
+            "edges": edges,
+            "hotspots": hotspots,
+        },
+        "findings": findings,
+        "fingerprint": fingerprint,
     }
 
 
@@ -533,13 +628,15 @@ def main():
 
     if args.output:
         args.output.write_text(output_json, encoding="utf-8")
-        total_caps = len(result["capabilities_registry"])
-        total_kanban = len(result["kanban_registry"])
-        total_issues = len(result["cross_validation"])
+        fp = result["fingerprint"]
+        findings_count = len(result["findings"])
+        dep_modules = len(result["dep_graph"]["modules"])
         print(
             f"Written to {args.output} "
-            f"({total_caps} capabilities, {total_kanban} kanban cards, "
-            f"{total_issues} cross-validation issues)"
+            f"(dep_graph: {dep_modules} modules, "
+            f"findings: {findings_count}, "
+            f"fingerprint: {fp['capabilities_total']} caps / "
+            f"{fp['kanban_total']} cards)"
         )
     else:
         print(output_json)

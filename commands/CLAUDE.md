@@ -49,7 +49,8 @@
 - `/claude:clean` — 清理 Markdown 元資訊
 - `/claude:distill` — 蒸餾文檔，提煉核心精華
 - `/claude:sync` — 檢查文檔與程式碼同步性
-- `/claude:daily-maintain` — 每日維護四合一（統一快照 + Capabilities/Kanban sync + SYSTEM-MAP 一致性 + 健康報告），支援 `--init`、`--only`
+- `/daily-maintain` — 每日自動維護（cron 用），自動修正低風險問題 + commit
+- `/project-review` — 互動式專案審查（人類用），findings + kanban + doc health
 
 ### 日常工具
 

@@ -36,11 +36,11 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 
 從 snapshot 取得：
 
-- `modules` / `edges` — 精確的模組依賴結構（取代 Phase 1 的粗略分析）
-- `capabilities_registry` — 現有 Capabilities 條目（用於報告覆蓋缺口）
-- `kanban_registry` — 現有 Kanban 卡片
-- `claude_md_registry` — 現有 CLAUDE.md 分佈（避免重複生成）
-- `cross_validation` — 預計算的問題（X6 模組缺 CLAUDE.md 等）
+- `dep_graph.modules` / `dep_graph.edges` — 精確的模組依賴結構（取代 Phase 1 的粗略分析）
+- `findings` — 預計算的機械性問題（X6 模組缺 CLAUDE.md、X-cap-path 路徑失效等）
+- `fingerprint` — 變化偵測用 counts + hashes
+
+其餘資訊（現有 Capabilities、Kanban 卡片、CLAUDE.md 分佈）由 LLM 直接讀取檔案系統，不經 snapshot。
 
 **Capabilities 覆蓋缺口報告**：列出缺少 CLAUDE.md Capabilities 表格的 library 模組，但不自動生成（需要人類意圖）。
 
@@ -51,7 +51,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 從最深層的子模組開始，一路往上寫到 Root CLAUDE.md。
 
 **既有 CLAUDE.md 處理**：
-- Phase 1.5 有 `claude_md_registry` → 直接知道哪些目錄已有 CLAUDE.md，跳過
+- Phase 1.5 有 snapshot → LLM 直接掃描目錄結構確認哪些目錄已有 CLAUDE.md，跳過
 - 無 Phase 1.5 → 目錄已有 CLAUDE.md 時預設跳過。使用者可明確確認覆蓋
 
 **每個模組 CLAUDE.md 包含**：
@@ -94,7 +94,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - 純配置目錄（只有 `__init__.py`）
 - 第三方依賴目錄
 
-**Phase 1.5 加成**：`cross_validation` 中的 X6 問題直接指出哪些模組缺少 CLAUDE.md。
+**Phase 1.5 加成**：`findings` 中的 X6 問題直接指出哪些模組缺少 CLAUDE.md。
 
 ## CLAUDE.md 寫作品質
 

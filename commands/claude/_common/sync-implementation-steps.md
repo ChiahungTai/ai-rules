@@ -14,26 +14,26 @@
 1. 偵測專案根目錄是否有 .project-snapshot.json
 2. 如果存在：
    a. 讀取 JSON
-   b. 驗證 schema_version >= 2（否則視為舊格式，只取 modules/edges）
+   b. 驗證 schema_version >= 5（否則視為舊格式，建議重新掃描）
    c. Staleness 檢查：如果 scan_timestamp 超過 24 小時，
       記錄警告 "[WARN] snapshot is stale, recommend /scan-project first"，
       不阻塞後續步驟（資料可能過時但仍有參考價值）
    d. 提取以下資料供後續步驟使用：
-      - modules + edges → 步驟 1.5 依賴鏈擴展（精確取代 naive grep）
-      - claude_md_registry → 步驟 4 驗證一致性（預計算的模組邊界）
-      - capabilities_registry → 步驟 10.5 交叉驗證（UC ID 集合）
-      - kanban_registry → 步驟 10.5 交叉驗證（Kanban UC ID 集合）
-      - cross_validation → 步驟 10.5（預計算的 X6/X-cap-dup/X-cap-kanban-conflict/X-kanban-orphan 問題）
+      - dep_graph.modules + dep_graph.edges → 步驟 1.5 依賴鏈擴展（精確取代 naive grep）
+      - findings → 步驟 10.5（預計算的 X-cap-path/X-cap-dup/X-tag-module/X-ep-ready/X6 問題）
+      - fingerprint → 變化偵測（counts + hashes）
 3. 如果不存在：記錄 "running without snapshot"，後續步驟用傳統方式
 ```
+
+**其餘資訊（Capabilities、Kanban、CLAUDE.md 內容）由 LLM 直接讀取檔案系統，不經 snapshot。**
 
 **Snapshot 資料消費對照**：
 
 | 步驟 | 消費的 snapshot 資料 | 取代的傳統方式 |
 |------|---------------------|---------------|
-| 1.5 依賴鏈擴展 | `edges[]` | naive grep import chain |
-| 4 驗證一致性 | `claude_md_registry[]` | 逐一 Read CLAUDE.md |
-| 10.5 交叉驗證 | `cross_validation[]` + `capabilities_registry[]` + `kanban_registry[]` | 無（新增能力） |
+| 1.5 依賴鏈擴展 | `dep_graph.edges[]` | naive grep import chain |
+| 4 驗證一致性 | LLM 直接 Read CLAUDE.md | 逐一 Read CLAUDE.md |
+| 10.5 交叉驗證 | `findings[]` + LLM 直接讀取 Capabilities/.kanban/ | 無（新增能力） |
 
 ---
 
@@ -281,30 +281,30 @@ fi
 
 > **觸發條件**：`.project-snapshot.json` 存在時執行。無 snapshot 時跳過。
 
-消費步驟 0.5 載入的 snapshot 資料，執行跨 artifact 交叉驗證（角度 10-12）。
+消費步驟 0.5 載入的 snapshot 資料 + LLM 直接讀取，執行跨 artifact 交叉驗證（角度 10-12）。
 
 ```
-1. 消費 cross_validation[] 中的預計算結果：
-   - X6 問題：模組缺 CLAUDE.md → 轉為角度 11（模組覆蓋缺口）
+1. 消費 findings[] 中的預計算結果：
+   - X-cap-path 問題：Capabilities 入口路徑不存在 → 標記為 important
    - X-cap-dup 問題：同一 UC ID 出現在多個 CLAUDE.md Capabilities → 標記為 critical
-   - X-cap-kanban-conflict 問題：UC ID 同時在 Capabilities ✅ 和 Kanban active → 標記為 critical
-   - X-kanban-orphan 問題：Kanban 卡片 UC ID 不在任何 Capabilities → 標記為 important
+   - X-tag-module 問題：Kanban 卡片 tag 不對應模組目錄 → 標記為 important
+   - X-ep-ready 問題：Next-Up/In-Progress 卡片引用的 EP 不存在 → 標記為 important
+   - X6 問題：模組缺 CLAUDE.md → 轉為角度 11（模組覆蓋缺口）
 
 2. 角度 10：dep-graph 矛盾（X1）
-   - 遍歷 claude_md_registry[]
-   - 對每個有 declared_not_depend_on 的 CLAUDE.md
-   - 比對 edges[] 中是否有對應的 import edge
+   - LLM 直接讀取 CLAUDE.md 中的 "Does NOT depend on" 段落
+   - 比對 dep_graph.edges[] 中是否有對應的 import edge
    - 有矛盾 → 標記 [X1] critical
 
 3. 角度 11：模組覆蓋缺口（X6）
-   - 遍歷 modules[]（file_count >= 3）
-   - 檢查 claude_md_registry[] 中是否有對應模組
+   - 遍歷 dep_graph.modules[]（file_count >= 3）
+   - LLM 直接檢查目錄中是否有 CLAUDE.md
    - 缺少 CLAUDE.md → 標記 [X6] important
 
 4. 角度 12：幽靈 UC 引用
-   - 收集 capabilities_registry[] 和 kanban_registry[] 中所有 uc_id 形成有效集合
-   - 遍歷 claude_md_registry[].referenced_uc_ids
-   - 引用的 UC ID 不在有效集合中 → 標記 important
+   - LLM 直接讀取所有 CLAUDE.md 的 Capabilities 表格，收集 UC ID 形成有效集合
+   - LLM 直接讀取 .kanban/ 卡片中的 UC ID 引用
+   - CLAUDE.md 中引用的 UC ID 不在有效集合中 → 標記 important
 ```
 
 **輸出格式**：
@@ -312,9 +312,9 @@ fi
 ```markdown
 ### Cross-Validation (vs Snapshot)
 
-- [X1] data/CLAUDE.md 宣告 "Does NOT depend on strategies" 但 edges 有 data→strategies
+- [X1] data/CLAUDE.md 宣告 "Does NOT depend on strategies" 但 dep_graph.edges 有 data→strategies
 - [X6] Module 'services' (12 files) 缺少 CLAUDE.md
 - [X-cap-dup] UC ID D-14 同時出現在 data/CLAUDE.md 和 features/CLAUDE.md Capabilities
-- [X-cap-kanban-conflict] D-15 有 Capabilities ✅ 但仍存在於 Kanban In-Progress lane
-- [X-kanban-orphan] Kanban Backlog 卡片 SJ-05 不在任何 CLAUDE.md Capabilities 中
+- [X-cap-path] Capabilities entry path 'runner.py' does not exist (in mosaic_alpha/data/CLAUDE.md)
+- [X-tag-module] Card '騰落線指標' has tag 'nonexistent' which does not match any mosaic_alpha/ subdirectory
 ```

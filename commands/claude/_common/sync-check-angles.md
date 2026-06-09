@@ -195,8 +195,8 @@
 
 | 檢查項 | 說明 | 驗證方式 |
 |--------|------|----------|
-| X1 矛盾 | CLAUDE.md 宣告 "Does NOT depend on X" 但 dep-graph 有 import edge → X | 比對 `claude_md_registry[].declared_not_depend_on` vs `edges[]` |
-| X1 缺失宣告 | dep-graph 顯示模組 A 大量依賴模組 B，但 CLAUDE.md 未宣告邊界 | 分析 `edges[]` 中模組間依賴密度 |
+| X1 矛盾 | CLAUDE.md 宣告 "Does NOT depend on X" 但 dep-graph 有 import edge → X | LLM 讀取 CLAUDE.md 的 "Does NOT depend on" 段落，比對 `dep_graph.edges[]` |
+| X1 缺失宣告 | dep-graph 顯示模組 A 大量依賴模組 B，但 CLAUDE.md 未宣告邊界 | 分析 `dep_graph.edges[]` 中模組間依賴密度 |
 
 **判斷標準**：
 
@@ -215,7 +215,7 @@
 
 | 檢查項 | 說明 | 驗證方式 |
 |--------|------|----------|
-| X6 缺口 | dep-graph 有模組但無 CLAUDE.md | 比對 `modules[]` vs `claude_md_registry[]` |
+| X6 缺口 | dep-graph 有模組但無 CLAUDE.md | 消費 `findings[]` 中 check_id=X6 的項目；或比對 `dep_graph.modules[]` vs 目錄結構 |
 | X6 小模組 | 模組 < 3 個檔案，CLAUDE.md 非必要 | 過濾 `file_count < 3` |
 
 **判斷標準**：
@@ -235,7 +235,7 @@
 
 | 檢查項 | 說明 | 驗證方式 |
 |--------|------|----------|
-| X8 幽靈引用 | CLAUDE.md 提到的 UC ID 不在 `capabilities_registry[]` 或 `kanban_registry[]` 中 | 比對 `claude_md_registry` 中的 UC ID 引用 vs `capabilities_registry[].uc_id` + `kanban_registry[].uc_id` |
+| X8 幽靈引用 | CLAUDE.md 提到的 UC ID 不在任何 Capabilities 表格或 .kanban/ 卡片中 | LLM 直接讀取 CLAUDE.md 中引用的 UC ID，然後搜尋所有 `## Capabilities` 表格和 .kanban/ 卡片驗證存在性 |
 
 **判斷標準**：
 
