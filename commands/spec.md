@@ -60,7 +60,7 @@ User Story 格式：
 ```markdown
 [tag:module]
 
-# [名稱]
+# [中文標題，與檔名相同]
 
 ## 目標
 [簡述，或完整 spec（詳細 📋 時）]
@@ -75,9 +75,10 @@ User Story 格式：
 ## 備註
 [依賴、前置條件]
 ```
+- **檔名**：繁體中文標題，保留必要英文縮寫。UC ID 放在內容，不放在檔名。範例：`訂閱分級語意重構.md`（而非 `SJ-04-revised-tiered-semantics.md`）
 - 📋 簡單（< 10 行描述）：`## 目標` 放一句話
 - 📋 詳細（≥ 10 行）：`## 目標` 放完整描述（卡片是 markdown，長度不限）
-- **Tag**：由 UC ID prefix 自動決定（見專案 CLAUDE.md「Tag 慣例」）。無 UC prefix 的卡片（如 Track cards）依「歸屬模組」欄位決定 tag
+- **Tag**：掃描 `mosaic_alpha/` 子目錄決定 tag 名（見專案 CLAUDE.md「Tag 慣例」）。`adapters/sj` → `sj`
 
 ### 階段 4：量化成功條件
 

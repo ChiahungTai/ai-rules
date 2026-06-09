@@ -187,16 +187,11 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 **讀取 EP 收尾段**：EP 結構末段的「收尾步驟」定義了本 EP 的具體收尾範圍。讀取後按以下三項執行：
 
-#### 5a. CLAUDE.md Capabilities + Kanban 卡片更新（大型/中型變更）
+#### 5a. 消費場景提煉（大型/中型變更）
 
-1. **讀取 EP 中引用的 UC ID**（來自段落 Context 的 UC 引用欄位）
-2. **更新對應模組 CLAUDE.md 的 Capabilities 表格**：
-   - 已完成的 UC：在對應模組 CLAUDE.md 的 `## Capabilities` 表格新增一行（UC ID + 能力 + 入口 + ✅）
-   - 部分完成的 UC：更新 Kanban card 內嵌剩餘細節（前置條件、設計要點、測試計畫 — 測試類型分佈 + 情境覆蓋 + 已知風險，不寫數量）
-   - 進行中的 UC：移動 Kanban card 至對應 lane
-3. **移動 Kanban 卡片**：已完成 UC 的對應 Kanban card 從 active lane 移至 Done/
-4. **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成（`/doc-health` 角度 6 驗證此一致性）
-5. **從 EP Scenario Matrix 提煉「消費場景」**：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），寫入 Capabilities 表格的備註或 Kanban card 的描述
+> **注意**：Capabilities 表格更新和 Kanban 卡片搬移**不在 /build 執行**，而是在 `/commit` 階段 3 確認後執行。原因：build 完成不代表會 commit（可能 code-review 後決定重做），提前更新狀態會造成 Capabilities/Kanban 與實際程式碼不一致。
+
+1. **從 EP Scenario Matrix 提煉「消費場景」**：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），暫存於 build context，供後續 `/commit` 階段 3 寫入 Capabilities 表格或 Kanban card
 
 #### 5b. SYSTEM-MAP.md 更新（大型/中型變更）
 

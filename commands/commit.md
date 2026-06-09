@@ -69,16 +69,23 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 輸出：列出需檢查的檔案（不是要求全部更新，是提醒檢查是否需要更新）。用戶在階段 5 確認時一併判斷。
 
-### 階段 3：Capabilities + Kanban 狀態確認
+### 階段 3：Capabilities + Kanban 狀態更新（大型/中型變更）
 
 **大型/中型變更時執行，小型變更跳過。**
 
+> **核心原則**：Capabilities 更新 + Kanban 卡片搬移 + EP 歸檔是「metadata finalization」，只在用戶確認 commit 時才執行。不在 `/build` 執行（build 可能不 commit）。
+
 1. 識別變更涉及的 library 模組目錄
 2. 檢查該模組 CLAUDE.md Capabilities 表格和 .kanban/ 卡片：是否有 UC 狀態需要更新？
-3. 在 commit message 展示後，提示用戶確認：
-   - 「本次變更是否需要更新 Capabilities 或 Kanban 狀態？」
-   - 如果需要，提醒執行 `/task-status` 或 `/doc-health`
-4. **不自動修改 CLAUDE.md Capabilities 或 Kanban 卡片**（本命令只負責提醒）
+3. 在 commit message 展示後，提示用戶確認以下操作：
+   - **Capabilities 更新**：在對應模組 CLAUDE.md 的 `## Capabilities` 表格新增 ✅ 行
+   - **Kanban 卡片搬移**：已完成 UC 的卡片從 active lane 移至 Done/
+   - **消費場景寫入**：從 `/build` 提煉的消費場景寫入 Capabilities 備註或 Kanban card
+   - **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成
+4. 用戶確認後，在 commit 前**執行上述操作**（修改 CLAUDE.md + mv 卡片）
+5. **EP 歸檔檢查**：如果本次 commit 是 EP 的最後一個段落（所有段落都已 commit），提醒用戶：
+   - 「EP 所有段落已 commit，建議歸檔：`mv ai-analysis/execution-plans/ep-xxx.md ai-analysis/execution-plans/_done/`」
+   - 歸檔為手動操作，不自動執行
 
 ### 階段 4：生成 Commit Message
 
