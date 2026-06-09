@@ -1,5 +1,5 @@
 ---
-name: daily-maintain
+name: maintain
 description: >
   Core daily maintenance procedure consumed by /daily-maintain (auto) and /project-review (interactive).
   4-phase flow, findings risk matrix, auto-fix procedures, kanban hygiene.
@@ -8,7 +8,7 @@ when_to_use: >
   or /project-review for interactive human mode.
 ---
 
-# daily-maintain Skill — 核心維護程序
+# maintain Skill — 核心維護程序
 
 被 `/daily-maintain`（自動）和 `/project-review`（互動）共用的核心程序。
 
@@ -31,7 +31,7 @@ diff fingerprint                用 dep_graph 驗證 imports   LLM 直接讀 .ka
 
 ```bash
 cd <project-root>
-uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --output .project-snapshot.json
+uv run python /Users/ctai/Github/ai-rules/skills/scan-project/scripts/scan_project.py --project-root . --output .project-snapshot.json
 ```
 
 產出 JSON v5（dep_graph / findings / fingerprint），不含 registry。
@@ -95,12 +95,39 @@ Snapshot 輔助：
 
 ## 自動修正程序
 
-### X-cap-path 修正
+### X-cap-path 修正（三層策略）
+
+**第一層：同目錄搜尋**（直接比對）
 
 1. Read 目標 CLAUDE.md，找到含該路徑的 Capabilities 行
 2. 在模組目錄下搜尋正確檔名：`fd <basename> <module_dir>/`
-3. 找到 → 更新路徑
-4. 找不到 → 標記為「路徑已刪除，需人工確認」，不修正
+3. 單一候選 + class/function 名吻合 → 🟢 更新路徑
+4. 多候選或無候選 → 進入第二層
+
+**第二層：git 歷史推導**（改名/搬遷偵測）
+
+1. `git log --oneline --all -- "<original_path>"` 查詢檔案歷史
+2. 找到最近一次涉及該檔案的 commit → 檢查 commit message（rename? move? refactor?）
+3. 從 commit 推導新位置：
+   - 改名（如 `capital_allocation.py → capital.py`）→ 確認新檔案存在 + class 名吻合 → 🟢 更新路徑
+   - 搬遷（如 `runner.py → verification/runner.py`）→ 確認新路徑存在 → 🟢 更新路徑
+   - 拆分（功能分散到多個檔案）→ 🟡 標記待人工確認
+   - 刪除（功能已移除）→ 🟡 標記待人工確認
+4. `rg "^class <ClassName>" <new_file>` 驗證 class 仍然存在
+
+**第三層：標記待人工確認**
+
+找不到候選、git 歷史顯示功能已拆分/刪除、或歧義無法解決 → 🟡 報告不修正
+
+**判斷信心等級**：
+
+| 證據 | 信心 | 動作 |
+|------|------|------|
+| 同目錄找到同名（改副檔名/加後綴）+ class 吻合 | 🟢 高 | 自動修正 |
+| git 顯示改名/搬遷 + 新路徑 class 吻合 | 🟢 高 | 自動修正 |
+| git 顯示改名 + 新路徑 class 不吻合 | 🟡 中 | 標記待確認 |
+| git 顯示功能拆分為多檔 | 🟡 中 | 標記待確認 |
+| git 無歷史（從未 commit） | 🟡 中 | 幽靈路徑，標記待確認 |
 
 ### X-tag-module 修正
 

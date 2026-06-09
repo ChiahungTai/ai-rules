@@ -10,7 +10,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 
 > **人類手動維護用。** cron 自動維護請用 `/daily-maintain`。
 
-執行 [daily-maintain skill](../skills/daily-maintain/SKILL.md) 的互動版本。
+執行 [daily-maintain skill](../skills/maintain/SKILL.md) 的互動版本。
 
 ---
 
@@ -28,7 +28,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 
 ## 執行流程
 
-遵循 [daily-maintain skill](../skills/daily-maintain/SKILL.md) 的四階段流程：
+遵循 [daily-maintain skill](../skills/maintain/SKILL.md) 的四階段流程：
 
 1. **Phase 1**: 執行 `/scan-project` → 產出 snapshot → diff fingerprint → **展示變化**
 2. **Phase 2**: 執行 `/claude:sync --changed-since yesterday --recursive` → **呈現問題待確認**
