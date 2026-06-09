@@ -65,7 +65,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 | Architecture | 設計模式、模組邊界 | 變更 ≥ 3 files | P1 |
 | Security | 輸入驗證、權限檢查 | diff 含 HTTP/auth/credential | P1 |
 | Performance | N+1、無界操作 | 變更 ≥ 5 files | P2 |
-| UC Coverage | UC 行為覆蓋 | 大型/中型變更 | P2 |
+| UC Coverage | Capabilities 行為覆蓋 | 大型/中型變更 | P2 |
 
 啟用軸數 > max-agents → 從低優先級（P2 起）合併至前一個 agent（不丟棄任何軸）。
 
@@ -107,13 +107,13 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 
 ### 5. Performance — 無 N+1 查詢、無無界操作
 
-### 6. UC Coverage — 滿足 Use Case 描述嗎？
+### 6. UC Coverage — 滿足 Capabilities 描述嗎？
 大型/中型變更時審查：
-- 實作是否涵蓋 UC 描述的所有行為？
-- 是否有 UC 引用的行為在 diff 中沒有對應實作？
-- EP 段落引用的 UC ID 是否與 USE-CASES.md 一致？
-- UC 引用是否指向 library 模組目錄的 USE-CASES.md（非 scripts/）？
-- 實作是否涵蓋 UC「消費場景」欄位描述的所有情境（happy path、錯誤操作、邊界、效能期待差異）？
+- 實作是否涵蓋 CLAUDE.md Capabilities 表格描述的所有行為？
+- 是否有 Capabilities 引用的行為在 diff 中沒有對應實作？
+- EP 段落引用的 UC ID 是否與 Capabilities 表格或 .kanban/ 卡片一致？
+- Capabilities 入口路徑是否指向 library 模組（非 scripts/）？
+- 實作是否涵蓋「消費場景」描述的所有情境（happy path、錯誤操作、邊界、效能期待差異）？
 小型變更（bug fix）跳過此軸。
 
 ### 深層思考（第一性原理 + 第二層思考）

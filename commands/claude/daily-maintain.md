@@ -1,7 +1,7 @@
 ---
-description: "每日維護四合一：統一知識快照 + CLAUDE.md sync + USE-CASES sync + 健康報告"
-when_to_use: "Daily maintenance routine: dependency graph update, CLAUDE.md sync, and USE-CASES sync. Use daily, after refactoring, or before standup. Supports --init for first-time dep-graph generation, --only to run specific phases."
-usage: "/claude:daily-maintain [--init] [--only dep-graph|sync|uc-sync]"
+description: "每日維護四合一：統一知識快照 + CLAUDE.md sync + Capabilities/Kanban sync + 健康報告"
+when_to_use: "Daily maintenance routine: dependency graph update, CLAUDE.md sync, and Capabilities/Kanban sync. Use daily, after refactoring, or before standup. Supports --init for first-time dep-graph generation, --only to run specific phases."
+usage: "/claude:daily-maintain [--init] [--only dep-graph|sync|cap-sync]"
 argument-hint: "/claude:daily-maintain — 全部執行 | --only dep-graph | --init"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 ---
@@ -15,11 +15,11 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 ## 四階段流程
 
 ```
-Phase 1: Unified Snapshot        Phase 2: CLAUDE.md Sync        Phase 3: USE-CASES Sync       Phase 4: Health Report
-─────────────────────────        ──────────────────────         ────────────────────────      ──────────────────────
-/scan-project → snapshot    →    /claude:sync              →    /uc-sync                 →   彙總報告
-diff 新舊 snapshot                消費 claude_md_registry         消費 uc_registry              跨 phase 關聯
-LLM 策展更新 dep-graph.md         + cross_validation             + uc_edges                    趨勢追蹤
+Phase 1: Unified Snapshot        Phase 2: CLAUDE.md Sync        Phase 3: Cap+Kanban Sync     Phase 4: Health Report
+─────────────────────────        ──────────────────────         ──────────────────────────   ──────────────────────
+/scan-project → snapshot    →    /claude:sync              →    /doc-health              →   彙總報告
+diff 新舊 snapshot                消費 claude_md_registry         消費 capabilities_registry    跨 phase 關聯
+LLM 策展更新 dep-graph.md         + cross_validation             + kanban_registry             趨勢追蹤
 commit snapshot
 ```
 
@@ -38,18 +38,19 @@ cd <project-root>
 uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --output .project-snapshot.json
 ```
 
-腳本產出 JSON v2（modules / edges / hotspots / uc_registry / claude_md_registry / uc_edges / cross_validation）。
+腳本產出 JSON v3（modules / edges / hotspots / capabilities_registry / kanban_registry / claude_md_registry / cross_validation）。
 
-**Graceful Degradation**：如果目標專案沒有 `scripts/scan_imports.py`，dep-graph 欄位為空，UC/CLAUDE.md 掃描仍正常運作。
+**Graceful Degradation**：如果目標專案沒有 `scripts/scan_imports.py`，dep-graph 欄位為空，Capabilities/Kanban/CLAUDE.md 掃描仍正常運作。
 
 ### 步驟 1.2：偵測變化
 
 **`--init` 模式**：跳過 diff，直接進入步驟 1.3。
 
-**維護模式**：比較新舊 JSON 的 `modules`、`edges`、`uc_registry`。沒變 → 報告跳過。有變 → 列出具體變更：
+**維護模式**：比較新舊 JSON 的 `modules`、`edges`、`capabilities_registry`、`kanban_registry`。沒變 → 報告跳過。有變 → 列出具體變更：
 
 - **dep-graph 變化**：新增/移除的 import edges、fan-out 變化
-- **UC registry 變化**：新增/移除/狀態變更的 UC 條目
+- **Capabilities 變化**：新增/移除/狀態變更的 Capabilities 條目
+- **Kanban 變化**：新增/移除/lane 變更的卡片
 - **cross-validation 變化**：新增/解決的交叉驗證問題
 
 ### 步驟 1.3：更新 dependency-graph.md（LLM 策展）
@@ -61,7 +62,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 
 **Mermaid 暗色主題**：所有 ````mermaid` 區塊必須在第一行加入 `%%{init: {'theme': 'dark'}}%%`，禁止使用 `style ... fill:` 淺色系填色。
 
-**UC Graph 章節**：在 dep-graph.md 中新增 UC graph section，用 `uc_edges` 資料繪製 UC→UC 依賴圖（虛線箭頭）：
+**Capabilities Graph 章節**：在 dep-graph.md 中新增 Capabilities graph section，用 `capabilities_registry` 的 domain_deps 資料繪製 UC→UC 依賴圖（虛線箭頭）：
 
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
@@ -89,8 +90,8 @@ graph LR
 
 **Snapshot 加成**（如果 `.project-snapshot.json` 存在）：
 
-- 載入 `claude_md_registry` — 預計算的模組邊界、UC 引用
-- 載入 `cross_validation` — 預計算的 X6（模組缺 CLAUDE.md）和 X-path 問題
+- 載入 `claude_md_registry` — 預計算的模組邊界、Capabilities 覆蓋
+- 載入 `cross_validation` — 預計算的 X6（模組缺 CLAUDE.md）和 X-cap-dup 問題
 - 載入 `edges` — 精確的 import 依賴鏈（取代 naive grep import chain）
 
 **無 snapshot 時**：降級為獨立模式（目前的 sync 流程不變）。
@@ -109,32 +110,30 @@ graph LR
 
 ---
 
-## Phase 3: USE-CASES 同步（資料驅動）
+## Phase 3: Capabilities + Kanban 同步（資料驅動）
 
-執行 [/uc-sync](../uc-sync.md)。
+執行 [/doc-health](../doc-health.md)。
 
 **Snapshot 加成**（如果 `.project-snapshot.json` 存在）：
 
-- 載入 `uc_registry` — 預計算的 UC 條目、狀態、交叉引用
-- 載入 `uc_edges` — 預計算的 UC→UC 依賴邊
-- 載入 `cross_validation` — 預計算的 X7（斷裂引用）、X-unique（重複 ID）、X-path（路徑失效）
+- 載入 `capabilities_registry` — 預計算的 Capabilities 條目（UC ID、模組、入口、狀態）
+- 載入 `kanban_registry` — 預計算的 Kanban 卡片（UC ID、lane、標題）
+- 載入 `cross_validation` — 預計算的 X-cap-dup（重複 Capabilities）、X-cap-kanban-conflict（Capabilities/Kanban 衝突）、X-kanban-orphan（孤立卡片）
 
-**無 snapshot 時**：降級為獨立模式（目前的 uc-sync 流程不變）。
+**無 snapshot 時**：降級為獨立模式（直接掃描 CLAUDE.md Capabilities 表格 + .kanban/ cards）。
 
 檢查：
-- 狀態-實作一致性（✅ 的 UC 路徑是否存在）
-- 路徑有效性
-- Domain-First 合規（UC 放在主要實作模組目錄）
-- 跨引用完整性
-- **UC-BACKLOG 一致性**（如果 UC-BACKLOG.md 存在）：
-  - BACKLOG item 標 📋 但其引用的所有 UC 都已 ✅ → 報告「狀態不一致：P0-X 全部 UC 已完成，但 BACKLOG 仍標 📋」
-  - BACKLOG item 標 ✅ 但其引用的 UC 有 📋/🔧 → 報告「狀態不一致：P0-X 有未完成 UC」
-  - 報告每個 BACKLOG item 的完成進度（如「P0-1: 2/3 UCs ✅」）
+- **Capabilities-Code 一致性**：✅ 的 Capabilities 入口路徑是否存在
+- **路徑有效性**：入口路徑格式正確、檔案存在
+- **Domain-First 合規**：UC ID 前綴與 CLAUDE.md 所在模組目錄一致
+- **Kanban-Capabilities 同步**：
+  - Done/ lane 的卡片都有對應 Capabilities ✅？
+  - 同一 UC ID 不同時出現在 Capabilities ✅ 和 Kanban active lane？
 - **SYSTEM-MAP 一致性**（如果 SYSTEM-MAP.md 存在）：
   - SYSTEM-MAP 功能中引用的 UC ID → 驗證這些 UC 存在且狀態正確
-  - 功能生命週期狀態 vs 底層 UC 狀態聚合：所有 UC ✅ 但功能標 ⚠️ 或 📋 → 報告「狀態不一致」
-  - SYSTEM-MAP 中存在功能但無對應 UC → 報告「缺口：功能 X 無 UC 追蹤」
-  - **資料來源**：優先消費 Phase 1 產出的 `.project-snapshot.json`（uc_registry）；無 snapshot 時直接掃描 USE-CASES.md
+  - 功能生命週期狀態 vs 底層 Capabilities + Kanban 狀態聚合：全部 ✅ 但功能標 ⚠️ 或 📋 → 報告「狀態不一致」
+  - SYSTEM-MAP 中存在功能但無對應 Capabilities 或 Kanban → 報告「缺口：功能 X 無 UC 追蹤」
+  - **資料來源**：優先消費 Phase 1 產出的 `.project-snapshot.json`；無 snapshot 時直接掃描 CLAUDE.md + .kanban/
 
 ---
 
@@ -147,10 +146,10 @@ graph LR
 1. **各 Phase 摘要**：每個 phase 的通過/警告/失敗統計
 2. **跨 Phase 關聯**：
    - Phase 1 發現的 import 變化是否反映在 Phase 2/3 的報告中？
-   - Phase 2 發現的 CLAUDE.md 問題是否與 Phase 3 的 UC 問題有共同根因？
+   - Phase 2 發現的 CLAUDE.md 問題是否與 Phase 3 的 Capabilities/Kanban 問題有共同根因？
    - cross_validation 中未解決的 critical 問題清單
 3. **趨勢追蹤**（如果前次 snapshot 可比較）：
-   - UC 狀態變化趨勢（📋→✅ 的數量）
+   - Capabilities 狀態變化趨勢（📋→✅ 的數量）
    - cross_validation 問題增減
    - 新增/移除的模組數
 
@@ -164,7 +163,7 @@ graph LR
 | **--init** | Phase 1 用初始生成模式（從零產出 dep-graph） |
 | **--only dep-graph** | 只跑 Phase 1 |
 | **--only sync** | 只跑 Phase 2 |
-| **--only uc-sync** | 只跑 Phase 3 |
+| **--only cap-sync** | 只跑 Phase 3（Capabilities + Kanban 同步） |
 
 ---
 
@@ -177,13 +176,13 @@ graph LR
 
 ### Phase 1: Unified Snapshot
 ✅ 無變化（掃描結果與上次一致）
-   - modules: 21, UCs: 142, cross-validation issues: 21
+   - modules: 21, Capabilities: 142, Kanban: 31, cross-validation issues: 3
 
 ### Phase 2: CLAUDE.md Sync
 ✅ 無問題（檢查 N 個檔案）
 
-### Phase 3: USE-CASES Sync
-✅ 無問題（檢查 N 個 USE-CASES.md）
+### Phase 3: Capabilities + Kanban Sync
+✅ 無問題（Capabilities/Kanban 一致性通過）
 
 ### Phase 4: Health Report
 ✅ 整體健康，無跨 phase 關聯問題
@@ -198,9 +197,9 @@ graph LR
 ⚠️ 偵測到變更
 - 新增 deps: features → data
 - 新增 hotspots: services (fan_out 2→4)
-- UC 變化: 📋→✅ D-31, 新增 📋 D-35
-- cross-validation: X-path 新增 2 筆（D-15, D-22），X7 解決 1 筆
-- 已更新: Mermaid graph, Direct Dependencies 表, UC graph
+- Capabilities 變化: 新增 ✅ D-31, 新增 📋 D-35（Kanban Backlog）
+- cross-validation: X-cap-kanban-conflict 新增 1 筆（D-15），X-cap-dup 解決 1 筆
+- 已更新: Mermaid graph, Direct Dependencies 表, Capabilities graph
 
 ### Phase 2: CLAUDE.md Sync
 ⚠️ 發現 3 個問題
@@ -208,13 +207,14 @@ graph LR
 - features/CLAUDE.md: 缺少 features/spec_base.py 導航 → 建議新增
 - [X1] data/CLAUDE.md 宣告 "Does NOT depend on strategies" 但 dep-graph 有 import edge
 
-### Phase 3: USE-CASES Sync
-✅ 無問題
+### Phase 3: Capabilities + Kanban Sync
+⚠️ 發現 1 個問題
+- [X-cap-kanban-conflict] D-15 有 Capabilities ✅ 但仍存在於 Kanban In-Progress lane
 
 ### Phase 4: Health Report
 - Phase 1 的 features→data 新增依賴與 Phase 2 的 data/CLAUDE.md 問題有共同根因（D-31 狀態升級）
-- 未解決 critical: X-path 2 筆（D-15, D-22 路徑失效）
-- 趨勢: UC 📋→✅ 本月 +5（健康），cross-validation issues -3（改善中）
+- 未解決 critical: X-cap-kanban-conflict 1 筆（D-15 原子操作未完成）
+- 趨勢: Capabilities 📋→✅ 本月 +5（健康），cross-validation issues -3（改善中）
 
 ### 下一步
 確認更新內容後，commit 變更
@@ -246,5 +246,5 @@ claude -p "/claude:daily-maintain"
 ```bash
 claude -p "/claude:daily-maintain --only dep-graph"
 claude -p "/claude:daily-maintain --only sync"
-claude -p "/claude:daily-maintain --only uc-sync"
+claude -p "/claude:daily-maintain --only cap-sync"
 ```

@@ -21,8 +21,9 @@
    d. 提取以下資料供後續步驟使用：
       - modules + edges → 步驟 1.5 依賴鏈擴展（精確取代 naive grep）
       - claude_md_registry → 步驟 4 驗證一致性（預計算的模組邊界）
-      - uc_registry → 步驟 10.5 交叉驗證（UC ID 集合）
-      - cross_validation → 步驟 10.5（預計算的 X6/X7/X-path 問題）
+      - capabilities_registry → 步驟 10.5 交叉驗證（UC ID 集合）
+      - kanban_registry → 步驟 10.5 交叉驗證（Kanban UC ID 集合）
+      - cross_validation → 步驟 10.5（預計算的 X6/X-cap-dup/X-cap-kanban-conflict/X-kanban-orphan 問題）
 3. 如果不存在：記錄 "running without snapshot"，後續步驟用傳統方式
 ```
 
@@ -32,7 +33,7 @@
 |------|---------------------|---------------|
 | 1.5 依賴鏈擴展 | `edges[]` | naive grep import chain |
 | 4 驗證一致性 | `claude_md_registry[]` | 逐一 Read CLAUDE.md |
-| 10.5 交叉驗證 | `cross_validation[]` + `uc_registry[]` | 無（新增能力） |
+| 10.5 交叉驗證 | `cross_validation[]` + `capabilities_registry[]` + `kanban_registry[]` | 無（新增能力） |
 
 ---
 
@@ -284,10 +285,10 @@ fi
 
 ```
 1. 消費 cross_validation[] 中的預計算結果：
-   - X-path 問題：UC 路徑不存在 → 轉為角度 2（程式碼一致性）的具體案例
    - X6 問題：模組缺 CLAUDE.md → 轉為角度 11（模組覆蓋缺口）
-   - X7 問題：斷裂 UC 引用 → 轉為角度 12（幽靈 UC 引用）的佐證
-   - X-unique 問題：重複 UC ID → 標記為 critical
+   - X-cap-dup 問題：同一 UC ID 出現在多個 CLAUDE.md Capabilities → 標記為 critical
+   - X-cap-kanban-conflict 問題：UC ID 同時在 Capabilities ✅ 和 Kanban active → 標記為 critical
+   - X-kanban-orphan 問題：Kanban 卡片 UC ID 不在任何 Capabilities → 標記為 important
 
 2. 角度 10：dep-graph 矛盾（X1）
    - 遍歷 claude_md_registry[]
@@ -300,11 +301,10 @@ fi
    - 檢查 claude_md_registry[] 中是否有對應模組
    - 缺少 CLAUDE.md → 標記 [X6] important
 
-4. 角度 12：幽靈 UC 引用（X8）
-   - 收集 uc_registry[] 中所有 uc_id 形成有效集合
+4. 角度 12：幽靈 UC 引用
+   - 收集 capabilities_registry[] 和 kanban_registry[] 中所有 uc_id 形成有效集合
    - 遍歷 claude_md_registry[].referenced_uc_ids
-   - 引用的 UC ID 不在有效集合中 → 標記 [X8] important
-   - 額外檢查：搜尋 _archive/ 中是否有匹配的 UC（已歸檔）
+   - 引用的 UC ID 不在有效集合中 → 標記 important
 ```
 
 **輸出格式**：
@@ -314,6 +314,7 @@ fi
 
 - [X1] data/CLAUDE.md 宣告 "Does NOT depend on strategies" 但 edges 有 data→strategies
 - [X6] Module 'services' (12 files) 缺少 CLAUDE.md
-- [X8] root/CLAUDE.md 引用 TE-01，但 uc_registry 中不存在（可能在 _archive/）
-- [X-path] D-15 路徑 data/fetchers/industry.py 不存在
+- [X-cap-dup] UC ID D-14 同時出現在 data/CLAUDE.md 和 features/CLAUDE.md Capabilities
+- [X-cap-kanban-conflict] D-15 有 Capabilities ✅ 但仍存在於 Kanban In-Progress lane
+- [X-kanban-orphan] Kanban Backlog 卡片 SJ-05 不在任何 CLAUDE.md Capabilities 中
 ```

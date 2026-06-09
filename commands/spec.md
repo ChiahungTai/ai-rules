@@ -43,26 +43,38 @@ User Story 格式：
 
 **UC 是開發的驅動層，不是事後追蹤。大型/中型變更必須在此階段定義或更新 UC。**
 
-1. **掃描相關 USE-CASES.md**：搜尋需求涉及的 library 模組目錄（非 scripts/），確認是否已有相關 UC
+1. **掃描相關 CLAUDE.md Capabilities + .kanban/ 卡片**：搜尋需求涉及的 library 模組目錄的 CLAUDE.md Capabilities 表格 + `.kanban/` cards，確認是否已有相關 UC
 2. **判斷變更規模**：
 
 | 規模 | UC 行為 |
 |------|--------|
-| 大型 | 在對應 **library 模組**的 USE-CASES.md 新增 UC 條目（📋）。新領域則在 library 模組目錄建立 USE-CASES.md 骨架（UC ID prefix + 狀態標記說明） |
-| 中型 | 更新既有 UC 的描述或狀態 |
+| 大型 | 建立 **Kanban Backlog 卡片**（含 UC ID、目標、驗收標準）。UC ID 前綴對應模組域（D- = data, SJ- = adapters/sj 等）。新領域定義新前綴 |
+| 中型 | 更新既有 Kanban 卡片的描述或狀態；或更新 CLAUDE.md Capabilities 表格的描述 |
 | 小型 | 跳過（bug fix、文檔不需要 UC） |
 
-3. **確認 UC 不重複**：已有 UC 能覆蓋需求 → 更新描述，不另建新 UC
+3. **確認 UC 不重複**：已有 UC（Capabilities ✅ 或 Kanban 📋）能覆蓋需求 → 更新描述，不另建新卡片
 4. **記錄 UC ID**：後續 EP 和 /build 會引用此 ID
-5. **消費場景欄位**：大型變更新增 UC 時可先留空，由後續 `/execution-plan` 產出 Scenario Matrix 後、`/build` 階段 5a 從矩陣提煉自包含描述填入。中型變更若影響使用情境，可於此階段直接更新既有 UC 的消費場景欄位
+5. **消費場景欄位**：大型變更新增 UC 時可先留空，由後續 `/execution-plan` 產出 Scenario Matrix 後、`/build` 階段 5a 從矩陣提煉自包含描述填入。中型變更若影響使用情境，可於此階段直接更新既有 UC 的消費場景
 
-**UC 標題行路徑格式**：有具體實作檔案時，路徑必須使用 markdown link 格式讓路徑可點擊跳轉：
+**Kanban Backlog 卡片格式**（📋 新建時使用）：
 ```markdown
-### ✅ UC-ID: 標題 — [`filename.py`](/project/root/path/to/filename.py)
-### 📋 UC-ID: 標題 — project/root/path/to/          （尚未實作，目錄即可）
+# [名稱]
+
+## 目標
+[簡述，或完整 spec（詳細 📋 時）]
+
+## 相關
+- UC ID: [UC-ID]
+- EP: [ep-xxx.md，如有]
+
+## 驗收標準
+- [ ] [主要驗收條件]
+
+## 備註
+[依賴、前置條件]
 ```
-- 顯示文字用**檔名**（簡潔），href 用 `/` 開頭的**專案根目錄相對路徑**（確保 Claude Code / VS Code / GitHub 可點擊）
-- 📋 條目若無具體檔案，保持純文字路徑即可
+- 📋 簡單（< 10 行描述）：`## 目標` 放一句話
+- 📋 詳細（≥ 10 行）：`## 目標` 放完整描述（卡片是 markdown，長度不限）
 
 ### 階段 4：量化成功條件
 

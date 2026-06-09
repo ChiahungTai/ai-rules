@@ -26,13 +26,13 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 
 ## 🔴 UC 盤點（大型/中型變更必填，寫在 Scenario Matrix 之前）
 
-> **核心原則**：UC-Driven Development 要求 USE-CASES.md 是開發的**起點**，不是段落的附屬品。EP 必須在一開始就盤點 UC，後續段落才能引用。
+> **核心原則**：UC-Driven Development 要求 CLAUDE.md Capabilities + .kanban/ 是開發的**起點**，不是段落的附屬品。EP 必須在一開始就盤點 UC，後續段落才能引用。
 
 **何時需要**：大型/中型變更必填；小型變更（bug fix、文檔）跳過。
 
 **執行步驟**（生成 EP 時的強制前置動作）：
 
-1. **掃描相關 USE-CASES.md**：`rg` 搜尋受影響 library 模組目錄下的 `USE-CASES.md`，列出與本次變更相關的既有 UC
+1. **掃描相關 CLAUDE.md Capabilities + .kanban/ 卡片**：`rg` 搜尋受影響 library 模組目錄的 CLAUDE.md Capabilities 表格 + `.kanban/` cards，列出與本次變更相關的既有 UC
 2. **判定 UC 變更類型**：
 
 | 變更類型 | 說明 | EP 中的動作 |
@@ -41,10 +41,11 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 | 更新既有 UC | 既有 UC 的能力擴展或行為改變 | 標記 UC ID + 改變摘要，後續段落引用 |
 | 無影響 | 既有 UC 不受影響 | 標記「無 UC 變更」即可 |
 
-3. **掃描 UC-BACKLOG.md 關聯**（如果存在）：
-   - 搜尋專案根目錄的 `UC-BACKLOG.md`
-   - 找出本次 EP 對應的 BACKLOG item（Track P / Track A 的 item ID + 名稱）
-   - EP 可能對應多個 BACKLOG item，全部列出
+3. **掃描 .kanban/Backlog/ 關聯**（如果存在）：
+   - 搜尋專案根目錄的 `.kanban/Backlog/` 目錄
+   - 找出本次 EP 對應的 Backlog 卡片（UC ID + 名稱）
+   - EP 可能對應多張 Backlog 卡片，全部列出
+   - **Fallback**：如果專案仍使用 `UC-BACKLOG.md`（舊格式），掃描該檔案而非 .kanban/
 
 4. **掃描 SYSTEM-MAP.md 關聯**（如果存在）：
    - 搜尋專案根目錄的 `SYSTEM-MAP.md`
@@ -57,9 +58,9 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 ## UC 盤點
 
 ### Backlog 關聯
-- [UC-BACKLOG.md 存在時] 列出相關 BACKLOG item ID + 名稱（如 P0-1 每日自動啟停、A1-1 MKT-01 AD Line）
-- [UC-BACKLOG.md 不存在時] 提醒用戶：目前無 UC-BACKLOG.md，建議確認是否需要建立。如本次變更為大型/中型，建議先建立 UC-BACKLOG.md 追蹤進度
-- 無對應 BACKLOG item 時寫「無」
+- [.kanban/Backlog/ 存在時] 列出相關 Backlog 卡片（UC ID + 名稱）
+- [.kanban/Backlog/ 不存在時] 提醒用戶：目前無 .kanban/Backlog/ 目錄。如本次變更為大型/中型，建議先 /spec 建立 Kanban Backlog 卡片追蹤進度
+- 無對應 Backlog 卡片時寫「無」
 
 ### SYSTEM-MAP 影響
 - [SYSTEM-MAP.md 存在時] 列出受影響功能 + 當前生命週期狀態（如「每日收盤 Pipeline 🏃」「Paper Trading Terminal ⚠️」）
@@ -67,12 +68,12 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 - 無對應功能時寫「無」
 
 ### 掃描範圍
-- [列出掃描的 USE-CASES.md 路徑]
+- [列出掃描的 CLAUDE.md Capabilities 路徑 + .kanban/ cards]
 
 ### 既有 UC 狀態
-| UC ID | 狀態 | 影響 | 說明 |
-|-------|------|------|------|
-| D-18 | ✅ | 更新 | 擴展消費場景 |
+| UC ID | 狀態 | 來源 | 影響 | 說明 |
+|-------|------|------|------|------|
+| D-18 | ✅ | CLAUDE.md Capabilities | 更新 | 擴展消費場景 |
 
 ### 新增 UC
 | UC ID | 狀態 | 簡述 | 實作路徑 |
@@ -155,7 +156,7 @@ EP 專屬約束：
 
 ## 段落設計檢查清單
 
-- [ ] UC 盤點已完成（大型/中型變更：掃描 USE-CASES.md、列出新增/更新 UC、Backlog 關聯）
+- [ ] UC 盤點已完成（大型/中型變更：掃描 CLAUDE.md Capabilities + .kanban/、列出新增/更新 UC、Backlog 關聯）
 - [ ] Scenario Matrix 已填寫（大型/中型變更；涵蓋 happy path、錯誤操作、邊界、效能期待差異）
 - [ ] 標題明確且獨立
 - [ ] Context 包含所有必要背景
@@ -238,12 +239,12 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 每個 EP 的收尾段必須包含以下三項：
 
-### 1. USE-CASES.md 更新
+### 1. CLAUDE.md Capabilities + Kanban 更新
 
-- 將 EP 引用的 UC 狀態從 📋 更新為 ✅（或 🔧/🟡）
-- 已完成 UC 搬到正確章節（不留在「待實作」區）
-- 清理暫時性資訊（前置條件、測試計畫），保留已知限制和結果摘要
-- **從 EP Scenario Matrix 提煉「消費場景」寫入對應 UC**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號，因為 EP 可能歸檔或刪除），填入 UC 的「消費場景」欄位
+- 已完成 UC：在對應模組 CLAUDE.md Capabilities 表格新增一行（UC ID + 能力 + 入口 + ✅）
+- 移動 Kanban 卡片至 Done/ lane
+- **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成
+- **從 EP Scenario Matrix 提煉「消費場景」**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），寫入 Capabilities 表格備註或 Kanban card 描述
 
 ### 2. SYSTEM-MAP.md 更新（如果存在）
 

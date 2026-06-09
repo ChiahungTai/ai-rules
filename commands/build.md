@@ -187,19 +187,16 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 **讀取 EP 收尾段**：EP 結構末段的「收尾步驟」定義了本 EP 的具體收尾範圍。讀取後按以下三項執行：
 
-#### 5a. USE-CASES.md 更新（大型/中型變更）
+#### 5a. CLAUDE.md Capabilities + Kanban 卡片更新（大型/中型變更）
 
 1. **讀取 EP 中引用的 UC ID**（來自段落 Context 的 UC 引用欄位）
-2. **更新對應 library 模組的 USE-CASES.md**：
-   - 已完成的 UC：📋→✅，附專案相對路徑；若原在「待實作」章節，搬到對應的正確章節。路徑必須使用 markdown link 格式：
-     `` [`filename.py`](/project/root/path/to/filename.py) ``（顯示文字用檔名，href 用 `/` 開頭的專案根目錄相對路徑）
-   - 部分完成的 UC：📋→🔧，內嵌剩餘細節（前置條件、設計要點、測試計畫 — 測試類型分佈 + 情境覆蓋 + 已知風險，不寫數量）
-   - 進行中的 UC：🔧→🟡（如 backfill 正在跑）
-3. **從 EP Scenario Matrix 提煉「消費場景」寫入 UC**：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號，因為 EP 可能歸檔或刪除），填入 UC 的「消費場景」欄位
-4. **更新 UC-BACKLOG.md 狀態**（如果 EP 有「Backlog 關聯」且 UC-BACKLOG.md 存在）：
-   - 讀取 EP「Backlog 關聯」列出的 BACKLOG item IDs
-   - 對每個 BACKLOG item，檢查其引用的所有 UC 狀態（從對應的 USE-CASES.md，不限本次更新的）
-   - 更新 UC-BACKLOG.md 中對應 item 的狀態：所有引用 UC ✅ → item 標為完成；部分 ✅ → 標記進度
+2. **更新對應模組 CLAUDE.md 的 Capabilities 表格**：
+   - 已完成的 UC：在對應模組 CLAUDE.md 的 `## Capabilities` 表格新增一行（UC ID + 能力 + 入口 + ✅）
+   - 部分完成的 UC：更新 Kanban card 內嵌剩餘細節（前置條件、設計要點、測試計畫 — 測試類型分佈 + 情境覆蓋 + 已知風險，不寫數量）
+   - 進行中的 UC：移動 Kanban card 至對應 lane
+3. **移動 Kanban 卡片**：已完成 UC 的對應 Kanban card 從 active lane 移至 Done/
+4. **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成（`/doc-health` 角度 6 驗證此一致性）
+5. **從 EP Scenario Matrix 提煉「消費場景」**：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），寫入 Capabilities 表格的備註或 Kanban card 的描述
 
 #### 5b. SYSTEM-MAP.md 更新（大型/中型變更）
 
@@ -238,7 +235,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 3. 每段必須 TDD（RED → GREEN → REFACTOR）
 4. 每段必須獨立驗證（ruff + mypy + pytest）
 5. 禁止 `from __future__ import annotations`
-6. 必須執行收尾步驟（階段 5）：大型/中型 → UC 更新 + SYSTEM-MAP 更新 + CLAUDE.md 更新 + /audit-test；小型 → /audit-test
+6. 必須執行收尾步驟（階段 5）：大型/中型 → Capabilities + Kanban 更新 + SYSTEM-MAP 更新 + CLAUDE.md 更新 + /audit-test；小型 → /audit-test
 
 ### 禁止
 

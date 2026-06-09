@@ -49,14 +49,13 @@
 - `/claude:clean` — 清理 Markdown 元資訊
 - `/claude:distill` — 蒸餾文檔，提煉核心精華
 - `/claude:sync` — 檢查文檔與程式碼同步性
-- `/claude:daily-maintain` — 每日維護四合一（統一快照 + sync + uc-sync + SYSTEM-MAP 一致性 + 健康報告），支援 `--init`、`--only`
+- `/claude:daily-maintain` — 每日維護四合一（統一快照 + Capabilities/Kanban sync + SYSTEM-MAP 一致性 + 健康報告），支援 `--init`、`--only`
 
 ### 日常工具
 
 - `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要、UC 進度 + SYSTEM-MAP 功能進度）
-- `/uc-status` — USE-CASES 跨領域狀態掃描（全局進度儀表板 + SYSTEM-MAP 功能級別摘要）
-- `/uc-sync` — USE-CASES.md 同步與品質檢查（狀態-實作一致性、路徑有效性、Domain-First 合規）
-- `/uc-report` — 系統能力地圖生成器（top-down 層級 + Workflow 展開 + 孤兒偵測 + 未驗證 UC + 連結，產出 uc-coverage.md）；`--sync-system-map` 用 UC 狀態同步 SYSTEM-MAP.md
+- `/task-status` — Kanban-centric 進度儀表板（Capabilities 完成率 + Kanban lane 分佈 + 模組 Breakdown + SYSTEM-MAP 功能進度）
+- `/doc-health` — Capabilities + Kanban 健康檢查（12 角度驗證文件準確性）；`--report` 產出完整能力地圖；`--sync-system-map` 用 Capabilities 狀態同步 SYSTEM-MAP.md
 - `/rebase <target>` — Worktree 分支棧 rebase（當前 branch → target，cascade 子 worktree）
 
 ### 依賴升級（收盤後執行）

@@ -229,18 +229,16 @@
 
 ## 角度十二：幽靈 UC 引用（完整層，--all）
 
-> **核心原則**：CLAUDE.md 中引用的 UC ID 必須存在於某個 USE-CASES.md。引用已刪除或歸檔的 UC ID 會讓 AI 在不存在的知識上做判斷。
+> **核心原則**：CLAUDE.md 中引用的 UC ID 必須存在於某個 Capabilities 表格或 .kanban/ 卡片。引用已刪除或歸檔的 UC ID 會讓 AI 在不存在的知識上做判斷。
 
 **前置條件**：需要 `.project-snapshot.json`。無 snapshot 時跳過此角度。
 
 | 檢查項 | 說明 | 驗證方式 |
 |--------|------|----------|
-| X8 幽靈引用 | CLAUDE.md 提到的 UC ID 不在 `uc_registry[]` 中 | 比對 `claude_md_registry[].referenced_uc_ids` vs `uc_registry[].uc_id` |
-| X8 archive 殘留 | UC ID 曾存在但已歸檔（移到 `_archive/`） | 搜尋 `_archive/` 目錄中的 USE-CASES.md |
+| X8 幽靈引用 | CLAUDE.md 提到的 UC ID 不在 `capabilities_registry[]` 或 `kanban_registry[]` 中 | 比對 `claude_md_registry` 中的 UC ID 引用 vs `capabilities_registry[].uc_id` + `kanban_registry[].uc_id` |
 
 **判斷標準**：
 
 - **important**：CLAUDE.md 引用的 UC ID 完全不存在（可能從未定義或已刪除）
-- **suggestion**：UC ID 存在於 `_archive/`（已歸檔），CLAUDE.md 引用需更新
 
 **與角度三（涵蓋性）的區別**：角度三檢查「功能是否有記錄」，角度十二檢查「記錄的引用是否指向存在的知識」。

@@ -49,7 +49,7 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 | 9 | 連鎖影響 | 完整 | 程式碼變更是否影響消費端文檔 |
 | 10 | dep-graph 矛盾 | 完整 | CLAUDE.md "Does NOT depend on" 與 dep-graph import edge 矛盾 |
 | 11 | 模組覆蓋缺口 | 完整 | dep-graph 有模組但無 CLAUDE.md |
-| 12 | 幽靈 UC 引用 | 完整 | CLAUDE.md 引用的 UC ID 不在任何 USE-CASES.md |
+| 12 | 幽靈 UC 引用 | 完整 | CLAUDE.md 引用的 UC ID 不在任何 Capabilities 表格或 .kanban/ 卡片 |
 
 完整定義和判斷標準：[sync-check-angles.md](./_common/sync-check-angles.md)
 

@@ -69,16 +69,16 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 輸出：列出需檢查的檔案（不是要求全部更新，是提醒檢查是否需要更新）。用戶在階段 5 確認時一併判斷。
 
-### 階段 3：UC 狀態確認
+### 階段 3：Capabilities + Kanban 狀態確認
 
 **大型/中型變更時執行，小型變更跳過。**
 
 1. 識別變更涉及的 library 模組目錄
-2. 檢查該模組目錄的 USE-CASES.md：是否有 UC 狀態需要更新？
+2. 檢查該模組 CLAUDE.md Capabilities 表格和 .kanban/ 卡片：是否有 UC 狀態需要更新？
 3. 在 commit message 展示後，提示用戶確認：
-   - 「本次變更是否需要更新 UC 狀態？」
-   - 如果需要，提醒執行 `/uc-status` 或手動更新
-4. **不自動修改 USE-CASES.md**（本命令只負責提醒）
+   - 「本次變更是否需要更新 Capabilities 或 Kanban 狀態？」
+   - 如果需要，提醒執行 `/task-status` 或 `/doc-health`
+4. **不自動修改 CLAUDE.md Capabilities 或 Kanban 卡片**（本命令只負責提醒）
 
 ### 階段 4：生成 Commit Message
 
@@ -95,7 +95,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 ### 階段 5：用戶確認
 
-展示變更摘要 + 建議 commit message + UC 狀態提醒（如適用）→ **等待用戶明確確認**。
+展示變更摘要 + 建議 commit message + Capabilities/Kanban 狀態提醒（如適用）→ **等待用戶明確確認**。
 
 **遵守 `commit-consent` rule**：未收到確認絕不執行 git commit。
 
@@ -131,4 +131,4 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 前置：`/lint-fix`（lint 不通過時）、`/code-review`
 
-**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描）和階段 3（UC 狀態確認），直接進入階段 1（Lint）→ 階段 5（確認）→ 階段 6（提交）。
+**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描）和階段 3（Capabilities + Kanban 狀態確認），直接進入階段 1（Lint）→ 階段 5（確認）→ 階段 6（提交）。

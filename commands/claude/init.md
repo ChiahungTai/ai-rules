@@ -37,11 +37,12 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 從 snapshot 取得：
 
 - `modules` / `edges` — 精確的模組依賴結構（取代 Phase 1 的粗略分析）
-- `uc_registry` — 現有 UC 條目（用於報告 UC 缺口）
+- `capabilities_registry` — 現有 Capabilities 條目（用於報告覆蓋缺口）
+- `kanban_registry` — 現有 Kanban 卡片
 - `claude_md_registry` — 現有 CLAUDE.md 分佈（避免重複生成）
 - `cross_validation` — 預計算的問題（X6 模組缺 CLAUDE.md 等）
 
-**UC 缺口報告**：列出缺少 USE-CASES.md 的 library 模組，但不自動生成（需要人類意圖）。
+**Capabilities 覆蓋缺口報告**：列出缺少 CLAUDE.md Capabilities 表格的 library 模組，但不自動生成（需要人類意圖）。
 
 **無 scan-project 時**：跳過此 phase，Phase 2 使用 Phase 1 的粗略分析。
 

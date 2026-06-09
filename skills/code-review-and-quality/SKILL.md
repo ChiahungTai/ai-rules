@@ -49,12 +49,12 @@ For detailed profiling, read [performance-optimization](../performance-optimizat
 
 ### 6. UC Coverage
 
-For projects using UC-Driven Development, verify implementation against USE-CASES.md.
+For projects using UC-Driven Development, verify implementation against CLAUDE.md Capabilities tables.
 
-- Does implementation cover all UC-defined behaviors?
-- Are UC-referenced behaviors present in the diff?
-- EP segment UC IDs match USE-CASES.md?
-- UC references point to library module directory USE-CASES.md (not scripts/)?
+- Does implementation cover all Capabilities-defined behaviors?
+- Are Capabilities-referenced behaviors present in the diff?
+- EP segment UC IDs match Capabilities table or .kanban/ cards?
+- Capabilities entry points point to library modules (not scripts/)?
 - Skip for small changes (bug fix, docs)
 
 ## Review Process
