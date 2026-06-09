@@ -14,7 +14,11 @@
 
 # Temporary files
 .tmp/
-*.tmp.claude/settings.local.json
+*.tmp
+
+# Python bytecode
+__pycache__/
+*.pyc
 
 # AI agents
 .claude/
