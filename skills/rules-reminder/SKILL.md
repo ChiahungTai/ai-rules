@@ -15,14 +15,9 @@ description: Enforces the most frequently violated Claude Code rules to prevent 
 
 Claude Code 偵測到引號內「換行後接 `#`」會觸發權限提示（"Newline followed by # inside a quoted argument can hide arguments from path validation"）。`#` 緊接開頭引號不觸發，但換行後的 `#` 會。
 
-```bash
-# ❌ 禁止 — 觸發權限提示
-uv run python -c "
-# 這是註解
-from module import something
-print(something)
-"
+**❌ 禁止**：`uv run python -c "...\n# 註解\n..."` — 換行後的 `#` 觸發 "Newline followed by # inside a quoted argument can hide arguments from path validation"。即使 `#` 是有用註解也禁止。
 
+```bash
 # ✅ 正確 — 無註解
 uv run python -c "
 from module import something

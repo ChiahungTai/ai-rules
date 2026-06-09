@@ -85,12 +85,30 @@ allowed-tools: ["Read", "Bash"]
 | 檢查項 | 嚴重程度 | 驗證方式 |
 |--------|---------|---------|
 | 修改了 `.py` 但沒有修改對應 test（或最近 N 個 commit 都沒改 test） | Important | 比對 `git diff` 中 source files vs test files |
-| 新增了 public class/function 但無 test 引用 | Important | 搜尋 test files 是否 import 該 class/function |
+| 新增了 public class/function 但無 test 引用 | Important | 見下方「覆蓋搜尋策略」 |
 | test file 存在但對應 source file 已刪除 | Important | `test -f` 驗證 source 存在 |
 
 **判斷邏輯**：
-- Source `foo.py` → 對應 test `test_foo.py`（同名慣例）
+- Source `foo.py` → 對應 test `test_foo.py`（同名慣例）為主要測試檔案
 - 新增 class/function 在 `__init__.py` 或 `__all__` → 搜尋所有 test files
+
+**覆蓋搜尋策略**（區分 function vs method）：
+
+覆蓋判斷必須區分三種粒度，不可一概用 import 搜尋：
+
+| 粒度 | 搜尋方式 | 範例 |
+|------|---------|------|
+| **standalone function** | `rg "from module import func"` 或 `rg "func("` in tests | `rg "compute_adj_factors" tests/` |
+| **class 本身** | `rg "from module import ClassName"` in tests | `rg "TWSecurityIndex" tests/` |
+| **class method** | 找到 class 的 import 後，追蹤 instance 上的 method call | 見下方 Method Coverage 流程 |
+
+**Method Coverage 流程**（避免將有覆蓋的方法誤判為零覆蓋）：
+
+1. **建立候選清單**：從 source file 提取所有 public method（排除 `_` 開頭）
+2. **找測試檔案**：不只看同名 `test_foo.py`，用 `rg "ClassName" tests/ -l` 找所有引用該 class 的 test files
+3. **搜尋 method call**：對每個候選 method，在所有找到的 test files 中搜尋 `.method_name(` pattern
+4. **判定零覆蓋**：只有當 method 在**所有** test files 中都不出現時，才判定為零覆蓋
+5. **交叉驗證**：報告前用 `rg "\.method_name\(" tests/` 確認，避免單一檔案掃描遺漏
 
 ### 角度 3：Mock 健康度
 
