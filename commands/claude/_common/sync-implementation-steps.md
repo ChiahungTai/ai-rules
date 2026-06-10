@@ -65,14 +65,26 @@
 
 當指定 `--changed-since` 時，步驟 1 只掃描 git 變更涉及的目錄，而非全部目錄。這大幅縮小檢查範圍，適合 daily-maintain 的 Phase 1 使用。
 
+增量模式分兩個 Phase 收集待檢查的 CLAUDE.md，合併後執行 sync：
+
 ```
-增量模式流程：
-1. git log --since="$SINCE" --name-only --pretty=format: → 取得變更檔案清單
-2. 過濾 .py 和 .md 檔案
-3. 映射到所屬模組目錄
-4. 只對這些目錄執行 sync 檢查
-5. 步驟 1.5 的依賴鏈擴展仍然執行（確保消費端也被檢查）
+Phase A: Code 變更 → 對應目錄的 CLAUDE.md
+  1. git log --since="$SINCE" --name-only --pretty=format: -- "*.py"
+  2. 對每個變更 .py，映射到所屬模組目錄（取 library root 下一層目錄）
+  3. 檢查該目錄是否有 CLAUDE.md → 加入檢查清單
+  範例：src/data/parsing.py 變更 → 檢查 src/data/CLAUDE.md
+
+Phase B: CLAUDE.md 本身被直接修改
+  1. git log --since="$SINCE" --name-only --pretty=format: -- "*/CLAUDE.md"
+  2. 這些 CLAUDE.md 直接加入檢查清單
+
+合併：
+  1. Phase A + Phase B 去重
+  2. 步驟 1.5 的依賴鏈擴展仍然執行（確保消費端 CLAUDE.md 也被檢查）
+  3. 對最終清單中的每個 CLAUDE.md 執行 sync 檢查
 ```
+
+**Phase A 是核心價值**：code 變了但 CLAUDE.md 沒跟著更新，正是 sync 要抓的問題。不要跳過。
 
 ---
 
