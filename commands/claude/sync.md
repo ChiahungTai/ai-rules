@@ -34,7 +34,7 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 | **品質層** | + 內部品質 + 元資訊 + 引用語法 | `--quality` |
 | **完整層** | + 涵蓋性 + 連鎖影響 + 蒸餾評估 | `--all` |
 
-### 12 個檢查角度
+### 11 個檢查角度
 
 | # | 角度 | 層級 | 一行摘要 |
 |---|------|------|---------|
@@ -49,7 +49,6 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 | 9 | 連鎖影響 | 完整 | 程式碼變更是否影響消費端文檔 |
 | 10 | dep-graph 矛盾 | 完整 | CLAUDE.md "Does NOT depend on" 與 dep-graph import edge 矛盾 |
 | 11 | 模組覆蓋缺口 | 完整 | dep-graph 有模組但無 CLAUDE.md |
-| 12 | 幽靈 UC 引用 | 完整 | CLAUDE.md 引用的 UC ID 不在任何 Capabilities 表格或 .kanban/ 卡片 |
 
 完整定義和判斷標準：[sync-check-angles.md](./_common/sync-check-angles.md)
 
@@ -109,7 +108,7 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 | **--recursive, -r** | 遞歸檢查所有子目錄 |
 | **--changed-since** | 增量模式：只檢查 git 變更涉及的檔案 |
 | **--quality** | 品質層（加入內部品質 + 引用語法） |
-| **--all, -a** | 完整層（12 個角度 + 清理 + 蒸餾） |
+| **--all, -a** | 完整層（11 個角度 + 清理 + 蒸餾） |
 | **--dry-run** | 預覽模式 |
 | **--verbose** | 顯示詳細過程 |
 

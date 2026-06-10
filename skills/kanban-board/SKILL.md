@@ -68,7 +68,6 @@ fd -e md . .kanban/In-Progress/
 [這張卡片要完成什麼]
 
 ## 相關
-- UC ID: [UC ID（如 D-14）]
 - EP: [EP 路徑或編號]
 - 分支: [git branch name]
 
@@ -81,7 +80,7 @@ fd -e md . .kanban/In-Progress/
 
 **檔名規則**：
 - **中文標題**：檔名使用繁體中文，保留必要的英文縮寫（如 NT、SJ、SMA、LGBM）
-- **無 UC prefix**：UC ID 放在卡片內容的 `## 相關` 段落，不放在檔名
+- **純描述性**：檔名只描述功能，不含編號 prefix
 - 範例：`訂閱分級語意重構.md`（而非 `SJ-04-revised-tiered-semantics.md`）
 - Tag 負責模組歸屬，檔名只負責描述功能
 
@@ -135,7 +134,7 @@ EP 段落完成後：
 新需求討論完成時：
 
 1. 在 `Backlog/` 建立卡片
-2. 卡片內記錄 spec 討論結論和對應 UC ID
+2. 卡片內記錄 spec 討論結論和對應能力描述
 
 ## 卡片與 UC 的關係
 
@@ -144,7 +143,7 @@ EP 段落完成後：
 | **Kanban Card** | 時間（現在做什麼） | 建立 → 移動 → 歸檔到 Done |
 | **CLAUDE.md Capabilities** | 功能（系統能做什麼） | 📋 → 🔧 → ✅ |
 
-**關聯方式**：卡片內用 `UC: D-14` 引用 UC ID，但不取代 UC 的狀態追蹤。一張卡片可能涉及多個 UC，一個 UC 也可能跨多張卡片完成。
+**關聯方式**：卡片內用能力描述引用 Capabilities 條目，但不取代 Capabilities 的狀態追蹤。一張卡片可能涉及多個能力，一個能力也可能跨多張卡片完成。
 
 ## 每週回顧
 

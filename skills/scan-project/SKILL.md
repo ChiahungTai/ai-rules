@@ -61,7 +61,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 | `dep_graph.modules` | scan_imports.py（如有） | 模組依賴結構（file_count, internal_deps, fan_out 等） |
 | `dep_graph.edges` | scan_imports.py（如有） | 模組間 import edges |
 | `dep_graph.hotspots` | scan_imports.py（如有） | 高 fan-out imports |
-| `findings` | 機械性交叉檢查 | X-cap-dup / X-cap-path / X-tag-module / X-ep-ready / X6 |
+| `findings` | 機械性交叉檢查 | X-cap-path / X-tag-module / X-ep-ready / X6 |
 | `fingerprint` | 計數 + 雜湊 | capabilities_total, kanban_total, kanban_by_lane, hashes |
 
 **不在輸出中的**：capabilities_registry、kanban_registry、claude_md_registry、cross_validation（v3 舊格式）。
@@ -80,7 +80,6 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 
 | Check | 說明 | 嚴重度 |
 |-------|------|--------|
-| X-cap-dup | 同一 UC ID 出現在多個 CLAUDE.md Capabilities 表格 | critical |
 | X-cap-path | Capabilities 入口路徑不存在（檢查 project root / package root / CLAUDE.md 目錄） | important |
 | X-tag-module | Kanban 卡片 `[tag:xxx]` 不對應 mosaic_alpha/ 子目錄 | important |
 | X-ep-ready | Next-Up/In-Progress 卡片引用的 EP 檔案不存在 | important |

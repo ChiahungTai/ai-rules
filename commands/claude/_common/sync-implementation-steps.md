@@ -20,7 +20,7 @@
       不阻塞後續步驟（資料可能過時但仍有參考價值）
    d. 提取以下資料供後續步驟使用：
       - dep_graph.modules + dep_graph.edges → 步驟 1.5 依賴鏈擴展（精確取代 naive grep）
-      - findings → 步驟 10.5（預計算的 X-cap-path/X-cap-dup/X-tag-module/X-ep-ready/X6 問題）
+      - findings → 步驟 10.5（預計算的 X-cap-path/X-tag-module/X-ep-ready/X6 問題）
       - fingerprint → 變化偵測（counts + hashes）
 3. 如果不存在：記錄 "running without snapshot"，後續步驟用傳統方式
 ```
@@ -281,12 +281,11 @@ fi
 
 > **觸發條件**：`.project-snapshot.json` 存在時執行。無 snapshot 時跳過。
 
-消費步驟 0.5 載入的 snapshot 資料 + LLM 直接讀取，執行跨 artifact 交叉驗證（角度 10-12）。
+消費步驟 0.5 載入的 snapshot 資料 + LLM 直接讀取，執行跨 artifact 交叉驗證（角度 10-11）。
 
 ```
 1. 消費 findings[] 中的預計算結果：
    - X-cap-path 問題：Capabilities 入口路徑不存在 → 標記為 important
-   - X-cap-dup 問題：同一 UC ID 出現在多個 CLAUDE.md Capabilities → 標記為 critical
    - X-tag-module 問題：Kanban 卡片 tag 不對應模組目錄 → 標記為 important
    - X-ep-ready 問題：Next-Up/In-Progress 卡片引用的 EP 不存在 → 標記為 important
    - X6 問題：模組缺 CLAUDE.md → 轉為角度 11（模組覆蓋缺口）
@@ -300,11 +299,6 @@ fi
    - 遍歷 dep_graph.modules[]（file_count >= 3）
    - LLM 直接檢查目錄中是否有 CLAUDE.md
    - 缺少 CLAUDE.md → 標記 [X6] important
-
-4. 角度 12：幽靈 UC 引用
-   - LLM 直接讀取所有 CLAUDE.md 的 Capabilities 表格，收集 UC ID 形成有效集合
-   - LLM 直接讀取 .kanban/ 卡片中的 UC ID 引用
-   - CLAUDE.md 中引用的 UC ID 不在有效集合中 → 標記 important
 ```
 
 **輸出格式**：
@@ -314,7 +308,6 @@ fi
 
 - [X1] data/CLAUDE.md 宣告 "Does NOT depend on strategies" 但 dep_graph.edges 有 data→strategies
 - [X6] Module 'services' (12 files) 缺少 CLAUDE.md
-- [X-cap-dup] UC ID D-14 同時出現在 data/CLAUDE.md 和 features/CLAUDE.md Capabilities
 - [X-cap-path] Capabilities entry path 'runner.py' does not exist (in mosaic_alpha/data/CLAUDE.md)
 - [X-tag-module] Card '騰落線指標' has tag 'nonexistent' which does not match any mosaic_alpha/ subdirectory
 ```

@@ -113,7 +113,7 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 大型/中型變更時審查：
 - 實作是否涵蓋 CLAUDE.md Capabilities 表格描述的所有行為？
 - 是否有 Capabilities 引用的行為在 diff 中沒有對應實作？
-- EP 段落引用的 UC ID 是否與 Capabilities 表格或 .kanban/ 卡片一致？
+- EP 段落引用的能力描述是否與 Capabilities 表格或 .kanban/ 卡片一致？
 - Capabilities 入口路徑是否指向 library 模組（非 scripts/）？
 - 實作是否涵蓋「消費場景」描述的所有情境（happy path、錯誤操作、邊界、效能期待差異）？
 小型變更（bug fix）跳過此軸。

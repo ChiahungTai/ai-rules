@@ -123,8 +123,8 @@ git log --name-only --since="yesterday 00:00:00" --pretty=format: -- "tests/" | 
 - ...
 
 ### Capabilities + Kanban 進度（昨日變更）
-- ✅ 完成：[UC ID 列表]
-- 📋 新增 Kanban Backlog：[UC ID 列表]
+- ✅ 完成：[能力列表]
+- 📋 新增 Kanban Backlog：[能力列表]
 - 📋 剩餘待實作：[總數]
 
 ### 測試品質

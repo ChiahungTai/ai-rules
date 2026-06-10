@@ -18,13 +18,14 @@ Usage:
 """
 
 import argparse
-import importlib.util
-import json
-import re
 from collections import defaultdict
 from datetime import datetime
 from datetime import timezone
+import hashlib
+import importlib.util
+import json
 from pathlib import Path
+import re
 
 
 # ---------------------------------------------------------------------------
@@ -32,9 +33,18 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 SKIP_DIRS_SCAN = {
-    ".venv", "venv", "__pycache__", ".git", "node_modules",
-    ".mypy_cache", ".ruff_cache", ".idea", "_archive",
-    ".claude", "build", "dist",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".git",
+    "node_modules",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".idea",
+    "_archive",
+    ".claude",
+    "build",
+    "dist",
 }
 
 KANBAN_LANES = {"Backlog", "Next-Up", "In-Progress", "Done"}
@@ -52,8 +62,8 @@ CAPABILITIES_HEADER_RE = re.compile(r"^##\s+Capabilities", re.MULTILINE)
 # Markdown table row detection: starts and ends with |
 TABLE_ROW_START = re.compile(r"^\|.*\|\s*$")
 
-# UC ID pattern (for Capabilities table parsing only)
-UC_ID_RE = re.compile(r"\b([A-Z][A-Z0-9]*-[A-Z0-9]+)\b")
+# Note: UC ID pattern removed — Capabilities tables now use 3-column format
+# (能力 | 入口 | 狀態) without UC ID numbering.
 
 
 # ---------------------------------------------------------------------------
@@ -70,9 +80,7 @@ def _load_scan_imports(project_root: Path) -> dict | None:
     for path in candidates:
         if path.exists():
             try:
-                spec = importlib.util.spec_from_file_location(
-                    "scan_imports", path
-                )
+                spec = importlib.util.spec_from_file_location("scan_imports", path)
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
                 package_root = _find_package_root(project_root)
@@ -134,7 +142,11 @@ def parse_claude_md_registry(
 def _parse_capabilities_table(
     content: str, source_claude_md: str, module: str
 ) -> list[dict]:
-    """Parse Capabilities table from CLAUDE.md content."""
+    """Parse Capabilities table from CLAUDE.md content.
+
+    Expected table format (3 columns, no UC ID):
+        | 能力 | 入口 | 狀態 |
+    """
     entries = []
 
     header_match = CAPABILITIES_HEADER_RE.search(content)
@@ -145,7 +157,7 @@ def _parse_capabilities_table(
     start = header_match.end()
     next_section = re.search(r"\n## ", content[start:])
     section_text = (
-        content[start:start + next_section.start()]
+        content[start : start + next_section.start()]
         if next_section
         else content[start:]
     )
@@ -154,49 +166,47 @@ def _parse_capabilities_table(
         # Parse table row using split-by-| instead of regex.
         # This handles | inside backtick content (e.g. CLI `sync [revenue|income|all]`)
         # by taking col1 from the left and status from the right, then
-        # reconstructing col3 (entry_point) from the middle fragments.
+        # reconstructing entry_point from the middle fragments.
         if not TABLE_ROW_START.match(line):
             continue
         parts = line.split("|")
         # parts: ['', col1, col2, ..., colN, ''] (leading/trailing |)
-        if len(parts) < 5:  # need at least: '' col1 col2 col3 col4 ''
+        if len(parts) < 5:  # need at least: '' capability entry_point status ''
             continue
-        col1 = parts[1].strip()          # UC ID (never contains |)
-        col2 = parts[2].strip()          # capability/能力 (never contains |)
-        col_last = parts[-2].strip()     # status/狀態 (never contains |)
-        # Reconstruct col3 by rejoining fragments — restores | inside backticks
-        col3 = "|".join(parts[3:-2]).strip()  # entry_point/入口
+        col1 = parts[1].strip()  # capability/能力 (never contains |)
+        col_last = parts[-2].strip()  # status/狀態 (never contains |)
+        # Reconstruct entry_point by rejoining fragments — restores | inside backticks
+        entry_point = "|".join(parts[2:-2]).strip()
 
         # Skip separator rows (---)
         if all(set(c.strip()) <= {"-", ":"} for c in parts[1:-1]):
             continue
         # Skip header rows
-        if col1 == "UC ID":
+        if col1 in ("能力", "Capability"):
             continue
 
-        uc_id_match = UC_ID_RE.search(col1)
-        if not uc_id_match:
+        # Skip empty rows
+        if not col1:
             continue
 
-        uc_id = uc_id_match.group(1)
-        status_raw = col_last
         # Extract status emoji
         status = ""
-        for ch in status_raw:
+        for ch in col_last:
             if ch in "✅📋🔧❌🟡🟢":
                 status = ch
                 break
         if not status:
             status = "✅"  # Default for Capabilities table entries
 
-        entries.append({
-            "uc_id": uc_id,
-            "module": module,
-            "capability": col2,
-            "entry_point": col3,
-            "status": status,
-            "source_claude_md": source_claude_md,
-        })
+        entries.append(
+            {
+                "module": module,
+                "capability": col1,
+                "entry_point": entry_point,
+                "status": status,
+                "source_claude_md": source_claude_md,
+            }
+        )
 
     return entries
 
@@ -221,16 +231,12 @@ def _parse_single_claude_md(
     has_capabilities = bool(CAPABILITIES_HEADER_RE.search(content))
 
     not_depend_on = []
-    for m in re.finditer(
-        r"Does NOT depend on[：:]*\s*(.+?)(?:\n|$)", content
-    ):
+    for m in re.finditer(r"Does NOT depend on[：:]*\s*(.+?)(?:\n|$)", content):
         for mod_match in re.finditer(r"\b([a-z][a-z0-9_]*)\b", m.group(1)):
             not_depend_on.append(mod_match.group(1))
 
     # Parse Capabilities table
-    capabilities_entries = _parse_capabilities_table(
-        content, path_rel, module
-    )
+    capabilities_entries = _parse_capabilities_table(content, path_rel, module)
 
     md_entry = {
         "path": path_rel,
@@ -269,9 +275,7 @@ def parse_kanban_registry(project_root: Path) -> list[dict]:
     return registry
 
 
-def _parse_kanban_card(
-    card_file: Path, lane: str, project_root: Path
-) -> dict:
+def _parse_kanban_card(card_file: Path, lane: str, project_root: Path) -> dict:
     """Parse a single Kanban card.
 
     Card identity: title (= filename stem) + [tag:module] on line 1.
@@ -350,29 +354,9 @@ def run_cross_validation(
     """Run mechanical cross-validation checks."""
     findings = []
 
-    # Build lookup sets
-    cap_by_id: dict[str, list[dict]] = defaultdict(list)
-    for e in capabilities_registry:
-        cap_by_id[e["uc_id"]].append(e)
-
     claude_md_modules = {e["module"] for e in claude_md_registry}
 
     # --- Capabilities checks ---
-
-    # X-cap-dup: Same UC ID in multiple CLAUDE.md Capabilities
-    for uc_id, entries in cap_by_id.items():
-        if len(entries) > 1:
-            sources = [e["source_claude_md"] for e in entries]
-            findings.append({
-                "check_id": "X-cap-dup",
-                "severity": "critical",
-                "detail": (
-                    f"UC ID {uc_id} appears in Capabilities of "
-                    f"{len(entries)} CLAUDE.md files: {', '.join(sources)}"
-                ),
-                "uc_id": uc_id,
-                "source_files": sources,
-            })
 
     # X-cap-path: Capabilities entry_point path does not exist
     # Entry paths may be relative to: project root, package root, or
@@ -390,24 +374,30 @@ def run_cross_validation(
             rel_path = path_match.group(1).split(":")[0]
             # Candidate locations to check
             candidates = [
-                project_root / rel_path,                   # absolute from project root
+                project_root / rel_path,  # absolute from project root
             ]
             if pkg_root:
-                candidates.append(pkg_root / rel_path)     # under package root
+                candidates.append(pkg_root / rel_path)  # under package root
             # Relative to the CLAUDE.md's own directory
-            claude_md_dir = project_root / e["source_claude_md"].rsplit("/", 1)[0] if "/" in e["source_claude_md"] else project_root
+            claude_md_dir = (
+                project_root / e["source_claude_md"].rsplit("/", 1)[0]
+                if "/" in e["source_claude_md"]
+                else project_root
+            )
             candidates.append(claude_md_dir / rel_path)
             if not any(p.exists() for p in candidates):
-                findings.append({
-                    "check_id": "X-cap-path",
-                    "severity": "important",
-                    "detail": (
-                        f"Capabilities entry path '{rel_path}' "
-                        f"does not exist (in {e['source_claude_md']})"
-                    ),
-                    "uc_id": e["uc_id"],
-                    "source_claude_md": e["source_claude_md"],
-                })
+                findings.append(
+                    {
+                        "check_id": "X-cap-path",
+                        "severity": "important",
+                        "detail": (
+                            f"Capabilities entry path '{rel_path}' "
+                            f"does not exist (in {e['source_claude_md']})"
+                        ),
+                        "capability": e["capability"],
+                        "source_claude_md": e["source_claude_md"],
+                    }
+                )
 
     # X6: Module in dep-graph but no CLAUDE.md
     for mod_name, mod_data in modules.items():
@@ -421,20 +411,18 @@ def run_cross_validation(
             pkg_dir = _find_package_root(project_root)
             if pkg_dir:
                 actual_dir = pkg_dir / mod_name
-                if (
-                    actual_dir.is_dir()
-                    and (actual_dir / "CLAUDE.md").exists()
-                ):
+                if actual_dir.is_dir() and (actual_dir / "CLAUDE.md").exists():
                     continue
-            findings.append({
-                "check_id": "X6",
-                "severity": "important",
-                "detail": (
-                    f"Module '{mod_name}' has {file_count} files "
-                    f"but no CLAUDE.md"
-                ),
-                "module": mod_name,
-            })
+            findings.append(
+                {
+                    "check_id": "X6",
+                    "severity": "important",
+                    "detail": (
+                        f"Module '{mod_name}' has {file_count} files but no CLAUDE.md"
+                    ),
+                    "module": mod_name,
+                }
+            )
 
     # --- Kanban checks ---
 
@@ -444,16 +432,18 @@ def run_cross_validation(
         for e in kanban_registry:
             for tag in e.get("tags", []):
                 if tag not in valid_tags:
-                    findings.append({
-                        "check_id": "X-tag-module",
-                        "severity": "important",
-                        "detail": (
-                            f"Card '{e['title']}' has tag '{tag}' "
-                            f"which does not match any mosaic_alpha/ "
-                            f"subdirectory"
-                        ),
-                        "kanban_source": e["source_file"],
-                    })
+                    findings.append(
+                        {
+                            "check_id": "X-tag-module",
+                            "severity": "important",
+                            "detail": (
+                                f"Card '{e['title']}' has tag '{tag}' "
+                                f"which does not match any mosaic_alpha/ "
+                                f"subdirectory"
+                            ),
+                            "kanban_source": e["source_file"],
+                        }
+                    )
 
     # X-ep-ready: Next-Up/In-Progress card has EP ref but file missing
     for e in kanban_registry:
@@ -471,15 +461,17 @@ def run_cross_validation(
         ]
         ep_exists = any(p.exists() for p in ep_candidates)
         if not ep_exists:
-            findings.append({
-                "check_id": "X-ep-ready",
-                "severity": "important",
-                "detail": (
-                    f"Card '{e['title']}' in {e['lane']} references "
-                    f"EP '{ep_ref}' but file not found"
-                ),
-                "kanban_source": e["source_file"],
-            })
+            findings.append(
+                {
+                    "check_id": "X-ep-ready",
+                    "severity": "important",
+                    "detail": (
+                        f"Card '{e['title']}' in {e['lane']} references "
+                        f"EP '{ep_ref}' but file not found"
+                    ),
+                    "kanban_source": e["source_file"],
+                }
+            )
 
     return findings
 
@@ -499,12 +491,10 @@ def _compute_fingerprint(
     LLM reads CLAUDE.md and .kanban/ directly when it needs details.
     The fingerprint only answers: "did something change since last scan?"
     """
-    import hashlib
 
-    # Capabilities hash: sorted UC IDs + modules
+    # Capabilities hash: sorted capability + module + status
     cap_keys = sorted(
-        f"{e['uc_id']}:{e['module']}:{e['status']}"
-        for e in capabilities_registry
+        f"{e['capability']}:{e['module']}:{e['status']}" for e in capabilities_registry
     )
     cap_hash = hashlib.md5("|".join(cap_keys).encode()).hexdigest()[:12]
 
@@ -558,9 +548,7 @@ def scan_project(project_root: Path) -> dict:
         project_name = project_root.name
 
     # Phase 2: Parse CLAUDE.md files (internal — not in output)
-    claude_md_registry, capabilities_registry = parse_claude_md_registry(
-        project_root
-    )
+    claude_md_registry, capabilities_registry = parse_claude_md_registry(project_root)
 
     # Phase 3: Parse .kanban/ cards (internal — not in output)
     kanban_registry = parse_kanban_registry(project_root)
@@ -599,9 +587,7 @@ def scan_project(project_root: Path) -> dict:
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Unified project knowledge scanner"
-    )
+    parser = argparse.ArgumentParser(description="Unified project knowledge scanner")
     parser.add_argument(
         "--project-root",
         type=Path,

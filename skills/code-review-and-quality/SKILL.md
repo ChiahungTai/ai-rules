@@ -47,13 +47,12 @@ For detailed profiling, read [performance-optimization](../performance-optimizat
 - Missing pagination on list endpoints?
 - Large objects created in hot paths?
 
-### 6. UC Coverage
+### 6. Capability Coverage
 
 For projects using UC-Driven Development, verify implementation against CLAUDE.md Capabilities tables.
 
 - Does implementation cover all Capabilities-defined behaviors?
 - Are Capabilities-referenced behaviors present in the diff?
-- EP segment UC IDs match Capabilities table or .kanban/ cards?
 - Capabilities entry points point to library modules (not scripts/)?
 - Skip for small changes (bug fix, docs)
 

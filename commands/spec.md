@@ -48,12 +48,12 @@ User Story 格式：
 
 | 規模 | UC 行為 |
 |------|--------|
-| 大型 | 建立 **Kanban Backlog 卡片**（含 UC ID、目標、驗收標準）。UC ID 前綴對應模組域（D- = data, SJ- = adapters/sj 等）。新領域定義新前綴 |
+| 大型 | 建立 **Kanban Backlog 卡片**（含能力描述、目標、驗收標準） |
 | 中型 | 更新既有 Kanban 卡片的描述或狀態；或更新 CLAUDE.md Capabilities 表格的描述 |
 | 小型 | 跳過（bug fix、文檔不需要 UC） |
 
 3. **確認 UC 不重複**：已有 UC（Capabilities ✅ 或 Kanban 📋）能覆蓋需求 → 更新描述，不另建新卡片
-4. **記錄 UC ID**：後續 EP 和 /build 會引用此 ID
+4. **記錄能力描述**：後續 EP 和 /build 會引用此能力描述
 5. **消費場景欄位**：大型變更新增 UC 時可先留空，由後續 `/execution-plan` 產出 Scenario Matrix 後、`/build` 階段 5a 從矩陣提煉自包含描述填入。中型變更若影響使用情境，可於此階段直接更新既有 UC 的消費場景
 
 **Kanban Backlog 卡片格式**（📋 新建時使用）：
@@ -66,7 +66,6 @@ User Story 格式：
 [簡述，或完整 spec（詳細 📋 時）]
 
 ## 相關
-- UC ID: [UC-ID]
 - EP: [ep-xxx.md，如有]
 
 ## 驗收標準
@@ -75,7 +74,7 @@ User Story 格式：
 ## 備註
 [依賴、前置條件]
 ```
-- **檔名**：繁體中文標題，保留必要英文縮寫。UC ID 放在內容，不放在檔名。範例：`訂閱分級語意重構.md`（而非 `SJ-04-revised-tiered-semantics.md`）
+- **檔名**：繁體中文標題，保留必要英文縮寫。範例：`訂閱分級語意重構.md`
 - 📋 簡單（< 10 行描述）：`## 目標` 放一句話
 - 📋 詳細（≥ 10 行）：`## 目標` 放完整描述（卡片是 markdown，長度不限）
 - **Tag**：掃描 `mosaic_alpha/` 子目錄決定 tag 名（見專案 CLAUDE.md「Tag 慣例」）。`adapters/sj` → `sj`
@@ -120,8 +119,8 @@ Never（不做）：[列表]
 ## 規格摘要
 ### 目標 / User Story / 核心功能 / 技術約束
 ### UC 引用
-- 新增：UC-ID（📋）
-- 更新：UC-ID（描述更新）
+- 新增：[能力描述]（📋）
+- 更新：[能力描述]（描述更新）
 ### 現有基礎設施
 - `path/to/file.py:ClassName` — 用途簡述
 ### 技術決策 / 成功條件 / 邊界 / 已確認假設

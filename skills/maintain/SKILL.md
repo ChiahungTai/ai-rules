@@ -85,7 +85,6 @@ Snapshot 輔助：
 |----------|------|---------|---------|---------|
 | X-cap-path | 🟢 Low | 自動修正 | 呈現待確認 | 見下方 |
 | X-tag-module | 🟢 Low | 自動修正 | 呈現待確認 | 見下方 |
-| X-cap-dup | 🟡 Medium | 只報告 | 呈現待確認 | 需人類判斷歸屬 |
 | X-ep-ready | 🟡 Medium | 只報告 | 呈現待確認 | EP 可能未建立 |
 | X6 | 🟡 Medium | 只報告 | 呈現待確認 | 需人類決定是否建 CLAUDE.md |
 
@@ -154,7 +153,7 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 
 ### 無 tag 卡片推導
 
-1. 讀取卡片內容，搜尋模組引用（程式碼路徑、UC ID prefix、模組名）
+1. 讀取卡片內容，搜尋模組引用（程式碼路徑、模組名）
 2. 對照 `mosaic_alpha/` 子目錄清單
 3. 單一匹配 → 加上 `[tag:xxx]` 到第一行
 4. 多重匹配或模糊 → 標記待人工確認
@@ -177,7 +176,7 @@ Done/ 超過 14 天的卡片：
 | X-tag-module 修正 | 自動修 | 🟢 low risk |
 | 無 tag 卡片 | 推導後自動加 | 🟢 low risk |
 | Done/ 歸檔 | > 14 天自動刪 | 🟢 low risk |
-| X-cap-dup / X-ep-ready / X6 | 只報告 | 🟡 需語義判斷 |
+| X-ep-ready / X6 | 只報告 | 🟡 需語義判斷 |
 | /claude:sync --changed-since | `yesterday` | 每日增量 |
 | /doc-health 參數 | 預設（不含 --quality --all） | 核心 findings 即可 |
 | SYSTEM-MAP 同步 | 不執行 | 需人類確認狀態語義 |
@@ -226,7 +225,6 @@ Done/ 超過 14 天的卡片：
 ⚠️ findings: N issues (0 critical, N important)
 - [X-cap-path] xxx 不存在 → [自動修正已完成]
 - [X-tag-module] 卡片 'xxx' tag 錯誤 → [自動修正已完成]
-- [X-cap-dup] UC ID xxx 重複 → 🟡 待人工確認
 Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
   - Stale: Next-Up 'xxx' 已 8 天未更新
   - Done 歸檔: N 張 > 14 天已清理
@@ -253,7 +251,7 @@ Commit message 格式：
 chore(maintain): daily auto-maintain — X findings fixed, Y reported
 
 Auto-fixed: X-cap-path(N), X-tag-module(N)
-Reported: X-cap-dup(N), X6(N)
+Reported: X6(N)
 Snapshot: capabilities N, kanban N, findings N
 ```
 

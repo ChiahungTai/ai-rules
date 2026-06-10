@@ -53,7 +53,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 ### 階段 1：準備
 
 1. 讀取 Execution Plan，識別段落結構、依賴關係
-2. **Kanban 狀態更新**：掃描 EP 中引用的 UC ID，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在 `/commit` 確認後才執行）
+2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在 `/commit` 確認後才執行）
 3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）
 4. **Examples 盤點**：掃描 `demo_*.py`、`examples/**/*.py` 等，建立 `{module} → [example paths]` 映射表
 5. 檢查清單：Kanban InProgress ✓ | Examples 映射表 ✓ | 測試檔案 ✓ | CLAUDE.md 同步 ✓ | 依賴完整 ✓
@@ -197,7 +197,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 #### 5b. SYSTEM-MAP.md 更新（大型/中型變更）
 
 1. **讀取 SYSTEM-MAP.md**（如果存在於專案根目錄）
-2. **定位受影響的功能區塊**：根據本次更新的 UC ID，找到 SYSTEM-MAP.md 中引用這些 UC 的功能
+2. **定位受影響的功能區塊**：根據本次更新的能力描述，找到 SYSTEM-MAP.md 中引用這些能力的功能
 3. **更新功能生命週期狀態**：
    - 所有引用 UC 都 ✅ 且測試通過 → 功能狀態升級（✅→✅🔍 或 📋→✅ Built）
    - 有已知問題或未驗證 → 標記 ⚠️ 並附說明
@@ -218,7 +218,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 ### 階段 6：完成報告
 
-輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + UC 狀態變更摘要 + SYSTEM-MAP 功能狀態變更 + /audit-test 稽核結果
+輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + 能力狀態變更摘要 + SYSTEM-MAP 功能狀態變更 + /audit-test 稽核結果
 
 ---
 

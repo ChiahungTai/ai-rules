@@ -60,17 +60,9 @@
 
   "findings": [
     {
-      "check_id": "X-cap-dup",
-      "severity": "critical",
-      "detail": "UC ID D-14 appears in Capabilities of 2 CLAUDE.md files",
-      "uc_id": "D-14",
-      "source_files": ["mosaic_alpha/data/CLAUDE.md", "mosaic_alpha/cli/CLAUDE.md"]
-    },
-    {
       "check_id": "X-cap-path",
       "severity": "important",
       "detail": "Capabilities entry path 'runner.py' does not exist (in mosaic_alpha/data/CLAUDE.md)",
-      "uc_id": "D-14",
       "source_claude_md": "mosaic_alpha/data/CLAUDE.md"
     },
     {
@@ -136,7 +128,7 @@
 | 欄位 | 型別 | 說明 |
 |------|------|------|
 | `capabilities_total` | int | 所有 CLAUDE.md Capabilities ✅ 條目總數 |
-| `capabilities_hash` | string | sorted UC ID:module:status 的 MD5 前 12 碼 |
+| `capabilities_hash` | string | sorted capability:module:status 的 MD5 前 12 碼 |
 | `kanban_total` | int | .kanban/ 卡片總數 |
 | `kanban_by_lane` | dict | 各 lane 卡片數 |
 | `kanban_hash` | string | sorted title:lane:tags 的 MD5 前 12 碼 |
@@ -148,7 +140,6 @@
 
 | check_id | 檢查邏輯 | severity |
 |----------|---------|----------|
-| `X-cap-dup` | 同一 UC ID 出現在多個 CLAUDE.md Capabilities 表格 | critical |
 | `X-cap-path` | Capabilities 入口路徑不存在（檢查 project root / package root / CLAUDE.md 目錄三個候選位置） | important |
 | `X-tag-module` | Kanban 卡片的 `[tag:xxx]` 不對應 `mosaic_alpha/` 子目錄 | important |
 | `X-ep-ready` | Next-Up/In-Progress 卡片引用的 EP 檔案在 ai-analysis/ 等目錄找不到 | important |
@@ -156,4 +147,4 @@
 
 **語義性驗證（由 LLM 判斷，不在 findings 中）**：
 - X1：dep-graph 矛盾（CLAUDE.md "Does NOT depend on" vs 實際 import edge）
-- X8：幽靈 Capabilities 引用（SYSTEM-MAP.md 提到的 UC ID 不在 Capabilities 表格中）
+- X8：幽靈 Capabilities 引用（SYSTEM-MAP.md 提到的能力不在 Capabilities 表格中）
