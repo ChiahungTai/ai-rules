@@ -83,9 +83,9 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
    - **消費場景寫入**：從 `/build` 提煉的消費場景寫入 Capabilities 備註或 Kanban card
    - **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成
 4. 用戶確認後，在 commit 前**執行上述操作**（修改 CLAUDE.md + mv 卡片）
-5. **EP 歸檔檢查**：如果本次 commit 是 EP 的最後一個段落（所有段落都已 commit），提醒用戶：
-   - 「EP 所有段落已 commit，建議歸檔：`mv ai-analysis/execution-plans/ep-xxx.md ai-analysis/execution-plans/_done/`」
-   - 歸檔為手動操作，不自動執行
+5. **EP 歸檔**：如果本次 commit 是 EP 的最後一個段落（所有段落都已 commit），自動執行歸檔：
+   - `mv ai-analysis/execution-plans/ep-xxx.md ai-analysis/execution-plans/_done/`
+   - 歸檔與 Capabilities + Kanban 搬移同為 metadata finalization，一併執行
 
 ### 階段 4：生成 Commit Message
 
