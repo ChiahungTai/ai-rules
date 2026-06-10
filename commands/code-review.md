@@ -26,9 +26,11 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 | 用法 | 實際執行 | 場景 |
 |------|---------|------|
-| `/code-review` | `git diff` + `git diff --cached` | 審查 uncommitted（預設） |
+| `/code-review` | `git diff` + `git diff --cached` + `git ls-files --others --exclude-standard` | 審查 uncommitted（預設，含 untracked files） |
 | `/code-review feat/xxx` | `git diff HEAD...feat/xxx` | 審查 feature branch |
 | `/code-review feat/xxx main` | `git diff main...feat/xxx` | 審查 branch（指定 base） |
+
+**Untracked files 處理**：新檔案沒有「變更前/後」可比對，審查時以完整檔案內容為對象（等同 diff against `/dev/null`），重點檢查架構一致性、命名慣例、與既有程式碼的整合點。
 
 ---
 

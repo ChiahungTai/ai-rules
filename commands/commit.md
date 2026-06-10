@@ -73,7 +73,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 **大型/中型變更時執行，小型變更跳過。**
 
-> **核心原則**：Capabilities 更新 + Kanban 卡片搬移 + EP 歸檔是「metadata finalization」，只在用戶確認 commit 時才執行。不在 `/build` 執行（build 可能不 commit）。
+> **核心原則**：Capabilities 更新 + Kanban 搬至 Done/ + EP 歸檔是「metadata finalization」，只在用戶確認 commit 時才執行。此類永久狀態更新不在 `/build` 執行（build 可能不 commit）。Kanban 搬至 InProgress/（暫時狀態）已在 `/build` 階段 1 完成。
 
 1. 識別變更涉及的 library 模組目錄
 2. 檢查該模組 CLAUDE.md Capabilities 表格和 .kanban/ 卡片：是否有 UC 狀態需要更新？

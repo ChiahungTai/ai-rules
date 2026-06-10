@@ -53,9 +53,10 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 ### 階段 1：準備
 
 1. 讀取 Execution Plan，識別段落結構、依賴關係
-2. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）
-3. **Examples 盤點**：掃描 `demo_*.py`、`examples/**/*.py` 等，建立 `{module} → [example paths]` 映射表
-4. 檢查清單：Examples 映射表 ✓ | 測試檔案 ✓ | CLAUDE.md 同步 ✓ | 依賴完整 ✓
+2. **Kanban 狀態更新**：掃描 EP 中引用的 UC ID，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在 `/commit` 確認後才執行）
+3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）
+4. **Examples 盤點**：掃描 `demo_*.py`、`examples/**/*.py` 等，建立 `{module} → [example paths]` 映射表
+5. 檢查清單：Kanban InProgress ✓ | Examples 映射表 ✓ | 測試檔案 ✓ | CLAUDE.md 同步 ✓ | 依賴完整 ✓
 
 ### 階段 2：逐段實作
 
@@ -189,7 +190,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 #### 5a. 消費場景提煉（大型/中型變更）
 
-> **注意**：Capabilities 表格更新和 Kanban 卡片搬移**不在 /build 執行**，而是在 `/commit` 階段 3 確認後執行。原因：build 完成不代表會 commit（可能 code-review 後決定重做），提前更新狀態會造成 Capabilities/Kanban 與實際程式碼不一致。
+> **注意**：Capabilities 表格更新和 Kanban 搬至 **Done/** 在 `/commit` 階段 3 確認後才執行。原因：build 完成不代表會 commit（可能 code-review 後決定重做），提前更新永久狀態會造成 Capabilities 與實際程式碼不一致。（Kanban 搬至 InProgress/ 已在階段 1 完成，屬暫時狀態。）
 
 1. **從 EP Scenario Matrix 提煉「消費場景」**：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），暫存於 build context，供後續 `/commit` 階段 3 寫入 Capabilities 表格或 Kanban card
 
