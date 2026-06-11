@@ -189,6 +189,44 @@ The spec is a living document, not a one-time artifact:
 - Making architectural decisions without documenting them
 - Skipping the spec because "it's obvious what to build"
 
+## POC Verification Mode
+
+When `/spec` identifies high-risk technical assumptions, validate them with POCs **before** writing the spec output. This is a lightweight feasibility check — not the deep validation that `/ep-validate` performs post-EP.
+
+### Risk Classification
+
+| Risk | Criteria | Action |
+|------|----------|--------|
+| 🔴 High | External API, SDK behavior, architectural assumption, never-used library | Write `lab/poc_*.py` and execute |
+| 🟢 Low | Internal logic, known patterns, previously verified library | Document + cite source |
+
+### POC Writing Guide
+
+- **One POC per assumption** — focused, not comprehensive
+- **Include happy path + one edge case** — enough to confirm feasibility
+- **Must be independently executable** — `uv run python lab/poc_<name>.py`
+- **File header**（中文，與 `/spec` 和 `/ep-validate` 共用規範）:
+  ```python
+  """POC: [假設描述]
+
+  驗證: [具體驗證標的]
+  風險: [高]
+  來源: [假設來源]
+  """
+  ```
+
+### POC Result Recording
+
+| 假設 | 風險 | 驗證方式 | 結果 |
+|------|------|---------|------|
+| [描述] | 🔴/🟢 | POC 檔案或來源引用 | ✅/❌/⚠️ + 關鍵發現 |
+
+Results feed into the spec's "Verified Assumptions" section and carry forward to `/execution-plan`.
+
+### Relationship with /ep-validate
+
+`/spec` POC 做可行性驗證（能不能做），`/ep-validate` 做深度驗證（效能、邊界、壓力）。完整分工表格見 `/spec` 和 `/ep-validate` 命令。
+
 ## Verification
 
 Before proceeding to implementation, confirm:
@@ -197,4 +235,4 @@ Before proceeding to implementation, confirm:
 - [ ] The human has reviewed and approved the spec
 - [ ] Success criteria are specific and testable
 - [ ] Boundaries (Always/Ask First/Never) are defined
-- [ ] The spec is saved to a file in the repository
+- [ ] High-risk assumptions have been validated with POCs
