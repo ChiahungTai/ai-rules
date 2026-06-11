@@ -275,9 +275,11 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 ## 輸出
 
-- **位置**：`ai-analysis/execution-plans/`
-- **檔名**：從任務描述自動衍生（kebab-case）
+- **位置**：`ai-analysis/execution-plans/`（相對於專案根目錄）
+- **檔名**：從任務描述自動衍生（kebab-case，`ep-` 前綴）
 - **結構**：實作總覽 → **UC 盤點** → Scenario Matrix → 段落劃分原則 → 各段落（Context → 要點 → Pseudo Code → 驗證）→ 整合策略 → 收尾步驟
+
+> **🔴 路徑警告**：Claude Code plan mode 的硬編碼路徑是 `~/.claude/plans/`，**那不是 EP 的存放位置**。EP 必須寫到專案目錄下的 `ai-analysis/execution-plans/ep-<name>.md`。若已寫入 `~/.claude/plans/`，完成後必須複製到正確位置。
 
 ---
 
