@@ -17,7 +17,7 @@
 
 ```
 /spec（含 UC 定義 + POC 可行性驗證）→ /execution-plan（引用 UC ID + SYSTEM-MAP 關聯）→ [/ep-validate（可選，深度 POC 技術驗證）]
-  → /build（含 Agent Review + UC 狀態更新 + SYSTEM-MAP 同步）→ /code-review（六軸，含 UC 覆蓋度）→ /commit（含 UC 狀態確認）
+  → /build（含 Agent Review + UC 狀態更新 + SYSTEM-MAP 同步）→ /code-review（六軸，含 UC 覆蓋度）或 /human-review（人工導向，找重複/漏用）→ /commit（含 UC 狀態確認）
 ```
 
 - `/spec` — 結構化需求討論 + codebase 研究 + POC 可行性驗證（`--write` 寫 spec MD、`--research-only` 只研究）
@@ -27,6 +27,7 @@
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
 - `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新 + SYSTEM-MAP 同步）
 - `/code-review` — 深層思考六軸代碼審查（含 UC 覆蓋度）
+- `/human-review` — 人工導向代碼審查（Human 提線索 + LSP/rg 調查，找重複造輪子/漏用）
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → UC 狀態確認 → message → 確認）
 
