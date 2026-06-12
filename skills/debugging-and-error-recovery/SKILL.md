@@ -47,6 +47,12 @@ Make the failure happen reliably. If you can't reproduce it, you can't fix it wi
 
 Narrow down which layer: UI, API, database, build tooling, external service, or the test itself. Use `git bisect` for regression bugs.
 
+**LSP-assisted localization:**
+- Stack trace `file:line` → LSP `goToDefinition` to jump directly to relevant source
+- Type confusion → LSP `hover` to see actual inferred type at that location
+- "Who calls this?" → LSP `incomingCalls` to trace execution path to failure point
+- Post-fix verification → LSP `diagnostics` to catch type errors introduced by the fix
+
 ### 3. Reduce
 
 Create the minimal failing case. Remove unrelated code until only the bug remains. Minimal reproduction makes root cause obvious.

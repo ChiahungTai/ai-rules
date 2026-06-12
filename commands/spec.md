@@ -56,10 +56,10 @@ User Story 格式（參考）：
 
 spawn Explore Agent 深度掃描相關模組：
 
-1. **Capabilities 盤點**：搜尋需求涉及的 CLAUDE.md Capabilities + `.kanban/` cards
-2. **依賴分析**：相關模組的 import 依賴和介面
-3. **可複用基礎設施**：`rg` 搜尋 class/function 使用模式，找出可複用的 utilities、base classes、protocols
-4. **類似實作**：搜尋已有類似功能的程式碼，避免重新發明
+1. **Capabilities 盤點**：搜尋需求涉及的 CLAUDE.md Capabilities + `.kanban/` cards（rg 搜 Markdown）
+2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用
+3. **可複用基礎設施**：LSP `workspaceSymbol` 搜尋相關 class/function，`findReferences` 確認使用模式，找出可複用的 utilities、base classes、protocols
+4. **類似實作**：LSP `workspaceSymbol` 搜尋相似名稱的 class/function，rg 補充搜尋字串和註解中的引用
 
 **產出研究摘要**（對話中呈現）：
 - 可複用基礎設施清單（附 `path/to/file.py:ClassName`）

@@ -65,6 +65,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 **Module Boundaries 精確度**（有 Phase 1.5 時加成）：
 - `Depends on` 從 `edges[]` 精確推導（而非猜測）
 - `Does NOT depend on` 從 `modules[]` 的 `imported_by` 反向推導
+- Use LSP findReferences on module-level symbols to verify module boundaries when dep_graph is unavailable
 - 無 snapshot 時，Module Boundaries 基於 Phase 1 的粗略 import 分析
 
 **Root CLAUDE.md 額外包含**：

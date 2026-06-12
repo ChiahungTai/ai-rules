@@ -86,6 +86,12 @@ df_pd = df.to_pandas()  # mypy 知道 df 是 pl.DataFrame
 
 判斷標準：isinstance > assert isinstance > cast > type: ignore（優先順序由高到低）。
 
+**LSP type intelligence（跨所有 Layer）：**
+- LSP `hover` 在任意位置顯示 mypy 推斷的型別 — 不用讀檔案就能確認 narrowing 是否生效
+- LSP `goToDefinition` 從第三方符號跳到 stub 檔案 — 立刻看到型別定義品質（是精確型別還是 `Any`）
+- LSP `diagnostics` 在編輯後即時回報型別錯誤 — 不用等 `uv run mypy` 就知道修正方向
+- 新增 stub 後，diagnostics 立刻顯示是否解決了對應的 type error
+
 ## Layer 2：Project Stubs（推薦）
 
 適用：套件無 type support、inline annotations 缺口多、或有 `py.typed` 但特定子模組缺 stubs。

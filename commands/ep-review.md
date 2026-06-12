@@ -67,7 +67,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 5 個 Dimensio
 
 ### F1: 完整性檢查
 
-每段是否有驗收標準？檔案是否完整列出？依賴項是否遺漏？邊界情況是否考量？
+每段是否有驗收標準？檔案是否完整列出？依賴項是否遺漏？邊界情況是否考量？Use LSP goToDefinition to verify file paths mentioned in EP actually contain the referenced symbols.
 
 ### F2: Rules 合規檢查
 

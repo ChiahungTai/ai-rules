@@ -1,4 +1,4 @@
-# 現代 CLI 工具偏好
+# 搜尋工具分工
 
 > **自動載入**: 此檔案位於 `~/.claude/rules/`，會自動載入到所有會話
 
@@ -6,9 +6,13 @@
 
 ## 核心原則
 
-**搜尋檔案用 `fd` 取代 `find`，搜尋內容用 `rg` 取代 `grep`。**
+**語義查詢用 LSP，文字搜尋用 rg，檔案搜尋用 fd。**
 
-兩者皆為 BurntSushi 開發，已透過 Homebrew 安裝，預設可被 `Bash(fd:*)` / `Bash(rg:*)` auto-allow。
+- LSP：符號定義、引用、型別、呼叫鏈（~50ms，100% 準確）
+- rg：註解、字串、config、文件內容（文字匹配）
+- fd：檔案/目錄名稱搜尋
+
+詳細 LSP 決策樹見 `@~/.claude/rules/lsp-navigation.md`
 
 ---
 
@@ -57,7 +61,7 @@ rg -o -r '$1' "(\w+)\.py" # 捕獲群組替換輸出（$1 是 rg 語法，非 sh
 
 ## 搜尋策略
 
-- **找檔案**：`rg -l "pattern"` 或 `fd` — 只需檔名
+- **找檔案**：`fd` 或 `rg -l "pattern"` — 只需檔名
 - **看內容**：`rg --heading -A 3 "pattern" src/` — 多檔搜尋省 token
 - **單檔搜尋**：`rg "pattern" file.py` — 路徑已知時直接指定，不需遞迴
 - **跨語言搜尋**：`rg -g "*.py" -g "*.pyx" -g "*.rs" "pattern"` — 補足 `--type` 不涵蓋的副檔名

@@ -11,7 +11,7 @@ paths:
 
 **print 當索引，Logger 當資料庫。** AI Agent 透過 print 理解執行結果，透過 rg 按需查詢 Logger 檔案取得詳細資訊。
 
-> **rg 使用規範**：搜尋檔案用 `fd`，搜尋內容用 `rg`。詳見 `@~/.claude/rules/modern-cli-preference.md`
+> **搜尋規範**：語義查詢用 LSP，文字搜尋用 `rg`，檔案搜尋用 `fd`。詳見 `@~/.claude/rules/lsp-navigation.md` 和 `@~/.claude/rules/modern-cli-preference.md`
 
 **print = state transition, not computation trace。**
 

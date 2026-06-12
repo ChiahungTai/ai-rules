@@ -4,7 +4,7 @@
 
 > 違反 = 權限提示卡關。每次都遵守。
 
-- `fd` 取代 `find`，`rg` 取代 `grep`
+- 語義查詢用 LSP（goToDefinition / findReferences / hover），文字搜尋用 `rg`，檔案搜尋用 `fd`
 - 多行 `python -c` 中換行後禁止 `#` 註解（newline + `#` 觸發權限提示）
 - 所有 Python 命令用 `uv run` 前綴
 - 禁止 `sed` 修改 `.py`/`.md`/`.yaml`/`.json`/`.toml`
@@ -12,4 +12,4 @@
 - `pytest` 用背景跑（`run_in_background: true`），不要阻塞對話
 - 輸出使用繁體中文 + 英文術語
 
-口訣：`#` 是毒藥、`$` 是禁區、`rg`/`fd` 取代 `grep`/`find`、`uv run` 是王道、`sed` 是地雷、`pytest` 跑背景、繁體中文
+口訣：`#` 是毒藥、`$` 是禁區、語義用 LSP 文字用 `rg`/`fd`、`uv run` 是王道、`sed` 是地雷、`pytest` 跑背景、繁體中文

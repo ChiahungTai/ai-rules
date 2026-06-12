@@ -30,6 +30,8 @@ Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.m
 
 內部解析（CLAUDE.md、.kanban/）僅用於計算 findings，**不在輸出中包含 registry**。
 
+**LSP 與 dep_graph 的分工**：LSP 提供符號級查詢（goToDefinition, findReferences, incomingCalls），dep_graph 提供模組級架構分析（fan-out、熱點、架構邊界）。dep_graph 獨有價值：捕捉 CLAUDE.md 位置、kanban cards、Capabilities 表格等專案元資料（LSP 不知道這些）。兩者互補。
+
 ---
 
 ## 執行

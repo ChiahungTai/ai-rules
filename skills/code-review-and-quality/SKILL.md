@@ -105,14 +105,25 @@ DEAD CODE IDENTIFIED:
 - **Don't accept deferred cleanup promises.** "I'll clean it up later" never happens.
 - **Accept override gracefully.** If the author has full context and disagrees, defer.
 
+## LSP-Assisted Review
+
+LSP provides symbol-level precision that text search cannot match. Use it to verify cross-file claims:
+
+- **Claiming a naming conflict** → LSP `findReferences` to check if the symbol is actually used as claimed
+- **Claiming a dependency order problem** → LSP `incomingCalls` / `outgoingCalls` to trace execution order across files
+- **Claiming dead code** → LSP `findReferences` — zero hits = confirmed dead code (rg misses dynamic references)
+- **Impact assessment** → LSP `findReferences` on changed APIs to find ALL consumers (100% exhaustive)
+
+After editing, check LSP diagnostics for type errors before reporting review results.
+
 ## Reviewer Self-Verification
 
 Every claim in a review must be verified against actual code. Unverified claims waste the author's time and erode trust in reviews.
 
 - **Claiming a file/directory exists** → Read it first
-- **Claiming a naming conflict** → Check the import chain (is it actually a Python package? does the import work?)
-- **Claiming a dependency order problem** → Trace the execution order across segments/files
-- **Claiming something is missing** → Verify it doesn't exist elsewhere or under a different name
+- **Claiming a naming conflict** → LSP `findReferences` to check import chain, then `rg` for string references
+- **Claiming a dependency order problem** → LSP `incomingCalls` / `outgoingCalls` to trace execution order
+- **Claiming something is missing** → LSP `findReferences` first, then `rg` for string and comment references
 
 If you cannot verify a claim with the tools available, label it explicitly as **unverified** rather than stating it as fact.
 

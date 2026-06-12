@@ -27,7 +27,7 @@ Before changing or removing anything, understand **why it exists**. Check git bl
 
 **Naming**: Generic names (`data`, `result`, `temp`), abbreviated names, misleading names.
 
-**Redundancy**: Duplicated logic, dead code, wrappers that add no value, over-engineered patterns (factory-for-a-factory).
+**Redundancy**: Duplicated logic, dead code, wrappers that add no value, over-engineered patterns (factory-for-a-factory). Dead code: LSP findReferences — zero references confirms dead code (rg misses dynamic references).
 
 ### 3. Apply Incrementally
 

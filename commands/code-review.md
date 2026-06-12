@@ -123,7 +123,7 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 - **確認實作合理性**：為什麼這樣寫？有沒有更簡單的方式？
 - **驗證假設**：修改是否基於對現有程式碼的正確理解？
 - **追蹤後果**：這個修改的下游影響是什麼？依賴模組是否受影響？
-- **審查者自證**：提出問題前必須用 Read/Grep 查證宣稱。聲稱檔案存在 → 讀它；聲稱命名衝突 → 查 import 鏈；聲稱依賴順序有問題 → 追蹤執行順序。無法查證的宣稱標注「未驗證」
+- **審查者自證**：提出問題前必須查證宣稱。聲稱命名衝突 → LSP `findReferences` 查 import 鏈；聲稱依賴順序有問題 → LSP `incomingCalls` / `outgoingCalls` 追蹤執行順序；聲稱 dead code → LSP `findReferences`（zero hits = 確認）；聲稱檔案存在 → Read 它。LSP 無法涵蓋的（字串、註解引用）用 rg 補充。無法查證的宣稱標注「未驗證」
 
 深層思考框架見 `~/.claude/rules/deep-thinking.md`
 
@@ -133,7 +133,7 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 
 不向後相容原則下，API 變更必須同步更新所有消費端：
 1. 識別變更的 class/function
-2. 搜尋 `demo_*.py`、`lab/`、`examples/` 是否 import 被修改模組
+2. LSP `findReferences` 找到所有消費者，再用 rg 搜尋 `demo_*.py`、`lab/`、`examples/` 中的字串引用
 3. 驗證受影響的消費端是否需要更新
 
 ---

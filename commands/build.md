@@ -54,7 +54,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 1. 讀取 Execution Plan，識別段落結構、依賴關係
 2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在 `/commit` 確認後才執行）
-3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）
+3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）。LSP `goToDefinition` 驗證 dependency anchors 的定義端，`findReferences` 驗證消費端，`hover` 確認關鍵參數型別
 4. **Examples 盤點**：掃描 `demo_*.py`、`examples/**/*.py` 等，建立 `{module} → [example paths]` 映射表
 5. 檢查清單：Kanban InProgress ✓ | Examples 映射表 ✓ | 測試檔案 ✓ | CLAUDE.md 同步 ✓ | 依賴完整 ✓
 
@@ -98,7 +98,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 #### 驗證
 
-每段完成後：`ruff check --fix && ruff format` → `mypy .` → `pytest <test> -v`（背景跑）→ Examples 驗證
+每段完成後：`ruff check --fix && ruff format` → LSP diagnostics（即時型別檢查）→ `mypy .`（完整驗證）→ `pytest <test> -v`（背景跑）→ Examples 驗證
 
 ### 階段 3：整合驗證
 

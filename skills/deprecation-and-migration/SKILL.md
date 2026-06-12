@@ -103,6 +103,11 @@ Migrate consumers one at a time, not all at once. For each consumer:
 5. Confirm no regressions
 ```
 
+**LSP-assisted migration:**
+- Step 1 "Identify all touchpoints" → LSP `findReferences` on the deprecated API symbol (100% exhaustive — includes dynamic dispatch, aliased imports, re-exports that `rg` misses)
+- Step 4 "Remove references to the old system" → LSP `findReferences` confirms zero references remain, then `rg` as secondary check for string references and comments
+- After each consumer migration → LSP `diagnostics` to catch type errors introduced by the change
+
 **The Churn Rule:** If you own the infrastructure being deprecated, you are responsible for migrating your users — or providing backward-compatible updates that require no migration. Don't announce deprecation and leave users to figure it out.
 
 ### Step 4: Remove the Old System

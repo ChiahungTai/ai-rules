@@ -44,7 +44,7 @@ NautilusTrader 升級指揮官。負責版本差距分析、breaking changes 影
 
 ### Phase 2: Breaking Changes 影響掃描
 
-逐一掃描 breaking changes 對專案的影響。掃描項目（按常見 breaking changes 分類）：
+逐一掃描 breaking changes 對專案的影響。先用 LSP `workspaceSymbol` 搜尋 release notes 提到的 API 名稱，確認專案是否使用。再用 rg 做完整的文字搜尋。掃描項目（按常見 breaking changes 分類）：
 
 > **使用方式**：表格中的搜尋指令是掃描模式範本。第一列「API 改名/移除」的 `"舊名"` 是佔位符，執行時需根據 release notes 中的具體 breaking changes 替換為實際 API 名稱。其餘列為通用掃描，可直接執行。
 
@@ -111,9 +111,18 @@ uv run pytest tests/external_api/sj/ -x -q
 ```
 SJ 外部 API 完整測試，驗證 NT 升級不影響 Shioaji 整合。
 
-### Phase 5: Commit
+### Phase 5: Sync NT Stubs + Commit
 
-提交 `pyproject.toml` 變更，commit message 格式：
+**LSP stub 重新同步**（`uv sync` 會清除 venv 內的 `.pyi`）：
+```bash
+bash scripts/sync_nt_stubs.sh
+```
+
+**檢查 API 變更是否影響 stub**：
+- 如果 NT 改了 `Bar`、`Price`、`Quantity` 等 class 的公開 API → 更新 `stubs/nautilus_trader/` 對應 `.pyi` 後重新 sync
+- 如果模組路徑重組 → 更新 `stubs/` 目錄結構 + `pyrightconfig.json`
+
+提交 `pyproject.toml` + stub 變更，commit message 格式：
 
 ```
 chore(deps): upgrade nautilus-trader >=X.Y.Z
