@@ -34,6 +34,7 @@
 
 - `/deep-work` — 用戶離開時的自主實作引擎
 - `/batch-task` — 序列批次任務處理器（避免 rate limit）
+- `/at` — 排程工作接續（對應 Unix `at`，LLM provider reset usage 後自動 resume）
 
 ### 品質工具
 

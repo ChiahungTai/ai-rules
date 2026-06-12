@@ -2,7 +2,7 @@
 description: "基於 Execution Plan 逐段實作（準備、TDD、驗證、提交）。/build <EP路徑> [段落編號]"
 when_to_use: "Implement an Execution Plan segment-by-segment using TDD. Use after /execution-plan (with built-in EP Review). Supports parallel agents with --max-agents."
 usage: "/build <Execution Plan 路徑> [段落編號]"
-argument-hint: "<Execution Plan 檔案路徑> [段落編號] [--max-agents N]"
+argument-hint: "<Execution Plan 檔案路徑> [段落編號] [--max-agents N | -a N]"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "Workflow"]
 ---
 
@@ -47,7 +47,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 **平行可行性分析**：
 1. 建構段落依賴圖，識別可平行段落
-2. 套用 max-agents 限制（預設 3，可透過 `--max-agents N` 覆蓋）
+2. 套用 max-agents 限制（預設 3，可透過 `--max-agents N` 或 `-a N` 覆蓋）
 3. **有語義約束的段落強制序列**
 
 ### 階段 1：準備
@@ -111,7 +111,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 #### Step 1: 確認 max-agents
 
-`--max-agents N` 參數控制平行 Agent 數量，預設 3。用戶可手動調整。
+`--max-agents N` 或 `-a N` 參數控制平行 Agent 數量，預設 3。用戶可手動調整。
 印出確認：`[Review Agent] max=N`
 
 #### Step 2: 選擇審查模式
