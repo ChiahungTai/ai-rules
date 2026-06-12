@@ -111,3 +111,22 @@ Edit → ruff → LSP diagnostics（即時）→ mypy（完整驗證）→ pytes
 ```
 
 diagnostics 不能取代 mypy 在品質閘門中的角色。
+
+---
+
+## Agent Prompt 工具選擇
+
+> **核心原則**：spawn agent 時，prompt 必須根據任務性質明確指定使用 LSP 或 rg。禁止只寫「驗證/讀取/確認」不指定工具。
+
+**Agent prompt 工具指定模板**：
+
+```
+# 工具選擇（必填）
+- 簽名/型別/定義位置 → 用 LSP hover / goToDefinition
+- 呼叫鏈/引用 → 用 LSP outgoingCalls / incomingCalls / findReferences
+- 文字搜尋（字串、註解、config）→ 用 rg
+- 檔案搜尋 → 用 fd
+- NT Cython 模組（.pyx/.so）→ 用 rg + Read（LSP 不索引 Cython）
+```
+
+**判斷方式**：如果任務描述包含「簽名」「型別」「定義」「呼叫」「繼承」「Protocol」→ 主工具是 LSP，輔以 rg 確認。如果任務描述包含「字串」「註解」「config」「檔案路徑」→ 主工具是 rg/fd。
