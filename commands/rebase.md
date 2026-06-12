@@ -27,15 +27,18 @@ allowed-tools:
 3. **分叉預覽**：判斷 rebase 風險等級
 
 ```bash
-git merge-base --is-ancestor <target> HEAD && echo "fast-forward" || echo "diverged"
+git merge-base --is-ancestor HEAD <target>  # HEAD 是 target 祖先 → fast-forward
+git merge-base --is-ancestor <target> HEAD  # target 是 HEAD 祖先 → up-to-date
+# 兩者都不是 → diverged
 git log --oneline HEAD..<target> | wc -l   # target 獨有 commit 數
 git log --oneline <target>..HEAD | wc -l   # current 獨有 commit 數（將被 replay）
 ```
 
 | 分叉狀態 | 風險 | 說明 |
 |---------|------|------|
-| fast-forward | 🟢 零風險 | 無衝突可能，直接快轉 |
-| diverged（少 commits） | 🟡 可能衝突 | N commits replay，提示用戶有衝突風險 |
+| fast-forward | 🟢 零風險 | HEAD 落後 target，直接快轉 |
+| up-to-date | 🟢 零風險 | HEAD 已包含 target，rebase no-op |
+| diverged | 🟡 可能衝突 | 雙方各有獨有 commit，N commits replay |
 
 4. **印出確認**：`當前分支: <current>，目標: <target>，<分叉狀態>`
 
@@ -92,7 +95,7 @@ Git index stages: `:1:` = base（共同祖先）, `:2:` = HEAD（target）, `:3:
 | Block | 行號 | HEAD（<target>）加/改 | Incoming（<current>）加/改 | 衝突類型 | 建議 |
 |-------|------|----------------------|--------------------------|---------|------|
 | 1 | 36-41 | `import SubscriptionGroup` | `import RankedStock, RankingSnapshot` | 獨立新增 | 保留兩者 |
-| 2 | 140-150 | `_resolved_subscriptions` + 多行註解 | `_watchlist_data: WatchlistData` | 架構重構 | 採 incoming |
+| 2 | 140-150 | `_resolved_subscriptions` + 多行註解 | `_watchlist_data: WatchlistData` | 架構重構 | 採 incoming + 遷移 HEAD 端 `_resolved_subscriptions` 用法至新介面 |
 ```
 
 #### Step 3：等用戶確認
@@ -122,7 +125,7 @@ Rebase 成功後（無衝突或衝突已解決），檢查**非衝突區域**的
 
 **驗證步驟**：
 
-1. 識別 incoming commits（`git diff <old-tip>..HEAD`）中涉及的**識別符改名**（如 `futures_codes → futures_watchlist`、class 刪除、函數簽名變更）
+1. 識別 incoming commits（`git diff ORIG_HEAD..HEAD`，rebase 後 `ORIG_HEAD` 自動指向 rebase 前的 tip）中涉及的**識別符改名**（如 `futures_codes → futures_watchlist`、class 刪除、函數簽名變更）
 2. `rg` 搜尋被改名/刪除的舊識別符在**整個 codebase**（不限衝突檔案）中是否還有殘留引用
 3. 特別關注：import 改名、dataclass 欄位改名、函數簽名改名 — 這些會波及 git 認為「無衝突」auto-merge 的檔案
 4. 發現殘留 → 視同衝突，Read + 分析 + 用戶確認 + Edit 修正
@@ -192,7 +195,7 @@ Rebase 完成但用戶不滿意結果時，用 reflog 回復：
 
 ```bash
 git reflog show <branch> --format="%h %gD: %gs" | head -10
-# 找到 rebase 前的 commit（通常是 "rebase (finish)" 之前的条目）
+# 找到 rebase 前的 commit（通常是 "rebase (finish)" 之前的條目）
 git reset --hard <pre-rebase-commit>
 ```
 
