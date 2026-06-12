@@ -47,7 +47,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 **平行可行性分析**：
 1. 建構段落依賴圖，識別可平行段落
-2. 套用 max-agents 限制：從系統提示偵測 GLM 模型，決定 Agent 模型和並發上限
+2. 套用 max-agents 限制（預設 3，可透過 `--max-agents N` 覆蓋）
 3. **有語義約束的段落強制序列**
 
 ### 階段 1：準備
@@ -107,12 +107,12 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 ### 階段 4：Agent Review Cycle
 
 **Writer/Reviewer 分離**：用獨立 Agent context 做品質閘門，避免主 LLM 審查自己的 code。
-**適應式多 Agent Review**：依模型並發上限和變更複雜度決定 spawn 幾個 review agent。
+**適應式多 Agent Review**：依 `--max-agents` 和變更複雜度決定 spawn 幾個 review agent。
 
-#### Step 1: 偵測模型 → 查表
+#### Step 1: 確認 max-agents
 
-從系統提示詞偵測 GLM 模型，查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md) 決定 max-agents。
-印出確認：`[Review Agent] model=X, max=N`
+`--max-agents N` 參數控制平行 Agent 數量，預設 3。用戶可手動調整。
+印出確認：`[Review Agent] max=N`
 
 #### Step 2: 選擇審查模式
 
@@ -139,13 +139,13 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-review」步驟（現有流程不變）。
 
-**B. Agent Tool 模式**（Fallback，max-agents = 1 或非 ultracode）：
+**B. Agent Tool 模式**（Fallback，非 ultracode）：
 
 ##### Adaptive Agent 數量
 
-**max-agents = 1**（haiku/opus）→ 跳至下方「單一 Agent Prompt（Fallback）」。
+**max-agents = 1** → 跳至下方「單一 Agent Prompt（Fallback）」。
 
-**max-agents > 1**（如 sonnet = 4）→ 根據變更特徵啟用維度：
+**max-agents > 1**（預設 3）→ 根據變更特徵啟用維度：
 
 | 維度 Agent | 審查項目 | 啟用條件 | 優先級 |
 |-----------|---------|---------|--------|

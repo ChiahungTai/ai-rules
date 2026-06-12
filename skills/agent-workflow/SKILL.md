@@ -81,7 +81,7 @@ Pre-flight 檢查：
 
 ### `/build` 整合
 
-`/build --max-agents N` 的 N 受模型並發上限限制。未傳入時預設使用查表的並發上限。
+`/build --max-agents N` 的 N 由用戶指定，預設 3。
 
 ---
 
