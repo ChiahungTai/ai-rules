@@ -19,15 +19,29 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 - **單一主題圖解**：概念解析 + 視覺化圖表
 - **批次檔案分析**：`@dir` 自動分析目錄結構，檔案 ≥ 5 時自動 Agent 並行
-- **深度分析**：根據內容類型套用對應框架（論文/文章/程式碼）。詳見 [illustrate-deep-analysis.md](./claude/_common/illustrate-deep-analysis.md)
+- **深度分析**：根據內容類型套用對應框架（論文/文章/程式碼/EP）。詳見 [illustrate-deep-analysis.md](./claude/_common/illustrate-deep-analysis.md)
+
+## 現有程式碼優先原則
+
+> **核心原則**：不管哪種情境，先讀現有程式碼再解釋。不理解現有架構，就無法判斷變更的品質。
+
+| 情境 | 現有程式碼的角色 | 關注點 |
+|------|----------------|--------|
+| EP 審查（`@ep-*.md`） | **Ground Truth** — EP 假設對不對？ | 依賴錨點、API 簽名、行號、架構假設逐一比對 |
+| 變更審查（無參數） | **Baseline** — 改動融入得好不好？ | 語義 diff、架構一致性、下游缺口 |
+| 一般圖解 | **Context** — 現有結構是什麼？ | 先理解再解釋 |
 
 ## 無參數行為
 
 未提供任何參數時，自動圖解**當前 repo 尚未 commit 的變更**：
 
-1. 執行 `git diff` + `git diff --cached` 取得未暫存與已暫存的變更
-2. 以 Console 模式（ASCII）圖解每個變更的意圖、影響範圍、關聯模組
-3. 無變更時輸出「工作目錄乾淨，無未 commit 變更」
+1. **讀受影響檔案的現有程式碼**（建立 baseline）— 理解架構、風格、慣例
+2. 執行 `git diff` + `git diff --cached` 取得變更
+3. **無 uncommitted 變更時**，自動 fallback 到 `git diff HEAD~1`（上一個 commit）
+4. 以 Console 模式圖解：
+   - **語義 diff**：不只看行數，看能力/行為的變更
+   - **交疊偵測**：同一檔案被多個改動觸及的風險
+   - **缺口偵測**：下游消費者、索引、文件是否同步更新
 
 此行為等同於 `/illustrate @git-diff`，但不需要使用者記憶語法。
 
@@ -66,10 +80,12 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 ```
 用戶輸入 → 有參數?
-  否 → Console 模式：圖解 git diff（未 commit 變更）
-  是 → 指定 md?
-    是 → MD 模式（Mermaid）→ 檔案數 ≥ 5? → 並行處理
-    否 → Console 模式（ASCII）→ 檔案數 ≥ 5? → 並行處理
+  否 → Console 模式：讀現有程式碼 → 語義 diff + 缺口偵測
+  是 → 輸入含 EP 檔案（ep-*.md 或 @execution-plans/）?
+    是 → EP 審查模式：讀現有程式碼 → 假設驗證矩陣（詳 illustrate-deep-analysis.md）
+    否 → 指定 md?
+      是 → MD 模式（Mermaid）→ 檔案數 ≥ 5? → 並行處理
+      否 → Console 模式（ASCII）→ 檔案數 ≥ 5? → 並行處理
 ```
 
 委託 Skills：
@@ -82,5 +98,5 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 | 檔案 | 何時讀取 |
 |------|---------|
 | [illustrate-parallel-architecture.md](./claude/_common/illustrate-parallel-architecture.md) | 檔案 ≥ 5 需並行處理時 |
-| [illustrate-deep-analysis.md](./claude/_common/illustrate-deep-analysis.md) | 分析特定類型內容時 |
+| [illustrate-deep-analysis.md](./claude/_common/illustrate-deep-analysis.md) | 分析特定類型內容時（含 EP 審查框架） |
 | [illustrate-examples.md](./claude/_common/illustrate-examples.md) | 需理解各模式實際輸出時 |
