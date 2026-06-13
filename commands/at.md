@@ -148,4 +148,4 @@ Resume 觸發時，LLM 應：
 - **`durable: true`**：持久化到 `.claude/scheduled_tasks.json`，短暫中斷可恢復
 - **清理**：Resume 完成後必須刪除 context 檔案，避免殘留
 - **多個排程**：若 `.claude/` 已有 `at-context-*` 檔案，提示用戶確認是否有衝突
-- **語音通知**：遵循 `voice-notification.md` 規範
+- **語音通知**：遵循 `voice-notification` skill 規範

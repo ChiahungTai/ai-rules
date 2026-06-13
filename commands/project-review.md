@@ -65,6 +65,6 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 
 ## 語音通知
 
-遵循 `voice-notification.md`：
+遵循 `voice-notification` skill：
 - **開始**：`say -v Meijia -r 180 "開始專案審查"`
 - **完成**：`say -v Meijia -r 180 "主人！專案審查完成，請驗收～"`

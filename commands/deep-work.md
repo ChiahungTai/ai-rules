@@ -122,7 +122,7 @@ Agent prompt 開頭加上 /rules-reminder 六條規則摘要：
 
 ## 語音通知
 
-遵循 `voice-notification.md`：
+遵循 `voice-notification` skill：
 - **開始**：`say -v Meijia -r 180 "開始深度工作模式，主人外出期間我會全力實作"`
 - **完成**：`say -v Meijia -r 180 "主人！深度工作完成，所有任務已驗證通過～"`
 
@@ -157,7 +157,6 @@ Agent prompt 開頭加上 /rules-reminder 六條規則摘要：
 - `python-standards.md` — Python 規範
 - `code-edit-constraints.md` — 編輯約束
 - `quality-constraints.md` — 品質約束
-- `voice-notification.md` — 語音通知
 
 ---
 
