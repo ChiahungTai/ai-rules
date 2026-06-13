@@ -40,13 +40,9 @@ tail -f <背景任務output路徑> | grep --line-buffered "\[ACTION\]\|\[FAIL\]\
 
 ## 領域感知
 
-當 UI 涉及股票分析（Trajectory Viewer、K 線圖等），LLM 的分析必須遵循深層思考框架的股票分析視角（見 `~/.claude/rules/deep-thinking.md`）：
+當 UI 涉及股票分析（Trajectory Viewer、K 線圖等），載入 `trading-analysis` skill（三層框架：經典 TA → 量化 → 第二層思考整合），分析必含「各理論共識/歧異對照」表格。
 
-- **Layer 1（必備）**：先從經典技術分析理論出發（Dow Theory、Elliott Wave、Wyckoff、Darvas Box、Bollinger Bands、Support/Resistance、Volume、Trend）
-- **Layer 2（疊加）**：再疊加系統計算的指標（indicators/）和結構（structure/）
-- **Layer 3（整合）**：列出各理論的共識與歧異，讓用戶判斷
-
-未經 Layer 1 直接跳到 Layer 2 數值判斷（如「RSI=75 所以超買」）是錯誤的分析流程。
+未經 Layer 1（經典 TA）直接跳到 Layer 2 數值判斷（如「RSI=75 所以超買」）是錯誤的分析流程。
 
 ## 討論記錄
 
