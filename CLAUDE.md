@@ -8,6 +8,7 @@
 - `skills/` — On-demand 領域知識和工作流
 - `commands/` — Slash commands（`/invoke` 時載入）
 - `commands/claude/_common/` — 共用子範本（`claude:*` 命令的引用單元）
+- `agents/` — Custom subagent 定義（Agent tool 按需委派，跨專案可用）
 
 ## Hooks vs Rules vs Skills 分界
 
@@ -16,11 +17,13 @@
 | 必須每次零例外執行 | **Hook**（`.claude/settings.json`） | 確定性保證，非建議性 |
 | 每次 session 都需遵守的行為規範 | **Rule**（`~/.claude/rules/`） | Auto-loaded，治理性 |
 | 不需要每次載入的領域知識或工作流 | **Skill**（`.claude/skills/`） | On-demand，不消耗日常 context |
+| 按需委派的專家子能力 | **Agent**（`~/.claude/agents/`） | 獨立 context，由主對話視任務委派 |
 
 **判斷原則**：
 - 如果忘了執行會造成損害 → Hook（如：commit 前跑 lint）
 - 如果 AI 不知道就會犯錯 → Rule（如：用 `fd` 不用 `find`）
 - 如果只在特定任務才需要 → Skill（如：Mermaid 圖表生成）
+- 如果需要獨立 context 執行專家任務 → Agent（如：LSP 架構驗證）
 
 ## 寫作治理
 

@@ -57,11 +57,19 @@ from mosaic_alpha.common import Interval
 
 ### 規範摘要
 
-- `__init__.py` ≤ 20 行（docstring + import policy 註解）
+- **審查原則**：每個 `__init__.py` 的內容都必須能回答「為什麼放在這裡而非子模組？」行數不是判準，內容是否合理才是
 - **禁止** `from .submodule import Symbol` re-export
 - **禁止** `__all__` 搭配 re-export（`__all__` 只在 `from package import *` 時有效，幾乎不需要）
 - 消費端用完整路徑 import（`from package.module import Class`）
 - **唯一例外**：套件發佈給外部使用的 public API（內部專案不適用）
+
+### 遷移既有 re-export
+
+遇到既有 `__init__.py` 含 re-export 時，按以下步驟遷移（禁止直接刪除，必須先改消費端）：
+
+1. **找出消費端**：`rg -t py "from package import" path/to/package/` 找出所有透過 re-export import 的消費者
+2. **逐一改直接路徑**：將 `from package import X` 改為 `from package.module import X`
+3. **移除 re-export**：消費端全數改完後，清除 `__init__.py` 中的 re-export 行
 
 ## 型別註解（Python 3.11+）
 

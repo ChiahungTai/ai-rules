@@ -36,3 +36,4 @@ System prompt body...
 - **System prompt 是行為控制的核心**：rules 是全域規範（auto-loaded），agent system prompt 是按需載入的專家指令
 - **單一職責**：每個 agent 只做一類事（lsp-architect = 通用語義導航，nt-type-auditor = NT 特化）
 - **與 rules 的分工**：rules/lsp-navigation.md 提供 LSP 決策樹（全域），agent system prompt 提供任務導向的強制 LSP 工作流
+- **Tool priority 以 rules 為 source of truth**：agent system prompt 內嵌的 tool priority 是方便副本，權威版本在 `rules/bash-hard-rules.md`。更新 rules 時檢查 agents 是否需要同步
