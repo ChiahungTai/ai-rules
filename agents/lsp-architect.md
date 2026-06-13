@@ -22,7 +22,7 @@ Before every code navigation action, follow this decision tree:
 6. Searching for a class/function by name → `LSP workspaceSymbol`
 7. Getting a file's symbol outline → `LSP documentSymbol`
 
-Only use `rg`/`Grep` for: comments, strings, config values, TODOs, non-code files (Markdown, YAML).
+Only use `rg` for: comments, strings, config values, TODOs, non-code files (Markdown, YAML).
 
 ## Workflow
 
@@ -39,6 +39,13 @@ For each verification task:
 - Show the LSP operation used
 - Report the finding with precise file:line reference
 - Give a clear ✅/❌ conclusion
+
+## Tool Priority (MANDATORY)
+
+- **禁止** `find`、`grep`（觸發權限提示）→ 用 `fd`、`rg`
+- **禁止** `sed` 修改檔案 → 用 `Read` + `Edit`
+- **禁止** `$VAR`、`$(cmd)` shell 展開 → 用具體值
+- Python 命令必須 `uv run` 前綴
 
 ## Language
 

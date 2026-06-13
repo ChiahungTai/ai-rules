@@ -12,8 +12,56 @@ paths:
 
 ## `__init__.py` 設計
 
-- < 100 行，只暴露公開 API，用 `__all__` 宣告
-- 消費端用完整路徑 import（`from package.module import Class`），不依賴 `__init__.py`
+### 🔴 禁止 re-export
+
+`__init__.py` **禁止** `from .submodule import Symbol` 形式的 re-export。
+
+**為什麼**：re-export 建立隱性依賴鏈。`from package import X` 會先執行 `__init__.py`，如果裡面 re-export 了重型子模組（pandas、numpy、NT Logger），所有 import 消費者都被迫等待。實測案例：一個 re-export `logging.py`（拉 NT 730ms）+ `cost.py`（拉 pandas 600ms）的 `common/__init__.py`，讓 `from common.enums import Interval` 從 5ms 膨脹到 1300ms（260x）。
+
+### ❌ 錯誤：re-export（LLM 最愛犯的錯）
+
+```python
+# package/__init__.py — 禁止這樣寫
+from .logging import init_logging_with_defaults    # 拉 NT 730ms
+from .cost import TradingCostCalculator            # 拉 pandas 600ms
+from .enums import Interval                        # 5ms，但被迫等上面兩個
+
+__all__ = ["init_logging_with_defaults", "TradingCostCalculator", "Interval"]
+```
+
+後果：`from package.enums import Interval` 表面上只 import enums，但 Python 先解析 `__init__.py` → 觸發所有 re-export → 1.3s。
+
+### ✅ 正確：`__init__.py` 只放註解或空
+
+```python
+# package/__init__.py
+"""Package docstring."""
+
+# Import policy: 無 re-export
+# 消費端用完整路徑 import（from package.module import Class），
+# 不透過 __init__.py re-export。
+```
+
+消費端直接 `from package.module import Class`，`__init__.py` 雖仍被 Python 執行，但無重型 re-export，開銷可忽略。
+
+### 消費端正確寫法
+
+```python
+# ✅ 直接從子模組 import
+from mosaic_alpha.common.enums import Interval
+from mosaic_alpha.common.logging import init_logging_with_defaults
+
+# ❌ 透過 __init__.py re-export import（不應存在）
+from mosaic_alpha.common import Interval
+```
+
+### 規範摘要
+
+- `__init__.py` ≤ 20 行（docstring + import policy 註解）
+- **禁止** `from .submodule import Symbol` re-export
+- **禁止** `__all__` 搭配 re-export（`__all__` 只在 `from package import *` 時有效，幾乎不需要）
+- 消費端用完整路徑 import（`from package.module import Class`）
+- **唯一例外**：套件發佈給外部使用的 public API（內部專案不適用）
 
 ## 型別註解（Python 3.11+）
 

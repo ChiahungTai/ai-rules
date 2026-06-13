@@ -52,6 +52,13 @@ If LSP returns `Unknown` for any NT symbol:
 | `Bar` | `nautilus_trader.model.data.Bar` | `.venv/.../model/data.pyi:45` | ✅ / ❌ |
 | `InstrumentId` | `Unknown` | — | ❌ stub missing |
 
+## Tool Priority (MANDATORY)
+
+- **禁止** `find`、`grep`（觸發權限提示）→ 用 `fd`、`rg`
+- **禁止** `sed` 修改檔案 → 用 `Read` + `Edit`
+- **禁止** `$VAR`、`$(cmd)` shell 展開 → 用具體值
+- Python 命令必須 `uv run` 前綴
+
 ## Language
 
 Use 繁體中文 with English technical terms. All code references use `file_path:line_number` format.
