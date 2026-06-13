@@ -161,3 +161,11 @@ chore(deps): upgrade nautilus-trader >=X.Y.Z
 - **收盤後才能跑完整驗證**：SJ external API 測試需收盤後（15:30+）
 - **兩個 worktree 都要更新**：`mosaic_alpha/` 和 `mosaic_alpha_offline_backtesting/`
 - **pyproject.toml 下限反映實際最低相容版本**：不只反映歷史安裝版本
+
+---
+
+## 語音通知
+
+遵循 `voice-notification` skill：
+- **開始**：`say -v Meijia -r 180 "開始升級 NautilusTrader"`
+- **完成**：`say -v Meijia -r 180 "前輩！NT 升級完成，請驗收～"`

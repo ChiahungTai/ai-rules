@@ -112,3 +112,11 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 4. 最後列出所有新增的 CLAUDE.md 檔案路徑
 
 > **下一步**：產出後建議執行 `/claude:sync` 驗證同步性與品質。
+
+---
+
+## 語音通知
+
+遵循 `voice-notification` skill：
+- **開始**：`say -v Meijia -r 180 "開始產生 CLAUDE.md"`
+- **完成**：`say -v Meijia -r 180 "主人！CLAUDE.md 產生完成～"`

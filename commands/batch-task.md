@@ -121,3 +121,11 @@ when_to_use: "Process multiple subtasks sequentially (one agent at a time) to av
 - 近期常觸發 rate limit
 - 任務數量少（< 5 個子任務）
 - 不急於完成，穩定優先
+
+---
+
+## 語音通知
+
+遵循 `voice-notification` skill：
+- **開始**：`say -v Meijia -r 180 "開始批次任務，逐一處理中"`
+- **完成**：`say -v Meijia -r 180 "道友！批次任務全部完成～"`

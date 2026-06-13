@@ -176,3 +176,11 @@ chore(deps): upgrade shioaji[speed] >=X.Y.Z
 - **Volume 單位鐵律**：升級後必須驗證張/股轉換邏輯（`adapters/sj/units.py`）未受影響
 - **Shioaji Skill 優先**：API 行為有疑問時，使用 `shioaji:shioaji` skill 查證，不憑記憶
 - **pyproject.toml 下限反映實際最低相容版本**
+
+---
+
+## 語音通知
+
+遵循 `voice-notification` skill：
+- **開始**：`say -v Meijia -r 180 "開始升級 Shioaji"`
+- **完成**：`say -v Meijia -r 180 "前輩！SJ 升級完成，請驗收～"`

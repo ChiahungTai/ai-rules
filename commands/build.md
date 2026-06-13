@@ -252,3 +252,11 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。
 
 > **Agent Review Cycle 已完成。** 可直接 `/commit`；如需額外審查可跑獨立 `/code-review`。
+
+---
+
+## 語音通知
+
+遵循 `voice-notification` skill：
+- **開始**：`say -v Meijia -r 180 "開始實作 EP，主人請稍候"`
+- **完成**：`say -v Meijia -r 180 "主人！實作完成，所有段落已驗證通過～"`

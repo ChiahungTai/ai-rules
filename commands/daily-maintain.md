@@ -81,3 +81,11 @@ claude -p "/daily-maintain --only doc-health"
 | `--only dep-graph` | 只跑 Phase 1 |
 | `--only sync` | 只跑 Phase 2 |
 | `--only doc-health` | 只跑 Phase 3 |
+
+---
+
+## 語音通知
+
+遵循 `voice-notification` skill：
+- **開始**：`say -v Meijia -r 180 "開始每日自動維護"`
+- **完成**：`say -v Meijia -r 180 "主人！每日維護完成，已自動提交"`

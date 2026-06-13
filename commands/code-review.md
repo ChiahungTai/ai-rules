@@ -186,3 +186,11 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 ```
 
 後續：用戶確認 commit message → `/commit`（跳過階段 2 分析，直接執行 lint + commit）
+
+---
+
+## 語音通知
+
+遵循 `voice-notification` skill：
+- **開始**：`say -v Meijia -r 180 "開始程式碼審查"`
+- **完成**：`say -v Meijia -r 180 "主人！審查完成，請看報告～"`

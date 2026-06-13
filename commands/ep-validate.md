@@ -193,3 +193,11 @@ EP 段落: S{N}
 
 前置：`/execution-plan`（或手動撰寫的 EP）
 後續：`/build`（基於驗證後的 EP）
+
+---
+
+## 語音通知
+
+遵循 `voice-notification` skill：
+- **開始**：`say -v Meijia -r 180 "開始 EP 技術驗證"`
+- **完成**：`say -v Meijia -r 180 "前輩！技術驗證完成，請看結果～"`
