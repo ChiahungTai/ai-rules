@@ -69,6 +69,17 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 輸出：列出需檢查的檔案（不是要求全部更新，是提醒檢查是否需要更新）。用戶在階段 5 確認時一併判斷。
 
+### 階段 2.6：Review Findings 閘門
+
+掃描 `.review/` 與 EP review 區段(`## ... Findings` 表格,格式見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)),檢查殘留 `status=open` 的 Critical finding:
+
+| 情境 | 處理 |
+|------|------|
+| 有 `status=open` Critical | **警告**(不阻擋):列出未關閉 Critical,提示用戶確認是否可接受(合理拒絕或接受風險) |
+| 無 / 全關閉 | 通過 |
+
+不阻擋是刻意的 —— `status=rejected` 是合理拒絕,用戶也可能接受風險。閘門只確保「未處理」的 Critical 不被默默 commit。
+
 ### 階段 3：Capabilities + Kanban 狀態更新（大型/中型變更）
 
 **大型/中型變更時執行，小型變更跳過。**
@@ -138,4 +149,4 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 前置：`/lint-fix`（lint 不通過時）、`/code-review`
 
-**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描）和階段 3（Capabilities + Kanban 狀態確認），直接進入階段 1（Lint）→ 階段 5（確認）→ 階段 6（提交）。
+**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描）和階段 3（Capabilities + Kanban 狀態確認），直接進入階段 1（Lint）→ **階段 2.6（Review Findings 閘門）** → 階段 5（確認）→ 階段 6（提交）。

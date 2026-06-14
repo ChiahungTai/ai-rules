@@ -3,7 +3,7 @@ description: "審查者回頭驗收實作結果，確認修改合理性和不修
 when_to_use: "Verify that code changes from a previous review were implemented correctly. Use after /judge-review decisions have been applied."
 usage: "/followup-review [審查報告與採納決策]"
 argument-hint: "可選：貼上原始審查報告和 judge-review 的決策結果；無參數時自動從 git 變更推斷"
-allowed-tools: ["Read", "Grep", "Glob", "Bash"]
+allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 ---
 
 # /followup-review — 審查者驗收實作結果
@@ -32,20 +32,22 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 ### 無參數模式（推薦）
 
-1. `git diff` + `git status` 查看所有修改
-2. 讀取變更檔案，推斷對應的審查建議
-3. 基於實際變更逐項驗收
+1. **優先讀持久化 finding**：讀 `.review/<branch>.md`(或 EP review 區段)的 finding 清單
+2. finding 存在 → 逐項驗收(讀修改後程式碼對照原始問題)
+3. **無持久化檔才 fallback** `git diff` + `git status` 推斷(舊行為)
 4. 變更範圍超出可推斷範圍 → 向用戶確認
 
 ### 有參數模式
 
-提供原始審查報告和 judge-review 決策 → 按標準流程對照驗收。
+提供持久化 finding(`/judge-review` 已標 `decision`)→ 按標準流程對照驗收。
 
 ### 逐項驗收
 
-- **採納的建議**：讀取修改後程式碼 → 對照原始問題 → 檢查是否引入新問題
-- **拒絕的建議**：讀取相關程式碼 → 對照拒絕理由 → 重新評估原始問題
+- **採納的建議**：讀取修改後程式碼 → 對照原始問題 → 檢查是否引入新問題 → 通過標 `verified`
+- **拒絕的建議**：讀取相關程式碼 → 對照拒絕理由 → 重新評估原始問題 → 拒絕合理標 `closed`
 - **整體品質檢查**：新引入問題掃描 + 一致性 + 完整性
+
+驗收後更新 `.review/<branch>.md`(或 EP review 區段)finding 的 `status`(格式見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)):`verified`(採納且通過)/ `closed`(拒絕合理)/ 維持 `open`(未通過需再修)。新引入的 Critical / Important 問題,新增 finding(狀態 `open`)。
 
 ---
 

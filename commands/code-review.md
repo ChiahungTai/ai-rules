@@ -149,6 +149,22 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 
 ---
 
+## Finding 持久化
+
+Critical / Important finding 寫入 `.review/<branch>.md`(Finding Record 表格,欄位定義見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)),狀態初始 `open`。跨 session、跨命令可追蹤(`/judge-review` 更新決策、`/followup-review` 驗收、`/commit` 檢查殘留 Critical)。
+
+```
+## Code Review Findings — <branch>
+
+| ID | 嚴重度 | 檔案:行 | 問題 | 建議 | 狀態 | 決策 |
+|----|--------|---------|------|------|------|------|
+| F1 | 🔴 critical | src/foo.py:42 | ... | ... | open | — |
+```
+
+Suggestion 級留在報告即可,不持久化(避免噪音)。
+
+---
+
 ## Commit Message 產生
 
 審查完成後，基於已分析的 diff 直接產生 commit message。

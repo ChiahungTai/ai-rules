@@ -234,7 +234,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 ### 主 LLM — Apply Changes
 
-根據 judge-review 的 ✅ 採納清單修正 EP。**修正必須寫入 EP 段落本身**（加入 `> **EP Review 修正**：[修正內容]`），不是只記在審查報告裡。build 可能由不同 LLM session 執行，看不到審查報告。
+根據 judge-review 的 ✅ 採納清單修正 EP。**修正必須寫入 EP 段落本身**（加入 EP review 區段表格，格式見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md) Finding Record），不是只記在審查報告裡。build 可能由不同 LLM session 執行，看不到審查報告。
 
 ---
 

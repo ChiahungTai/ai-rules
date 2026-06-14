@@ -89,6 +89,54 @@ Workflow tool 的優勢：
 
 ---
 
+## Finding Record（跨命令持久化標準）
+
+> **核心原則**：審查發現(finding)的對話對象主要是另一個 LLM(`/build` 內串接、`/copy` 給外部 LLM)。finding 必須持久化、結構化,跨 session、跨命令可追蹤。
+
+### Finding Record = DimensionVerdict + 追蹤欄
+
+Review agent 回傳的 `DimensionVerdict.findings[]` 是**發現時**狀態。持久化時擴充為 Finding Record,加入生命週期追蹤欄:
+
+| 欄位 | 來源 | 用途 |
+|------|------|------|
+| `id` / `title` / `severity` / `file` / `line` / `description` / `suggestion` | DimensionVerdict 沿用 | 發現本體 |
+| `status` | 追蹤 | 生命週期見下(跨命令 join key) |
+| `source` | 追蹤 | 產生命令(由表格標題 `## <命令> Findings` 編碼,不單獨成欄) |
+| `decision` | 追蹤 | judge-review 的 ✅ / ❌ / ⚠️ |
+
+**status 生命週期**:
+
+- **Code review flow**(經 judge-review):`open` →(`adopted` / `rejected` / `needs-confirmation`)→ `implemented` → `verified` → `closed`。**rejected 不經 implemented**,直接 `closed`(不實作)
+- **EP flow**(ep-review/ep-validate,無 judge-review):`open` → `implemented`(修正入 EP)/ `verified`(POC 通過)
+- **decision → status 映射**(judge-review):✅ → `adopted`、❌ → `rejected`、⚠️ → `needs-confirmation`
+- commit 階段 2.6 檢查殘留 `open` Critical
+
+### 持久化位置
+
+| 情境 | 位置 |
+|------|------|
+| 有 EP 上下文(EP 審查、EP 驅動 build) | 回寫 EP 的 review 區段(沿用 ep-review) |
+| 無 EP(獨立 code-review / judge-review / followup-review) | `.review/<branch>.md`(綁定分支,代表一次變更的 finding 清單) |
+
+`.review/` 為 ephemeral 工作產物,**各專案須將 `.review/` 加入 `.gitignore`**(避免審查筆記污染 repo 歷史)。
+
+### Markdown 表格呈現格式(持久化與 /copy 載體)
+
+人類可讀 + 機器可解析。所有命令的持久化 finding 統一用此格式:
+
+```
+## <命令> Findings — <branch 或 EP 段落>
+
+| ID | 嚴重度 | 檔案:行 | 問題 | 建議 | 狀態 | 決策 |
+|----|--------|---------|------|------|------|------|
+| F1 | 🔴 critical | src/foo.py:42 | ... | ... | open | — |
+| F2 | 🟡 important | src/bar.py:10 | ... | ... | adopted | ✅ |
+```
+
+`/copy` 場景:用戶貼此表格給外部 LLM,回饋以同格式 append 回寫。
+
+---
+
 ## 腳本骨架
 
 各命令提供具體的 `dimensions` 陣列（維度名稱、prompt、啟用條件）。骨架定義通用協調邏輯：

@@ -43,7 +43,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 | Pseudo Code 可執行性 | 具體到可翻譯為程式碼 | 標記模糊處，自行推斷 |
 | 驗證策略具體性 | 有明確測試案例 | 自行補充合理測試 |
 | 依賴錨點有效性 | file:line 與實際程式碼一致 | drift 時先更新 EP |
-| EP Review 修正 | 掃描 `> **EP Review 修正**` 標記，納入實作 | 列入快檢報告 |
+| EP Review 修正 | 掃描 EP review 區段(`## EP Review Findings` 表格,見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)),納入實作 | 列入快檢報告 |
 
 **平行可行性分析**：
 1. 建構段落依賴圖，識別可平行段落

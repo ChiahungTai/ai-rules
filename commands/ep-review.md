@@ -119,11 +119,18 @@ build 可能由不同 LLM session 執行，無法存取審查報告。因此：
 
 ### 回寫格式
 
-在 EP 對應段落的 Context 末尾加入：
+在 EP 開頭(研究摘要之後、UC 盤點之前)加 review 區段,用 Finding Record 表格(欄位定義見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md))。EP 場景「檔案:行」欄填「EP 段落」(如 S2):
 
-```markdown
-> **EP Review 修正**：[修正內容描述]
 ```
+## EP Review Findings
+
+| ID | 嚴重度 | EP 段落 | 問題 | 建議 | 狀態 |
+|----|--------|---------|------|------|------|
+| 1 | 🔴 必須修正 | S2 | ... | ... | implemented |
+| 2 | 🟡 建議 | S3 | ... | ... | needs-confirmation |
+```
+
+回寫後:🔴 / 🟡-採納 → `implemented`(修正已入 EP);🟡-未確認 → `needs-confirmation`。
 
 ### 回寫驗證
 
