@@ -10,6 +10,10 @@
 
 LSP 提供語義級程式碼導航（~50ms，100% 準確），rg/fd 提供文字級搜尋。LSP 理解程式碼結構（區分定義、引用、型別、scope）；rg 只匹配字串。
 
+> **搜尋前自問（3 秒）**：找的是**符號**（class/def/引用/型別/呼叫鏈）還是**文字**（字串/註解/config/路徑）？符號 → LSP；文字 → rg/fd。直覺想 rg 時停一下 —— 符號查詢 rg 會 truncated/漏動態引用，LSP 100% 涵蓋。
+
+**反例（rg 找符號的陷阱）**：`rg "ShioajiDataClient\("` 結果被截斷（只顯示 `n`），只能「推測」呼叫端；`LSP findReferences` 精準列出 4 references（定義 + import + 型別註解 + 唯一實際呼叫點）。**符號查詢用 rg 會 truncated/漏；LSP 結構化、不截斷、100% 涵蓋。**
+
 ---
 
 ## 決策樹

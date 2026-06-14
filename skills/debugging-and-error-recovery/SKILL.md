@@ -47,10 +47,12 @@ Make the failure happen reliably. If you can't reproduce it, you can't fix it wi
 
 Narrow down which layer: UI, API, database, build tooling, external service, or the test itself. Use `git bisect` for regression bugs.
 
-**LSP-assisted localization:**
+**符號查詢預設用 LSP，rg 只做文字/字串**（找 class/def/引用/呼叫端 → LSP first；找字串內容/註解/config → rg）：
+
+- 「誰建立/引用這個符號？」→ LSP `findReferences`（100% 涵蓋；rg 可能 truncated/漏動態引用）
 - Stack trace `file:line` → LSP `goToDefinition` to jump directly to relevant source
 - Type confusion → LSP `hover` to see actual inferred type at that location
-- "Who calls this?" → LSP `incomingCalls` to trace execution path to failure point
+- "Who calls this method?" → LSP `incomingCalls` to trace execution path to failure point
 - Post-fix verification → LSP `diagnostics` to catch type errors introduced by the fix
 
 ### 3. Reduce
