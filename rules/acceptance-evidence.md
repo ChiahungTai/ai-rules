@@ -69,11 +69,19 @@
 
 `must-execute-before-complete.md` 把 `.py / demo / POC / lab / example` 全歸為「可執行 → 必須 uv run」是**生產側視角**(確保 AI 跑過),完全缺**消費側視角**(給誰看、怎麼看)。B 軸的演進方向:
 
-1. **demo / POC / lab 升格為人類驗收層一級公民**,與 tests 分工:tests 是機器對機器斷言(人讀 assert 意義不大),demo 是機器對人類演示(人觀察產出才有意義)。兩層並存鐵律:demo 不豁免 tests,tests 不取代 demo。
-2. **可觀察性合約(Observability Contract)**:demo 的硬性品質要求 — stdout 必須產出人類一眼可判讀的結論行 + 關鍵數字(非 log 傾倒),且暴露至少一個失敗路徑(避免 demo 淪為 AI 的公關稿)。
+1. **UC 場景執行驗收(B 軸核心)**:驗收單位是 [UC 場景](../commands/execution-plan.md)(EP Scenario Matrix),不是泛泛 demo。SM 欄位「觸發 / 預期行為」是現成的可執行輸入 + 人類可判讀預期,且必須涵蓋 happy / 錯誤 / 邊界 / 效能。跑 SM 場景,人類觀察「觸發 → 預期行為」是否成立 = L6。素材 EP 已產出,不需另發明。
+2. **可觀察性合約**:SM 的「預期行為」欄位 = 人類可判讀的結論。執行 SM 場景的 stdout 必須對應預期行為,且至少跑一個錯誤/邊界場景(避免只演 happy path 的 AI 公關稿)。
 3. **自動化對照(A/B diff)**:跑新舊版 / 兩 branch / 兩參數比對,人類只判讀 diff 合理性。把「讀」外包給機器,這是長期最該投資的模式。
-4. **流程末端驗收步驟**:[build](../commands/build.md) / [deep-work](../commands/deep-work.md) 在 commit 前缺「啟動可觀察 demo 讓人判讀行為」的步驟;Examples 驗證只驗 exit code 0,不驗輸出內容(silent failure / 語義錯誤偵測不到)。
+4. **流程末端驗收步驟**:[build](../commands/build.md) / [deep-work](../commands/deep-work.md) 在 commit 前缺「執行 SM 代表性場景讓人判讀」的步驟;現有 Examples 驗證只驗 exit code 0,不驗輸出內容(silent failure / 語義錯誤偵測不到)。
 5. **人類介入點前移到 RED**:GREEN 後人類讀不完;RED 時刻判讀「失敗是否符合預期」更便宜,是意圖偏移的最早訊號。
+
+### 內部跨層接線的 L2 歸屬(A 軸天花板,B 軸補強)
+
+整合器型 L2 的觸發準則鎖定「≥2 真實**外部**組件」。**內部跨層接線 + 真實資料依賴**(例:auto-discovery registry 成員 consume Feature 的真實 dtype、跨層欄位 auto-prefix 展開)不觸發整合器 flag — 這是 by design 而非 gap:
+
+- 這類 bug(L1 接線通過但真實資料 dtype/契約落差)是 **A 軸 L3 天花板**:跑真實 pipeline 仍可能因 mock/合成資料不反映真實 dtype 而自洽通過。強迫 L2 收不掉這個天花板。
+- 真正能抓此落差的是 **B 軸**(執行 UC/SM 場景,人類觀察真實資料產出,L4-L6)。
+- 實務:內部跨層段落,L1(registry membership / 路徑覆蓋)靠 A 軸機械閘門擋高頻 regression;真實 dtype/契約落差靠 B 軸 UC 場景驗收。兩軸分工,不靠收緊整合器 flag 把 L2 塞回 A 軸(over-classify,違反「避免過度工程」)。
 
 ## 與既有規則的關係
 

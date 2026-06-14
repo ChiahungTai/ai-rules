@@ -24,6 +24,16 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 ---
 
+## 流程 dispatch（依 ARGUMENTS 決定骨架）
+
+**deep-work 是「行為模式」（mode），不是「流程骨架」（procedure）**。組合時 procedure 委派:
+
+- **ARGUMENTS = `/build <EP>`**：流程骨架**委派 [build.md](./build.md)**（階段 0-6 全跑）。deep-work 只疊加**行為模式**：自主決策、歧義選最合理並記錄（不問用戶）、完整交付、錯誤自癒、語音通知。deep-work 下方階段 3/4/5 **不覆蓋** build 對應階段。
+- **組合下不得省略的 build 步驟**（無人在場時唯一機械防線）：階段 0「EP 快檢」強制輸出、階段 1「Examples 盤點」映射表、**階段 2「整合路徑覆蓋硬閘門」**（`rg "<新參數>=" tests/`）、階段 4「測試覆蓋維度」、階段 5d `/audit-test`。絕不靜默跳過。
+- **ARGUMENTS = 非 `/build`**（任意任務描述）：用 deep-work 自己的階段結構（下方）。
+
+關鍵：`/deep-work /build` 時，硬閘門在最需要它的無人路徑必須生效 — 不委派就等於失效。
+
 ## 執行流程
 
 ### 階段 1：深度理解
@@ -70,7 +80,8 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 5. CLAUDE.md 同步檢查
 6. 移除除錯用程式碼
 7. **/audit-test checkpoint**（見 [audit-test](./audit-test.md)）：跑 `/audit-test`（Diff Audit）。重點看角度 4（消費端驗證覆蓋：新 public 參數路徑、整合器型真實邊界）與角度 2（registry 接線）。缺口不得帶進 /commit。用戶不在場時，這是「單元全綠但接線/邊界沒測」隱性 regression 的唯一機械化閘門。
-8. 生成摘要報告
+8. **任務級整合路徑檢查**（非 `/build` 任務；若變更含新 callable 參數/注入點 → `rg "<新參數>=" tests/` → 0 hits 必須補消費端整合測試，見 [build.md](./build.md) 階段 2）
+9. 生成摘要報告
 
 #### Agent Review Cycle
 

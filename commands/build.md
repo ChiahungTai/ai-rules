@@ -56,6 +56,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 - 邊界正確性無法從任一單方文件推導
 - 錯了不是調參數而是整天行為全錯
 
+**機械 IO 觸發（三條件的 OR 補充，降 LLM 單點）**：段落 diff 觸及真實 IO 模式（parquet/檔案讀寫、DB 連線、第三方 SDK 呼叫、跨進程/跨框架邊界）→ 即使三條件判「非整合器型」，仍標「**待 L2 評估**」，交階段 3 確認是否真需要 L2。候選撈取 → LLM 裁決兩段式（非硬卡）。排除：純 config/fixture 讀取（非整合器，避免 false positive 稀釋信號）。
+
 整合器型段落標記後，在階段 2/3/4 對應加嚴（路徑覆蓋硬閘門 + 真實邊界整合測試 + 測試覆蓋維度審查）。
 
 ### 階段 1：準備
@@ -118,6 +120,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
   - 有 hits → 確認 hits 是「驅動消費端流程」的測試，而非僅符號 import
 
 ### 階段 3：整合驗證
+
+> **scope 邊界（階段 2 vs 階段 3）**：階段 2 抓「新參數/注入點的接線路徑」（機械 rg 初篩）；階段 3 抓「既有接線的行為正確性」（需真實邊界跑）。**鐵律：階段 2 rg 有 hits ≠ 階段 3 L2 已滿足** — 符號出現在 tests（如被測單元自己的單元測試）≠ 消費端驅動該符號的路徑被覆蓋。例（真實歷史案例）：`rg "<符號>=" tests/` 有 hits 但全在被測單元自己的測試，消費端 integration 路徑不存在 — 符號有測 ≠ 消費路徑有測，bug 漏到補 integration test 才抓到。
 
 全量 Lint + mypy + pytest（背景跑）+ Examples 全量驗證。全量跑只是 baseline。
 
