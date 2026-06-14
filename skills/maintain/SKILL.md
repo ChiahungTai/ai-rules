@@ -31,7 +31,7 @@ diff fingerprint                用 dep_graph 驗證 imports   LLM 直接讀 .ka
 
 ```bash
 cd <project-root>
-uv run python /Users/ctai/Github/ai-rules/skills/scan-project/scripts/scan_project.py --project-root . --output .project-snapshot.json
+uv run python ${CLAUDE_SKILL_DIR}/../scan-project/scripts/scan_project.py --project-root . --output .project-snapshot.json
 ```
 
 產出 JSON v5（dep_graph / findings / fingerprint），不含 registry。
@@ -131,7 +131,7 @@ Snapshot 輔助：
 ### X-tag-module 修正
 
 1. Read 卡片檔案，找到第一行的 `[tag:xxx]`
-2. 從 scan_project.py 的 valid_tags 或 `fd . mosaic_alpha/ --max-depth 1 --type d` 取得合法 tag 清單
+2. 從 scan_project.py 的 valid_tags 或 `fd . <package>/ --max-depth 1 --type d` 取得合法 tag 清單
 3. 比對卡片內容中的模組引用，推導正確 tag
 4. 確定性高（卡片引用單一模組）→ 更新 tag
 5. 確定性低（多模組引用或模糊）→ 標記待人工確認
@@ -154,7 +154,7 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 ### 無 tag 卡片推導
 
 1. 讀取卡片內容，搜尋模組引用（程式碼路徑、模組名）
-2. 對照 `mosaic_alpha/` 子目錄清單
+2. 對照 `<package>/` 子目錄清單
 3. 單一匹配 → 加上 `[tag:xxx]` 到第一行
 4. 多重匹配或模糊 → 標記待人工確認
 

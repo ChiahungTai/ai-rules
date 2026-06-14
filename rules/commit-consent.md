@@ -38,4 +38,4 @@
 
 ---
 
-完整 commit 流程定義在 [commit.md](../../commands/commit.md)。
+完整 commit 流程定義在 [commit.md](../commands/commit.md)。

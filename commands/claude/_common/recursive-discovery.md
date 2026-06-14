@@ -4,13 +4,10 @@
 
 ```bash
 # 單檔案模式
-Read $TARGET_CLAUDE_MD
+Read <target-claude-md>
 
-# 遞歸模式
-Glob "**/CLAUDE.md" $TARGET_DIR
-
-# 或使用 find 命令
-find $TARGET_DIR -name "CLAUDE.md" -type f
+# 遞歸模式（用 fd，預設排除隱藏檔與 .gitignore）
+fd "CLAUDE.md" <target-dir>
 ```
 
 ## 步驟 2: 分類與優先級
@@ -29,7 +26,7 @@ def categorize_claude_files(files: list) -> dict:
     for file_path in files:
         if "/" not in file_path.replace(target_dir, ""):
             categories["critical"].append(file_path)
-        elif any(x in file_path for x in ["/src/", "/core/", "/lib/", "/mosaic_alpha/"]):
+        elif any(x in file_path for x in ["/src/", "/core/", "/lib/"]):
             if file_path.count("/") > 3:  # 深層目錄
                 categories["medium"].append(file_path)
             else:

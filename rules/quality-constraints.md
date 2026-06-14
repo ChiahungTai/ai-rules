@@ -148,6 +148,8 @@ def process_trading_data(data):
 
 ### 兩層整合測試
 
+> ⚠️ 本段 L1/L2 為「整合器型變更」的**局部命名**，異於 [acceptance-evidence.md](./acceptance-evidence.md) 的全局證據階層 L1-L6（該處 L3 = 整合層）。追蹤「L2」時注意區分語境。
+
 整合器型變更兩層都要，缺任一即缺口：
 
 | 層 | 性質 | 目錄 | marker |

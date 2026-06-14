@@ -54,7 +54,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - ❌ 直接移除：詳細程式碼步驟、過多配置參數列表、版本變更歷史
 - ✅ 簡潔描述替代：一句話總結 + 源碼引用（`config.py:15-30`）
 
-遞迴發現邏輯: [recursive-discovery.md](./_common/recursive-discovery.md)
+遞歸發現邏輯: [recursive-discovery.md](./_common/recursive-discovery.md)
 
 ---
 
@@ -78,7 +78,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 - **備份優先**：蒸餾前必須建立 `.backup` 檔案
 - **AI 導航價值優先**：架構圖、核心表格、使用範例、引用來源必須特別謹慎
 
-遞迴處理約束: [recursive-constraints.md](./_common/recursive-constraints.md)
+遞歸處理約束: [recursive-constraints.md](./_common/recursive-constraints.md)
 
 ---
 

@@ -26,8 +26,8 @@ System prompt body...
 
 | Agent | 用途 | 搭配 Rules |
 |-------|------|-----------|
-| `lsp-architect` | 架構驗證、型別追蹤、呼叫鏈分析 | `rules/lsp-navigation.md` |
-| `nt-type-auditor` | NautilusTrader Cython 邊界型別審計 | `rules/lsp-navigation.md` |
+| `lsp-architect` | 架構驗證、型別追蹤、呼叫鏈分析 | `rules/lsp-navigation.md` + `bash-hard-rules.md` |
+| `nt-type-auditor` | NautilusTrader Cython 邊界型別審計 | `rules/lsp-navigation.md` + `bash-hard-rules.md` |
 
 ---
 

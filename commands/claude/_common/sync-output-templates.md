@@ -284,7 +284,7 @@ actions:
 
 建議執行: `/claude:sync --recursive --clean`
 
-> 當 ⚠️ 項目 ≥ 3 個時，建議執行 `/claude:decode-compare {module}` 進行深度精度驗證。
+> 當 ⚠️ 項目 ≥ 3 個時，建議執行 `/claude:sync {module} --all` 進行完整 11 角度深度驗證。
 ```
 
 ---

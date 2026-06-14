@@ -41,6 +41,7 @@ fd --max-depth 3          # 限制深度
 - `fd <pattern> <path>` 中 pattern 匹配**檔名**，不是路徑
 - 搜尋特定目錄：`fd . <dir>`（`.` 表示匹配所有檔名，第二個參數是路徑）
 - **常見錯誤**：`fd src/` 是搜尋檔名包含 `src/` 的檔案，不是搜尋 src/ 目錄
+- **隱藏檔陷阱**：`fd` 預設跳過 dotfiles（`.` 開頭）與 `.gitignore` 內檔案。查 `.project-snapshot.json`、`.gitignore`、`.env`、`.claude/` 等必須加 `-H`（`fd -H "project-snapshot"`），否則 false negative 誤判「不存在」。`rg` 同理用 `--hidden` 或 `-uu`
 
 ---
 

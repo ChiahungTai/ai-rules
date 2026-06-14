@@ -1,7 +1,7 @@
 # 遞歸處理約束
 
 ### 基本約束
-- **使用 Glob 或 find**: 正確發現所有 CLAUDE.md
+- **使用 fd**: 正確發現所有 CLAUDE.md（`fd "CLAUDE.md" <dir>`，預設排除隱藏檔與 .gitignore）
 - **分類處理**: 按重要性分類（Critical/High/Medium/Low），優先處理關鍵文檔
 - **順序處理**: 從根目錄到深層模組，按重要性順序處理
 - **進度報告**: 每處理一個檔案報告進度

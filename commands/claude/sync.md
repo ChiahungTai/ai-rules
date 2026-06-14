@@ -95,7 +95,7 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 步驟詳細實作：[sync-implementation-steps.md](./_common/sync-implementation-steps.md)
 遞歸發現邏輯: [recursive-discovery.md](./_common/recursive-discovery.md)
 輸出格式模板：[sync-output-templates.md](./_common/sync-output-templates.md)
-遞迴輸出格式: [recursive-output.md](./_common/recursive-output.md)
+遞歸輸出格式: [recursive-output.md](./_common/recursive-output.md)
 
 ---
 
@@ -121,10 +121,10 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 - **報告先行**：先報告發現，再詢問是否執行清理或蒸餾
 - **低風險自動修正**：以下問題修正成本極低且無歧義，發現時直接修正不詢問：路徑引用指向已更名/遷移的檔案（且能明確對應到正確檔案）。只有涉及模糊匹配（多個候選）或語意變更（描述文字要改）才需要確認
 
-遞迴處理約束: [recursive-constraints.md](./_common/recursive-constraints.md)
+遞歸處理約束: [recursive-constraints.md](./_common/recursive-constraints.md)
 
 ---
 
-> **同步哲學**: CLAUDE.md 是活文檔，必須與程式碼同步演進。當 sync 發現 ⚠️ ≥ 3 個時，建議執行 `/claude:decode-compare {module}` 深度驗證。
+> **同步哲學**: CLAUDE.md 是活文檔，必須與程式碼同步演進。當 sync 發現 ⚠️ ≥ 3 個時，建議執行 `/claude:sync {module} --all` 完整 11 角度深度驗證。
 
 > **工作流**: `/claude:clean` → `/claude:distill` → `/claude:sync`

@@ -97,7 +97,7 @@ LLM 直接讀取 CLAUDE.md 的 `## Capabilities` 表格：
 3. 比對功能生命週期狀態是否一致
 4. `--sync-system-map`：自動推導並更新 SYSTEM-MAP.md（展示 diff 待確認）
 
-生命週期推導規則：
+生命週期推導規則（**功能層級**狀態 — 聚合該功能內所有 UC；UC 層級狀態 ✅📋❌🔧🟡🟢 見 [ai-development-guide.md](../ai-development-guide.md)）：
 
 | 條件 | 狀態 |
 |------|------|

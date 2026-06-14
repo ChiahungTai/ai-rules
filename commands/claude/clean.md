@@ -63,7 +63,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ### 4. 引用語法正確性
 
-依據 `claude-writing.md` 的引用語法規則，檢查 CLAUDE.md 中的引用是否使用了正確語法：
+依據 [claude-writing.md](../../rules/claude-writing.md) 的引用語法規則，檢查 CLAUDE.md 中的引用是否使用了正確語法：
 
 | 情境 | 正確語法 | 錯誤語法 |
 |------|---------|---------|
@@ -86,6 +86,8 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 **失敗處理**：如果清理過度導致關鍵設計理由遺失，從 `.backup` 還原並重新評估。
 
 ## 📋 執行流程
+
+### 步驟 1: 遞歸發現 CLAUDE.md
 
 遞歸發現邏輯: [recursive-discovery.md](./_common/recursive-discovery.md)
 

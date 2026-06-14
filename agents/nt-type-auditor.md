@@ -41,7 +41,7 @@ For each NT type encountered:
 ## Stub Health Detection
 
 If LSP returns `Unknown` for any NT symbol:
-- Run `make sync-stubs` to refresh stubs from NT source
+- 若專案有 `make sync-stubs` target（NT 專案）則執行以刷新 stub；否則手動從 NT source tree 同步 `.pyi` 到 `stubs/` 與 `.venv/.../nautilus_trader/`
 - Check `stubs/nautilus_trader/` for `.pyi` file existence
 - Check `.venv/lib/python3.12/site-packages/nautilus_trader/` for `.pyi` next to `.so`
 

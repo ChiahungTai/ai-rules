@@ -182,24 +182,11 @@ done
 
 ## 步驟 5: 命令涵蓋性檢查
 
-```bash
-# 重要！掃描所有命令檔案，檢查是否被記錄
-ALL_COMMAND_FILES=$(fd -e md . $TARGET_DIR --exclude CLAUDE.md)
+機械性檢查（用 `fd` + `rg`，避免 shell 變數與 `sed`）：
 
-for cmd_file in $ALL_COMMAND_FILES; do
-    # 推導命令名稱
-    # e.g., "worktree/status.md" -> "/worktree:status"
-    # e.g., "claude/clean.md" -> "/claude:clean"
-    cmd_name=$(echo "$cmd_file" | sed "s|$TARGET_DIR||" | sed 's|\.md$||' | sed 's|^/|/|')
-
-    # 檢查是否在 CLAUDE.md 中
-    if rg -q "$cmd_name" "$CLAUDE_MD"; then
-        echo "✅ $cmd_name 已記錄"
-    else
-        echo "❌ $cmd_name 未記錄"
-    fi
-done
-```
+1. 列出所有命令檔：`fd -e md . <target-dir> --exclude CLAUDE.md`
+2. 對每個檔推導命令名稱（去目錄前綴與 `.md`：`claude/clean.md` → `/claude:clean`、`worktree/status.md` → `/worktree:status`）—— 以具體檔名推導，不用 `$TARGET_DIR` 變數
+3. 逐個驗證是否記錄：`rg -q "<命令名稱>" <target-CLAUDE.md>`（找到 = ✅ 已記錄，未找到 = ❌ 未記錄）
 
 ---
 

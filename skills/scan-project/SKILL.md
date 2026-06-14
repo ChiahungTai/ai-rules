@@ -92,7 +92,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 | Check | 說明 | 嚴重度 |
 |-------|------|--------|
 | X-cap-path | Capabilities 入口路徑不存在（檢查 project root / package root / CLAUDE.md 目錄） | important |
-| X-tag-module | Kanban 卡片 `[tag:xxx]` 不對應 mosaic_alpha/ 子目錄 | important |
+| X-tag-module | Kanban 卡片 `[tag:xxx]` 不對應 `<package>/` 子目錄 | important |
 | X-ep-ready | Next-Up/In-Progress 卡片引用的 EP 檔案不存在 | important |
 | X6 | dep-graph 有模組（≥3 files）但無 CLAUDE.md | important |
 
