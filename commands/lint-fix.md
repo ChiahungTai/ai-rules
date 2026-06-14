@@ -3,7 +3,7 @@ description: "執行 ruff 和 mypy 檢查並自動修正問題"
 when_to_use: "Run ruff format, ruff check --fix, and mypy on Python files. Use after writing or modifying Python code to enforce style and type conventions."
 usage: "/lint-fix [檔案或目錄路徑]"
 argument-hint: "預設檢查當前目錄，可指定檔案或目錄"
-allowed-tools: ["Bash", "Read", "Edit", "Grep"]
+allowed-tools: ["Bash", "Read", "Edit"]
 ---
 
 # Lint Fix - Python 程式碼品質自動修正工具
@@ -63,45 +63,70 @@ def process_data(data):
 2. **真的遇到 circular import 時**：正確解法是重構目錄結構（調整 parent-child 關係），不是局部 import。局部 import 只掩蓋問題
 3. **檢查 pyproject.toml 的 per-file-ignores**：如果專案已設定例外，尊重專案配置
 
-### 優先級 2：`__init__.py` 太肥
+### 優先級 2：`__init__.py` re-export
 
-#### ❌ 錯誤做法：塞太多東西到 `__init__.py`
+> 對齊 [python-standards.md](../rules/python-standards.md) 的 re-export 禁令。判準是「**是否 re-export**」不是「行數」——一行 `from .x import Y` 就違規，50 行 docstring 沒問題。
+
+#### ❌ 錯誤做法：re-export 符號到 `__init__.py`（LLM 最常犯的錯）
+
 ```python
-# __init__.py 超過 50 行，有很多 from xxx import yyy
+# package/__init__.py — 禁止。建立隱性依賴鏈，import 開銷膨脹（實測 5ms→1300ms）
 from .module_a import ClassA
-from .module_b import ClassB
-from .module_c import func_c
-# ... 很多 import
-```
-
-#### ✅ 正確做法：只暴露公開 API
-```python
-# __init__.py 保持精簡
 from .core import PublicAPI
 
-__all__ = ["PublicAPI"]
+__all__ = ["ClassA", "PublicAPI"]
 ```
 
-### 優先級 3：濫用 TYPE_CHECKING
+#### ✅ 正確做法：`__init__.py` 只放 docstring，消費端用完整路徑
 
-#### ❌ 錯誤做法：不必要地使用 TYPE_CHECKING
+```python
+# package/__init__.py
+"""Package docstring."""
+
+# Import policy: 無 re-export。消費端用 from package.module import Class
+```
+
+```python
+# 消費端 — 直接從子模組 import
+from package.module_a import ClassA
+```
+
+**唯一例外**：套件發佈給外部使用的穩定 public API（Facade Pattern）。內部專案不適用，完整論證見 [python-standards.md](../rules/python-standards.md) 的「Facade Pattern 為何不適用內部專案」段。
+
+### 優先級 3：TYPE_CHECKING
+
+> 對齊 [python-standards.md](../rules/python-standards.md) 的 TYPE_CHECKING 禁令。與優先級 1（PLC0415 局部 import）同理——circular import 是架構問題，重構模組結構才是解法，TYPE_CHECKING 只是掩蓋。
+
+#### ❌ 錯誤做法：用 TYPE_CHECKING 掩蓋 circular import
 ```python
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from somewhere import SomeType  # ❌ 大部分情況不需要
+    from somewhere import SomeType  # ❌ 掩蓋循環依賴，非解決
 
-def process(x: "SomeType"):  # string forward reference
+def process(x: "SomeType"):
     pass
 ```
 
-#### ✅ 正確做法：直接 toplevel import
-```python
-# Python 3.12+ 直接 import 即可
-from somewhere import SomeType
+#### ✅ 正確做法：現代 Python（3.12+）不需 TYPE_CHECKING
 
-def process(x: SomeType):
-    pass
+TYPE_CHECKING 的傳統用途都有更好解法：
+
+| 情境 | ❌ TYPE_CHECKING | ✅ 現代解法 |
+|------|-----------------|-----------|
+| 同檔前向引用 | （誤用） | 字串註解 `"B"` / `Self`（回傳自身） |
+| 跨檔循環型別 | `if TYPE_CHECKING: from b import B` | 重構模組（抽型別到獨立模組）/ 局部 import（優先級 1） |
+| 重型 import 延遲 | `if TYPE_CHECKING: import pandas` | stubs / 接受 runtime import |
+
+```python
+# 同檔前向引用 — 字串註解（Python 原生）
+def process(node: "TreeNode") -> None: ...
+
+# 回傳自身 — Self（Python 3.11+）
+from typing import Self
+def copy(self) -> Self: ...
+
+# 循環依賴 — 重構或局部 import（優先級 1），不用 TYPE_CHECKING 掩蓋
 ```
 
 ### 優先級 4：舊式 typing 慣例
@@ -176,7 +201,7 @@ def process(data: dict[str, int | float]) -> list[str]:
 
 ### 優先級 6：第三方套件 Type Gap
 
-當第三方套件的 type annotations 不完整時，遵循 [python-type-gap](../skills/python-type-gap/SKILL.md) skill 的四層處理策略（Type Narrowing → Project Stubs → `# type: ignore[code]` → pyproject.toml Override）。
+當第三方套件的 type annotations 不完整時，遵循 [python-type-gap](../skills/python-type-gap/SKILL.md) skill 的四層處理策略（isinstance narrowing → Project Stubs → `# type: ignore[code]` → pyproject.toml Override）。
 
 ## 📋 輸出格式
 
@@ -208,6 +233,7 @@ def process(data: dict[str, int | float]) -> list[str]:
 
 ### 必須遵守
 - **使用 uv run**：所有 Python 命令必須使用 `uv run`
+- **`$ARGUMENTS` 是 Claude Code placeholder**：Phase 1/2 的 `$ARGUMENTS` 是 slash command 參數替換（Claude Code 在 shell 執行前把它換成使用者傳入的路徑），非 shell `$VAR` 展開，不觸發 rules-reminder 的 `$` 禁令
 - **尊重專案配置**：使用現有的 `pyproject.toml`，不覆蓋
 - **分析前先查證**：確認問題真的存在，不基於猜測
 
@@ -228,7 +254,7 @@ def process(data: dict[str, int | float]) -> list[str]:
 - [ ] 執行了 ruff format
 - [ ] 執行了 mypy
 - [ ] 分析了所有 PLC0415 問題
-- [ ] 檢查了濫用的 TYPE_CHECKING
+- [ ] 檢查了 TYPE_CHECKING（對齊優先級 3 禁令）
 - [ ] 識別了舊式 typing 慣例
 - [ ] 檢查了裸型別缺參數（`type-arg`：裸 `list`/`dict`）
 - [ ] 第三方 type gap 遵循 [python-type-gap](../skills/python-type-gap/SKILL.md) skill 四層策略

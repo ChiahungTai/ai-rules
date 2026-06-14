@@ -57,11 +57,27 @@ from mosaic_alpha.common import Interval
 
 ### 規範摘要
 
-- **審查原則**：每個 `__init__.py` 的內容都必須能回答「為什麼放在這裡而非子模組？」行數不是判準，內容是否合理才是
+- **審查原則**：每個 `__init__.py` 的內容都必須能回答「為什麼放在這裡而非子模組？」行數不是判準，內容是否合理才是。適用所有內容——re-export（原則禁止，見上）、handy functions / 註冊初始化（如 `features/_auto_register_all()`，個案衡量：收益是否大於對所有消費者的 import 代價）、`__version__` / docstring（無代價，合理）
 - **禁止** `from .submodule import Symbol` re-export
 - **禁止** `__all__` 搭配 re-export（`__all__` 只在 `from package import *` 時有效，幾乎不需要）
 - 消費端用完整路徑 import（`from package.module import Class`）
-- **唯一例外**：套件發佈給外部使用的 public API（內部專案不適用）
+- **唯一例外**：套件發佈給外部使用的 public API（Facade Pattern，內部專案不適用，詳見下段）
+
+### Facade Pattern 為何不適用內部專案
+
+> 補充論證：回應 Python 社群常見「公開 API 統一由 `__init__.py` 導出（Facade Pattern）」的主張。禁令若不先承認並反駁 Facade 的價值，會被這套社群論述動搖。
+
+Facade Pattern 的價值在**解耦內部實作與外部介面**——使用者不必知道內部目錄結構，重構時 import 路徑不崩潰。**這個價值在「發佈給外部消費者的套件」為真**：使用者不該知道、也無需知道內部結構。
+
+但內部專案（如 mosaic_alpha）的消費者是同專案的 modules/scripts/tests/AI，本來就靠 CLAUDE.md 導航定位，Facade 的「重構解耦」收益不存在，代價卻突出：
+
+- **import 開銷**：re-export 重型子模組（pandas、NT），無關消費者被迫等待（見上方 1300ms 實測）
+- **循環依賴風險**：`__init__.py` 一層層 re-export 互相依賴，是循環 import 溫床
+- **IDE 混淆**：符號來源指向 `__init__` 而非真實定義，jump-to-def 失準
+
+**判準**：Facade 的價值取決於「消費者是否外部」。內部專案消費者靠導航而非 import 路徑簡潔度，故全面禁止 re-export。
+
+**若未來發佈外部套件**：用 `_internal` 模式（PyTorch/Open edX 風格）——實作放私有子模組，`__init__.py` 只 re-export 穩定 API。而非把所有內部符號 re-export。
 
 ### 遷移既有 re-export
 
@@ -71,7 +87,7 @@ from mosaic_alpha.common import Interval
 2. **逐一改直接路徑**：將 `from package import X` 改為 `from package.module import X`
 3. **移除 re-export**：消費端全數改完後，清除 `__init__.py` 中的 re-export 行
 
-## 型別註解（Python 3.11+）
+## 型別註解（Python 3.12+）
 
 ### ❌ 禁止 `from __future__ import annotations`
 
