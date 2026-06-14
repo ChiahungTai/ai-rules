@@ -1,5 +1,5 @@
 ---
-description: "排程工作接續 — 在指定時間自動 resume 當前工作（對應 Unix at 命令，CronCreate durable）"
+description: "排程工作接續 — 在指定時間自動 resume 當前工作（CronCreate one-shot，session-only）"
 when_to_use: "LLM provider reset usage 後需要自動接續工作時"
 usage: "/at <時間> [任務簡述]"
 argument-hint: "HH:MM 或 +Xh/+Xm | 任務簡述（可選）"
@@ -38,7 +38,9 @@ allowed-tools: ["Read", "Write", "Bash", "Glob", "CronCreate", "CronDelete", "Cr
 
 ### Phase 2：寫入 Context 檔案
 
-寫入 `.claude/at-context-{YYYYMMDD-HHMM}.md`（排程時間戳，避免衝突）。
+> **路徑選擇理由**：判斷 auto mode 是否放行的條件是「路徑是否為 protected path」,與是否 gitignore 無關。`.claude/` 是 protected path(auto mode classifier 硬擋、accept-edits mode 彈框);`.at-contexts/` 不是 protected path,所有 edit mode 零摩擦放行。故 context 寫 `.at-contexts/`。
+
+寫入 `.at-contexts/at-context-{YYYYMMDD-HHMM}.md`(排程時間戳,避免衝突)。
 
 **Context 檔案格式**：
 
@@ -75,7 +77,6 @@ project_path: "{當前專案路徑}"
 ```
 cron: "{分} {時} {日} {月} *"
 recurring: false
-durable: true
 prompt: |
   🔴 排程接續任務 — 用戶於 {scheduled_time} 排程此工作在 {resume_time} 自動接續。
 
@@ -95,6 +96,8 @@ prompt: |
   → 產出「當前狀態報告」
   → 不要靜默結束
 ```
+
+> `{context_file_path}` = `.at-contexts/at-context-{YYYYMMDD-HHMM}.md`（Phase 2 Step 1 寫入的絕對/相對路徑）
 
 ### Phase 4：確認 + 通知
 
@@ -116,7 +119,7 @@ prompt: |
 
 Resume 觸發時，LLM 應：
 
-1. **讀 context 檔案** → 了解任務和背景
+1. **讀 context 檔案** → 了解任務和背景（`.at-contexts/` 非 protected path，讀取零摩擦）
 2. **驗證 git 狀態** → 確認 context 快照與現實一致
 3. **執行任務** → 自主完成（同 `/deep-work` 模式）
 4. **清理** → 完成後刪除 context 檔案
@@ -145,7 +148,8 @@ Resume 觸發時，LLM 應：
 ## 執行約束
 
 - **Terminal 必須保持開啟**：CronCreate 在 Claude Code session 中觸發
-- **`durable: true`**：持久化到 `.claude/scheduled_tasks.json`，短暫中斷可恢復
+- **session-only 排程（不持久化）**：cron 存活在當前 session，靠 terminal 保持開啟維持；session 結束即消失。一次性接續用途足夠（善用 usage reset 後的配額窗口內接續工作）
 - **清理**：Resume 完成後必須刪除 context 檔案，避免殘留
-- **多個排程**：若 `.claude/` 已有 `at-context-*` 檔案，提示用戶確認是否有衝突
+- **多個排程**：若 `.at-contexts/` 已有 `at-context-*` 檔案，提示用戶確認是否有衝突
+- **版控排除（一次性設定，與 auto-mode 放行無關）**：`.at-contexts/` 含 git 快照與任務描述，建議加入該專案 `.gitignore` 或全域 `core.excludesFile`，避免誤 commit
 - **語音通知**：遵循 `voice-notification` skill 規範
