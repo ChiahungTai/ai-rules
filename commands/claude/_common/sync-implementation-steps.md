@@ -307,6 +307,6 @@ fi
 
 - [X1] data/CLAUDE.md 宣告 "Does NOT depend on strategies" 但 dep_graph.edges 有 data→strategies
 - [X6] Module 'services' (12 files) 缺少 CLAUDE.md
-- [X-cap-path] Capabilities entry path 'runner.py' does not exist (in mosaic_alpha/data/CLAUDE.md)
-- [X-tag-module] Card '騰落線指標' has tag 'nonexistent' which does not match any mosaic_alpha/ subdirectory
+- [X-cap-path] Capabilities entry path 'runner.py' does not exist (in <package>/data/CLAUDE.md)
+- [X-tag-module] Card '<card_title>' has tag 'nonexistent' which does not match any <package>/ subdirectory
 ```

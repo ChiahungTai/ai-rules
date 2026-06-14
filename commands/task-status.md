@@ -28,7 +28,7 @@ argument-hint: "[專案根目錄路徑，預設當前目錄]"
 |------|------|------|
 | 1 | 列出 Kanban lanes | 讀取 .kanban/ 下的子目錄（Backlog, Next-Up, In-Progress, Done） |
 | 2 | 列出每個 lane 的卡片 | `fd -e md . .kanban/{lane}/`，提取檔名（= title）和 line 1 的 `[tag:module]` |
-| 3 | 讀取 Capabilities | `fd "CLAUDE.md" mosaic_alpha/ --type f`，解析 `## Capabilities` 表格的 ✅ 數量 |
+| 3 | 讀取 Capabilities | `fd "CLAUDE.md" <package>/ --type f`，解析 `## Capabilities` 表格的 ✅ 數量 |
 | 4 | 偵測過時卡片 | 檔案 mtime：Backlog > 30 天、In-Progress > 14 天、Next-Up > 7 天 |
 | 5 | 聚合統計 | 按模組（tag）聚合 Kanban 卡片 + 按 CLAUDE.md 模組聚合 ✅ |
 | 6 | 產出 Dashboard | 見下方格式 |
@@ -48,14 +48,14 @@ argument-hint: "[專案根目錄路徑，預設當前目錄]"
 | 概念 | 對應 | 範例 |
 |------|------|------|
 | Lane | `.kanban/` 子目錄 | `.kanban/Backlog/` |
-| Card | `.md` 檔案 | `.kanban/Backlog/騰落線指標.md` |
-| Title | 檔案 stem | `騰落線指標` |
+| Card | `.md` 檔案 | `.kanban/Backlog/<card_title>.md` |
+| Title | 檔案 stem | `<card_title>` |
 | Tag | Line 1 的 `[tag:xxx]` | `[tag:indicators]` |
 | Content | 檔案剩餘內容 | Markdown body |
 
 **Lanes**：`Backlog`、`Next-Up`、`In-Progress`、`Done`
 
-**Tag → 模組歸屬**：Card 的 `[tag:xxx]` 對應 `mosaic_alpha/xxx/`，用於 Module Breakdown 統計。
+**Tag → 模組歸屬**：Card 的 `[tag:xxx]` 對應 `<package>/xxx/`，用於 Module Breakdown 統計。
 
 **容錯**：lane 目錄不存在時視為 0 張卡片（不報錯）。Done/ 不計入 pending 統計。
 
@@ -118,4 +118,4 @@ Done/ 不計入 pending（已完成 → 已在 Capabilities 中）。
 - 容錯：無 .kanban/ 目錄時只顯示 Capabilities 統計，不報錯
 - 容錯：無 `## Capabilities` 的 CLAUDE.md 跳過，不報錯
 - 過時閾值：Backlog 30 天、In-Progress 14 天、Next-Up 7 天
-- 掃描路徑：`mosaic_alpha/**/CLAUDE.md`（遞迴 glob）
+- 掃描路徑：`<package>/**/CLAUDE.md`（遞迴 glob）

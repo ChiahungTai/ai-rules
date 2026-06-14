@@ -1,6 +1,6 @@
 # Sync 檢查角度完整定義
 
-> **載入時機**: 僅在 `/claude:sync` 執行時按需讀取。本檔案定義 11 個檢查角度的判斷標準和驗證方式。
+> **載入時機**: 僅在 `/claude:sync` 執行時按需讀取。本檔案定義 12 個檢查角度的判斷標準和驗證方式。
 
 ---
 
@@ -56,7 +56,7 @@
 2. 隨機抽 1-2 個核心函數，`Read` 實際 .py 比對
 3. 比對重點：文檔描述的「方法/策略/目標函數/邏輯」是否與程式碼實作一致
 
-**範例**：文檔說「SequentialGreedyBuilder 以 Wilson CI 為目標函數」→ Read `sequential_greedy.py` 發現 `metric: str = "median"` → 標記為語義不準確。
+**範例**：文檔說「`<BuilderClass>` 以 `<claimed_metric>` 為目標函數」→ Read `<builder>.py` 發現 `metric: str = "<actual_metric>"` → 標記為語義不準確。
 
 ---
 
@@ -230,3 +230,20 @@
 - **suggestion**：模組 1-2 個檔案，無 CLAUDE.md 可接受
 
 **與角度三（涵蓋性）的區別**：角度三檢查「文檔是否記錄了核心模組」，角度十一用 dep-graph 精確資料驗證「哪些模組缺少文檔」。
+
+---
+
+## 角度十二：通用性（完整層，--all）
+
+> **核心原則**：泛用 rules/commands（非專案特定工具）教 pattern，不應釘死真實專案符號/路徑/數字 —— 否則 fact drift（該專案一改，例子就錯）且跨專案失效。原則定義見 [claude-writing.md](../../../rules/claude-writing.md)「應該避免 → 專案特定事實」。
+
+**判斷標準**：泛用 rules/（auto-loaded）、泛用 commands（非某專案專屬，如 `upgrade-*`）中，例子是否用 `<placeholder>` 而非真實專案符號。
+
+| 檢查項 | 說明 | 驗證方式 |
+|--------|------|----------|
+| 專案符號殘留 | 泛用檔含真實專案 package/module/class 名（非 `<placeholder>`） | LLM 語義判斷「這是泛用檔卻出現非佔位的具體符號」；抽查 examples / import 路徑 |
+| 例外：專案特定工具 | `upgrade-sj`/`nt`、`trading-analysis` 等本質是某專案工具 | 標 N/A，不檢查 |
+
+**判斷方式**：用 LLM 語義判斷，**不用 denylist**（denylist 脆弱，新專案加入就失效）。判斷準則：符號是「具體專案的 package/class」還是「通用佔位（`<package>`/`<EnumClass>`）」。
+
+**與角度二（程式碼一致性）的區別**：角度二檢查「描述是否與程式碼一致」，角度十二檢查「泛用檔是否不該出現該專案符號」。

@@ -16,20 +16,20 @@ paths:
 
 `__init__.py` **禁止** `from .submodule import Symbol` 形式的 re-export。
 
-**為什麼**：re-export 建立隱性依賴鏈。`from package import X` 會先執行 `__init__.py`，如果裡面 re-export 了重型子模組（pandas、numpy、NT Logger），所有 import 消費者都被迫等待。實測案例：一個 re-export `logging.py`（拉 NT 730ms）+ `cost.py`（拉 pandas 600ms）的 `common/__init__.py`，讓 `from common.enums import Interval` 從 5ms 膨脹到 1300ms（260x）。
+**為什麼**：re-export 建立隱性依賴鏈。`from package import X` 會先執行 `__init__.py`，如果裡面 re-export 了重型子模組（pandas、numpy 等重型依賴），所有 import 消費者都被迫等待。實測案例：一個 re-export `logging.py`（拉重型框架）+ `cost.py`（拉 pandas）的 `__init__.py`，讓輕量 enum import 從毫秒級膨脹到秒級（兩個數量級）。
 
 ### ❌ 錯誤：re-export（LLM 最愛犯的錯）
 
 ```python
 # package/__init__.py — 禁止這樣寫
-from .logging import init_logging_with_defaults    # 拉 NT 730ms
-from .cost import TradingCostCalculator            # 拉 pandas 600ms
-from .enums import Interval                        # 5ms，但被迫等上面兩個
+from .logging import <heavy_init_fn>               # 拉重型框架（秒級）
+from .cost import <CostCalculator>                 # 拉 pandas（數百 ms）
+from .enums import <LightEnum>                     # 輕量（ms 級），但被迫等上面兩個
 
-__all__ = ["init_logging_with_defaults", "TradingCostCalculator", "Interval"]
+__all__ = ["<heavy_init_fn>", "<CostCalculator>", "<LightEnum>"]
 ```
 
-後果：`from package.enums import Interval` 表面上只 import enums，但 Python 先解析 `__init__.py` → 觸發所有 re-export → 1.3s。
+後果：`from package.enums import <LightEnum>` 表面上只 import enums，但 Python 先解析 `__init__.py` → 觸發所有 re-export → 秒級延遲。
 
 ### ✅ 正確：`__init__.py` 只放註解或空
 
@@ -48,11 +48,11 @@ __all__ = ["init_logging_with_defaults", "TradingCostCalculator", "Interval"]
 
 ```python
 # ✅ 直接從子模組 import
-from mosaic_alpha.common.enums import Interval
-from mosaic_alpha.common.logging import init_logging_with_defaults
+from <package>.common.enums import <EnumClass>
+from <package>.common.logging import <init_fn>
 
 # ❌ 透過 __init__.py re-export import（不應存在）
-from mosaic_alpha.common import Interval
+from <package>.common import <EnumClass>
 ```
 
 ### 規範摘要
@@ -69,9 +69,9 @@ from mosaic_alpha.common import Interval
 
 Facade Pattern 的價值在**解耦內部實作與外部介面**——使用者不必知道內部目錄結構，重構時 import 路徑不崩潰。**這個價值在「發佈給外部消費者的套件」為真**：使用者不該知道、也無需知道內部結構。
 
-但內部專案（如 mosaic_alpha）的消費者是同專案的 modules/scripts/tests/AI，本來就靠 CLAUDE.md 導航定位，Facade 的「重構解耦」收益不存在，代價卻突出：
+但內部專案的消費者是同專案的 modules/scripts/tests/AI，本來就靠 CLAUDE.md 導航定位，Facade 的「重構解耦」收益不存在，代價卻突出：
 
-- **import 開銷**：re-export 重型子模組（pandas、NT），無關消費者被迫等待（見上方 1300ms 實測）
+- **import 開銷**：re-export 重型子模組（pandas 等重型依賴），無關消費者被迫等待（見上方實測）
 - **循環依賴風險**：`__init__.py` 一層層 re-export 互相依賴，是循環 import 溫床
 - **IDE 混淆**：符號來源指向 `__init__` 而非真實定義，jump-to-def 失準
 

@@ -100,6 +100,7 @@ permission-mode: "acceptEdits"
 - **完整範例**: 超過 5 行的程式碼範例（精簡為一句話 + 源碼引用）
 - **元資訊**: 版本號、更新日期、統計資訊、Changelog
 - **過時範例**: 無法實際執行的範例
+- **專案特定事實**: 真實專案符號/路徑/數字（如 `myproject.common.enums.MyEnum`）—— 泛用 rules/commands 教 pattern，用 `<placeholder>`（`<package>`、`<EnumClass>` 等）。例子釘死專案現狀 → 該專案一改就 drift、其他專案讀無關。專案特定工具（upgrade-* 等）例外
 
 ### 引用語法（依檔案類型選擇）
 

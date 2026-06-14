@@ -91,23 +91,23 @@ class UIActionLogger:
 
 ### [ACTION] 分層原則
 
-**ui 元件層 log，app 層不重複。** 如果互動來自 `mosaic_alpha/ui` 的元件（Tabulator、Panel），由元件 log；只有 app 直接操作 Bokeh/Panel 時才由 app 層 log。
+**ui 元件層 log，app 層不重複。** 如果互動來自 UI 元件層的元件，由元件 log；只有 app 直接操作 UI 框架時才由 app 層 log。
 
 ```python
 # ✅ 正確：元件擁有互動，元件 log
-class SwingTriagePanel:
-    def _handle_selection(self, event):
-        self._action_log.log("select_swing", f"{swing_id}")
+class <Component>:
+    def _handle_interaction(self, event):
+        self._action_log.log("<component_action>", "<detail>")
 
 # ❌ 錯誤：app 層重複 log 同一事件
-class TrajectoryViewerApp:
-    def _on_swing_selected(self, row):
-        self._action_log.log("select_swing", f"{row['swing_id']}")  # 重複
+class <App>:
+    def _on_interaction(self, row):
+        self._action_log.log("<component_action>", "<detail>")  # 重複
 
-# ✅ 正確：app 直接操作 Panel widget，由 app log
-class TrajectoryViewerApp:
-    def _on_instrument_change(self, event):
-        self._action_log.log("switch_instrument", f"->{new_code}")
+# ✅ 正確：app 直接操作 UI widget，由 app log
+class <App>:
+    def _on_app_action(self, event):
+        self._action_log.log("<app_action>", "<detail>")
 ```
 
 ### 決策規則
@@ -179,19 +179,19 @@ Logger 提供補充細節（print 沒說的），不重複 print 的摘要。
 ## init_logging 配置
 
 ```python
-from mosaic_alpha.common.logging import init_logging_with_defaults
+from <package>.logging import <init_fn>
 
-log_config = init_logging_with_defaults()
+log_config = <init_fn>()
 # 內部自動處理：
 #   - stdout=OFF, file=DEBUG
 #   - file_name 從 sys.argv[0] 自動偵測
-#   - directory 從 MOSAIC_LOG_PATH 環境變數讀取
+#   - directory 從 <LOG_PATH_ENV> 環境變數讀取
 #   - max_file_size=0（不 rotation，檔名可預測）
 #   - RuntimeError（重複初始化）自動處理
 # 自動印出：[LOG] {log_path} (init at {ts})
 ```
 
-路徑解析優先順序：`directory 參數` > `MOSAIC_LOG_PATH 環境變數` > `/tmp/mosaic_logs/`
+路徑解析優先順序：`directory 參數` > `<LOG_PATH_ENV>` 環境變數 > `<default_log_dir>`
 
 ---
 

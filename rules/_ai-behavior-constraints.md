@@ -74,10 +74,10 @@
 
 ```
 # ❌ 禁止：版號標記（必然過時）
-├── setup_classifier.py  # SetupClassifier（v7: pure AND/OR evaluator）
+├── <module>.py  # <ClassName>（v7: pure AND/OR evaluator）
 
 # ✅ 正確：功能性描述（始終準確）
-├── setup_classifier.py  # SetupClassifier（pure AND/OR evaluator, multi-setup, YAML-driven）
+├── <module>.py  # <ClassName>（pure AND/OR evaluator, multi-setup, YAML-driven）
 ```
 
 #### 唯一例外

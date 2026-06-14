@@ -139,7 +139,7 @@ ASSUMPTIONS I'M MAKING:
 - **檔名**：繁體中文標題，保留必要英文縮寫。範例：`訂閱分級語意重構.md`
 - 📋 簡單（< 10 行描述）：`## 目標` 放一句話
 - 📋 詳細（≥ 10 行）：`## 目標` 放完整描述（卡片是 markdown，長度不限）
-- **Tag**：掃描 `mosaic_alpha/` 子目錄決定 tag 名（見專案 CLAUDE.md「Tag 慣例」）。`adapters/sj` → `sj`
+- **Tag**：掃描 `<package>/` 子目錄決定 tag 名（見專案 CLAUDE.md「Tag 慣例」）。`<nested>/<mod>` → `<mod>`
 
 **邊界定義**：
 ```

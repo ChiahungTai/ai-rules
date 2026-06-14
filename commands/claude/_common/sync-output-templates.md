@@ -27,8 +27,8 @@
 - ⚠️  "DataEngine 會自動重連" → 實際程式碼沒有自動重連邏輯
 
 #### 語義正確性 spot-check
-- ✅ "classify 使用 AND/OR 邏輯" → 實際 setup_classifier.py 確實如此
-- ⚠️ "Greedy 用 Wilson CI 排序" → 實際 metric="median"（語義不準確，來源: sequential_greedy.py:46）
+- ✅ "<behavior> 使用 <logic>" → 實際 <file>.py 確實如此
+- ⚠️ "<Class> 用 <claimed_metric> 排序" → 實際 metric="<actual>"（語義不準確，來源: <file>.py:<行號>）
 
 ### 涵蓋性檢查
 
@@ -143,19 +143,19 @@ module: {module_name}
 inconsistencies:
   - type: outdated_description
     location: CLAUDE.md:{行號}
-    detail: "描述的 FilterTreePipeline 已重構為 Pipeline v2"
+    detail: "描述的 <OldClass> 已重構為 <NewClass>"
     confidence: high
-    source: filter_tree_pipeline.py:{行號}
+    source: <old_module>.py:{行號}
   - type: missing_reference
     location: CLAUDE.md:{行號}
-    detail: "新模組 condition_auditor.py 未在 CLAUDE.md 提及"
+    detail: "新模組 <new_module>.py 未在 CLAUDE.md 提及"
     confidence: high
-    source: condition_auditor.py:1
+    source: <new_module>.py:1
   - type: signature_changed
     location: CLAUDE.md:{行號}
     detail: "evaluate() 新增參數 strict_mode"
     confidence: high
-    source: setup_classifier.py:{行號}
+    source: <file>.py:{行號}
 coverage_gaps:
   - file: new_module.py
     location: CLAUDE.md:(未提及)
@@ -250,7 +250,7 @@ actions:
 - 程式碼一致性: ⚠️ 85%（1 個型別引用過時）
 - 內部品質: ✅ 95/100
 
-**Sub-doc**: src/filter_tree_design_v1.md（設計文檔）
+**Sub-doc**: src/<design_doc>.md（設計文檔）
 - ⏭️ 跳過（設計文檔，不檢查程式碼一致性）
 
 **檔案**: src/core/CLAUDE.md
