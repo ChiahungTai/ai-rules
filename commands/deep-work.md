@@ -69,7 +69,8 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 4. **Agent Review Cycle**（見下方）
 5. CLAUDE.md 同步檢查
 6. 移除除錯用程式碼
-7. 生成摘要報告
+7. **/audit-test checkpoint**（見 [audit-test](./audit-test.md)）：跑 `/audit-test`（Diff Audit）。重點看角度 4（消費端驗證覆蓋：新 public 參數路徑、整合器型真實邊界）與角度 2（registry 接線）。缺口不得帶進 /commit。用戶不在場時，這是「單元全綠但接線/邊界沒測」隱性 regression 的唯一機械化閘門。
+8. 生成摘要報告
 
 #### Agent Review Cycle
 
@@ -86,6 +87,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 | EP 合規 | EP 完成度稽核：Done / Skipped / Partial | **always**（有 EP 時） | P0 |
 | 正確性 | 邏輯 bugs、邊界案例、error handling | 變更 ≥ 3 files | P1 |
 | 架構與安全 | 設計模式、耦合、安全性 | 變更 ≥ 5 files 或含 API changes | P2 |
+| 測試覆蓋 | 新增 public 行為（新參數、新注入點）的整合路徑是否有測試？`rg "<新參數>=" tests/`，區分符號覆蓋 vs 路徑覆蓋 | 變更含新 public API / 注入點 / 整合器型段落 | P1 |
 
 啟用維度數 > max-agents → 從低優先級（P2 起）合併至前一個 agent（不丟棄任何維度）。
 

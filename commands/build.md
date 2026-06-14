@@ -50,6 +50,14 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 2. 套用 max-agents 限制（預設 3，可透過 `--max-agents N` 或 `-a N` 覆蓋）
 3. **有語義約束的段落強制序列**
 
+**整合器段落識別**（驅動階段 2 硬閘門、階段 3 真實邊界、階段 4 測試覆蓋維度的觸發）：掃描 EP 段落，標記同時滿足以下者為整合器型（見 [quality-constraints](../rules/quality-constraints.md)「整合器型變更判定」）：
+
+- 主要價值是把 ≥2 個真實外部組件接起來（DB、catalog、SDK、跨進程、跨框架）
+- 邊界正確性無法從任一單方文件推導
+- 錯了不是調參數而是整天行為全錯
+
+整合器型段落標記後，在階段 2/3/4 對應加嚴（路徑覆蓋硬閘門 + 真實邊界整合測試 + 測試覆蓋維度審查）。
+
 ### 階段 1：準備
 
 1. 讀取 Execution Plan，識別段落結構、依賴關係
@@ -90,19 +98,30 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 #### EP 專屬約束
 
-- **照著 EP 寫，不要自己發明**
-- 記錄偏差：與 Pseudo Code 有出入時記錄原因
+> **EP 是收斂方向，不是合約**。EP 是規劃層對需求理解的最佳猜測，有預見極限（見 [acceptance-evidence](../rules/acceptance-evidence.md)「認知誤差與 EP 的預見極限」）— 實作落差、設計本身錯，都只能在實作呈現時發現。前線實作 LLM 有裁量權根據實作發現調整；死守 EP 會實作「忠實但錯誤」的東西，反而妨礙人類在呈現時發現認知誤差。
+
+- **EP 為收斂方向，實作層有裁量權**：照 EP 為主軸，但實作時發現 EP 預見極限外的真相（邊界、副作用、組件互動、需求落差）可調整 — 這是「發現真相的責任」而非「偷懶不照 EP」
+- 記錄偏差：與 Pseudo Code 有出入時記錄原因（偏差是發現認知誤差的線索，不是違規）
 - 記錄疑慮不中斷：先選最合理方案繼續，最後統一讓用戶確認
 - 錯誤自癒：連續 3 次失敗 → 標記 ⚠️ 繼續下一段
 - **依賴錨點 drift check**：實作每段前驗證錨點，drift 時先更新 EP
 
 #### 驗證
 
-每段完成後：`ruff check --fix && ruff format` → LSP diagnostics（即時型別檢查）→ `mypy .`（完整驗證）→ `pytest <test> -v`（背景跑）→ Examples 驗證
+每段完成後：**整合路徑覆蓋檢查** → `ruff check --fix && ruff format` → LSP diagnostics（即時型別檢查）→ `mypy .`（完整驗證）→ `pytest <test> -v`（背景跑）→ Examples 驗證
+
+**整合路徑覆蓋檢查**（機械式硬閘門，見 [acceptance-evidence](../rules/acceptance-evidence.md) L3 + [quality-constraints](../rules/quality-constraints.md) 符號 vs 路徑覆蓋）：本段是否新增/修改 callable 簽名（新參數、新 keyword）或新增注入點（constructor 接受新依賴）？
+
+- 否 → 跳過
+- 是 → 對每個新參數/注入點 `rg "<param>=" tests/`
+  - **0 hits → 該段不得 pass**，必須先補消費端整合測試（驅動真實消費端流程 + 新參數組合路徑，非僅符號 import）
+  - 有 hits → 確認 hits 是「驅動消費端流程」的測試，而非僅符號 import
 
 ### 階段 3：整合驗證
 
-全量 Lint + mypy + pytest（背景跑）+ Examples 全量驗證
+全量 Lint + mypy + pytest（背景跑）+ Examples 全量驗證。全量跑只是 baseline。
+
+**整合器型段落必須有真實邊界整合測試**（見 [quality-constraints](../rules/quality-constraints.md)「整合器型變更判定」+「兩層整合測試」）：主要價值是接 ≥2 個真實外部組件的段落，完成定義必須含 L1 接線 guard（`unit_tests/`）+ L2 真實邊界（`integration_tests/`），不能只靠 mock — mock 循環論證會讓 mock 假設即 bug 來源。
 
 ### 階段 4：Agent Review Cycle
 
@@ -152,6 +171,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-revie
 | EP 合規 | EP 完成度稽核：Done / Skipped / Partial | **always**（有 EP 時） | P0 |
 | 正確性 | 邏輯 bugs、邊界案例、error handling | 變更 ≥ 3 files | P1 |
 | 架構與安全 | 設計模式、耦合、安全性 | 變更 ≥ 5 files 或含 API changes | P2 |
+| 測試覆蓋 | 新增 public 行為（新參數、新注入點）的整合路徑是否有測試？`rg "<新參數>=" tests/`，區分符號覆蓋 vs 路徑覆蓋 | 變更含新 public API / 注入點 / 整合器型段落 | P1 |
 
 啟用維度數 > max-agents → 從低優先級（P2 起）合併至前一個 agent（不丟棄任何維度）。
 
@@ -212,7 +232,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 #### 5d. /audit-test（所有變更）
 
-執行 `/audit-test` 對新增/修改的測試進行品質稽核。稽核結果附於完成報告。
+執行 `/audit-test` 對新增/修改的測試進行品質稽核（階段 2 已逐段檢查整合路徑覆蓋，此處複驗整體 + 其他角度如反模式、mock 健康度、測試必要性）。稽核結果附於完成報告。
 
 **小型變更**（bug fix）：僅執行 5d（/audit-test），跳過 5a、5b、5c。
 

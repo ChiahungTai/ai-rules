@@ -129,6 +129,34 @@ def process_trading_data(data):
 
 **跨模組影響擴散**：修改共用模組（如 `_validate_output`、`fill_null`、`column_metadata`）時，影響會跨測試檔案（parity test、interaction test、consistency test）。必須跑整個受影響目錄而非單一檔案。例如：修改 `features/column_metadata.py` 的預設值，可能同時影響 parity test（欄位比對）、interaction test（Feature 組合）、consistency test（跨 Interval 一致性），三者分在不同測試檔案中。
 
+### 符號覆蓋 vs 整合路徑覆蓋
+
+理論基礎見 [acceptance-evidence](./acceptance-evidence.md) 證據階層 L3。消費端驗證模式的盲點：**符號覆蓋**（symbol 出現在 tests）≠ **整合路徑覆蓋**（新參數 / 新接線 / 多組件組合被實際驅動）。
+
+- **新 public 參數 / 注入點**：既有符號 + 新參數組合必須被測試。例：把 `RiskGuard` 注入既有 `Strategy` 的 7 個 `submit_order` 點 — `Strategy` 有 58 個 `on_bar` 測試，但全是 `risk_guard=None` 的回測路徑，新注入路徑零測試。機械檢查：`rg "<param>=" tests/` → 0 hits = 路徑未覆蓋。
+- **新增 registry 成員**：auto-discovery 接線必須被斷言。per-class 單元測試只證明邏輯正確，不證明接上 registry。機械檢查：在 test files 搜尋 `list_*_classes()` membership 斷言。
+
+### 整合器型變更判定
+
+整合器型變更的完成定義必須含**真實邊界整合測試**（L3+），不能只靠 mock。EP 段落同時滿足以下 → 整合器型：
+
+- 主要價值是把 ≥2 個真實外部組件接起來（DB、catalog、第三方 SDK、跨進程、跨框架）
+- 邊界正確性無法從任一單方文件推導（必須實際接起來跑）
+- 錯了不是「調參數」而是「整天行為全錯」（時區偏移整天、序列化整批毀損）
+
+**mock 循環論證陷阱**：當 EP 主要價值是「把外部組件接對」，mock 測試的假設本身可能是 bug 來源 — mock 驗證「假設成立的話行為正確」，無法驗證「假設本身是否成立」。例：catalog 存 naive Taiwan-local 時間，`tz_localize("UTC")` 只貼標不轉換，mock 假設「catalog 回傳正確 UTC」就是 bug 來源，mock unit test 結構上抓不到 +8h 時區偏移。
+
+### 兩層整合測試
+
+整合器型變更兩層都要，缺任一即缺口：
+
+| 層 | 性質 | 目錄 | marker |
+|--|--|--|--|
+| L1 接線 guard | 純邏輯、無 IO（registry lookup、membership 斷言） | `tests/unit_tests/` | `quick` |
+| L2 真實邊界 | 真實 DB / Catalog / 資料，跑完整消費端 pipeline | `tests/integration_tests/` | `integration` |
+
+**不可互代**：L1 廉價（毫秒）擋高頻接線 regression；L2 昂貴（秒級以上）擋跨層 schema / 展開失敗。命名含 `_integration` 但純邏輯仍留 unit_tests（依依賴判斷，不看名稱）。
+
 ---
 
 ## 多步驟任務檢查點
