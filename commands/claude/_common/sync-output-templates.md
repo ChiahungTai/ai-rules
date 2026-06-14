@@ -89,15 +89,15 @@
 
 ### 導航有效性檢查
 
-#### 概念→程式碼連結
+#### 概念→符號連結
 抽查概念: [概念A, 概念B, 概念C]
-- ✅ [概念A]: → `module/file.py:ClassName`
-- ❌ [概念B]: 無檔案或 class 指引（導航缺口）
-- ✅ [概念C]: → `module/file.py` + function 名
+- ✅ [概念A]: → `ClassName`（路徑由 LSP 解析）
+- ❌ [概念B]: 無 symbol 指引（導航缺口）
+- ✅ [概念C]: → `function_name()`（路徑選用）
 
-#### 職責→檔案對應
-- ✅ [職責A]: 指向 file_a.py
-- ⚠️ [職責B]: 有描述但無檔案指引
+#### 職責→符號對應
+- ✅ [職責A]: 指向 `ClassName`
+- ⚠️ [職責B]: 有描述但無 symbol 指引
 
 #### 跨模組依賴導航
 - ✅ [依賴A]: 具體到 `other_module.ClassName`
@@ -107,9 +107,9 @@
 [多步驟流程的 step 間銜接驗證結果，無流程標 N/A]
 
 #### 導航 Decoder Test
-- Q1「修改 X 打開哪個檔案？」: [✅ 可回答 / ❌ 無法定位]
-- Q2「Y 在哪裡實作？」: [✅ 可回答 / ❌ 無法定位]
-- Q3「Z 的上游從哪來？」: [✅ 可回答 / ❌ 無法定位]
+- Q1「修改 X 核心符號是什麼？」: [✅ 可回答 / ❌ 無法定位]
+- Q2「Y 這個概念在哪裡實作？」: [✅ 可回答 / ❌ 無法定位]
+- Q3「Z 的上游資料從哪來？」: [✅ 可回答 / ❌ 無法定位]
 
 ### 總結
 - 程式碼一致性: X%
@@ -122,7 +122,7 @@
 1. 移除不存在的檔案引用
 2. 更新變更的 API 簽名
 3. 修正語義不準確的描述（spot-check 發現）
-4. 補充導航缺口（概念→程式碼連結缺失處）
+4. 補充導航缺口（概念→符號連結缺失處）
 5. 補充遺漏的模組說明
 6. 修正內部品質問題
 7. 清理元資訊
@@ -166,7 +166,7 @@ metadata_issues:
 navigation_gaps:
   - concept: "{概念名稱}"
     location: CLAUDE.md:{行號}
-    detail: "提到概念但無檔案/class 指引"
+    detail: "提到概念但無 symbol 指引"
     confidence: high
   - dependency: "{跨模組依賴}"
     location: CLAUDE.md:{行號}
@@ -192,7 +192,7 @@ actions:
     target: "CLAUDE.md:{章節名}"
     concept: "{概念名稱}"
     text: |
-      - **{概念描述}** → `file.py:ClassName`
+      - **{概念描述}** → `ClassName`
     signal_level: high
     reason: "導航缺口：概念無程式碼指引"
 
@@ -207,7 +207,7 @@ actions:
   - type: add_design_decision
     target: "CLAUDE.md:{章節名}"
     text: |
-      - **{設計決策名稱}**：{一句話理由} → `file.py:ClassName`
+      - **{設計決策名稱}**：{一句話理由} → `ClassName`
     signal_level: high
     reason: "設計決策缺失（從程式碼猜不到）"
 

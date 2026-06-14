@@ -80,7 +80,7 @@ LLM 直接讀取 CLAUDE.md 的 `## Capabilities` 表格：
 遵循 [claude-writing.md](../rules/claude-writing.md) 品質標準：
 
 - **Signal/Noise**：無可推導內容（API 簽名、參數表）、無統計/版本/日期
-- **導航有效性**：每個關鍵概念有 `file.py:Class` 指引（導航 Decoder Test）
+- **導航有效性**：每個關鍵概念有 symbol 種子（位置由 LSP 解析）（導航 Decoder Test）
 - **消費場景**：Capabilities 行有下游消費者資訊
 
 ### 步驟 4：過時卡片（--all）

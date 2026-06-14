@@ -60,7 +60,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - **架構定位**：在整體系統中的角色
 - **Module Boundaries**：Depends on / Consumed by / Does NOT depend on
 - **關鍵設計決策**：從程式碼推導不出來的「為什麼」
-- **導航索引**：如果模組很大，加上檔案→功能對照表
+- **導航索引**：如果模組很大，加上符號→職責對照表（檔案路徑選用，LSP 可從符號解析）
 
 **Module Boundaries 精確度**（有 Phase 1.5 時加成）：
 - `Depends on` 從 `edges[]` 精確推導（而非猜測）

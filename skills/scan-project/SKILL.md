@@ -30,7 +30,16 @@ Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.m
 
 內部解析（CLAUDE.md、.kanban/）僅用於計算 findings，**不在輸出中包含 registry**。
 
-**LSP 與 dep_graph 的分工**：LSP 提供符號級查詢（goToDefinition, findReferences, incomingCalls），dep_graph 提供模組級架構分析（fan-out、熱點、架構邊界）。dep_graph 獨有價值：捕捉 CLAUDE.md 位置、kanban cards、Capabilities 表格等專案元資料（LSP 不知道這些）。兩者互補。
+**LSP 與 dep_graph 的分工（正交，非競爭）**：
+
+| 查詢類型 | 用誰 | 理由 |
+|---------|------|------|
+| 單點依賴（「X 用到 Y 嗎？」「誰呼叫 Z？」） | **LSP** findReferences / incomingCalls | live、無 snapshot 時效衰減 |
+| 否定宣稱（X1：CLAUDE.md「Does NOT depend on」是否為真） | **dep_graph** edges 集合差集 | 證明「不存在」需窮舉邊，LSP 點查詢不擅長否定驗證 |
+| 全域拓撲（fan-out、熱點、blast radius、遞迴閉包） | **dep_graph** | 一次看全圖；LSP 需 N 次點查詢重建 |
+| code↔doc 一致性（X-cap-path / X-tag-module / X6 等 findings） | **scan-project** | LSP 符號世界裡沒有「文檔宣稱什麼」這一側 —— **scan-project 真正不可替代的價值，非 dependency graph 本身** |
+
+**原則**：單點查詢優先 LSP（dep_graph snapshot 可能 stale）；否定宣稱、全域拓撲、code↔doc 一致性用 dep_graph / scan-project。兩者在不同軸上互補。
 
 ---
 
