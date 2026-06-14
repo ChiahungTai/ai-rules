@@ -261,6 +261,21 @@ This catches wrong directions before you've built on them. It's a 30-second inve
 | Implicit knowledge | Agent doesn't know project-specific rules | Write it down in rules files — if it's not written, it doesn't exist |
 | Silent confusion | Agent guesses when it should ask | Surface ambiguity explicitly using the confusion management patterns above |
 
+### Rule Freshness Within a Session
+
+Rules files (CLAUDE.md, rules/) are loaded at session start, but **updates to rules during a session do not propagate to agents already spawned or tasks already in flight**. This is a structural gap:
+
+- A rule updated after an agent was spawned won't reach that agent — it carries the context it was given at spawn time.
+- Within one session, consecutive tasks may still run on stale context unless the session is reset.
+
+**Mitigation**:
+
+- For rules that are frequently violated (e.g. mock patterns, property patching), **inject the relevant rule excerpt directly into the agent prompt** at the point of spawning. Do not assume "it's in the rules file, so the agent will follow it."
+- After updating a high-stakes rule, reset context (`/clear` or re-`@` the rule) before the next task that depends on it.
+- Hot-spot rules — the ones agents keep getting wrong — are worth repeating at key flow points (audit angles, agent prompt templates) rather than relying on a single load.
+
+**Bottom line**: "it's in the rules" does not mean "the agent will do it." Important rules must be actively injected at the moments they matter.
+
 ## Common Rationalizations
 
 | Rationalization | Reality |

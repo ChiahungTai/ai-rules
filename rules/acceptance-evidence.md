@@ -47,6 +47,19 @@
 | [test-driven-development](../skills/test-driven-development/SKILL.md) 警告過度 mock | L2 的獨立性被掏空 |
 | 消費端驗證模式(見 quality-constraints) | L3 的具體化 |
 
+### L3 整合層的正向價值實例(為什麼整合測試值得)
+
+**理論呼應**:"mock 循環論證讓 mock 假設成為 bug 來源"(見 quality-constraints 整合器型變更)。以下實例顯示補整合測試如何**立刻**抓到 mock 抓不到的 source bug。
+
+**實例(真實案例 — DB 序列重置函式)**:
+
+- **audit 發現**:restore flow 新增的 DB 序列重置函式(`pg_get_serial_sequence` + `setval` 動態 SQL),屬整合器型變更(DB catalog + serial sequence + restore flow),但整合測試零覆蓋。
+- **補整合測試**(真實 PostgreSQL,跑 restore → reset → INSERT):**立刻崩潰**。
+- **source bug**:空 table 時 `setval(seq, COALESCE(MAX(id), 0))` → `setval(seq, 0)`,但 SERIAL 的 `MINVALUE=1`,`setval(seq, 0)` 違反約束 → fresh DB restore 後第一次 INSERT 崩潰。
+- **為什麼 mock 抓不到**:mock 假設「table 有資料,MAX 有值」,整個邊界(空 table)不在 mock 的假設世界裡。mock 循環論證讓這個假設成為 bug 來源。
+
+**啟示**:整合器型變更(接 ≥2 真實外部組件)補整合測試不是「儀式」,是**唯一能抓跨組件邊界 bug 的手段**。理論見品質約束「整合器型變更判定」;判定流程見 audit-test 角度 4。
+
 ### 證據時效性
 
 證據階層談「強度」,但證據還有「時效」— 測試通過的證據會隨系統演化而**腐化**。重構改變行為後,測試可能:

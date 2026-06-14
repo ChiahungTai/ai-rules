@@ -132,6 +132,7 @@ claude --permission-mode auto -p "fix all lint errors"
 - [ ] 當前 Agent 數量未超過上限
 - [ ] 任務確實需要 Agent
 - [ ] Prompt 包含足夠 context + 相對路徑 + rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules，必須在 prompt 開頭明確寫入：`fd` 取代 `find`、`rg` 取代 `grep`、`uv run` 前綴 Python、禁止 `sed` 修改 `.py/.md`、禁止 `$` shell 展開、輸出繁體中文）
+- [ ] **若任務涉及 mock / PropertyMock / fixture**：prompt 主動注入專案 `tests/CLAUDE.md` 的 mock 規範段落摘要（agent 不會自己讀專案 CLAUDE.md，必須主動注入；見 [context-engineering](../context-engineering/SKILL.md)「Rule Freshness」）
 - [ ] Uncommitted changes：需要 → 先 commit；Branch：不正確 → 先 checkout
 - [ ] 失敗 Agent 的 worktrees 已清理（`git worktree list`）
 - [ ] Agent 產出 commit 前需用戶確認（[commit-consent](../../rules/commit-consent.md)）

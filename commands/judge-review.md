@@ -72,10 +72,33 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Edit"]
 
 ---
 
+## 查證工具指定
+
+> 符號引用查證優先 LSP `findReferences`（100% 涵蓋），rg 文字搜尋易 pattern 失誤。完整工具決策樹見 [lsp-navigation](../rules/lsp-navigation.md)。
+
+| 查證對象 | 必用工具 | 禁止 |
+|---------|---------|------|
+| 「X class/function 是否存在」「X 在哪裡被引用 / 建構 / 呼叫」 | **LSP `findReferences` / `goToDefinition` / `workspaceSymbol`** | 單一 rg pattern 0 hits 就下結論「不存在」|
+| 「X 字串 / 註解 / config 值是否存在」 | rg | — |
+| 「名為 test_X 的檔案是否存在」 | `fd -g "test_X.py"` + `ls <expected_dir>/` 雙查 | 單一 `fd "test_X"` 無結果就下結論 |
+
+### 自我否證義務
+
+**「找不到」不等於「不存在」**。查證 0 hits 時，必須：
+
+1. **換工具**：rg 0 hits → 用 LSP `findReferences` 再查一次（覆蓋動態引用、避免 pattern 失誤）
+2. **換 pattern**：`rg "<ClassName>\("` 失敗 → 試 `rg "<ClassName>"`（去掉 `(`，可能建構方式不同）、`workspaceSymbol "<ClassName>"`
+3. **換位置**：以為在某檔 → 用 `workspaceSymbol` 全域查定義位置
+4. **標註「查證失敗」而非「不存在」**：若三個工具都 0 hits，仍只能標「查證失敗，無法確認」，**禁止標「不存在」**（你可能是查證者錯，不是程式碼錯）
+
+**反例（真實案例）**：審查者稱「`<ExecutorClass>` 在 `<module>.py` 無建構點，查證失敗」→ 不採納 audit finding。獨立查證：`<module>.py` import 行 + 建構行確實存在（LSP `findReferences` 立刻列出）。審查者的 rg pattern 失誤，把「自己沒查到」誤判為「程式碼不存在」。
+
+---
+
 ## 特殊情況
 
 - **建議互相矛盾**：基於程式碼判斷採納哪一方，附理由
-- **找不到相關程式碼**：❌ 不採納（無法驗證）
+- **找不到相關程式碼**：先按「自我否證義務」三工具交叉查證。仍找不到 → 標「查證失敗」並請用戶提供線索，**不直接 ❌ 不採納**（查證者可能是 pattern 失誤，非程式碼不存在）
 - **與專案規範衝突**：❌ 不採納（專案規範優先）
 
 ---

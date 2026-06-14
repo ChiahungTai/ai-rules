@@ -40,6 +40,17 @@ allowed-tools: ["Read", "Bash"]
 **Commit Audit**：`git show <commit-id> --stat` 中 `tests/` 下的 `.py` 檔案。讀取 commit diff 取得完整 test body。
 **Daily Scan**：`fd -e py . tests/` 全部 test files。受影響的 source files = 所有被 import 的模組。
 
+### 長任務 findings 落盤策略（Daily Scan 必讀）
+
+> Daily Scan 涵蓋數百 test files，單一 agent 可能跑數十分鐘。**必須假設會中斷**（rate limit、context 上限、network），findings 即時落盤，避免 resume 重跑。
+
+1. **分段輸出**：每完成一個子任務（一個 test 目錄 / 一組 test files），立即將該段 findings 寫入中間檔案（如 `ai-analysis/audit-test-daily-scan-{date}-{agent}.partial.md`），不在 context 中累積全部 findings 才一次輸出
+2. **進度標記**：每段含進度標記（如 `<!-- agent=2, segment=3/8, completed=true -->`），resume 時讀 `.partial.md` 判斷已完成段落
+3. **彙整**：全部子任務完成後，讀所有 `.partial.md` 彙整成最終報告，刪除中間檔
+4. **resume**：中斷後 resume 先讀 `.partial.md`，只重跑未完成段落
+
+**反例（真實案例）**：某 Daily Scan agent 跑多個子任務，findings 全留 context，彙整前因 rate limit 中斷 → resume 需完整重跑全部子任務。即時落盤則只需重跑中斷時正在做的那一段。
+
 ---
 
 ## 6 個檢查角度
@@ -88,7 +99,7 @@ allowed-tools: ["Read", "Bash"]
 | 修改了 `.py` 但沒有修改對應 test（或最近 N 個 commit 都沒改 test） | Important | 比對 `git diff` 中 source files vs test files |
 | 新增了 public class/function 但無 test 引用 | Important | 見下方「覆蓋搜尋策略」 |
 | test file 存在但對應 source file 已刪除 | Important | `test -f` 驗證 source 存在 |
-| 新增 registry 成員（auto-discovery）但無 membership 斷言 | Important | `rg "list_.*_classes" <test files>` + 檢查 `"<ClassName>" in {c.__name__ ...}`；per-class 單元測試只 import 不代表接上 registry（見 [quality-constraints](../rules/quality-constraints.md) 符號 vs 路徑覆蓋） |
+| 新增 registry 成員（auto-discovery）但無 membership 斷言 | Important | 見下方「Registry Membership 流程」（多工具交叉，**禁用單一 rg pattern**）；per-class 單元測試只 import 不代表接上 registry（見 [quality-constraints](../rules/quality-constraints.md) 符號 vs 路徑覆蓋） |
 
 **判斷邏輯**：
 - Source `foo.py` → 對應 test `test_foo.py`（同名慣例）為主要測試檔案
@@ -112,6 +123,19 @@ allowed-tools: ["Read", "Bash"]
 4. **判定零覆蓋**：只有當 method 在**所有** test files 中都不出現時，才判定為零覆蓋
 5. **交叉驗證**：報告前用 `rg "\.method_name\(" tests/` 確認，避免單一檔案掃描遺漏
 
+**Registry Membership 流程**（避免單一 rg pattern 造成 false positive）：
+
+> ⚠️ **教訓（真實案例）**：audit 用單一 rg pattern（如 `rg "list_.*_classes" tests/`）判斷 membership 斷言存在與否，但專案可能用不同符號（列舉函式 `list_*_classes()`、registry 變數 `*_REGISTRY`、registry module 的 import）。**單一 pattern 0 hits ≠ 斷言不存在**，必須多工具交叉。
+
+1. **候選符號清單**：從 source file 提取 registry 的所有可能符號（registry 變數名 `*_REGISTRY`、列舉函式 `list_*_classes()` / `<enum_classes>()`、registry module 的 import）
+2. **多工具交叉搜尋**（至少兩個獨立途徑）：
+   - `rg "<registry_var>" tests/ -l`（找直接引用 registry 變數的 test files）
+   - **LSP `findReferences`**（從 registry 變數定義找所有引用點 — 100% 涵蓋，含動態引用，避免 pattern 失誤）
+   - `rg "<ClassName>.*(in|__name__).*<registry>" tests/`（找 per-class membership 斷言的多種寫法）
+3. **檔案存在性用 fd + ls 雙查**：`fd "<test_name>" tests/` 0 results 時，必須 `ls <expected_dir>/` 或 `fd -g "<exact_name>.py" tests/` 確認 — **不能單靠 fd 結果下結論**（gitignore、pattern 差異會造成 false negative）
+4. **判定零覆蓋**：只有當上述多個工具都 0 hits 時，才判定為零覆蓋
+5. **報告前交叉驗證**：報告中列出「已查的工具與結果」，讓 reviewer 可複現
+
 ### 角度 3：Mock 健康度
 
 **核心原則**：Mock 應該用最少代價隔離外部依賴，不是把被測系統也隔離掉。
@@ -122,6 +146,23 @@ allowed-tools: ["Read", "Bash"]
 | Mock 被測對象本身（mock 了正在測的 class） | Critical | `@patch("module.ClassUnderTest")` — 如果 mock 了主角，測試什麼？ |
 | Mock 層級過低（patch private method / 內部函數） | Suggestion | patch 路徑含 `_` 開頭的函數 |
 | 未使用繼承式 Mock（可用但未用） | Suggestion | 多個 test 用相同 `@patch` 組合 → 建議抽取 `MockClient(RealClient)` |
+| **`type(obj).attr = PropertyMock(...)` patch 真實 class** | Important | 見下方「PropertyMock type-level 危險性」 |
+
+#### PropertyMock type-level 危險性
+
+`type(obj).attr = PropertyMock(...)` 是 class-level patch，跨測試殘留風險真實。但**是否危險取決於 `obj` 的型別**：
+
+| `obj` 型別 | 風險 | 判定 |
+|-----------|------|------|
+| `MagicMock` instance / 純 mock fixture | 🟢 安全 | `type(obj)` 是 mock 類型，patch 不影響真實 class |
+| 真實 class instance（fixture 回傳 `RealClass()`） | 🔴 危險 | `type(obj)` 是真實 class，patch 污染整個 class，跨測試殘留 |
+
+**調查 / 修改前的強制義務**：
+
+1. **確認 fixture 回傳型別**：用 LSP `hover` / `goToDefinition` 跳到 fixture 定義，確認回傳 `MagicMock` 還是 `RealClass()`。**禁止憑 fixture 名稱猜測**（`<client_fixture>` 可能回傳真實 `<ServiceClient>`，不是 mock）
+2. **必讀專案踩雷指南**：修改 PropertyMock 前，讀專案 `tests/CLAUDE.md` 的 mock 規範段落（每個專案可能有不同的 PropertyMock 例外規則）
+
+**反例（真實案例）**：audit 稱某 `type(obj).attr = PropertyMock(...)` 多餘可刪，認為 fixture 回傳 mock；實作查證推翻 — fixture 回傳**真實 class**，該行是唯一讓某狀態（如某個 boolean 連線旗標）成立的機制，不能刪。調查前未確認 fixture 型別。
 
 ### 角度 4：消費端驗證覆蓋
 
@@ -162,7 +203,7 @@ allowed-tools: ["Read", "Bash"]
 1. `git log --oneline -20` 找最近重構 commit（行為語意改變，非純重命名/格式）
 2. `git show <commit> --stat` 找該 commit 改動的 test files
 3. 對這些 test files，diff 看改動是「assertion 值/邏輯迎合新實作」（過時信號）還是「新增測試案例」（正常）
-4. assertion 被改成等於新實作輸出 → 過時信號，報 Important
+4. **判定「迎合」標準並報告**：assertion 改成等於新實作輸出（literal value 追隨），而非新增獨立案例 — 需讀完整 test body 判斷（不能只看 diff 的 `+/-` 行，rename 也會產生 diff）。若不確定，標「需實作查證」而非定論。**判定為迎合 → 過時信號，報 Important**
 
 **與角度 1 的區別**：角度 1「同義反覆」是靜態（test/source 同值）；角度 6「過時」是動態（重構後 test 被改迎合）。角度 1 抓不到動態漂移。
 
@@ -185,21 +226,24 @@ allowed-tools: ["Read", "Bash"]
 
 ### 🔴 Critical（必須修正）
 
-- [ ] **空殼覆蓋**: `test_tw_catalog.py:test_adj_weekly` — 只有 `pass`
-- [ ] **Mock 被測對象**: `test_classifier.py:test_classify` — `@patch("module.Classifier")` mock 了主角
+> Critical 只能是 `[confirmed]` 或 `[evidence-based]`，禁止 `[inferred]`（見「Audit 誠信約束」）。
+
+- [ ] **[空殼覆蓋]** `[confirmed]` `test_<module>.py:test_<case>:NN` — test body 只有 `pass`（讀過原始碼確認）
+- [ ] **[Mock 被測對象]** `[confirmed]` `test_<module>.py:test_<case>:NN` — `@patch("<module>.<ClassUnderTest>")` mock 了主角
 
 ### 🟡 Important（建議修正）
 
-- [ ] **幽靈斷言**: `test_pipeline.py:test_run` — 只有 `assert result is not None`
-- [ ] **過度 mock**: `test_catalog.py` — 23 個 mock / 8 個 assert（比例 2.9:1）
-- [ ] **覆蓋缺口**: `tw_catalog.py` 新增 `_build_agg_exprs()` 但無對應 test
-- [ ] **同義反覆**: `test_config.py:test_default` — test 和 source 都 hardcode `42`
+- [ ] **[幽靈斷言]** `[confirmed]` `test_<module>.py:test_<case>:NN` — 只有 `assert result is not None`
+- [ ] **[過度 mock]** `[evidence-based]` `test_<module>.py` — N 個 mock / M 個 assert（比例 X:1）
+- [ ] **[覆蓋缺口]** `[evidence-based]` `<module>.py:<func>` — `rg "<func>" tests/` → 0 hits。⚠️ 單一 rg，建議下游用 LSP `findReferences` 交叉確認
+- [ ] **[同義反覆]** `[confirmed]` `test_<module>.py:test_<case>:NN` — test 和 source 都 hardcode 同一值
 
 ### 💡 Suggestion（可以改善）
 
-- [ ] **標題不符**: `test_adj_weekly_path` — 名稱暗示路徑測試，但 assert 驗證欄位存在性
-- [ ] **消費端缺驗證**: `features/column_metadata.py` 修改只在 unit test 驗證，建議跑 integration
-- [ ] **Mock 層級過低**: `test_fetcher.py:test_fetch` — patch `_internal_retry()`（private method）
+- [ ] **[標題不符]** `[confirmed]` `test_<module>.py:test_<case>` — 名稱暗示測 X，但 assert 驗證 Y
+- [ ] **[消費端缺驗證]** `[evidence-based]` `<module>.py` 修改只在 unit test 驗證，建議跑 integration
+- [ ] **[Mock 層級過低]** `[confirmed]` `test_<module>.py:test_<case>:NN` — patch `_internal()`（private method）
+- [ ] **[技術判斷]** `[inferred]` ⚠️ 未實證：宣稱「<套件行為>」基於推理。**禁止列 Critical**，建議實作層跑 demo 確認
 
 ### 建議處理方式
 
@@ -215,11 +259,12 @@ allowed-tools: ["Read", "Bash"]
 
 - mode: diff|commit|daily
 - files_scanned: N
-- critical: X
-- important: X
+- critical: X（全為 confirmed/evidence-based）
+- important: X（含 Y inferred，已標 ⚠️）
 - suggestion: X
 - health_score: XX%
 - needs_action: true/false
+- **findings_nature: 待驗證（非定論）** — 建議經 judge-review / 實作查證後再行動
 ```
 
 ### 健康度計算
@@ -325,6 +370,57 @@ fd -e py . tests/
 
 ---
 
+## Audit 誠信約束
+
+> audit 是偵測器（眼睛），不是判官。偵測結果可能 false positive，必須以「可被下一層（judge-review / 實作查證）推翻」的心態輸出。
+
+### 1. Findings 不是定論 — 標示信心水準
+
+每個 finding 必須標示信心水準，讓下游知道哪些需要重點查證：
+
+| 信心水準 | 判斷標準 | 範例 |
+|---------|---------|------|
+| **confirmed（已查證）** | 已讀完整 test body + source，比對過具體行/符號 | 空殼覆蓋：test body 只有 `pass` — 讀過原始碼確認 |
+| **evidence-based（有證據）** | 有具體 file:line + rg/fd 結果，但未深入驗證符號語義 | 角度 2 多數覆蓋缺口 |
+| **inferred（推理）** | 基於規範 / 套件行為推理，未實證 | 「無 seed → 不 deterministic」 |
+
+**推理類（inferred）findings 必須額外標註**：「⚠️ 未實證，建議實作層跑 demo 確認」。**禁止把推理類寫成 Critical**（Critical 必須 confirmed 或 evidence-based）。
+
+### 2. 技術 / 套件行為判斷必須實證
+
+對「套件行為」「演算法行為」「數值特性」的判斷（如「無 seed → 不 deterministic」「浮點運算 → 誤差累積」「此 API 會 raise」），**不能只靠推理**。判斷前必須：
+
+- 寫最小 demo（`uv run python -c "..."` 或獨立腳本）實際跑一次，或
+- 引用套件 source（`.venv/lib/python*/site-packages/<pkg>/`）具體行號佐證，或
+- 標「inferred」+「未實證」並降級為 Suggestion
+
+**反例（真實案例）**：audit 稱「<ML 訓練庫> 無 seed → 每次訓練結果不同」並列為 Critical。實驗推翻（同 config 兩次訓練結果完全相同，該庫有預設 seed）。**推理看起來合理但與套件實際行為不符**。
+
+### 3. Findings 輸出格式（嚴格）
+
+每個 finding 必須包含（缺一即不合格）：
+
+- **file:line**（精確位置，不能只寫檔名）
+- **證據**（rg/fd/LSP 指令 + 結果，或原始碼引用）
+- **角度 + 嚴重程度 + 信心水準**
+- **建議**（具體可執行，不是「建議改善」）
+
+**禁止**：把多個 finding 壓成摘要（如「2 Critical + 4 Important」）回報 — 摘要丟失 file:line，下游無法定位。摘要只能作為總覽表格，**明細必須完整保留**。
+
+### 4. 多層驗證設計意圖
+
+audit-test → judge-review → 實作查證 是**刻意設計的三層**，每一層都可能錯：
+
+| 層 | 抓什麼錯 |
+|---|---------|
+| audit（偵測器） | 測試品質問題（主要產出 findings） |
+| judge-review（審查者） | audit 的 false positive / 過度陳述 |
+| 實作查證（最終） | judge-review 的查證失誤 / 調查 agent 誤判 |
+
+**啟示**：audit findings 預設「待驗證」，不應被當成已確認的問題清單。Daily Scan 報告開頭必須聲明此性質。
+
+---
+
 ## 執行約束
 
 - **只讀不寫**：本命令只檢查和報告，不自動修改任何檔案
@@ -332,3 +428,31 @@ fd -e py . tests/
 - **引用來源**：報告問題時標註具體位置（test file:function name）
 - **繁體中文輸出**：報告使用繁體中文 + 英文術語
 - **不重複 ruff 工作**：語法問題交給 ruff，本命令只關注邏輯品質
+
+---
+
+## 反思閉環（大型 Daily Scan 後執行）
+
+> 每次 Daily Scan 涵蓋全專案、產出數十 findings，是真實流程經驗的富礦，**不提煉等於浪費**。本段定義大型 audit 後的反思流程。
+
+### 觸發條件
+
+- Daily Scan 完成且 findings ≥ 20（Critical + Important + Suggestion 總和）
+- 或 judge-review / 實作查證階段發現 ≥ 3 個 audit false positive / over-statement
+- 或長任務因 rate limit / context 中斷重跑
+
+### 反思流程
+
+1. **收集教訓**：哪些 finding 被 judge-review 推翻？哪些被實作查證推翻？哪些技術判斷推理錯？哪些流程造成重跑？
+2. **歸因到 ai-rules 具體段落**：每個教訓對應哪個 rules/commands/skills 檔案的哪段不足？是規範缺（沒寫）還是規範有但 agent 沒讀？
+3. **產出改進建議**：寫到 `ai-analysis/audit-test-improvement-proposals-{date}.md`（不直接改規範，使用者 review 後併入）
+4. **滾動更新**：建議被採納後更新對應段落，下次 audit 自動受惠
+
+### 反思的反思
+
+反思本身也可能 over-engineering。判斷標準：
+
+- **該提煉**：同類問題在 ≥ 2 次 audit 反覆出現（結構性 gap）
+- **不該提煉**：單一偶發案例（個案，不值得改規範）
+
+避免把每個個案都上升成規範 — 規範膨脹會降低 signal/noise ratio。

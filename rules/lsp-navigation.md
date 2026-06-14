@@ -12,7 +12,13 @@ LSP 提供語義級程式碼導航（~50ms，100% 準確），rg/fd 提供文字
 
 > **搜尋前自問（3 秒）**：找的是**符號**（class/def/引用/型別/呼叫鏈）還是**文字**（字串/註解/config/路徑）？符號 → LSP；文字 → rg/fd。直覺想 rg 時停一下 —— 符號查詢 rg 會 truncated/漏動態引用，LSP 100% 涵蓋。
 
-**反例（rg 找符號的陷阱）**：`rg "ShioajiDataClient\("` 結果被截斷（只顯示 `n`），只能「推測」呼叫端；`LSP findReferences` 精準列出 4 references（定義 + import + 型別註解 + 唯一實際呼叫點）。**符號查詢用 rg 會 truncated/漏；LSP 結構化、不截斷、100% 涵蓋。**
+**反例（rg 找符號的陷阱）**：
+
+- `rg "<ServiceClient>\("` 結果被截斷（只顯示 `n`），只能「推測」呼叫端；`LSP findReferences` 精準列出結構化 references（定義 + import + 型別註解 + 唯一實際呼叫點）。
+- **audit 覆蓋判斷（真實案例）**：`rg "list_.*_classes" tests/` → 0 hits，audit 誤報「多個 class 無 membership 斷言」。實際測試用不同符號（列舉函式 / registry 變數），LSP `findReferences` 可找到。**符號覆蓋判斷用 rg 會因命名 pattern 差異 false negative**。
+- **judge-review 查證（真實案例）**：審查者 rg 稱「`<ExecutorClass>` 在 `<module>.py` 無建構點」，LSP `findReferences` 立刻列出 import 行 + 建構行。**符號存在性查證用 rg 會因 pattern 失誤 false negative，把「自己沒查到」誤判為「不存在」**。
+
+**結論**：符號查詢用 rg 會 truncated/漏/pattern 失誤；LSP 結構化、不截斷、100% 涵蓋。
 
 ---
 
@@ -130,7 +136,9 @@ diagnostics 不能取代 mypy 在品質閘門中的角色。
 - 呼叫鏈/引用 → 用 LSP outgoingCalls / incomingCalls / findReferences
 - 文字搜尋（字串、註解、config）→ 用 rg
 - 檔案搜尋 → 用 fd
-- NT Cython 模組（.pyx/.so）→ 用 rg + Read（LSP 不索引 Cython）
+- Cython 模組（.pyx/.so）→ 用 rg + Read（LSP 不索引 Cython）
+- **audit-test 角度 2 覆蓋判斷** → **禁用單一 rg pattern**；registry membership / class 引用 / method call 必須 LSP findReferences 為主、rg 為輔（見 audit-test.md「Registry Membership 流程」）
+- **judge-review 符號查證** → 「X 是否存在 / 在哪引用」必須 LSP findReferences / workspaceSymbol；rg 0 hits 不可直接下「不存在」結論（見 judge-review.md「自我否證義務」）
 ```
 
 **判斷方式**：如果任務描述包含「簽名」「型別」「定義」「呼叫」「繼承」「Protocol」→ 主工具是 LSP，輔以 rg 確認。如果任務描述包含「字串」「註解」「config」「檔案路徑」→ 主工具是 rg/fd。
