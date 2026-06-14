@@ -99,7 +99,23 @@ AI: "我已分析 `src/core/engine.py:122-184`，該函式預期回傳 non-empty
 
 ### 為什麼
 
-同一個 repo 可能在不同目錄有 worktree（如 `mosaic_alpha/` 是主 repo，`mosaic_alpha_offline_backtesting/` 是同一 repo 的 worktree）。cd 到錯的目錄會造成：
+同一個 repo 可能在不同目錄有 worktree（如 `<project>/` 是主 repo，`<project>_worktree/` 是同一 repo 的 worktree）。cd 到錯的目錄會造成：
 - 在錯的 worktree commit 或修改
 - git 狀態混亂（兩個目錄共享同一個 git repo，操作會互相影響）
 - Agent worktree 建立在非預期的位置
+
+---
+
+## Agent 派發與產出回收
+
+> **核心原則**：跨 repo 寫入是 spawn 端（主 session）的責任，不丟給受限 worktree 的 agent。
+
+### 強制規則
+
+- **spawn 前判斷 worktree 能力**：跨 repo 任務優先在目標 repo 的 session 做，不委派給受限 worktree 的 agent（worktree 隔離下 agent 物理上寫不進目標 repo）
+- **agent 寫不進目標 → agent 寫當前 repo，主 session 事後搬運回收**：不要讓 agent 妥協到 /tmp（agent 視角見 `agents/README.md`「檔案寫入紀律」）
+- **禁把「跨 repo 寫入」責任丟給 agent**：worktree 隔離下「前置確認」無效 —— 根因是 spawn 端 routing，不是 agent 意願
+
+### 為什麼
+
+agent 跑很久才在末端因跨 repo 寫入被擋 → 前面 context 全浪費。把回收責任放 spawn 端，讓 agent 只寫自己寫得到的地方，失敗收斂到 spawn 時刻（快失敗）。
