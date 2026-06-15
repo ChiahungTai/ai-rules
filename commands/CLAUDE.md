@@ -13,11 +13,15 @@
 
 ## 命令索引
 
+> 命令依「產出受眾」分類（LLM 執行鏈 / 人類 viewport / 三層介入）見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」。
+
 ### 核心開發流程
 
 ```
-/spec（含 UC 定義 + POC 可行性驗證）→ /execution-plan（引用 UC ID + SYSTEM-MAP 關聯）→ [/ep-validate（可選，深度 POC 技術驗證）]
-  → /build（含 Agent Review + UC 狀態更新 + SYSTEM-MAP 同步）→ /code-review（六軸，含 UC 覆蓋度）或 /human-review（人工導向，找重複/漏用）→ /commit（含 UC 狀態確認）
+/spec（含 UC 定義 + POC 可行性驗證）→ /execution-plan（含 EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
+          ↓ post-EP checkpoint: /human-review --ep（layer 3 人類 viewport，4 lens 判「這是我要的系統嗎」）
+  → /build（含 Agent Review + /audit-test + UC 狀態 + SYSTEM-MAP 同步，LLM 鏈）
+          ↓ post-build checkpoint: /human-review（layer 3）→ /code-review（layer 1/2, LLM 六軸）→ /commit（UC 狀態確認）
 ```
 
 - `/spec` — 結構化需求討論 + codebase 研究 + POC 可行性驗證（`--write` 寫 spec MD、`--research-only` 只研究）
@@ -27,7 +31,7 @@
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
 - `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新 + SYSTEM-MAP 同步）
 - `/code-review` — 深層思考六軸代碼審查（含 UC 覆蓋度）
-- `/human-review` — 人工導向代碼審查（Human 提線索 + LSP/rg 調查，找重複造輪子/漏用）
+- `/human-review` — 人類 viewport（layer 3）：4 lens（I/O / 架構 / 大概實作 / 驗證範圍審查）判讀 EP（`--ep`）或 code；人用大原則，不做逐行正確性、不親跑場景
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → UC 狀態確認 → message → 確認）
 
