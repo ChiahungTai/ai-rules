@@ -5,6 +5,8 @@ paths:
 
 # AI Agent 雙通道輸出慣例
 
+> **scope**：跨專案通用日誌原則。Framework-specific 細節（log format、init 入口、suppress policy、framework quirk）在各專案文檔（如 quant 專案 `mosaic_alpha/common/LOGGING.md`），本檔不重述，避免雙處真理論漂移。
+
 ---
 
 ## 核心原則
@@ -16,21 +18,6 @@ paths:
 **print = state transition, not computation trace。**
 
 如果 output 不遵循此協議，視為 bug。
-
----
-
-## NT Logger 實際格式
-
-```
-2026-05-06T14:41:34.259492000Z [INFO] TRADER-000.FeatureEngine: message_here
-│                           │       │              │
-│                           │       │              └─ message（我們控制）
-│                           │       └─ Logger name（自動帶，=模組名）
-│                           └─ level
-└─ ISO 8601 timestamp (nanosecond)
-```
-
-NT Logger **不輸出檔名/行號**，不支援自訂 formatter。Logger name 已提供模組資訊，message 只需加 action prefix。
 
 ---
 
@@ -74,7 +61,7 @@ _logger = Logger("MyService")
 | 通道 | 消費者 | 職責 | 何時使用 |
 |------|--------|------|----------|
 | `print()` | AI Agent (stdout) | 精簡摘要 + rg 搜尋指引 | state transition：流程的最終結果或關鍵決策點 |
-| NT Logger → file | AI Agent (rg 按需) | 可搜尋的詳細資訊 | 中間步驟、狀態變化、除錯資訊 |
+| Logger → file | AI Agent (rg 按需) | 可搜尋的詳細資訊 | 中間步驟、狀態變化、除錯資訊 |
 
 ---
 
@@ -166,7 +153,7 @@ print(df.head())
 
 ---
 
-## NT Logger 慣例
+## Logger 慣例
 
 ### 統一 Prefix
 
@@ -183,15 +170,15 @@ logger.info("開始處理...")
 logger.info(f"✅ 完成，共 {n} 個 features")
 ```
 
-### Level 層級定義
+### Level 層級
 
 | Level | 用途 | 還原能力 |
 |-------|------|----------|
-| `info` | 狀態轉換（start/done/cache hit） | 還原執行流程 |
 | `debug` | 中間計算、參數值 | 重現計算過程 |
-| `trace` | 逐筆資料流（預設關閉） | 原始資料留存 |
+| `info` | 狀態轉換（start/done/cache hit） | 還原執行流程 |
 | `warning` | 異常但可繼續 | 非預期事件追蹤 |
 | `error` | 失敗 | 錯誤定位 |
+| `trace`（部分框架） | 逐筆資料流（預設關閉） | 原始資料留存 |
 
 ### 與 print 的互補（閉環規則）
 
@@ -208,25 +195,6 @@ def build_features(df, spec_name):
 ```
 
 Logger 提供補充細節（print 沒說的），不重複 print 的摘要。
-
----
-
-## init_logging 配置
-
-```python
-from <package>.logging import <init_fn>
-
-log_config = <init_fn>()
-# 內部自動處理：
-#   - stdout=OFF, file=DEBUG
-#   - file_name 從 sys.argv[0] 自動偵測
-#   - directory 從 <LOG_PATH_ENV> 環境變數讀取
-#   - max_file_size=0（不 rotation，檔名可預測）
-#   - RuntimeError（重複初始化）自動處理
-# 自動印出：[LOG] {log_path} (init at {ts})
-```
-
-路徑解析優先順序：`directory 參數` > `<LOG_PATH_ENV>` 環境變數 > `<default_log_dir>`
 
 ---
 
@@ -253,5 +221,5 @@ stdlib `logging` 與框架內建 Logger 是兩套不相連系統；stdlib logger
 - [ ] Logger name 是 module-path（`Logger(__name__)`），非 flat name
 - [ ] Logger 不重複 print 的摘要，提供補充細節
 - [ ] print 的 rg tag 必須在 Logger 中存在（閉環）
-- [ ] init_logging 設定 `level_stdout=OFF`, `level_file=DEBUG`
+- [ ] 依專案 init_logging 配置 file level ≥ DEBUG（供 rg 查），stdout 交 print 控制（細節見各專案文檔）
 - [ ] 同進程只用一套 Logger 系統（框架 Logger 優先，禁混 stdlib `logging.getLogger` 無 handler）
