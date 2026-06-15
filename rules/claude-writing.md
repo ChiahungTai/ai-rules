@@ -62,7 +62,7 @@ permission-mode: "acceptEdits"
 
 ### 應該包含（High Signal）
 - **導航指引（概念→符號）**: 每個關鍵概念必須附帶 symbol name 指引（如 `ClassName` 或 `function_name()`），讓 LLM 能從概念定位到符號、再由 LSP 解析到位置。檔案路徑（`file.py:`）為選用 fallback（判斷：文檔引入了概念但 LLM 不知道對應哪個符號 → 導航缺口）
-- **設計理由**: 為什麼這樣做而非那樣做
+- **設計理由（精煉一句）**: 為什麼這樣做而非那樣做 —— 一句 why 即可（防 LLM 不懂而亂改）；整段權衡論證屬 design doc，不寫進 auto-loaded rule（每 session 載入 = token 成本 + 稀釋 signal）
 - **架構約束**: 不可妥協的設計限制
 - **非顯而易見的選擇**: 看起來反直覺但有意義的決策
 - **模組邊界**: 這個模組不做什麼
