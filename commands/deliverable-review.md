@@ -83,14 +83,16 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 
 每個 feature / UC 對到一個**可跑的 demo target**，你跑、看結果、勾確認。feature 沒 demo 到 = 沒證明完成。
 
+**demo target 用 repo-root 相對路徑**（如 `scripts/demo_daily_close.py`），讓 VSCode terminal Cmd+Click 可直接點開看 / 跑 —— 老闆要能鑽進 demo 看程式碼。純檔名 terminal 解析不到、點不動。
+
 ```
 🎯 Deliverable Demo Checklist — code-mode
 
 Feature / UC         demo target（可跑）                       覆蓋    你跑 → 確認
 ──────────────────────────────────────────────────────────────────────────────────
-每日收盤備份          demo_daily_close.py                       full    [ ] 跑 → 4 release 保留？
-FinMind gap 回填      examples/backfill/run_gap.py              full    [ ] 跑 → gap 補齊？
-除權息調整            test_apply_adjustment + demo_adj.py       partial [ ] 跑 → adj 欄位？（僅 happy）
+每日收盤備份          scripts/demo_daily_close.py                full    [ ] 跑 → 4 release 保留？
+FinMind gap 回填      examples/backfill/run_gap.py               full    [ ] 跑 → gap 補齊？
+除權息調整            tests/test_apply_adjustment.py + scripts/demo_adj.py  partial [ ] 跑 → adj 欄位？（僅 happy）
 成交量單位遷移        （無 demo）                               NONE    ⚠️ 沒 demo = 沒證明完成
 ```
 
@@ -127,9 +129,9 @@ claude-writing 種子深度       種子指向 method 不停在 class           
 
 UC / Feature           我打算做              打算 demo 什麼                  你確認
 ──────────────────────────────────────────────────────────────────────────────────
-UC-1 每日備份           BackupPipeline        demo_daily_close.py            [ ] 方向對？
-UC-2 FinMind 回填       run_backfill()        examples/backfill/run_gap      [ ]
-UC-3 除權息調整         apply_adjustment()    demo_adj.py                    [ ]
+UC-1 每日備份           BackupPipeline        scripts/demo_daily_close.py    [ ] 方向對？
+UC-2 FinMind 回填       run_backfill()        examples/backfill/run_gap.py   [ ]
+UC-3 除權息調整         apply_adjustment()    scripts/demo_adj.py            [ ]
 ```
 
 ### C. 認知誤差點（天才工程師主動揭露，消除方向偏差）
