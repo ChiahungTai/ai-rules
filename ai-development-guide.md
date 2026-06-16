@@ -81,7 +81,7 @@
 - ✅ → **主要實作模組的 CLAUDE.md**（如 `mosaic_alpha/data/CLAUDE.md`）
 - 📋/🔧 → **.kanban/Backlog/** cards
 - **UC 不重複**：同一能力只在一個 CLAUDE.md 記錄
-- **scripts/ 不放 Capabilities**：scripts/ 是 thin wrapper
+- **scripts/ 不放 Capabilities**：scripts/ 是 demo 給老闆的呈現入口（基於 library 重寫，可用 typer），不放 Capabilities
 
 ### 變更規模分級
 

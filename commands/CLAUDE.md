@@ -34,7 +34,7 @@
 - `/deliverable-review` — 人類 viewport 交付軸（layer 3）：天才工程師向老闆 demo 完成的功能——product-type-aware（code: demo-checklist / docs: behavior delta），--ep 審 planned deliverable；方向 >> 品質，不做逐行正確性（交 /code-review）、不審結構（交 /arch-review）
 - `/arch-review` — 人類 viewport 結構軸（layer 3）：whole-picture 渲染（City Map / Flows / Boundaries）+ 重用候選枚舉，人判「結構撐得起 use case 嗎」「在重造既有的嗎」；機器枚舉為主、lsp-architect 驗證為輔
 - `/followup-review` — 審查者回頭驗收實作結果
-- `/commit` — Commit 入口（lint 閘門 → UC 狀態確認 → message → 確認）
+- `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → UC 狀態確認 → message → 確認）
 
 ### 自主實作
 

@@ -69,16 +69,50 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 輸出：列出需檢查的檔案（不是要求全部更新，是提醒檢查是否需要更新）。用戶在階段 5 確認時一併判斷。
 
-### 階段 2.6：Review Findings 閘門
+### 階段 2.6：Review Findings 提醒（optional）
 
-掃描 `.review/` 與 EP review 區段(`## ... Findings` 表格,格式見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)),檢查殘留 `status=open` 的 Critical finding:
+**人主導工作流**（finding 在 review session 對話、`/copy` 搬到實作 LLM）：無 `.review/`，此階段跳過 —— finding 處置由用戶在階段 5 確認時對照 diff 判讀（B 軸 viewport，不靠 status 機械追蹤）。
+
+**跨命令自動化工作流**（`/judge-review` / `/followup-review` 產生 `.review/`）：若 `.review/` 存在，列出殘留 `open` finding 提醒（不阻擋）。`status` 靠 LLM 更新會漏，僅作提醒非閘門。
+
+> 無論哪種工作流，finding 處置的最終把關在階段 5（人確認 commit）—— 機制只列出不保證。
+
+### 階段 2.7：POC/Demo 處置閘門
+
+**commit 前檢查閘門**（與 2.5/2.6 同系列）。機械結算每個 POC/Demo 的去處，不靠 build LLM 自覺回頭看 —— 同 build「整合路徑覆蓋 rg 0 hits 就擋」的機械閘門模式，用「POC 不得無痕消失」倒逼測試覆蓋（預設改寫成 test，delete 須附證據）。
+
+**時序**：掃描+歸類在階段 3（Capabilities+Kanban）之前執行；處置清單隨階段 5 用戶確認一併確認；確認後在階段 6 commit 執行前，先跑已確認的處置（刪 poc/ 檔、歸併 demo）。
+
+掃描 `poc/**/*.py` + `demo_*.py`（rg glob，機械事實不可靜默跳過）：
 
 | 情境 | 處理 |
 |------|------|
-| 有 `status=open` Critical | **警告**(不阻擋):列出未關閉 Critical,提示用戶確認是否可接受(合理拒絕或接受風險) |
-| 無 / 全關閉 | 通過 |
+| 空（無命中） | 通過 |
+| 非空 | 逐個處置（見下） |
 
-不阻擋是刻意的 —— `status=rejected` 是合理拒絕,用戶也可能接受風險。閘門只確保「未處理」的 Critical 不被默默 commit。
+**逐個處置**（跨段落豁免）：先讀 POC 檔頭「EP 段落」標注，判斷生命週期：
+
+- 所屬段落尚未 build（活躍 POC）→ 標「待該段落 build 時處置」，暫不擋
+- 所屬段落已 build+commit，或檔頭缺失 → 強制顯式歸類檔案去處
+
+**強制歸類（檔案去處三選一）**：
+
+| 產物 | 預設檔案去處 | 偏離預設 |
+|------|------------|---------|
+| `poc/**/*.py` | 改寫成 test（給測試路徑，須存在）| 選 delete 須附分類證據 |
+| `demo_*.py` | 進 scripts/（給 demo 入口路徑）| 選 delete 須附分類證據 |
+
+- 承接物（test/scripts 路徑）不存在 → 當場補，否則擋 commit
+
+**delete 須附分類證據**（非憑空理由，三選一）：
+
+- 「已被既有 test 覆蓋」→ 附 `test_path:line` + 該 assert 驗證的行為一句話（階段 5 可機械核對 assert 真覆蓋 POC 行為，非僅驗檔案存在）
+- 「假設被推翻（行為不進生產）」→ 附 EP finding（ep-validate ❌ 結果記錄）
+- 「純探索性（無對應 UC）」→ 說明探索目的 + 為何無對應 UC
+
+提不出證據 → 不得 delete，須改寫成 test（倒逼覆蓋）。用戶階段 5 見處置清單（含證據），可核對 AI 是否全選 delete 編理由。
+
+> **demo 雙重**：「檔案去處三選一」是互斥分類（檔案層）。demo 驗證的「行為」是獨立層面 —— 若值得測，build 時另提煉 `test_<feature>.py`（不在 2.7 範圍）。2.7 掃 `demo_*.py` 只管檔案去處（預設 scripts / delete）。
 
 ### 階段 3：Capabilities + Kanban 狀態更新（大型/中型變更）
 
@@ -119,7 +153,9 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 ### 階段 6：執行 Commit
 
-確認後 `git add` + `git commit`（含 `Co-Authored-By: Claude`）
+確認後 `git add`（**納入本次開發的完整產物**：主變更 + EP（`ai-analysis/execution-plans/`）+ flow-feedback（`ai-analysis/flow-feedback/`，本次開發的反饋，沒道理分開 commit））+ `git commit`（含 `Co-Authored-By: Claude`）。
+
+**commit 成功後清除 ephemeral 工作產物**：`rm -f .review/*.md`（刪 review 筆記檔案、保留 `.review/` 目錄供下次 review 直接寫入；review 筆記為工作過程產物，commit 結算後清除 —— 同 POC 生命週期哲學，不進 git 歷史）。
 
 ### 階段 7：選配分支操作
 
@@ -149,4 +185,4 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 前置：`/lint-fix`（lint 不通過時）、`/code-review`
 
-**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描）和階段 3（Capabilities + Kanban 狀態確認），直接進入階段 1（Lint）→ **階段 2.6（Review Findings 閘門）** → 階段 5（確認）→ 階段 6（提交）。
+**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描）和階段 3（Capabilities + Kanban 狀態確認），直接進入階段 1（Lint）→ **階段 2.7（POC/Demo 處置閘門）** → 階段 5（確認）→ 階段 6（提交）。2.7 屬 commit 前檢查閘門（非被跳過的階段 2），捷徑保留；2.6 為 optional 提醒，捷徑不強制。

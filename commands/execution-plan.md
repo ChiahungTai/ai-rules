@@ -139,7 +139,7 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 
 ### 4. 驗證策略
 
-Examples 設計 + 測試計畫 + 完成檢查 + 整合測試
+POC/demo 設計 + 測試計畫 + 完成檢查 + 整合測試
 
 **測試計畫內容**：描述測試的種類和情境，不寫數量（數字每次修改都過時，對決策無價值）。應包含：
 - **測試類型分佈**：單元 / 整合 / E2E / 外部 API mock
@@ -172,6 +172,31 @@ EP 專屬約束：
 - [ ] 語義約束已顯式標記
 - [ ] 基礎設施盤點已完成
 - [ ] 依賴錨點已標記
+
+---
+
+## docs mode（純文檔/rules 改動）
+
+EP 變更全為 `rules/`、`skills/`、`commands/` 下的 `.md`（無 `.py` 邏輯）時進入 docs mode —— 段落元素裁剪程式碼導向部分，驗證改為文檔驗證。
+
+**觸發判準**：變更全為 `.md` **且** 無新增/修改 `.py` callable 符號（`rg "^def |^class " --type py` 於本 EP 變更範圍為 0）→ docs mode。純 `.py` 搬移（無邏輯改）→ docs mode + 保留 mypy/pytest baseline。
+
+**EP 元素對照**：
+
+| EP 段落元素 | 程式碼 mode | docs mode |
+|------------|------------|-----------|
+| UC 盤點 | 掃 library Capabilities | 掃「受影響命令/rules 清單」（元專案無 Capabilities 表格）|
+| kanban / SYSTEM-MAP | 強制 | 元專案 / 無對應時跳過（正當跳過，標記理由）|
+| Context 錨點 | file:line 符號（LSP）| file:line 文檔行號錨點（rg 驗證行號指向預期內容）|
+| Scenario Matrix | 大型/中型必填 | 影響命令行為時仍填，但「觸發/預期行為」改文檔語境（rg 命中/0 殘留），非程式執行結果 |
+| Pseudo Code | 類別 + Call Stack | **裁剪**（文檔無類別）；以「修改要點」替代 |
+| 驗證策略 | POC/demo + 測試 + 整合測試 | 改為文檔驗證（rg 殘留、跨檔一致性、`/consistency`、導航有效性）|
+| TDD / mypy / ruff / pytest | 強制 | **跳過**（`/build` 階段 2 僅「修改 → rg 殘留 → 跨檔一致性 → `/consistency`」）|
+| 整合路徑覆蓋 | `rg "<param>="` | **跳過**（或改為跨檔引用一致性 rg）|
+| EP Review 維度 | Call Stack / Pattern Alignment | 改為「文檔一致性 + 設計合理性 + 引用 drift + 漏改」|
+| 收尾 Capabilities + Kanban | 強制 | 元專案跳過；改為「受影響命令/rules 行為已反映 + `commands/CLAUDE.md` 命令索引 description 同步」|
+
+docs mode 的 `/build` 執行分支見 [build.md](./build.md) 階段 0/2/3。
 
 ---
 

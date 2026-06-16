@@ -84,12 +84,12 @@
 
 **仍為設計方向**(viewport 之外,更深的 B 軸演進):
 
-`must-execute-before-complete.md` 把 `.py / demo / POC / lab / example` 全歸為「可執行 → 必須 uv run」是**生產側視角**(確保 AI 跑過),完全缺**消費側視角**(給誰看、怎麼看)。B 軸的演進方向:
+`must-execute-before-complete.md` 把 `.py / demo / poc/ / example` 全歸為「可執行 → 必須 uv run」是**生產側視角**(確保 AI 跑過),完全缺**消費側視角**(給誰看、怎麼看)。B 軸的演進方向:
 
 1. **UC 場景執行驗收(B 軸核心)**:驗收單位是 [UC 場景](../commands/execution-plan.md)(EP Scenario Matrix),不是泛泛 demo。SM 欄位「觸發 / 預期行為」是現成的可執行輸入 + 人類可判讀預期,且必須涵蓋 happy / 錯誤 / 邊界 / 效能。**人的角色**:deliverable-review 元件 D(意圖情境完整性)審「該驗哪些」(範圍,不親跑);LLM 跑場景、人觀察產出 = L6。素材 EP 已產出,不需另發明。
 2. **可觀察性合約**:SM 的「預期行為」欄位 = 人類可判讀的結論。執行 SM 場景的 stdout 必須對應預期行為,且至少跑一個錯誤/邊界場景(避免只演 happy path 的 AI 公關稿)。
 3. **自動化對照(A/B diff)**:跑新舊版 / 兩 branch / 兩參數比對,人類只判讀 diff 合理性。把「讀」外包給機器,這是長期最該投資的模式。
-4. **流程末端驗收步驟**:[build](../commands/build.md) / [deep-work](../commands/deep-work.md) 在 commit 前缺「執行 SM 代表性場景讓人判讀」的步驟;現有 Examples 驗證只驗 exit code 0,不驗輸出內容(silent failure / 語義錯誤偵測不到)。
+4. **流程末端驗收步驟**:[build](../commands/build.md) / [deep-work](../commands/deep-work.md) 在 commit 前缺「執行 SM 代表性場景讓人判讀」的步驟;現有 demo/POC 驗證只驗 exit code 0,不驗輸出內容(silent failure / 語義錯誤偵測不到)。
 5. **人類介入點前移到 RED**:GREEN 後人類讀不完;RED 時刻判讀「失敗是否符合預期」更便宜,是意圖偏移的最早訊號。
 
 ### 內部跨層接線的真實邊界歸屬(A 軸天花板,B 軸補強)

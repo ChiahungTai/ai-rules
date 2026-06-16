@@ -35,6 +35,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 **前置流程確認**（僅記錄，不因此停下）：`/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build`
 
+**docs mode 偵測**：掃描 EP 檔頭是否有 docs mode 聲明（變更全為 `.md` 且無新增/修改 `.py` callable 符號）→ 標記本 EP 為 docs mode，後續階段 2/3 依 docs mode 分支跳過 TDD/mypy/pytest，改 rg 殘留 + 一致性（完整對照見 [execution-plan.md](./execution-plan.md) docs mode）。
+
 **EP 品質快掃**：
 
 | 檢查項目 | 通過標準 | 發現問題時 |
@@ -65,8 +67,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 1. 讀取 Execution Plan，識別段落結構、依賴關係
 2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在 `/commit` 確認後才執行）
 3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）。LSP `goToDefinition` 驗證 dependency anchors 的定義端，`findReferences` 驗證消費端，`hover` 確認關鍵參數型別
-4. **Examples 盤點**：掃描 `demo_*.py`、`examples/**/*.py` 等，建立 `{module} → [example paths]` 映射表
-5. 檢查清單：Kanban InProgress ✓ | Examples 映射表 ✓ | 測試檔案 ✓ | CLAUDE.md 同步 ✓ | 依賴完整 ✓
+4. **POC + demo 盤點**：掃描 `poc/**/*.py`、`demo_*.py`、`scripts/demo_*.py`、`notebooks/*.ipynb`，建立 `{module} → [poc/demo paths]` 映射表
+5. 檢查清單：Kanban InProgress ✓ | POC/demo 映射表 ✓ | 測試檔案 ✓ | CLAUDE.md 同步 ✓ | 依賴完整 ✓
 
 ### 階段 2：逐段實作
 
@@ -78,6 +80,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 | 驗證策略 | RED | 讀 EP 測試類型 → 分類情境 → 寫對應測試（詳 TDD skill EP Integration） |
 | Pseudo Code | GREEN | 照設計實作 |
 | 核心要點 | REFACTOR | 對 EP 完成檢查逐項驗證 |
+
+**POC → RED 測試銜接**：若本段有對應的 POC（檔頭 `EP 段落:` 標注本段），優先將其「提煉改寫」成該段 RED 測試，非另起爐灶 —— POC 先於 impl、獨立產生（時間獨立性），改寫保留其驗證意圖。「提煉改寫」= 提煉 POC 的驗證意圖（斷言什麼行為）→ 寫成 pytest test function，assert 的對象（被測函數）尚未實作 → 確保 RED 狀態；**非把 POC 整段貼進 test file**（POC 已跑通非 fail）。
 
 #### 平行模式
 
@@ -94,7 +98,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 - EP 段落完整內容（Context + Pseudo Code + 驗證策略 + 核心要點）
 - 準備階段結論（現有程式碼狀態、架構決策）
 - 語義約束
-- Examples 映射（Agent 回報前必須執行至少一個 Example 驗證）
+- POC/demo 映射（Agent 回報前必須執行至少一個 demo 驗證）
 - 相關檔案路徑（必讀 / 可修改 / 禁止修改）
 - Skills invoke 指示（rules-reminder, test-driven-development, incremental-implementation, autonomous-execution）
 
@@ -110,7 +114,9 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 #### 驗證
 
-每段完成後：**整合路徑覆蓋檢查** → `ruff check --fix && ruff format` → LSP diagnostics（即時型別檢查）→ `mypy .`（完整驗證）→ `pytest <test> -v`（背景跑）→ Examples 驗證
+每段完成後：**整合路徑覆蓋檢查** → `ruff check --fix && ruff format` → LSP diagnostics（即時型別檢查）→ `mypy .`（完整驗證）→ `pytest <test> -v`（背景跑）→ POC/demo 驗證
+
+> **docs mode**：跳過 TDD（RED/GREEN/REFACTOR）、mypy/ruff/pytest、整合路徑覆蓋；改執行「修改 → rg 殘留 → 跨檔一致性 → `/consistency`」。
 
 **整合路徑覆蓋檢查**（機械式硬閘門，見 [acceptance-evidence](../rules/acceptance-evidence.md) L3 + [quality-constraints](../rules/quality-constraints.md) 符號 vs 路徑覆蓋）：本段是否新增/修改 callable 簽名（新參數、新 keyword）或新增注入點（constructor 接受新依賴）？
 
@@ -123,7 +129,9 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 > **scope 邊界（階段 2 vs 階段 3）**：階段 2 抓「新參數/注入點的接線路徑」（機械 rg 初篩）；階段 3 抓「既有接線的行為正確性」（需真實邊界跑）。**鐵律：階段 2 rg 有 hits ≠ 階段 3 真實邊界已滿足** — 符號出現在 tests（如被測單元自己的單元測試）≠ 消費端驅動該符號的路徑被覆蓋。例（真實歷史案例）：`rg "<符號>=" tests/` 有 hits 但全在被測單元自己的測試，消費端 integration 路徑不存在 — 符號有測 ≠ 消費路徑有測，bug 漏到補 integration test 才抓到。
 
-全量 Lint + mypy + pytest（背景跑）+ Examples 全量驗證。全量跑只是 baseline。
+全量 Lint + mypy + pytest（背景跑）+ POC/demo 全量驗證。全量跑只是 baseline。
+
+> **docs mode**：跳過全量 mypy/pytest，改全量 rg 殘留 + `/consistency`。
 
 **整合器型段落必須有真實邊界整合測試**（見 [quality-constraints](../rules/quality-constraints.md)「整合器型變更判定」+「兩層整合測試」）：主要價值是接 ≥2 個真實外部組件的段落，完成定義必須含接線 guard（`unit_tests/`）+ 真實邊界（`integration_tests/`），不能只靠 mock — mock 循環論證會讓 mock 假設即 bug 來源。
 
@@ -208,8 +216,8 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-revie
 
 1. 必須先 EP 快檢
 2. 必須完整讀取計畫書
-3. 每段必須 TDD（RED → GREEN → REFACTOR）
-4. 每段必須獨立驗證（ruff + mypy + pytest）
+3. 每段必須 TDD（RED → GREEN → REFACTOR）—— docs mode EP 除外
+4. 每段必須獨立驗證（ruff + mypy + pytest）—— docs mode EP 除外（改 rg 殘留 + 跨檔一致性 + `/consistency`）
 5. 禁止 `from __future__ import annotations`
 6. 必須執行收尾步驟（階段 5）：大型/中型 → Capabilities + Kanban 更新 + SYSTEM-MAP 更新 + CLAUDE.md 更新 + /audit-test；小型 → /audit-test
 

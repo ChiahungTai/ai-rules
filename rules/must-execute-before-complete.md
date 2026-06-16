@@ -12,11 +12,12 @@
 
 ## 強制規則
 
-### 可執行程式碼（.py 腳本、demo、POC、lab、example）
+### 可執行程式碼（.py 腳本、demo、poc/、example）
 
 - 建立/修改後，必須 `uv run python <file>` 實際執行
 - 修改多個相關檔案時，每個可執行檔案都必須跑
 - AI 不得在未執行的情況下宣稱「完成」或「正確」
+- **POC 暫時性**：`poc/` 為暫時性驗證產物，僅存活到所屬 EP 段落 build+commit；build 時驗證行為改寫成正式測試，`/commit` 階段 2.7 確認承接後清除
 
 ### 測試程式
 

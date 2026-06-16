@@ -79,7 +79,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 - rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
 - schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
-Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → 分三級（Critical/Important/Suggestion）→ Demo/Lab 影響檢查 → commit message 產生。
+Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → 分三級（Critical/Important/Suggestion）→ POC/Demo 影響檢查 → commit message 產生。
 
 印出確認：`[Code Review Mode] effort=ultracode, workflow=true, max=N`
 
@@ -114,7 +114,7 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 - 實作是否涵蓋 CLAUDE.md Capabilities 表格描述的所有行為？
 - 是否有 Capabilities 引用的行為在 diff 中沒有對應實作？
 - EP 段落引用的能力描述是否與 Capabilities 表格或 .kanban/ 卡片一致？
-- Capabilities 入口路徑是否指向 library 模組（非 scripts/）？
+- Capabilities 入口路徑是否指向 library 模組（非 scripts/ —— scripts/ 是 demo 入口非能力入口）？
 - 實作是否涵蓋「消費場景」描述的所有情境（happy path、錯誤操作、邊界、效能期待差異）？
 小型變更（bug fix）跳過此軸。
 
@@ -129,11 +129,11 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 
 ---
 
-## Demo/Lab 影響檢查
+## POC/Demo 影響檢查
 
 不向後相容原則下，API 變更必須同步更新所有消費端：
 1. 識別變更的 class/function
-2. LSP `findReferences` 找到所有消費者，再用 rg 搜尋 `demo_*.py`、`lab/`、`examples/` 中的字串引用
+2. LSP `findReferences` 找到所有消費者，再用 rg 搜尋 `demo_*.py`、`poc/` 中的字串引用（不含 `examples/`——`scripts/demo_*.py` 已擔負 demo 職責）
 3. 驗證受影響的消費端是否需要更新
 
 ---
@@ -149,9 +149,9 @@ diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [se
 
 ---
 
-## Finding 持久化
+## Finding 呈現
 
-Critical / Important finding 寫入 `.review/<branch>.md`(Finding Record 表格,欄位定義見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)),狀態初始 `open`。跨 session、跨命令可追蹤(`/judge-review` 更新決策、`/followup-review` 驗收、`/commit` 檢查殘留 Critical)。
+finding 預設留在審查報告/對話，供用戶 `/copy` 搬到實作 LLM（**人主導工作流**，不靠持久化追蹤）。**跨命令自動化場景**（接 `/judge-review`/`/followup-review`）才寫 `.review/<branch>.md`（Finding Record 表格，欄位見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)）—— optional，`/commit` 階段 6 成功後清除。
 
 ```
 ## Code Review Findings — <branch>

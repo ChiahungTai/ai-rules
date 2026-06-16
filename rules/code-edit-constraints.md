@@ -14,7 +14,7 @@
 - **品質優先**：可以大幅重構來改善架構品質
 - **快速迭代**：優先正確性和清晰度
 - **架構優先**：預設不考慮向後相容，優先考慮架構品質
-- **依賴方向**：import 必須遵循依賴層級（library → CLI → scripts），禁止反向依賴（下層 import 上層）
+- **依賴方向**：import 必須遵循依賴層級（library → scripts（demo 入口））；scripts 不反向依賴 library 內部，可複用邏輯一旦累積須上抽進 library，不讓 scripts 變第二個 library
 
 ---
 

@@ -46,7 +46,7 @@ System prompt body...
 
 1. **禁 /tmp** —— 產出絕不寫 /tmp（易丟、不可追溯、session 中斷即消失）；寫在自己當前工作目錄（repo/worktree）內
 2. **寫不進指定路徑（跨 repo / worktree 隔離）→ 回報「環境限制：我寫不進 X」，不自行妥協到 /tmp**；交回主 session 決定（spawn 端回收責任見 `rules/collaboration-constraints.md`「Agent 派發與產出回收」）
-3. **暫時產物**（中間分析、草稿、POC 輸出）→ 集中到 repo 內暫存區，依模式處置：
+3. **暫時產物**（中間分析、草稿、POC 輸出）→ 集中到 repo 內暫存區，依模式處置（此處「POC 輸出」指 agent 暫存 `.agent-tmp/`，非 `/ep-validate` 的 poc/ 正式生命週期）：
    - **互動模式**：完成時列出清單詢問保留／刪除
    - **autonomous / deep-work**：集中到 `.agent-tmp/`（repo 內，權限預期 allow；**各專案須將 `.agent-tmp/` 加入 `.gitignore`**），最終報告列出清單，使用者事後處理（逐一確認會卡死 autonomous flow）
 

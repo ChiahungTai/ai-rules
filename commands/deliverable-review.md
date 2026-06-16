@@ -91,13 +91,13 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 Feature / UC         demo target（可跑）                       覆蓋    你跑 → 確認
 ──────────────────────────────────────────────────────────────────────────────────
 每日收盤備份          scripts/demo_daily_close.py                full    [ ] 跑 → 4 release 保留？
-FinMind gap 回填      examples/backfill/run_gap.py               full    [ ] 跑 → gap 補齊？
+FinMind gap 回填      scripts/demo_backfill.py                   full    [ ] 跑 → gap 補齊？
 除權息調整            tests/test_apply_adjustment.py + scripts/demo_adj.py  partial [ ] 跑 → adj 欄位？（僅 happy）
 成交量單位遷移        （無 demo）                               NONE    ⚠️ 沒 demo = 沒證明完成
 ```
 
 **demo target 挑選規則**（優先序）：
-1. `demo_*.py` / `examples/**/*.py` / `scripts/demo_*.py` / `notebooks/*.ipynb`（既有 demo）
+1. `demo_*.py` / `scripts/demo_*.py` / `notebooks/*.ipynb`（既有 demo）
 2. 既有 test（`test_<feature>.py`）—— 可跑驗證
 3. 新功能入口 method（`ClassName.method()`）—— 標「需手動跑 / 無現成 demo」
 4. 都沒有 → **NONE**（⚠️ 沒 demo = 沒證明完成，老闆該問「這功能怎麼沒 demo？」）
@@ -130,7 +130,7 @@ claude-writing 種子深度       種子指向 method 不停在 class           
 UC / Feature           我打算做              打算 demo 什麼                  你確認
 ──────────────────────────────────────────────────────────────────────────────────
 UC-1 每日備份           BackupPipeline        scripts/demo_daily_close.py    [ ] 方向對？
-UC-2 FinMind 回填       run_backfill()        examples/backfill/run_gap.py   [ ]
+UC-2 FinMind 回填       run_backfill()        scripts/demo_backfill.py       [ ]
 UC-3 除權息調整         apply_adjustment()    scripts/demo_adj.py            [ ]
 ```
 

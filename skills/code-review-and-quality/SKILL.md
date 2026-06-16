@@ -53,7 +53,7 @@ For projects using UC-Driven Development, verify implementation against CLAUDE.m
 
 - Does implementation cover all Capabilities-defined behaviors?
 - Are Capabilities-referenced behaviors present in the diff?
-- Capabilities entry points point to library modules (not scripts/)?
+- Capabilities entry points point to library modules (not scripts/ — scripts/ is demo entry, not capability)?
 - Skip for small changes (bug fix, docs)
 
 ## Review Process

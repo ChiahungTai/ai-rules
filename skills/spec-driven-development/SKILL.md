@@ -197,21 +197,22 @@ When `/spec` identifies high-risk technical assumptions, validate them with POCs
 
 | Risk | Criteria | Action |
 |------|----------|--------|
-| 🔴 High | External API, SDK behavior, architectural assumption, never-used library | Write `lab/poc_*.py` and execute |
+| 🔴 High | External API, SDK behavior, architectural assumption, never-used library | Write `poc/poc_*.py` and execute |
 | 🟢 Low | Internal logic, known patterns, previously verified library | Document + cite source |
 
 ### POC Writing Guide
 
 - **One POC per assumption** — focused, not comprehensive
 - **Include happy path + one edge case** — enough to confirm feasibility
-- **Must be independently executable** — `uv run python lab/poc_<name>.py`
+- **Must be independently executable** — `uv run python poc/poc_<name>.py`
 - **File header**（中文，與 `/spec` 和 `/ep-validate` 共用規範）:
   ```python
   """POC: [假設描述]
 
   驗證: [具體驗證標的]
-  風險: [高]
-  來源: [假設來源]
+  EP 段落: S{N}
+  風險: [致命/高/中]
+  來源: [假設來源，如 path/to/file.py:ClassName 或用戶確認]
   """
   ```
 

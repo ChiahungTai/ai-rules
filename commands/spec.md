@@ -82,11 +82,11 @@ ASSUMPTIONS I'M MAKING:
 
 | 風險 | 判定標準 | 驗證方式 |
 |------|---------|---------|
-| 🔴 高風險 | 外部 API、SDK 行為、架構假設、從未用過的函式庫 | 寫 `lab/poc_*.py` 實際執行驗證 |
+| 🔴 高風險 | 外部 API、SDK 行為、架構假設、從未用過的函式庫 | 寫 `poc/poc_*.py` 實際執行驗證 |
 | 🟢 低風險 | 內部邏輯、已知模式、已驗證過的函式庫 | 文件記錄 + 來源引用 |
 
 高風險假設的 POC 規範：
-- 放置 `lab/poc_<描述性名稱>.py`
+- 放置 `poc/poc_<描述性名稱>.py`
 - 每個 POC 聚焦一個假設，包含 happy path + 至少一個邊界案例
 - 必須 `uv run python` 實際執行（遵守 `must-execute-before-complete` rule）
 - 檔頭格式（中文，與 `/ep-validate` 共用規範）：
@@ -94,8 +94,9 @@ ASSUMPTIONS I'M MAKING:
   """POC: [假設描述]
 
   驗證: [具體驗證標的]
-  風險: [高]
-  來源: [假設來源，如 path/to/file.py:ClassName]
+  EP 段落: S{N}
+  風險: [致命/高/中]
+  來源: [假設來源，如 path/to/file.py:ClassName 或用戶確認]
   """
   ```
 
@@ -191,7 +192,7 @@ Never（不做）：[列表]
 | 時機 | EP 之前 | EP 之後 |
 | 深度 | 可行性驗證（能不能做） | 深度驗證（效能、邊界、壓力） |
 | 範圍 | 2-3 個關鍵假設 | EP 所有段落的假設 |
-| 產出 | `lab/poc_*.py`（可保留或刪除） | EP 回寫 + `lab/poc_*.py` |
+| 產出 | `poc/poc_*.py`（build+commit 後清除） | EP 回寫 + `poc/poc_*.py` |
 
 ---
 

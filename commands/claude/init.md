@@ -91,7 +91,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - 外部參考頻繁的區域（docs、examples）
 
 **不需要**：
-- 單檔案目錄（CLI 入口、thin wrapper）
+- 單檔案目錄（demo 給老闆入口，基於 library）
 - 純配置目錄（只有 `__init__.py`）
 - 第三方依賴目錄
 
