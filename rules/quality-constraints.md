@@ -148,16 +148,14 @@ def process_trading_data(data):
 
 ### 兩層整合測試
 
-> ⚠️ 本段 L1/L2 為「整合器型變更」的**局部命名**，異於 [acceptance-evidence.md](./acceptance-evidence.md) 的全局證據階層 L1-L6（該處 L3 = 整合層）。追蹤「L2」時注意區分語境。
-
 整合器型變更兩層都要，缺任一即缺口：
 
-| 層 | 性質 | 目錄 | marker |
+| 測試類型 | 性質 | 目錄 | marker |
 |--|--|--|--|
-| L1 接線 guard | 純邏輯、無 IO（registry lookup、membership 斷言） | `tests/unit_tests/` | `quick` |
-| L2 真實邊界 | 真實 DB / Catalog / 資料，跑完整消費端 pipeline | `tests/integration_tests/` | `integration` |
+| 接線 guard | 純邏輯、無 IO（registry lookup、membership 斷言） | `tests/unit_tests/` | `quick` |
+| 真實邊界 | 真實 DB / Catalog / 資料，跑完整消費端 pipeline | `tests/integration_tests/` | `integration` |
 
-**不可互代**：L1 廉價（毫秒）擋高頻接線 regression；L2 昂貴（秒級以上）擋跨層 schema / 展開失敗。命名含 `_integration` 但純邏輯仍留 unit_tests（依依賴判斷，不看名稱）。
+**不可互代**：接線 guard 廉價（毫秒）擋高頻接線 regression；真實邊界昂貴（秒級以上）擋跨層 schema / 展開失敗。命名含 `_integration` 但純邏輯仍留 unit_tests（依依賴判斷，不看名稱）。
 
 ---
 

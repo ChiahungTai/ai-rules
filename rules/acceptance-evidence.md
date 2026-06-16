@@ -74,15 +74,13 @@
 | 軸 | 職責 | 證據層 | 天花板 |
 |--|--|--|--|
 | **A 機器自驗** | 內部實作細節的正確性 | L1-L3 | **AI 內部自洽** — 機器斷言跳不出 AI 信念體系 |
-| **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:deliverable-review(交付) + arch-review(結構) = 人類 viewport(layer 3);完整 L4-L6 執行驗收仍為設計方向(見下) |
+| **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:deliverable-review(交付) + arch-review(結構) = 人類 viewport(三層介入);完整 L4-L6 執行驗收仍為設計方向(見下) |
 
 **鐵律**:A 是必要不充分,B 是充分性的來源。A 軸深化有邊際效益遞減 — 天花板是 AI 自洽,真正的驗收鴻溝在 B 軸。Agent Review 的「獨立 context」≠「獨立智能」:同家族 LLM 共享系統性偏誤,quorum 對共同盲點無效,A 軸的深層防線最終仍由 B 軸兜底。
 
 ## B 軸人類驗收層
 
-> ⚠️ 座標消歧:「layer 3」(三層介入,人類 viewport)異於「L3」(證據階層 L1-L6,整合測試)。前者見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」。本檔 L1/L2/L3 均指證據階層,除非標明「layer N」。
-
-**已落地**:[/deliverable-review](../commands/deliverable-review.md)(交付:demo-checklist + 認知誤差點) + [/arch-review](../commands/arch-review.md)(結構:whole-picture + 重用枚舉) 是 layer 3 人類 viewport —— 讓人用大原則判讀 EP 或 code,補 LLM 兩個結構性 blind spot(重造既有 / 偏方向)。受眾模型見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」。
+**已落地**:[/deliverable-review](../commands/deliverable-review.md)(交付:demo-checklist + 認知誤差點) + [/arch-review](../commands/arch-review.md)(結構:whole-picture + 重用枚舉) 是人類 viewport(三層介入,見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」)—— 讓人用大原則判讀 EP 或 code,補 LLM 兩個結構性 blind spot(重造既有 / 偏方向)。
 
 **仍為設計方向**(viewport 之外,更深的 B 軸演進):
 
@@ -94,13 +92,13 @@
 4. **流程末端驗收步驟**:[build](../commands/build.md) / [deep-work](../commands/deep-work.md) 在 commit 前缺「執行 SM 代表性場景讓人判讀」的步驟;現有 Examples 驗證只驗 exit code 0,不驗輸出內容(silent failure / 語義錯誤偵測不到)。
 5. **人類介入點前移到 RED**:GREEN 後人類讀不完;RED 時刻判讀「失敗是否符合預期」更便宜,是意圖偏移的最早訊號。
 
-### 內部跨層接線的 L2 歸屬(A 軸天花板,B 軸補強)
+### 內部跨層接線的真實邊界歸屬(A 軸天花板,B 軸補強)
 
-整合器型 L2 的觸發準則鎖定「≥2 真實**外部**組件」。**內部跨層接線 + 真實資料依賴**(例:auto-discovery registry 成員 consume Feature 的真實 dtype、跨層欄位 auto-prefix 展開)不觸發整合器 flag — 這是 by design 而非 gap:
+整合器型「真實邊界」的觸發準則鎖定「≥2 真實**外部**組件」。**內部跨層接線 + 真實資料依賴**(例:auto-discovery registry 成員 consume Feature 的真實 dtype、跨層欄位 auto-prefix 展開)不觸發整合器 flag — 這是 by design 而非 gap:
 
-- 這類 bug(L1 接線通過但真實資料 dtype/契約落差)是 **A 軸 L3 天花板**:跑真實 pipeline 仍可能因 mock/合成資料不反映真實 dtype 而自洽通過。強迫 L2 收不掉這個天花板。
+- 這類 bug(接線 guard 通過但真實資料 dtype/契約落差)是 **A 軸 L3 天花板**:跑真實 pipeline 仍可能因 mock/合成資料不反映真實 dtype 而自洽通過。強迫真實邊界收不掉這個天花板。
 - 真正能抓此落差的是 **B 軸**(執行 UC/SM 場景,人類觀察真實資料產出,L4-L6)。
-- 實務:內部跨層段落,L1(registry membership / 路徑覆蓋)靠 A 軸機械閘門擋高頻 regression;真實 dtype/契約落差靠 B 軸 UC 場景驗收。兩軸分工,不靠收緊整合器 flag 把 L2 塞回 A 軸(over-classify,違反「避免過度工程」)。
+- 實務:內部跨層段落,接線 guard(registry membership / 路徑覆蓋)靠 A 軸機械閘門擋高頻 regression;真實 dtype/契約落差靠 B 軸 UC 場景驗收。兩軸分工,不靠收緊整合器 flag 把真實邊界塞回 A 軸(over-classify,違反「避免過度工程」)。
 
 ## 與既有規則的關係
 

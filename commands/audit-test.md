@@ -171,7 +171,7 @@ allowed-tools: ["Read", "Bash"]
 | 檢查項 | 嚴重程度 | 判斷標準 |
 |--------|---------|---------|
 | 新增 public 參數 / 注入點但消費端路徑無測試 | **Important** | `rg "<新參數>=" tests/` → 0 hits，或 hits 僅符號 import 非路徑驅動 |
-| 整合器型變更（接 ≥2 真實組件）只在 unit test 驗證 | **Important** | 缺 L2 真實邊界整合測試（`integration_tests/`），mock 循環論證風險 |
+| 整合器型變更（接 ≥2 真實組件）只在 unit test 驗證 | **Important** | 缺真實邊界整合測試（`integration_tests/`），mock 循環論證風險 |
 | 修改了 library 模組但只在 unit test 驗證 | Suggestion | source 在 library 層，test 只在 `tests/unit_tests/` |
 | 修改了共用模組但未跑跨模組測試 | Suggestion | 修改的模組被 ≥ 2 個 test directory 引用 |
 

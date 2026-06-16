@@ -56,7 +56,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 - 邊界正確性無法從任一單方文件推導
 - 錯了不是調參數而是整天行為全錯
 
-**機械 IO 觸發（三條件的 OR 補充，降 LLM 單點）**：段落 diff 觸及真實 IO 模式（parquet/檔案讀寫、DB 連線、第三方 SDK 呼叫、跨進程/跨框架邊界）→ 即使三條件判「非整合器型」，仍標「**待 L2 評估**」，交階段 3 確認是否真需要 L2。候選撈取 → LLM 裁決兩段式（非硬卡）。排除：純 config/fixture 讀取（非整合器，避免 false positive 稀釋信號）。
+**機械 IO 觸發（三條件的 OR 補充，降 LLM 單點）**：段落 diff 觸及真實 IO 模式（parquet/檔案讀寫、DB 連線、第三方 SDK 呼叫、跨進程/跨框架邊界）→ 即使三條件判「非整合器型」，仍標「**待真實邊界評估**」，交階段 3 確認是否真需要真實邊界。候選撈取 → LLM 裁決兩段式（非硬卡）。排除：純 config/fixture 讀取（非整合器，避免 false positive 稀釋信號）。
 
 整合器型段落標記後，在階段 2/3 對應加嚴（路徑覆蓋硬閘門 + 真實邊界整合測試）。
 
@@ -121,11 +121,11 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 ### 階段 3：整合驗證
 
-> **scope 邊界（階段 2 vs 階段 3）**：階段 2 抓「新參數/注入點的接線路徑」（機械 rg 初篩）；階段 3 抓「既有接線的行為正確性」（需真實邊界跑）。**鐵律：階段 2 rg 有 hits ≠ 階段 3 L2 已滿足** — 符號出現在 tests（如被測單元自己的單元測試）≠ 消費端驅動該符號的路徑被覆蓋。例（真實歷史案例）：`rg "<符號>=" tests/` 有 hits 但全在被測單元自己的測試，消費端 integration 路徑不存在 — 符號有測 ≠ 消費路徑有測，bug 漏到補 integration test 才抓到。
+> **scope 邊界（階段 2 vs 階段 3）**：階段 2 抓「新參數/注入點的接線路徑」（機械 rg 初篩）；階段 3 抓「既有接線的行為正確性」（需真實邊界跑）。**鐵律：階段 2 rg 有 hits ≠ 階段 3 真實邊界已滿足** — 符號出現在 tests（如被測單元自己的單元測試）≠ 消費端驅動該符號的路徑被覆蓋。例（真實歷史案例）：`rg "<符號>=" tests/` 有 hits 但全在被測單元自己的測試，消費端 integration 路徑不存在 — 符號有測 ≠ 消費路徑有測，bug 漏到補 integration test 才抓到。
 
 全量 Lint + mypy + pytest（背景跑）+ Examples 全量驗證。全量跑只是 baseline。
 
-**整合器型段落必須有真實邊界整合測試**（見 [quality-constraints](../rules/quality-constraints.md)「整合器型變更判定」+「兩層整合測試」）：主要價值是接 ≥2 個真實外部組件的段落，完成定義必須含 L1 接線 guard（`unit_tests/`）+ L2 真實邊界（`integration_tests/`），不能只靠 mock — mock 循環論證會讓 mock 假設即 bug 來源。
+**整合器型段落必須有真實邊界整合測試**（見 [quality-constraints](../rules/quality-constraints.md)「整合器型變更判定」+「兩層整合測試」）：主要價值是接 ≥2 個真實外部組件的段落，完成定義必須含接線 guard（`unit_tests/`）+ 真實邊界（`integration_tests/`），不能只靠 mock — mock 循環論證會讓 mock 假設即 bug 來源。
 
 ### 階段 4：Agent Review Cycle
 
