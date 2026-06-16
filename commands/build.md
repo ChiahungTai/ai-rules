@@ -50,7 +50,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 2. 套用 max-agents 限制（預設 3，可透過 `--max-agents N` 或 `-a N` 覆蓋）
 3. **有語義約束的段落強制序列**
 
-**整合器段落識別**（驅動階段 2 硬閘門、階段 3 真實邊界、階段 4 測試覆蓋維度的觸發）：掃描 EP 段落，標記同時滿足以下者為整合器型（見 [quality-constraints](../rules/quality-constraints.md)「整合器型變更判定」）：
+**整合器段落識別**（驅動階段 2 硬閘門、階段 3 真實邊界的觸發）：掃描 EP 段落，標記同時滿足以下者為整合器型（見 [quality-constraints](../rules/quality-constraints.md)「整合器型變更判定」）：
 
 - 主要價值是把 ≥2 個真實外部組件接起來（DB、catalog、SDK、跨進程、跨框架）
 - 邊界正確性無法從任一單方文件推導
@@ -58,7 +58,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 **機械 IO 觸發（三條件的 OR 補充，降 LLM 單點）**：段落 diff 觸及真實 IO 模式（parquet/檔案讀寫、DB 連線、第三方 SDK 呼叫、跨進程/跨框架邊界）→ 即使三條件判「非整合器型」，仍標「**待 L2 評估**」，交階段 3 確認是否真需要 L2。候選撈取 → LLM 裁決兩段式（非硬卡）。排除：純 config/fixture 讀取（非整合器，避免 false positive 稀釋信號）。
 
-整合器型段落標記後，在階段 2/3/4 對應加嚴（路徑覆蓋硬閘門 + 真實邊界整合測試 + 測試覆蓋維度審查）。
+整合器型段落標記後，在階段 2/3 對應加嚴（路徑覆蓋硬閘門 + 真實邊界整合測試）。
 
 ### 階段 1：準備
 
@@ -130,7 +130,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 ### 階段 4：Agent Review Cycle
 
 **Writer/Reviewer 分離**：用獨立 Agent context 做品質閘門，避免主 LLM 審查自己的 code。
-**適應式多 Agent Review**：依 `--max-agents` 和變更複雜度決定 spawn 幾個 review agent。
+**2-perspective Review**（① Intent-anchored + ② Fresh）：多樣性 > 數量 — 兩異質 perspective 比多個同錨定 agent 覆蓋更廣。完整設計見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
 
 #### Step 1: 確認 max-agents
 
@@ -143,60 +143,16 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 **A. Workflow 模式**（effort = ultracode/xhigh 且 max-agents > 1）：
 
-使用 Workflow tool，參照 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md) 腳本骨架。
-
-**啟用維度**（沿用下表 Agent Tool 模式的維度定義和啟用條件）：
+用 Workflow tool 協調 2 perspective（perspective 定義 + prompt 見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)）；腳本骨架、DimensionVerdict schema、adversarial verify 見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)。
 
 | Workflow Phase | 說明 | Agent 數量 |
 |----------------|------|-----------|
-| Review | 平行 spawn 維度 agents | ≤ max-agents |
+| Review | 平行 spawn 2 perspective agents | ≤ max-agents |
 | Verify | Critical findings → 3 verifier + ≥2/3 quorum | 3 × critical findings |
-
-每個 Review agent prompt 包含（同 Agent Tool 模式）：
-- `git diff` 範圍（所有 build 產出的變更）
-- 該維度的檢查項目清單
-- 相關檔案路徑（必讀）
-- 引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) 方法論
-- rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
-- schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-review」步驟（現有流程不變）。
 
-**B. Agent Tool 模式**（Fallback，非 ultracode）：
-
-##### Adaptive Agent 數量
-
-**max-agents = 1** → 跳至下方「單一 Agent Prompt（Fallback）」。
-
-**max-agents > 1**（預設 3）→ 根據變更特徵啟用維度：
-
-| 維度 Agent | 審查項目 | 啟用條件 | 優先級 |
-|-----------|---------|---------|--------|
-| EP 合規 | EP 完成度稽核：Done / Skipped / Partial | **always**（有 EP 時） | P0 |
-| 正確性 | 邏輯 bugs、邊界案例、error handling | 變更 ≥ 3 files | P1 |
-| 架構與安全 | 設計模式、耦合、安全性 | 變更 ≥ 5 files 或含 API changes | P2 |
-| 測試覆蓋 | 新增 public 行為（新參數、新注入點）的整合路徑是否有測試？`rg "<新參數>=" tests/`，區分符號覆蓋 vs 路徑覆蓋 | 變更含新 public API / 注入點 / 整合器型段落 | P1 |
-
-啟用維度數 > max-agents → 從低優先級（P2 起）合併至前一個 agent（不丟棄任何維度）。
-
-##### 平行 Spawn
-
-同時 spawn 所有啟用的 review agents（subagent_type: "Explore"，read-only by design）。
-
-每個 agent prompt 包含：
-- `git diff` 範圍（所有 build 產出的變更）
-- 該維度的檢查項目清單（如上表）
-- 相關檔案路徑（必讀）
-- 引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) 方法論
-- rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
-
-#### 單一 Agent Prompt（Fallback，max-agents = 1）
-
-Spawn Agent（subagent_type: "Explore"），prompt 包含：
-- `git diff` 範圍（所有 build 產出的變更）
-- EP 完成度稽核：讀 EP 段落表，對比 git diff，列出 Done / Skipped / Partial
-- 標準 code-review 方法論（引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md)）
-- 相關檔案路徑（必讀）
+**B. Agent Tool 模式**（Fallback，非 ultracode）：2-perspective review（① Intent-anchored + ② Fresh），完整流程見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
 
 #### 主 LLM — /judge-review
 
@@ -270,7 +226,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 ## 與其他命令的協作
 
 ```
-/spec → /execution-plan（含 EP Review）→ [/ep-validate] → post-EP: /deliverable-review --ep（layer 3 方向）→ /arch-review --ep（layer 3 結構）→ /build（含 Agent Review + /audit-test, LLM 鏈）→ post-build: /arch-review（layer 3 結構）→ /deliverable-review（layer 3 demo 交付）→ [/code-review] → /commit
+/spec → /execution-plan（含 EP Review）→ [/ep-validate] → post-EP: /deliverable-review --ep（layer 3 方向）→ /arch-review --ep（layer 3 結構）→ /build（含 Agent Review + /audit-test, LLM 鏈）→ post-build（看狀況呼叫，不硬定先後）: /arch-review（layer 3 結構）/ /deliverable-review（layer 3 demo 交付）→ [/code-review] → /commit
 ```
 
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。

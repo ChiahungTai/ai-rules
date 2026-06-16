@@ -201,13 +201,19 @@ UC-3 除權息調整         apply_adjustment()    demo_adj.py                  
 
 兩者 product-type-aware（code/docs 都通）；`--ep` 各審 plan 的對應軸。
 
-**推薦順序**：
+**呼叫時機**（你看狀況觸發）：
+
+post-EP — 方向先於結構（plan 階段 cheap to change，錯方向白審結構）：
 ```
-post-EP：/deliverable-review --ep（方向：打算做對嗎）→ /arch-review --ep（結構：提案撐得起嗎）
-post-build：/arch-review（結構，早）→ /deliverable-review（demo 交付，晚）→ /code-review → /commit
+/deliverable-review --ep（方向：打算做對嗎）→ /arch-review --ep（結構：提案撐得起嗎）
 ```
 
-> post-EP 方向先（錯方向白審結構）；post-build demo 需 full build 故 deliverable 在後。
+post-build — 兩 viewport 看狀況呼叫，**不硬定先後**：
+```
+/arch-review        懷疑「build 期間結構漂移 / 在重造既有」時
+/deliverable-review 要確認「做成的是我要的嗎 / demo 覆蓋嗎」時
+→ /code-review → /commit
+```
 
 ---
 
@@ -219,6 +225,6 @@ post-build：/arch-review（結構，早）→ /deliverable-review（demo 交付
         /deliverable-review --ep（layer 3，planned）→ /arch-review --ep（layer 3，結構）
           ↓
         /build（含 Agent Review + /audit-test）
-          ↓ post-build
-        /arch-review（layer 3，結構）→ /deliverable-review（layer 3，demo 交付）→ /code-review → /commit
+          ↓ post-build（看狀況呼叫，不硬定先後）
+        /arch-review（layer 3，結構）/ /deliverable-review（layer 3，demo 交付）→ /code-review → /commit
 ```

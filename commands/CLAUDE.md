@@ -2,7 +2,7 @@
 
 ## 寫作原則
 
-> **載入時機**：Command 只在 `/invoke` 時載入，非每次 session 自動載入。Noise 容忍度比 CLAUDE.md 高，但仍應保持 signal 導向。
+> **載入時機**：Command 只在被觸發（`/<command>`）時載入，非每次 session 自動載入。Noise 容忍度比 CLAUDE.md 高，但仍應保持 signal 導向。
 
 - **引用語法**：Command 不支援 `@` transclusion。引用其他檔案一律使用 `[描述](path)` markdown link
 - **輸出格式模板**：是 command 的核心交付物規格，不算一般程式碼範例，可接受 >5 行
@@ -21,7 +21,7 @@
 /spec（含 UC 定義 + POC 可行性驗證）→ /execution-plan（含 EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
           ↓ post-EP checkpoint: /deliverable-review --ep（layer 3 方向：打算做對嗎）→ /arch-review --ep（layer 3 結構：撐得起嗎）
   → /build（含 Agent Review + /audit-test + UC 狀態 + SYSTEM-MAP 同步，LLM 鏈）
-          ↓ post-build checkpoint: /arch-review（layer 3 結構）→ /deliverable-review（layer 3 demo 交付）→ /code-review（layer 1/2, LLM 六軸）→ /commit（UC 狀態確認）
+          ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /arch-review（layer 3 結構）/ /deliverable-review（layer 3 demo 交付）→ /code-review（layer 1/2, LLM 六軸）→ /commit（UC 狀態確認）
 ```
 
 - `/spec` — 結構化需求討論 + codebase 研究 + POC 可行性驗證（`--write` 寫 spec MD、`--research-only` 只研究）
@@ -47,7 +47,7 @@
 - `/lint-fix` — ruff + mypy 自動修正
 - `/fix-test` — 測試失敗分類修復（先分類 A/B/C/D/E 再修復，防止盲目讓測試通過）
 - `/audit-test` — 測試品質稽核（反模式偵測、覆蓋對稱性、mock 健康度，只讀不寫）
-- `/consistency` — 文檔品質檢查（自洽性、矛盾性、精準度）
+- `/consistency` — 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度、Signal/Noise）
 - `/distill-spec` — 蒸餾肥大的 spec 文檔
 
 ### CLAUDE.md 維護
