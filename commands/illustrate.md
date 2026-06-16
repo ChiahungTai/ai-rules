@@ -70,7 +70,7 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 ## 智能並行處理
 
-檔案 ≥ 5 時，Agent tool 並行處理：按關聯性分組 → 每組 spawn Agent → 整合結果。
+檔案 ≥ 5 時，Agent tool 並行處理（model 依 [model-routing](../rules/model-routing.md)：session 降一級）：按關聯性分組 → 每組 spawn Agent → 整合結果。
 
 平行處理架構：[illustrate-parallel-architecture.md](./claude/_common/illustrate-parallel-architecture.md)
 

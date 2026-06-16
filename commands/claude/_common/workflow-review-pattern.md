@@ -153,6 +153,9 @@ export const meta = {
 
 const REVIEW_SCHEMA = { /* DimensionVerdict schema */ }
 const VERIFY_SCHEMA = { /* VerifyVerdict schema */ }
+// review/verify agent = 主 session 降一級（opus→sonnet, sonnet→haiku, haiku→haiku）；見 rules/model-routing.md
+// author 時依當前 session 填對的 literal（下為 sonnet session 範例）
+const REVIEW_MODEL = 'haiku'
 
 // --- 各命令定義自己的 dimensions ---
 // const dimensions = [
@@ -169,7 +172,8 @@ const reviews = await parallel(
       label: `review:${d.key}`,
       phase: 'Review',
       schema: REVIEW_SCHEMA,
-      agentType: 'Explore'
+      agentType: 'Explore',
+      model: REVIEW_MODEL
     })
   )
 )
@@ -195,7 +199,7 @@ const verified = await parallel(
          Finding: ${f.title} — ${f.description}
          File: ${f.file}:${f.line}
          Default to isReal=false if uncertain.`,
-        { label: `verify:${f.id}`, phase: 'Verify', schema: VERIFY_SCHEMA, agentType: 'Explore' }
+        { label: `verify:${f.id}`, phase: 'Verify', schema: VERIFY_SCHEMA, agentType: 'Explore', model: REVIEW_MODEL }
       )
     ))
   )

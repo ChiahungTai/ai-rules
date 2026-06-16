@@ -54,7 +54,7 @@ User Story 格式（參考）：
 
 **先讀程式碼，再提假設。禁止憑訓練資料猜測。**
 
-spawn Explore Agent 深度掃描相關模組：
+spawn Explore Agent（model 依 [model-routing](../rules/model-routing.md)：session 降一級）深度掃描相關模組：
 
 1. **Capabilities 盤點**：搜尋需求涉及的 CLAUDE.md Capabilities + `.kanban/` cards（rg 搜 Markdown）
 2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用
@@ -78,7 +78,7 @@ ASSUMPTIONS I'M MAKING:
 → 正確的話請告知，否則我將按照這些假設繼續進行。
 ```
 
-**風險分級驗證**（POC 語境簡化為二元；完整 🔴🟡🟢 三級見 [ai-development-guide.md](../ai-development-guide.md)「驗證約束」）：
+**風險分級驗證**（POC 語境簡化為 🔴/🟢 兩級；完整 🔴🟡🟢 三級見 [ai-development-guide.md](../ai-development-guide.md)「驗證約束」）：
 
 | 風險 | 判定標準 | 驗證方式 |
 |------|---------|---------|
