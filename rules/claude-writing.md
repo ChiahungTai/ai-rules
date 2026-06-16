@@ -101,6 +101,7 @@ permission-mode: "acceptEdits"
 - **元資訊**: 版本號、更新日期、統計資訊、Changelog
 - **過時範例**: 無法實際執行的範例
 - **專案特定事實**: 真實專案符號/路徑/數字（如 `myproject.common.enums.MyEnum`）—— 泛用 rules/commands 教 pattern，用 `<placeholder>`（`<package>`、`<EnumClass>` 等）。例子釘死專案現狀 → 該專案一改就 drift、其他專案讀無關。專案特定工具（upgrade-* 等）例外
+- **重複描述（反模式是重複，不是集中）**: 集中清單（Symbol Map / Index 段落）與 per-concept 種子重複描述同概念 —— 寫兩遍浪費 token 且易 drift。集中段落（如「可複用基礎設施」）只用於跨模組共用 symbol（distinct purpose），不可與 per-concept 種子重複
 
 ### 引用語法（依檔案類型選擇）
 
@@ -210,6 +211,17 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | Pipeline 步驟 | 每個步驟指向入口 symbol |
 | 資料流描述 | 標注產出型別和下游消費者 |
 
+### 種子深度：推進到可執行單元
+
+**入口類**導航種子必須指向**可執行單元**（function 或 method），不可停在 config / dataclass / 裸 class —— 這些不是執行入口：停在 class 讓 LLM 多一步 `documentSymbol` 才找到執行處；停在 config 則誤把配置當入口。（單純型別引用——「這個 class 在哪」——裸 class 仍是有效種子；本規則僅限**入口類**：會被導航來執行任務者。）
+
+- **class 入口附主要 method**：寫 `ClassName.method_name()` 而非只 `ClassName`
+- **config / dataclass 概念推進到 consumer**：概念核心若是 config，種子指向讀取它的 executor function，別讓 config 單獨當入口
+
+**判準**：自問「LLM 拿這個種子能直接執行任務，還是還要再找一層？」要再找 → 種子不夠深。
+
+> 命名慣例（`run_*` / `apply_*` = executor，`*Config` / `*Factor` = config）已承擔角色消歧，**不需額外標註角色標籤**；種子深度是對「種子指向哪裡」的結構要求，不是對符號貼標籤。
+
 ### 標準段落標題（機械識別）
 
 > **核心原則**：每類導航內容用唯一標準標題，讓 `rg` / sync 能機械識別「所有導航表」「所有檔案結構」。模組依規模選用子集，**不強制全有**（小模組省略避免過度結構化）。
@@ -223,7 +235,9 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | `## Capabilities` | UC 能力表（能力 \| 入口 \| 狀態） | 有已完成 UC |
 | `## 核心 API` | import 範例 | 有公開 API |
 
-**內容要求 vs 形式選擇**：導航-A 種子是**內容要求**（每個關鍵概念都要有 symbol 種子，由角度一 audit 驗證）；**形式**（表 / 描述性文字 / 目錄樹）依符號數量自然選擇 — 別為少量符號強制建表，也別讓大量符號擠在散文裡。閾值由寫作者判斷，不硬規範。
+**內容要求 vs 形式選擇**：導航-A 種子是**內容要求**（每個關鍵概念都要有 symbol 種子，由角度一 audit 驗證）。**形式**依符號數量選擇：**內嵌種子（概念旁直接附 symbol）為預設** —— 不另開段落，最少 token 達全覆蓋；少量符號用描述性文字，不強制建表。
+
+**大模組 selectivity 靠分組結構，不靠編排格式**：symbol 多時，關鍵不是「內嵌 vs 集中表格」，是用 **### 類別小標題**（如 `### 均線 / 動量 / 波動率 / 量能`）把長清單分組 —— 線性掃描降為「定位分組 + 小範圍掃描」，幾乎不增加 token。
 
 **禁止標題變體**：導航表統一「模組導航」，**禁止** "Navigation" / "導航" / "Navigation Table" 等變體 — 多種標題讓 `rg "模組導航"` 漏掉其他寫法，是 LSP 時代 audit/sync 的機械識別障礙。
 

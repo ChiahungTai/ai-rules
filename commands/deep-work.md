@@ -20,7 +20,17 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 委託 Skills：
 - [autonomous-execution](../skills/autonomous-execution/SKILL.md) — 自主決策、錯誤自癒、完成報告
-- [agent-workflow](../skills/agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 規範
+- [agent-workflow](../skills/agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 覄範
+
+---
+
+## 前置：進入 auto-mode（強制）
+
+deep-work 前提是用戶已離開 —— 權限提示會卡死無人 flow。**必須在 auto-mode 下執行**（流程 dispatch 前先確認）。
+
+- **Auto-mode**（詳見 [agent-workflow](../skills/agent-workflow/SKILL.md)「Auto Mode」）：classifier model 在命令執行前把關（阻擋 scope 升級 / 未知基礎設施 / 惡意操作），取代人工權限提示。
+- **進入**：`claude --permission-mode auto -p`（CLI 啟動旗標）。
+- **誠實處理**：permission mode 是 CLI 啟動旗標，**命令本身無法中途切換**。若當前非 auto-mode → 印出警告「非 auto-mode，無人值守會卡在權限提示；請以 `--permission-mode auto` 重啟或由用戶切換 mode」並停下，**不靜默降級成互動模式硬跑**。
 
 ---
 

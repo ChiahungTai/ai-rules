@@ -270,12 +270,12 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 ## 與其他命令的協作
 
 ```
-/spec → /execution-plan（含 EP Review）→ [/ep-validate] → post-EP: /human-review --ep（layer 3 人類 viewport）→ /build（含 Agent Review + /audit-test, LLM 鏈）→ post-build: /human-review（layer 3）→ [/code-review] → /commit
+/spec → /execution-plan（含 EP Review）→ [/ep-validate] → post-EP: /deliverable-review --ep（layer 3 方向）→ /arch-review --ep（layer 3 結構）→ /build（含 Agent Review + /audit-test, LLM 鏈）→ post-build: /arch-review（layer 3 結構）→ /deliverable-review（layer 3 demo 交付）→ [/code-review] → /commit
 ```
 
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。
 
-> **Agent Review Cycle（LLM 鏈, layer 1）已完成。** 機器自驗天花板 = AI 自洽,commit 前建議跑 `/human-review`（layer 3 人類 viewport, 4 lens）跨越認知誤差;如需 LLM 第二意見可跑獨立 `/code-review`（layer 1/2）。
+> **Agent Review Cycle（LLM 鏈, layer 1）已完成。** 機器自驗天花板 = AI 自洽,commit 前建議跑 `/deliverable-review`（layer 3 demo 交付）跨越認知誤差、`/arch-review`（layer 3 結構 viewport）跨越重造盲點;如需 LLM 第二意見可跑獨立 `/code-review`（layer 1/2）。
 
 ---
 

@@ -19,9 +19,9 @@
 
 ```
 /spec（含 UC 定義 + POC 可行性驗證）→ /execution-plan（含 EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
-          ↓ post-EP checkpoint: /human-review --ep（layer 3 人類 viewport，4 lens 判「這是我要的系統嗎」）
+          ↓ post-EP checkpoint: /deliverable-review --ep（layer 3 方向：打算做對嗎）→ /arch-review --ep（layer 3 結構：撐得起嗎）
   → /build（含 Agent Review + /audit-test + UC 狀態 + SYSTEM-MAP 同步，LLM 鏈）
-          ↓ post-build checkpoint: /human-review（layer 3）→ /code-review（layer 1/2, LLM 六軸）→ /commit（UC 狀態確認）
+          ↓ post-build checkpoint: /arch-review（layer 3 結構）→ /deliverable-review（layer 3 demo 交付）→ /code-review（layer 1/2, LLM 六軸）→ /commit（UC 狀態確認）
 ```
 
 - `/spec` — 結構化需求討論 + codebase 研究 + POC 可行性驗證（`--write` 寫 spec MD、`--research-only` 只研究）
@@ -31,7 +31,8 @@
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
 - `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新 + SYSTEM-MAP 同步）
 - `/code-review` — 深層思考六軸代碼審查（含 UC 覆蓋度）
-- `/human-review` — 人類 viewport（layer 3）：4 lens（I/O / 架構 / 大概實作 / 驗證範圍審查）判讀 EP（`--ep`）或 code；人用大原則，不做逐行正確性、不親跑場景
+- `/deliverable-review` — 人類 viewport 交付軸（layer 3）：天才工程師向老闆 demo 完成的功能——product-type-aware（code: demo-checklist / docs: behavior delta），--ep 審 planned deliverable；方向 >> 品質，不做逐行正確性（交 /code-review）、不審結構（交 /arch-review）
+- `/arch-review` — 人類 viewport 結構軸（layer 3）：whole-picture 渲染（City Map / Flows / Boundaries）+ 重用候選枚舉，人判「結構撐得起 use case 嗎」「在重造既有的嗎」；機器枚舉為主、lsp-architect 驗證為輔
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → UC 狀態確認 → message → 確認）
 
@@ -57,6 +58,11 @@
 - `/claude:sync` — 檢查文檔與程式碼同步性
 - `/daily-maintain` — 每日自動維護（cron 用），自動修正低風險問題 + commit
 - `/project-review` — 互動式專案審查（人類用），findings + kanban + doc health
+
+### 流程演化回饋
+
+- `/flow-feedback` — session 摩擦收集器：不順 session 後，user 植入摩擦 + AI map 到 skills/commands，產 type-1（時機）/type-2（設計）建議 + 具體例子，寫 `ai-analysis/flow-feedback/`
+- `/flow-review` — 定期讀累積 flow-feedback，找重複摩擦 + 聚合 type-2 設計缺陷，跟 user 討論改善 skills/commands（B 軸）；定案 → /spec / kanban → /build
 
 ### 日常工具
 
