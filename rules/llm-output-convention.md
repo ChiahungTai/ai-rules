@@ -5,7 +5,7 @@ paths:
 
 # AI Agent 雙通道輸出慣例
 
-> **scope**：跨專案通用日誌原則。Framework-specific 細節（log format、init 入口、suppress policy、framework quirk）在各專案文檔（如 quant 專案 `mosaic_alpha/common/LOGGING.md`），本檔不重述，避免雙處真理論漂移。
+> **scope**：跨專案通用日誌原則。Framework-specific 細節（log format、init 入口、suppress policy、framework quirk）在各專案文檔（如 quant 專案 `<package>/common/LOGGING.md`），本檔不重述，避免雙處真理論漂移。
 
 ---
 

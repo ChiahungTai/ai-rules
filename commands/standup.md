@@ -1,5 +1,5 @@
 ---
-description: "每日晨間簡報 — 昨日 commits、未 commit 變更、跨 session 對話摘要，一天的開始"
+description: "每日晨間簡報 — 昨日 commits、未 commit 變更、跨 session 對話摘要、SYSTEM-MAP 功能進度，一天的開始"
 when_to_use: "Morning briefing: yesterday's commits, uncommitted changes, and cross-session conversation summary from the previous day. Use at the start of your workday."
 usage: "/standup"
 argument-hint: "/standup — 無參數，自動偵測昨日的活動"

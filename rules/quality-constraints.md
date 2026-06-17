@@ -133,7 +133,7 @@ def process_trading_data(data):
 
 理論基礎見 [acceptance-evidence](./acceptance-evidence.md) 證據階層 L3。消費端驗證模式的盲點：**符號覆蓋**（symbol 出現在 tests）≠ **整合路徑覆蓋**（新參數 / 新接線 / 多組件組合被實際驅動）。
 
-- **新 public 參數 / 注入點**：既有符號 + 新參數組合必須被測試。例：把 `RiskGuard` 注入既有 `Strategy` 的 7 個 `submit_order` 點 — `Strategy` 有 58 個 `on_bar` 測試，但全是 `risk_guard=None` 的回測路徑，新注入路徑零測試。機械檢查：`rg "<param>=" tests/` → 0 hits = 路徑未覆蓋。
+- **新 public 參數 / 注入點**：既有符號 + 新參數組合必須被測試。例：把 `<GuardComponent>` 注入既有 `<Strategy>` 的 `<N>` 個 `<submit_order>()` 點 — `<Strategy>` 有 `<M>` 個 `<on_bar>()` 測試，但全是 `<guard>=None` 的回測路徑，新注入路徑零測試。機械檢查：`rg "<param>=" tests/` → 0 hits = 路徑未覆蓋。
 - **新增 registry 成員**：auto-discovery 接線必須被斷言。per-class 單元測試只證明邏輯正確，不證明接上 registry。機械檢查：在 test files 搜尋 `list_*_classes()` membership 斷言。
 
 ### 整合器型變更判定
