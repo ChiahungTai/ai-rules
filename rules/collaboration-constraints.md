@@ -25,6 +25,14 @@
   - 檔案路徑 (如 `path/to/code.py:122-184`)
   - 具體代碼特徵 (函數名、類名、關鍵邏輯)
 
+### 對外部系統宣稱的查證（含概覽）
+
+> **核心原則**：對外部系統（framework / library / dependency）的特定宣稱——「X 支援/不做 Y」「X 底層是 Rust」——無論出現在分析、概覽、或順口一句，都需 grounding 才能說出口。概覽不豁免查證。
+
+- **概覽最易漏**：問「介紹一下 X」時，傾向用 upstream-general 知識（context7 / 訓練資料）快速作答，把特定宣稱夾帶進去而未驗證——這些夾帶宣稱正是高風險點
+- **自審不等於驗證**：事後檢查「我有沒有查證？」必要但**不足以抓錯**——自審與作答共享盲點（只抓到符合心智模型的，漏掉真正的錯）。把「沒驗證、但大概對」當成「沒驗證」處理：有些未驗證宣稱已經錯了，無法從內部分辨哪些（自審是零獨立性驗證，理論見 [acceptance-evidence](./acceptance-evidence.md)）
+- **fork ≠ upstream**：專案用 forked / divergent 版本依賴時，upstream 文檔（context7 / 線上）描述的是 upstream；runtime 可能不同（語言層、啟用功能、API 行為）。state-dependent 宣稱用本地 checkout（`.venv/` source / 本地 repo），不用 upstream 文檔
+
 ### 破壞性選擇的查證觸發
 
 刪除/整併「看似等價」的無測試保護檔案或版本（新舊版文件、重複設定）時，禁止用檔名直覺判斷保留哪個——先查證專案權威指定（上層索引/README「使用這個」、CLAUDE.md Capabilities 入口、git log 活躍度、內容完整度）。
