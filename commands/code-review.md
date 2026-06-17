@@ -71,6 +71,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 啟用軸數 > max-agents → 從低優先級（P2 起）合併至前一個 agent（不丟棄任何軸）。
 
+**docs mode（純文檔變更）**：Security / Performance 軸 N/A（文檔不涉及 HTTP/auth/credential、無 N+1/無界操作），跳過此二軸避免噪音；Correctness / Readability / Architecture / UC Coverage 仍適用（文檔正確性、可讀、結構、行為覆蓋）。docs mode 觸發判準見 [execution-plan.md](./execution-plan.md) docs mode 段。
+
 每個 Review agent prompt 包含：
 - `git diff` 範圍
 - 該軸的檢查項目清單（如上表）
