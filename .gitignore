@@ -19,6 +19,7 @@
 # Review & agent work products (ephemeral — see workflow-review-pattern.md / agents/README.md)
 .review/
 .agent-tmp/
+.at-contexts/
 
 # Python bytecode
 __pycache__/
