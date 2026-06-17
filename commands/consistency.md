@@ -56,7 +56,9 @@ Signal/noise framework: [encoder-philosophy.md](./claude/_common/encoder-philoso
 
 ### 步驟 0: 決定檢查目標
 
-**如果用戶指定了文檔路徑**（`$ARGUMENTS` 非空）→ 直接檢查該文檔，跳過此步驟。
+> **🔴 fail-fast guard（防 silent 自檢）**：若目標是字面 `$ARGUMENTS`（未替換；常見於程式化 `Skill(consistency, args=...)` + `context: fork` 調用——harness 在 fork 前未把 `$ARGUMENTS` 替換進命令體）或指向不存在的路徑 → **停止**，回「未收到有效目標路徑；請改用 `/consistency <path>` 互動式調用，或 spawn 獨立 Agent 把路徑直接寫進 prompt」。**嚴禁退化成自檢本命令定義檔**——拿不到目標卻自評分數 = 虛假信心，比「沒跑」更危險（違反 fail-loud）。
+
+**如果用戶指定了文檔路徑**（`$ARGUMENTS` 非空且通過上方 guard）→ 直接檢查該文檔，跳過此步驟。
 
 **如果未指定文檔路徑** → 依序嘗試：
 1. `git diff --name-only` — 檢查未 commit 的變更文檔
