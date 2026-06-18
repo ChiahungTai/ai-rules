@@ -6,4 +6,4 @@
 
 屬 docs mode（rule + skill 皆 `.md`）。
 
-**來源**：`hermes-agent-axes` §5 行動 1 + 兩筆 feedback
+**來源**：`hermes-agent-synthesis` §7（自我改進安全檢查表）+ 兩筆 feedback
