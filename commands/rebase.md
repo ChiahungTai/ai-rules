@@ -42,6 +42,8 @@ git log --oneline <target>..HEAD | wc -l   # current 獨有 commit 數（將被 
 
 4. **印出確認**：`當前分支: <current>，目標: <target>，<分叉狀態>`
 
+5. **target worktree HEAD vs target branch ref 消歧**（防誤讀 `git worktree list`）：rebase 的 base 永遠是 **target branch ref**（`git rev-parse <target>`）。`git worktree list` 顯示的 target worktree HEAD 可能**落後** target branch ref（該 worktree 未 checkout 最新，或處於 detached），但那與 rebase base **無關** —— 你不在 target worktree 操作。若 `git worktree list` 的 target HEAD ≠ `git rev-parse <target>`，提示「base 採 target branch ref（`<ref>`），非 target worktree HEAD（`<head>`）」消歧，省下釐清 stale HEAD 的 tool call。
+
 **不 clean** → 停下，提示用戶先 commit 或 stash。
 
 ### Phase 2：Rebase 當前 branch

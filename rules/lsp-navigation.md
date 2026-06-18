@@ -18,7 +18,9 @@ LSP 提供語義級程式碼導航（~50ms，100% 準確），rg/fd 提供文字
 - **audit 覆蓋判斷（真實案例）**：`rg "list_.*_classes" tests/` → 0 hits，audit 誤報「多個 class 無 membership 斷言」。實際測試用不同符號（列舉函式 / registry 變數），LSP `findReferences` 可找到。**符號覆蓋判斷用 rg 會因命名 pattern 差異 false negative**。
 - **judge-review 查證（真實案例）**：審查者 rg 稱「`<ExecutorClass>` 在 `<module>.py` 無建構點」，LSP `findReferences` 立刻列出 import 行 + 建構行。**符號存在性查證用 rg 會因 pattern 失誤 false negative，把「自己沒查到」誤判為「不存在」**。
 
-**結論**：符號查詢用 rg 會 truncated/漏/pattern 失誤；LSP 結構化、不截斷、100% 涵蓋。
+- **rg display masking（真實案例）**：`rg "_update_x_axis_labels"` 把 method 名 mask 成 `n`（輸出 `def n(self) -> None:`）—— **看起來像真實輸出但不是**。masking 比 truncation 更危險：truncation 是「少給」（你知道有漏），masking 是「給錯的」（誤以為查到了，停止往下查）。符號引用查詢一律 LSP `findReferences`。
+
+**結論**：符號查詢用 rg 會 truncated/漏/pattern 失誤/masking（給錯的）；LSP 結構化、不截斷、100% 涵蓋。
 
 ---
 

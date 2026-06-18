@@ -461,6 +461,20 @@ print(f"mean={float(mean_val):.2f}")  # ✅ float() 包裹
 print(f"range={str(df['datetime'].min())}")  # ✅ str() 包裹（日期型）
 ```
 
+#### polars `Series` 彙总方法的寬聯合 — `.max()`/`.mean()` 等
+
+polars `Series` 因無泛型 dtype，其彙总方法（`.max()`/`.min()`/`.mean()`/`.std()`/`.first()`/`.last()`/`.item()`）皆回傳寬聯合 `int | float | Decimal | date | time | datetime | timedelta | str | bytes | ... | None`（同上方 `str-bytes-safe` 的 `.mean()`）。裸 `int(series.max())` / `cast(int, ...)` 觸發 `arg-type`（union 含 `date`/`bytes`，`int()` 不接受）。
+
+```python
+v = per_day["len"].max()  # mypy: int | float | Decimal | date | ... | None（同 .mean()）
+n = int(v)                # ❌ arg-type（union 含 date/bytes，int() 拒絕）
+
+n = v if isinstance(v, int) else 0           # ✅ isinstance narrowing
+# 或先 .item() 確認非 None，再顯式轉換
+```
+
+**禁用** `int(series.max())` / `cast(int, series.max())` —— union 的 `date`/`bytes` 分支使裸轉換型別不成立；isinstance narrowing 或先 `.item()` + 顯式轉換才安全。
+
 #### `type-arg` — bare generic 加型別參數
 
 ```python

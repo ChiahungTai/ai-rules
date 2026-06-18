@@ -24,6 +24,7 @@ ai-rules 是持續演化的系統，但「session 不順 → 該改哪個 comman
 ### 1. user 植入摩擦
 - 有參數 → 直接帶入；無參數 → 互動問「這次哪裡不順？」
 - **保留 user 原話**（高 signal；AI 改寫會稀釋）
+- **terse 種子（無法 map，如 ≤3 字）→ 不列多選項**：保留原話 + 標「種子過短待釐清」+ map 到**最可能的一個**（標低信心），一句確認即可。禁止用「5 選項 + N 問題」抬高反思門檻 —— 本命令是降低門檻的收集器，不是 inquisition。真的無法 map 就保留原話 + 標待釐清，不硬猜。
 
 ### 2. 建立 inventory
 讀 [commands/CLAUDE.md](./CLAUDE.md) 命令索引 + 掃 `skills/` 清單，知道現有 command/skill 全貌，才能 map 摩擦。
