@@ -2,7 +2,7 @@
 
 Loaded on demand for questions about account types, balances, equity, margin, or PnL computation. `<NT_REPO>` is resolved in SKILL.md. This file gives the **non-derivable design model** (how `account_type` fans out across layers), the **two lifecycle paths** that most often get conflated, the **margin-model side capabilities** (init vs maint), navigation seeds, and the failure modes that trap investigators. Authoritative concept docs: `<NT_REPO>/docs/concepts/accounting.md` and `portfolio.md` — read them first.
 
-> **Margin query checklist** (if you're chasing a balance/equity/margin bug): (1) which `account_type`? it selects the 4 layers below; (2) margin has **two lifecycle paths** — pending (`orders_open`) vs filled — verify the one your scenario hits, not just one; (3) Cash/Margin `calculate_pnls` **branch by account_type** — don't read one and assume the other; (4) is the instrument's `margin_maint` actually set? default `0` is the #1 trap (gotcha #1); (5) sim vs live — who produced `balances_total` decides the right equity call (see "Equity is mode-aware").
+> **Margin query checklist** (if you're chasing a balance/equity/margin bug): (1) which `account_type`? it selects the 4 layers below; (2) margin has **two lifecycle paths** — pending (`orders_open`) vs filled — verify the one your scenario hits, not just one; (3) Cash/Margin `calculate_pnls` **branch by account_type** — don't read one and assume the other; (4) is the instrument's `margin_maint` actually set? default `0` is the #1 trap (gotcha #1); (5) equity — what `balances_total` **represents** (cash vs net; is position cost already reflected?) decides the formula, not the sim/live label (see Equity section).
 
 ## Layer — Cython is the runtime; Rust is the PyO3 equivalent
 
@@ -86,18 +86,40 @@ You **can** subclass `MarginModel` from pure Python and the override fires at ru
 
 **When you actually need a custom model:** side-specific *maintenance* (one instrument has one `margin_maint` field). For plain symmetric percentage-of-notional (e.g. Reg T initial 50% both sides), `StandardMarginModel` with per-instrument `margin_init`/`margin_maint` set suffices — no subclass. Prefer `standard` over the default `leveraged` for stock venues: `leveraged` **divides margin by leverage** (the crypto/perp exchange model where higher leverage lowers the margin requirement), which is wrong for stocks — Reg T is a fixed percentage regardless of leverage, so use `standard`.
 
+## Position-type (現股 / 融資 / 融券) — NT can't distinguish same-side positions
+
+NT's margin engine keys on `(instrument, side)` and NT orders/positions have **no built-in `cond`/financing-type field**. So two LONG positions in the *same* stock — a 現股 (cash) long and a 融資 (margin) long — are **indistinguishable** to `MarginModel` (both `LONG`, same instrument → same maintenance margin). NT cannot tell "paid in cash" from "on margin".
+
+**To model 現股 + 融資 + 融券 on one stock, the consumer must layer above NT:**
+
+1. **Encode position-type in the position id** — under `OmsType.HEDGING`, submit orders with a custom `PositionId` (e.g. `{symbol}-{CASH|MARGIN|SHORT}`). NETTING ignores custom position ids, so **HEDGING is required** (NT `execution.md`: "Custom position IDs only valid under HEDGING").
+2. **Correct margin in an app-level layer (not the `MarginModel`)** — read the cond from each position id; NT's `MarginModel` charges 現股 and 融資 the *same* LONG maintenance, so the app layer must zero-out the margin for 現股 (cash → no margin) and compute the true account-wide 維持率. This is also the only place **initial-margin asymmetry** (融資-init ≠ 融券-init) can live — `calculate_margin_init` is side-blind (no `side` param), so a `MarginModel` subclass cannot express it.
+
+**Net layering for a multi-type stock account (sim/paper):**
+- **NT `MarginModel`** (custom subclass): maintenance by **side** — 融資 (`LONG`) vs 融券 (`SHORT`).
+- **App margin layer** (e.g. a `margin_accounting` module): by **cond** — correct 現股 to 0 margin, compute 整戶維持率, hold the init-margin asymmetry.
+- **`HEDGING` OMS** so cond-tagged positions coexist on one instrument.
+
+**Live is broker-authoritative** — the broker computes all of this (margin / 維持率 / 融資 financing); the app layer just reads broker-reported values (no NT `MarginModel` involved). See "IB reference" and "Equity" sections.
+
 ## Cross-mode behavior — backtest ≡ sandbox (NT design)
 
 Paper/backtest/replay share the **same** matching + accounting engine: NT's `SandboxExecutionClient` (`nautilus_trader/adapters/sandbox/execution.py`) directly reuses backtest's `SimulatedExchange` + `BacktestExecClient` + `FillModel`/`FeeModel` (`from nautilus_trader.backtest.engine import SimulatedExchange`; `from nautilus_trader.backtest.execution_client import BacktestExecClient`), swapping only the clock (`LiveClock` vs `TestClock`) and message queue (real-time vs batched). So backtest Cash/Margin/margin-accounting behavior **extrapolates to paper/replay** — it is the same code path, not an assumption. **Live is the exception**: it routes through the broker adapter, so balance is broker-authoritative and does not pass through `SimulatedExchange`.
 
-## Equity is mode-aware — don't use one formula for sim + live
+## Equity — the formula depends on what `balances_total` represents, not just sim vs live
 
-The right equity call depends on **who produced `balances_total`**:
+`Portfolio.equity(venue)` branches on `account_type`: MARGIN → `balances_total + Σ unrealized_pnl`; CASH/betting → `balances_total + Σ mark_value`. This is correct **only when `balances_total`'s cost-treatment matches the account_type's term**. The trap is a MISMATCH — a MARGIN account whose `balances_total` already reflects cost:
 
-- **paper/backtest/replay (NT-computed):** `balances_total` is the cash balance NT tracks from fills — it **excludes** open positions. Use `portfolio.equity(venue)` (= `balances_total + Σ unrealized_pnl` for MARGIN, `+ Σ mark_value` for CASH); it adds the position term correctly.
-- **live (broker-authoritative):** the broker's `balances_total` is a **net liquidation value that already includes positions** (IB sets `total = NetLiquidation`; a Shioaji adapter should do the equivalent). So `portfolio.equity` — which adds `unrealized_pnl`/`mark_value` on top — **double-counts**. Use `account.balances_total()[ccy]` directly for live equity.
+| What `balances_total` represents | account_type | Correct equity | Why |
+|---|---|---|---|
+| cash, cost **not** in total (NT MARGIN sim — `calculate_pnls` doesn't deduct notional on open) | MARGIN | `portfolio.equity` (= total + unrealized_pnl) ✓ | unrealized_pnl = mv − cost supplies the missing cost |
+| cash, cost **in** total (NT CASH sim; or a broker feeding settled cash) | CASH | `portfolio.equity` (= total + mv) ✓ | total already has cost; mv adds position value |
+| cash, cost **in** total (broker settled cash, e.g. Shioaji T+2: `total = acc_balance + settlements`) | **MARGIN** | **`balances_total + Σ mv` (manual)** ⚠️ | `portfolio.equity`-MARGIN uses unrealized_pnl → **double-subtracts cost** (total has it AND unrealized_pnl subtracts again). Use mv instead. |
+| **net liquidation** incl. position value (IB: `total = NetLiquidation`) | MARGIN | `balances_total` alone | total already includes the position; adding anything double-counts |
 
-**Implication:** a single equity formula cannot span sim + live, because `balances_total` means different things (cash-only vs net). Branch by mode. A `balance_available + Σ mv` style workaround that tries to span both will be wrong on one side.
+**The mismatch that forces a custom formula (row 3):** a **MARGIN account** whose broker reports **settled cash** as `total` (cost already deducted, e.g. Shioaji T+2 settlement — `adapters/sj/client/account.py` `TaiwanSettlementCalculator`). `portfolio.equity()` is locked to the MARGIN term (`+ unrealized_pnl`) and double-subtracts cost. The fix is a manual `balances_total + Σ mark_value` (the CASH term) — which is exactly the `balance_available + total_market_value` workaround. **So that workaround is correct and necessary for such adapters, not a candidate for retirement.** (By contrast, a broker feeding **net liquidation** like IB needs `balances_total` alone — row 4.)
+
+**Don't assume "live = broker net".** Whether `total` includes position value (net), or is cash with/without cost reflected, depends on **how the adapter builds `AccountBalance.total`** in its account-summary handler — read it (IB `execution.py` sets `NetLiquidation`; Shioaji `TaiwanSettlementCalculator` sets `acc_balance + settlements`, `margins=[]`). The sim/live label alone does not determine the formula.
 
 ## IB reference — how a broker-authoritative account is fed
 
@@ -108,8 +130,8 @@ The right equity call depends on **who produced `balances_total`**:
 - **`trading_mode: "paper" | "live"`** (`config.py`) selects only the IB Gateway port (`gateway.py`: paper 4002 / live 4001) — **account handling is identical in both** (broker-authoritative). Note: IB's *paper* is a broker-side paper server, NOT NT's internal `SandboxExecutionClient` sim — different quadrant.
 - **Subscribes the broker account summary** (`client/account.py` `subscribe_account_summary` → `reqAccountSummary`); `_on_account_summary` (`execution.py`) builds the NT state from **5 broker tags** (all account-wide / 整戶): `NetLiquidation`→`AccountBalance.total` (**net equity — already includes positions**, so don't add them again), `FullAvailableFunds`→`free` (`locked` is derived as `total − free`, not a separate tag), `FullInitMarginReq`→`MarginBalance.initial` and `FullMaintMarginReq`→`MarginBalance.maintenance` (both `instrument_id=None`), `TotalCashValue`→`info` (not a balance field). Emitted via `generate_account_state(..., reported=True)` — `reported=True` flags it broker-authoritative (NT will not recompute).
 
-A real broker adapter is a **thin shell**: connection + instrument loading + translating broker messages into NT `AccountState`/`Position`/`Order` events. Margin/equity are the broker's numbers; NT just stores them. So for a live broker, "which MarginModel" and "which equity formula" are moot — mirror IB: hardcode MARGIN, feed the broker's `NetLiquidation`/margin, set `reported=True`, and read equity from `balances_total`.
+A real broker adapter is a **thin shell**: connection + instrument loading + translating broker messages into NT `AccountState`/`Position`/`Order` events. Margin/equity are the broker's numbers; NT just stores them. **For a net-liquidation broker like IB**, "which MarginModel" is moot — hardcode MARGIN, feed the broker's `NetLiquidation`/margin, set `reported=True`, and read equity from `balances_total` (Equity row 4: total already includes the position). **But not every broker feeds net liquidation** — a broker feeding settled cash (e.g. Shioaji T+2: `total = acc_balance + settlements`, `margins=[]`) is Equity row 3: `portfolio.equity` double-subtracts cost, so use `balances_total + Σ mv` instead. Which row applies depends on how the adapter builds `AccountBalance.total` — read it, don't assume "live = net".
 
 ## Worked example — floating-equity correctness (CASH)
 
-**Bottom line:** for a pure-CASH account (one that does no short/margin), native `portfolio.equity(venue)` (`= balances_total + Σ mark_value`) is correct — `cash.pyx::calculate_pnls` deducts notional on BUY, so `balances_total` reflects spent cash. Any `balance_available + total_market_value` workaround can retire (and was understating by `locked` under pending orders). For the full docs→source verification walkthrough (exact tool sequence), see [reference.md Example 4](reference.md). *(If the account also does 融資/融券 it must be MARGIN, not CASH — see "account_type is forced" above; then use the MARGIN equity term `Σ unrealized_pnl`.)*
+**Bottom line:** for a pure-CASH account (one that does no short/margin), native `portfolio.equity(venue)` (`= balances_total + Σ mark_value`) is correct — `cash.pyx::calculate_pnls` deducts notional on BUY, so `balances_total` reflects spent cash. Any `balance_available + total_market_value` workaround can retire (and was understating by `locked` under pending orders). For the full docs→source verification walkthrough (exact tool sequence), see [reference.md Example 4](reference.md). *(If the account also does 融資/融券 it must be MARGIN — see "account_type is forced". The MARGIN equity term `Σ unrealized_pnl` is correct for **NT MARGIN sim** (total excludes cost); for a **broker feeding settled cash** like Shioaji it double-subtracts — use the Equity section's row 3 instead.)*
