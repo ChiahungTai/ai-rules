@@ -47,6 +47,8 @@ Make the failure happen reliably. If you can't reproduce it, you can't fix it wi
 
 Narrow down which layer: UI, API, database, build tooling, external service, or the test itself. Use `git bisect` for regression bugs.
 
+**症狀層 ≠ bug 層**：症狀出現在某層（如 display 顯示錯），不代表 bug 就在該層 —— 直覺往 data 層挖（datetime 值算錯？），可能全對、bug 其實在 render 層。**先驗症狀對應的 data 值**（秒級 diagnostic log，如印 `new_dt` vs `prev_dt`）：值對 → 轉 render/formatter 層；值錯 → 才深入值計算路徑。display 類症狀尤其危險（直覺往 data 找，但顯示問題常在 render）—— 先驗值（秒級成本）再決定方向，避免過度投資錯誤假說。
+
 **符號查詢預設用 LSP，rg 只做文字/字串**（找 class/def/引用/呼叫端 → LSP first；找字串內容/註解/config → rg）：
 
 - 「誰建立/引用這個符號？」→ LSP `findReferences`（100% 涵蓋；rg 可能 truncated/漏動態引用）

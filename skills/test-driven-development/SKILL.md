@@ -48,6 +48,14 @@ Every test must encode **why** the behavior matters. A test that can't fail when
 - **Real implementations over mocks**: Real > Fake > Stub > Mock. Over-mocking creates tests that pass while production breaks.
 - **One assertion per concept**: Each test verifies one behavior, named descriptively.
 
+## Test User Logic, Not the Framework
+
+假設第三方套件（Panel/Bokeh/React…）正常，測**你的邏輯**（handler → 資料流 → 行為結果），不是套件機制（渲染、WebSocket、document lock）。框架機制的 debug 是無底洞，且就算解了也沒驗證你的邏輯。
+
+- **任務起始自問**：我測的是使用者的程式碼，還是框架/套件？「如果框架完全正常，這個測試還剩下什麼要驗？」剩下來的才是真正該測的。
+- **投入機制前問**：這個 POC/工具/config 驗證什麼**具體行為**？答不出來（如「figure 渲染驗證什麼行為？」），就不要投入 —— 會掉進框架 debug 無底洞。
+- **漂移警報**：連續 2 次在解「框架為何不工作」（渲染、連線、配置、版本）→ 停，回問「使用者的邏輯是什麼、怎麼純粹測它」。
+
 ## Subagent Testing Pattern
 
 For complex bug fixes, spawn a subagent to write the reproduction test. The main agent then verifies the test fails, implements the fix, and verifies it passes. This separation ensures the test is written without knowledge of the fix.
