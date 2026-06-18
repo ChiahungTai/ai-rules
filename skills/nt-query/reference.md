@@ -2,7 +2,7 @@
 
 Loaded on demand. `<NT_REPO>` is resolved in SKILL.md ("Locate the NT repo"). The full concept→doc→source map lives in `<NT_REPO>/docs/concepts/CLAUDE.md` (authoritative); this file adds (A) worked examples showing the exact tool sequence, and (B) common symbol seeds so you can `hover` immediately.
 
-## A. Worked examples — the three query shapes
+## A. Worked examples — the four query shapes
 
 ### Example 1 — Capability (the failure this skill prevents)
 
@@ -37,6 +37,22 @@ This is the exact mistake: inferring a **capability ceiling** from one **impleme
 3. Symbol seeds (`Position`, `OrderFilled`, `PositionChanged`) → `LSP hover` / `findReferences` to confirm event types and dispatch.
 4. **Answer:** the *contract* (docs) + the *types* (LSP).
 
+### Example 4 — Balance/equity correctness (mixed: concept + implementation, the account-model trap)
+
+**Question:** "After switching my venue to CASH, is `portfolio.equity()` giving the correct floating total equity — or do I still need my `balance_available + market_value` workaround?"
+
+❌ **BAD path (path-extrapolation):**
+Read `_update_margin_init` in `nautilus_trader/accounting/manager.pyx` → see it skips orders with no price → conclude "NT doesn't lock anything on open → equity must be wrong, keep the workaround." This reads the **pending-order path** and concludes about **post-fill** behavior — two different paths (the corollary in SKILL.md).
+
+✅ **GOOD path (docs-first, then verify the formula + the cash flow):**
+1. `Read <NT_REPO>/docs/concepts/portfolio.md` → "Equity formula": **CASH = `balances_total + Σ mark_value`**. ← the contract is stated here.
+2. `Read <NT_REPO>/docs/concepts/accounting.md` → "Account types": Cash locks notional for pending orders; "Balance model": `total == locked + free`.
+3. Confirm the cash flow that makes the formula hold: `Read <NT_REPO>/nautilus_trader/accounting/accounts/cash.pyx` → `calculate_pnls` inserts `-notional` on BUY → `balances_total` already reflects spent cash. (Accounting runs as Cython at runtime — see [account-model.md](account-model.md) "Layer".)
+4. Confirm native uses `balances_total` (not `balance_available`): `rg "balances_total" <NT_REPO>/nautilus_trader/portfolio/portfolio.pyx` → inside `equity()`.
+5. **Answer:** native `portfolio.equity(venue)` is correct for CASH. The workaround retires — it used `balance_available = total − locked`, understating by `locked` whenever pending orders existed. Caveats: `equity()` returns `dict[Currency, Money]`; call `missing_price_instruments(venue)` if it understates.
+
+For the full account_type → 4-layers map, the two lifecycle paths, and gotchas (incl. the `margin_maint=0` silent trap), load [account-model.md](account-model.md).
+
 ## B. Common concept → symbol seeds
 
 Seeds are starting points — always verify via `LSP hover` / docstring. **If a seed does not resolve, stubs may be stale → see SKILL.md "Fallback".**
@@ -44,6 +60,7 @@ Seeds are starting points — always verify via `LSP hover` / docstring. **If a 
 | Concept | Doc | Primary symbol seed(s) |
 |---|---|---|
 | Multi-account / accounting | `accounting.md` | `account_for_venue(venue, account_id)`, `Account` |
+| Balance / equity / margin | `accounting.md` + `portfolio.md` | `Portfolio.equity()`, `CashAccount.calculate_pnls`, `MarginAccount.calculate_pnls`, `account_type_from_str()` — **load [account-model.md](account-model.md) for the full map + Cython-vs-Rust layer note** |
 | Positions / OMS | `positions.md` | `Position`, `OmsType` |
 | Cache (central store) | `cache.md` | `Cache`, `positions(...)`; **`_index_venue_account` is the over-inference trap — implementation only** |
 | Orders (incl. emulated) | `orders.md` | `Order`, `OrderFactory` |

@@ -14,6 +14,8 @@ You're investigating **NautilusTrader (NT)** — the Cython+Rust quant platform.
 
 `dict[Venue, AccountId]` (a 1:1 helper index) is an *implementation choice*, not proof that "one venue = one account" is a hard limit. A data structure shows how something is built today — not what the platform can do.
 
+**Corollary — don't extrapolate behavior from one code path.** NT behavior often splits by lifecycle stage or account type, and each split is a separate code path. Example: margin reservation has a *pending-order* path (`_update_margin_init`) and a *filled-position* path (`calculate_margin_maint`); a finding from one (e.g. "market order has no price → skipped") does not describe the other. When a concern splits, verify the **specific path your scenario hits**. Same anti-pattern shape as the one rule — don't describe the whole from one part. The account/margin map and its two paths are written up in [account-model.md](account-model.md).
+
 ## Locate the NT repo — resolve `<NT_REPO>` once
 
 This skill needs a local NautilusTrader checkout (with `docs/concepts/`). All paths below use `<NT_REPO>`; resolve it in this order, then substitute everywhere (do this once per session):
@@ -66,6 +68,21 @@ NT `.pyi` sit next to the `.pyx`/`.so`; in a consumer repo they reach the LSP vi
 
 **Discipline:** label every source finding as IMPLEMENTATION, not CAPABILITY. `cache._index_venue_account: dict[Venue, AccountId]` = "there is a venue→account lookup index" (implementation), NOT "NT allows only one account per venue" (capability — check docs).
 
+## 🔴 Symbol-name discipline — verify before you write
+
+Before **writing down** any NT class / method / function name (in your notes, a `CLAUDE.md`, code, or this skill), confirm it exists in the **Cython runtime**. Do NOT infer a name from naming symmetry, an abbreviation, or the Rust/PyO3 layer — that blind spot has repeatedly produced wrong symbols:
+
+- `calculate_maintenance_margin` is the **Rust/PyO3** name; the Cython runtime method is `calculate_margin_maint`.
+- a private `_update_margin_init` was assumed to have a `_update_margin_maint` sibling — **it does not exist** (the maintenance path is the public `update_positions`).
+- the leading `_` on private `cdef` methods (`_update_balance_locked`, `_update_margin_init`) was dropped.
+
+**Verify before writing — 0 hits means the name is wrong or from another layer; do not use it:**
+
+- `rg "def <name>|cdef .*<name>|cpdef .*<name>" <NT_REPO>/nautilus_trader/<dir>/`, **or**
+- `LSP workspaceSymbol "<name>"`.
+
+NT naming is often **asymmetric** (pending path is private `_update_margin_init`, filled path is public `update_positions`) — never assume a counterpart exists.
+
 ## Fallback — LSP is blind / stubs stale
 
 If LSP can't resolve NT Cython symbols (`workspaceSymbol` empty, or `attr-defined` / `Unknown` on `Bar` / `Price` / `Quantity` / `InstrumentId`):
@@ -79,4 +96,5 @@ If LSP can't resolve NT Cython symbols (`workspaceSymbol` empty, or `attr-define
 - **NT module guide + LSP stub workflow:** `<NT_REPO>/CLAUDE.md`
 - **LSP stub generation tools:** `<NT_REPO>/scripts/lsp_stubs/README.md`
 - **The failure this prevents (case study):** `<NT_REPO>/ai-analysis/analysis/2026-06-16-nt-docs-over-source.md`
-- **Worked examples (3 query shapes, exact tool calls) + common concept→symbol seeds:** [reference.md](reference.md)
+- **Account / balance / equity / margin model** (account_type → 4 layers, two lifecycle paths, gotchas incl. `margin_maint=0` trap): [account-model.md](account-model.md) — load when the query touches account types, balances, equity, margin, or PnL computation
+- **Worked examples (4 query shapes, exact tool calls) + common concept→symbol seeds:** [reference.md](reference.md)
