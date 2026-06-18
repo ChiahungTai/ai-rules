@@ -56,16 +56,19 @@ Signal/noise framework: [encoder-philosophy.md](./claude/_common/encoder-philoso
 
 ### 步驟 0: 決定檢查目標
 
-> **🔴 fail-fast guard（防 silent 自檢）**：若目標是字面 `$ARGUMENTS`（未替換；常見於程式化 `Skill(consistency, args=...)` + `context: fork` 調用——harness 在 fork 前未把 `$ARGUMENTS` 替換進命令體）或指向不存在的路徑 → **停止**，回「未收到有效目標路徑；請改用 `/consistency <path>` 互動式調用，或 spawn 獨立 Agent 把路徑直接寫進 prompt」。**嚴禁退化成自檢本命令定義檔**——拿不到目標卻自評分數 = 虛假信心，比「沒跑」更危險（違反 fail-loud）。
+**目標只有兩種合法來源**：
 
-**如果用戶指定了文檔路徑**（`$ARGUMENTS` 非空且通過上方 guard）→ 直接檢查該文檔，跳過此步驟。
+1. **`$ARGUMENTS` 空**（無參數調用）→ 走 git diff fallback（下方）自動偵測最近變更的 `.md`
+2. **`$ARGUMENTS` 是一個存在的 `.md` 檔案路徑** → 直接檢查該檔，跳過 fallback
 
-**如果未指定文檔路徑** → 依序嘗試：
-1. `git diff --name-only` — 檢查未 commit 的變更文檔
-2. `git diff --cached --name-only` — 檢查已 staged 但未 commit 的文檔
-3. `git diff --name-only HEAD~1 HEAD` — 檢查最近一次 commit 修改的文檔
+> **🔴 fail-fast guard（防 silent 自檢）**：`$ARGUMENTS` 非空但**不是一個存在的 `.md` 路徑**時——無論是字面 `$ARGUMENTS`（未替換；常見於程式化 `Skill(consistency, args=...)` + `context: fork`，harness 在 fork 前未替換）、自然語言指代（如「你剛改好的文檔」「最近改的」）、或不存在的路徑——**立即停止**，回「未收到有效的文檔路徑；請用 `/consistency <path>` 指定，或用無參數 `/consistency` 自動偵測 git 變更」。**嚴禁把非路徑參數退而求其次去檢查本命令定義檔或其他任意 `.md`**——拿不到目標卻自評分數 = 虛假信心，比「沒跑」更危險（違反 fail-loud）。
 
-從上述結果中篩選 `.md` 檔案，作為本次檢查目標。若無任何 `.md` 檔案，提示用戶並結束。
+**git diff fallback**（僅當 `$ARGUMENTS` 空）— 依序嘗試：
+1. `git diff --name-only` — 未 commit 的變更文檔
+2. `git diff --cached --name-only` — 已 staged 但未 commit 的文檔
+3. `git diff --name-only HEAD~1 HEAD` — 最近一次 commit 修改的文檔
+
+從結果篩選 `.md`，作為檢查目標。若無任何 `.md`，提示用戶並結束。
 
 ### 步驟 1: 讀取文檔
 完整讀取目標文檔內容。
