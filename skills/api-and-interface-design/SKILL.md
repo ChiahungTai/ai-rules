@@ -23,6 +23,16 @@ Trust internal code. Validate at system edges: API route handlers, form submissi
 
 **Third-party API responses are untrusted data.** Always validate their shape before using them in logic or decisions.
 
+### 邊界 = Clean Architecture Adapter 邊界
+
+「Validate at Boundaries」的 boundary，在 Clean Architecture 是 **adapter 邊界** — 介面（port）定義在內層（use case），實作在外層（adapter）。依賴向內：use case 定義 port，adapter 實作，infra 是外部細節。
+
+- 驗證點 = adapter 邊界（系統邊緣：API、SDK、DB、跨進程）
+- 內層（domain / use case）之間信任型別合約，不重複驗證
+- 設計介面時，介面屬於內層（use case 定義 needs），實作屬於外層（adapter 提供）
+
+**與 [architecture-thinking](../architecture-thinking/SKILL.md) 分工（RC-2 邊界）**：本 skill 設計**介面合約**（Hyrum's Law、Validate at Boundaries、穩定性）；architecture-thinking 檢視**整體結構**（分層依賴、bounded context）。介面是 adapter 邊界的具體化 — 設計介面用本 skill，看整體分層用 thinking。
+
 ### Prefer Addition Over Modification
 
 Extend interfaces without breaking existing consumers. Add optional fields; don't change existing field types or remove fields. See [deprecation-and-migration](../deprecation-and-migration/SKILL.md) for safe removal.

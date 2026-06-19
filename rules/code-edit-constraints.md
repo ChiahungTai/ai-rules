@@ -15,6 +15,10 @@
 - **快速迭代**：優先正確性和清晰度
 - **架構優先**：預設不考慮向後相容，優先考慮架構品質
 - **依賴方向**：import 必須遵循依賴層級（library → scripts（demo 入口））；scripts 不反向依賴 library 內部，可複用邏輯一旦累積須上抽進 library，不讓 scripts 變第二個 library
+- **單一職責（SRP）**：一個 class/function 一個改變理由 — 改 A 不該順便碰 B；職責多時拆分而非堆疊
+- **依賴向內（DIP）**：高層不依賴低層細節，依賴透過 interface（定義在內層）反轉；新增依賴先問「能否透過內層 interface」
+- **不洩漏實作細節**：公開介面不暴露內部資料結構/型別；消費者不該知道實作
+- **SOLID 指標**：SRP/OCP/LSP/ISP/DIP 實作時遵循（頂層總綱見 [架構設計紀律](../ai-development-guide.md)）
 
 ---
 

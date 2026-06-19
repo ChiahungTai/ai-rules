@@ -99,6 +99,28 @@
 
 ---
 
+## 架構設計紀律
+
+> **核心原則**：所有設計決策（spec/EP/build/review）用 Clean Architecture + DDD 視角檢視。是**視角非模板**（注入思考，不強制分層、不過度工程）— 補體系缺失的架構紀律層。
+
+### 三主線
+
+- **依賴規則（Clean Architecture 分層）**：domain ← use case ← adapter ← infra，依賴**向內**（內層不依賴外層）。設計時自問「新東西落哪層？依賴方向對嗎？有無循環？」
+- **bounded context（DDD 邊界）**：每個 context 邊界清楚，**不跨域直接存取內部**（`_private`）。設計時自問「這該在哪個 context？有無跨域存取？」
+- **use case 驅動**：先問**消費者要什麼行為**（use case），再設計結構（與 UC-Driven 呼應）。設計時自問「消費者是誰？結構撐得起 use case 嗎？」
+
+### SOLID 精神
+
+SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介面隔離）/ DIP（依賴反轉）— 實作時遵循，詳見 `~/.claude/rules/code-edit-constraints.md`。
+
+### 視角非模板
+
+本紀律是**設計視角**（檢視結構方向），非強制分層模板 — 不要求每個專案套四層。原則通用，範例領域特定（mosaic：domain=策略訊號 / use case=回測下單 / adapter=NT·SJ·catalog / infra）。
+
+> 深入視角（三主線在 spec/illustrate/EP/build 各自怎麼用）見 [architecture-thinking](skills/architecture-thinking/SKILL.md) skill（與 [api-and-interface-design](skills/api-and-interface-design/SKILL.md) 邊界：本視角檢視整體結構，api-and-interface 設計介面合約）。
+
+---
+
 ## 量化交易專屬鐵律
 
 量化交易系統有特殊的品質要求，適用 Crash-Only Design 原則。
