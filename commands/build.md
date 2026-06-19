@@ -79,7 +79,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 | EP 元素 | TDD 步驟 | 說明 |
 |---------|---------|------|
 | Context | 開始前讀取 | 理解背景 |
-| 驗證策略 | RED | 讀 EP 測試類型 → 分類情境 → 寫對應測試（詳 TDD skill EP Integration） |
+| 驗證策略 | RED | 讀 EP 測試類型 → 分類情境 → 寫對應測試（測試類型選擇紀律見 [validation-strategy](../skills/validation-strategy/SKILL.md)：e2e 優先 / 交易 replay >>> live / 放 scripts/ / 不重驗 pkg；詳 TDD skill EP Integration） |
 | Pseudo Code | GREEN | 照設計實作 |
 | 核心要點 | REFACTOR | 對 EP 完成檢查逐項驗證 |
 

@@ -139,10 +139,10 @@ argument-hint: "<實作任務描述> [可選：PROMPT檔案路徑]"
 
 ### 4. 驗證策略
 
-POC/demo 設計 + 測試計畫 + 完成檢查 + 整合測試
+POC/demo 設計 + 測試計畫 + 完成檢查 + 整合測試。**測試類型選擇紀律見 [validation-strategy](../skills/validation-strategy/SKILL.md)**（e2e 優先 > 單元隔離 / 交易 replay >>> live / 放 scripts/ / 不重驗 package NT·bokeh·panel）+ 結構視角見 [architecture-thinking](../skills/architecture-thinking/SKILL.md)。
 
 **測試計畫內容**：描述測試的種類和情境，不寫數量（數字每次修改都過時，對決策無價值）。應包含：
-- **測試類型分佈**：單元 / 整合 / E2E / 外部 API mock
+- **測試類型分佈**：單元 / 整合 / E2E / 外部 API mock（選擇紀律見 validation-strategy）
 - **關鍵情境覆蓋**：happy path、邊界案例、error handling、冪等性
 - **已知未覆蓋的風險**：哪些路徑沒測到、為什麼
 
