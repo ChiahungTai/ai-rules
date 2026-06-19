@@ -63,21 +63,21 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 | 軸 Agent | 審查項目 | 啟用條件 | 優先級 |
 |----------|---------|---------|--------|
 | Correctness | 邏輯 bugs、邊界案例、測試充分性 | **always** | P0 |
-| Readability | 命名、控制流、避免過早抽象 | **always** | P0 |
-| Architecture | 設計模式、模組邊界 | 變更 ≥ 3 files | P1 |
+| Readability & Simplicity | 命名、控制流、避免過早抽象 | **always** | P0 |
+| Architecture（axis 3，調用 architecture-viewport skill） | 設計模式、模組邊界、重用、dep weight | 變更 ≥ 3 files | P1 |
 | Security | 輸入驗證、權限檢查 | diff 含 HTTP/auth/credential | P1 |
 | Performance | N+1、無界操作 | 變更 ≥ 5 files | P2 |
-| UC Coverage | Capabilities 行為覆蓋 | 大型/中型變更 | P2 |
+| Capability Coverage | Capabilities 行為覆蓋 | 大型/中型變更 | P2 |
 
 啟用軸數 > max-agents → 從低優先級（P2 起）合併至前一個 agent（不丟棄任何軸）。
 
-**docs mode（純文檔變更）**：Security / Performance 軸 N/A（文檔不涉及 HTTP/auth/credential、無 N+1/無界操作），跳過此二軸避免噪音；Correctness / Readability / Architecture / UC Coverage 仍適用（文檔正確性、可讀、結構、行為覆蓋）。docs mode 觸發判準見 [execution-plan.md](./execution-plan.md) docs mode 段。
+**docs mode（純文檔變更）**：Security / Performance 軸 N/A（文檔不涉及 HTTP/auth/credential、無 N+1/無界操作），跳過此二軸避免噪音；Correctness / Readability & Simplicity / Architecture / Capability Coverage 仍適用（文檔正確性、可讀、結構、行為覆蓋）。docs mode 觸發判準見 [execution-plan.md](./execution-plan.md) docs mode 段。
 
 每個 Review agent prompt 包含：
 - `git diff` 範圍
 - 該軸的檢查項目清單（如上表）
 - 相關檔案路徑（必讀）
-- 方法論引用（code-review-and-quality；Security 軸額外引用 security-and-hardening）
+- 方法論引用（code-review-and-quality；Architecture 軸引用 architecture-viewport + architecture-thinking；Security 軸額外引用 security-and-hardening）
 - rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
 - schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
@@ -97,21 +97,15 @@ Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mod
 
 ## 六軸審查 + 深層思考
 
-### 1. Correctness — 符合規格嗎？
-邊界情況、測試充分性
+> **六軸定義**（Correctness / Readability & Simplicity / Architecture / Security / Performance / Capability Coverage）見 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) — **單一真相源**（定義沉 skill，本命令不重複）。本命令定義執行方式：top-down 順序、axis 3 接線、Capability Coverage 審查細節、深層思考。
 
-### 2. Readability — 能看懂嗎？
-命名清晰、控制流直觀、避免過早抽象
+**top-down 審查順序**：axis 3（Architecture，結構）先於細部正確性（Correctness 等）— 結構錯了正確性審白費。
 
-### 3. Architecture — 符合現有架構嗎？
-遵循現有模式還是引入新模式？模組邊界乾淨？
+### axis 3：Architecture — 調用 [architecture-viewport](../skills/architecture-viewport/SKILL.md) skill
+- **機器產 finding（A 軸）**：city map / dep weight / 重用枚舉 / LSP 查證，調用 skill 取結構資料 → 產 finding（變更融入既有結構？在重造？）
+- **受眾明文**：axis 3 與 `/illustrate` 用同一 skill，但 axis 3 產**機器 finding**（A 軸）、illustrate **渲染給人判讀**（B 軸）
 
-### 4. Security — 輸入驗證、密碼安全、權限檢查
-diff 涉及 HTTP handler / user input / credential / auth 時，必須讀取 [security-and-hardening](../skills/security-and-hardening/SKILL.md)
-
-### 5. Performance — 無 N+1 查詢、無無界操作
-
-### 6. UC Coverage — 滿足 Capabilities 描述嗎？
+### Capability Coverage — 滿足 Capabilities 描述嗎？
 大型/中型變更時審查：
 - 實作是否涵蓋 CLAUDE.md Capabilities 表格描述的所有行為？
 - 是否有 Capabilities 引用的行為在 diff 中沒有對應實作？
@@ -200,7 +194,7 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 ## 流程位置
 
 ```
-/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ /code-review（含 commit message）→ /commit
+/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ /code-review（六軸含 axis 3 結構 = arch 吸收，top-down，含 commit message）→ /judge-review（一次）→ /commit
 ```
 
 後續：用戶確認 commit message → `/commit`（跳過階段 2 分析，直接執行 lint + commit）
