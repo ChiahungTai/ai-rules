@@ -40,6 +40,7 @@
 
 ### 架構與演進
 - `api-and-interface-design` — 穩定 API / 模組邊界 / 公開介面設計
+- `architecture-viewport` — 結構機械能力（City Map 資料/dep weight/Pattern Radar/domain grounding/LSP，可複用；不決定受眾）
 - `deprecation-and-migration` — 舊系統 / API 棄用與遷移
 - `documentation-and-adrs` — 架構決策與文檔記錄（ADR）
 - `ci-cd-and-automation` — CI/CD pipeline 與品質閘門
