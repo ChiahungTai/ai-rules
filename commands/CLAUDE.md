@@ -36,7 +36,7 @@
 - `/ep-validate` — POC 驅動的 EP 技術假設驗證（高技術風險 EP 的動態驗證）
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
 - `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新 + SYSTEM-MAP 同步）
-- `/code-review` — 深層思考六軸代碼審查（含 UC 覆蓋度）
+- `/code-review` — 深層思考六軸代碼審查（含 axis 3 結構 = arch 吸收，top-down；UC 覆蓋度）
 - `/deliverable-review` — 人類 viewport 交付軸（layer 3）：天才工程師向老闆 demo 完成的功能——product-type-aware（code: demo-checklist / docs: behavior delta），--ep 審 planned deliverable；方向 >> 品質，不做逐行正確性（交 /code-review）、不審結構（交 /illustrate 結構 viewport）
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → UC 狀態確認 → message → 確認）

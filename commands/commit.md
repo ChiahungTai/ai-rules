@@ -144,7 +144,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 4. 用戶確認後，在 commit 前**執行上述操作**（修改 CLAUDE.md + mv 卡片）
 5. **EP 歸檔**：如果本次 commit 是 EP 的最後一個段落（所有段落都已 commit），自動執行歸檔：
    - `mv ai-analysis/execution-plans/ep-xxx.md ai-analysis/execution-plans/_done/`
-   - **子目錄 EP**（如 `dev-process/`）：跨目錄 mv 到 `execution-plans/_done/`（統一歸檔區，不另開子目錄 _done/）
+   - **子目錄 EP**（如 `<task-group>/`，整脊曾用 `dev-process/`）：跨目錄 mv 到 `execution-plans/_done/`（統一歸檔區，不另開子目錄 _done/）
    - **綱要 EP（blueprint）**：所有衍生子 EP build+commit 後才歸檔 master（子 EP 未全完成 → master 留在原地，不提早歸檔）
    - 歸檔與顯式收尾三件同為 metadata finalization，一併執行
 

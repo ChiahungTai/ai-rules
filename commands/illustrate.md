@@ -1,6 +1,6 @@
 ---
-description: "圖解技術概念、架構設計或流程。可指定 @目錄或 @檔案讓 AI 先讀再圖解，支援 console（即時）和 md（寫檔）兩種輸出模式。"
-when_to_use: "Illustrate technical concepts, architecture, or processes. Supports console (ASCII) and md (Mermaid) output. Use with @dir or @file for code-based explanations."
+description: "圖解技術概念、架構設計或流程 + 結構 viewport（city map/call stack/drill，三時點 pre-EP/post-EP/post-build）。可指定 @目錄或 @檔案讓 AI 先讀再圖解，支援 console（即時）和 md（寫檔）兩種輸出模式。"
+when_to_use: "Illustrate technical concepts, architecture, or processes. Also structure viewport (city map, call stack, reuse candidates, drill) at pre-EP / post-EP / post-build. Supports console (ASCII) and md (Mermaid) output. Use with @dir or @file for code-based explanations."
 usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 ---
 

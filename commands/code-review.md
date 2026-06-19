@@ -97,7 +97,7 @@ Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mod
 
 ## 六軸審查 + 深層思考
 
-> **六軸定義**（Correctness / Readability & Simplicity / Architecture / Security / Performance / Capability Coverage）見 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) — **單一真相源**（定義沉 skill，本命令不重複）。本命令定義執行方式：top-down 順序、axis 3 接線、Capability Coverage 審查細節、深層思考。
+> **六軸定義**（Correctness / Readability & Simplicity / Architecture / Security / Performance / Capability Coverage）見 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) — **單一真相源**（完整定義沉 skill）。本命令：上方啟用軸表的「審查項目」是 agent-prompt 啟用條件 + 摘要（agent 看的），非定義重複；另定義執行方式（top-down、axis 3 接線、Capability Coverage 審查細節、深層思考）。
 
 **top-down 審查順序**：axis 3（Architecture，結構）先於細部正確性（Correctness 等）— 結構錯了正確性審白費。
 
