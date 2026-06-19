@@ -28,13 +28,9 @@ allowed-tools: ["Read", "Write", "Bash", "Glob", "CronCreate", "CronDelete", "Cr
 
    計算 cron 表達式（5-field：`分 時 日 月 週`），pinned 到具體日/月，DoW = `*`。
 
-2. **自動捕獲 git 快照**：
-   - `git branch --show-current`
-   - `git status --short`
-   - `git log -5 --oneline`
-   - `git stash list`
+2. **提取 task hint**：時間之後的所有文字為任務簡述（**任務目標** — resume 接續的依據）；無則標記「用戶未提供具體描述，resume 時看 git log 推斷進度」。
 
-3. **提取 task hint**：時間之後的所有文字為任務簡述；無則標記「用戶未提供具體描述，請根據 git 狀態推斷」。
+> **不捕獲 git snapshot**：/at 預設是「usage reset 後接續」，resume 時狀態可能已變（quota 期間其他進度）。context 只記**任務目標**，resume 時看**當前 git log/status** 知進度到哪 — 不比對排程時 snapshot（舊狀態無意義）。
 
 ### Phase 2：寫入 Context 檔案
 
@@ -53,21 +49,14 @@ project_path: "{當前專案路徑}"
 
 # 排程接續任務
 
-## 任務簡述
+## 任務目標
 {task hint}
 
-## Git 快照（排程時）
-- **Branch**: {branch}
-- **Status**: {git status}
-- **Recent commits**: {git log -5 --oneline}
-- **Stash**: {stash list 或 "無"}
-
 ## ⛔ 給 Resume LLM 的指令
-這是排程任務，不是閒聊。你必須：
-1. 先執行 git status 和 git log -5 確認當前狀態
-2. 比對上方快照和當前狀態，找出差異
-3. 根據任務簡述和差異，繼續工作
-4. 完成後刪除此檔案
+這是排程任務（usage reset 後接續），不是閒聊。你必須：
+1. 先執行 `git log --oneline -10` + `git status` 看**當前進度**（做到哪、剩什麼）
+2. 根據任務目標 + 當前進度，接續未完成的工作（不比對排程時狀態 — quota 期間進度可能已變）
+3. 完成後刪除此檔案
 ```
 
 ### Phase 3：建立 CronCreate
@@ -81,9 +70,9 @@ prompt: |
   🔴 排程接續任務 — 用戶於 {scheduled_time} 排程此工作在 {resume_time} 自動接續。
 
   立即執行：
-  1. 讀取 context 檔案：{context_file_path}
-  2. 執行 git status、git log -5 了解當前狀態
-  3. 根據 context 檔案中的任務描述和 git 狀態，繼續未完成的工作
+  1. 讀取 context 檔案：{context_file_path}（任務目標）
+  2. 執行 `git log --oneline -10` + `git status` 看**當前進度**（不比對排程時 snapshot — quota 期間進度可能已變）
+  3. 根據任務目標 + 當前進度，接續未完成的工作
   4. 完成後刪除 context 檔案 {context_file_path}
 
   ⛔ 禁止事項：
@@ -119,9 +108,9 @@ prompt: |
 
 Resume 觸發時，LLM 應：
 
-1. **讀 context 檔案** → 了解任務和背景（`.at-contexts/` 非 protected path，讀取零摩擦）
-2. **驗證 git 狀態** → 確認 context 快照與現實一致
-3. **執行任務** → 自主完成（同 `/deep-work` 模式）
+1. **讀 context 檔案** → 了解**任務目標**（`.at-contexts/` 非 protected path，讀取零摩擦）
+2. **看當前進度** → `git log --oneline -10` + `git status` 知做到哪（**不比對排程時 snapshot** — quota 期間進度可能已變，看當前才準）
+3. **接續未完成** → 根據任務目標 + 當前進度，自主完成剩餘（同 `/deep-work` 模式）
 4. **清理** → 完成後刪除 context 檔案
 5. **通知** → 語音通知完成
 
@@ -151,5 +140,5 @@ Resume 觸發時，LLM 應：
 - **session-only 排程（不持久化）**：cron 存活在當前 session，靠 terminal 保持開啟維持；session 結束即消失。一次性接續用途足夠（善用 usage reset 後的配額窗口內接續工作）
 - **清理**：Resume 完成後必須刪除 context 檔案，避免殘留
 - **多個排程**：若 `.at-contexts/` 已有 `at-context-*` 檔案，提示用戶確認是否有衝突
-- **版控排除（一次性設定，與 auto-mode 放行無關）**：`.at-contexts/` 含 git 快照與任務描述，建議加入該專案 `.gitignore` 或全域 `core.excludesFile`，避免誤 commit
+- **版控排除（一次性設定，與 auto-mode 放行無關）**：`.at-contexts/` 含任務目標描述，建議加入該專案 `.gitignore` 或全域 `core.excludesFile`，避免誤 commit
 - **語音通知**：遵循 `voice-notification` skill 規範
