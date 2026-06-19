@@ -46,7 +46,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 | 驗證策略具體性 | 有明確測試案例 | 自行補充合理測試 |
 | 依賴錨點有效性 | file:line 與實際程式碼一致 | drift 時先更新 EP |
 | EP Review 修正 | 掃描 EP review 區段(`## EP Review Findings` 表格,見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)),納入實作 | 列入快檢報告 |
-| **ep_type 偵測** | 掃描 EP 標頭 `ep_type`（blueprint/implementation，預設 implementation） | **blueprint → 不直接 /build**：提示「逐段衍生子 EP」（列段落 + 建議子 EP 路徑 + build 順序），**不腦補**藍圖段落為實作段落（修段落缺 Pseudo Code 時「自行補上」的腦補災難路徑）；implementation → 正常逐段 |
+| **ep_type 偵測** | **機械掃描** `> **ep_type**:` 欄位（非語義字眼掃描 — 避免描述 blueprint 概念的 implementation EP 自指誤判；預設 implementation） | **blueprint → 不直接 /build**：提示「逐段衍生子 EP」（列段落 + 建議子 EP 路徑 + build 順序），**不腦補**藍圖段落為實作段落（修段落缺 Pseudo Code 時「自行補上」的腦補災難路徑）；implementation → 正常逐段 |
 
 **平行可行性分析**：
 1. 建構段落依賴圖，識別可平行段落

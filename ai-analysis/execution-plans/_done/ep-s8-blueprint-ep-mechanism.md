@@ -1,6 +1,7 @@
 # EP: S8 綱要 EP / 子 EP 結構機制（ep_type）+ task #8
 
 > **parent**: [ep-dev-process-redesign.md](./ep-dev-process-redesign.md)（master 整脊綱要 S8 段展開 — **整脊自身暴露的 dev process gap**）
+> **ep_type**: implementation（本 EP 建機制本身,雖描述 blueprint 概念；欄位機械掃描避免自指誤判）
 > **本 EP**: dev process 支援大型任務的**綱要 EP（blueprint）+ 子 EP（implementation）**結構。加 `ep_type`；`/build` 偵測 blueprint → 提示衍生（修「自行補上」腦補災難路徑）；子 EP 繼承；觸發條件；commit 歸檔。**task #8**：觸發條件 N 定值。
 
 ## 動機（self-contained 背景）

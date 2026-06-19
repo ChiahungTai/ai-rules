@@ -33,9 +33,11 @@ EP 分兩類，由任務規模決定：
 | **implementation**（預設） | 小型 / 單一中型變更 | 完整段落（Context + 要點 + Pseudo Code + 驗證策略 + Scenario Matrix） | 正常逐段 /build |
 | **blueprint**（綱要 EP） | **≥ 5 段都是中型變更**（每段本身需完整 EP 規劃深度，單一 EP 裝不下） | 段落是藍圖層級（描述要做什麼 + 依賴 + 吸收範圍）+ 每段標「→ 衍生子 EP（路徑）」；**不含可實作 Pseudo Code** | **不直接 /build** — 提示逐段衍生子 EP（見 `/build` 階段 0 ep_type 偵測） |
 
+**欄位格式**（結構化，與 `parent` 一致 — `/build` 機械掃描欄位非語義字眼）：EP 標頭標 `> **ep_type**: blueprint` 或 `> **ep_type**: implementation`（預設 implementation，可不標）。blueprint EP 必標；implementation EP 若描述到 blueprint 概念也標（避免語義掃描自指誤判）。
+
 **衍生機制**：blueprint EP 每段 → 衍生 implementation 子 EP（標 `parent: <master EP 路徑>` + 繼承該段 Context/依賴/吸收範圍）。子 EP 是完整 implementation EP，可獨立 /build。
 
-**觸發條件**（避免過度工程）：任務含 ≥ 5 段都是中型變更 → blueprint；否則 implementation。視複雜度調整 — 小型任務硬拆成 blueprint 是過度工程。
+**觸發條件**（避免過度工程）：任務含 ≥ 5 段都是[中型變更](../ai-development-guide.md)（變更規模分級見 ai-development-guide）→ blueprint；否則 implementation。視複雜度調整 — 小型任務硬拆成 blueprint 是過度工程。
 
 ---
 

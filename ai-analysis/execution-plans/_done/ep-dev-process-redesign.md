@@ -4,6 +4,8 @@
 >
 > **本 EP 位置**：`ai-analysis/execution-plans/dev-process/`(整脊工作群組目錄,master + 衍生 EP 放此;歸檔走 `execution-plans/_done/` 統一區)。
 >
+> **ep_type**: blueprint（綱要 EP — 不直接 /build，逐段衍生子 EP；欄位格式見 `/execution-plan` EP 類型段）
+>
 > **🔴 本 EP 是綱要 EP（blueprint），不直接 /build**。整脊任務跨 10+ 段都是中型變更,單一 EP 裝不下。本 EP 是整脊全貌綱要(段落依賴 + 吸收範圍 + 風險);**每段(S0-S8)→ 衍生子 EP（在 `dev-process/`）→ /build 子 EP**（見 S8）。/build 偵測本 EP 為 blueprint 會提示衍生、不腦補(S8 建立此機制)。
 
 ## 動機（self-contained 背景）
