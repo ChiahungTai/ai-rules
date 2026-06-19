@@ -18,10 +18,11 @@
 ### 核心開發流程
 
 ```
-/spec（含 UC 定義 + POC 可行性驗證）→ /execution-plan（含 EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
-          ↓ post-EP checkpoint: /deliverable-review --ep（layer 3 方向：打算做對嗎）→ /arch-review --ep（layer 3 結構：撐得起嗎）
+〔pre-EP 軟 gate〕對話討論新功能 →〔提醒〕/illustrate 結構化提案（city map/重用，軟 gate 不硬擋）→ 人判讀 → 確認
+/spec（含 UC 定義 + POC 可行性驗證，spec 可選前置）→ /execution-plan（含 EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
+          ↓ post-EP checkpoint: /deliverable-review --ep（layer 3 方向：打算做對嗎）→ /illustrate --ep（layer 3 結構：撐得起嗎）
   → /build（含 Agent Review + /audit-test + UC 狀態 + SYSTEM-MAP 同步，LLM 鏈）
-          ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /arch-review（layer 3 結構）/ /deliverable-review（layer 3 demo 交付）→ /code-review（layer 1/2, LLM 六軸）→ /commit（UC 狀態確認）
+          ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport，漂移/重造檢查）/ /deliverable-review（layer 3 demo 交付）→ /code-review（layer 1/2, LLM 六軸）→ /commit（UC 狀態確認）
 ```
 
 - `/spec` — 結構化需求討論 + codebase 研究 + POC 可行性驗證（`--write` 寫 spec MD、`--research-only` 只研究）
@@ -31,8 +32,7 @@
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
 - `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新 + SYSTEM-MAP 同步）
 - `/code-review` — 深層思考六軸代碼審查（含 UC 覆蓋度）
-- `/deliverable-review` — 人類 viewport 交付軸（layer 3）：天才工程師向老闆 demo 完成的功能——product-type-aware（code: demo-checklist / docs: behavior delta），--ep 審 planned deliverable；方向 >> 品質，不做逐行正確性（交 /code-review）、不審結構（交 /arch-review）
-- `/arch-review` — 人類 viewport 結構軸（layer 3）：whole-picture 渲染（City Map / Flows / Boundaries）+ 重用候選枚舉，人判「結構撐得起 use case 嗎」「在重造既有的嗎」；機器枚舉為主、lsp-architect 驗證為輔
+- `/deliverable-review` — 人類 viewport 交付軸（layer 3）：天才工程師向老闆 demo 完成的功能——product-type-aware（code: demo-checklist / docs: behavior delta），--ep 審 planned deliverable；方向 >> 品質，不做逐行正確性（交 /code-review）、不審結構（交 /illustrate 結構 viewport）
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → UC 狀態確認 → message → 確認）
 
@@ -78,5 +78,5 @@
 
 ### 其他
 
-- `/illustrate` — 技術概念、架構設計或流程圖解（console / md 模式）
+- `/illustrate` — 技術概念、架構設計或流程圖解（console / md 模式）+ 結構 viewport（city map/call stack/drill，三時點 pre-EP/post-EP/post-build，人 viewport B 軸）
 - `/swing-analysis` — Swing Analysis 協作模式（Trajectory Viewer + 日誌監控）

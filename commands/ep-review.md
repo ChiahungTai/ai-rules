@@ -12,7 +12,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Agent", "Workflow"]
 
 EP 審查員，在實作前審查 Execution Plan，確保計畫書完整、合規、可執行。
 
-> **受眾**：LLM 執行鏈命令（layer 1 同 session 自判 / layer 2 跨 session），產出回寫 EP 餵回產 EP 的 LLM，**不給人看**。EP 的人類 viewport 是 `/deliverable-review --ep`（layer 3 方向）+ `/arch-review --ep`（layer 3 結構）。見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」。
+> **受眾**：LLM 執行鏈命令（layer 1 同 session 自判 / layer 2 跨 session），產出回寫 EP 餵回產 EP 的 LLM，**不給人看**。EP 的人類 viewport 是 `/deliverable-review --ep`（layer 3 方向）+ `/illustrate --ep`（layer 3 結構 viewport）。見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」。
 
 委託 Skills：
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則

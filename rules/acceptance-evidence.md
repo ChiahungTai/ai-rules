@@ -74,13 +74,13 @@
 | 軸 | 職責 | 證據層 | 天花板 |
 |--|--|--|--|
 | **A 機器自驗** | 內部實作細節的正確性 | L1-L3 | **AI 內部自洽** — 機器斷言跳不出 AI 信念體系 |
-| **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:deliverable-review(交付) + arch-review(結構) = 人類 viewport(三層介入);完整 L4-L6 執行驗收仍為設計方向(見下) |
+| **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:deliverable-review(交付) + illustrate(結構 viewport) = 人類 viewport(三層介入);完整 L4-L6 執行驗收仍為設計方向(見下) |
 
 **鐵律**:A 是必要不充分,B 是充分性的來源。A 軸深化有邊際效益遞減 — 天花板是 AI 自洽,真正的驗收鴻溝在 B 軸。Agent Review 的「獨立 context」≠「獨立智能」:同家族 LLM 共享系統性偏誤,quorum 對共同盲點無效,A 軸的深層防線最終仍由 B 軸兜底。
 
 ## B 軸人類驗收層
 
-**已落地**:[/deliverable-review](../commands/deliverable-review.md)(交付:demo-checklist + 認知誤差點) + [/arch-review](../commands/arch-review.md)(結構:whole-picture + 重用枚舉) 是人類 viewport(三層介入,見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」)—— 讓人用大原則判讀 EP 或 code,補 LLM 兩個結構性 blind spot(重造既有 / 偏方向)。
+**已落地**:[/deliverable-review](../commands/deliverable-review.md)(交付:demo-checklist + 認知誤差點) + [/illustrate](../commands/illustrate.md)(結構 viewport:whole-picture + 重用枚舉) 是人類 viewport(三層介入,見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」)—— 讓人用大原則判讀 EP 或 code,補 LLM 兩個結構性 blind spot(重造既有 / 偏方向)。
 
 **仍為設計方向**(viewport 之外,更深的 B 軸演進):
 
