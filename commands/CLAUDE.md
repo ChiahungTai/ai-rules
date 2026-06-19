@@ -26,7 +26,7 @@
 ```
 
 - `/spec` — 結構化需求討論 + codebase 研究 + POC 可行性驗證（`--write` 寫 spec MD、`--research-only` 只研究）
-- `/execution-plan` — 段落式實作計畫書，基於 /spec 生成 Self-Contained Segments（含 Scenario Matrix + EP Review Cycle），掃描 SYSTEM-MAP.md 取得功能上下文
+- `/execution-plan` — 段落式實作計畫書，基於 /spec 生成 Self-Contained Segments（含 Scenario Matrix + EP Review Cycle；ep_type blueprint/implementation 支援大型任務綱要+子 EP 結構），掃描 SYSTEM-MAP.md 取得功能上下文
 - `/ep-review` — 深層思考審查 Execution Plan 合理性（已內建於 `/execution-plan`，可獨立使用）
 - `/ep-validate` — POC 驅動的 EP 技術假設驗證（高技術風險 EP 的動態驗證）
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
