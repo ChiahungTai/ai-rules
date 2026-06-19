@@ -163,20 +163,9 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 
 ## Commit Message 產生
 
-審查完成後，基於已分析的 diff 直接產生 commit message。
+審查完成後，基於已分析的 diff 直接產生 commit message。**格式 / 語言規範見 [commit.md](./commit.md) 階段 4 — 單一真相源**（task #10：避免雙重定義 drift）。
 
-**格式**：`<type>(<scope>): <description>`
-
-**語言規範**：
-
-| 部分 | 語言 | 範例 |
-|------|------|------|
-| type | 英文 | `feat`, `fix`, `refactor` |
-| scope | 英文 | `data`, `commands`, `ui` |
-| description | **繁體中文**（術語保留英文） | `新增 DataGateway 統一數據介面` |
-| body | 繁體中文 + 英文術語 | 說明為什麼這樣改 |
-
-**type 對應審查結論**：
+**type 對應審查結論**（code-review 特有，映射審查發現 → type）：
 
 | 審查判斷 | type | 說明 |
 |----------|------|------|

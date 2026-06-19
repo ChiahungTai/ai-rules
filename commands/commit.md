@@ -127,11 +127,11 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 **判斷是 judgment 非機械**（feedback↔change 非 1:1，不像 EP↔段落明確）→ forgetting 風險靠**階段 5 可見清單**把關：to-archive 清單隨 commit 確認一併展示，用戶核對 AI 漏標沒。仍在 /flow-review 討論中、未決策的不歸檔（留 root，/flow-review 既有「defer → 留 feedback」規則）。
 
-### 階段 3：Capabilities + Kanban 狀態更新（大型/中型變更）
+### 階段 3：顯式收尾三件（Capabilities + Kanban + SYSTEM-MAP）
 
 **大型/中型變更時執行，小型變更跳過。**
 
-> **核心原則**：Capabilities 更新 + Kanban 搬至 Done/ + EP 歸檔是「metadata finalization」，只在用戶確認 commit 時才執行。此類永久狀態更新不在 `/build` 執行（build 可能不 commit）。Kanban 搬至 InProgress/（暫時狀態）已在 `/build` 階段 1 完成。
+> **核心原則**：顯式收尾三件（Capabilities + Kanban + SYSTEM-MAP）+ EP 歸檔是「metadata finalization」，只在用戶確認 commit 時才執行（對齊 [ai-development-guide](../ai-development-guide.md) 三層文件體系：CLAUDE.md Capabilities / SYSTEM-MAP / .kanban）。此類永久狀態更新不在 `/build` 執行（build 可能不 commit）。Kanban 搬至 InProgress/（暫時狀態）已在 `/build` 階段 1 完成。
 
 1. 識別變更涉及的 library 模組目錄
 2. 檢查該模組 CLAUDE.md Capabilities 表格和 .kanban/ 卡片：是否有 UC 狀態需要更新？
@@ -139,11 +139,13 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
    - **Capabilities 更新**：在對應模組 CLAUDE.md 的 `## Capabilities` 表格新增 ✅ 行
    - **Kanban 卡片搬移**：已完成 UC 的卡片從 active lane 移至 Done/
    - **消費場景寫入**：從 `/build` 提煉的消費場景寫入 Capabilities 備註或 Kanban card
-   - **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成
+   - **SYSTEM-MAP 狀態更新**：消費專案有 SYSTEM-MAP.md 就顯式更新受影響功能生命週期狀態（ai-rules 元專案無 SYSTEM-MAP，正當跳過）
+   - **原子操作**：Capabilities 新增 + Kanban 卡片移動 + SYSTEM-MAP 更新必須同時完成
 4. 用戶確認後，在 commit 前**執行上述操作**（修改 CLAUDE.md + mv 卡片）
 5. **EP 歸檔**：如果本次 commit 是 EP 的最後一個段落（所有段落都已 commit），自動執行歸檔：
    - `mv ai-analysis/execution-plans/ep-xxx.md ai-analysis/execution-plans/_done/`
-   - 歸檔與 Capabilities + Kanban 搬移同為 metadata finalization，一併執行
+   - **子目錄 EP**（如 `dev-process/`）：跨目錄 mv 到 `execution-plans/_done/`（統一歸檔區，不另開子目錄 _done/）
+   - 歸檔與顯式收尾三件同為 metadata finalization，一併執行
 
 ### 階段 4：生成 Commit Message
 
