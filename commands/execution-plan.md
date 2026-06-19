@@ -226,14 +226,14 @@ docs mode 的 `/build` 執行分支見 [build.md](./build.md) 階段 0/2/3。
 
 **max-agents = 1**（haiku/opus）→ 跳至下方「單一 Agent Prompt（Fallback）」，行為等同原 single-agent。
 
-**max-agents > 1**（如 sonnet = 4）→ 根據 EP 特徵啟用維度：
+**max-agents > 1**（如 sonnet = 4）→ 根據 EP 特徵啟用維度。**top-down 審查順序**：先結構（分層依賴/bounded context）後細部正確性（use case 覆蓋/兜底）— 結構錯了正確性審白費（視角見 [architecture-thinking](../skills/architecture-thinking/SKILL.md)）。
 
-| 維度 Agent | 審查項目 | 啟用條件 | 優先級 |
+| 維度 Agent | 審查項目（Clean Arch 視角） | 啟用條件 | 優先級 |
 |-----------|---------|---------|--------|
-| 技術可行性 | Call Stack 可行性 + Pattern Alignment + 下游依賴發現 + 邊界條件 | **always** | P0 |
-| 計畫品質 | 完整性 + 內部一致性 + 遺漏風險 | EP ≥ 3 segments | P1 |
-| 合規與 UC | Rules 合規 + UC 覆蓋度 | 有 UC references | P2 |
-| 語義約束 | 段落間共享假設 + 依賴錨點 drift | EP ≥ 4 segments 且有跨段落語義約束 | P3 |
+| 分層依賴 | domain←use case←adapter←infra 依賴向內？循環？+ Call Stack 可行性 + 下游依賴發現 + 邊界條件 | **always** | P0 |
+| bounded context | 不跨域存取 `_private`？邊界清楚？職責單一？ | EP ≥ 3 segments | P1 |
+| use case 覆蓋 | 消費者要什麼行為？EP 撐得起 use case？UC 覆蓋度 + 完整性 | 有 UC references | P2 |
+| 兜底路徑驗證 | EP 預見極限（實作落差）+ 語義約束 + 依賴錨點 drift + 遺漏風險 + Rules 合規 | EP ≥ 4 segments 且有跨段落語義約束 | P3 |
 
 啟用維度數 > max-agents → 從低優先級（P3 起）合併至前一個 agent（不丟棄任何維度）。
 
@@ -245,8 +245,10 @@ docs mode 的 `/build` 執行分支見 [build.md](./build.md) 階段 0/2/3。
 - EP 完整內容
 - 該維度的檢查項目清單（如上表）
 - 相關檔案路徑（必讀）
-- 引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) 方法論
+- 引用 [architecture-thinking](../skills/architecture-thinking/SKILL.md)（Clean Arch 視角）+ [architecture-viewport](../skills/architecture-viewport/SKILL.md)（結構機械能力）+ [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) 方法論
 - rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
+
+> **agents→skills 統一**（#B12 探討）：agent 審查知識（Clean Arch 視角、結構機械能力、方法論）沉 skill 統一引用，agent prompt 只組裝 — 非各命令內嵌審查邏輯。EP review agent 引用 architecture-thinking + architecture-viewport，與 `/code-review` axis 3、`/illustrate` 共用同一組 skill（整脊「能力下沉」一致性）。
 
 ### 單一 Agent Prompt（Fallback，max-agents = 1）
 
@@ -257,12 +259,11 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
   2. **Pattern Alignment（最重要）**：EP 設計假設的 usage pattern 是否與 callers 實際 pattern 一致？
   3. **下游依賴發現**：有沒有 EP 沒提到的 callers？
   4. **邊界條件**：空值、null、缺少欄位等
-- 四維度審查（引用 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md)）：
-  1. **完整性**：每段有驗收標準？檔案完整列出？依賴遺漏？邊界考量？
-  2. **Rules 合規**：命名、code-edit-constraints、_ai-behavior-constraints、CLAUDE.md 更新需求
-  3. **內部一致性**：段落間依賴順序、同一檔案修改矛盾、技術方案一致、語義約束標記
-  4. **遺漏風險**：Demo、測試、`__init__.py`、配置檔案、受影響模組
-  5. **UC 覆蓋度**：大型變更的 UC 是否被 EP 段落完整覆蓋？每個引用的 UC 是否有對應段落？
+- Clean Arch 審查（**top-down**：先結構後正確性，引用 [architecture-thinking](../skills/architecture-thinking/SKILL.md) + [code-review-and-quality](../skills/code-review-and-quality/SKILL.md)）：
+  1. **分層依賴**：domain←use case←adapter←infra 依賴向內？有循環？Call Stack 可行？
+  2. **bounded context**：不跨域存取 `_private`？邊界清楚？職責單一？
+  3. **use case 覆蓋**：消費者要什麼行為？EP 撐得起？UC 完整覆蓋？每段有驗收標準？檔案完整？依賴遺漏？
+  4. **兜底路徑驗證**：EP 預見極限（實作落差）+ 語義約束 drift + Rules 合規（命名、code-edit-constraints、_ai-behavior-constraints、CLAUDE.md 更新）+ 遺漏風險（Demo、測試、`__init__.py`、配置、受影響模組）+ 內部一致性
 - 相關檔案路徑（必讀）
 
 ### 主 LLM — /judge-review
@@ -323,8 +324,9 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 ## 流程位置
 
 ```
-/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ [/code-review] → /commit
+〔pre-EP 軟 gate〕對話討論 →〔提醒〕/illustrate 結構化提案（軟 gate 不硬擋）→ 確認
+/spec（spec 可選前置）→ /execution-plan（含 EP Review, Clean Arch 視角 top-down）→ [/ep-validate] → /build（含 Agent Review）→ [/code-review] → /commit
 ```
 
-前置：`/spec`
+前置：`/spec`（可選；pre-EP illustrate 結構確認為軟 gate 提醒，不硬擋）
 後續：`/ep-validate`（可選，高技術風險時）→ `/build`（如需額外審查可跑獨立 `/ep-review` 或 `/judge-review`）
