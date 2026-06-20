@@ -103,6 +103,8 @@ workflow-review-pattern 的 schema、各命令的輸出分類，皆引用此。
 
 判定結果決定讀哪個執行範本的 schema/腳本 —— 這是**依賴方向**（判定 → schema），不是耦合。本 skill 只放判定規則，**不重複** schema/腳本（在 workflow-review-pattern）。
 
+> **Main LLM 模式的適用範圍**：上表 3 模式是通用判定規則，但 **build / ep-review / execution-plan 的 Agent Review 強制獨立 agent**（Workflow 或 Agent Tool），**刻意不走 Main LLM 模式** —— 這三者是品質閘門，連 standard effort 也要 Writer/Reviewer 分離，不接受主 LLM 自審；僅 code-review 等無強制分離的命令用 Main LLM 模式。各命令的覆蓋宣告見各自檔案。
+
 ### 為何 Writer/Reviewer 分離
 
 用獨立 Agent context 審查，避免主 LLM 審自己寫的 code/EP。理論基礎：[acceptance-evidence](../../rules/acceptance-evidence.md) 證據獨立性 — AI 同寫 impl + test 時獨立性塌縮，審查同理（同 LLM 審自己的計畫/實作 = 零獨立性 = 證據強度低）。獨立 context 提升證據獨立性（雖同家族 LLM 共享系統偏誤，quorum 對共同盲點無效 — 見 acceptance-evidence A/B 軸）。
