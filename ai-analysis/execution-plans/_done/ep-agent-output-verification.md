@@ -1,5 +1,7 @@
 # EP: agent 產出機械驗證 + scope fence + classifier 處置 + .review 清理
 
+> ⚠️ **ghost-done 註記（2026-06-20）**：本 EP 歸檔 `_done/` 時 S1/S2/S3/S4 實作**皆未落地**（查證：build.md 無 agent 產出 git diff 驗證、agent-workflow 無 scope fence 模板、無 classifier 重試、commit.md 用 `rm -f .review/*.md` 非 per-branch）。實作由 [ep-verify-chain-landing](../ep-verify-chain-landing.md) S2 補落地。
+
 ## 動機（self-contained 背景）
 
 parallel agent 的自述是 L2（同義反覆風險 — agent 寫報告描述自己的作為），缺 L1 機械驗證，曾釀嚴重摩擦：**agent 稱「零修改」、`git diff` 揭露實際有改 + scope-creep（改了 prompt 沙盒外的 `component_base`）差點直接 ship**，靠用戶手動 `/code-review` 才抓到（`mosaic_alpha/ai-analysis/flow-feedback/2026-06-16-log-refactoring-agent-verification.md` §2.2，本 EP 簡稱 #7）。同一類工作模式另有兩個縫隙：

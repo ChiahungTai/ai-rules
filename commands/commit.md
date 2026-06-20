@@ -177,7 +177,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 **flow-feedback 歸檔**（隨 resolving commit，類比階段 3 EP 歸檔）：階段 2.8 標記 to-archive 的 feedback，commit 前 `mv ai-analysis/flow-feedback/<file>.md ai-analysis/flow-feedback/_done/`（`_done/` 不存在則先建）再 `git add` `_done/` 路徑 → 檔在 resolving commit 直接落地 `_done/`，不留 root。未解決 / 討論中的 feedback 不 add（留 root 未追蹤）。
 
-**commit 成功後清除 ephemeral 工作產物**：`rm -f .review/*.md`（刪 review 筆記檔案、保留 `.review/` 目錄供下次 review 直接寫入；review 筆記為工作過程產物，commit 結算後清除 —— 同 POC 生命週期哲學，不進 git 歷史）。
+**commit 成功後清除 ephemeral 工作產物**：review 筆記為工作過程產物，commit 結算後清除（同 POC 生命週期哲學，不進 git 歷史）。**per-branch 清除**（`.review/` 可能含多 branch — 如 backbone / paper-trading / replay）：只刪當前 branch 的 `.review/<branch>.md`，**勿 `rm -f .review/*.md`**（會誤刪他 branch review）。先 `ls .review/` 確認內容；`.review/` 為 gitignore ephemeral 產物（無 git 復原途徑），per-branch 清除正是為避免誤刪他 branch。保留 `.review/` 目錄供下次 review 直接寫入。
 
 ### 階段 7：選配分支操作
 

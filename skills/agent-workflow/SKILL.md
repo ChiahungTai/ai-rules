@@ -79,6 +79,16 @@ Pre-flight 檢查：
 
 **品質預期**：核心邏輯 ~80% 正確，細節（邊界條件、錯誤處理、命名）常需修正。
 
+### Scope Fence（機械任務 prompt 模板 — negative-space）
+
+機械任務（rename / 補 log / format / 批次替換）的 Agent prompt 只有「做什麼」不夠，必須加 **negative-space scope fence** —— 否則 Agent 易「順手重構」scope 外區塊（實證：4 個補-Logger agent 各自找到已有 Logger 的區塊順手改 severity / 合併 / 丟 callback 名，需 4 處 pure-revert）。模板三要素：
+
+- **DO NOT** modify blocks that already contain `<pattern>`（例：`Logger.` 已存在的 except 塊 —— 別動）
+- 只 touch 符合 `<criteria>` 的區塊（例：silent `except: pass` 或 print-only 塊）
+- 完成後自驗：`rg <pattern> <edited_file>` 確認沒碰不該碰的
+
+**適用判準**：機械任務（pattern 明確、意圖單一）強制；設計 / 實作任務（需創造性判斷）不強制。與 build 階段 2「Agent 產出機械驗證」攻守 —— fence 事前預防、git diff 事後驗證。
+
 ### `/build` 整合
 
 `/build --max-agents N` 的 N 由用戶指定，預設 3（受上表並發上限 cap）。
@@ -119,7 +129,9 @@ Session A（Writer）                      Session B（Reviewer）
 claude --permission-mode auto -p "fix all lint errors"
 ```
 
-**注意**：非互動式 `-p` 模式下，如果 classifier 反覆阻擋操作，auto mode 會中止（沒有用戶可回退）。
+**注意**：非互動式 `-p` 模式下，如果 classifier **反覆阻擋**操作（主動擋 scope 升級 / 惡意），auto mode 中止（沒有用戶可回退）。
+
+**classifier unavailable ≠ 阻擋**（服務端間歇故障，非主動擋）：spawn Agent 收 classifier unavailable note（只回警告、無 findings）→ **先重試 spawn（≤ 2 次，間歇常成功）**；仍 unavailable 才降級主 LLM 自審 + **顯式標記 fallback**（警示獨立 review 丟失，非靜默降級）。GLM / 非 Claude harness 的 classifier 間歇 unavailable 是已知風險，重試是正解非異常（見 [model-routing](../../rules/model-routing.md)）。
 
 ---
 

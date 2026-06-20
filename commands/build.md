@@ -45,6 +45,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 | Pseudo Code 可執行性 | 具體到可翻譯為程式碼 | 標記模糊處，自行推斷 |
 | 驗證策略具體性 | 有明確測試案例 | 自行補充合理測試 |
 | 依賴錨點有效性 | file:line 與實際程式碼一致 | drift 時先更新 EP |
+| 兜底宣稱路徑 | EP「X 段暴露/處理 Y」宣稱附 X→Y call chain 證據（path:line） | 路徑未驗證 → flag（計入「⚠️ N 項自行補充」），Y 須獨立調查 |
 | EP Review 修正 | 掃描 EP review 區段(`## EP Review Findings` 表格,見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)),納入實作 | 列入快檢報告 |
 | **ep_type 偵測** | **機械掃描** `> **ep_type**:` 欄位（非語義字眼掃描 — 避免描述 blueprint 概念的 implementation EP 自指誤判；預設 implementation） | **blueprint → 不直接 /build**：提示「逐段衍生子 EP」（列段落 + 建議子 EP 路徑 + build 順序），**不腦補**藍圖段落為實作段落（修段落缺 Pseudo Code 時「自行補上」的腦補災難路徑）；implementation → 正常逐段 |
 
@@ -94,6 +95,11 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 1. 依賴圖分層為 waves
 2. 同 wave 平行 Agent（上限 max-agents）
 3. Wave 合併：讀取 Agent 產出 → 應用到主 worktree → `ruff check --fix && ruff format`
+4. **Agent 產出機械驗證**（agent 自述是 L2 同義反覆風險、`git diff` 是 L1 機械證據，見 [acceptance-evidence](../rules/acceptance-evidence.md)）：
+   - `git diff --name-only` 列實際變更檔（機械事實）
+   - 比對各 Agent 自述「改了哪些檔 / 幾處」vs git 實際 → flag mismatch（**稱「零修改」但 git 顯示有改**最危險，曾釀 scope-creep 近乎 ship）
+   - scope-creep：diff 檔是否超出該 Agent prompt 指定 scope → flag 超出（附 prompt scope 引用）
+   - mismatch / scope-creep → 列為 finding 進階段 4 Agent Review，**不靜默採信自述**
 
 **Agent Context 邊界**：Agent 看不到主對話歷史、其他 Agent 結果、EP 準備結論。**主 LLM 的 prompt 是 Agent 理解任務的唯一來源。**
 
@@ -149,6 +155,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 `--max-agents N` 或 `-a N` 參數控制平行 Agent 數量，預設 3。用戶可手動調整。
 印出確認：`[Review Agent] max=N`
+
+> **classifier unavailable**（spawn 收 note、無 findings）→ **重試 spawn ≤ 2 次**（間歇常成功），非直接降級主 LLM 自審（會丟失獨立 review）；仍失敗才降級 + 顯式標記 fallback。完整處置見 [agent-workflow](../skills/agent-workflow/SKILL.md)「Auto Mode」。
 
 #### Step 2: 選擇審查模式
 

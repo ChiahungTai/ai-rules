@@ -39,6 +39,18 @@ EP 分兩類，由任務規模決定：
 
 **觸發條件**（避免過度工程）：任務含 ≥ 5 段都是[中型變更](../ai-development-guide.md)（變更規模分級見 ai-development-guide）→ blueprint；否則 implementation。視複雜度調整 — 小型任務硬拆成 blueprint 是過度工程。
 
+## 流程規模分級（是否寫 EP — 與 ep_type 正交）
+
+ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**是否寫 EP**」（規模維度，與 docs mode 的 product-type 維度正交）：
+
+| 規模 | 判準 | 流程 |
+|------|------|------|
+| **simple** | 單檔 bug fix、小 tweak、🟢 低風險 | **不寫 EP** — 直接 TDD + 驗證（`/build` 裸任務或直接實作）；對齊 [ai-development-guide](../ai-development-guide.md)「小型變更不需 UC」 |
+| **standard** | 跨檔 feature、🟡 中風險 | 寫 EP（implementation，本命令預設） |
+| **full** | 架構、跨模組、🔴 高風險 | 完整流程（`/spec` → EP → `/ep-validate` → review → `/build` → judge） |
+
+> **防濫用**：simple「不寫 EP」是跳過**規劃文檔**，非跳過品質 — 仍須 TDD + 驗證。判準機械化（檔案數 + 跨模組 + 風險等級）；**不確定歸 standard，勿把中型降級 simple**。
+
 ---
 
 ## 🔴 UC 盤點（大型/中型變更必填，寫在 Scenario Matrix 之前）
@@ -275,7 +287,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
   1. **分層依賴**：domain←use case←adapter←infra 依賴向內？有循環？Call Stack 可行？
   2. **bounded context**：不跨域存取 `_private`？邊界清楚？職責單一？
   3. **use case 覆蓋**：消費者要什麼行為？EP 撐得起？UC 完整覆蓋？每段有驗收標準？檔案完整？依賴遺漏？
-  4. **兜底路徑驗證**：EP 預見極限（實作落差）+ 語義約束 drift + Rules 合規（命名、code-edit-constraints、_ai-behavior-constraints、CLAUDE.md 更新）+ 遺漏風險（Demo、測試、`__init__.py`、配置、受影響模組）+ 內部一致性
+  4. **兜底路徑驗證**：EP 預見極限（實作落差）+ 語義約束 drift + Rules 合規（命名、code-edit-constraints、_ai-behavior-constraints、CLAUDE.md 更新）+ 遺漏風險（Demo、測試、`__init__.py`、配置、受影響模組）+ 內部一致性 + **兜底假設路徑驗證**（EP 若宣稱「X 段暴露/處理 Y 問題」→ 必須驗證 X 的 code path 真經過 Y，追 call chain 附 path:line；不經過 → 標「未驗證」而非「handled」，Y 須獨立調查）+ **「可觀測 ≠ 已修復」用語**（visible / overlap-fixed / root-cause-fixed 三區分；`handled/exposed` 不得模糊涵蓋 visible 與 fixed — S0=visible、S6=overlap-fixed，root-cause-fixed 是另一件事）
 - 相關檔案路徑（必讀）
 
 ### 主 LLM — /judge-review

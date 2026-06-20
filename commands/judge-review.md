@@ -37,7 +37,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Edit"]
 2. **查證實際程式碼**：讀取相關檔案，確認問題是否真實
 3. **第一性原理分析**：本質問題是什麼？問題真的存在嗎？解決方案合理嗎？權衡是什麼？
 4. **輸出評估報告**（格式如下）
-5. **寫入持久化**：決策更新到 finding 的 `decision`(✅/❌/⚠️)與 `status` 欄 —— ✅→`adopted`、❌→`rejected`、⚠️→`needs-confirmation`(更新 `.review/<branch>.md` 或 EP review 區段,格式見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md))。**judge-review 不實作** —— 實作由呼叫端決定(`/build` Phase 4 直接 apply ✅;獨立使用由用戶判讀決策清單)
+5. **寫入持久化**：決策更新到 finding 的 `decision`(✅/❌/⚠️)與 `status` 欄 —— ✅→`adopted`、❌→`rejected`、⚠️→`needs-confirmation`。持久化**首選 EP review 區段**（tracked，跨 session/branch 保留）；`.review/<branch>.md` 僅 local-only（已被 gitignore，跨 session 不保留，不作為決策落點）。格式見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)。**judge-review 不實作** —— 實作由呼叫端決定(`/build` Phase 4 直接 apply ✅;獨立使用由用戶判讀決策清單)
 
 ---
 

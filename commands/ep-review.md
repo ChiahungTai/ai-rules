@@ -109,7 +109,7 @@ execution-plan EP Review Cycle 的四維度 ↔ 本命令 F1-F5 對應（executi
 | ①分層依賴（domain←use case←adapter←infra 向內？循環？） | F3 |
 | ②bounded context（跨域 `_private`？） | F3 |
 | ③use case 覆蓋（EP 撐得起 use case？） | F5 場景覆蓋 |
-| ④兜底路徑驗證（複合） | 拆解 → 實作落差預見（深層思考）+ 語義約束 drift（F3）+ 依賴錨點 drift（F3）+ Rules 合規（F2）+ 遺漏（F4）+ 內部一致性（F3） |
+| ④兜底路徑驗證（複合） | 拆解 → 實作落差預見（深層思考）+ 語義約束 drift（F3）+ 依賴錨點 drift（F3）+ **兜底假設路徑驗證**（F3：EP 宣稱「X 段暴露/處理 Y」→ 驗證 X 的 code path 真經過 Y，追 call chain 附 path:line；不經過標「未驗證」非「handled」，Y 另開調查）+ Rules 合規（F2）+ 遺漏（F4）+ 內部一致性（F3） |
 
 ### 深層思考（第一性原理 + 第二層思考）
 

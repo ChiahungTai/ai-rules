@@ -17,3 +17,7 @@ subagent model 依**任務類型**決定是否降級；降級目標 = 主 sessio
 - **Agent Tool path**（fallback）：spawn `model` param 同上
 
 作者（Claude）依當前 session model 套降級映射、填入對的 literal。並發上限（rate-limit）見 agent-workflow 並發表，與本檔 model 分派正交。
+
+## classifier 間歇 unavailable（harness 已知風險，與 model 分派正交）
+
+GLM / 非 Claude harness 的 safety classifier 可能**間歇 unavailable**（spawn agent 收 note、無 findings，非主動阻擋）。這是已知服務端間歇故障，**重試 spawn 是正解**（≤ 2 次，常成功），非異常 —— 別因此直接降級主 LLM 自審（會丟失獨立 review）。完整處置（重試 / 降級 + 標記 fallback）見 [agent-workflow](../skills/agent-workflow/SKILL.md)「Auto Mode」。
