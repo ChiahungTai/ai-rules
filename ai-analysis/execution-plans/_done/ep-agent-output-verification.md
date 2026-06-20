@@ -1,6 +1,6 @@
 # EP: agent 產出機械驗證 + scope fence + classifier 處置 + .review 清理
 
-> ⚠️ **ghost-done 註記（2026-06-20）**：本 EP 歸檔 `_done/` 時 S1/S2/S3/S4 實作**皆未落地**（查證：build.md 無 agent 產出 git diff 驗證、agent-workflow 無 scope fence 模板、無 classifier 重試、commit.md 用 `rm -f .review/*.md` 非 per-branch）。實作由 [ep-verify-chain-landing](../ep-verify-chain-landing.md) S2 補落地。
+> ⚠️ **ghost-done 註記（2026-06-20）**：本 EP 歸檔 `_done/` 時 S1/S2/S3/S4 實作**皆未落地**（查證：build.md 無 agent 產出 git diff 驗證、agent-workflow 無 scope fence 模板、無 classifier 重試、commit.md 用 `rm -f .review/*.md` 非 per-branch）。實作由 [ep-verify-chain-landing](./ep-verify-chain-landing.md) S2 補落地。
 
 ## 動機（self-contained 背景）
 

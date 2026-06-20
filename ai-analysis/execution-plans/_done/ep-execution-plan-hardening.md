@@ -1,6 +1,6 @@
 # EP: execution-plan 強化 — 兜底假設路徑驗證 + 流程分級
 
-> ⚠️ **ghost-done 註記（2026-06-20）**：本 EP 歸檔 `_done/` 時實作**未落地**（查證：execution-plan.md 只有舊「兜底」維度、build 階段 0 無兜底假設 check、流程分級查無）。實作由 [ep-verify-chain-landing](../ep-verify-chain-landing.md) S1 補落地。
+> ⚠️ **ghost-done 註記（2026-06-20）**：本 EP 歸檔 `_done/` 時實作**未落地**（查證：execution-plan.md 只有舊「兜底」維度、build 階段 0 無兜底假設 check、流程分級查無）。實作由 [ep-verify-chain-landing](./ep-verify-chain-landing.md) S1 補落地。
 
 ## 動機（self-contained 背景）
 
