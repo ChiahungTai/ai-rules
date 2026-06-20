@@ -33,6 +33,8 @@ uv run mypy .                # 必須 0 errors
 
 **執行順序**：Step 1 → Step 2 → **並行** Step 3 + MyPy（ruff format 後同時跑 ruff verify 和 mypy，省時間）。
 
+> ⚠️ **MyPy/Pytest 閘門禁止 pipe 到 tail/grep**（exit code 會被遮蔽，見 [bash-hard-rules](../rules/bash-hard-rules.md)）：`uv run mypy . | tail` 回報的是 `tail` 的 exit 0 而非 mypy 的非 0 → 誤判通過。看 output 重導檔案再 Read，別 `| tail`。
+
 Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 | 錯誤類型 | 自動處理策略 |
@@ -111,6 +113,8 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 - 「純探索性（無對應 UC）」→ 說明探索目的 + 為何無對應 UC
 
 提不出證據 → 不得 delete，須改寫成 test（倒逼覆蓋）。用戶階段 5 見處置清單（含證據），可核對 AI 是否全選 delete 編理由。
+
+**刪除後 dangling-ref 全域掃描**（delete 路徑適用）：刪 POC/demo 檔後，機械掃指向已刪檔名的 ref —— `rg <已刪檔名>` 跨 `lab/`+`demo_*.py`+`tests/`+`ai-analysis/`（EP、docstring「實證 lab/poc_*.py」多處引用），逐個清或重指承接 test。範圍必須含 code + EP + docs，不只 `tests/` —— 不靠 AI 記得「還要查 lab/demo」。
 
 > **demo 雙重**：「檔案去處三選一」是互斥分類（檔案層）。demo 驗證的「行為」是獨立層面 —— 若值得測，build 時另提煉 `test_<feature>.py`（不在 2.7 範圍）。2.7 掃 `demo_*.py` 只管檔案去處（預設 scripts / delete）。
 

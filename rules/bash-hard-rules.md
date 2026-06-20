@@ -12,5 +12,6 @@
 - 禁止 `$VAR`、`$(cmd)` 等 shell 展開（觸發 simple_expansion / command_subshell / subshell 偵測）。需要變數時用具體值或寫 `.py` 檔案
 - `pytest` 用背景跑（`run_in_background: true`），不要阻塞對話
 - 輸出使用繁體中文 + 英文術語
+- **lint/test 閘門命令禁止 pipe 到 tail/grep**：exit code 是閘門依據，pipe 會被最後一環蓋掉。`uv run mypy . 2>&1 | tail -15` 回報的是 `tail` 的 exit 0，不是 mypy 的 7 errors → 誤判「全綠」。需看 output 用重導檔案再 Read（`uv run mypy . > /tmp/mypy.log` 再 Read），或 `set -o pipefail` 讓 pipe exit = 最後一個非 0 退出碼
 
-口訣：`#` 是毒藥、`$` 是禁區、語義用 LSP 文字用 `rg`/`fd`、**agent prompt 寫工具**、`uv run` 是王道、`sed` 是地雷、`pytest` 跑背景、繁體中文
+口訣：`#` 是毒藥、`$` 是禁區、語義用 LSP 文字用 `rg`/`fd`、**agent prompt 寫工具**、`uv run` 是王道、`sed` 是地雷、`pytest` 跑背景、**閘門命令不 pipe**、繁體中文

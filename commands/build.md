@@ -119,6 +119,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 每段完成後：**整合路徑覆蓋檢查** → `ruff check --fix && ruff format` → LSP diagnostics（即時型別檢查）→ `mypy .`（完整驗證）→ `pytest <test> -v`（背景跑）→ POC/demo 驗證
 
+> ⚠️ **mypy/pytest 閘門禁 `| tail/grep`**（exit code 被遮蔽 → 誤判通過，見 [bash-hard-rules](../rules/bash-hard-rules.md)）；看 output 重導檔案再 Read。
+
 > **docs mode**：跳過 TDD（RED/GREEN/REFACTOR）、mypy/ruff/pytest、整合路徑覆蓋；改執行「修改 → rg 殘留 → 跨檔一致性 → `/consistency`」。
 
 **整合路徑覆蓋檢查**（機械式硬閘門，見 [acceptance-evidence](../rules/acceptance-evidence.md) L3 + [quality-constraints](../rules/quality-constraints.md) 符號 vs 路徑覆蓋）：本段是否新增/修改 callable 簽名（新參數、新 keyword）或新增注入點（constructor 接受新依賴）？

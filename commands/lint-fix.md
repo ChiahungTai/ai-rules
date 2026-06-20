@@ -33,6 +33,8 @@ uv run ruff format $ARGUMENTS
 uv run mypy $ARGUMENTS
 ```
 
+> ⚠️ **mypy 輸出禁 `| tail/grep`**（exit code 被遮蔽 → 誤判通過，見 [bash-hard-rules](../rules/bash-hard-rules.md)）；輸出要完整讀（餵問題分析），看 output 重導檔案再 Read。
+
 - mypy 不會 auto-fix，輸出做為下方「問題分析與建議」的輸入
 - **即使 Phase 1 零錯誤，Phase 2 仍必須執行** — 型別問題和 lint 問題是正交的
 
