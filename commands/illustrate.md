@@ -15,12 +15,18 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 **執行鐵律**：Console 禁止 Mermaid 語法。MD 禁止 ASCII 圖表。違反 = 指令執行失敗。
 
-## 核心能力
+## 核心：4 mode（從使用者 use case 歸納，非內部能力）
 
-- **單一主題圖解**：概念解析 + 視覺化圖表
-- **批次檔案分析**：`@dir` 自動分析目錄結構，檔案 ≥ 5 時自動 Agent 並行
-- **深度分析**：根據內容類型套用對應框架（論文/文章/程式碼/EP）。詳見 [illustrate-deep-analysis.md](./claude/_common/illustrate-deep-analysis.md)
-- **結構 viewport**（人類 viewport，B 軸）：渲染整體結構心智模型讓人判讀 —— **city map**（模組 + 依賴方向 + dep weight lean/heavy，調用 [architecture-viewport](../skills/architecture-viewport/SKILL.md) skill 取資料）、**call stack**（重要節點呼叫鏈）、**重用枚舉**（Pattern Radar 嫌疑標記）。能力來源 skill，本命令負責**渲染給人判讀**（不產機器 finding，那是 `/code-review` axis 3）。詳見 [illustrate-structure-viewport.md](./claude/_common/illustrate-structure-viewport.md)
+> /illustrate 從**使用者日常開發 use case** 歸納 4 個高層 mode（意圖）。**mode = 意圖，能力 = 手段（跨 mode 共用）** — 能力（city map / 假設驗證 / diff / 概念圖）服務 mode，不是 mode 本身（同一能力可服務多 mode）。
+
+| mode | 意圖 | 典型情境 | 主要能力（手段）|
+|------|------|---------|---------------|
+| **A 設計決策** | 「這樣設計對嗎」 | 討論新功能 / 重構 / pre-EP | city map + 流程 + 重用枚舉（調 [architecture-viewport](../skills/architecture-viewport/SKILL.md) skill）|
+| **B 理解既有** | 「這怎麼運作」 | 接手 / 學習套件 / 除錯 | 運作流程 + 資料流 + 概念圖 |
+| **C 審查驗證** | 「對不對 / 好不好」 | code-review 前 / EP 審查 / 重造偵測 / commit 前 | 語義 diff + [假設驗證矩陣](./claude/_common/illustrate-deep-analysis.md) + city map |
+| **D 溝通傳達** | 「畫給別人看」 | 文檔 / demo | Mermaid 圖（md 模式）|
+
+use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate-analysis.md](./claude/_common/illustrate-analysis.md)。結構 viewport 互動（drill）見 [illustrate-structure-viewport.md](./claude/_common/illustrate-structure-viewport.md)。批次檔案分析（`@dir`，≥ 5 Agent 並行）跨 mode 通用。
 
 ## 現有程式碼優先原則
 
@@ -95,19 +101,35 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 ---
 
-## 決策流程
+## 決策流程（mode 驅動）
+
+> 從使用者 **use case 判斷 mode**（非內部能力觸發）。輸入（@ep / 無參數 / 主題 / @dir）是 mode 判斷**線索**（客觀輸入，非相容保留 — ai-rules 預設不考慮向後相容，演化性重構）。
 
 ```
-用戶輸入 → 有參數?
-  否 → Console 模式：讀現有程式碼 → 語義 diff + 缺口偵測
-  是 → 結構 viewport 觸發（架構 / 模組邊界 / pre-EP 提醒 / 顯式結構請求）?
-    是 → 結構 viewport 模式：調用 architecture-viewport skill → city map/call stack/重用 → 人判讀（詳 illustrate-structure-viewport.md）
-    否 → 輸入含 EP 檔案（ep-*.md 或 @execution-plans/）?
-      是 → EP 審查模式：讀現有程式碼 → 假設驗證矩陣（詳 illustrate-deep-analysis.md）
-      否 → 指定 md?
-        是 → MD 模式（Mermaid）→ 檔案數 ≥ 5? → 並行處理
-        否 → Console 模式（ASCII）→ 檔案數 ≥ 5? → 並行處理
+用戶輸入 → 判斷 use case → mode?
+  A 設計決策（討論新功能 / pre-EP / 重構 / 架構取捨）
+    → 讀 code → city map + 流程 + 重用枚舉（調 skill）→ 渲染 → 人判讀
+  B 理解既有（@模組 / 概念 / 除錯 / 學習套件）
+    → 讀 code → 運作流程 / 資料流 / 概念圖 → 渲染 → 人理解
+  C 審查驗證（無參數 diff / @ep / 重造偵測 / commit 前）
+    → 讀 code → 語義 diff / 假設驗證矩陣 / city map → 渲染 → 人判讀
+  D 溝通傳達（文檔 / demo / 主題）
+    → 主題 → Mermaid（md）→ 可分享
+
+輸入判斷線索：無參數→C（diff）；@ep→C（假設驗證）；@模組/概念→B；主題+md→D；架構/邊界討論→A
 ```
+
+## 能力 survey 與下沉
+
+> 能力位置 + 下沉標準（**跨命令共用才沉**；illustrate 特有留本體/supporting，避免過度下沉）。
+
+| 能力 | 位置 | 下沉? |
+|------|------|-------|
+| city map / dep weight / 重用枚舉 / LSP 查證 | `architecture-viewport` skill | ✅ 已沉（跨 illustrate/code-review/ep-review 共用）|
+| 假設驗證矩陣（EP 審查）| `illustrate-deep-analysis.md` | ❌ 留（illustrate 特有）|
+| 語義 diff / 缺口 | 本體（無參數行為）| ❌ 留（簡單 + 特有）|
+| use cases + 情境矩陣分析 | `illustrate-analysis.md` | ❌ 留（分析步驟，特有）|
+| drill / Phase 2 互動 | `illustrate-structure-viewport.md` | ❌ 留（mode A 互動）|
 
 委託 Skills：
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則
@@ -121,5 +143,6 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 |------|---------|
 | [illustrate-parallel-architecture.md](./claude/_common/illustrate-parallel-architecture.md) | 檔案 ≥ 5 需並行處理時 |
 | [illustrate-deep-analysis.md](./claude/_common/illustrate-deep-analysis.md) | 分析特定類型內容時（含 EP 審查框架） |
+| [illustrate-analysis.md](./claude/_common/illustrate-analysis.md) | use cases / 情境矩陣分析時（mode A/C 組合步驟） |
 | [illustrate-examples.md](./claude/_common/illustrate-examples.md) | 需理解各模式實際輸出時 |
 | [illustrate-structure-viewport.md](./claude/_common/illustrate-structure-viewport.md) | 結構 viewport / drill / pre-EP checkpoint 時 |

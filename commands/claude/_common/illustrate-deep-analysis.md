@@ -61,7 +61,7 @@
 
 ---
 
-## EP 審查模式
+## EP 審查模式（mode C 審查驗證）
 
 > **觸發**：輸入含 EP 檔案（`ep-*.md` 或 `@execution-plans/`）。現有程式碼是 **Ground Truth**，EP 的假設必須逐一驗證。
 

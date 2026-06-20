@@ -83,5 +83,5 @@
 
 ### 其他
 
-- `/illustrate` — 技術概念、架構設計或流程圖解（console / md 模式）+ 結構 viewport（city map/call stack/drill，三時點 pre-EP/post-EP/post-build，人 viewport B 軸）
+- `/illustrate` — 技術概念、架構設計或流程圖解（console / md 模式）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達，use case 歸納；結構 viewport city map/call stack/drill 調 architecture-viewport skill）
 - `/swing-analysis` — Swing Analysis 協作模式（Trajectory Viewer + 日誌監控）
