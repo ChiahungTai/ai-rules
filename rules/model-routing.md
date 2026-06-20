@@ -9,14 +9,20 @@ subagent model 依**任務類型**決定是否降級；降級目標 = 主 sessio
 
 **降級映射**（主 session → 降一級）：opus→sonnet、sonnet→haiku、haiku→haiku（已最低）
 
-> 例外：opus session（rate limit 1）的 impl agent 也降一級避 bottleneck（見 [agent-workflow](../skills/agent-workflow/SKILL.md) 並發表）。
+## rate limit 與並發上限（model facts 單一源 — 以 provider 現況為準，可能滯後）
+
+| 模型 | rate limit | 並發上限 |
+|------|-----------|---------|
+| haiku / sonnet / opus | 10 | **3** |
+
+> provider 帳號級事實，repo 無法驗證；改限額時**只改本表**（agent-workflow 引用此，不自帶數字，避免 provider 改限額時兩處 drift）。數字可能滯後 — 以 provider dashboard 為準。
 
 ## 套用（兩路徑都從本檔取 literal，不寫死絕對 model）
 
 - **Workflow path**（ultracode）：script `agent({model})` 填「當前 session 降一級」literal（runtime deterministic、saved workflow 凍結）
 - **Agent Tool path**（fallback）：spawn `model` param 同上
 
-作者（Claude）依當前 session model 套降級映射、填入對的 literal。並發上限（rate-limit）見 agent-workflow 並發表，與本檔 model 分派正交。
+作者（Claude）依當前 session model 套降級映射、填入對的 literal。並發上限查本檔上表（單一源）。
 
 ## classifier 間歇 unavailable（harness 已知風險，與 model 分派正交）
 

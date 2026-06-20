@@ -37,13 +37,7 @@ Claude Code 提供多種平行模式，依任務規模和協調需求選擇。
 | `claude-sonnet-*` / `glm-5.1` | sonnet | glm-5.1 |
 | `claude-opus-*` / `glm-5-turbo` | opus | glm-5-turbo |
 
-**Step 2**：查表決定**並發上限**（Agent **model 依任務類型**，見 [model-routing](../../rules/model-routing.md)，非本表 session-keyed 查表）：
-
-| 主 session GLM 模型 | 並發上限 | 說明 |
-|--------------------|---------|------|
-| `glm-4.7` (haiku) | **1** | rate limit 2，保守用 1 |
-| `glm-5.1` (sonnet) | **4** | rate limit 10，安全用 4 |
-| `glm-5-turbo` (opus) | **1** | rate limit 1；impl agent 也降一級 sonnet 避 bottleneck（見 model-routing） |
+**Step 2**：依 Step 1 偵測的模型，查 [model-routing](../../rules/model-routing.md)「rate limit 與並發上限」表得**並發上限**（單一源 — 本檔不自帶數字，避免 provider 改限額時這裡 drift）。
 
 **spawn Agent 前必須印出確認**：`[Agent] model=<依 model-routing 任務類型>, max=N, current=M`
 
@@ -91,7 +85,7 @@ Pre-flight 檢查：
 
 ### `/build` 整合
 
-`/build --max-agents N` 的 N 由用戶指定，預設 3（受上表並發上限 cap）。
+`/build --max-agents N` 的 N 由用戶指定，預設 3（受 [model-routing](../../rules/model-routing.md) 並發上限 cap）。
 
 ---
 
@@ -139,7 +133,7 @@ claude --permission-mode auto -p "fix all lint errors"
 
 ### Agent tool spawn 前
 
-- [ ] 已偵測自身模型查表確認**並發上限**；Agent **model 依任務類型**（見 model-routing）
+- [ ] 已偵測自身模型，查 [model-routing](../../rules/model-routing.md) 表確認**並發上限**；Agent **model 依任務類型**（見 model-routing）
 - [ ] 已印出 `[Agent] model=X, max=N, current=M`
 - [ ] 當前 Agent 數量未超過上限
 - [ ] 任務確實需要 Agent
