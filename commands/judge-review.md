@@ -86,14 +86,9 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Edit"]
 
 ### 自我否證義務
 
-**「找不到」不等於「不存在」**。查證 0 hits 時，必須：
+**「找不到」不等於「不存在」**。通用自我否證義務（換工具 / pattern / 位置；三工具都 0 hits 只能標「查證失敗」，禁止標「不存在」）見 [review-engine](../skills/review-engine/SKILL.md)。
 
-1. **換工具**：rg 0 hits → 用 LSP `findReferences` 再查一次（覆蓋動態引用、避免 pattern 失誤）
-2. **換 pattern**：`rg "<ClassName>\("` 失敗 → 試 `rg "<ClassName>"`（去掉 `(`，可能建構方式不同）、`workspaceSymbol "<ClassName>"`
-3. **換位置**：以為在某檔 → 用 `workspaceSymbol` 全域查定義位置
-4. **標註「查證失敗」而非「不存在」**：若三個工具都 0 hits，仍只能標「查證失敗，無法確認」，**禁止標「不存在」**（你可能是查證者錯，不是程式碼錯）
-
-**反例（真實案例）**：審查者稱「`<ExecutorClass>` 在 `<module>.py` 無建構點，查證失敗」→ 不採納 audit finding。獨立查證：`<module>.py` import 行 + 建構行確實存在（LSP `findReferences` 立刻列出）。審查者的 rg pattern 失誤，把「自己沒查到」誤判為「程式碼不存在」。
+**judge-review 場景應用**：評估 AI 審查建議時，建議宣稱「X 不存在 / 無引用 / 無建構點」→ 必須獨立查證（LSP `findReferences` / `workspaceSymbol`），0 hits 換工具再查，仍 0 hits 才標「查證失敗」→ **禁止把「自己沒查到」誤判為「程式碼不存在」就 ❌ 不採納**（查證者可能是 pattern 失誤，非程式碼不存在；真實案例：審查者 rg 稱某 class 無建構點，獨立 LSP 查證立刻列出 import + 建構行）。
 
 ---
 

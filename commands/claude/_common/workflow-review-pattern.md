@@ -6,6 +6,8 @@
 
 ## 何時使用 Workflow
 
+> 判定規則真相源見 [review-engine](../../../skills/review-engine/SKILL.md)；下表為 Workflow 範本的使用時機速查。
+
 | 條件 | 路徑 | 說明 |
 |------|------|------|
 | effort = ultracode/xhigh 且 max-agents > 1 | ✅ Workflow tool | 確定性協調、schema 輸出、內建進度追蹤 |

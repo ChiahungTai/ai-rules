@@ -165,7 +165,8 @@ Not every task needs every skill. A bug fix might only need: `debugging-and-erro
 | Verify | test-driven-development | Failing test first, then make it pass |
 | Verify | browser-testing-with-devtools | Chrome DevTools MCP for runtime verification |
 | Verify | debugging-and-error-recovery | Reproduce → localize → fix → guard |
-| Review | code-review-and-quality | Five-axis review with quality gates |
+| Review | code-review-and-quality | Six-axis review (what to check); 通用邏輯見 review-engine |
+| Review | review-engine | 通用審查邏輯 domain（嚴重度/信心水準/自證/LSP/模式判定；被各 review 命令引用）|
 | Review | security-and-hardening | OWASP prevention, input validation, least privilege |
 | Review | performance-optimization | Measure first, optimize only what matters |
 | Ship | git-workflow-and-versioning | Atomic commits, clean history |

@@ -241,18 +241,13 @@ docs mode 的 `/build` 執行分支見 [build.md](./build.md) 階段 0/2/3。
 
 ### Step 2: Adaptive Agent 數量
 
+> EP Review 總用獨立 agent（強制品質閘門），不走 review-engine 的 Main LLM 模式 —— 刻意覆蓋。差別僅在單一 vs 平行：
+
 **max-agents = 1**（haiku/opus）→ 跳至下方「單一 Agent Prompt（Fallback）」，行為等同原 single-agent。
 
 **max-agents > 1**（如 sonnet = 4）→ 根據 EP 特徵啟用維度。**top-down 審查順序**：先結構（分層依賴/bounded context）後細部正確性（use case 覆蓋/兜底）— 結構錯了正確性審白費（視角見 [architecture-thinking](../skills/architecture-thinking/SKILL.md)）。
 
-| 維度 Agent | 審查項目（Clean Arch 視角） | 啟用條件 | 優先級 |
-|-----------|---------|---------|--------|
-| 分層依賴 | domain←use case←adapter←infra 依賴向內？循環？+ Call Stack 可行性 + 下游依賴發現 + 邊界條件 | **always** | P0 |
-| bounded context | 不跨域存取 `_private`？邊界清楚？職責單一？ | EP ≥ 3 segments | P1 |
-| use case 覆蓋 | 消費者要什麼行為？EP 撐得起 use case？UC 覆蓋度 + 完整性 | 有 UC references | P2 |
-| 兜底路徑驗證 | EP 預見極限（實作落差）+ 語義約束 + 依賴錨點 drift + 遺漏風險 + Rules 合規 | EP ≥ 4 segments 且有跨段落語義約束 | P3 |
-
-啟用維度數 > max-agents → 從低優先級（P3 起）合併至前一個 agent（不丟棄任何維度）。
+審查維度（「審 EP profile」：分層依賴 / bounded context / use case 覆蓋 / 場景 / 完整性 / 合規 / 遺漏 / 兜底拆解）定義見 [/ep-review](./ep-review.md) 五維度 + 維度映射表 — 本 Cycle 不自帶維度定義，與獨立 `/ep-review` 共用同一 profile（根治內建 vs 獨立 drift）。啟用：所有維度 always；啟用維度數 > max-agents → 從低優先級（場景/遺漏起）合併至前一個 agent（不丟棄任何維度）。
 
 ### Step 3: 平行 Spawn
 
@@ -260,12 +255,12 @@ docs mode 的 `/build` 執行分支見 [build.md](./build.md) 階段 0/2/3。
 
 每個 agent prompt 包含：
 - EP 完整內容
-- 該維度的檢查項目清單（如上表）
+- 該維度的檢查項目清單（見 [/ep-review](./ep-review.md) 五維度 + 維度映射表）
 - 相關檔案路徑（必讀）
-- 引用 [architecture-thinking](../skills/architecture-thinking/SKILL.md)（Clean Arch 視角）+ [architecture-viewport](../skills/architecture-viewport/SKILL.md)（結構機械能力）+ [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) 方法論
+- 引用 [review-engine](../skills/review-engine/SKILL.md)（通用：嚴重度/信心水準/審查者自證/LSP 查證/模式判定規則）+ [architecture-thinking](../skills/architecture-thinking/SKILL.md)（Clean Arch 視角）+ [architecture-viewport](../skills/architecture-viewport/SKILL.md)（結構機械能力）+ [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) 方法論
 - rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
 
-> **agents→skills 統一**（#B12 探討）：agent 審查知識（Clean Arch 視角、結構機械能力、方法論）沉 skill 統一引用，agent prompt 只組裝 — 非各命令內嵌審查邏輯。EP review agent 引用 architecture-thinking + architecture-viewport，與 `/code-review` axis 3、`/illustrate` 共用同一組 skill（整脊「能力下沉」一致性）。
+> **agents→skills 統一**（#B12 探討）：agent 審查知識（通用審查邏輯、Clean Arch 視角、結構機械能力、方法論）沉 skill 統一引用，agent prompt 只組裝 — 非各命令內嵌審查邏輯。EP review agent 引用 review-engine（通用）+ architecture-thinking + architecture-viewport（維度）+ code-review-and-quality（方法論），與 `/code-review`、`/illustrate` 共用同一組 skill（整脊「能力下沉」一致性）。
 
 ### 單一 Agent Prompt（Fallback，max-agents = 1）
 

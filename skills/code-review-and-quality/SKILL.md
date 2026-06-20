@@ -1,9 +1,11 @@
 ---
 name: code-review-and-quality
-description: Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch.
+description: 合併前多軸 code review。code 變更合併前審查品質（六軸：Correctness/Readability/Architecture/Security/Performance/Capability Coverage）。code review 的 profile 定義源（what to check）。通用審查邏輯（嚴重度/信心水準/審查者自證/LSP 查證/Writer-Reviewer 分離/多層驗證）見 review-engine。
 ---
 
-# Code Review and Quality
+# Code Review and Quality — code 六軸審查
+
+code review 的 **profile 定義源**：六軸（what to check）。通用審查邏輯（嚴重度分級、信心水準、審查者自證、LSP 查證方法、Writer-Reviewer 分離、多層驗證）的真相源在 [review-engine](../review-engine/SKILL.md) — 本檔聚焦 code 六軸，不重複通用邏輯。
 
 Six-axis review with quality gates. Every change gets reviewed before merge — no exceptions.
 
@@ -73,13 +75,7 @@ Walk through code with the six axes.
 
 ### Step 4: Categorize Findings
 
-| Severity | Meaning | Author Action |
-|----------|---------|---------------|
-| **Critical** | Security vulnerability, data loss, broken functionality | Must address before merge |
-| **Important** | Architecture inconsistency, readability issue, performance risk | Should address |
-| **Suggestion** | Style, naming, minor optimization | Author may ignore |
-| **Nit** | Formatting, style preferences | Author may ignore |
-| **FYI** | Informational only | No action needed |
+嚴重度分級（3 級：Critical / Important / Suggestion）+ 信心水準標註見 [review-engine](../review-engine/SKILL.md) 嚴重度框架與信心水準段。Nit/FYI 已併入 Suggestion（統一 3 級，理由見 review-engine）。
 
 ### Step 5: Verify Verification
 - What tests were run? Did the build pass?
@@ -96,43 +92,13 @@ DEAD CODE IDENTIFIED:
 → Safe to remove these?
 ```
 
-## Honesty in Review
+## 通用審查邏輯（見 review-engine）
 
-- **Don't rubber-stamp.** "LGTM" without evidence helps no one.
-- **Don't soften real issues.** "This might be minor" when it's a bug is dishonest.
-- **Quantify problems.** "N+1 adds ~50ms per item" beats "this could be slow."
-- **Push back on approaches with clear problems.** Sycophancy is a failure mode.
-- **Don't accept deferred cleanup promises.** "I'll clean it up later" never happens.
-- **Accept override gracefully.** If the author has full context and disagrees, defer.
+以下通用邏輯已移至 [review-engine](../review-engine/SKILL.md)，本檔不重複（避免跨命令 drift）：
 
-## LSP-Assisted Review
+- **嚴重度分級 + 信心水準**（原 5 級含 Nit/FYI → 統一 3 級 Critical/Important/Suggestion + confirmed/evidence-based/inferred；Critical 禁止 inferred）
+- **審查者自證 / 誠信**（原 Reviewer Self-Verification + Honesty in Review — 每 claim 必須查證、findings 非定論、對外部行為判斷必須實證、不 rubber-stamp）
+- **LSP 查證方法 + 自我否證義務**（原 LSP-Assisted Review — 符號用 LSP、文字用 rg、找不到 ≠ 不存在）
+- **Writer-Reviewer 分離 + 多層驗證**（原 Multi-Model Review Pattern — 獨立 context 審查避免自審、review→judge→followup 各層都可能錯）
 
-LSP provides symbol-level precision that text search cannot match. Use it to verify cross-file claims:
-
-- **Claiming a naming conflict** → LSP `findReferences` to check if the symbol is actually used as claimed
-- **Claiming a dependency order problem** → LSP `incomingCalls` / `outgoingCalls` to trace execution order across files
-- **Claiming dead code** → LSP `findReferences` — zero hits = confirmed dead code (rg misses dynamic references)
-- **Impact assessment** → LSP `findReferences` on changed APIs to find ALL consumers (100% exhaustive)
-
-After editing, check LSP diagnostics for type errors before reporting review results.
-
-## Reviewer Self-Verification
-
-Every claim in a review must be verified against actual code. Unverified claims waste the author's time and erode trust in reviews.
-
-- **Claiming a file/directory exists** → Read it first
-- **Claiming a naming conflict** → LSP `findReferences` to check import chain, then `rg` for string references
-- **Claiming a dependency order problem** → LSP `incomingCalls` / `outgoingCalls` to trace execution order
-- **Claiming something is missing** → LSP `findReferences` first, then `rg` for string and comment references
-
-If you cannot verify a claim with the tools available, label it explicitly as **unverified** rather than stating it as fact.
-
-## Multi-Model Review Pattern
-
-Different models have different blind spots. For important reviews, use separate sessions:
-
-```
-Model A writes → Model B reviews → Model A addresses → Human final call
-```
-
-See also: [security-and-hardening](../security-and-hardening/SKILL.md), [performance-optimization](../performance-optimization/SKILL.md)
+See also: [review-engine](../review-engine/SKILL.md)（通用審查邏輯真相源）, [security-and-hardening](../security-and-hardening/SKILL.md), [performance-optimization](../performance-optimization/SKILL.md)

@@ -10,7 +10,7 @@ allowed-tools: ["Read", "Bash"]
 
 偵測**通過但品質差**的測試。`ruff` 抓語法問題，`/fix-test` 修失敗測試，本命令抓**隱性品質問題**。
 
-方法論定義見 [test-driven-development](../skills/test-driven-development/SKILL.md)（反模式定義）、[must-execute-before-complete](../rules/must-execute-before-complete.md)（覆蓋對稱性）。
+方法論定義見 [test-driven-development](../skills/test-driven-development/SKILL.md)（反模式定義）、[must-execute-before-complete](../rules/must-execute-before-complete.md)（覆蓋對稱性）。通用審查邏輯（嚴重度/信心水準/審查者自證/LSP 查證/多層驗證）見 [review-engine](../skills/review-engine/SKILL.md)。
 
 ---
 
@@ -373,18 +373,14 @@ fd -e py . tests/
 ## Audit 誠信約束
 
 > audit 是偵測器（眼睛），不是判官。偵測結果可能 false positive，必須以「可被下一層（judge-review / 實作查證）推翻」的心態輸出。
+>
+> **stance 釐清**：「偵測器非判官 + read-only」是 audit-test 專屬 stance（只產 findings 不下判）。通用誠信「findings 非定論」見 [review-engine](../skills/review-engine/SKILL.md) — code-review/ep-review 要下判（給結論/commit/回寫），適用通用誠信但不適用偵測器 stance。
 
 ### 1. Findings 不是定論 — 標示信心水準
 
-每個 finding 必須標示信心水準，讓下游知道哪些需要重點查證：
+信心水準定義（confirmed / evidence-based / inferred + Critical 必須 confirmed 或 evidence-based，禁止 inferred）見 [review-engine](../skills/review-engine/SKILL.md) 信心水準段。本命令每個 finding 必須標信心水準，讓下游（judge-review / 實作查證）知道哪些需重點查證。
 
-| 信心水準 | 判斷標準 | 範例 |
-|---------|---------|------|
-| **confirmed（已查證）** | 已讀完整 test body + source，比對過具體行/符號 | 空殼覆蓋：test body 只有 `pass` — 讀過原始碼確認 |
-| **evidence-based（有證據）** | 有具體 file:line + rg/fd 結果，但未深入驗證符號語義 | 角度 2 多數覆蓋缺口 |
-| **inferred（推理）** | 基於規範 / 套件行為推理，未實證 | 「無 seed → 不 deterministic」 |
-
-**推理類（inferred）findings 必須額外標註**：「⚠️ 未實證，建議實作層跑 demo 確認」。**禁止把推理類寫成 Critical**（Critical 必須 confirmed 或 evidence-based）。
+test 場景的信心判準參考：confirmed = 已讀完整 test body + source 比對符號；evidence-based = 有 file:line + rg/fd 結果（角度 2 多數覆蓋缺口）；inferred = 基於套件行為推理（如「無 seed → 不 deterministic」）。
 
 ### 2. 技術 / 套件行為判斷必須實證
 

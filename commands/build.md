@@ -150,9 +150,9 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 #### Step 2: 選擇審查模式
 
-偵測 effort level。印出確認：`[Review Mode] effort=ultracode, workflow=true, max=N` 或 `[Review Mode] effort=standard, workflow=false, max=N`
+審查模式判定規則（effort/max-agents → Workflow/Agent Tool/Main LLM）見 [review-engine](../skills/review-engine/SKILL.md)。偵測 effort level，印出確認：`[Review Mode] effort=ultracode, workflow=true, max=N` 或 `[Review Mode] effort=standard, workflow=false, max=N`
 
-**A. Workflow 模式**（effort = ultracode/xhigh 且 max-agents > 1）：
+**A. Workflow 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 
 用 Workflow tool 協調 2 perspective（perspective 定義 + prompt 見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)）；腳本骨架、DimensionVerdict schema、adversarial verify 見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)。
 
@@ -163,7 +163,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-review」步驟（現有流程不變）。
 
-**B. Agent Tool 模式**（Fallback，非 ultracode）：2-perspective review（① Intent-anchored + ② Fresh），完整流程見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
+**B. Agent Tool 模式**（Fallback，非 Workflow 條件 = max-agents=1 或非 ultracode）：build 的 Agent Review **總用獨立 agent**（Writer/Reviewer 分離為強制品質閘門），不走 review-engine 的 Main LLM 模式 —— 這是 build 對通用判定規則的刻意覆蓋。2-perspective review（① Intent-anchored + ② Fresh），完整流程見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
 
 #### 主 LLM — /judge-review
 

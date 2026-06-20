@@ -19,7 +19,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 - [mermaid](../skills/mermaid/SKILL.md) — MD 模式（`--md` 時）
 
 按需讀取：
-- [code-review-and-quality](../skills/code-review-and-quality/SKILL.md) — LSP 輔助（Phase 2）
+- [review-engine](../skills/review-engine/SKILL.md) — LSP 查證方法（Phase 2）+ 通用審查邏輯（嚴重度/自證/多層驗證）
 
 受眾模型見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」；理論見 [acceptance-evidence](../rules/acceptance-evidence.md)。
 
@@ -56,7 +56,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 
 ## 執行模式選擇
 
-偵測 effort level 和 max-agents（查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md)）。
+判定規則（effort/max-agents → 模式）見 [review-engine](../skills/review-engine/SKILL.md)；max-agents 上限查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md)。下表為交付渲染的平行化判定（借用相同條件）：
 
 **Phase 1（交付渲染）**：
 
