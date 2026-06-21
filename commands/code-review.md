@@ -184,7 +184,7 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 /spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ /code-review（六軸含 axis 3 結構 = arch 吸收，top-down，含 commit message）→ /judge-review（一次）→ /commit
 ```
 
-後續：用戶確認 commit message → `/commit`（跳過階段 2 分析，直接執行 lint + commit）
+後續：用戶確認 commit message → `/commit` 捷徑（跳過階段 2 Git 分析 + 階段 3；保留 2.7 POC/Demo 處置 + 2.8 flow-feedback 歸檔；見 [commit](./commit.md) 捷徑模式）
 
 ---
 

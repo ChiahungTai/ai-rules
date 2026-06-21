@@ -93,7 +93,7 @@ workflow-review-pattern 的 schema、各命令的輸出分類，皆引用此。
 
 ## 審查模式判定規則
 
-**本段職責 = 判定規則**（domain：effort/max-agents → 抽象 mode）。**派發到 adapter 範本是命令層職責**（use-case）—— 判定為某 mode 後，各命令自取對應執行範本（Workflow → [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md)；Agent Tool → [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md)）。語意上分開：mode 表**產抽象 mode 決策**（domain），**各命令讀決策 → 自取範本**（use-case 派發）—— 不強求完全消除導覽連結（docs 系統導覽性互指可容忍），重點是職責歸位（domain 不內嵌派發）。
+**本段職責 = 判定規則**（domain：effort/max-agents → 抽象 mode）；**派發到 adapter 範本是命令層職責**（use-case）—— 判定為某 mode 後，各命令自取執行範本（Workflow → [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md)；Agent Tool → [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md)）。不強求消除導覽連結（docs 互指可容忍），重點是 domain 不內嵌派發。
 
 **唯一判定規則**（消 build/code-review/ep-review 三處重複定義）：
 
@@ -140,12 +140,13 @@ review finding 可經多層驗證，**各層都可能錯**：
    - **② UC-anchored（Intent）** 抓漏覆蓋 / 偏意圖〔coverage〕—— 逐 UC 檢驗 impl 滿足度、EP 偏離
    - 單跑任一有盲點（clean 漏該查的 UC；UC-anchored 被錨定看不到合理化），同時跑互補。執行範本見 [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md) —— 此 2-perspective 是 Agent Tool 範本的 base 視角（build Agent Review 用）；code-review 六軸、ep-review F1-F5 等以**維度 profile** 分配 agent（見各命令 + 上方 mode 表），非此 clean/UC 2-perspective。
 
-5. **>2 配置**（opt-in，高風險 / 大變更；受 max-agents cap）：base 恆 ①+②；extra（第 3+）優先序到 cap —— **UC 數 >6 → UC-split**（extra 拿 UC 子集做深度，唯一給 UC-anchored 開 extra 的情境）；否則 **architecture（axis 3）> adversarial / edge > consumer-perspective**；**絕不** 2nd clean / 2nd 同 UC —— 複製 lens 同家族共享盲點，邊際覆蓋 ≈0（多樣性 > 數量）。
+5. **>2 配置**（opt-in，高風險 / 大變更；受 max-agents cap）：base 恆 ①+②；extra（第 3+）優先序到 cap —— **UC 數 >6 → UC-split**（extra 拿 UC 子集做深度，唯一給 UC-anchored 開 extra 的情境）；否則 **architecture（axis 3）> adversarial / edge > consumer-perspective**；**絕不** 2nd clean / 2nd **同一** UC lens —— 複製 lens 同家族共享盲點，邊際覆蓋 ≈0（UC-split 是不同子集做深度，非複製；多樣性 > 數量）。
 
 6. **spawn vs 另開 session 共存**（非二選一）：
    - **spawn**（命令內、即時、同家族 LLM 天花板）—— 預設路徑
    - **另開 session**（user 手動、最強獨立、抓 spawn 漏的）—— 高風險建議補跑
    - **另開 handoff 套件** = 持久化 finding（EP review 區段 / kanban，tracked）+ git diff + 標的 / EP / UC 路徑 —— 讓新 session 不靠記憶還原審查標的
+   - **跨 session 鏈**（另開 session 時，persistence 串起每步；不靠對話記憶 —— 跨 session 不在）：`review` 寫 finding → `judge-review` 寫決策（✅ / ❌ / ⚠️）→ apply（主 agent / impl LLM 改）→ `followup-review` 讀持久化逐項驗收（verified / closed / open）。findings 交接格式見 [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md) Finding Record。
 
 ---
 
