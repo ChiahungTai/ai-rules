@@ -74,8 +74,8 @@ TABLE_ROW_START = re.compile(r"^\|.*\|\s*$")
 def _load_scan_imports(project_root: Path) -> dict | None:
     """Try to import and run scan_imports.scan_project from the target project."""
     candidates = [
-        project_root / "scripts" / "scan_imports.py",
-        project_root.parent / "scripts" / "scan_imports.py",
+        project_root / "tools" / "scan_imports.py",
+        project_root.parent / "tools" / "scan_imports.py",
     ]
     for path in candidates:
         if path.exists():

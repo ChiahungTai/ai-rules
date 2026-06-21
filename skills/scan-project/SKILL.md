@@ -58,7 +58,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 
 ## Graceful Degradation
 
-- 如果目標專案有 `scripts/scan_imports.py`：自動 import 並擴展（dep-graph 資料完整）
+- 如果目標專案有 `tools/scan_imports.py`：自動 import 並擴展（dep-graph 資料完整）
 - 如果沒有：dep-graph 欄位為空，findings 仍正常運作
 - 如果沒有 `.kanban/` 目錄：kanban 相關 findings 不產出
 - 輸出格式 schema_version: 5

@@ -108,7 +108,7 @@
 | `edges` | array | 模組間 import edges |
 | `hotspots` | array | 高 fan-out imports |
 
-如果專案沒有 `scripts/scan_imports.py`，三個欄位皆為空（`{}`、`[]`、`[]`）。
+如果專案沒有 `tools/scan_imports.py`，三個欄位皆為空（`{}`、`[]`、`[]`）。
 
 ### findings
 
