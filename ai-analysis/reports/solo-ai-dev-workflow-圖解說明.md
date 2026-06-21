@@ -4,7 +4,7 @@
 
 ---
 
-## 核心模式：一個 EP = 一個 Session
+## 核心模式：預設一個 EP = 一個 Session
 
 ```mermaid
 %%{init: {'theme': 'dark', 'themeVariables': {'primaryBorderColor': '#4a9eff', 'lineColor': '#6a9fff', 'fontFamily': 'system-ui'}}}%%
@@ -54,7 +54,7 @@ flowchart TD
         BL["UC-BACKLOG.md<br/>Track P: P0→P3<br/>Track A: A0→A4"]:::decision
     end
 
-    BL --> HUMAN["👤 人類判斷<br/>看兩個 VSCode window"]:::human
+    BL --> HUMAN["👤 人類判斷<br/>看三個 VSCode worktree"]:::human
     HUMAN -->|"選定 item"| NEWSession
 
     %% ── 新 Session ──
@@ -81,7 +81,7 @@ flowchart TD
     CR --> CM["/commit<br/>展示變更摘要<br/>等待人類確認"]:::archive
 
     %% ── 歸檔 ──
-    CM --> EPARC["EP → done_plans/"]:::archive
+    CM --> EPARC["EP → _done/"]:::archive
     CM --> BLUP["更新 UC-BACKLOG"]:::archive
     BLUP --> BL
 
@@ -93,31 +93,31 @@ flowchart TD
 
 ---
 
-## 兩個 Worktree 並行關係
+## 三個 Worktree + Trunk 模型
 
 ```mermaid
 %%{init: {'theme': 'dark'}}%%
 flowchart LR
-    classDef stable fill:#1a3e2e,stroke:#27ae60,color:#e0e0e0,stroke-width:2px
-    classDef frontier fill:#3e2e1a,stroke:#e67e22,color:#e0e0e0,stroke-width:2px
+    classDef trunk fill:#1a3e2e,stroke:#27ae60,color:#e0e0e0,stroke-width:2px
+    classDef feature fill:#3e2e1a,stroke:#e67e22,color:#e0e0e0,stroke-width:2px
 
-    subgraph WT1["🖥️ Window 1: daily-update（main repo）"]
-        direction TB
-        W1A["data/ 92% ✅"]:::stable
-        W1B["config/ 100% ✅"]:::stable
-        W1C["indicators/ 100% ✅"]:::stable
-        W1D["features/ 100% ✅"]:::stable
+    subgraph WT0["🖥️ main repo — main（trunk）"]
+        T0["唯一整合線<br/>只往前、永不被 rebase"]:::trunk
     end
 
-    subgraph WT2["🖥️ Window 2: paper-trading（worktree）"]
-        direction TB
-        W2A["strategies/ 50%"]:::frontier
-        W2B["watchlist/ 33%"]:::frontier
-        W2C["workflows/ 33%"]:::frontier
+    subgraph WT1["🖥️ trading_lab — replay（feature）"]
+        F1["replay 開發軌"]:::feature
     end
 
-    WT1 <-->|"交互 rebase<br/>main→daily-update→paper-trading"| WT2
+    subgraph WT2["🖥️ offline_backtesting — backbone（feature）"]
+        F2["backbone 開發軌"]:::feature
+    end
+
+    WT1 -->|"rebase main（單向）"| WT0
+    WT2 -->|"rebase main（單向）"| WT0
 ```
+
+> **單向 rebase，不交互**：feature（replay / backbone）只 rebase onto trunk（`main`）；feature 之間不直接 rebase（要對方的東西走 trunk 中轉）。Trunk 只用 `git merge --ff-only` 吸收「已 rebase 過 main」的 feature —— 不是 fast-forward 就拒絕（安全欄杆，避免靜默改寫已 push 的 trunk）。`rerere` 開啟，相同衝突自動套用前次解析。詳見 [/rebase](../../commands/rebase.md)。
 
 ---
 
@@ -187,8 +187,8 @@ flowchart TD
     PAIN1["⚠️ EP ↔ UC-BACKLOG 未綁定<br/>無法查詢「P0-1 做了幾個 EP」"]:::pain
     PAIN2["⚠️ 跨 Session 接續<br/>依賴人類記憶口述進度"]:::pain
 
-    OK1["✅ 一個 EP = 一個 Session<br/>簡單明確的工作單元"]:::ok
-    OK2["✅ Worktree 兩 window + rebase<br/>不複雜，交互同步"]:::ok
+    OK1["✅ 預設一個 EP = 一個 Session<br/>model 退化可跨 Session 接續"]:::ok
+    OK2["✅ Worktree 三 slot + trunk rebase<br/>單向 onto main，ff-only 吸收"]:::ok
     OK3["✅ Review 用平行 session<br/>Writer/Reviewer 分離"]:::ok
     OK4["✅ Model 變怪就更新 EP 重開<br/>不硬撐，務實"]:::ok
     OK5["✅ UC-BACKLOG + UC-Driven<br/>Local-first，無外部依賴"]:::ok
