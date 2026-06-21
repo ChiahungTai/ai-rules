@@ -48,7 +48,7 @@ Workflow 執行協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 ## 審查模式選擇
 
-審查模式判定規則（effort/max-agents → Workflow/Agent Tool/Main LLM）見 [review-engine](../skills/review-engine/SKILL.md)。偵測 effort level，max-agents 查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md)，依判定規則選 A/B/C 並印出確認。下方 A/B/C 為本命令的六軸啟用配置：
+review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」—— **code-review 是唯一允許 Main LLM 模式**的 review 命令（低 effort 主 LLM 直接審；其餘 review 命令刻意覆蓋為恆獨立）。模式判定規則（effort/max-agents → A/B/C）見 [review-engine](../skills/review-engine/SKILL.md)；max-agents 查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md)。下方 A/B/C 為本命令的六軸啟用配置：
 
 **A. Workflow 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 

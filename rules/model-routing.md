@@ -4,8 +4,10 @@
 
 subagent model 依**任務類型**決定是否降級；降級目標 = 主 session model **降一級**。
 
-- **降級（session-1）**：review / verify / research / explore / render agent — 讀/分析、產 findings，不需最強推理
-- **inherit session**（不降級）：impl / test-gen agent — 寫 code/test，需強度
+- **降級（session-1）**：verify / research / explore / render agent（查證 / 分析 / 偵測，非 review command）— 讀/分析、產 findings，不需最強推理
+- **inherit session**（不降級）：impl / test-gen agent + **review command agent**（ep-review / code-review / audit-test / execution-plan EP Review / build Agent Review — 品質閘門需強度）— 寫 code/test、做品質審查
+
+> **carve-out**：review **command** agent 預設 inherit（覆蓋早期「review→降級」通用規則 —— review command 是品質閘門需強度）；其他 review-ish agent（verify / research / explore）維持降級。完整 review 執行預設見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」。
 
 **降級映射**（主 session → 降一級）：opus→sonnet、sonnet→haiku、haiku→haiku（已最低）
 
@@ -19,10 +21,10 @@ subagent model 依**任務類型**決定是否降級；降級目標 = 主 sessio
 
 ## 套用（兩路徑都從本檔取 literal，不寫死絕對 model）
 
-- **Workflow path**（ultracode）：script `agent({model})` 填「當前 session 降一級」literal（runtime deterministic、saved workflow 凍結）
-- **Agent Tool path**（fallback）：spawn `model` param 同上
+- **Workflow path**（ultracode）：script `agent({model})` 填 literal —— **review command agent = 主 session（inherit，見上方 carve-out）**；非 review command agent（explore / research / verify）= 當前 session 降一級（runtime deterministic、saved workflow 凍結）
+- **Agent Tool path**（fallback）：spawn `model` param 同上（review command inherit / 非 review 降一級）
 
-作者（Claude）依當前 session model 套降級映射、填入對的 literal。並發上限查本檔上表（單一源）。
+作者（Claude）依當前 session model + 任務類型（review command vs 其他）套映射、填入對的 literal。並發上限查本檔上表（單一源）。
 
 ## classifier 間歇 unavailable（harness 已知風險，與 model 分派正交）
 

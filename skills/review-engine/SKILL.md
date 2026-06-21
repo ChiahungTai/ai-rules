@@ -1,6 +1,6 @@
 ---
 name: review-engine
-description: review 命令家族通用審查邏輯的 domain 真相源 — 嚴重度分級（Critical/Important/Suggestion）、信心水準（confirmed/evidence-based/inferred）、審查者自證、LSP 查證方法、審查模式判定（Workflow/Agent Tool/Main LLM）、Writer-Reviewer 分離、多層驗證設計。所有 review 命令（ep-review/code-review/audit-test/execution-plan EP Review/build Agent Review）共用。觸發：決定 finding 嚴重度、標信心水準、查證審查宣稱、選審查模式、理解多層驗證鏈。
+description: review 命令家族通用審查邏輯的 domain 真相源 — 嚴重度分級（Critical/Important/Suggestion）、信心水準（confirmed/evidence-based/inferred）、審查者自證、LSP 查證方法、審查模式判定（Workflow/Agent Tool/Main LLM）、Writer-Reviewer 分離、多層驗證設計、review 執行預設單一源（force 獨立 / max-agents / model / 視角 / spawn-vs-session）。所有 review 命令（ep-review/code-review/audit-test/execution-plan EP Review/build Agent Review）共用。觸發：決定 finding 嚴重度、標信心水準、查證審查宣稱、選審查模式、理解多層驗證鏈、決定 review 執行預設。
 ---
 
 # review-engine — 通用審查邏輯 domain 層
@@ -93,10 +93,12 @@ workflow-review-pattern 的 schema、各命令的輸出分類，皆引用此。
 
 ## 審查模式判定規則
 
+**本段職責 = 判定規則**（domain：effort/max-agents → 抽象 mode）。**派發到 adapter 範本是命令層職責**（use-case）—— 判定為某 mode 後，各命令自取對應執行範本（Workflow → [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md)；Agent Tool → [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md)）。語意上分開：mode 表**產抽象 mode 決策**（domain），**各命令讀決策 → 自取範本**（use-case 派發）—— 不強求完全消除導覽連結（docs 系統導覽性互指可容忍），重點是職責歸位（domain 不內嵌派發）。
+
 **唯一判定規則**（消 build/code-review/ep-review 三處重複定義）：
 
-| 條件 | 模式 | 執行範本 |
-|------|------|---------|
+| 條件 | 抽象 mode | 命令層自取的執行範本 |
+|------|----------|-------------------|
 | effort = ultracode/xhigh **且** max-agents > 1 | **Workflow** | [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md)（schema + 兩階段腳本 + adversarial verify） |
 | max-agents = 1 但 effort = ultracode/xhigh | **Agent Tool**（Fallback） | [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md)（2-perspective） |
 | effort < ultracode | **Main LLM** | 主 LLM 直接審（現有行為） |
@@ -120,6 +122,30 @@ review finding 可經多層驗證，**各層都可能錯**：
 | [followup-review](../../commands/followup-review.md)（驗收） | 實作是否正確套用採納的 finding |
 
 每一層都是獨立查證機會，不假定上層正確。**具體 audit→judge→followup 三層鏈的細節**（各層盲點、偵測器 stance）見 [audit-test](../../commands/audit-test.md) — test 場景講最細；本 skill 只放通用的「各層都可能錯」原則。
+
+---
+
+## review 執行預設（單一源 — 各 review 命令引用）
+
+> 各 review 命令（ep-review / code-review / audit-test / execution-plan EP Review / build Agent Review）的**執行層預設**集中於此 —— 消除「預設行為跨命令重複定義且 drift」。各命令保留自己的 profile（維度）+ 產出動作，執行預設（force 獨立 / max-agents / model / 視角 / spawn-vs-session）引用本段。
+
+1. **不 auto-detect，force 獨立 agent（預設）**：review 命令預設 spawn 獨立 agent（Workflow / Agent Tool），**不接受 LLM 在裁量點偷懶退 Main LLM 自審**（實證：auto-detect 時 LLM 偷懶 / 搞錯退 Main LLM）。合法 Main LLM（mode 表判定的低 effort code-review）與 spawn 失敗降級（顯式標記 fallback，見 [agent-workflow](../agent-workflow/SKILL.md)「spawn 失敗階梯」）除外。
+
+2. **agent 數量 = max-agents**（預設 **3**，與 [build](../../commands/build.md) 一致；受 [model-routing](../../rules/model-routing.md) 並發上限 cap）。
+
+3. **agent model 預設 = 主 session（inherit）**；**可調降一級**（[model-routing](../../rules/model-routing.md) 降級映射）。此為 review **command** agent 專屬預設，**覆蓋** model-routing 通用「review→降級」—— review command 是品質閘門需強度；其他 review-ish agent（verify / research / explore，非 review command）維持降級（見 model-routing carve-out）。
+
+4. **預設 2 agent = ① clean（Fresh，無 anchor）+ ② UC-anchored（Intent）**：兩 lens 正交、同時跑。
+   - **① clean（Fresh）** 抓作者 rationalize〔bias〕—— 無 anchor 讀 code 自身 merits，不被「該做 X」綁住
+   - **② UC-anchored（Intent）** 抓漏覆蓋 / 偏意圖〔coverage〕—— 逐 UC 檢驗 impl 滿足度、EP 偏離
+   - 單跑任一有盲點（clean 漏該查的 UC；UC-anchored 被錨定看不到合理化），同時跑互補。執行範本見 [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md) —— 此 2-perspective 是 Agent Tool 範本的 base 視角（build Agent Review 用）；code-review 六軸、ep-review F1-F5 等以**維度 profile** 分配 agent（見各命令 + 上方 mode 表），非此 clean/UC 2-perspective。
+
+5. **>2 配置**（opt-in，高風險 / 大變更；受 max-agents cap）：base 恆 ①+②；extra（第 3+）優先序到 cap —— **UC 數 >6 → UC-split**（extra 拿 UC 子集做深度，唯一給 UC-anchored 開 extra 的情境）；否則 **architecture（axis 3）> adversarial / edge > consumer-perspective**；**絕不** 2nd clean / 2nd 同 UC —— 複製 lens 同家族共享盲點，邊際覆蓋 ≈0（多樣性 > 數量）。
+
+6. **spawn vs 另開 session 共存**（非二選一）：
+   - **spawn**（命令內、即時、同家族 LLM 天花板）—— 預設路徑
+   - **另開 session**（user 手動、最強獨立、抓 spawn 漏的）—— 高風險建議補跑
+   - **另開 handoff 套件** = 持久化 finding（EP review 區段 / kanban，tracked）+ git diff + 標的 / EP / UC 路徑 —— 讓新 session 不靠記憶還原審查標的
 
 ---
 

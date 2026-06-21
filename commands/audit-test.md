@@ -12,6 +12,8 @@ allowed-tools: ["Read", "Bash"]
 
 方法論定義見 [test-driven-development](../skills/test-driven-development/SKILL.md)（反模式定義）、[must-execute-before-complete](../rules/must-execute-before-complete.md)（覆蓋對稱性）。通用審查邏輯（嚴重度/信心水準/審查者自證/LSP 查證/多層驗證）見 [review-engine](../skills/review-engine/SKILL.md)。
 
+> **audit-test 是 review 執行預設的例外**：review 執行預設（force 獨立 / max-agents / 2-perspective / mode 判定，見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」）適用 ep-review/code-review/execution-plan/build；**audit-test 是 read-only 單一 agent 偵測器**（不平行、不 2-perspective、不 mode 判定），僅共用通用審查邏輯（spawn 失敗處理仍走 [agent-workflow](../skills/agent-workflow/SKILL.md) general 階梯）。
+
 ---
 
 ## 價值定位

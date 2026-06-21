@@ -31,7 +31,7 @@
 - `autonomous-execution` — 無人介入自主執行的決策 / 錯誤恢復 / 完成回報
 
 ### 品質與審查
-- `review-engine` — review 命令家族通用審查邏輯 domain 真相源（嚴重度/信心水準/審查者自證/LSP 查證/審查模式判定/Writer-Reviewer 分離/多層驗證）；ep-review/code-review/audit-test/execution-plan EP Review/build Agent Review 共用
+- `review-engine` — review 命令家族通用審查邏輯 domain 真相源（嚴重度/信心水準/審查者自證/LSP 查證/審查模式判定/Writer-Reviewer 分離/多層驗證/**review 執行預設單一源**：force 獨立 / max-agents / model / 視角 / spawn-vs-session）；ep-review/code-review/audit-test/execution-plan EP Review/build Agent Review 共用
 - `code-review-and-quality` — code 六軸審查 profile（what to check）；通用邏輯見 review-engine
 - `code-simplification` — 不改行為的重構簡化
 - `security-and-hardening` — 未信任輸入 / 外部整合的安全強化

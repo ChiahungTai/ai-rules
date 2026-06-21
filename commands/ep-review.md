@@ -26,7 +26,7 @@ Workflow 執行協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 ## 審查模式選擇
 
-審查模式判定規則（effort/max-agents → Workflow/Agent Tool/Main LLM）見 [review-engine](../skills/review-engine/SKILL.md)。本命令啟用 F1-F5 五維度（下表），Workflow 執行細節（schema/腳本）見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)。
+review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」—— 本命令僅定義 EP 特有 profile（F1-F5）+ 產出（回寫 EP）。模式判定規則（effort/max-agents → Workflow/Agent Tool/Main LLM）見 [review-engine](../skills/review-engine/SKILL.md)；啟用 F1-F5 五維度（下表），Workflow 執行細節（schema/腳本）見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)。
 
 **Workflow 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 
@@ -61,7 +61,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 5 個 Dimensio
 
 印出確認：`[EP Review Mode] effort=ultracode, workflow=true, max=N`
 
-**Agent Tool 模式**（Fallback；ep-review 的 Agent Review 總用獨立 agent —— 強制品質閘門，刻意不走 review-engine 的 Main LLM 模式；判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
+**Agent Tool 模式**（Fallback；review 執行預設 force 獨立、不走 Main LLM —— 見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」；判定條件同見 review-engine）：
 
 單一 Explore agent 做所有 5 維度（ep-review 特有配置，非 code-review 的 2-perspective）。印出確認：`[EP Review Mode] effort=standard, workflow=false`
 

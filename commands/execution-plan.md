@@ -244,7 +244,7 @@ docs mode 的 `/build` 執行分支見 [build.md](./build.md) 階段 0/2/3。
 ## EP Review Cycle
 
 **Writer/Reviewer 分離**：用獨立 Agent context 審查 EP，避免主 LLM 審查自己的計畫。
-**適應式多 Agent Review**：依模型並發上限和 EP 複雜度決定 spawn 幾個 review agent。
+review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」。**適應式多 Agent Review**：依模型並發上限和 EP 複雜度決定 spawn 幾個 review agent。
 
 ### Step 1: 偵測模型 → 查表
 
@@ -253,7 +253,7 @@ docs mode 的 `/build` 執行分支見 [build.md](./build.md) 階段 0/2/3。
 
 ### Step 2: Adaptive Agent 數量
 
-> EP Review 總用獨立 agent（強制品質閘門），不走 review-engine 的 Main LLM 模式 —— 刻意覆蓋。差別僅在單一 vs 平行：
+> EP Review force 獨立 agent、不走 Main LLM（review 執行預設 + 刻意覆蓋，見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」）。差別僅在單一 vs 平行：
 
 **max-agents = 1**（haiku/opus）→ 跳至下方「單一 Agent Prompt（Fallback）」，行為等同原 single-agent。
 

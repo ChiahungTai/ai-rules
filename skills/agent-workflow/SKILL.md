@@ -129,6 +129,22 @@ claude --permission-mode auto -p "fix all lint errors"
 
 ---
 
+## spawn 失敗階梯（general，所有 spawn 共用）
+
+spawn 失敗處理依失敗類型分階梯 —— classifier unavailable retry 見上方「Auto Mode」；本段涵蓋 **429 / 持續失敗**（所有 spawn 命令共用的 general 階梯）：
+
+```
+429 單次 → backoff retry（同 spawn 重試）
+429 持續 → 降並發（N → N/2 → … 最深 = serialization，concurrency=1，一次一個循序）
+              • deep-work（無人、無時間壓力）停在此 — 用時間換獨立性，保所有 lens
+非 429 失敗（crash / timeout）→ retry ≤ 2（同 classifier 模式）
+全失敗（serialization 仍 429，少見）→ 降級主 LLM 自審 + 顯式標記 fallback（警示獨立 review 丟失，非靜默）
+```
+
+**關鍵區分**：serialization 是**降並發的一步，不是降級**。降級（丟獨立性）只在 concurrency=1 還持續 429 才發生。deep-work（無人、無時間壓力）甚至可**預設低並發** —— 不急，何必冒 429 平行；用時間換獨立性，保所有 lens。
+
+---
+
 ## 自檢清單
 
 ### Agent tool spawn 前

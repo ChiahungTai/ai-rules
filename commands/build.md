@@ -149,14 +149,14 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 ### 階段 4：Agent Review Cycle
 
 **Writer/Reviewer 分離**：用獨立 Agent context 做品質閘門，避免主 LLM 審查自己的 code。
-**2-perspective Review**（① Intent-anchored + ② Fresh）：多樣性 > 數量 — 兩異質 perspective 比多個同錨定 agent 覆蓋更廣。完整設計見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
+review 執行預設（force 獨立 / max-agents 預設 3 / model inherit / 2-perspective）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」—— 本段僅定義 build 特有流程。**2-perspective**（① clean + ② UC-anchored，多樣性 > 數量）完整設計見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
 
 #### Step 1: 確認 max-agents
 
-`--max-agents N` 或 `-a N` 參數控制平行 Agent 數量，預設 3。用戶可手動調整。
+`--max-agents N` 或 `-a N` 參數控制平行 Agent 數量（預設 3，見 review-engine review 執行預設）。用戶可手動調整。
 印出確認：`[Review Agent] max=N`
 
-> **classifier unavailable**（spawn 收 note、無 findings）→ **重試 spawn ≤ 2 次**（間歇常成功），非直接降級主 LLM 自審（會丟失獨立 review）；仍失敗才降級 + 顯式標記 fallback。完整處置見 [agent-workflow](../skills/agent-workflow/SKILL.md)「Auto Mode」。
+> **classifier unavailable**（spawn 收 note、無 findings）→ **重試 spawn ≤ 2 次**（間歇常成功），非直接降級主 LLM 自審（會丟失獨立 review）；仍失敗才降級 + 顯式標記 fallback。完整處置見 [agent-workflow](../skills/agent-workflow/SKILL.md)「Auto Mode」+「spawn 失敗階梯」（429 / continuous）。
 
 #### Step 2: 選擇審查模式
 
@@ -164,7 +164,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 **A. Workflow 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 
-用 Workflow tool 協調 2 perspective（perspective 定義 + prompt 見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)）；腳本骨架、DimensionVerdict schema、adversarial verify 見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)。
+用 Workflow tool 協調 2-perspective（① clean + ② UC-anchored；perspective 定義 + prompt 見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)）；腳本骨架、DimensionVerdict schema、adversarial verify 見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)。
 
 | Workflow Phase | 說明 | Agent 數量 |
 |----------------|------|-----------|
@@ -173,7 +173,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-review」步驟（現有流程不變）。
 
-**B. Agent Tool 模式**（Fallback，非 Workflow 條件 = max-agents=1 或非 ultracode）：build 的 Agent Review **總用獨立 agent**（Writer/Reviewer 分離為強制品質閘門），不走 review-engine 的 Main LLM 模式 —— 這是 build 對通用判定規則的刻意覆蓋。2-perspective review（① Intent-anchored + ② Fresh），完整流程見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
+**B. Agent Tool 模式**（Fallback，非 Workflow 條件 = max-agents=1 或非 ultracode）：build 的 Agent Review force 獨立 agent、不走 Main LLM（review 執行預設 + 刻意覆蓋通用判定，見 [review-engine](../skills/review-engine/SKILL.md)）。2-perspective（① clean + ② UC-anchored）完整流程見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
 
 #### 主 LLM — /judge-review
 

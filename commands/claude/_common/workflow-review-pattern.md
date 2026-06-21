@@ -157,9 +157,9 @@ export const meta = {
 
 const REVIEW_SCHEMA = { /* DimensionVerdict schema */ }
 const VERIFY_SCHEMA = { /* VerifyVerdict schema */ }
-// review/verify agent = 主 session 降一級（opus→sonnet, sonnet→haiku, haiku→haiku）；見 rules/model-routing.md
-// author 時依當前 session 填對的 literal（下為 sonnet session 範例）
-const REVIEW_MODEL = 'haiku'
+// review command agent = 主 session（inherit，品質閘門需強度；覆蓋通用 review→降級，見 rules/model-routing.md carve-out + review-engine「review 執行預設」）
+// author 時依當前 session 填對的 literal（下為 sonnet session 範例 → inherit = sonnet）
+const REVIEW_MODEL = 'sonnet'
 
 // --- 各命令定義自己的 dimensions ---
 // const dimensions = [
