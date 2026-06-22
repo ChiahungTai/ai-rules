@@ -6,7 +6,7 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 # /illustrate — 智能圖解系統
 
-> **受眾：layer 3 人類 viewport / B 軸**。產出**供人判讀的結構 artifact**（city map / 心智模型 / 重用枚舉 / 流程圖）—— 人用大原則判讀「結構撐得起嗎、在重造嗎、方向對嗎」。**不產機器 finding**（嚴重度 / file:line，那是 `/code-review` axis 3 的職責）。與 `/code-review` axis 3 共用 [architecture-viewport](../skills/architecture-viewport/SKILL.md) skill 但**受眾不同**（人 viewport vs 機器 finding）—— skill 刻意中性，受眾由本命令（人）vs code-review（機器）決定。
+> **受眾：layer 3 人類 viewport / B 軸**。產出**供人判讀的結構 artifact**（city map / 心智模型 / 重用枚舉 / 流程圖）—— 人用大原則判讀「結構撐得起嗎、在重造嗎、方向對嗎」。**不產機器 finding**（嚴重度 / file:line，那是 `/code-review` axis 3 的職責）。與 `/code-review` axis 3 共用 [arch-viewport](../skills/arch-viewport/SKILL.md) skill 但**受眾不同**（人 viewport vs 機器 finding）—— skill 刻意中性，受眾由本命令（人）vs code-review（機器）決定。
 >
 > 受眾模型見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」；理論（A/B 軸、證據階層）見 [acceptance-evidence](../rules/acceptance-evidence.md)。
 
@@ -25,7 +25,7 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 | mode | 意圖 | 典型情境 | 主要能力（手段）|
 |------|------|---------|---------------|
-| **A 設計決策** | 「這樣設計對嗎」 | 討論新功能 / 重構 / pre-EP | city map + 流程 + 重用枚舉（調 [architecture-viewport](../skills/architecture-viewport/SKILL.md) skill）|
+| **A 設計決策** | 「這樣設計對嗎」 | 討論新功能 / 重構 / pre-EP | city map + 流程 + 重用枚舉（調 [arch-viewport](../skills/arch-viewport/SKILL.md) skill）|
 | **B 理解既有** | 「這怎麼運作」 | 接手 / 學習套件 / 除錯 | 運作流程 + 資料流 + 概念圖 |
 | **C 審查驗證** | 「對不對 / 好不好」 | code-review 前 / EP 審查 / 重造偵測 / commit 前 | 語義 diff + [假設驗證矩陣](./claude/_common/illustrate-deep-analysis.md) + city map |
 | **D 溝通傳達** | 「畫給別人看」 | 文檔 / demo | Mermaid 圖（md 模式）|
@@ -99,7 +99,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 
 - **EP 必備、spec 可選**：EP 是實作起點（必備）；spec 只在需求不明時前置（可選）
 - **軟 gate（不硬擋）**：pre-EP 是**標註 + 提醒**，不強制擋流程。前移價值靠提醒（「結構還沒確認，建議先 illustrate」）而非硬性 gate —— 避免流程摩擦，保留前移價值
-- **視角來源**：調用 [architecture-thinking](../skills/architecture-thinking/SKILL.md)（分層/bounded context/use case 視角）+ [architecture-viewport](../skills/architecture-viewport/SKILL.md)（結構資料）
+- **視角來源**：調用 [arch-thinking](../skills/arch-thinking/SKILL.md)（分層/bounded context/use case 視角）+ [arch-viewport](../skills/arch-viewport/SKILL.md)（結構資料）
 
 **結構 viewport 三時點**（同一載體，三觸發點）：pre-EP（本段，軟 gate）/ post-EP（EP 審查模式渲染提案結構撐得起嗎，見決策流程）/ post-build（懷疑結構漂移或重造既有時，重畫 city map 比對）。
 
@@ -129,7 +129,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 
 | 能力 | 位置 | 下沉? |
 |------|------|-------|
-| city map / dep weight / 重用枚舉 / LSP 查證 | `architecture-viewport` skill | ✅ 已沉（跨 illustrate/code-review/ep-review 共用）|
+| city map / dep weight / 重用枚舉 / LSP 查證 | `arch-viewport` skill | ✅ 已沉（跨 illustrate/code-review/ep-review 共用）|
 | 假設驗證矩陣（EP 審查）| `illustrate-deep-analysis.md` | ❌ 留（illustrate 特有）|
 | 語義 diff / 缺口 | 本體（無參數行為）| ❌ 留（簡單 + 特有）|
 | use cases + 情境矩陣分析 | `illustrate-analysis.md` | ❌ 留（分析步驟，特有）|
@@ -137,7 +137,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 
 委託 Skills：
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則
-- [architecture-viewport](../skills/architecture-viewport/SKILL.md) — 結構 viewport 能力來源（city map 資料/dep weight/Pattern Radar/LSP 查證；本命令渲染給人判讀）
+- [arch-viewport](../skills/arch-viewport/SKILL.md) — 結構 viewport 能力來源（city map 資料/dep weight/Pattern Radar/LSP 查證；本命令渲染給人判讀）
 
 ---
 

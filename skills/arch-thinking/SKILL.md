@@ -1,5 +1,5 @@
 ---
-name: architecture-thinking
+name: arch-thinking
 description: Clean Architecture + DDD 設計視角 — 用分層依賴規則（domain←use case←adapter←infra）、bounded context 邊界、use case 驅動檢視整體結構。用於 spec/EP/build/review 的設計決策，自問「新東西落哪層？依賴方向對嗎？邊界清楚嗎？消費者是誰？」。觸發詞：架構設計、clean architecture、分層、bounded context、use case 驅動、DDD、SOLID、依賴方向、模組邊界。
 ---
 

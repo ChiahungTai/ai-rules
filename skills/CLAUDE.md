@@ -25,7 +25,7 @@
 - `incremental-implementation` — 跨多檔變更增量交付（避免一次寫一大坨）
 - `test-driven-development` — TDD 驅動實作（RED → GREEN → 重構）
 - `source-driven-development` — 每個實作決策 grounding 於官方文檔
-- `architecture-thinking` — Clean Architecture + DDD 設計視角（分層依賴/bounded context/use case 驅動；視角非模板；檢視整體結構，與 api-and-interface-design 分工）
+- `arch-thinking` — Clean Architecture + DDD 設計視角（分層依賴/bounded context/use case 驅動；視角非模板；檢視整體結構，與 api-and-interface-design 分工）
 - `debugging-and-error-recovery` — 系統性根因除錯（非猜測）
 - `external-api-investigation` — 外部 API / 整合器真實行為調查（monkey-patch dry-run、查 stub、問 domain；實證優先於讀 code 推理）
 - `autonomous-execution` — 無人介入自主執行的決策 / 錯誤恢復 / 完成回報
@@ -41,7 +41,7 @@
 
 ### 架構與演進
 - `api-and-interface-design` — 穩定 API / 模組邊界 / 公開介面設計
-- `architecture-viewport` — 結構機械能力（City Map 資料/dep weight/Pattern Radar/domain grounding/LSP，可複用；不決定受眾）
+- `arch-viewport` — 結構機械能力（City Map 資料/dep weight/Pattern Radar/domain grounding/LSP，可複用；不決定受眾）
 - `deprecation-and-migration` — 舊系統 / API 棄用與遷移
 - `documentation-and-adrs` — 架構決策與文檔記錄（ADR）
 - `ci-cd-and-automation` — CI/CD pipeline 與品質閘門

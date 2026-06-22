@@ -1,7 +1,7 @@
 # 結構 viewport — drill 與機械分工
 
 > **載體**：[illustrate.md](../../illustrate.md) 的結構 viewport 模式（人類 viewport，B 軸）支撐檔。
-> **能力來源**：[architecture-viewport](../../../skills/architecture-viewport/SKILL.md) skill —— City Map 資料 / dep weight / Pattern Radar / domain grounding / LSP 查證 / product-type 雙軌都在 skill。本檔定義**人 viewport 的互動式 drill 與機械分工** —— 渲染結構心智模型讓人判讀（不產機器 finding，那是 `/code-review` axis 3）。
+> **能力來源**：[arch-viewport](../../../skills/arch-viewport/SKILL.md) skill —— City Map 資料 / dep weight / Pattern Radar / domain grounding / LSP 查證 / product-type 雙軌都在 skill。本檔定義**人 viewport 的互動式 drill 與機械分工** —— 渲染結構心智模型讓人判讀（不產機器 finding，那是 `/code-review` axis 3）。
 
 ## drill 指令（whole-picture → 嫌疑）
 

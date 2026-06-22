@@ -31,7 +31,7 @@ Trust internal code. Validate at system edges: API route handlers, form submissi
 - 內層（domain / use case）之間信任型別合約，不重複驗證
 - 設計介面時，介面屬於內層（use case 定義 needs），實作屬於外層（adapter 提供）
 
-**與 [architecture-thinking](../architecture-thinking/SKILL.md) 分工（RC-2 邊界）**：本 skill 設計**介面合約**（Hyrum's Law、Validate at Boundaries、穩定性）；architecture-thinking 檢視**整體結構**（分層依賴、bounded context）。介面是 adapter 邊界的具體化 — 設計介面用本 skill，看整體分層用 thinking。
+**與 [arch-thinking](../arch-thinking/SKILL.md) 分工（RC-2 邊界）**：本 skill 設計**介面合約**（Hyrum's Law、Validate at Boundaries、穩定性）；arch-thinking 檢視**整體結構**（分層依賴、bounded context）。介面是 adapter 邊界的具體化 — 設計介面用本 skill，看整體分層用 thinking。
 
 ### Prefer Addition Over Modification
 
