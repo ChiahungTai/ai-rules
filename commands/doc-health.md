@@ -150,6 +150,18 @@ LLM 直接讀取索引/清單類段落，驗證與實際檔案一致：
 
 ---
 
+## 與其他命令
+
+| 重疊區 | 歸誰 | 判準 |
+|--------|------|------|
+| 文件↔程式碼同步、Capabilities/Kanban 準確性、專案級 S-N、過時卡片 | **/doc-health**（本命令） | 跨檔、doc↔code、消費 scan findings |
+| 單一文檔內部自洽（術語/章節/引用/邏輯/格式） | **/consistency** | 單檔、內部 |
+| 跨檔 single-source invariant | **/sync-sources** | 機械跨檔單一源 |
+
+> 本命令看**文件與程式碼/專案狀態同步**；單一文檔內部自洽交 /consistency。
+
+---
+
 ## 執行約束
 
 - **容錯**：無 `.project-snapshot.json` 時降級為純 LLM 檢查，不報錯

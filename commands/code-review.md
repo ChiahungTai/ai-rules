@@ -48,7 +48,7 @@ Workflow 執行協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 
 ## 審查模式選擇
 
-review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」—— **code-review 是唯一允許 Main LLM 模式**的 review 命令（低 effort 主 LLM 直接審；其餘 review 命令刻意覆蓋為恆獨立）。模式判定規則（effort/max-agents → A/B/C）見 [review-engine](../skills/review-engine/SKILL.md)；max-agents 查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md)。下方 A/B/C 為本命令的六軸啟用配置：
+review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」—— **code-review 是唯一允許 Main LLM 模式**的 review 命令（低 effort 主 LLM 直接審；其餘 review 命令刻意覆蓋為恆獨立）。模式判定規則（effort/max-agents → A/B/C）見 [review-engine](../skills/review-engine/SKILL.md)；max-agents 查 [model-routing 並發上限](../rules/model-routing.md)（agent-workflow defer 到此、不自帶數字）。下方 A/B/C 為本命令的六軸啟用配置：
 
 **A. Workflow 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 
@@ -145,7 +145,7 @@ Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mod
 
 ## Finding 呈現
 
-finding 預設留在審查報告/對話，供用戶 `/copy` 搬到實作 LLM（**人主導工作流**，不靠持久化追蹤）。**跨命令自動化場景**（接 `/judge-review`/`/followup-review`）才寫 `.review/<branch>.md`（Finding Record 表格，欄位見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)）—— optional，`/commit` 階段 6 成功後清除。
+finding 預設留在審查報告/對話，供用戶 `/copy` 搬到實作 LLM（**人主導工作流**，不靠持久化追蹤）。**跨命令自動化場景**（接 `/judge-review`/`/followup-review`）才寫 `.review/<branch>.md`（Finding Record 表格，欄位見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)）—— code-review 立場 optional（接 `/judge-review`→`/followup-review` 鏈才寫）；一旦進入該鏈，judge-review/followup-review 預設讀寫持久化（它們即此「跨命令自動化場景」，故二者步驟內固定讀寫、非再條件判斷）。`/commit` 階段 6 成功後清除。
 
 ```
 ## Code Review Findings — <branch>
@@ -179,6 +179,8 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 ---
 
 ## 流程位置
+
+> **canonical review flow（詳細）以本檔為單一源** —— 其他命令畫 flow 須引用此處、不重畫（防 flow drift；機械追蹤見 [/sync-sources](./sync-sources.md)）。commands/CLAUDE.md 的 review-pipeline recipe 是高層概觀，非重畫。
 
 ```
 /spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ /code-review（六軸含 axis 3 結構 = arch 吸收，top-down，含 commit message）→ /judge-review（一次）→ /commit

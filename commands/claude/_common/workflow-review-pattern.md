@@ -60,12 +60,13 @@ Workflow tool 的優勢：
           "id": { "type": "string", "description": "唯一 ID，如 F1, F2" },
           "title": { "type": "string" },
           "severity": { "type": "string", "enum": ["critical", "important", "suggestion"] },
+          "confidence": { "type": "string", "enum": ["confirmed", "evidence-based", "inferred"], "description": "信心水準（見 review-engine）；與 VerifyVerdict.confidence（verify 把握度）不同概念" },
           "file": { "type": "string", "description": "專案相對路徑" },
           "line": { "type": "number" },
           "description": { "type": "string" },
           "suggestion": { "type": "string" }
         },
-        "required": ["id", "title", "severity", "description", "suggestion"]
+        "required": ["id", "title", "severity", "confidence", "description", "suggestion"]
       }
     },
     "summary": { "type": "string", "description": "該維度的整體評估" }

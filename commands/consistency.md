@@ -132,6 +132,18 @@ Signal/noise framework: [encoder-philosophy.md](./claude/_common/encoder-philoso
 
 ---
 
+## 🔗 與其他命令
+
+| 重疊區 | 歸誰 | 判準 |
+|--------|------|------|
+| 單一文檔內部自洽（術語/章節/引用/邏輯/格式/S-N） | **/consistency**（本命令） | 單檔、內部一致性 |
+| 文件↔程式碼同步、Capabilities/Kanban 準確性、專案級 S-N | **/doc-health** | 跨檔、doc↔code、消費 scan findings |
+| 跨檔 single-source invariant | **/sync-sources** | 機械跨檔單一源驗證（v1：enum + classification；數字/flow 未來擴充） |
+
+> 本命令只看**單一文檔內部**自洽；該文檔與程式碼/其他檔是否同步，交 /doc-health。
+
+---
+
 ## 📝 使用範例
 
 ```bash

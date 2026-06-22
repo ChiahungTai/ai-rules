@@ -95,17 +95,17 @@ workflow-review-pattern 的 schema、各命令的輸出分類，皆引用此。
 
 **本段職責 = 判定規則**（domain：effort/max-agents → 抽象 mode）；**派發到 adapter 範本是命令層職責**（use-case）—— 判定為某 mode 後，各命令自取執行範本（Workflow → [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md)；Agent Tool → [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md)）。不強求消除導覽連結（docs 互指可容忍），重點是 domain 不內嵌派發。
 
-**唯一判定規則**（消 build/code-review/ep-review 三處重複定義）：
+**通用判定規則**（消 build/code-review/ep-review 三處重複定義；例外見下表最右欄）：
 
-| 條件 | 抽象 mode | 命令層自取的執行範本 |
-|------|----------|-------------------|
-| effort = ultracode/xhigh **且** max-agents > 1 | **Workflow** | [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md)（schema + 兩階段腳本 + adversarial verify） |
-| max-agents = 1 但 effort = ultracode/xhigh | **Agent Tool**（Fallback） | [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md)（2-perspective） |
-| effort < ultracode | **Main LLM** | 主 LLM 直接審（現有行為） |
+| 條件 | 抽象 mode | 例外（不走此 mode） | 命令層自取的執行範本 |
+|------|----------|-------------------|-------------------|
+| effort = ultracode/xhigh **且** max-agents > 1 | **Workflow** | — | [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md)（schema + 兩階段腳本 + adversarial verify） |
+| max-agents = 1 但 effort = ultracode/xhigh | **Agent Tool**（Fallback） | — | [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md)（2-perspective） |
+| effort < ultracode | **Main LLM** | build / ep-review / execution-plan（品質閘門，連 standard effort 也強制獨立 agent、不走 Main LLM；僅 code-review 等無強制分離命令適用） | 主 LLM 直接審（現有行為） |
 
 判定結果決定讀哪個執行範本的 schema/腳本 —— 這是**依賴方向**（判定 → schema），不是耦合。本 skill 只放判定規則，**不重複** schema/腳本（在 workflow-review-pattern）。
 
-> **Main LLM 模式的適用範圍**：上表 3 模式是通用判定規則，但 **build / ep-review / execution-plan 的 Agent Review 強制獨立 agent**（Workflow 或 Agent Tool），**刻意不走 Main LLM 模式** —— 這三者是品質閘門，連 standard effort 也要 Writer/Reviewer 分離，不接受主 LLM 自審；僅 code-review 等無強制分離的命令用 Main LLM 模式。各命令的覆蓋宣告見各自檔案。
+> 各命令的覆蓋宣告見各自檔案（例外已編入上表最右欄，不再以註腳形式存在 —— 避免「唯一判定規則」式承諾迫使例外被低估、被讀者忽略）。
 
 ### 為何 Writer/Reviewer 分離
 

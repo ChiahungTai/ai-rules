@@ -85,7 +85,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 前置：`/code-review` → `/judge-review` → 實作 AI 完成修改
 後續：未通過 → 再次修正 → `/followup-review`；全部通過 → `/commit`
 
-### 完整流程
+### review 驗收迴圈（canonical 全流程見 [code-review.md](./code-review.md)）
 
 ```
 /code-review（Review LLM）→ /judge-review（Implementation LLM）
