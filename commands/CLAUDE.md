@@ -75,7 +75,7 @@
 - `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要、UC 進度 + SYSTEM-MAP 功能進度）
 - `/task-status` — Kanban-centric 進度儀表板（Capabilities 完成率 + Kanban lane 分佈 + 模組 Breakdown）
 - `/doc-health` — Capabilities + Kanban 健康檢查（12 角度驗證文件準確性）；`--report` 產出完整能力地圖；`--sync-system-map` 用 Capabilities 狀態同步 SYSTEM-MAP.md
-- `/rebase <trunk>` — Trunk-based rebase（feature onto trunk/main，trunk 永不被 rebase；可選同步其他 feature worktree）
+- `/rebase <branch> [--autostash]` — Trunk-based rebase（雙向：trunk 上 `merge --ff-only` 吸收 feature / feature 上 rebase onto trunk；trunk 永不被 rebase；可選同步其他 feature worktree）
 
 ### 依賴升級（收盤後執行）
 
