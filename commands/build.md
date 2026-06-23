@@ -175,6 +175,24 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-revie
 
 **B. Agent Tool 模式**（Fallback，非 Workflow 條件 = max-agents=1 或非 ultracode）：build 的 Agent Review force 獨立 agent、不走 Main LLM（review 執行預設 + 刻意覆蓋通用判定，見 [review-engine](../skills/review-engine/SKILL.md)）。2-perspective（① clean + ② UC-anchored）完整流程見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
 
+#### adaptive 觸發映射（extra agent 機械觸發）
+
+base ① clean + ② UC-anchored 之外，extra agent 由**段落風險特徵機械觸發**（非 LLM 語義判「高風險」）。映射框架定義見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」點 5；build 提供 adapter 信號翻譯成通用特徵：
+
+| build 既有信號 | review-engine 通用特徵 | 觸發 extra agent |
+|------------------|----------------------|-----------------|
+| 階段 0 整合器標記（機械 IO 觸發，`:63`） | `外部整合` | adversarial |
+| 階段 2 路徑覆蓋觸發（新簽名/注入點，`:132`） | `公開簽名變更` | architecture + consumer-perspective |
+| EP UC 盤點計數 >6（半機械：LLM 數 EP UC 清單，非純 diff） | `UC 數 >6` | UC-split |
+
+**範圍（只接線既有信號，不新造偵測）**：build adapter 只翻譯上表兩個既有機械信號（IO + 簽名）+ EP UC 計數。**無特徵命中 → 僅 base ①+②，不開 extra**（機械避免浪費，非 LLM 判）。**跨模組特徵在 build 無 adapter**（無既有偵測，不新造；跨模組 ripple 交階段 6 layer 旗標導向 layer 2，不在 build 段落自檢 — 同 session 看不全跨模組 ripple）。
+
+**依賴方向（DIP）**：build 是 adapter（提供特徵偵測 + 翻譯成通用特徵名）；review-engine 是 domain（定義特徵→agent 映射）。build 引用 review-engine 通用特徵名，review-engine 不列 build 特有名詞。
+
+**cap + 優先序**：extra 受 max-agents cap + 優先序（見 review-engine 點 5：architecture > adversarial/edge > consumer-perspective）；多特徵命中 + cap 不足時依序取最高，截斷其餘並輸出截斷提示：
+
+> ⚠️ cap 截斷：max-agents=N，base 佔 2，僅 (N-2) extra 額度。命中 [特徵清單]，取 [最高優先 agent]，其餘 [被截斷 agent] 截斷 — 建議提高 `--max-agents` 或跑 `/code-review` 補截斷軸。
+
 #### 主 LLM — /judge-review
 
 用 Skill tool invoke `judge-review`，傳入**所有 agent 的 review findings**（合併）。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認。
@@ -220,6 +238,12 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-revie
 ### 階段 6：完成報告
 
 輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + 能力狀態變更摘要 + SYSTEM-MAP 功能狀態變更 + /audit-test 稽核結果
+
+**layer 旗標（硬性 — commit 前方向提示）**：偵測本 EP 變更是否觸及**跨模組**（`git diff --name-only` top-level 模組目錄計數 ≥2；模組目錄 = 專案 bounded context 根目錄，各專案自訂）、**公開簽名變更**（階段 2 路徑覆蓋觸發）、或**整合器段落**（階段 0 標記）。命中 → 完成報告必含：
+
+> ⚠️ 本 build 僅 layer 1（AI 自洽天花板）。此變更觸及 [跨模組/公開簽名/外部整合]，**建議跑跨 session `/code-review`（layer 2）** 抓全貌漣漪 / 同 session 盲點（段落自檢 + Agent Review 都是 layer 1，看不全跨模組 ripple）。
+
+此旗標是**新增**硬性 code-review 導向提示；檔尾「與其他命令的協作」段的既有軟提醒（涵蓋 deliverable-review/illustrate/code-review）**保留不動**。
 
 ---
 
