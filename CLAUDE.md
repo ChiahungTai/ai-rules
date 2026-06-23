@@ -46,7 +46,7 @@
 
 | 命令 | 受眾 | 層 | 誰呼叫 |
 |------|------|----|--------|
-| `/spec` | LLM（人互動） | 鏈 | 人類觸發 |
+| `/spec` | LLM（人互動·需求釐清） | 鏈 | 人類觸發 |
 | `/execution-plan` | LLM | 鏈 | 人類觸發 |
 | `/ep-review` | LLM | 1（同 session 自判）/ 2（跨 session） | AI-self / 人類（跨 session） |
 | `/ep-validate` | LLM | 鏈 | AI-self |

@@ -204,7 +204,7 @@ build 可能由不同 LLM session 執行，無法存取審查報告。因此：
 > **內建整合**：EP Review Cycle 已整合至 `/execution-plan`。獨立使用適用於手動修改 EP 後重新審查。
 
 ```
-/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ /code-review
+/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ /code-review
 ```
 
 前置：`/execution-plan`

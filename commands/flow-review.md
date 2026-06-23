@@ -1,6 +1,6 @@
 ---
 description: "定期讀 ai-analysis/flow-feedback/ 累積回饋，找重複摩擦 + 聚合 type-2 設計缺陷，跟 user 討論怎改善 skills/commands。/flow-review [--since <date>]"
-when_to_use: "Periodic review of accumulated flow-feedback. User fires when they have time. LLM globs all feedback files, finds recurring friction (systemic) + aggregates type-2 design-flaw candidates, then discusses improvement directions with the user. B-axis: human judgment drives the improvement decisions. Output → /spec (big change) or kanban card (small change) → /build."
+when_to_use: "Periodic review of accumulated flow-feedback. User fires when they have time. LLM globs all feedback files, finds recurring friction (systemic) + aggregates type-2 design-flaw candidates, then discusses improvement directions with the user. B-axis: human judgment drives the improvement decisions. Output → /execution-plan (big change; /spec to clarify requirements if needed) or kanban card (small change) → /build."
 usage: "/flow-review [--since <date>]"
 argument-hint: "無參數讀全部 / --since YYYY-MM-DD 限定日期後"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]
@@ -35,7 +35,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 | 共識類型 | 去向 |
 |---------|------|
-| 大改（重寫 command、新命令） | `/spec` → kanban |
+| 大改（重寫 command、新命令） | `/spec` → `/execution-plan` → kanban（建卡歸 EP UC盤點） |
 | 小改（措辭、流程微調） | kanban card |
 | 還沒想清楚 | 留在 feedback，下次 review 再議 |
 
@@ -62,5 +62,5 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ## 與其他命令
 
 - ← [`/flow-feedback`](./flow-feedback.md)：素材源（每筆 feedback）
-- → `/spec` / kanban card / `/build`：改善落地
+- → `/execution-plan`（必要時先 `/spec` 釐清需求）/ kanban card / `/build`：改善落地
 - 相關：`/project-review`（專案健康）；本命令聚焦 **session 摩擦驅動的系統演化**

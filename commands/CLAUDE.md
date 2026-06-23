@@ -19,7 +19,7 @@
 
 ```
 〔pre-EP 軟 gate〕對話討論新功能 →〔提醒〕/illustrate 結構化提案（city map/重用，軟 gate 不硬擋）→ 人判讀 → 確認
-/spec（含 UC 定義 + POC 可行性驗證，spec 可選前置）→ /execution-plan（含 EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
+/spec（純輔助·需求釐清，可選）→ /execution-plan（自足：段落0全域研究 + UC盤點 + EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
           ↓ post-EP checkpoint: /deliverable-review --ep（layer 3 方向：打算做對嗎）→ /illustrate --ep（layer 3 結構：撐得起嗎）
   → /build（含 Agent Review + /audit-test + UC 狀態 + SYSTEM-MAP 同步，LLM 鏈）
           ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport，漂移/重造檢查）/ /deliverable-review（layer 3 demo 交付）→ /code-review（layer 1/2, LLM 六軸）→ /commit（UC 狀態確認）
@@ -30,8 +30,8 @@
 - **review 期**：post-build 可選 `/illustrate`（漂移/重造檢查，B 軸）→ `/code-review`（六軸含 axis 3 結構 = arch 吸收，top-down，A 軸機器）→ `/judge-review`（**一次**）
 - **不再** arch→judge→code→judge 兩次 judge（code review 已含結構軸，judge 一次即可）
 
-- `/spec` — 結構化需求討論 + codebase 研究 + POC 可行性驗證（`--write` 寫 spec MD、`--research-only` 只研究）
-- `/execution-plan` — 段落式實作計畫書，基於 /spec 生成 Self-Contained Segments（含 Scenario Matrix + EP Review Cycle；ep_type blueprint/implementation 支援大型任務綱要+子 EP 結構），掃描 SYSTEM-MAP.md 取得功能上下文
+- `/spec` — 需求釐清（User Story + UC 定位 + Scenario Matrix + 邊界，純輔助；`--write` 寫需求 MD）
+- `/execution-plan` — 段落式實作計畫書，自足生成 Self-Contained Segments（含段落0全域研究 + UC盤點 + Scenario Matrix + EP Review Cycle；ep_type blueprint/implementation 支援大型任務綱要+子 EP 結構），掃描 SYSTEM-MAP.md 取得功能上下文
 - `/ep-review` — 深層思考審查 Execution Plan 合理性（已內建於 `/execution-plan`，可獨立使用）
 - `/ep-validate` — POC 驅動的 EP 技術假設驗證（高技術風險 EP 的動態驗證）
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
@@ -68,7 +68,7 @@
 ### 流程演化回饋
 
 - `/flow-feedback` — session 摩擦收集器：不順 session 後，user 植入摩擦 + AI map 到 skills/commands，產 type-1（時機）/type-2（設計）建議 + 具體例子，寫 `ai-analysis/flow-feedback/`
-- `/flow-review` — 定期讀累積 flow-feedback，找重複摩擦 + 聚合 type-2 設計缺陷，跟 user 討論改善 skills/commands（B 軸）；定案 → /spec / kanban → /build
+- `/flow-review` — 定期讀累積 flow-feedback，找重複摩擦 + 聚合 type-2 設計缺陷，跟 user 討論改善 skills/commands（B 軸）；定案 → /execution-plan（大改，必要時先 /spec 釐清需求）/ kanban（小改）→ /build
 
 ### 日常工具
 

@@ -97,7 +97,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 對話討論新功能 →〔提醒〕/illustrate 結構化提案 → 人判讀（撐得起嗎、在重造嗎）→ 直接 EP 或先 spec
 ```
 
-- **EP 必備、spec 可選**：EP 是實作起點（必備）；spec 只在需求不明時前置（可選）
+- **EP 必備、spec 可選**：EP 是實作起點（必備，自足）；spec 是純輔助需求釐清（需求不明時前置，可選）
 - **軟 gate（不硬擋）**：pre-EP 是**標註 + 提醒**，不強制擋流程。前移價值靠提醒（「結構還沒確認，建議先 illustrate」）而非硬性 gate —— 避免流程摩擦，保留前移價值
 - **視角來源**：調用 [arch-thinking](../skills/arch-thinking/SKILL.md)（分層/bounded context/use case 視角）+ [arch-viewport](../skills/arch-viewport/SKILL.md)（結構資料）
 

@@ -183,7 +183,7 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 > **canonical review flow（詳細）以本檔為單一源** —— 其他命令畫 flow 須引用此處、不重畫（防 flow drift；機械追蹤見 [/sync-sources](./sync-sources.md)）。commands/CLAUDE.md 的 review-pipeline recipe 是高層概觀，非重畫。
 
 ```
-/spec → /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ /code-review（六軸含 axis 3 結構 = arch 吸收，top-down，含 commit message）→ /judge-review（一次）→ /commit
+/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review）→ /code-review（六軸含 axis 3 結構 = arch 吸收，top-down，含 commit message）→ /judge-review（一次）→ /commit
 ```
 
 後續：用戶確認 commit message → `/commit` 捷徑（跳過階段 2 Git 分析 + 階段 3；保留 2.7 POC/Demo 處置 + 2.8 flow-feedback 歸檔；見 [commit](./commit.md) 捷徑模式）

@@ -93,4 +93,4 @@ ai-rules 是持續演化的系統，但「session 不順 → 該改哪個 comman
 ## 與其他命令
 
 - → [`/flow-review`](./flow-review.md)：定期讀這些 feedback + 跟你討論改善
-- 討論定案 → `/spec`（大改）/ kanban card（小改）→ `/build`
+- 討論定案 → `/execution-plan`（大改，必要時先 `/spec` 釐清需求）/ kanban card（小改）→ `/build`

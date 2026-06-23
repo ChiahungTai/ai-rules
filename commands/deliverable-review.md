@@ -222,7 +222,7 @@ post-build — 兩 viewport 看狀況呼叫，**不硬定先後**：
 ## 流程位置
 
 ```
-/spec → /execution-plan（含 EP Review）
+/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review）
           ↓ post-EP
         /deliverable-review --ep（layer 3，planned）→ /illustrate --ep（layer 3，結構 viewport）
           ↓

@@ -61,7 +61,7 @@
 | `SYSTEM-MAP.md` | 跨域功能狀態總覽（按工作流組織） | 現在 |
 | `.kanban/` | 任務追蹤（Kanban lanes） | 暫時（Done/ 歸檔） |
 
-**UC 生命週期**：📋（/spec → Backlog card）→ 🟡（/build → InProgress）→ ✅（/commit → Capabilities + Done）
+**UC 生命週期**：📋（/execution-plan → Backlog card，UC盤點自動建卡）→ 🟡（/build → InProgress）→ ✅（/commit → Capabilities + Done）
 
 ### UC 狀態標記
 
@@ -87,13 +87,13 @@
 
 | 規模 | UC 要求 |
 |------|---------|
-| **大型**（跨模組、新功能） | /spec 必須建立 Kanban Backlog card |
+| **大型**（跨模組、新功能） | /execution-plan 自動建立 Kanban Backlog card |
 | **中型**（功能優化） | 更新既有 Capabilities 或 Kanban card |
 | **小型**（bug fix、文檔） | 不需要 UC |
 
 ### 銜接機制
 
-1. **/spec → Backlog**：建立 .kanban/Backlog/ card（含模組、spec 連結）
+1. **/execution-plan → Backlog**：UC盤點自動建立 .kanban/Backlog/ card（含模組、EP 連結）
 2. **/build → InProgress**：搬 Backlog cards 至 In-Progress/（暫時狀態，**不更新 Capabilities、不搬 Done**）
 3. **/commit → Capabilities + Done**：確認後新增 Capabilities ✅ 行 + 搬 Done/ + EP 歸檔（**原子操作**）
 

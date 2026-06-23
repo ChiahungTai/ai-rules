@@ -1,18 +1,22 @@
 ---
-description: "結構化需求討論 + codebase 研究 + POC 可行性驗證（User Story、假設浮出、風險分級 POC、UC 定義、邊界），為 EP 做準備。/spec [需求描述] [--write] [--research-only]"
-when_to_use: "Structure a feature requirement with codebase research and risk-classified POC validation. Use before /execution-plan to verify assumptions and map existing infrastructure."
-usage: "/spec [需求描述] [--write] [--research-only]"
+description: "需求釐清：結構化需求討論（User Story、UC 定位、Scenario Matrix、邊界），為 /execution-plan 做需求層準備。/spec [需求描述] [--write]"
+when_to_use: "Clarify a requirement (User Story + UC + Scenario Matrix + boundaries) before /execution-plan. Lightweight, optional — EP is self-sufficient."
+usage: "/spec [需求描述] [--write]"
 argument-hint: "你要做什麼功能或改變"
 ---
 
-# /spec — 結構化需求討論
+# /spec — 需求釐清
 
-EP 前的研究與結構化階段。透過對話整理需求、深度研究 codebase、驗證假設，為 `/execution-plan` 提供已驗證的結構化輸入。
+EP 前的**需求層**澄清。把「討論一下感覺對了」的鬆散共識，結構化成 User Story + UC 定位 + Scenario Matrix + 邊界，為 `/execution-plan` 提供需求層輸入。
+
+**定位（純輔助）**：spec 是需求釐清（問「要做什麼」），不是實作規劃。全域 codebase 研究、前期 POC、UC 盤點建卡都在 `/execution-plan`（EP 自足）。spec 不做這些。
+
+> **為什麼這樣切**：人走阻力最小的路——重命令會被跳過。把研究/POC/UC盤點放必走的 EP（一定執行），把 spec 瘦身為輕量需求澄清（阻力降、更可能用）。討論期共識 ≠ 結構化對齊；普通對話給的是共識幻覺，spec 強迫把「感覺」變成 User Story + UC + SM + 邊界的結構。
 
 UC-Driven Development 方法論見 [ai-development-guide.md](../ai-development-guide.md) 的「UC-Driven Development」章節。
 
 委託 Skills：
-- [spec-driven-development](../skills/spec-driven-development/SKILL.md) — 假設浮出、邊界定義、成功條件量化
+- [spec-driven-development](../skills/spec-driven-development/SKILL.md) — 假設浮出、邊界定義、成功條件量化（取其 Phase 1 Specify 子集；該 skill 是通用方法論，非本命令專屬）
 
 ---
 
@@ -20,9 +24,8 @@ UC-Driven Development 方法論見 [ai-development-guide.md](../ai-development-g
 
 | 參數 | 說明 |
 |------|------|
-| 無參數 | 預設：對話中產出規格摘要（不寫檔案），可直接接 `/execution-plan` |
+| 無參數 | 預設：對話中產出需求摘要（不寫檔案），可直接接 `/execution-plan` |
 | `--write` | 寫入 `ai-analysis/specs/{feature-name}-spec.md`。適用於換 session 時傳遞 context |
-| `--research-only` | 只做 Phase 1-2（對齊 + 研究），不進 UC 定義。適用於「先研究看看」的情境 |
 
 ---
 
@@ -30,18 +33,16 @@ UC-Driven Development 方法論見 [ai-development-guide.md](../ai-development-g
 
 ### Phase 1: 對齊（2-3 turns）
 
-快速確認方向和範圍，不填表單。
+快速確認方向和範圍。
 
 1. **User Story 一句話**：目標 + 痛點 + 範圍
-2. **範圍判斷**：
+2. **規模判定**：
 
 | 規模 | 後續行為 |
 |------|---------|
-| 大型（跨模組、新功能） | 完整 Phase 1-5 |
-| 中型（功能優化、新 API） | Phase 1-5（Phase 3 深度調整） |
+| 大型（跨模組、新功能） | 完整 Phase 1-4 + 後續 `/execution-plan` |
+| 中型（功能優化、新 API） | Phase 1-4（深度調整） |
 | 小型（bug fix、文檔） | 建議直接做，跳過 `/spec` |
-
-3. **規模判斷**：小型變更建議用戶直接做（跳過 /spec），中大型繼續 Phase 2
 
 User Story 格式（參考）：
 ```
@@ -50,97 +51,31 @@ User Story 格式（參考）：
 現在怎麼處理：[workaround]
 ```
 
-### Phase 2: Codebase 研究（自動，spawn Explore Agent）
-
-**先讀程式碼，再提假設。禁止憑訓練資料猜測。**
-
-spawn Explore Agent（model 依 [model-routing](../rules/model-routing.md)：session 降一級）深度掃描相關模組：
-
-1. **Capabilities 盤點**：搜尋需求涉及的 CLAUDE.md Capabilities + `.kanban/` cards（rg 搜 Markdown）
-2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用
-3. **可複用基礎設施**：LSP `workspaceSymbol` 搜尋相關 class/function，`findReferences` 確認使用模式，找出可複用的 utilities、base classes、protocols
-4. **類似實作**：LSP `workspaceSymbol` 搜尋相似名稱的 class/function，rg 補充搜尋字串和註解中的引用
-
-**產出研究摘要**（對話中呈現）：
-- 可複用基礎設施清單（附 `ClassName`，路徑選用）
-- 依賴關係和關鍵約束
-- 類似功能的既有實作位置
-
-### Phase 3: 假設 + POC（風險分級）
-
-基於 Phase 2 研究結果，列出技術假設並驗證。
-
-**假設浮出格式**（遵循 [spec-driven-development](../skills/spec-driven-development/SKILL.md)）：
+**假設浮出**（遵循 [spec-driven-development](../skills/spec-driven-development/SKILL.md)）：對齊時立即列出假設，不靜默填補模糊需求。
 ```
 ASSUMPTIONS I'M MAKING:
-1. [假設]（來源：path/to/file.py:ClassName）
-2. [假設]（來源：用戶確認）
-→ 正確的話請告知，否則我將按照這些假設繼續進行。
+1. [假設]（來源：用戶確認 / 既有討論）
+→ 正確的話請告知，否則我將按照這些假設繼續。
 ```
 
-**風險分級驗證**（POC 語境簡化為 🔴/🟢 兩級；完整 🔴🟡🟢 三級見 [ai-development-guide.md](../ai-development-guide.md)「驗證約束」）：
+> 技術假設的**驗證**（POC）不在 spec 階段——前期可行性 POC 在 `/execution-plan` 段落驗證策略，深度驗證在 `/ep-validate`。
 
-| 風險 | 判定標準 | 驗證方式 |
-|------|---------|---------|
-| 🔴 高風險 | 外部 API、SDK 行為、架構假設、從未用過的函式庫 | 寫 `poc/poc_*.py` 實際執行驗證 |
-| 🟢 低風險 | 內部邏輯、已知模式、已驗證過的函式庫 | 文件記錄 + 來源引用 |
+### Phase 2: UC 定位 + Scenario Matrix
 
-高風險假設的 POC 規範：
-- 放置 `poc/poc_<描述性名稱>.py`
-- 每個 POC 聚焦一個假設，包含 happy path + 至少一個邊界案例
-- 必須 `uv run python` 實際執行（遵守 `must-execute-before-complete` rule）
-- 檔頭格式（中文，與 `/ep-validate` 共用規範）：
-  ```python
-  """POC: [假設描述]
+**UC 是開發的驅動層**。在此定義需求要實現什麼能力（需求層），而非盤點 codebase 既有 UC（那是 `/execution-plan` UC 盤點 + 自動建卡的事）。
 
-  驗證: [具體驗證標的]
-  EP 段落: S{N}
-  風險: [致命/高/中]
-  來源: [假設來源，如 path/to/file.py:ClassName 或用戶確認]
-  """
-  ```
+1. **UC 定位**：需求要實現的能力描述（日後 EP 段落引用）。若疑似已有相近 UC，標注讓 EP 盤點時留意
+2. **Scenario Matrix**：強制思考使用者會遇到的情境，避免實作完成才發現漏掉錯誤路徑或邊界
 
-**技術選型**（如有需要）：在此階段用 POC 結果佐證方案選擇。
+| # | 場景 | 觸發 | 預期行為 |
+|---|------|------|---------|
+| SM-1 | [使用者意圖] | [CLI flag / 事件 / 錯誤操作] | [系統該怎麼反應] |
 
-### Phase 4: UC + 邊界（結構化產出）
+**必須涵蓋**：Happy path / 錯誤操作 / 邊界案例 / 效能期待差異
 
-**UC 是開發的驅動層，不是事後追蹤。大型/中型變更必須在此階段定義或更新 UC。**
+> Scenario Matrix 產出後，`/build` 階段 5a 會將場景提煉成自包含描述散到 UC 的「消費場景」欄位。
 
-1. **掃描相關 CLAUDE.md Capabilities + .kanban/ 卡片**：搜尋需求涉及的 library 模組目錄的 CLAUDE.md Capabilities 表格 + `.kanban/` cards，確認是否已有相關 UC
-2. **判斷變更規模**：
-
-| 規模 | UC 行為 |
-|------|--------|
-| 大型 | 建立 **Kanban Backlog 卡片**（含能力描述、目標、驗收標準） |
-| 中型 | 更新既有 Kanban 卡片的描述或狀態；或更新 CLAUDE.md Capabilities 表格的描述 |
-| 小型 | 跳過（bug fix、文檔不需要 UC） |
-
-3. **確認 UC 不重複**：已有 UC（Capabilities ✅ 或 Kanban 📋）能覆蓋需求 → 更新描述，不另建新卡片
-4. **記錄能力描述**：後續 EP 和 /build 會引用此能力描述
-5. **消費場景欄位**：大型變更新增 UC 時可先留空，由後續 `/execution-plan` 產出 Scenario Matrix 後、`/build` 階段 5a 從矩陣提煉自包含描述填入。中型變更若影響使用情境，可於此階段直接更新既有 UC 的消費場景
-
-**Kanban Backlog 卡片格式**（📋 新建時使用）：
-```markdown
-[tag:module]
-
-# [中文標題，與檔名相同]
-
-## 目標
-[簡述，或完整 spec（詳細 📋 時）]
-
-## 相關
-- EP: [ep-xxx.md，如有]
-
-## 驗收標準
-- [ ] [主要驗收條件]
-
-## 備註
-[依賴、前置條件]
-```
-- **檔名**：繁體中文標題，保留必要英文縮寫。範例：`訂閱分級語意重構.md`
-- 📋 簡單（< 10 行描述）：`## 目標` 放一句話
-- 📋 詳細（≥ 10 行）：`## 目標` 放完整描述（卡片是 markdown，長度不限）
-- **Tag**：掃描 `<package>/` 子目錄決定 tag 名（見專案 CLAUDE.md「Tag 慣例」）。`<nested>/<mod>` → `<mod>`
+### Phase 3: 邊界 + 成功條件
 
 **邊界定義**：
 ```
@@ -151,53 +86,32 @@ Never（不做）：[列表]
 
 **成功條件量化**：將模糊需求轉為可驗證的目標（測試類型分佈、關鍵情境覆蓋，不寫數量）。
 
-**對接校驗**：對照 Phase 2 研究摘要中的 callers 使用模式，確認邊界定義涵蓋所有下游消費者。
+### Phase 4: 產出
 
-### Phase 5: 產出
+**預設（無參數）**：在對話中產出需求摘要，不寫檔案。用戶可直接接 `/execution-plan`。
 
-**預設（無參數）**：在對話中產出規格摘要，不寫檔案。用戶可直接接 `/execution-plan`。
+**`--write`**：寫入 `ai-analysis/specs/{feature-name}-spec.md`。適用於換 session 時傳遞 context。
 
-**`--write`**：寫入 `ai-analysis/specs/{feature-name}-spec.md`。適用於：
-- 換 session 時傳遞 context
-- 需要跨 session 協作
-
-**`--research-only`**：只做 Phase 1-2，產出研究報告（對話中或寫入）。不進 UC 定義。適用於：
-- 「先研究看看，還沒確定要做」
-- 技術選型前的可行性調查
-
-**規格摘要格式**（`--write` 時使用，向後相容 EP 輸入）：
+**需求摘要格式**：
 
 ```markdown
-## 規格摘要
-### 目標 / User Story / 核心功能 / 技術約束
-### UC 引用
-- 新增：[能力描述]（📋）
-- 更新：[能力描述]（描述更新）
-### 現有基礎設施
-- `ClassName` — 用途簡述
-### 已驗證假設（含 POC 結果）
-| 假設 | 風險 | 驗證方式 | 結果 |
-|------|------|---------|------|
-### 技術決策 / 成功條件 / 邊界
+## 需求摘要
+### 目標 / User Story
+### UC 定位
+- [能力描述]（📋 新增 / 更新既有）
+### Scenario Matrix
+### 邊界（Always / Ask First / Never）
+### 成功條件
 ```
 
-此摘要直接作為 `/execution-plan` 的輸入。
-
----
-
-## 與 /ep-validate 的分工
-
-| | /spec Phase 3 | /ep-validate |
-|--|---------------|-------------|
-| 時機 | EP 之前 | EP 之後 |
-| 深度 | 可行性驗證（能不能做） | 深度驗證（效能、邊界、壓力） |
-| 範圍 | 2-3 個關鍵假設 | EP 所有段落的假設 |
-| 產出 | `poc/poc_*.py`（build+commit 後清除） | EP 回寫 + `poc/poc_*.py` |
+> 此摘要作為 `/execution-plan` 的需求層輸入。EP 自足——有 spec 則引用其 UC/SM，沒有則 EP 自己產。
 
 ---
 
 ## 流程位置
 
 ```
-/spec（含 UC 定義 + POC 可行性驗證）→ /execution-plan（含 EP Review）→ [/ep-validate] → /build（含 Agent Review + UC 更新）→ /code-review → /commit
+/spec（純輔助·需求釐清，可選）→ /execution-plan（自足：全域研究 + UC盤點 + SM + 段落）→ [/ep-validate] → /build → [/code-review] → /commit
 ```
+
+> spec 是需求釐清（人類在 EP 前澄清意圖）；EP 是實作規劃（機器自足）。全域研究、前期 POC、UC 盤點建卡都在 EP——spec 不做這些。

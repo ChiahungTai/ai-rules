@@ -191,7 +191,9 @@ The spec is a living document, not a one-time artifact:
 
 ## POC Verification Mode
 
-When `/spec` identifies high-risk technical assumptions, validate them with POCs **before** writing the spec output. This is a lightweight feasibility check — not the deep validation that `/ep-validate` performs post-EP.
+> **定位**：本 skill 是通用 spec-first 方法論（specify→plan→tasks→implement），非 ai-rules `/spec` 命令專屬。ai-rules `/spec` 命令現為純需求釐清（User Story + UC + Scenario Matrix + 邊界），**不做 POC**——ai-rules 流程裡，前期可行性 POC 在 `/execution-plan` 段落驗證策略、深度驗證在 `/ep-validate`。下方 POC 方法適用於通用 spec 場景（非 `/spec` 命令職責）。
+
+When a spec identifies high-risk technical assumptions, validate them with POCs. This is a lightweight feasibility check (can it be done?) — not the deep validation that `/ep-validate` performs post-EP.
 
 ### Risk Classification
 
@@ -226,7 +228,7 @@ Results feed into the spec's "Verified Assumptions" section and carry forward to
 
 ### Relationship with /ep-validate
 
-`/spec` POC 做可行性驗證（能不能做），`/ep-validate` 做深度驗證（效能、邊界、壓力）。完整分工表格見 `/spec` 和 `/ep-validate` 命令。
+可行性 POC（能不能做）在 `/execution-plan` 段落驗證策略；`/ep-validate` 做深度驗證（效能、邊界、壓力）。ai-rules `/spec` 命令現為純需求釐清，不做 POC。
 
 ## Verification
 

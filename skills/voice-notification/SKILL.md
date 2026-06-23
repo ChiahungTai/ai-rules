@@ -1,6 +1,6 @@
 ---
 name: voice-notification
-description: 語音通知規範 — 任務完成或狀態變更時用 macOS say 命令通知用戶。三模式（預設/精簡/安靜）可切換。適用耗時的實作/審查/分析任務（build/deep-work/code-review/spec 等）；不適用快速查詢/建議。觸發詞：語音通知、任務完成通知、語音模式、通知用戶、say。
+description: 語音通知規範 — 任務完成或狀態變更時用 macOS say 命令通知用戶。三模式（預設/精簡/安靜）可切換。適用耗時的實作/審查/分析任務（build/deep-work/code-review/execution-plan 等）；不適用快速查詢/建議。觸發詞：語音通知、任務完成通知、語音模式、通知用戶、say。
 allowed-tools: [Bash]
 ---
 
@@ -24,7 +24,7 @@ allowed-tools: [Bash]
 
 - **實作任務**：`/build`、`/deep-work`、功能開發、重構
 - **審查任務**：`/code-review`、`/ep-review`、`/ep-validate`、`/judge-review`、`/followup-review`
-- **分析任務**：`/spec`、`/execution-plan`
+- **分析任務**：`/execution-plan`
 - **文檔處理**：`/claude:distill`、`/claude:sync`、`/consistency`
 
 ### ❌ 不適用（不需要語音通知）
