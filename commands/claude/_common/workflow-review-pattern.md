@@ -252,4 +252,4 @@ Workflow 路徑和 Agent tool 路徑**共存不互斥**：
 - 命令文件中 Agent tool 指令標記為「Agent Tool 模式（Fallback）」
 - Workflow 指令標記為「Workflow 模式（Ultracode）」
 - 分支點在 effort level 偵測
-- Agent Tool Fallback 的完整邏輯（2-perspective review）見 [agent-review-cycle.md](./agent-review-cycle.md)
+- Agent Tool Fallback 的完整邏輯（3-perspective review）見 [agent-review-cycle.md](./agent-review-cycle.md)

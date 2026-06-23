@@ -63,7 +63,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 5 個 Dimensio
 
 **Agent Tool 模式**（Fallback；review 執行預設 force 獨立、不走 Main LLM —— 見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」；判定條件同見 review-engine）：
 
-單一 Explore agent 做所有 5 維度（ep-review 特有配置，非 code-review 的 2-perspective）。印出確認：`[EP Review Mode] effort=standard, workflow=false`
+單一 Explore agent 做所有 5 維度（ep-review 特有配置，非 code-review 的 3-perspective）。印出確認：`[EP Review Mode] effort=standard, workflow=false`
 
 ---
 

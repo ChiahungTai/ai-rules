@@ -71,6 +71,15 @@ INVARIANTS = [
                 "反覆性，靠機械閘門根治）。單向：只抓 missing；dead entry（舊名殘留）因 settings 含 "
                 "commands/built-in/plugin 需分類不抓，危害僅 noise 且 rename 必伴隨 missing 觸發修復。",
     },
+    {
+        "id": "base_perspective",
+        "type": "source_contains",
+        "source": "skills/review-engine/SKILL.md",
+        "must_contain_any": ["預設 3 agent", "3-perspective"],
+        "note": "review-engine base 點 4 定義 3-perspective（clean/UC/Correctness）為單一源 —— "
+                "防未來 drift 回 2-perspective。消費者反向（活躍文檔 rg 2-perspective 應 0 hits）"
+                "靠 rg + EP Review 兜底（消費者引用形態不一，機械反向 check 留未來）",
+    },
 ]
 
 
@@ -175,12 +184,26 @@ def check_coverage(inv: dict) -> list[tuple[str, str, str]]:
     ]
 
 
+def check_source_contains(inv: dict) -> list[tuple[str, str, str]]:
+    """source 檔必須含 must_contain_any 之一（定義源自身驗證，防 drift 回非預期值）。"""
+    if inv.get("type") != "source_contains":
+        return []
+    src = REPO_ROOT / inv["source"]
+    if not src.exists():
+        return [(inv["id"], "important", f"source 檔不存在: {inv['source']}")]
+    if not any(t in read_text(src) for t in inv["must_contain_any"]):
+        return [(inv["id"], "critical",
+                 f"{inv['source']} 缺少定義源應含的: {inv['must_contain_any']} —— drift 回非預期值？")]
+    return []
+
+
 def main() -> int:
     findings: list[tuple[str, str, str]] = []
     for inv in INVARIANTS:
         findings += check_enforced_by(inv)
         findings += check_classification(inv)
         findings += check_coverage(inv)
+        findings += check_source_contains(inv)
 
     crit = [f for f in findings if f[1] == "critical"]
     imp = [f for f in findings if f[1] == "important"]

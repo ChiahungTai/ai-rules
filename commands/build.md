@@ -149,7 +149,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./claude/_common/workflow-r
 ### 階段 4：Agent Review Cycle
 
 **Writer/Reviewer 分離**：用獨立 Agent context 做品質閘門，避免主 LLM 審查自己的 code。
-review 執行預設（force 獨立 / max-agents 預設 3 / model inherit / 2-perspective）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」—— 本段僅定義 build 特有流程。**2-perspective**（① clean + ② UC-anchored，多樣性 > 數量）完整設計見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
+review 執行預設（force 獨立 / max-agents 預設 3 / model inherit / 3-perspective）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」—— 本段僅定義 build 特有流程。**3-perspective**（① clean + ② UC-anchored + ③ Correctness，多樣性 > 數量）完整設計見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
 
 #### Step 1: 確認 max-agents
 
@@ -164,20 +164,20 @@ review 執行預設（force 獨立 / max-agents 預設 3 / model inherit / 2-per
 
 **A. Workflow 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 
-用 Workflow tool 協調 2-perspective（① clean + ② UC-anchored；perspective 定義 + prompt 見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)）；腳本骨架、DimensionVerdict schema、adversarial verify 見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)。
+用 Workflow tool 協調 3-perspective（① clean + ② UC-anchored + ③ Correctness；perspective 定義 + prompt 見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)）；腳本骨架、DimensionVerdict schema、adversarial verify 見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)。
 
 | Workflow Phase | 說明 | Agent 數量 |
 |----------------|------|-----------|
-| Review | 平行 spawn 2 perspective agents | ≤ max-agents |
+| Review | 平行 spawn 3 perspective agents（max-agents<3 時依 [agent-review-cycle](./claude/_common/agent-review-cycle.md) 降級序：Correctness > clean > UC） | ≤ max-agents |
 | Verify | Critical findings → 3 verifier + ≥2/3 quorum | 3 × critical findings |
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-review」步驟（現有流程不變）。
 
-**B. Agent Tool 模式**（Fallback，非 Workflow 條件 = max-agents=1 或非 ultracode）：build 的 Agent Review force 獨立 agent、不走 Main LLM（review 執行預設 + 刻意覆蓋通用判定，見 [review-engine](../skills/review-engine/SKILL.md)）。2-perspective（① clean + ② UC-anchored）完整流程見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
+**B. Agent Tool 模式**（Fallback，非 Workflow 條件 = max-agents=1 或非 ultracode）：build 的 Agent Review force 獨立 agent、不走 Main LLM（review 執行預設 + 刻意覆蓋通用判定，見 [review-engine](../skills/review-engine/SKILL.md)）。3-perspective（① clean + ② UC-anchored + ③ Correctness）完整流程見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
 
 #### adaptive 觸發映射（extra agent 機械觸發）
 
-base ① clean + ② UC-anchored 之外，extra agent 由**段落風險特徵機械觸發**（非 LLM 語義判「高風險」）。映射框架定義見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」點 5；build 提供 adapter 信號翻譯成通用特徵：
+base ① clean + ② UC-anchored + ③ Correctness 之外，extra agent 由**段落風險特徵機械觸發**（非 LLM 語義判「高風險」）。映射框架定義見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」點 5；build 提供 adapter 信號翻譯成通用特徵：
 
 | build 既有信號 | review-engine 通用特徵 | 觸發 extra agent |
 |------------------|----------------------|-----------------|
@@ -191,7 +191,7 @@ base ① clean + ② UC-anchored 之外，extra agent 由**段落風險特徵機
 
 **cap + 優先序**：extra 受 max-agents cap + 優先序（見 review-engine 點 5：architecture > adversarial/edge > consumer-perspective）；多特徵命中 + cap 不足時依序取最高，截斷其餘並輸出截斷提示：
 
-> ⚠️ cap 截斷：max-agents=N，base 佔 2，僅 (N-2) extra 額度。命中 [特徵清單]，取 [最高優先 agent]，其餘 [被截斷 agent] 截斷 — 建議提高 `--max-agents` 或跑 `/code-review` 補截斷軸。
+> ⚠️ cap 截斷：max-agents=N，base 佔 3，僅 (N-3) extra 額度。命中 [特徵清單]，取 [最高優先 agent]，其餘 [被截斷 agent] 截斷 — 建議提高 `--max-agents` 或跑 `/code-review` 補截斷軸。
 
 #### 主 LLM — /judge-review
 
@@ -200,6 +200,19 @@ base ① clean + ② UC-anchored 之外，extra agent 由**段落風險特徵機
 #### 主 LLM — Apply Changes
 
 根據 judge-review 的 ✅ 採納清單修改 code。修改完跑 `ruff check --fix && ruff format`。
+
+#### loop 迭代收斂（Loop engineering — apply 後 re-review）
+
+apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）：apply 修正可能引入新問題或舊 finding 未修對 → re-review 確認。
+
+1. **re-review**（同 base 3-perspective）審 apply 後的 diff
+2. **pass 判定**：re-review findings **再 invoke /judge-review**（非主 LLM 自判，保 Writer/Reviewer 分離）
+3. judge-review 有新 ✅ 採納 → 再 apply → re-review（迭代）
+4. **收斂條件**：judge-review 無新 ✅ 採納（pass）或**達迭代上限 3 輪**（防無限 loop）
+
+**達上限硬性處置**（loop 未收斂）：標 ⚠️「loop 未收斂（達 3 輪上限，仍有未修 finding）」+ **阻止 Capabilities/Kanban 升級**（階段 5 / `/commit` 升級條件加「loop 須收斂」）+ **layer 旗標導向 layer 2**（階段 6 layer 旗標條件加「loop 未收斂」）。
+
+> **Loop engineering 邊界**：build 內 loop（base 3-perspective 補 Correctness lens 後）收斂「視角覆蓋內」的錯（邏輯邊界、語意、結構）；**同 session 盲點類**（設計假設、系統性偏誤）loop 結構性抓不到 → 階段 6 layer 旗標導向 layer 2（loop 外部收斂）。不假裝 build loop 全閉環。
 
 ### 階段 5：收尾步驟（EP 強制）
 
@@ -218,7 +231,7 @@ base ① clean + ② UC-anchored 之外，extra agent 由**段落風險特徵機
 1. **讀取 SYSTEM-MAP.md**（如果存在於專案根目錄）
 2. **定位受影響的功能區塊**：根據本次更新的能力描述，找到 SYSTEM-MAP.md 中引用這些能力的功能
 3. **更新功能生命週期狀態**：
-   - 所有引用 UC 都 ✅ 且測試通過 → 功能狀態升級（✅→✅🔍 或 📋→✅ Built）
+   - 所有引用 UC 都 ✅ 且測試通過**且 build loop 已收斂**（階段 4 未達迭代上限）→ 功能狀態升級（✅→✅🔍 或 📋→✅ Built）；loop 未收斂（達 3 輪上限）→ **阻止升級** + 標 ⚠️
    - 有已知問題或未驗證 → 標記 ⚠️ 並附說明
    - 移除已修復的 ⚠️ 標記
 4. **更新全域狀態統計**（如果文件尾端有統計表）
@@ -239,7 +252,7 @@ base ① clean + ② UC-anchored 之外，extra agent 由**段落風險特徵機
 
 輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + 能力狀態變更摘要 + SYSTEM-MAP 功能狀態變更 + /audit-test 稽核結果
 
-**layer 旗標（硬性 — commit 前方向提示）**：偵測本 EP 變更是否觸及**跨模組**（`git diff --name-only` top-level 模組目錄計數 ≥2；模組目錄 = 專案 bounded context 根目錄，各專案自訂）、**公開簽名變更**（階段 2 路徑覆蓋觸發）、或**整合器段落**（階段 0 標記）。命中 → 完成報告必含：
+**layer 旗標（硬性 — commit 前方向提示）**：偵測本 EP 變更是否觸及**跨模組**（`git diff --name-only` top-level 模組目錄計數 ≥2；模組目錄 = 專案 bounded context 根目錄，各專案自訂）、**公開簽名變更**（階段 2 路徑覆蓋觸發）、**整合器段落**（階段 0 標記）、或 **build loop 未收斂**（階段 4 達 3 輪上限）。命中 → 完成報告必含：
 
 > ⚠️ 本 build 僅 layer 1（AI 自洽天花板）。此變更觸及 [跨模組/公開簽名/外部整合]，**建議跑跨 session `/code-review`（layer 2）** 抓全貌漣漪 / 同 session 盲點（段落自檢 + Agent Review 都是 layer 1，看不全跨模組 ripple）。
 

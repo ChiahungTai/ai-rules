@@ -14,6 +14,9 @@ Six-axis review with quality gates. Every change gets reviewed before merge — 
 ## The Six-Axis Review
 
 ### 1. Correctness
+
+> **lens vs checklist 邊界**：Correctness **lens**（base perspective，所有 review 共用的視角）定義在 [review-engine](../review-engine/SKILL.md) 點 4 ③；本段是 **checklist**（what to check 細節，profile 層）。
+
 - Matches spec/task requirements?
 - Edge cases handled (null, empty, boundary values)?
 - Error paths handled (not just happy path)?
