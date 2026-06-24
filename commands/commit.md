@@ -135,7 +135,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 **大型/中型變更時執行，小型變更跳過。**
 
-> **核心原則**：顯式收尾三件（Capabilities + Kanban + SYSTEM-MAP）+ EP 歸檔是「metadata finalization」，只在用戶確認 commit 時才執行（對齊 [ai-development-guide](../ai-development-guide.md) 三層文件體系：CLAUDE.md Capabilities / SYSTEM-MAP / .kanban）。此類永久狀態更新不在 `/build` 執行（build 可能不 commit）。Kanban 搬至 InProgress/（暫時狀態）已在 `/build` 階段 1 完成。
+> **核心原則**：顯式收尾三件（Capabilities + Kanban + SYSTEM-MAP）+ EP 歸檔是「metadata finalization」，只在用戶確認 commit 時才執行（對齊 [ai-development-guide](../ai-development-guide.md) 文檔體系：CLAUDE.md Capabilities / SYSTEM-MAP / .kanban）。此類永久狀態更新不在 `/build` 執行（build 可能不 commit）。Kanban 搬至 InProgress/（暫時狀態）已在 `/build` 階段 1 完成。
 
 1. 識別變更涉及的 library 模組目錄
 2. 檢查該模組 CLAUDE.md Capabilities 表格和 .kanban/ 卡片：是否有 UC 狀態需要更新？
@@ -144,6 +144,8 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
    - **Kanban 卡片搬移**：已完成 UC 的卡片從 active lane 移至 Done/
    - **消費場景寫入**：從 `/build` 提煉的消費場景寫入 Capabilities 備註或 Kanban card
    - **SYSTEM-MAP 狀態更新**：消費專案有 SYSTEM-MAP.md 就顯式更新受影響功能生命週期狀態（ai-rules 元專案無 SYSTEM-MAP，正當跳過）
+   - **architecture.md 更新（條件，非 atomic）**：本次涉及設計決策/原則/模組結構/新抽象層變更時，同步更新 architecture.md（純 feature 不改設計則跳過）。與 atomic 三件平行，不進原子操作那句 — atomic 守 status 一致性，architecture.md 與之無原子相依
+   - **導航文檔 /consistency 閘門**：本次動過 CLAUDE.md / architecture.md / SYSTEM-MAP.md 任一者，commit 前對動過的文檔逐一跑 `/consistency`（應於 `/build` 階段 5e 已跑；此處僅複驗 commit 階段才新增的 Capabilities 行等變更）。導航文檔任一份內部不自洽即誤導 LLM（見 [ai-development-guide](../ai-development-guide.md) 文檔體系）
    - **原子操作**：Capabilities 新增 + Kanban 卡片移動 + SYSTEM-MAP 更新必須同時完成
 4. 用戶確認後，在 commit 前**執行上述操作**（修改 CLAUDE.md + mv 卡片）
 5. **EP 歸檔**：如果本次 commit 是 EP 的最後一個段落（所有段落都已 commit），自動執行歸檔：

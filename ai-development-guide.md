@@ -53,12 +53,16 @@
 
 > **核心原則**：CLAUDE.md Capabilities 記錄已完成能力（✅），.kanban/ 追蹤待辦與進行中任務（📋/🔧）。所有功能開發以 UC（Use Case）定義為前置條件。能力描述和入口路徑是索引鍵。
 
-### 三層文件體系
+### 文檔體系
+
+`CLAUDE.md` 每次 session auto-load；`architecture.md` / `SYSTEM-MAP.md` / `dependency-graph.md` 內容大，用 markdown link on-demand 讀（**不 `@` transclude**，避免撂爆 CLAUDE.md — 機制見 [claude-writing.md](~/.claude/rules/claude-writing.md)「長文件按需指引」）：
 
 | 文件 | 角色 | 時間視角 |
 |------|------|---------|
-| `CLAUDE.md` Capabilities | 已完成能力索引（按模組組織） | 永久 |
-| `SYSTEM-MAP.md` | 跨域功能狀態總覽（按工作流組織） | 現在 |
+| `CLAUDE.md` | 導航 + 已完成能力索引（what / where） | 永久 |
+| `architecture.md` | 設計決策 / whole-picture（why）— 有此檔才適用 | 永久 |
+| `SYSTEM-MAP.md` | 跨域功能狀態總覽（status） | 現在 |
+| `dependency-graph.md` | 跨模組依賴 / ripple 風險地圖 | 現在 |
 | `.kanban/` | 任務追蹤（Kanban lanes） | 暫時（Done/ 歸檔） |
 
 **UC 生命週期**：📋（/execution-plan → Backlog card，UC盤點自動建卡）→ 🟡（/build → InProgress）→ ✅（/commit → Capabilities + Done）
