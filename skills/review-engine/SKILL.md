@@ -17,7 +17,7 @@ review 命令家族的 **domain 層**：跨 ep-review / code-review / audit-test
 |----|--------------------------|------|
 | [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md) | **方法論 + 判定規則**（嚴重度意義、信心水準、自證、為何分離、審查模式判定規則） | **Workflow 執行**：DimensionVerdict schema、兩階段腳本、Finding Record 持久化（判定規則 → 決定讀哪個 schema，依賴方向非耦合） |
 | [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md) | （不重疊） | **Agent Tool 模式執行範本**（3-perspective） |
-| [arch-thinking](../arch-thinking/SKILL.md) / [arch-viewport](../arch-viewport/SKILL.md) | **依賴**它們（架構審查需要視角/機械） | 提供架構視角/機械能力 |
+| [arch-thinking](../arch-thinking/SKILL.md) | **依賴**它（架構審查需要視角/機械） | 提供架構視角/機械能力 |
 | audit-test 三層驗證鏈 | 通用 why（各層都可能錯） | **具體 audit→judge→followup 鏈細節**（test 講最細，留 audit-test） |
 
 **不裝**（留各 adapter）：維度定義（各 profile 自訂）、產出動作（回寫 EP / commit message / 報告）、stance（audit「偵測器非判官」）、Workflow schema/腳本（留 workflow-review-pattern）。
@@ -171,4 +171,4 @@ review finding 可經多層驗證，**各層都可能錯**：
 - **ep-review / execution-plan EP Review / build Agent Review**：總用獨立 agent（Workflow / Agent Tool），**刻意不走 Main LLM** —— 內建流程的強制品質閘門（Writer/Reviewer 分離）
 - **audit-test**：不經模式判定（read-only 單一 agent 偵測，不做平行審查）
 
-維度知識（架構視角/機械）依賴 arch-thinking + arch-viewport，非本 skill 包含。
+維度知識（架構視角/機械）依賴 arch-thinking，非本 skill 包含。

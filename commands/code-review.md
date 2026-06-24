@@ -65,7 +65,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 |----------|---------|---------|--------|
 | Correctness | 邏輯 bugs、邊界案例、測試充分性 | **always** | P0 |
 | Readability & Simplicity | 命名、控制流、避免過早抽象 | **always** | P0 |
-| Architecture（axis 3，調用 arch-viewport skill） | 設計模式、模組邊界、重用、dep weight | 變更 ≥ 3 files | P1 |
+| Architecture（axis 3，調用 arch-thinking skill） | 設計模式、模組邊界、重用、dep weight | 變更 ≥ 3 files | P1 |
 | Security | 輸入驗證、權限檢查 | diff 含 HTTP/auth/credential | P1 |
 | Performance | N+1、無界操作 | 變更 ≥ 5 files | P2 |
 | Capability Coverage | Capabilities 行為覆蓋 | 大型/中型變更 | P2 |
@@ -78,7 +78,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 - `git diff` 範圍
 - 該軸的檢查項目清單（如上表）
 - 相關檔案路徑（必讀）
-- 方法論引用（code-review-and-quality；Architecture 軸引用 arch-viewport + arch-thinking；Security 軸額外引用 security-and-hardening）
+- 方法論引用（code-review-and-quality；Architecture 軸引用 arch-thinking（視角+機械）；Security 軸額外引用 security-and-hardening）
 - rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
 - schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
@@ -104,7 +104,7 @@ Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mod
 
 **top-down 審查順序**：axis 3（Architecture，結構）先於細部正確性（Correctness 等）— 結構錯了正確性審白費。
 
-### axis 3：Architecture — 調用 [arch-viewport](../skills/arch-viewport/SKILL.md) skill
+### axis 3：Architecture — 調用 [arch-thinking](../skills/arch-thinking/SKILL.md) skill
 - **機器產 finding（A 軸）**：city map / dep weight / 重用枚舉 / LSP 查證，調用 skill 取結構資料 → 產 finding（變更融入既有結構？在重造？）
 - **受眾明文**：axis 3 與 `/illustrate` 用同一 skill，但 axis 3 產**機器 finding**（A 軸）、illustrate **渲染給人判讀**（B 軸）
 

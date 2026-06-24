@@ -55,7 +55,7 @@ INVARIANTS = [
         "commands": ["commands/illustrate.md", "commands/deliverable-review.md"],  # layer 3 人類 viewport
         "must_contain_any": ["layer 3", "人類 viewport", "B 軸", "受眾"],
         "note": "CLAUDE.md 分類為 layer 3 的命令本體必須自標受眾 —— 與 /code-review axis 3 "
-                "共用 arch-viewport skill 的消歧對稱（外部分類 + 命令不自知 = drift 溫床）",
+                "共用 arch-thinking skill 的消歧對稱（外部分類 + 命令不自知 = drift 溫床）",
     },
     {
         "id": "skill_allowlist_coverage",
