@@ -62,7 +62,7 @@
 | `CLAUDE.md` | 導航 + 已完成能力索引（what / where） | 永久 |
 | `architecture.md` | 設計決策 / whole-picture（why）— 有此檔才適用 | 永久 |
 | `SYSTEM-MAP.md` | 跨域功能狀態總覽（status） | 現在 |
-| `dependency-graph.md` | 跨模組依賴 / ripple 風險地圖 | 現在 |
+| `dependency-graph.md` | 跨模組依賴 / ripple 風險地圖 — maintain Phase 1.3 維護（非 /consistency 範圍） | 現在 |
 | `.kanban/` | 任務追蹤（Kanban lanes） | 暫時（Done/ 歸檔） |
 
 **UC 生命週期**：📋（/execution-plan → Backlog card，UC盤點自動建卡）→ 🟡（/build → InProgress）→ ✅（/commit → Capabilities + Done）
