@@ -57,6 +57,8 @@ extra agent 由**消費命令提供的段落風險特徵**機械觸發（非 LLM
 
 ## Agent Prompt
 
+> subagent prompt 遵循 [self-contained-prompt](../../../skills/self-contained-prompt/SKILL.md) 原則（本場景 = **同環境・審查型**：subagent 讀得到 repo，給路徑不嵌內容）。
+
 **三 agent 共含**：
 - `git diff` 範圍（所有產出的變更）
 - 相關檔案路徑（必讀）

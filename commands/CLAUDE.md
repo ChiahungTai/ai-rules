@@ -46,6 +46,7 @@
 - `/deep-work` — 用戶離開時的自主實作引擎
 - `/batch-task` — 序列批次任務處理器（避免 rate limit）
 - `/at` — 排程工作接續（對應 Unix `at`，LLM provider reset usage 後自動 resume）
+- `/handoff` — 產出 self-contained 交接 prompt（進度+決策脈絡+下一步），交另一個 session/repo/provider；與 /at 分工（handoff 交別人 / /at 自己續）
 
 ### 品質工具
 

@@ -53,6 +53,7 @@
 - `scan-project` — 統一專案知識掃描（imports + Capabilities + kanban → dep_graph / findings）
 - `context-engineering` — session 起始 / 品質退化 / 任務切換時的 context 與 rules 設置
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / Writer-Reviewer
+- `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
 
 ### 工具與查詢

@@ -12,6 +12,8 @@ allowed-tools: ["Read", "Write", "Bash", "Glob", "CronCreate", "CronDelete", "Cr
 
 適用 LLM provider usage reset 後自動接續。Terminal 需保持開啟。
 
+> **與 `/handoff` 分工**：本命令是「時間接續」（usage 用盡，**自己 resume**）；要把工作交給**另一個** session/provider 並行或接手，用 [`/handoff`](handoff.md)。
+
 ---
 
 ## 執行流程
