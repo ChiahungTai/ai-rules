@@ -1,6 +1,6 @@
 ---
 description: "Trunk-based worktree rebase：trunk 永不被 rebase，其餘方向（feature onto trunk / feature 互 rebase）由呼叫者決定"
-when_to_use: "Rebase a feature branch onto another branch (trunk or another feature); trunk is never rebased. Optionally sync other feature worktrees onto the same trunk. Use when rebasing worktrees around a single integration branch."
+when_to_use: "Rebase a feature branch onto another branch (trunk or another feature); trunk is never rebased. Report which other feature worktrees lag trunk and prompt to sync manually — never auto-rebase them. Use when rebasing worktrees around a single integration branch."
 usage: "/rebase <branch> [--autostash]"
 argument-hint: "<branch>（慣例 main） [--autostash]"
 allowed-tools:
@@ -43,7 +43,7 @@ git branch --show-current
 
 | 當前 = | `<branch>` 是 | 操作 |
 |--------|--------------|------|
-| **trunk**（慣例 `main`） | feature | `git merge --ff-only <branch>`（吸收步，鐵律 3）→ 結束 |
+| **trunk**（慣例 `main`） | feature | `git merge --ff-only <branch>`（吸收步，鐵律 3）→ Phase 3 報告 |
 | **feature** | 任意 branch（trunk 或另個 feature） | 進入 Phase 1 rebase 流程 |
 
 **當前 = trunk（吸收步）**：**不 rebase**（鐵律 2）。前置檢查：
@@ -56,7 +56,7 @@ git branch --show-current
 git merge-base --is-ancestor HEAD <branch>   # exit 0 = 當前（trunk）是 arg 祖先 = ff 可能
 ```
 
-- **exit 0** → `git merge --ff-only <branch>`，印 `✅ <current>: merge --ff-only <branch>`，**結束**（跳過 Phase 1-3；需同步其他 feature worktree → 另在該 worktree 跑 `/rebase main`）。
+- **exit 0** → `git merge --ff-only <branch>`，印 `✅ <current>: merge --ff-only <branch>`。吸收步不 rebase（跳過 Phase 1-2），但 **trunk 剛前進 → 進入 Phase 3** 報告其他 feature 落後狀態 + 提示自行同步。
 - **exit 1** → arg 尚未 rebase onto trunk；**不強制 merge**，提示「切到 `<branch>` worktree 跑 `/rebase main`（鐵律 3 step 1：feature 先 rebase onto trunk）」。
 
 > **方向記法**：`--is-ancestor A B` =「A 是 B 祖先」。要把 `<branch>` 併進 trunk，trunk 須落後 arg → 查 `--is-ancestor <trunk> <branch>`，**不是** `<branch> <trunk>`。
@@ -180,19 +180,33 @@ Rebase 成功後（無衝突或衝突已解決），檢查**非衝突區域**的
 3. 特別關注：import 改名、dataclass 欄位改名、函數簽名改名 — 這些會波及 git 認為「無衝突」auto-merge 的檔案
 4. 發現殘留 → 視同衝突，Read + 分析 + 用戶確認 + Edit 修正
 
-### Phase 3：同步其他 feature worktree（onto trunk）
+### Phase 3：報告其他 feature worktree 的 trunk 落後狀態（提示，不自動 rebase）
 
-Trunk 模型沒有 parent-child stack；多個 feature worktree 共用同一 `.git`，可選擇一併 rebase onto 同一 trunk。**只 rebase 非 trunk 的 feature worktree**（trunk 永不被 rebase，鐵律 2）。
+> **核心：方向由呼叫者決定**（呼應開頭鐵律）。Phase 3 **絕不自動 rebase 任何 worktree**。它只報告「哪些 feature 落後 trunk 多少」並提示你自行切過去 `/rebase <trunk>`。多 worktree 同步是你在 VSCode workspace 切換的決定，不是本命令的批次動作。
 
-1. **`git worktree list`** — 取得所有 worktree
-2. 對每個**非 trunk** 的 feature worktree：先 `git -C <path> status --porcelain` 確認狀態
-3. **Rebase onto trunk**：`git -C <path> rebase [--autostash] <branch>`（`<branch>` = trunk，批次同步用途；feature 互 rebase 不在此批次流程，由呼叫者針對性手動處理）；dirty 處理同 Phase 1（預設停下問 / `--autostash` 自動 stash）
+**觸發條件**（base 須 = trunk；base = feature 不觸發）：
 
-無其他 feature worktree → 跳過此階段。
+| 到達方式 | base | 報告對象 |
+|---------|------|---------|
+| 吸收步後（Phase 0 `merge --ff-only` 成功，trunk 剛前進）| arg（feature）已併入 trunk | **所有** feature wt（trunk 前進，每個 feature 都可能落後）|
+| feature onto trunk 後（Phase 2 成功）| trunk | **其他** feature wt（排除當前 —— 當前剛 rebase 完已在 trunk 上）|
 
-每步 rebase 後同 Phase 2 的結果處理（成功印出 / 衝突停下）。
+**不觸發**：base = feature（feature 互 rebase，Phase 2 的 base 是另一個 feature）→ **跳過整個 Phase 3**。這次是 feature 間依賴調整，與 trunk 基線同步無關，提示只會是噪音。
 
-> 要讓 feature 的工作**進 trunk**：Phase 2/3 只是把 feature rebase 到 trunk 之上（feature 變 trunk 後代）；最後在 trunk worktree 跑 `git merge --ff-only <feature>` 才真正推進 trunk（鐵律 3）。
+**報告步驟**（只讀，不 rebase）：
+
+1. `git worktree list` — 取得 feature wt（排除 trunk wt；報告對象見上表）
+2. 對每個報告對象 feature wt，查落後 trunk 量：
+   ```bash
+   git rev-list --count <feature>..<trunk>   # trunk 獨有、feature 沒有的 commit 數 = 落後量
+   ```
+3. 列出現狀 + 提示，**不執行任何 rebase**：
+   - 落後 > 0 → `⚠️ <feature> 落後 <trunk> N commits → 切到該 worktree 跑 /rebase <trunk>`
+   - 落後 = 0 → `✅ <feature> 已在 <trunk> 上`（可省略）
+
+無其他 feature worktree → 跳過。
+
+> 要讓 feature 的工作**進 trunk**：Phase 2 把 feature rebase 到 trunk 之上（feature 變 trunk 後代）後，在 trunk worktree 跑 `git merge --ff-only <feature>` 才真正推進 trunk（鐵律 3）。
 
 ### Phase 4：報告
 
@@ -203,10 +217,12 @@ Trunk 模型沒有 parent-child stack；多個 feature worktree 共用同一 `.g
 
 ### 結果
 ✅ replay: rebase onto main（5 commits replayed）
-✅ backbone: rebase onto main（3 commits replayed）  [Phase 3 同步其他 feature]
+
+### 其他 feature（Phase 3 報告，未自動同步）
+⚠️ backbone 落後 main 3 commits → 切到 backbone worktree 跑 /rebase main
 
 ### 總結
-2/2 成功，0 衝突
+1/1 成功，0 衝突（backbone 待你手動同步）
 ```
 
 ---
@@ -231,7 +247,7 @@ Trunk 模型沒有 parent-child stack；多個 feature worktree 共用同一 `.g
 
 - 必須先確認當前分支和工作目錄狀態
 - 必須當前 worktree clean 才能 rebase（帶 `--autostash` 例外：dirty 由 git 自動 stash/pop）
-- 同步其他 feature worktree 前，每個必須先確認狀態（同 `--autostash` 例外）
+- Phase 3 僅報告其他 feature 落後狀態，**不執行 rebase** —— 無需在此確認其他 worktree clean（要同步由你切到該 worktree 自行跑 `/rebase`，屆時各自做 clean 檢查）
 - 必須使用 `git -C <path>` 操作跨 worktree，禁止 `cd`
 - 衝突時必須分析雙方變更意圖，提出解決方案，等用戶確認後才執行
 - 未經用戶確認不得執行 `git rebase --continue`
@@ -244,6 +260,7 @@ Trunk 模型沒有 parent-child stack；多個 feature worktree 共用同一 `.g
 - ❌ 跳過 clean 檢查直接 rebase
 - ❌ **未先 `git branch --show-current` 分流 arg 角色就動作**（本命令最常見誤判：假設 arg 一律是 trunk）
 - ❌ **當前 = trunk 卻跑 `git rebase`**（鐵律 2；trunk 用 `merge --ff-only` 吸收）
+- ❌ **Phase 3 自動 rebase 其他 feature worktree**（方向由呼叫者決定；Phase 3 只報告 + 提示，同步由你切到該 worktree 自行 `/rebase`）
 
 ---
 
@@ -257,14 +274,14 @@ git reflog show <branch> --format="%h %gD: %gs" | head -10
 git reset --hard <pre-rebase-commit>
 ```
 
-⚠️ 如果 branch 已 push 過，回復後需要 `git push --force-with-lease` 同步 remote。同步多個 feature worktree 時，被 push 過的每個都需要 force push。
+⚠️ 如果 branch 已 push 過，回復後需要 `git push --force-with-lease` 同步 remote。你手動同步多個 feature 後若要回復，被 push 過的每個都需要 force push。
 
 ---
 
 ## 流程位置
 
 ```
-/commit（--push / --rebase）→ /rebase <branch>（feature rebase，trunk 永不被 rebase；可選同步其他 feature onto trunk）
+/commit（--push / --rebase）→ /rebase <branch>（feature rebase，trunk 永不被 rebase；Phase 3 報告其他 feature 落後狀況 + 提示自行同步，不自動 rebase）
 ```
 
 獨立使用，通常在 commit 之後或每日開工前執行。
