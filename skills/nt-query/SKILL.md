@@ -57,7 +57,7 @@ Most real questions are **mixed** ("can NT do X, and how do I call it?") → run
 Use the symbol names from Step 2 (or the query) as seeds:
 
 - `workspaceSymbol "<Name>"`, or `documentSymbol` on the `.pyi` → locate the class/method
-- `hover` → signature. **Then `Read` the `.pyi` docstring** — stub signatures are often `Any`, but the docstring carries the precise types (stubs were generated from `.pyx` precisely to preserve these).
+- `hover` → signature. Stubs are now **cross-package-precise** — `hover`/`findReferences` give real types (`order() -> Order | None`, `Cache(CacheFacade)`) wherever the symbol's dependency has a deployed `.pyi`. Some remain `Any` — the generator couldn't resolve certain return types (e.g. `cache.mark_price() -> Any`; its docstring gives `MarkPriceUpdate | None`), plus the PyO3 layer. **Still `Read` the `.pyi` docstring** for semantics types can't express (behavioral notes, "X or None" intent).
 - `findReferences` / `incomingCalls` → who uses it
 
 NT `.pyi` sit next to the `.pyx`/`.so`; in a consumer repo they reach the LSP via `make sync-stubs`.
@@ -83,11 +83,17 @@ Before **writing down** any NT class / method / function name (in your notes, a 
 
 NT naming is often **asymmetric** (pending path is private `_update_margin_init`, filled path is public `update_positions`) — never assume a counterpart exists.
 
-## Fallback — LSP is blind / stubs stale
+## Fallback — LSP is blind / stub looks wrong
 
-If LSP can't resolve NT Cython symbols (`workspaceSymbol` empty, or `attr-defined` / `Unknown` on `Bar` / `Price` / `Quantity` / `InstrumentId`):
+**LSP can't resolve NT Cython symbols** (`workspaceSymbol` empty, `attr-defined` / `Unknown` on `Bar` / `Price` / `Quantity` / `InstrumentId`):
+→ stubs aren't synced to this repo's venv. Interim: `rg` the `.pyi` / `.pyx` directly. **Flag the user: run `make sync-stubs` in the consumer repo** (common cause: `uv sync` or an NT upgrade wiped the venv `.pyi`). Known recurring failure — don't struggle silently.
 
-→ **stubs are not synced.** Interim: `rg` the `.pyi` / `.pyx` directly. **Flag to the user: run `make sync-stubs` in the consumer repo** (common cause: `uv sync` or an NT upgrade wiped the venv `.pyi`). This is a known recurring failure — do not struggle silently.
+**LSP resolves but a type/signature looks wrong or a method is missing** (e.g. return should be `X | None` but isn't; `unknown import symbol`; method absent):
+→ the stub **content** is stale — not a sync issue. Fix fork-side in `<NT_REPO>`:
+- **Auto-gen stub** (most modules): regenerate — `uv run python scripts/lsp_stubs/generate_nt_stubs.py nautilus_trader/<mod>/<file>.pyx` → then `make sync-stubs` in consumer. **Don't hand-edit** (regen overwrites). If the generator itself is the limit (dependency lacks `.pyi` → stays `Any`; C-only `cdef` call artifact), that's a generator-evolution item — flag it, don't paper over with `# type: ignore`.
+- **Hand-written stub** (11: `model/{data,objects,identifiers}`, `trading/strategy`, `core/correctness`, `persistence/wranglers`, `indicators/{averages,momentum,trend,volatility,volume}`): hand-edit directly (they're audited for unmangled signatures).
+
+Which stub is which + the generator's precision rules (cross-package preservation, Optional-ize, elide): `<NT_REPO>/scripts/lsp_stubs/README.md`.
 
 ## Reference material
 

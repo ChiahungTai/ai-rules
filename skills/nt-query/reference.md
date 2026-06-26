@@ -24,7 +24,7 @@ This is the exact mistake: inferring a **capability ceiling** from one **impleme
 **Question:** "How does cache expose positions, and what does it return?"
 
 1. `LSP documentSymbol` on the cache `.pyi` (or `workspaceSymbol "positions"`) → locate `Cache.positions(...)`.
-2. `Read` the `.pyi` docstring of `positions` → real return type (stub signature may say `Any`; docstring carries the truth).
+2. `Read` the `.pyi` docstring of `positions` → element type (stub says `list`; the docstring gives `list[Position]` — collection element types still live in docstrings, not signatures).
 3. `rg "def positions" <NT_REPO>/nautilus_trader/cache/cache.pyx` → real filter logic / overloads the stub flattened.
 4. **Answer:** grounded in stub + source, not memory.
 
@@ -78,4 +78,4 @@ For any concept not seeded here, `Read <NT_REPO>/docs/concepts/CLAUDE.md` → th
 
 ## C. Why the stub layer needs this sequence
 
-NT core modules are `.pyx` compiled to `.so`; without the generated `.pyi`, pyright/LSP is **completely blind** to them (`workspaceSymbol` / `findReferences` miss). The `.pyi` restores vision, but stubgen-pyx flattens Cython types to `Any` in signatures — the **docstring** is where precise types survive. Hence the sequence: locate via `.pyi` → read docstring for types → `rg .pyx` only when you need the real internal structure. Skipping the docstring (trusting the `Any` signature) loses the type information the stub exists to provide.
+NT core modules are `.pyx` compiled to `.so`; without the generated `.pyi`, pyright/LSP is **completely blind** to them (`workspaceSymbol` / `findReferences` miss). The fork-maintained `.pyi` (regenerable via `scripts/lsp_stubs/`) restores vision. The generator now preserves **cross-package types precisely** (`order() -> Order | None`, real `Order`/`Position`/`Instrument`) — so for single-object returns, trust the signature. Two cases still need the **docstring**: (a) collection element types (stub says `list`/`dict`, docstring says `list[Position]`), and (b) return types the generator couldn't resolve (still `Any`, e.g. `cache.mark_price() -> Any` — its docstring gives `MarkPriceUpdate | None`). Hence the sequence: locate via `.pyi` → `hover` for the (now precise) signature → read docstring for collection elements / semantics → `rg .pyx` only for real internal structure.
