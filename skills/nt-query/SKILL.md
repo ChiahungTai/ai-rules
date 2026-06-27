@@ -1,7 +1,7 @@
 ---
 name: nt-query
-description: Query NautilusTrader (NT) correctly — docs-first for capability/concept, LSP-on-Cython-stubs for implementation. Use when investigating what NT supports ('NT 支援/能不能/能力/概念', multi-account, OMS, position 計算, accounting, value types, emulated orders) or where/how NT implements something (cache, model, execution, backtest config, 'NT symbol 在哪', BacktestEngine, TradingNode, Actor, on_bar, on_order_filled, submit_order). Prevents over-inferring a capability boundary from one source data structure.
-when_to_use: Fires when a consumer project's LLM investigates NautilusTrader — "does NT support X", "NT 能不能", "how does NT compute position", "where is X defined in NT", or when reading nautilus_trader/ source / .pyi stubs. Load BEFORE diving into NT source.
+description: Query NautilusTrader (NT) correctly — docs-first for capability/concept, LSP-on-Cython-stubs for implementation, designer-intent for usage contract. Use when investigating what NT supports ('NT 支援/能不能/能力/概念', multi-account, OMS, position 計算, accounting, value types, emulated orders), where/how NT implements something (cache, model, execution, backtest config, 'NT symbol 在哪', BacktestEngine, TradingNode, Actor, on_bar, on_order_filled, submit_order), or whether an NT API is safe to call in a given context (thread/loop/caller — '跨線程', node.run/stop/dispose, loop ownership, daemon thread). Prevents over-inferring a capability or usage boundary from one source data structure or method signature.
+when_to_use: Fires when a consumer project's LLM investigates NautilusTrader — "does NT support X", "NT 能不能", "how does NT compute position", "where is X defined in NT", "is it safe to call X from thread/loop Y" (usage contract — cross-thread node.stop/dispose, loop ownership, daemon thread), or when reading nautilus_trader/ source / .pyi stubs. Load BEFORE diving into NT source.
 ---
 
 # nt-query — Query NautilusTrader correctly
@@ -41,6 +41,7 @@ If you are working inside an NT worktree, `<NT_REPO>` is that worktree's root (i
 | **Capability / concept** | "does NT support…", "can NT…", "is X a hard limit", "NT 能力/概念/支援" | `docs/concepts/` **first** → Step 2 |
 | **Implementation / symbol** | "where is X", "signature of Y", "who calls Z", "NT symbol 在哪/實作" | **LSP on `.pyi`** → `.pyx` source → Step 3-4 |
 | **API contract** | "what params does X take" | `docs/api_reference/` OR `.pyi` + docstring → Step 3 |
+| **Usage contract / context** | "is it safe to call X from thread/loop Y", "can stop/dispose run cross-thread", "NT 跨線程 / loop ownership" | **Designer intent** → Step 2b |
 
 Most real questions are **mixed** ("can NT do X, and how do I call it?") → run the **capability path first**, then implementation.
 
@@ -51,6 +52,21 @@ Most real questions are **mixed** ("can NT do X, and how do I call it?") → run
 3. **The docs statement IS the answer.** If `accounting.md` says "multi-account venues", multi-account is supported — full stop.
 4. 🔴 **GATE — the failure this skill exists to prevent:** before concluding "NT can / cannot do X", you must hold **docs evidence** — an explicit statement, a `:::note`/`:::warning`, or a verified absence in the relevant concept doc. A source data structure is **not** evidence of a capability ceiling. If you only have a structure, stop and return to Step 2.1.
 5. **The GATE follows claims, not query type.** It applies to any "NT can / cannot / is X" statement wherever it appears — including a line dropped inside an overview or a casual answer, not only when you run a dedicated capability query. Overview framing does not suspend verification: a specific, falsifiable, fork-dependent claim needs docs / `<NT_REPO>` evidence even mid-sentence. "Probably right, I'll leave it" is not evidence — some unverified claims are already wrong, and you cannot tell which without grounding.
+
+## Step 2b — Usage-contract path (designer intent)
+
+"Method exists" ≠ "callable in any context." NT APIs — especially lifecycle (`node.run/stop/dispose`), threading, loop ownership, Actor registration timing — carry a **design contract** about *where/how* they're meant to be called. Violating it produces symptoms that look like "NT bug" but are contract violations (e.g. calling `node.stop()/dispose()` cross-thread while the loop runs in a daemon thread → `loop.stop()` interrupts `run_until_complete` → `RuntimeError("Event loop stopped before Future completed")`).
+
+**This is a third knowledge layer** — not docs/concepts (capability, Step 2), not stubs (implementation, Step 3). The source is **NT designer intent**:
+
+- **NT's own examples** (`<NT_REPO>/examples/live/**`): **mixed — don't generalize from one family.** Most (binance/bybit/dydx…) use main-thread `node.run()` block + SIGINT stop + `finally: node.dispose()`. But several IB examples (`connect_with_tws.py`, `with_databento_client.py`, `connect_with_dockerized_gateway.py`) call `node.stop()` from a `daemon=True` timer thread — and only get away with it because `stop()` swallows the resulting `RuntimeError` (see source bullet). **That swallowed error is the tell, not a sanction.**
+- **NT's own source** (`nautilus_trader/live/node.py:stop`, ~L381): `stop()` schedules via in-loop-only `loop.create_task(self.stop_async())`, wrapped in `try/except RuntimeError`. A cross-thread call hits `create_task` from the wrong thread → `RuntimeError` → silently swallowed by the except. **Stronger evidence than any example survey** (immune to the over-generalization above) and the real reason a cross-thread `stop` "doesn't crash."
+- **NT's own tests** (`<NT_REPO>/tests/live/**`): what usage does NT itself test?
+- **NT's own API choices**: when NT needs cross-thread scheduling, what does it use? (`asyncio.run_coroutine_threadsafe` is the sanctioned cross-thread API — NT uses it in `adapters/interactive_brokers/client/client.py`; `loop.create_task` is in-loop only. If NT never routes `stop` through `run_coroutine_threadsafe`, `stop` isn't designed for cross-thread call.)
+
+Combine with arch-thinking: loop/thread lifecycle is NT's internal (bounded context) — don't operate it from outside the owning thread.
+
+🔴 **GATE — same shape as the one rule:** before concluding "I can call X from context Y (thread/loop/caller)", hold designer-intent evidence — an example, a test, or NT's own API-choice pattern. A method's existence or signature is **not** evidence of usage safety. "It's a public method" = inferring usage from structure = the same anti-pattern this skill exists to prevent.
 
 ## Step 3 — Implementation path (LSP on the stub layer)
 

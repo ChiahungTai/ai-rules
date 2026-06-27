@@ -2,7 +2,7 @@
 
 Loaded on demand. `<NT_REPO>` is resolved in SKILL.md ("Locate the NT repo"). The full concept→doc→source map lives in `<NT_REPO>/docs/concepts/CLAUDE.md` (authoritative); this file adds (A) worked examples showing the exact tool sequence, and (B) common symbol seeds so you can `hover` immediately.
 
-## A. Worked examples — the four query shapes
+## A. Worked examples — the five query shapes
 
 ### Example 1 — Capability (the failure this skill prevents)
 
@@ -52,6 +52,21 @@ Read `_update_margin_init` in `nautilus_trader/accounting/manager.pyx` → see i
 5. **Answer:** native `portfolio.equity(venue)` is correct for CASH. The workaround retires — it used `balance_available = total − locked`, understating by `locked` whenever pending orders existed. Caveats: `equity()` returns `dict[Currency, Money]`; call `missing_price_instruments(venue)` if it understates.
 
 For the full account_type → 4-layers map, the two lifecycle paths, and gotchas (incl. the `margin_maint=0` silent trap), load [account-model.md](account-model.md).
+
+### Example 5 — Usage contract (designer intent: is calling X in context Y safe?)
+
+**Question:** "My TradingNode runs in a daemon thread. Can I call `node.stop()` / `node.dispose()` from the main thread to shut it down?"
+
+❌ **BAD path (over-conclusion from method signature):**
+`LSP hover` on `node.stop` → `stop(self) -> None` → "it's a public method, callable from anywhere" → call it cross-thread → intermittent `RuntimeError("Event loop stopped before Future completed")` that looks like an NT bug.
+
+This is the exact anti-pattern: inferring a **usage boundary** from a method signature. "Public method" ≠ "safe in any context."
+
+✅ **GOOD path (designer intent — examples + NT's own API choices + source):**
+1. `rg -n "Thread.*daemon" <NT_REPO>/examples/live/` → **mixed, don't generalize from one family**: most examples (binance/bybit) use main-thread `run()` + SIGINT; but IB examples (`connect_with_tws.py` etc.) DO call `node.stop()` from a daemon timer thread.
+2. NT's own cross-thread API choice: `rg "run_coroutine_threadsafe" <NT_REPO>/nautilus_trader/` → NT uses it (IB `client.py`) for cross-thread scheduling; `loop.create_task` is in-loop only. Does NT route `stop` through `run_coroutine_threadsafe`? No → `stop` isn't designed for cross-thread call.
+3. Confirm via source: `Read <NT_REPO>/nautilus_trader/live/node.py` (`stop`, ~L381) → schedules via in-loop-only `loop.create_task(self.stop_async())`, wrapped in `try/except RuntimeError` that **swallows** the error. A cross-thread call hits wrong-thread `create_task` → `RuntimeError` silently swallowed.
+4. **Answer:** No — `node.stop()/dispose()` are single-thread-contract APIs. IB examples "get away with it" only because the error is swallowed (that swallowed error is the tell, not a sanction). The shutdown race you see IS the contract violation. Fix = align to the contract (schedule stop in-loop via `loop.call_soon_threadsafe`, let `run()` return naturally, then `dispose()` when the loop is stopped) — not patch the symptom.
 
 ## B. Common concept → symbol seeds
 

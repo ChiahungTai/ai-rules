@@ -58,7 +58,7 @@
 
 ### 工具與查詢
 - `context7-mcp` — library / framework / API 文檔查詢（context7 MCP）
-- `nt-query` — NautilusTrader 能力 / 實作查詢（docs-first + LSP-on-Cython-stubs）
+- `nt-query` — NautilusTrader 能力 / 實作 / 用法合約查詢（docs-first + LSP-on-Cython-stubs + designer intent）
 - `mermaid` — pragmatism-first Mermaid 圖表生成
 - `rules-reminder` — 常被違反的 Bash 規則（rg/fd、無 `#`、`uv run`、無 `$` 展開）
 - `voice-notification` — 任務完成 macOS `say` 通知（三模式）
