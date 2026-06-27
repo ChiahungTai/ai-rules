@@ -147,7 +147,7 @@ uv run pytest <targets> -v --tb=short
 ## 禁止行為
 
 - ❌ 偷改 assertion 數值或字串讓測試通過（未理解契約變更就改 assertion = 盲目修復）
-- ❌ 用 `@pytest.skip`、`@pytest.mark.xfail` 壓制失敗
+- ❌ 用 `@pytest.skip`、`@pytest.mark.xfail`（非 strict）壓制失敗 — strict 釘住已知 bug 是 TDD red 機制（非壓制），見 [test-driven-development](../skills/test-driven-development/SKILL.md)
 - ❌ 放寬 assertion（`==` → `in`、移除檢查項、`assertAlmostEqual` 替代 `assertEqual`）
 - ❌ 改 test setup 繞過失敗路徑（改 fixture 只為了避開報錯的 code path）
 - ❌ 只改測試碼但不理解契約為什麼變了

@@ -139,6 +139,36 @@ EP（Execution Plan）的驗證策略是 TDD 的輸入。在 RED 階段按以下
 
 **關鍵**：EP 的驗證策略是 TDD 的「合約」— 如果 EP 說要測某個情境但沒測，等同段落在撒謊。
 
+## 已知 bug 釘住：xfail(strict=True)
+
+當發現一個 bug，但修復需要獨立 EP（超出當前段落範圍）— 用 `@pytest.mark.xfail(strict=True)` 釘住**目標行為**（斷言期望的正確行為，現在 fail），驅動後續 EP，修復後強制提醒轉綠。
+
+**與「未覆蓋風險 skip」（上方步驟 3）的區分**：
+
+| 情境 | 特徵 | 做法 |
+|------|------|------|
+| 未覆蓋風險 | 功能還沒做，**沒東西可測** | `skip` + TODO（步驟 3） |
+| 已知 bug、修復超出範圍 | 功能存在但壞，**有目標行為可釘** | `xfail(strict=True)` |
+
+**為什麼 xfail strict 優於 skip/TODO**：
+- `skip` = 不跑（無壓力、易遺忘、修復後無提醒）
+- `TODO` = 純文字（無強制力）
+- `xfail(strict=True)` = 跑且預期 fail；**修復後測試 pass → XPASS → 報失敗 → 強制移除 xfail → 測試成正式 regression guard**
+
+**範例**：
+
+```python
+@pytest.mark.xfail(
+    reason="TDD red — pins target: X should do Y. Currently red because Z. "
+           "Open as EP-X. strict=True surfaces XPASS when fixed.",
+    strict=True,
+)
+def test_x_should_do_y():
+    assert actual == expected  # target behavior, currently fails
+```
+
+**關鍵**：xfail 釘的是「該實現的正確行為」，不是「接受錯誤行為」。這是 TDD red 驅動後續 EP 的機制，避免目標被遺忘 — 優於「移除斷言默默接受」（用 crash-only 等設計哲學合理化不修，見 [quality-constraints](../../rules/quality-constraints.md) 誤用警告）。
+
 ## Verification
 
 After completing any implementation:

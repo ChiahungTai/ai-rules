@@ -94,6 +94,20 @@ def process_trading_data(data):
 - 需要保持連接的網路服務
 - 用戶體驗優先的交互式應用
 
+### 誤用警告：crash-only 不是「graceful 不修」的藉口
+
+> **核心原則**：crash-only 是 defense-in-depth 的**後備保證**，不是「graceful shutdown 故意不修」的合理化。
+
+**正確理解**：crash-only 處理「**不可預期的崩潰**」— 系統設計成即使意外崩潰，狀態外部化也能恢復。graceful shutdown 是理想，crash-only 確保它失敗時系統仍正確。
+
+**危險誤用**：把 crash-only 扭曲成「graceful 壞掉沒關係，反正能恢復」— 用設計哲學合理化跳過一個**真實可修的 bug**。這比一般 bug 更危險：披著「設計哲學」外衣，code review 難抓。
+
+**判準**：
+- graceful **意外**失敗（不可預期崩潰、極端情境）→ crash-only 後備保證職責 ✓
+- graceful **可預期地壞掉且可修**（整合 bug、配置錯誤、合約違反）→ 該修，**不可**用 crash-only 跳過 ✗
+
+**實例**：mosaic ReplayHost SIGTERM 在 daemon-thread 下 graceful shutdown 失敗（NT loop signal handler 衝突）。曾錯誤主張「crash-only 接受 graceful 不 work，只驗 signals persist」— 用 crash-only 跳過可修 bug。正解是 TDD red（xfail strict 釘住 graceful 目標，見 [test-driven-development](../skills/test-driven-development/SKILL.md)）+ 另開 EP 修復。
+
 ---
 
 ## 主動揭露錯誤（Fail Loud）
