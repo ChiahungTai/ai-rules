@@ -9,7 +9,7 @@ skills: ui-collab
 
 # Swing Analysis 協作模式
 
-> **🔴 mosaic 專屬**：本命令耦合 mosaic 專案的 Backbone Trajectory Viewer 與 `rule_forge` 符號，屬 `claude-writing.md` 的專案特定工具例外（同 `upgrade-nt`/`upgrade-sj` 類別），寄住 ai-rules 便於跨 worktree 共用。
+> **🔴 mosaic 專屬**：本命令耦合 mosaic 專案的 Backbone Trajectory Viewer 與 `alpha_forge` 符號，屬 `claude-writing.md` 的專案特定工具例外（同 `upgrade-nt`/`upgrade-sj` 類別），寄住 ai-rules 便於跨 worktree 共用。
 
 啟動 Backbone Trajectory Viewer 並監控 `[ACTION]` 操作日誌，讓 LLM 即時理解使用者 UI 操作上下文。
 
@@ -18,7 +18,7 @@ skills: ui-collab
 ## Phase 1：啟動 UI
 
 ```bash
-uv run python -u examples/rule_forge/demo_backbone_trajectory_viewer.py
+uv run python -u scripts/offline_analysis/run.py
 ```
 
 就緒信號：`[OK] load_data`
@@ -75,42 +75,25 @@ Merge 版本做了 anti-leakage shift：低頻資料的 datetime 往前推一根
 
 ```python
 from datetime import date
-from mosaic_alpha.rule_forge import PerStockDataPipeline
+from mosaic_alpha.alpha_forge import PerStockDataPipeline
 from mosaic_alpha.config.recipes import create_backbone_recipe, RecipePresets
-from mosaic_alpha.common.enums import CacheMode
 import polars as pl
 
 recipes = create_backbone_recipe(params=RecipePresets.BACKBONE_WATCHLIST)
-recipe = recipes[0]
-pipeline = PerStockDataPipeline()
-dataset = pipeline.build("2374", recipe)
+dataset = PerStockDataPipeline().build("2374", recipes[0])  # ⚠️ recipes 是 list，取 [0]
 
-# Merge 版本：所有 interval 的特徵合併到日線，帶 interval 前綴
-merged = dataset.get_features()
-
-# 欄位命名慣例：
-#   1d_rsi_6, 1d_sma_5_close  — 日線（即時，無 shift）
-#   1w_rsi_6, 1w_sma_5_close  — 週線（shift + forward fill）
-#   1mo_rsi_6, 1mo_sma_5_close — 月線（shift + forward fill）
-#   1d_prev1_structure, 1w_prev1_range_pct  — wave scalars
+merged = dataset.get_features()  # Merge 版本（anti-leakage）；欄位帶 interval 前綴 1d_/1w_/1mo_，wave scalars 為 1d_prev1_structure
 ```
 
 ### 查詢模式
 
 ```python
-# 過濾日期範圍（注意：datetime 是 datetime 型別，用 date() 非字串）
+# datetime 是 datetime 型別，filter 用 date() 非字串
 df = merged.filter(
     (pl.col("datetime") >= date(1999, 5, 1)) &
     (pl.col("datetime") <= date(1999, 7, 12))
 )
-
-# 選取多級別 RSI
 result = df.select(["datetime", "1d_close", "1d_rsi_6", "1w_rsi_6", "1mo_rsi_6"])
-
-# 範例輸出（5 月初）：
-# 1999-05-03 | 1d_rsi=31.8 | 1w_rsi=51.2 | 1mo_rsi=38.8
-# 1999-05-07 | 1d_rsi=53.5 | 1w_rsi=60.8 | 1mo_rsi=38.8
-#   ↑ 1w 在週五更新（shift 後），1mo 整月維持上個月值
 ```
 
 ### 注意事項
@@ -119,8 +102,8 @@ result = df.select(["datetime", "1d_close", "1d_rsi_6", "1w_rsi_6", "1mo_rsi_6"]
 - **欄位帶 interval 前綴**：merge 版本的欄位是 `1d_rsi_6`, `1w_rsi_6`, `1mo_rsi_6`（非原始的 `rsi_6`）
 - **Anti-leakage 語意**：`1w_rsi_6` 在某根日 K 上代表「上一根已完成的週線 RSI」，不是「當週即時 RSI」
 - **MLDataset 會被快取**：第一次 build 較慢，後續讀快取很快
-- **backbone recipe 日期範圍 1989-2016**：對應 `Experiment.early()`，7% 漲跌幅制度
-- **845 個欄位**：merge 後欄位很多，查詢時明確 select 需要的欄位，不要 `print(df)` 全部輸出
+- **backbone recipe 對應 `Experiment.early()`**：早期區間（7% 漲跌幅制度）
+- **merge 後欄位眾多**：查詢時明確 select 需要的欄位，不要 `print(df)` 全部輸出
 
 ## Phase 6：討論記錄
 

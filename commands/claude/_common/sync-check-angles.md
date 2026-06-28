@@ -187,7 +187,7 @@
 | 定位消費端文檔 | 消費端目錄是否有 CLAUDE.md 或相關 .md | `Glob` 搜尋 |
 | 檢查連鎖影響 | 消費端文檔是否引用了已變更的 API | `Read` + `rg` 比對 |
 
-**範例**：`rule_forge/` 的核心 class 變更 → 不只 `rule_forge/CLAUDE.md`，連 `examples/rule_forge/CLAUDE.md` 和引用該 API 的說明文檔也需要檢查同步性。
+**範例**：`<module>/` 的核心 class 變更 → 不只 `<module>/CLAUDE.md`，連 `examples/<module>/CLAUDE.md` 和引用該 API 的說明文檔也需要檢查同步性。
 
 ---
 
