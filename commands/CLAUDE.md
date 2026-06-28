@@ -39,7 +39,8 @@
 - `/code-review` — 深層思考六軸代碼審查（含 axis 3 結構 = arch 吸收，top-down；UC 覆蓋度）
 - `/deliverable-review` — 人類 viewport 交付軸（layer 3）：天才工程師向老闆 demo 完成的功能——product-type-aware（code: demo-checklist / docs: behavior delta），--ep 審 planned deliverable；方向 >> 品質，不做逐行正確性（交 /code-review）、不審結構（交 /illustrate 結構 viewport）
 - `/followup-review` — 審查者回頭驗收實作結果
-- `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → UC 狀態確認 → message → 確認）
+- `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → metadata finalization 委派 metadata-sync skill → message → 確認）
+- `/metadata-sync` — metadata finalization 獨立補漏入口（偵測漏掉的 Capabilities/Kanban/SYSTEM-MAP/arch/EP 歸檔/flow-feedback，確認後修補）；`/build`、`/commit` 委派同一 skill，漏了可重跑
 
 ### 自主實作
 

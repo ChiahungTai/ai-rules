@@ -83,7 +83,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 **commit 前檢查閘門**（與 2.5/2.6 同系列）。機械結算每個 POC/Demo 的去處，不靠 build LLM 自覺回頭看 —— 同 build「整合路徑覆蓋 rg 0 hits 就擋」的機械閘門模式，用「POC 不得無痕消失」倒逼測試覆蓋（預設改寫成 test，delete 須附證據）。
 
-**時序**：掃描+歸類在階段 3（Capabilities+Kanban）之前執行；處置清單隨階段 5 用戶確認一併確認；確認後在階段 6 commit 執行前，先跑已確認的處置（刪 poc/ 檔、歸併 demo）。
+**時序**：掃描+歸類在階段 3（metadata finalization）之前執行；處置清單隨階段 5 用戶確認一併確認；確認後在階段 6 commit 執行前，先跑已確認的處置（刪 poc/ 檔、歸併 demo）。
 
 掃描 `poc/**/*.py` + `demo_*.py`（rg glob，機械事實不可靜默跳過）：
 
@@ -120,7 +120,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 ### 階段 2.8：flow-feedback 歸檔識別
 
-**commit 前檢查閘門**（與 2.5/2.6/2.7 同系列）。識別本次 commit 解決了哪些 flow-feedback，標記隨 commit 歸檔到 `_done/`。與階段 3 的 EP 歸檔同屬 metadata finalization，但 **size-independent**——任何大小的 commit 都可能解決一筆 feedback。
+**commit 前檢查閘門**（與 2.5/2.6/2.7 同系列）。識別本次 commit 解決了哪些 flow-feedback，標記隨 commit 歸檔到 `_done/`。同屬 metadata finalization——**判斷 + mv 邏輯單一源於** [metadata-sync](../skills/metadata-sync/SKILL.md) skill（flow-feedback 歸檔項），本閘門保留 commit 前識別時序。**size-independent**——任何大小的 commit 都可能解決一筆 feedback（故獨立於階段 3 的大型/中型邊界）。
 
 掃描 `ai-analysis/flow-feedback/*.md`（root，glob 不含 `_done/` 內）：
 
@@ -131,28 +131,20 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 **判斷是 judgment 非機械**（feedback↔change 非 1:1，不像 EP↔段落明確）→ forgetting 風險靠**階段 5 可見清單**把關：to-archive 清單隨 commit 確認一併展示，用戶核對 AI 漏標沒。仍在 /flow-review 討論中、未決策的不歸檔（留 root，/flow-review 既有「defer → 留 feedback」規則）。
 
-### 階段 3：顯式收尾三件（Capabilities + Kanban + SYSTEM-MAP）
+### 階段 3：metadata finalization（commit mode）
 
 **大型/中型變更時執行，小型變更跳過。**
 
-> **核心原則**：顯式收尾三件（Capabilities + Kanban + SYSTEM-MAP）+ EP 歸檔是「metadata finalization」，只在用戶確認 commit 時才執行（對齊 [ai-development-guide](../ai-development-guide.md) 文檔體系：CLAUDE.md Capabilities / SYSTEM-MAP / .kanban）。此類永久狀態更新不在 `/build` 執行（build 可能不 commit）。Kanban 搬至 InProgress/（暫時狀態）已在 `/build` 階段 1 完成。
+> **核心原則**：metadata finalization（Capabilities + Kanban + SYSTEM-MAP + architecture.md + EP 歸檔 + consistency 閘門）是「永久狀態結算」，只在用戶確認 commit 時執行。**邏輯單一源於** [metadata-sync](../skills/metadata-sync/SKILL.md) skill（commit mode）——本階段 invoke 它，不在此重列細節（重構前自列邏輯與 `/build` 5b SYSTEM-MAP 雙處 drift）。此類永久狀態更新不在 `/build` 執行（build 可能不 commit）。Kanban 搬至 In-Progress/（暫時狀態）已在 `/build` 階段 1 完成。
 
-1. 識別變更涉及的 library 模組目錄
-2. 檢查該模組 CLAUDE.md Capabilities 表格和 .kanban/ 卡片：是否有 UC 狀態需要更新？
-3. 在 commit message 展示後，提示用戶確認以下操作：
-   - **Capabilities 更新**：在對應模組 CLAUDE.md 的 `## Capabilities` 表格新增 ✅ 行
-   - **Kanban 卡片搬移**：已完成 UC 的卡片從 active lane 移至 Done/
-   - **消費場景寫入**：從 `/build` 提煉的消費場景寫入 Capabilities 備註或 Kanban card
-   - **SYSTEM-MAP 狀態更新**：消費專案有 SYSTEM-MAP.md 就顯式更新受影響功能生命週期狀態（ai-rules 元專案無 SYSTEM-MAP，正當跳過）
-   - **architecture.md 更新（條件，非 atomic）**：本次涉及設計決策/原則/模組結構/新抽象層變更時，同步更新 architecture.md（純 feature 不改設計則跳過）。與 atomic 三件平行，不進原子操作那句 — atomic 守 status 一致性，architecture.md 與之無原子相依
-   - **導航文檔 /consistency 閘門**：本次動過 CLAUDE.md / architecture.md / SYSTEM-MAP.md 任一者，commit 前對動過的文檔逐一跑 `/consistency`（應於 `/build` 階段 5e 已跑；此處僅複驗 commit 階段才新增的 Capabilities 行等變更）。導航文檔任一份內部不自洽即誤導 LLM（見 [ai-development-guide](../ai-development-guide.md) 文檔體系）
-   - **原子操作**：Capabilities 新增 + Kanban 卡片移動 + SYSTEM-MAP 更新必須同時完成
-4. 用戶確認後，在 commit 前**執行上述操作**（修改 CLAUDE.md + mv 卡片）
-5. **EP 歸檔**：如果本次 commit 是 EP 的最後一個段落（所有段落都已 commit），自動執行歸檔：
-   - `mv ai-analysis/execution-plans/ep-xxx.md ai-analysis/execution-plans/_done/`
-   - **子目錄 EP**（如 `<task-group>/`，整脊曾用 `dev-process/`）：跨目錄 mv 到 `execution-plans/_done/`（統一歸檔區，不另開子目錄 _done/）
-   - **綱要 EP（blueprint）**：所有衍生子 EP build+commit 後才歸檔 master（子 EP 未全完成 → master 留在原地，不提早歸檔）
-   - 歸檔與顯式收尾三件同為 metadata finalization，一併執行
+**執行**（委派 metadata-sync skill · commit mode）：
+
+1. 識別變更涉及的 library 模組目錄，盤點該做的 finalization 項目（Capabilities ✅ 行 / Kanban 搬 Done / 消費場景寫入 / SYSTEM-MAP 結算 / architecture.md 條件更新 / EP 歸檔）——各項執行細節（Capabilities 行格式、EP 歸檔含子目錄 / blueprint 規則、SYSTEM-MAP 生命週期推導）見 skill
+2. 在 commit message 展示後，提示用戶確認 finalization 清單（**原子操作**：Capabilities + Kanban + SYSTEM-MAP 同時完成，三者描述同 UC 狀態）
+3. 用戶確認後，commit 前**執行**（修改 CLAUDE.md + mv 卡片 / EP）
+4. **consistency 閘門**：對動過的 CLAUDE.md / architecture.md / SYSTEM-MAP.md 跑 `/consistency`（應於 `/build` 階段 5e 已跑，此處複驗 commit 階段才新增的 Capabilities 行）；🔴 / 🟡 inconsistency → 修正後才算完成
+
+> **漏了可補**：commit 後若發現 finalization 漏項，獨立跑 [`/metadata-sync`](./metadata-sync.md)（standalone mode）補救——同 skill，不同 mode，不綁 commit 線性流程。
 
 ### 階段 4：生成 Commit Message
 
@@ -177,7 +169,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 確認後 `git add`（**納入本次開發的完整產物**：主變更 + EP（`ai-analysis/execution-plans/`）+ **已解決的 flow-feedback**）+ `git commit`（含 `Co-Authored-By: Claude`）。
 
-**flow-feedback 歸檔**（隨 resolving commit，類比階段 3 EP 歸檔）：階段 2.8 標記 to-archive 的 feedback，commit 前 `mv ai-analysis/flow-feedback/<file>.md ai-analysis/flow-feedback/_done/`（`_done/` 不存在則先建）再 `git add` `_done/` 路徑 → 檔在 resolving commit 直接落地 `_done/`，不留 root。未解決 / 討論中的 feedback 不 add（留 root 未追蹤）。
+**flow-feedback 歸檔**（隨 resolving commit）：階段 2.8 標記 to-archive 的 feedback，commit 前 `mv ai-analysis/flow-feedback/<file>.md ai-analysis/flow-feedback/_done/`（`_done/` 不存在則先建——mv / 歸檔判斷邏輯見 [metadata-sync](../skills/metadata-sync/SKILL.md) skill）再 `git add` `_done/` 路徑 → 檔在 resolving commit 直接落地 `_done/`，不留 root。未解決 / 討論中的 feedback 不 add（留 root 未追蹤）。
 
 **commit 成功後清除 ephemeral 工作產物**：review 筆記為工作過程產物，commit 結算後清除（同 POC 生命週期哲學，不進 git 歷史）。**per-branch 清除**（`.review/` 可能含多 branch — 如 main / replay / backbone）：只刪當前 branch 的 `.review/<branch>.md`，**勿 `rm -f .review/*.md`**（會誤刪他 branch review）。先 `ls .review/` 確認內容；`.review/` 為 gitignore ephemeral 產物（無 git 復原途徑），per-branch 清除正是為避免誤刪他 branch。保留 `.review/` 目錄供下次 review 直接寫入。
 
@@ -210,4 +202,4 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 前置：`/lint-fix`（lint 不通過時）、`/code-review`
 
-**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描）和階段 3（Capabilities + Kanban 狀態確認），直接進入階段 1（Lint）→ **階段 2.7（POC/Demo 處置閘門）+ 階段 2.8（flow-feedback 歸檔識別）** → 階段 5（確認）→ 階段 6（提交）。2.7/2.8 屬 commit 前檢查閘門（非被跳過的階段 2），捷徑保留；2.6 為 optional 提醒，捷徑不強制。
+**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描）和階段 3（metadata finalization），直接進入階段 1（Lint）→ **階段 2.7（POC/Demo 處置閘門）+ 階段 2.8（flow-feedback 歸檔識別）** → 階段 5（確認）→ 階段 6（提交）。2.7/2.8 屬 commit 前檢查閘門（非被跳過的階段 2），捷徑保留；2.6 為 optional 提醒，捷徑不強制。

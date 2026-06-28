@@ -59,6 +59,7 @@
 | **`/deliverable-review`** | **人類（交付）** | **3** | **人類** |
 | **`/illustrate`** | **人類（結構 viewport）** | **3** | **人類** |
 | `/commit` | 人類確認 | — | 人類 |
+| `/metadata-sync` | LLM | 1 | 人類 / AI-self |
 
 工具/維護命令（`/standup`、`/doc-health`、`/consistency`、`/claude:*` 等）與受眾模型正交，完整索引見 `commands/CLAUDE.md`。
 
