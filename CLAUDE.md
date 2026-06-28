@@ -69,6 +69,8 @@
 - `commands/` — Slash commands（`/invoke` 時載入）；依受眾分類（見上）
 - `commands/claude/_common/` — 共用子範本（`claude:*` 命令的引用單元）
 - `agents/` — Custom subagent 定義（Agent tool 按需委派，跨專案可用）
+- `hooks/` — Hook 實作腳本（被 `settings.json` 引用；如 `block-python-c-comment.py` 攔截 `python -c` 跨行註解）
+- `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）
 
 ## 載體選擇
 
@@ -82,7 +84,7 @@
 | 按需委派的專家子能力 | **Agent**（`~/.claude/agents/`） | 獨立 context，由主對話視任務委派 |
 
 **判斷原則**：
-- 如果忘了執行會造成損害 → Hook（如：commit 前跑 lint）
+- 如果忘了執行會造成損害 → Hook（如：攔截 `python -c` 跨行 `#` 註解免觸發權限提示 — `hooks/block-python-c-comment.py`）
 - 如果 AI 不知道就會犯錯 → Rule（如：用 `fd` 不用 `find`）
 - 如果只在特定任務才需要 → Skill（如：Mermaid 圖表生成）
 - 如果需要獨立 context 執行專家任務 → Agent（如：LSP 架構驗證）

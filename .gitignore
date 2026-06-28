@@ -31,3 +31,6 @@ __pycache__/
 # Claude Code settings (contains API keys)
 settings.json
 
+# Large / copyrighted reference PDFs (book PDFs in ref-docs/ — do not commit)
+ref-docs/*.pdf
+

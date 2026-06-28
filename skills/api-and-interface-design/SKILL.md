@@ -47,6 +47,16 @@ Pick one error strategy and use it everywhere. Don't mix throwing, returning nul
 - Boolean fields: `is`/`has`/`can` prefix
 - Input/output separation: input types exclude server-generated fields
 
+### Agent-Friendly Interfaces
+
+When an interface is consumed by AI agents (not just humans), it must be **machine-parseable and query-efficient**. A human-readable PDF or a rendered UI is useless to an agent that cannot render it.
+
+- **Return structured data, not rendered artifacts**: Markdown / JSON / typed schemas — not PDF, screenshots, or binary blobs. If a human-facing rendering exists, expose the underlying structured form too.
+- **Support filter / sort / pagination server-side**: agents must not download a huge payload and filter client-side. An API that only returns full records one-by-one forces an agent into slow, inaccurate aggregation — add deterministic filter/sort endpoints so the non-deterministic agent can ask precisely.
+- **Agents need *stronger* deterministic support, not less**: agents don't replace deterministic workflows — they sit on top of them and require more robust deterministic primitives (filter/sort/validate/paginate), because their access pattern is non-deterministic.
+
+**Why**: an interface that is merely "an API" but returns unparseable or unfilterable data defeats every agentic pattern built atop it — the contract is fine, the content is agent-hostile. Wrapping a legacy API behind MCP/Agent tooling without these improvements is the canonical anti-pattern (the adapter hides a hostile surface instead of fixing it).
+
 ## Verification
 
 - [ ] Every endpoint has typed input and output schemas
@@ -54,3 +64,4 @@ Pick one error strategy and use it everywhere. Don't mix throwing, returning nul
 - [ ] Validation happens at system boundaries only
 - [ ] New fields are additive and optional
 - [ ] List endpoints support pagination
+- [ ] Interfaces consumed by agents return structured/parseable data (not PDF/screenshots/binary) and support server-side filter/sort/pagination
