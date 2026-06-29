@@ -62,7 +62,7 @@
 - `nt-query` — NautilusTrader 能力 / 實作 / 用法合約查詢（docs-first + LSP-on-Cython-stubs + designer intent）
 - `mermaid` — pragmatism-first Mermaid 圖表生成
 - `rules-reminder` — 常被違反的 Bash 規則（rg/fd、無 `#`、`uv run`、無 `$` 展開）
-- `voice-notification` — 任務完成 macOS `say` 通知（三模式）
+- `voice-notification` — 三通道語音通知（系統召回 / 進度提醒 / 完成通知）
 - `idea-refine` — 結構化發散 / 收斂的想法精煉
 - `using-agent-skills` — skill 發現與呼叫的 meta-skill
 

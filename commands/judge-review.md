@@ -100,6 +100,22 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Edit"]
 
 ---
 
+## 語音通知
+
+遵循 [voice-notification skill](../skills/voice-notification/SKILL.md)（隨機稱謂、sentinel 進度提醒、say 樣板見 skill）：
+
+- **開始**（第一個動作前）：建進度提醒 sentinel + say 開始
+  ```bash
+  touch /tmp/.claude-voice-pending
+  say -v Meijia -r 180 "開始建議評估"
+  ```
+- **完成**（輸出結果後）：清 sentinel + 套 skill「任務完成」樣板 say（隨機稱謂，填「建議評估完成」）
+  ```bash
+  rm -f /tmp/.claude-voice-pending
+  ```
+
+---
+
 ## 流程位置
 
 前置：`/code-review`（其他 AI 執行審查）

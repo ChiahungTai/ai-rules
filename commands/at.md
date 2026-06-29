@@ -112,9 +112,9 @@ Resume 觸發時，LLM 應：
 
 1. **讀 context 檔案** → 了解**任務目標**（`.at-contexts/` 非 protected path，讀取零摩擦）
 2. **看當前進度** → `git log --oneline -10` + `git status` 知做到哪（**不比對排程時 snapshot** — quota 期間進度可能已變，看當前才準）
-3. **接續未完成** → 根據任務目標 + 當前進度，自主完成剩餘（同 `/deep-work` 模式）
+3. **接續未完成** → 建進度提醒 sentinel（`touch /tmp/.claude-voice-pending`），根據任務目標 + 當前進度，自主完成剩餘（同 `/deep-work` 模式）
 4. **清理** → 完成後刪除 context 檔案
-5. **通知** → 語音通知完成
+5. **通知** → 清 sentinel（`rm -f /tmp/.claude-voice-pending`）+ 套 [voice-notification skill](../skills/voice-notification/SKILL.md)「任務完成」樣板 say（隨機稱謂）
 
 ---
 

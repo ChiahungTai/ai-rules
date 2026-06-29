@@ -116,9 +116,17 @@ Agent prompt 開頭加上 /rules-reminder 六條規則摘要：
 
 ## 語音通知
 
-遵循 `voice-notification` skill：
-- **開始**：`say -v Meijia -r 180 "開始深度工作模式，主人外出期間我會全力實作"`
-- **完成**：`say -v Meijia -r 180 "主人！深度工作完成，所有任務已驗證通過～"`
+遵循 [voice-notification skill](../skills/voice-notification/SKILL.md)（隨機稱謂、sentinel 進度提醒、say 樣板見 skill）：
+
+- **開始**（第一個動作前）：建進度提醒 sentinel + say 開始
+  ```bash
+  touch /tmp/.claude-voice-pending
+  say -v Meijia -r 180 "開始深度工作"
+  ```
+- **完成**（輸出結果後）：清 sentinel + 套 skill「任務完成」樣板 say（隨機稱謂，填「深度工作完成」）
+  ```bash
+  rm -f /tmp/.claude-voice-pending
+  ```
 
 ---
 

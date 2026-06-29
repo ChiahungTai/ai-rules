@@ -199,6 +199,22 @@ build 可能由不同 LLM session 執行，無法存取審查報告。因此：
 
 ---
 
+## 語音通知
+
+遵循 [voice-notification skill](../skills/voice-notification/SKILL.md)（隨機稱謂、sentinel 進度提醒、say 樣板見 skill）：
+
+- **開始**（第一個動作前）：建進度提醒 sentinel + say 開始
+  ```bash
+  touch /tmp/.claude-voice-pending
+  say -v Meijia -r 180 "開始 EP 審查"
+  ```
+- **完成**（輸出結果後）：清 sentinel + 套 skill「任務完成」樣板 say（隨機稱謂，填「EP 審查完成」）
+  ```bash
+  rm -f /tmp/.claude-voice-pending
+  ```
+
+---
+
 ## 流程位置
 
 > **內建整合**：EP Review Cycle 已整合至 `/execution-plan`。獨立使用適用於手動修改 EP 後重新審查。

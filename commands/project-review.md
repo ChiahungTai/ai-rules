@@ -65,6 +65,14 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 
 ## 語音通知
 
-遵循 `voice-notification` skill：
-- **開始**：`say -v Meijia -r 180 "開始專案審查"`
-- **完成**：`say -v Meijia -r 180 "主人！專案審查完成，請驗收～"`
+遵循 [voice-notification skill](../skills/voice-notification/SKILL.md)（隨機稱謂、sentinel 進度提醒、say 樣板見 skill）：
+
+- **開始**（第一個動作前）：建進度提醒 sentinel + say 開始
+  ```bash
+  touch /tmp/.claude-voice-pending
+  say -v Meijia -r 180 "開始專案審查"
+  ```
+- **完成**（輸出結果後）：清 sentinel + 套 skill「任務完成」樣板 say（隨機稱謂，填「專案審查完成」）
+  ```bash
+  rm -f /tmp/.claude-voice-pending
+  ```
