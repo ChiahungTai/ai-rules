@@ -60,6 +60,9 @@ rg --no-filename "pat"    # 不印檔名（用於提取內容）
 rg -o -r '$1' "(\w+)\.py" # 捕獲群組替換輸出（$1 是 rg 語法，非 shell expansion）
 ```
 
+- **alternation 陷阱**：`rg "a\|b"` 搜尋的是 literal `a|b`（`\|` 是 regex literal pipe），**不是**「a 或 b」。多選一用 `rg "a|b"`（雙引號內 `|` 不被 shell 當 pipe，直傳 rg 作 alternation）或 `rg -e a -e b`
+- **gitignored 檔盲點**（如 `settings.json`）：rg/fd 預設跳過 `.gitignore` 內檔案 —— 殘留檢查若漏了這點會 false-negative 誤判「全綠」（本 session 真實案例：settings.json 殘留被 rg 跳過）。查 gitignored 檔用 `rg --no-ignore` / `-uu` 或顯式指定檔名（详见上「隱藏檔陷阱」）
+
 ## 搜尋策略
 
 - **找檔案**：`fd` 或 `rg -l "pattern"` — 只需檔名
