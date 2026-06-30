@@ -50,6 +50,7 @@
 - **討論/規劃期**：`/illustrate`（結構，人 viewport，pre-EP 軟 gate 提醒，可多次）
 - **review 期**：post-build 可選 `/illustrate`（漂移/重造檢查，B 軸）→ `/code-review`（六軸含 axis 3 結構 = arch 吸收，top-down，A 軸機器）→ `/judge-review`（**一次**）
 - **不再** arch→judge→code→judge 兩次 judge（code review 已含結構軸，judge 一次即可）
+- **既有 core 審查（無 change，純審穩固度）**：P1 識別 → selective review matrix（[arch-thinking](../skills/arch-thinking/SKILL.md)「core identification」lens）→ 依風險排序逐個 core 跑 `/illustrate` mode B（city map / call path，B 軸人 viewport）+ **人讀 code**（VS Code Cmd+Click 跳轉）→（可選）P2 邊界驗證。B 軸；不排 `/code-review`（正確性靠人讀，非機器 finding）；Console 或 MD 模式。Anthropic selective-review：core = heavy human review、leaf = 放過。
 
 - `/spec` — 需求釐清（User Story + UC 定位 + Scenario Matrix + 邊界，純輔助；`--write` 寫需求 MD）
 - `/execution-plan` — 段落式實作計畫書，自足生成 Self-Contained Segments（含段落0全域研究 + UC盤點 + Scenario Matrix + EP Review Cycle；ep_type blueprint/implementation 支援大型任務綱要+子 EP 結構），掃描 SYSTEM-MAP.md 取得功能上下文

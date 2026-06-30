@@ -138,6 +138,24 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 
 > 真實歷史案例：修「漏算 SHORT proceeds」的 compute 函式（缺陷 A）沒拆上游 sizing 函式裡手動 `+ proceeds` 的補丁（B）→ proceeds 算兩次 → baseline 虛高 → 風控 breaker 永不觸發。`findReferences(A)` 不會帶到 B（B 不引用 A，B 抵消的是 A 的 bug）。
 
+### core identification for review prioritization
+
+**消費前述機械產出做「審查優先序」判定** — 把 dep weight / 消費者數 / hotspot / ripple 框成 core vs leaf 判定 + 審查深度建議，供 `/illustrate`（人 viewport，B 軸）渲染 selective review matrix 讓人判讀「先審哪、審多深」。**受眾中性**（見本文 §受眾中性）：產判定 + 建議，**不產**機器 finding、不釘嚴重度、不給 file:line 處方（那交 `/code-review`）。
+
+**定義**（新詞錨定）：
+- **core**（heavy human review）：高 `消費者數`（`imported_by`）+ lean/廣用 + 高 ripple（在 `dependency-graph.md` Ripple Impact Rules）的模組；**或**位於 domain critical path（bug 會 silent-corrupt 全下游）。
+- **leaf**（放過 / behavior-only）：terminal consumer（library 內少被依賴）+ 低 ripple + 非 critical path。
+- **審查深度 tier**：deep human review（core，逐行讀）/ structure viewport + spot-read（中）/ behavior-only（leaf）。
+
+**資料來源（reference，不重造）**：
+- [`scan-project`](../scan-project/SKILL.md) `dep_graph.modules.imported_by[]`（消費者數）+ `hotspots[]`（hotspot tier）。
+- `dependency-graph.md`（[`maintain`](../maintain/SKILL.md) 步驟 1.3 持續維護的 Hotspots + Ripple Impact Rules — 持續真相源，非 snapshot；循環依賴集群若存在，其 ripple 會落在 Ripple Impact Rules 內）。
+- 本 skill City Map 資料生成既有 dep weight / 反向耦合 flag。
+
+**domain overlay**（不硬編特定領域）：project 可定義 domain-specific core overlay（bug 會污染全下游的 path）。**範例**（quant）：除權息調整 / volume 張↔股 / 風控 sizing / 會計總量。
+
+**觸發**：人類要 audit 既有 code 骨幹穩固度（無特定 change）→ 先跑本 lens 產 matrix 分配審查資源，再逐個 core heavy review。對照 Anthropic selective-review：core 重投入、leaf 放過。
+
 ## 三、流程注入點（spec/EP/build/review 各階段）
 
 設計視角三主線在各階段的注入：

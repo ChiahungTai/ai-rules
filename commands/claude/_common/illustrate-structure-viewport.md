@@ -44,6 +44,23 @@ boundary <module>  — 細看某模組邊界
 
 標定 symbol / 檔案位置用 **repo-root 相對路徑 + 行號**（如 `data/fetcher.py:15`），讓 VSCode terminal Cmd+Click 可跳轉 —— 人類 viewport 判讀需要能鑽進 code 看嫌疑。純檔名 terminal 解析不到。
 
+## Selective Review Matrix（既有 core 審查 artifact）
+
+**既有 core 骨幹審查（無 change，純審穩固度）的 P1 產物** —— core vs leaf 判定 + 審查深度建議，讓人決定「先審哪、審多深」（Anthropic selective-review：core heavy human review、leaf 放過）。**判定 / 資料來自 [arch-thinking](../../../skills/arch-thinking/SKILL.md)「core identification」lens**（消費 `dep_graph.modules.imported_by` / `hotspots` + `dependency-graph.md` ripple）—— 本檔只 spec **渲染格式**，不做判定（分層）。
+
+**欄位**：`| 模組 | dep weight | 消費者數 | ripple/hotspot tier | domain core overlay? | core/leaf | 建議審查深度 | 位置 |`
+
+- **位置欄**：repo-root 相對 path:line（沿用上方「位置標示」慣例，VS Code Cmd+Click 跳轉）。
+- **Console**：ASCII 表；**MD**：markdown 表 + Mermaid city map（沿用 [illustrate.md](../../illustrate.md) 雙模式，MD 寫 `ai-analysis/reports/`）。
+
+**輸出範例**：
+
+| 模組 | dep weight | 消費者數 | ripple/hotspot tier | domain core overlay? | core/leaf | 建議審查深度 | 位置 |
+|------|-----------|---------|--------------------|------------------------|-----------|--------------|------|
+| common | lean | 20 | 🔴 16 mods | — | core | deep | common/enums.py |
+| data | heavy | 7 | 🔴 cluster | ✅ 除權息 | core | deep | data/catalogs/... |
+| ui | heavy | 0 | 🟢 terminal | — | leaf | behavior-only | ui/__init__.py |
+
 ## Final Summary
 
 ```
