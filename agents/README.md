@@ -13,12 +13,22 @@ Custom subagents for Claude Code, stored as Markdown with YAML frontmatter.
 name: agent-name          # 必填：小寫 + 連字號
 description: ...          # 必填：觸發條件描述（Claude Code 據此決定何時委派）
 model: inherit            # 選填：sonnet / opus / haiku / inherit（省略 = sonnet）
+tools: [...]              # 選填：省略 = 繼承主對話全部工具（含 LSP plugin、MCP）
+isolation: worktree       # 選填：給 agent 自己的 git worktree（寫檔/平行實作用；read-only verify 不設）
+permissionMode: plan      # 選填：鎖定 agent 權限模式（read-only verify agent 可鎖 plan）
 ---
 
 System prompt body...
 ```
 
-**`tools:` 欄位**：省略 = 繼承主對話全部工具（含 LSP plugin、MCP）。除非需要限制工具，否則不要加此欄位。
+> 官方完整 frontmatter 欄位見 [sub-agents 文檔](https://code.claude.com/docs/zh-TW/sub-agents#supported-frontmatter-fields)。
+
+### 欄位決策
+
+- **`tools:`**：除非要限制工具，否則不加（繼承全部）。read-only verify agent 可加 `tools: [Read, Grep, Glob, LSP]` 做 defense-in-depth（防誤寫）
+- **`isolation: worktree`**：agent 會寫檔或平行實作時設（失敗自動清理、零污染）；純查證/研究 agent 不設
+- **`permissionMode`**：鎖定 agent 權限模式；read-only verify agent 可鎖 `plan`
+- **`model: inherit` 的理由**：[model-routing](../rules/model-routing.md) 的「verify/research agent 降一級」是**相對**規則（opus→sonnet→haiku），frontmatter 只能填**固定** tier，無法表達相對降級 → `inherit` + spawner 套 model-routing 是唯一忠實設計。代價：agent-view 直派（`@name`、繞過 spawner）會跑 session model —— 但 verify agent 實務上不被當 main agent 派發，影響低
 
 ---
 

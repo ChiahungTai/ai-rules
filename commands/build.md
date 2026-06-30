@@ -173,6 +173,12 @@ review 執行預設（force 獨立 / max-agents 預設 3 / model inherit / 3-per
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-review」步驟（現有流程不變）。
 
+##### Workflow 執行行為（官方文檔對齊）
+
+- **可恢復**：workflow 被中斷（user stop / 429 序列化）可同 session resume —— 已完成 agent 回快取結果、其餘 live 重跑（`/workflows` → 選執行 → `p`）。under `/deep-work` 多階段 loop 中，每階段 workflow 各自可 resume。
+- **監控**：review workflow 背景跑時用 `/workflows` 看階段 / agent 計數 / 令牌。under `/deep-work` 雙視角：`claude agents`（session 層）+ `/workflows`（workflow 層）。
+- **acceptEdits-always**：workflow 生成的 subagent **始終在 acceptEdits 執行，無視 session mode**（[官方 workflows 文檔](https://code.claude.com/docs/zh-TW/workflows)）。目前 review agent 全 `Explore`（read-only）無風險；若未來 build 經 workflow spawn impl agent，**edit 會繞過 session 權限自動准** —— 自主路徑（`/deep-work` + auto-mode）下，classifier + acceptEdits 是唯一防線，須知會。
+
 **B. Agent Tool 模式**（Fallback，非 Workflow 條件 = max-agents=1 或非 ultracode）：build 的 Agent Review force 獨立 agent、不走 Main LLM（review 執行預設 + 刻意覆蓋通用判定，見 [review-engine](../skills/review-engine/SKILL.md)）。3-perspective（① clean + ② UC-anchored + ③ Correctness）完整流程見 [agent-review-cycle.md](./claude/_common/agent-review-cycle.md)。
 
 #### adaptive 觸發映射（extra agent 機械觸發）

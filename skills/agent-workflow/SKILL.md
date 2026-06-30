@@ -16,12 +16,20 @@ Claude Code 提供多種平行模式，依任務規模和協調需求選擇。
 
 ## 平行模式選擇
 
-| 模式 | 適用場景 | 協調需求 | 說明 |
-|------|---------|---------|------|
-| **Agent tool + worktree** | 互動式平行實作 | 中（手動 spawn） | 本 skill 主要涵蓋 |
-| **Writer/Reviewer 雙 session** | 無偏差 code review | 低（兩個 terminal） | 審查者用新 session 避免 bias |
-| **Agent teams** | 複雜多步驟工作流 | 高（自動協調） | 共享 tasks、messaging、team lead |
-| **Auto mode** | 無人值守自主執行 | 無 | `claude --permission-mode auto -p` |
+Claude Code 官方四個**首類並行方法**（[官方比較](https://code.claude.com/docs/zh-TW/agents)），依「誰協調 / worker 是否互通 / 是否編輯同檔」選擇。**執行細節落在執行層命令**（`/deep-work` substrate、`/build` Phase 4），本 skill 是選擇參考。
+
+| 方法 | 它是什麼 | 何時用 | 執行落點 |
+|------|---------|--------|---------|
+| **Subagents**（Agent tool + worktree） | 一個 session 內委派 worker，獨立 context 回摘要 | 側任務會用搜尋/日誌/檔案內容淹沒主對話 | 本 skill 主要涵蓋；`/build` Agent Review |
+| **Agent view**（`claude agents` / `--bg`） | 一個螢幕調度 + 監控背景 session（supervisor 接管、survive terminal 關閉） | 多個獨立任務、user-away 可 peek/attach 監控 | **`/deep-work`** substrate layer（研究預覽 v2.1.139+） |
+| **Agent teams** | 多個協調 session，共享任務清單 + 互傳訊息（leader 管理；實驗性，預設禁用） | 要 Claude 自己分派 + 保持 worker 同步 | Claude Code 內建（見官方文檔） |
+| **Dynamic workflows**（Workflow tool / `ultracode`） | JS 腳本協調數十~數百 subagent，可對抗驗證 / 多角度起草 / loop 收斂 | 任務太大、需交叉驗證、大規模遷移/審計 | **`/build` Phase 4** Workflow 模式；[workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md) |
+
+**其他相關（非並行方法，與上面正交）**：
+
+- **Writer/Reviewer 雙 session**：開新 terminal 審查避免 bias（pattern，非 surface）
+- **Auto mode**（`claude --permission-mode auto -p`）：無人值守的**權限模式**（autonomy enabler），非並行方法 —— 詳見下方「Auto Mode」
+- **Worktrees**：給並行 session 各自 git checkout，避免編輯同檔（搭配上述方法用；agent-view bg session 自動 worktree）
 
 ---
 

@@ -24,25 +24,57 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 ---
 
-## 前置：進入 auto-mode（強制）
+## 前置：進入無人值守模式
 
-deep-work 前提是用戶已離開 —— 權限提示會卡死無人 flow。**必須在 auto-mode 下執行**（流程 dispatch 前先確認）。
+deep-work 前提是用戶已離開 —— 權限提示會卡死無人 flow。**必須在 auto-mode 下執行**（流程 dispatch 前先確認）。auto-mode（詳見 [agent-workflow](../skills/agent-workflow/SKILL.md)「Auto Mode」）：classifier model 在命令執行前把關（阻擋 scope 升級 / 未知基礎設施 / 惡意操作），取代人工權限提示。
 
-- **Auto-mode**（詳見 [agent-workflow](../skills/agent-workflow/SKILL.md)「Auto Mode」）：classifier model 在命令執行前把關（阻擋 scope 升級 / 未知基礎設施 / 惡意操作），取代人工權限提示。
-- **進入**：`claude --permission-mode auto -p`（CLI 啟動旗標）。
-- **誠實處理**：permission mode 是 CLI 啟動旗標，**命令本身無法中途切換**。若當前非 auto-mode → 印出警告「非 auto-mode，無人值守會卡在權限提示；請以 `--permission-mode auto` 重啟或由用戶切換 mode」並停下，**不靜默降級成互動模式硬跑**。
+### substrate 入口（三選一）
+
+| 入口 | 何時用 | 與 auto-mode 關係 |
+|------|--------|----------------|
+| **agent-view `claude agents` / `claude --bg "<task>"`**（長程 loop 推薦） | EP→build→review 多命令 loop、user 要可監控/介入、要關 terminal 離開 | 用 dir `defaultMode: auto`（repo 已設），**免旗標**；須先互動接受 auto 一次。supervisor 接管、session survive terminal 關閉（「我去洗澡了」不再綁 terminal；[研究預覽 v2.1.139+](https://code.claude.com/docs/zh-TW/agent-view)） |
+| **headless `claude -p`**（一次性） | 要 stdout 報告、單一短任務 | `claude --permission-mode auto -p`（現況保留） |
+| **`/at` 組合**（跨 session） | 任務超過一個 usage 窗 | `--bg` 派發 → usage 用盡 → `/at <time>` reset 後 resume |
+
+### 與其他自主入口分工（正交可組合）
+
+- **agent-view** = 本機背景長程（同 session，`claude agents` peek/attach 監控）
+- **`/at`** = 跨 session 接續（provider usage reset 後 resume；inline 出現在任務描述內，如「`/at 02:20 繼續修`」）
+- **`/handoff`** = 跨 session / repo / provider 交接（換手給另一個 session）
+
+組合例：`--bg` 派發長程 loop → usage 用盡 → `/at` reset 接續 → 必要時 `/handoff` 換 provider。
+
+### 誠實處理
+
+permission mode 是 CLI 啟動旗標 / dir 設定，**命令本身無法中途切換**。若當前非 auto-mode → 印出警告「非 auto-mode，無人值守會卡在權限提示；請以 `claude agents`（dir defaultMode=auto）或 `--permission-mode auto` 重啟」並停下，**不靜默降級成互動模式硬跑**。
 
 ---
 
-## 流程 dispatch（依 ARGUMENTS 決定骨架）
+## 流程 dispatch（自主 overlay，依 ARGUMENTS 決定程序）
 
-**deep-work 是「行為模式」（mode），不是「流程骨架」（procedure）**。組合時 procedure 委派:
+**deep-work 是「行為模式」（mode）+ 自主 overlay**，可疊加在任意 LLM-chain 程序上。組合時 procedure 委派，deep-work 疊加自主行為（自主決策、歧義選最合理並記錄、完整交付、錯誤自癒、語音通知）。
 
-- **ARGUMENTS = `/build <EP>`**：流程骨架**委派 [build.md](./build.md)**（階段 0-6 全跑）。deep-work 只疊加**行為模式**：自主決策、歧義選最合理並記錄（不問用戶）、完整交付、錯誤自癒、語音通知。deep-work 自身的階段 1-5（下方）**不執行**，完全委派 build 階段 0-6。
-- **組合下不得省略的 build 步驟**（無人在場時唯一機械防線）：階段 0「EP 快檢」強制輸出、階段 1「POC + demo 盤點」映射表、**階段 2「整合路徑覆蓋硬閘門」**（`rg "<新參數>=" tests/`）、階段 5d `/audit-test`。絕不靜默跳過。
-- **ARGUMENTS = 非 `/build`**（任意任務描述）：用 deep-work 自己的階段結構（下方）。
+```
+/deep-work <ARG>  ──ARG 決定程序 + 疊加自主行為──
 
-關鍵：`/deep-work /build` 時，硬閘門在最需要它的無人路徑必須生效 — 不委派就等於失效。
+  ├─ ARG 命名 LLM-chain 命令 → 委派該命令 + 自主疊加
+  │   • observed：/build、/execution-plan、/code-review、/ep-review、/ep-validate
+  │   • reasonable：/fix-test、/lint-fix（自癒 loop）、/audit-test、/consistency（自主品質）、
+  │                /followup-review（驗收）、/metadata-sync（結算）、
+  │                /handoff（跨 provider）、/sequential-batch（rate-limit 批次）
+  │
+  ├─ ARG = 任務描述 → deep-work 自選程序：
+  │   • 複雜（需規劃）→ /execution-plan 產 EP →（可選 /ep-validate、/ep-review）→ /build
+  │   • fix/debug/研究 → 自身階段 1-5（complex；可自癒接 /fix-test、/lint-fix）
+  │   • 完成後自主品質閘門 → /audit-test、/code-review
+  │
+  └─ ARG 內含接續/substrate 指令：
+      • /at <time> → 跨 session 接續修飾詞（reset 後 resume；inline，非獨立分支）
+      • substrate 見「前置」（agent-view / -p / /handoff / /sequential-batch）
+```
+
+- **ARGUMENTS = `/build <EP>`**（observed 主路徑）：流程骨架**委派 [build.md](./build.md)**（階段 0-6 全跑），deep-work 自身階段 1-5 **不執行**。**不得省略的 build 步驟**（無人在場時唯一機械防線）：階段 0「EP 快檢」強制輸出、階段 1「POC + demo 盤點」映射表、**階段 2「整合路徑覆蓋硬閘門」**（`rg "<新參數>=" tests/`）、階段 5d `/audit-test` —— 絕不靜默跳過（`/deep-work /build` 時硬閘門在最需要它的無人路徑必須生效）。
+- **ARGUMENTS = 任務描述**（無 EP）：用 deep-work 自己的階段結構（下方）；複雜者自主升級到 /execution-plan 產 EP 再 build。
 
 ## 執行流程
 
@@ -164,8 +196,9 @@ Agent prompt 開頭加上 /rules-reminder 六條規則摘要：
 
 ## 與其他命令的協作
 
-前置：`/execution-plan`（先生成計畫書）
-後續：`/commit` → `/claude:sync`
+**自主可調度**：`/execution-plan`（無 EP 時 deep-work 任務中自主產，非 user 前置）、`/build`、`/code-review`、`/ep-review`、`/ep-validate`、`/audit-test`
+**後續**：`/commit` → `/claude:sync`
+**接續/換手**：`/at`（跨 session reset 接續）、`/handoff`（跨 provider 交接）
 
 > **Agent Review Cycle 已完成。** 可直接 `/commit`；如需額外審查可跑獨立 `/code-review`。
 
