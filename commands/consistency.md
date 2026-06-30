@@ -59,16 +59,23 @@ Signal/noise framework: [encoder-philosophy.md](./claude/_common/encoder-philoso
 **目標只有兩種合法來源**：
 
 1. **`$ARGUMENTS` 空**（無參數調用）→ 走 git diff fallback（下方）自動偵測最近變更的 `.md`
-2. **`$ARGUMENTS` 是一個存在的 `.md` 檔案路徑** → 直接檢查該檔，跳過 fallback
+2. **`$ARGUMENTS` 是一個存在的 `.md` 檔案路徑，且該路徑 ≠ 本命令定義檔（`commands/consistency.md`）** → 直接檢查該檔，跳過 fallback
 
-> **🔴 fail-fast guard（防 silent 自檢）**：`$ARGUMENTS` 非空但**不是一個存在的 `.md` 路徑**時——無論是字面 `$ARGUMENTS`（未替換；常見於程式化 `Skill(consistency, args=...)` + `context: fork`，harness 在 fork 前未替換）、自然語言指代（如「你剛改好的文檔」「最近改的」）、或不存在的路徑——**立即停止**，回「未收到有效的文檔路徑；請用 `/consistency <path>` 指定，或用無參數 `/consistency` 自動偵測 git 變更」。**嚴禁把非路徑參數退而求其次去檢查本命令定義檔或其他任意 `.md`**——拿不到目標卻自評分數 = 虛假信心，比「沒跑」更危險（違反 fail-loud）。
+> **🔴 fail-fast guard（防 silent 自檢 — 無論如何不得繞過）**
+>
+> 出現以下任一情況，**立即停止，不得完成檢查、不得產出報告分數**，回「未收到有效的文檔路徑；請用 `/consistency <path>` 指定，或用無參數 `/consistency` 自動偵測 git 變更」：
+>
+> - **目標 = 本命令定義檔自身**（`commands/consistency.md`）— silent 自檢的明確訊號。不論參數解析為何，只要你發現自己即將檢查的目標是這份你正在執行的命令定義檔，**必定是出錯**（用戶不會叫你檢查命令定義檔本身的品質），立即停止。這是最常見的程式化調用失敗模式（`Skill(consistency, args=...)` + `context: fork` 時，harness 可能未替換 `$ARGUMENTS`，導致你拿不到真實目標而退而求其次檢查手上的定義檔）。
+> - **`$ARGUMENTS` 非空但不是一個存在的 `.md` 路徑** — 含未替換的占位符字面值（而非真實路徑）、自然語言指代（「你剛改好的」「最近改的」）、不存在的路徑。
+>
+> **為什麼絕對禁止**：拿不到目標卻退而求其次去檢查任意 `.md`（尤其定義檔自身），等於在沒有真實檢查對象的情況下產出分數——虛假信心，比「沒跑」更危險（違反 fail-loud）。silent 自檢（檢查定義檔自己）是最危險的形式：報告看起來完整，但檢查的是錯誤對象。
 
 **git diff fallback**（僅當 `$ARGUMENTS` 空）— 依序嘗試：
 1. `git diff --name-only` — 未 commit 的變更文檔
 2. `git diff --cached --name-only` — 已 staged 但未 commit 的文檔
 3. `git diff --name-only HEAD~1 HEAD` — 最近一次 commit 修改的文檔
 
-從結果篩選 `.md`，作為檢查目標。若無任何 `.md`，提示用戶並結束。
+從結果篩選 `.md`，**排除 `commands/consistency.md`（定義檔自身）**，作為檢查目標。若無任何 `.md`，提示用戶並結束。
 
 ### 步驟 1: 讀取文檔
 完整讀取目標文檔內容。
