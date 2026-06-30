@@ -11,6 +11,27 @@
 
 > **架構**: `~/.claude/commands` 符號連結指向本目錄，實現 Git 版本控制和跨專案共享。
 
+## Command 與 Skill 目錄分工
+
+> Claude Code harness 層兩者已收斂——`.claude/commands/foo.md` 與 `.claude/skills/foo/SKILL.md` 都產生 `/foo`，frontmatter 機制相通。harness 機械差異僅在 skill 是**目錄制**（可附私有支援檔 reference/scripts/examples）；本 repo 另以 invocation 語意區分兩者用途（見下表）。無 deprecation 訊號，不必跟軟性建議做 blanket 遷移。
+
+### 三層分工（現況）
+
+| 載體 | 形態 | 職責 |
+|------|------|------|
+| `skills/` | 目錄制 + 私有支援檔 | 領域知識、工作流（auto-loadable，model-invoked） |
+| `commands/` | 扁平單檔 | explicit workflow（人類 `/invoke` 觸發） |
+| `commands/claude/_common/` | 共享子範本 | 跨命令共用的流程範本，非 per-skill 支援檔 |
+
+### 轉換觸發（command → skill）
+
+單檔自足的 command 轉目錄制**零增益**。僅以下情境轉：
+
+- **長出私有、非共享支援檔**：command 需專屬 template/examples/scripts → 轉 skill 目錄放進去
+- **該被 auto-load**：內容是相關時自動載入的領域知識，非人類顯式觸發 → 本來就該是 skill
+
+**不要 blanket merge**：`_common/` 共享子範本不被 per-skill 目錄取代（轉了要嘛複製違反 DRY、要嘛仍留共享目錄）；單檔 command（`/standup`、`/commit`）無私有支援檔需求。
+
 ## 命令索引
 
 > 命令依「產出受眾」分類（LLM 執行鏈 / 人類 viewport / 三層介入）見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」。
@@ -38,6 +59,7 @@
 - `/build` — 基於 Execution Plan 逐段實作（TDD + UC 狀態更新 + SYSTEM-MAP 同步）
 - `/code-review` — 深層思考六軸代碼審查（含 axis 3 結構 = arch 吸收，top-down；UC 覆蓋度）
 - `/deliverable-review` — 人類 viewport 交付軸（layer 3）：天才工程師向老闆 demo 完成的功能——product-type-aware（code: demo-checklist / docs: behavior delta），--ep 審 planned deliverable；方向 >> 品質，不做逐行正確性（交 /code-review）、不審結構（交 /illustrate 結構 viewport）
+- `/illustrate` — 結構 viewport + 技術圖解（city map / call stack / drill / 流程；console / md）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build 漂移檢查，見上圖），結構能力調 arch-thinking skill
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → metadata finalization 委派 metadata-sync skill → message → 確認）
 - `/metadata-sync` — metadata finalization 獨立補漏入口（偵測漏掉的 Capabilities/Kanban/SYSTEM-MAP/arch/EP 歸檔/flow-feedback，確認後修補）；`/build`、`/commit` 委派同一 skill，漏了可重跑
@@ -77,7 +99,7 @@
 - `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要、UC 進度 + SYSTEM-MAP 功能進度）
 - `/task-status` — Kanban-centric 進度儀表板（Capabilities 完成率 + Kanban lane 分佈 + 模組 Breakdown）
 - `/doc-health` — Capabilities + Kanban 健康檢查（12 角度驗證文件準確性）；`--report` 產出完整能力地圖；`--sync-system-map` 用 Capabilities 狀態同步 SYSTEM-MAP.md
-- `/rebase <branch> [--autostash]` — Trunk-based rebase（trunk 永不被 rebase；trunk 上 `merge --ff-only` 吸收 feature / feature rebase onto trunk 或另個 feature；Phase 3 報告其他 feature 落後狀況 + 提示自行同步，不自動 rebase）
+- `/rebase <branch> [--autostash]` — Trunk-based rebase。**原則：trunk 永不被 rebase**，故已對齊的 feature 由 trunk 上 `merge --ff-only` 吸收（非 rebase）；feature 可 rebase onto trunk 或另個 feature；Phase 3 報告其他 feature 落後狀況 + 提示自行同步，不自動 rebase
 
 ### 依賴升級（收盤後執行）
 
@@ -86,5 +108,4 @@
 
 ### 其他
 
-- `/illustrate` — 技術概念、架構設計或流程圖解（console / md 模式）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達，use case 歸納；結構 viewport city map/call stack/drill 調 arch-thinking skill）
 - `/swing-analysis` — Swing Analysis 協作模式（Trajectory Viewer + 日誌監控）
