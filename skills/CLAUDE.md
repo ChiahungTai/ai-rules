@@ -56,6 +56,7 @@
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / Writer-Reviewer
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
+- `dependency-upgrade-watch` — 偵測 nautilus_trader / shioaji 版本漂移，主動建議 /upgrade-nt|/upgrade-sj（碰 pyproject.toml 時 auto-load）
 
 ### 工具與查詢
 - `context7-mcp` — library / framework / API 文檔查詢（context7 MCP）
@@ -76,17 +77,37 @@
 
 ## Frontmatter 配置
 
+> **上限真相源**：`description + when_to_use` 合計截斷 **1536 字元**（對齊 `skill-cleaner.ts` 的 `MAX_DESCRIPTION_CHARS`；可用 `maxSkillDescriptionChars` 覆寫）。skill 清單預算由 settings 的 `skillListingBudgetFraction` 控制（預設 context 的 1%，溢出時最少 invoke 的 skill 描述先丟）。
+
 ```yaml
 ---
-name: skill-name                    # 必填：小寫、數字、連字符 (最多 64 字元)
-description: 功能描述和觸發條件    # 必填：功能 + 何時使用 (最多 1024 字元)
-allowed-tools:                      # 可選：限制工具存取權限
-  - Read
-  - Write
-  - Edit
-model: sonnet|opus|haiku|inherit    # 可選：指定使用的 Claude 模型
-skills: dependency-skill            # 可選：依賴的其他技能
+name: skill-name                    # 顯示名稱；預設取目錄名
+description: 功能 + 何時使用 + 觸發詞    # auto-discovery 唯一依據，見下方寫法
+when_to_use: 觸發短語 / 範例請求       # 附加到 description，計入 1536 上限
+paths: ["**/*.py"]                   # glob 限制 auto-load（只在此檔被碰時載入 body）
+allowed-tools: [Bash(uv pip *)]      # skill 作用時預批准工具（免每次權限提示）
+disallowed-tools: [AskUserQuestion]  # 作用時移除工具（自主 loop 用）
+disable-model-invocation: true      # 純人類觸發 → 不進 listing（見決策原則，預設不設）
+user-invocable: false               # 背景知識 → 從 / 選單隱藏（仍可被 model invoke）
+context: fork                       # 在 subagent 隔離執行（配 agent:；無對話歷史）
+agent: Explore                      # context: fork 時的 subagent 型別
+model: opus|sonnet|haiku|inherit    # 作用時覆寫模型（下個 prompt 恢復）
+effort: medium                      # 作用時覆寫 effort
 ---
 ```
 
-`description` 是觸發關鍵 — 必須同時說明**功能**和**觸發條件**，包含多種同義觸發詞。
+### 欄位決策原則
+
+- **`disable-model-invocation` 預設不設** —— AI 在自主流程（deep-work、EP→build→commit 鏈）會高頻自動 invoke dev-loop 命令；設了會打斷既有工作流（transcript 實證：execution-plan/spec/build/commit 等在自主流程被 AI 高頻自動 invoke）。consent（如 commit-consent）已在 skill 層確保，**不需**在 invocation 層再加。只有「transcript 實證 AI 不會想 invoke」的純人類工具命令才考慮設 —— 依據 transcript 非受眾表
+- **`paths`** 限縮 auto-load 範圍 —— 領域特化 skill（查特定套件、特定副檔名）用 glob 避免跨專案誤觸發；注意 paths 只擋 body auto-load，**description 仍在 listing**
+- **`context: fork`** 隔離長任務 —— 適合 self-contained 任務（無對話歷史依賴），用 `agent:` 選 subagent 型別
+- **`allowed-tools` vs settings 權限**：`allowed-tools` 是 skill 作用時的預批准；基礎權限仍由 settings.json 管理
+- **`user-invocable: false`** 用於背景知識（不該被人類 `/invoke`）；`disable-model-invocation: true` 用於人類專屬 workflow（不該被 AI 自動觸發）
+
+### description 寫法
+
+`description` 是 auto-discovery 唯一依據，清單截斷時**從尾部丟**：
+
+- **觸發詞前置** —— 「何時使用 + 同義觸發詞」放前面，功能描述放後；截斷時保住觸發詞
+- **涵蓋多種說法** —— 使用者實際會打的詞（中英文同義詞都列）
+- **< 1536 字元**（含 when_to_use）
