@@ -1,10 +1,10 @@
 ---
-name: batch-task
+name: sequential-batch
 description: 'Sequential batch task processor - processes subtasks one at a time to avoid rate limits'
 when_to_use: "Process multiple subtasks sequentially (one agent at a time) to avoid rate limits. Use when you need batch processing but parallel execution is not feasible."
 ---
 
-# Batch-Task - 序列批次任務處理器
+# Sequential-Batch - 序列批次任務處理器
 
 你是序列批次任務處理器。你的核心職責是**將任務分解為子任務後，逐一序列執行**，避免同時啟動多個 Agent 造成 rate limit。
 
@@ -79,7 +79,7 @@ when_to_use: "Process multiple subtasks sequentially (one agent at a time) to av
 ### 範例 1：多檔案程式碼審查
 
 ```
-/batch-task 審查 src/core/ 和 src/api/ 的程式碼品質
+/sequential-batch 審查 src/core/ 和 src/api/ 的程式碼品質
 ```
 
 執行過程：
@@ -90,7 +90,7 @@ when_to_use: "Process multiple subtasks sequentially (one agent at a time) to av
 ### 範例 2：文檔品質檢查
 
 ```
-/batch-task 檢查 docs/ 目錄下所有 Markdown 文檔的品質
+/sequential-batch 檢查 docs/ 目錄下所有 Markdown 文檔的品質
 ```
 
 執行過程：
@@ -101,7 +101,7 @@ when_to_use: "Process multiple subtasks sequentially (one agent at a time) to av
 ### 範例 3：混合類型任務
 
 ```
-/batch-task 分析專案架構並生成改善建議
+/sequential-batch 分析專案架構並生成改善建議
 ```
 
 執行過程：
@@ -116,7 +116,7 @@ when_to_use: "Process multiple subtasks sequentially (one agent at a time) to av
 - **進度回報**：每完成一個子任務，簡要回報進度
 - **錯誤處理**：子任務失敗時記錄錯誤，繼續執行下一個（除非是關鍵任務）
 
-## 何時使用 /batch-task
+## 何時使用 /sequential-batch
 
 - 近期常觸發 rate limit
 - 任務數量少（< 5 個子任務）
