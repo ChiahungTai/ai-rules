@@ -76,6 +76,7 @@ Snapshot 輔助：
    - Phase 1 import 變化 ↔ Phase 2 CLAUDE.md 問題
    - Phase 1 findings ↔ Phase 3 doc-health 問題
 3. **趨勢追蹤**：fingerprint 數量變化、findings 增減
+4. **寫晨報檔**：若 `<project-root>/ai-analysis/daily-report/` 目錄存在，把報告寫入 `ai-analysis/daily-report/YYYY-MM-DD.md`（同日覆蓋；格式見下方「晨報檔格式」）。目錄不存在則 skip——這是跨專案 opt-in guard，避免影響沒有晨報慣例的專案。**無待決項時仍寫檔**（內容標「✅ 無待決項」），以證明排程有跑。
 
 ---
 
@@ -238,13 +239,42 @@ Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
 - 🟡 待確認項目：列出
 ```
 
+### 晨報檔格式（寫入 `ai-analysis/daily-report/YYYY-MM-DD.md`）
+
+晨報檔讀者是「早上想一眼知道今天要決定什麼的人類」。結構**不同於 stdout 的 phase 順序**——把需人類決定的事置頂，已自動處理的簡短帶過：
+
+```markdown
+# Daily Briefing — YYYY-MM-DD
+
+## 🔥 今天需要你決定的事
+<!-- 無則改標「✅ 無待決項」並仍寫檔，證明排程有跑 -->
+- 🟡 [X-ep-ready / X6 / 需語義判斷] — 為什麼需要你決定 + 建議
+- Kanban stale: `<card>` 已 N 天未動 — 繼續 or 歸檔？
+- 跨 phase 關聯待確認: Phase 1 import 變化 ↔ Phase 2 CLAUDE.md 問題
+
+## ✅ 已自動處理（你不用管）
+- auto-fixed: X-cap-path(N), X-tag-module(N)
+- Kanban: Done/ 清理(N), 無 tag 卡片補 tag(N)
+
+## 📈 趨勢
+- fingerprint: capabilities X→Y, findings X→Y
+- 與昨日 diff 要點
+```
+
+**撰寫要點**：
+
+- 🔥 段每項必附「**為什麼需要人類決定** + 建議方向」，不只是列項目——這是晨報的核心價值，呼應 description 的 morning report 承諾
+- ✅ 段簡短摘要即可，細節已在 stdout log（`$MOSAIC_OPS_LOG_DIR/daily-maintain-YYYYMMDD.log`）
+- 無 🟡 時 🔥 段標「✅ 無待決項」——**仍寫檔**，讓「沒檔」一致意味著「排程沒跑」（避免「沒事」與「沒跑」混淆，正是 2026-06-30 晨報斷更調查的教訓）
+- 檔名日期用排程觸發日；同日重跑覆蓋
+
 ---
 
 ## Commit 規則
 
 ### 自動模式（/daily-maintain）
 
-**自動 commit 範圍**：只有 🟢 自動修正的變更 + `.project-snapshot.json` 更新。
+**自動 commit 範圍**：🟢 自動修正的變更 + `.project-snapshot.json` 更新 + 晨報檔（`ai-analysis/daily-report/YYYY-MM-DD.md`，若產出）。
 
 Commit message 格式：
 ```
@@ -253,6 +283,7 @@ chore(maintain): daily auto-maintain — X findings fixed, Y reported
 Auto-fixed: X-cap-path(N), X-tag-module(N)
 Reported: X6(N)
 Snapshot: capabilities N, kanban N, findings N
+Morning report: ai-analysis/daily-report/YYYY-MM-DD.md
 ```
 
 **commit-consent 豁免**：調用 `/daily-maintain`（自動模式）即隱含同意 🟢 低風險修正的 commit。🟡 中風險不 commit。

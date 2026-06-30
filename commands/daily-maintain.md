@@ -25,6 +25,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 | Kanban stale cards | 只報告 |
 | Commit | 自動 commit 🟢 修正 + snapshot（見下方豁免） |
 | SYSTEM-MAP 同步 | 不執行（需人類確認狀態語義） |
+| Morning report | 若 `ai-analysis/daily-report/` 存在，寫 `YYYY-MM-DD.md`（🔥 待決項置頂），隨 commit 一起進 repo |
 
 ---
 
@@ -52,7 +53,7 @@ Snapshot: capabilities N, kanban N, findings N
 1. **Phase 1**: 執行 `/scan-project` → 產出 snapshot → diff fingerprint
 2. **Phase 2**: 執行 `/claude:sync --changed-since yesterday --recursive` → 自動修正路徑問題
 3. **Phase 3**: 執行 `/doc-health` → 自動修正 🟢 findings + kanban hygiene
-4. **Phase 4**: 彙總報告 + commit
+4. **Phase 4**: 彙總報告 → 寫晨報檔到 `ai-analysis/daily-report/YYYY-MM-DD.md`（目錄不存在則 skip）+ commit
 
 **不詢問、不等待、不阻塞。** 所有決策使用 skill 定義的預設值。
 
