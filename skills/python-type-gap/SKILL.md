@@ -145,7 +145,7 @@ stubs/
 
 - **`__init__.pyi` 必須有 `__getattr__ → Any`**：確保 top-level 屬性（如 `pa.schema`、`pa.Table`）透傳到已安裝套件的型別資訊。如果沒有它，mypy 會用 stubs 的 `__init__.pyi` 完全取代 site-packages 的型別資訊，導致已正確標註的型別全部變成 Any
 - **只補缺口的子模組**：不需要為整個套件寫完整 stubs
-- **只 stub 用到的函式**：先 `rg 'pc\.\w+' mosaic_alpha/ -t py --no-filename -o > /tmp/usage.txt`，再用 `sort -u /tmp/usage.txt` 找出實際用量
+- **只 stub 用到的函式**：先 `rg 'pc\.\w+' <package>/ -t py --no-filename -o > /tmp/usage.txt`，再用 `sort -u /tmp/usage.txt` 找出實際用量
 
 ### msgspec Struct 基底 class stub 模式
 
@@ -215,7 +215,7 @@ pq.write_table(  # type: ignore[no-untyped-call]
 |------|------|
 | **最小 blast radius** | 只影響單行，不會隱藏同模組其他位置的型別問題 |
 | **`warn_unused_ignores`** | pyproject.toml 設定後，mypy 自動偵測 stale suppress（第三方修復後自動暴露） |
-| **可審計** | `rg "# type: ignore" mosaic_alpha/` 即可列出所有 suppress，每個都有明確位置 |
+| **可審計** | `rg "# type: ignore" <package>/` 即可列出所有 suppress，每個都有明確位置 |
 | **不掩蓋新問題** | module-level disable 會靜默隱藏同模組內未來新增程式碼的同類型錯誤 |
 
 **`warn_unused_ignores` 重要限制**：只對 per-line `# type: ignore[code]` 有效，**不適用於** module-level `disable_error_code`。這是 per-line 的關鍵優勢 — 第三方修復後自動暴露 stale suppress。
@@ -310,7 +310,7 @@ Layer 4 通用約束：
 ```toml
 # ✅ Examples 目錄 — 100% demo 膠水碼，只有 no-untyped-call 和 operator
 [[tool.mypy.overrides]]
-module = ["examples.*", "mosaic_alpha.examples.*"]
+module = ["examples.*", "<package>.examples.*"]
 strict = true
 disable_error_code = ["no-untyped-call", "operator"]
 
@@ -328,7 +328,7 @@ disable_error_code = ["operator", "no-untyped-call", "union-attr", "call-arg", "
 # ❌ 反模式：adapter 用 module-level 壓制 arg-type
 # 原因：遮蓋同模組內未來新增程式碼的 arg-type 錯誤
 [[tool.mypy.overrides]]
-module = "mosaic_alpha.adapters.sj.data"
+module = "<package>.adapters.sj.data"
 strict = true
 disable_error_code = ["arg-type", "untyped-decorator"]
 
@@ -344,7 +344,7 @@ disable_error_code = ["arg-type", "untyped-decorator"]
 # ❌ 反模式：生產碼用 module-level disable
 # 原因：會靜默隱藏同模組內未來新增程式碼的型別錯誤
 [[tool.mypy.overrides]]
-module = "mosaic_alpha.common.logging"
+module = "<package>.common.logging"
 strict = true
 disable_error_code = ["call-arg"]
 
@@ -355,7 +355,7 @@ disable_error_code = ["call-arg"]
 
 ### UI 模組的特殊情況
 
-UI 模組（`mosaic_alpha.ui.*`）本質上是 Bokeh/Panel 的整合膠水碼，但仍然包含業務邏輯（K 線圖渲染策略、特徵顯示邏輯）。
+UI 模組（`<package>.ui.*`）本質上是 Bokeh/Panel 的整合膠水碼，但仍然包含業務邏輯（K 線圖渲染策略、特徵顯示邏輯）。
 
 **允許 module-level 的**：
 - **`no-untyped-call`**：Panel/Bokeh 建構子大量未標註，且 `assignment`/`arg-type` 等其他 check 間接覆蓋
@@ -368,7 +368,7 @@ UI 模組（`mosaic_alpha.ui.*`）本質上是 Bokeh/Panel 的整合膠水碼，
 ```toml
 # ✅ UI 模組 — 只壓制 no-untyped-call
 [[tool.mypy.overrides]]
-module = "mosaic_alpha.ui.*"
+module = "<package>.ui.*"
 strict = true
 disable_error_code = ["no-untyped-call"]
 ```
