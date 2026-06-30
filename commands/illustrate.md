@@ -25,7 +25,7 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 | mode | 意圖 | 典型情境 | 主要能力（手段）|
 |------|------|---------|---------------|
-| **A 設計決策** | 「這樣設計對嗎」 | 討論新功能 / 重構 / pre-EP | city map + 流程 + 重用枚舉（調 [arch-thinking](../skills/arch-thinking/SKILL.md) skill）|
+| **A 設計決策** | 「這樣設計對嗎」 | 討論新功能 / 重構 / pre-EP | city map + 流程 + 重用枚舉（調 [arch-thinking](../skills/arch-thinking/SKILL.md) skill）+ **邊界案例列設計替代** |
 | **B 理解既有** | 「這怎麼運作」 | 接手 / 學習套件 / 除錯 | 運作流程 + 資料流 + 概念圖 |
 | **C 審查驗證** | 「對不對 / 好不好」 | code-review 前 / EP 審查 / 重造偵測 / commit 前 | 語義 diff + [假設驗證矩陣](./claude/_common/illustrate-deep-analysis.md) + city map |
 | **D 溝通傳達** | 「畫給別人看」 | 文檔 / demo | Mermaid 圖（md 模式）|
@@ -112,7 +112,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 ```
 用戶輸入 → 判斷 use case → mode?
   A 設計決策（討論新功能 / pre-EP / 重構 / 架構取捨）
-    → 讀 code → city map + 流程 + 重用枚舉（調 skill）→ 渲染 → 人判讀
+    → 讀 code → city map + 流程 + 重用枚舉（調 skill）→ 邊界案例列 2-3 設計替代 + tradeoff → 渲染 → 人判讀
   B 理解既有（@模組 / 概念 / 除錯 / 學習套件）
     → 讀 code → 運作流程 / 資料流 / 概念圖 → 渲染 → 人理解
   C 審查驗證（無參數 diff / @ep / 重造偵測 / commit 前）
@@ -122,6 +122,17 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 
 輸入判斷線索：無參數→C（diff）；@ep→C（假設驗證）；@模組/概念→B；主題+md→D；架構/邊界討論→A
 ```
+
+### 邊界案例的行動路徑分流（mode A 輸出指引）
+
+mode A flag 邊界 / smell 時，給兩條行動路徑 + 取捨，**不替 user 預設**：
+
+| 路徑 | 性質 | 適用 |
+|------|------|------|
+| **文件化契約** | 保守、快速、低風險 | 結構合理，只是契約隱性（把不變量 / 設計原則寫進 CLAUDE.md）|
+| **重構修正** | 根本、風險高 | 結構本身有 smell（繼承 / strategy / 重寫）|
+
+兩條都擺出來讓 user 選——user 可能直覺朝重構想（要根本解），但文件化通常成本較低，可作為先手。
 
 ## 能力 survey 與下沉
 

@@ -44,6 +44,14 @@ boundary <module>  — 細看某模組邊界
 
 標定 symbol / 檔案位置用 **repo-root 相對路徑 + 行號**（如 `data/fetcher.py:15`），讓 VSCode terminal Cmd+Click 可跳轉 —— 人類 viewport 判讀需要能鑽進 code 看嫌疑。純檔名 terminal 解析不到。
 
+## city map 導航深度（審 authority 時）
+
+city map 預設渲染到**模組層**（不過載）。但 user 審 **authority / 資料流**（問「誰發布 X」「X 權威源」「data vs exec client」）時，加一層「**欄位 ← 發布者**」annotation —— 導航從「模組→符號」下到「**欄位→發布者**」，user 不用再追問權威源。
+
+範例：`<欄位> ← <發布 client>`（如 `<balance> ← <exec_client>`、`<price> ← <data_client>`——替換成你的專案符號）。
+
+**觸發判準**：authority 語境才加（避免噪音）；一般結構檢視不加。
+
 ## Selective Review Matrix（既有 core 審查 artifact）
 
 **既有 core 骨幹審查（無 change，純審穩固度）的 P1 產物** —— core vs leaf 判定 + 審查深度建議，讓人決定「先審哪、審多深」（Anthropic selective-review：core heavy human review、leaf 放過）。**判定 / 資料來自 [arch-thinking](../../../skills/arch-thinking/SKILL.md)「core identification」lens**（消費 `dep_graph.modules.imported_by` / `hotspots` + `dependency-graph.md` ripple）—— 本檔只 spec **渲染格式**，不做判定（分層）。
