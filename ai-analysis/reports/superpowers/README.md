@@ -12,8 +12,18 @@
 |------|------|---------|--------|
 | **本檔（README）** | 執行摘要 + 優先序 + Open Questions | 快速決策 | 先讀 |
 | [`01-結構理解與診斷.md`](01-結構理解與診斷.md) | 三層架構 + skill 拓樸 + skill-as-TDD + 結構債 | 理解 superpowers 是什麼 + 健康度 | 想全面理解時 |
-| [`02-改造方案.md`](02-改造方案.md) | fork-local（立即）vs upstream（高門檻）雙軌 + 第二層後果 | 改 superpowers 側 | 要動 superpowers 時 |
-| [`03-雙向借鑒.md`](03-雙向借鑒.md) | superpowers ⟷ ai-rules 移植清單 + 黃金連接點 | 改 ai-rules 側 / 看互補性 | 要借鑒到 ai-rules 時 |
+| [`02-sp借鑒到ai-rules.md`](02-sp借鑒到ai-rules.md) | 5 個內容類借鑒（skill-as-TDD/ledger/file-handoff/form-to-failure/behavior-shaping）+ 不借的結構類 | 借鑒到 ai-rules | 要吸收 sp 手法時 |
+| [`03-OpenCode退路.md`](03-OpenCode退路.md) | CC 堵 BYOK 風險 + OpenCode CC 相容免費保單 + 四大載體對應 + hooks adapter | 業務連續性 | 準備 OpenCode 退路時 |
+
+---
+
+## Session 結論（最新，優先於下方早期分析）
+
+> 本報告始於 session 早期的「全面改造強化」框架，經討論收斂為以下三點。**下方執行摘要/優先序若與此衝突，以此為準。**
+
+1. **不重寫整個 ai-rules 成 sp**。sp 是 fork 參考源，重心是 ai-rules 側。重寫會稀釋 ai-rules 的量化特化 + B 軸人類 viewport + 載體選擇（與 sp 世界觀衝突），且只 Claude Code 不需多 harness。
+2. **借鑒只取「內容/手法」**（skill-as-TDD、progress ledger、file-handoff、form-to-failure、behavior-shaping），**不借「結構/機制」**（bootstrap/adapter/eval harness —— 要重寫才有）。詳 [`02-sp借鑒到ai-rules.md`](02-sp借鑒到ai-rules.md)。
+3. **CC 堵 BYOK 是真實業務連續性風險，但 OpenCode 退路成本遠低於預期** —— OpenCode 刻意相容 Claude Code（CLAUDE.md/skills fallback），ai-rules 核心載體零成本可跑，只需 hooks adapter。詳 [`03-OpenCode退路.md`](03-OpenCode退路.md)。
 
 ---
 
@@ -25,7 +35,7 @@
 | **方法論核心** | 🟢 **skill-as-TDD** + **carefully-tuned behavior-shaping**（Red Flags tables、rationalization lists、「your human partner」措辭）。這是 superpowers 真正的護城河。 |
 | **結構債** | 🟡 **6 個 upstream 問題**（Gemini 移除不完整、4 個幽靈引用、Pi dual-maintenance、bootstrap 全靜默失敗、evals/ 外部依賴、文件回憶≠行為塑造）。**全部是 upstream 的，非 fork 造成**。 |
 | **與 ai-rules 的 scope 差異** | superpowers 從未追求 B 軸人類 viewport（受眾是 agent）。所有 review/eval 都是 LLM 鏈 —— 這是 **scope 邊界不是缺陷**，卻是「借鑒到 ai-rules」的關鍵差異點（`ai-rules/rules/acceptance-evidence.md` 證據獨立性視角可補強）。 |
-| **fork 現況** | 你已加 7 個 fork-local 導航 CLAUDE.md（借鏡 mosaic_alpha 多層導航）+ 改 root CLAUDE.md，**全部 uncommitted**。方向正確但未完成。 |
+| **fork 現況** | 7 個 fork-local 導航 CLAUDE.md + root 改動**已 commit**（superpowers repo `c7133db`，借鏡 mosaic_alpha 多層導航；非 upstream 認可）。重心不在改 sp，見 Session 結論 #1。 |
 | **黃金連接點** | superpowers 的「skill-as-TDD + behavior-shaping」⟷ ai-rules 的「A/B 雙軸 + L1-L6 證據階層 + 人類 viewport」**互補性極強**。兩者結合 > 任一單獨。 |
 
 ---
@@ -36,23 +46,22 @@
 
 | 優先 | 行動 | 路徑 | 理由 |
 |------|------|------|------|
-| **P0** | commit 你既有的 7 個 fork-local CLAUDE.md + root 改動 | fork | 工作區有未 commit 改造，先固化（`git status` 確認 `M CLAUDE.md` + 7 個 `??`） |
-| **P1** | A2：修 Gemini 殘留（fork-local） | fork | 立即、低風險、清掉 #1 結構債 |
-| **P1** | A1：補 `.agents/` CLAUDE.md + 承認導航層 | fork | 完成你已啟動的多層導航策略 |
-| **P2** | 借鑑 #2：把 skill-as-TDD 寫成 ai-rules 的 `writing-skills` 對等 skill | ai-rules 側 | **最高價值借鑒**，低衝突，補 ai-rules skill 品質方法論缺口 |
-| **P2** | 借鑒 #4：progress ledger 機制引進 ai-rules `/build` / deep-work | ai-rules 側 | 高價值，補 compaction 防失憶 |
-| **P3** | B1：提 upstream PR 清 Gemini 殘留 | upstream | 門檻最低的 upstream 貢獻，建立貢獻紀錄 |
-| **P3** | A3 + B2：single-source lint（先 fork 再 upstream） | fork → upstream | 機械防護，踏腳石 |
-| **P4** | 借鑒 #1：評估 session-start bootstrap 是否引進 ai-rules | ai-rules 側 | ⚠️ 與 ai-rules 省 context 哲學衝突，需深思（可能結論是不引進） |
-| **P5** | 借鑒 #5（證據獨立性 → writing-skills 補強） | upstream | 門檻高但理論互補性最強 |
+| **P0** | 借鑒 #1：skill-as-TDD 寫成 ai-rules `writing-skills` skill | ai-rules 側 | 最高價值借鑒，補 ai-rules skill 品質方法論缺口（無前置 TDD 迴圈） |
+| **P0** | 借鑒 #2：progress ledger 引進 `/build` / deep-work | ai-rules 側 | 補 compaction 防失憶，高價值低衝突 |
+| **P0** | OpenCode 驗證：在 OpenCode 跑一次 ai-rules 確認 fallback 相容 | ai-rules 側 | 1-2 小時，解 CC 堵 BYOK 焦慮 80%，知道 hooks adapter 長怎樣 |
+| **P1** | 借鑒 #3：SDD file-handoff 強化 `agent-workflow` | ai-rules 側 | 保護 controller context |
+| **P1** | 借鑒 #4：Match the Form to the Failure 寫進 `claude-writing.md` | ai-rules 側 | 寫 rule/skill 手法精度，純理論無衝突 |
+| **P2** | 借鑒 #5：behavior-shaping 措辭強化高違規 rules | ai-rules 側 | 抗 rationalization |
+| **P3** | sp fork 維護：保持 upstream 純粹，不重心改 sp | fork | 重心不在這；upstream 貢獻只挑低門檻（Gemini 清理）|
 
 ---
 
-## Open Questions（需你決策）
+## Open Questions
 
-1. **改造重心是 fork 還是 upstream？** —— 本報告假設「fork-local 為主、upstream 貢獻為輔」。若你想把 superpowers 當 ai-rules 的「上游方法論來源」長期追蹤，重心會不同。
-2. **借鑒 #1（session-start bootstrap）要不要引進 ai-rules？** —— 這是唯一與 ai-rules 哲學衝突的借鑒。`ai-rules` 刻意 on-demand 省 context（`CLAUDE.md`「載體選擇」）；強制載入用 context 換確定性，值不值得需你判斷。詳 [`03-雙向借鑒.md`](03-雙向借鑒.md)。
-3. **你的 7 個 fork-local CLAUDE.md 要不要 commit？** —— 目前全 uncommitted。若 commit，建議先 A2（修 Gemini）再一起 commit，避免固化已知結構債。
+1. ~~改造重心是 fork 還是 upstream？~~ **已決（Session 結論 #1）：重心是 ai-rules 側借鑒，sp 是 fork 參考源**（不重心改 sp）。
+2. ~~借鑒 session-start bootstrap 要不要引進？~~ **已決：不引進**（屬「結構類」，與 on-demand 省 context 衝突）。
+3. **OpenCode 驗證何時做？** —— 現在花 1-2 小時驗證 fallback 相容（買保險），或等 CC 真堵 BYOK 才做（成本低可延遲）。建議現在。
+4. **借鑒 P0 項（skill-as-TDD + progress ledger）何時開工？** —— 是 ai-rules 真的缺的能力，值得排進 kanban。
 
 ---
 
