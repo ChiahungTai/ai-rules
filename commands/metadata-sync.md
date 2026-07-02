@@ -1,6 +1,6 @@
 ---
-description: "metadata finalization 獨立補漏入口 — 偵測漏掉的文檔狀態結算(Capabilities/Kanban/SYSTEM-MAP/arch/EP 歸檔/flow-feedback),確認後執行修補"
-when_to_use: "When /build or /commit forgot metadata finalization (Capabilities rows, Kanban-to-Done, SYSTEM-MAP lifecycle, arch.md, EP archive, flow-feedback archive), or to re-run finalization independently. Read-only detection first, then execute after confirmation."
+description: "metadata finalization 獨立更新/補漏入口 — commit 前更新或事後補漏，偵測漏掉的文檔狀態結算(Capabilities/Kanban/SYSTEM-MAP/arch/EP 歸檔/flow-feedback),確認後執行修補"
+when_to_use: "When re-running finalization independently — commit-time update (after /code-review changed code) or after-the-fact gap-fill (Capabilities rows, Kanban-to-Done, SYSTEM-MAP lifecycle, arch.md, EP archive, flow-feedback archive). Read-only detection first, then execute after confirmation."
 usage: "/metadata-sync [--check]"
 argument-hint: "[--check 僅報告不執行]"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
@@ -13,7 +13,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 委託 Skill(單一真相源):
 - [metadata-sync](../skills/metadata-sync/SKILL.md) — finalization 方法論 + standalone 偵測維度 + 執行細節
 
-**與 `/commit` 階段 3 的關係**:`/commit` 階段 3 在 commit 流程內 invoke 同一 skill(commit mode,原子結算)。本命令是**獨立**入口(standalone mode)——不綁 commit 線性流程,任何時刻發現漏了都能重跑補救。
+**與 build 結算的關係**:`/build` 階段 5a invoke 同一 skill(build mode,依情境結算)——finalization 在 build 結算,不在 commit。本命令是**獨立**入口(standalone mode)——commit 前更新(code-review 後 code 變了)或事後補漏,任何時刻發現漏了/過時都能重跑。
 
 ---
 
@@ -51,7 +51,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 - EP:`mv ai-analysis/execution-plans/<ep>.md _done/`(含子目錄 / blueprint 規則見 SKILL.md)
 - flow-feedback:`mv ai-analysis/flow-feedback/<file>.md _done/`
 
-> **原子性例外**:standalone 補漏不要求「Capabilities + Kanban + SYSTEM-MAP 同時完成」的原子(commit mode 才要求)——補的是各自獨立漏項。但同一 UC 的 Capabilities + Kanban 應一起補(兩者描述同 UC 狀態)。
+> **原子性例外**:standalone 補漏不要求「Capabilities + Kanban + SYSTEM-MAP 同時完成」的原子(build 情境 A 才要求)——補的是各自獨立漏項。但同一 UC 的 Capabilities + Kanban 應一起補(兩者描述同 UC 狀態)。
 
 ### 階段 4:consistency 閘門
 
@@ -62,8 +62,9 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 ## 流程位置
 
 ```
-/build（階段5 invoke metadata-sync·build mode 預覽）
-   → /commit（階段3 invoke metadata-sync·commit mode 結算）
+/build（階段5a invoke metadata-sync·build mode 依情境結算）
+   → [/code-review] → commit 前 /metadata-sync（standalone 更新，code-review 後 code 變了）
+   → /commit（純 git 提交，finalization 已在 build）
    → 漏了？任何時刻 → /metadata-sync（standalone 補漏）
 
 /doc-health（檢出 drift）→ /metadata-sync（執行修補）
@@ -78,6 +79,6 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 - **未確認不執行**:finalization 改的是永久導航狀態,須用戶確認(同 commit-consent 精神)
 - **機械事實優先**:偵測靠 `rg` / `fd` / `git log`,不靠 LLM 記憶
 - **消費不重造**:SYSTEM-MAP 偵測消費 doc-health findings;單檔自洽 invoke `/consistency`
-- **容錯**:無對應檔案(SYSTEM-MAP.md / `.kanban/` / architecture.md / flow-feedback)→ 該項跳過(邏輯見 [metadata-sync](../skills/metadata-sync/SKILL.md)「容錯(三 mode 共用)」段,單一源)
+- **容錯**:無對應檔案(SYSTEM-MAP.md / `.kanban/` / architecture.md / flow-feedback)→ 該項跳過(邏輯見 [metadata-sync](../skills/metadata-sync/SKILL.md)「容錯(兩 mode 共用)」段,單一源)
 
 禁止:未確認就改檔 / 跳過偵測直接宣稱「無漏項」 / 把文檔內容同步(程式碼→描述)混入(那屬 build 5c)

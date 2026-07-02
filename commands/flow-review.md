@@ -39,7 +39,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 | 小改（措辭、流程微調） | kanban card |
 | 還沒想清楚 | 留在 feedback，下次 review 再議 |
 
-> **歸檔生命週期**：決策且對應變更經 `/commit` 落地 → /commit 自動把該 feedback 歸檔到 `ai-analysis/flow-feedback/_done/`（同 EP `_done/` 哲學，見 /commit 階段 2.8）；「還沒想清楚」留 root 供下次 review。active inbox（root）= 未結案項。
+> **歸檔生命週期**：決策且對應變更經 `/build`→`/commit` 落地 → **build 階段 5a 結算（情境 A）** 把該 feedback 歸檔到 `ai-analysis/flow-feedback/_done/`（同 EP `_done/` 哲學，見 [metadata-sync](../skills/metadata-sync/SKILL.md) flow-feedback 歸檔項）；「還沒想清楚」留 root 供下次 review。active inbox（root）= 未結案項。
 
 ---
 

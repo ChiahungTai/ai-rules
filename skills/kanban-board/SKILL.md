@@ -118,8 +118,8 @@ mv .kanban/Next-Up/feature-X.md .kanban/In-Progress/feature-X.md
 
 EP 段落完成後：
 
-1. 提煉消費場景（暫存，供 `/commit` 使用）
-2. 全部段落完成 → `/commit` 確認後移動到 `Done/` 並加完成紀錄
+1. 消費場景隨 Capabilities 寫入一併落地（build 階段 5a 結算，非暫存供 commit）
+2. 全部段落完成 → build 階段 5a 結算（情境 A）移動到 `Done/` 並加完成紀錄
 
 ### deep-work 整合
 

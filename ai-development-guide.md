@@ -65,7 +65,7 @@
 | `dependency-graph.md` | 跨模組依賴 / ripple 風險地圖 — maintain Phase 1.3 維護（非 /consistency 範圍） | 現在 |
 | `.kanban/` | 任務追蹤（Kanban lanes） | 暫時（Done/ 歸檔） |
 
-**UC 生命週期**：📋（/execution-plan → Backlog card，UC盤點自動建卡）→ 🟡（/build → InProgress）→ ✅（/commit → Capabilities + Done）
+**UC 生命週期**：📋（/execution-plan → Backlog card，UC盤點自動建卡）→ 🟡（/build → InProgress）→ ✅（/build 階段 5a → Capabilities + Done，UC 完成情境）
 
 ### UC 狀態標記
 
@@ -98,8 +98,8 @@
 ### 銜接機制
 
 1. **/execution-plan → Backlog**：UC盤點自動建立 .kanban/Backlog/ card（含模組、EP 連結）
-2. **/build → InProgress**：搬 Backlog cards 至 In-Progress/（暫時狀態，**不更新 Capabilities、不搬 Done**）
-3. **/commit → Capabilities + Done**：確認後新增 Capabilities ✅ 行 + 搬 Done/ + EP 歸檔（**原子操作**）
+2. **/build → InProgress + 結算**：階段 1 搬 Backlog cards 至 In-Progress/（暫時狀態）；階段 5a 結算 UC 完成情境——新增 Capabilities ✅ 行 + 搬 Done/ + EP 歸檔（working tree，隨 commit 帶走）
+3. **/commit → 純 git 提交**：finalization 已在 build 階段 5a 結算（working tree），commit 一次帶走 code + finalization（**同 commit** 保證，git add 納入 finalization 檔）
 
 ---
 

@@ -50,7 +50,7 @@
 - `git-workflow-and-versioning` — git commit / branch / 衝突 / 平行流
 - `kanban-board` — Tasks.md 看板卡片管理（讀 / 建 / 移動 / 回顧）
 - `maintain` — `/daily-maintain`（自動）與 `/project-review`（互動）共用的 4-phase 維護核心（勿直接呼叫）
-- `metadata-sync` — metadata finalization 單一真相源（Capabilities/Kanban/SYSTEM-MAP/arch/EP/flow-feedback 狀態結算；三 mode）；被 `/commit`、`/build`、`/metadata-sync` 共用 invoke
+- `metadata-sync` — metadata finalization 單一真相源（Capabilities/Kanban/SYSTEM-MAP/arch/EP/flow-feedback 狀態結算；兩 mode）；被 `/build`、`/metadata-sync` 共用 invoke
 - `scan-project` — 統一專案知識掃描（imports + Capabilities + kanban → dep_graph / findings）
 - `context-engineering` — session 起始 / 品質退化 / 任務切換時的 context 與 rules 設置
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / Writer-Reviewer
