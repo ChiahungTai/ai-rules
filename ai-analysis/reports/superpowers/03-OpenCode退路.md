@@ -48,11 +48,23 @@ OpenCode 刻意做了 Claude Code 相容（[官方 docs Rules 頁](https://openc
 
 | 動作 | 做什麼 | 成本 | 何時 |
 |------|--------|------|------|
-| **驗證 fallback 相容** | 在 OpenCode 開 ai-rules repo，確認 CLAUDE.md + skills 被讀到、幾個代表性 command 能跑 | 低（1-2 小時）| 可現在，或 CC 真堵 BYOK 時 |
+| **驗證 fallback 相容 + description 行為觀測** | 在 OpenCode 開 ai-rules repo，確認 CLAUDE.md + skills 被讀、代表性 command 能跑；**順便觀測 description 行為**（Q1 agent 是否讀 body、Q2 skills 觸發跨工具是否一致）—— eval ai-rules description 策略的跨工具效果（見下「description eval 三問」）| 低（1-2 小時）| 可現在，或 CC 堵 BYOK 時 |
 | **寫 hooks adapter** | 把 ai-rules 少數 hooks（`block-python-c-comment` 等）寫成 OpenCode plugin（借鑒 sp `.opencode/plugins/superpowers.js` 的模式）| 中 | 可延遲到切換時 |
 | **記遷移筆記** | 記錄 commands 觸發差異（TUI palette caveat）、hooks 對應表 | 低 | 驗證時順手 |
 
 **建議先做「驗證」** —— 花一兩小時在 OpenCode 跑一次 ai-rules，確認 fallback 相容真的有效。若有效，CC 堵 BYOK 焦慮解 80%，且知道剩下的 20%（hooks adapter）長什麼樣。這比「現在重寫整個 sp 化」或「純擔心不做」都務實。
+
+### description eval 三問（驗證時順帶觀測）
+
+ai-rules 的 description 策略（觸發詞 + 功能描述，≤1536，見 `skills/CLAUDE.md` frontmatter 規範）不同於 sp（純 when to use，≤500）。跨工具行為效果未經 eval 驗證 —— OpenCode 驗證時順帶觀測三問，不必另做 drill eval：
+
+| Q | 疑問 | 觀測/方法 |
+|---|------|----------|
+| **Q1** | description 的功能描述會不會讓 agent 不讀 body？（sp 警告的變形，見 sp `writing-skills/SKILL.md:150-158`）| 人類 viewport：跑代表 prompt，看 agent 是否引用 skill body 內容（不只 description）|
+| **Q2** | 跨工具 description 觸發/載入跟 CC 一致嗎？ | **本驗證即答** —— OpenCode 跑 ai-rules，比對 skills 觸發行為與 CC 差異 |
+| **Q3** | 42 skills description 總長會溢出 skill listing 預算嗎？ | 機械算（不驗證）：`skillListingBudgetFraction`（預設 context 1%）× context vs 42 skills description 總長；溢出時「最少 invoke 的 skill 描述先丟」|
+
+**為何不另做 drill eval**：Q2 折疊進本驗證（零額外成本），Q1 是低成本人類抽查，Q3 是純機械算 —— sp 那樣的 drill harness（LLM actor + verifier）對這個議題過重，且 ai-rules 的 eval 應是「人類 viewport + 機械檢查」混合（見 [附錄黃金連接點](#附錄黃金連接點理論價值保留參考)），不是純 LLM verifier。
 
 ---
 
