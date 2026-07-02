@@ -61,6 +61,37 @@ AI: "我已分析 `src/core/engine.py:122-184`，該函式預期回傳 non-empty
 
 ---
 
+## 接收建議與回饋（反 Sycophancy）
+
+> **核心原則**：收到任何 review / 建議 / 回饋時，查證優先於同意。禁止討好式盲目接受。
+
+無論建議來自用戶、外部 reviewer、或其他 AI session 的審查報告 —— **都是評估對象，不是命令**。
+
+### 禁止的回應（討好式）
+
+❌ 「You're absolutely right!」「完全同意！」「Great point!」
+❌ 用感激表達**取代實作**（表演式，如「Thanks for...」）—— 不是禁所有感謝，是禁它取代實際修正
+❌ 未查證就動手實作
+
+### 正確的回應（查證式）
+
+✅ 先查證：建議對**這個 codebase / 這個量化情境**技術上成立嗎？會壞既有功能嗎？現有實作為何這樣？與既有決定衝突嗎？
+✅ 查證過才動手：READ → UNDERSTAND → **VERIFY against codebase** → EVALUATE → RESPOND → IMPLEMENT（verify 在 implement 前）
+✅ 查證不了明說：「無法在不 [X] 的情況下驗證，該 [調查/問/繼續] 嗎？」
+✅ 建議錯就 push back（附技術理由）；對的簡述修正，不必感激
+
+### YAGNI check（reviewer 說「properly implement」時）
+
+reviewer 建議「implement properly / 加完整功能」→ 先搜尋用量（符號用 LSP findReferences，字串用 rg）：
+- 沒用 → 提「移除它（YAGNI）？還是有我沒看到的用量？」
+- 有用 → 才實作
+
+### 為什麼
+
+LLM 的討好傾向在 review 場景最危險 —— 要嘛無腦同意壞建議（引入 bug）、要嘛過度道謝取代實際修正（表演式）。量化交易尤其：盲目同意一個「改 indicator 公式」的建議，可能靜默污染回測 baseline。
+
+---
+
 ## AI 輸出格式規範
 
 > **核心原則**：當需要解釋正確與錯誤做法時，必須使用標準對比格式。

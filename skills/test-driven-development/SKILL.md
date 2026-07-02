@@ -7,6 +7,16 @@ description: Drives development with tests. Use when implementing any logic, fix
 
 Write a failing test before writing the code that makes it pass. Tests are proof — "seems right" is not done.
 
+## The Iron Law
+
+```
+NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+```
+
+Write code before the test? **Delete it. Start over.** Delete means delete —— 不留作「reference」、不「邊寫測試邊 adapt」、不看著它寫測試。從失敗測試重新實作。
+
+違反 letter 就是違反 spirit。「只這一次跳過」「太簡單不用測」是 rationalization，不是例外。
+
 ---
 
 ## The Prove-It Pattern (Bug Fixes)
@@ -176,3 +186,27 @@ After completing any implementation:
 - [ ] Every new behavior has a corresponding test
 - [ ] Bug fixes include a reproduction test that failed before the fix
 - [ ] No tests were skipped or disabled
+
+## 抗規避自檢（Anti-Rationalization）
+
+技術正確不代表走過 TDD —— agent 會找藉口跳過。出現以下念頭時是 rationalization，不是例外：
+
+| 藉口 | 現實 |
+|------|------|
+| 「太簡單不用測」 | 簡單的 code 也會壞（除權息邊界、減資調整、NaN 傳播）。測一下 30 秒。 |
+| 「先寫碼再補測就好」 | 事後測試立刻 pass，證明不了任何事（可能測錯東西、測到實作非行為）。Tests-first 才強迫看見失敗。 |
+| 「回測框架都搭好了，先跑起來再補」 | Sunk cost fallacy。先跑起來的 code 沒測 = 不能信任的技術債。 |
+| 「刪掉 X 小時的工作太浪費」 | 留下沒測的 code 才是浪費。Delete means delete（見 Iron Law）。 |
+| 「量化講速度，先有策略再說」 | TDD 比事後 debug 快（抓 bug 在 commit 前）。Pragmatic = test-first，不是趕路。 |
+| 「這只是 config/參數調整，不用測」 | config 錯 = 回測全錯（hash 鎖不住語義）。行為改變就要測。 |
+
+### Red Flags — 出現這些念頭就 STOP
+
+- 「先寫碼，測試之後補」
+- 「測試立刻 pass」（沒看見失敗 = 沒在測對的東西）
+- 「已經手動測過了」（ad-hoc ≠ 可重現）
+- 「刪掉太浪費，留作 reference」
+- 「只這一次跳過」
+- 「TDD 太教條，我務實一點」
+
+**以上全部 = 回 Iron Law，刪 code，從失敗測試重來。**

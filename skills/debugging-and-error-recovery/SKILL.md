@@ -5,6 +5,14 @@ description: Guides systematic root-cause debugging. Use when tests fail, builds
 
 # Debugging and Error Recovery
 
+## The Iron Law
+
+```
+NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
+```
+
+沒完成根因調查（重現 + 定位 + 證據），不能提 fix。症狀修補 = 靜默債務。
+
 ## Stop-the-Line Rule
 
 When anything unexpected happens:
@@ -42,6 +50,32 @@ Make the failure happen reliably. If you can't reproduce it, you can't fix it wi
 - 修改前先確認問題存在：用 LOG 或小程式驗證問題可重現
 - 禁止連續猜測超過 2 次：連續 2 次猜測失敗 → 停下改策略，加 LOG 驗證假設
 - 寧可寫 3 行驗證腳本，也不要 3 段文字分析「可能是什麼原因」
+
+### 3+fix 熔斷：質疑 Architecture（深化 No Guessing）
+
+No Guessing 的「2 次猜測 → 加 LOG」是**策略層**熔斷。**≥3 次 fix 失敗**是更深訊號 —— 不是猜錯，是 architecture 本身錯：
+
+- 每個 fix 都在不同地方揭出新問題 / shared state / coupling
+- fix 需要「massive refactoring」才能實作
+- 每個 fix 在別處製造新症狀
+
+**≥3 次 fix 失敗 → STOP，禁試第 4 次。** 這不是失敗的假說 —— 這是錯的 architecture。停下質疑：
+
+- 這個 pattern 根本 sound 嗎？
+- 我們是「靠慣性硬撐」嗎？
+- 該 refactor architecture vs 繼續修症狀？
+
+**與用戶討論後再嘗試更多 fix**（不是自己再試第 4 次）。量化場景尤其危險：回測/數據管線的 thrashing 會浪費數小時，且每個「再試一個 fix」可能引入新 silent bug（除權息/溢出/時區/隨機性）。
+
+### 用戶的糾正訊號（Human Partner Signals）
+
+聽到這些 = 你的方向錯了，STOP 回根因調查：
+
+- 「這不是這樣吧？」/「Is that not happening?」→ 你假設未驗證
+- 「能不能 show 我...？」→ 該加證據收集（LOG）
+- 「不要用猜的」/「Stop guessing」→ 在沒理解下提 fix
+- 「Ultra-think this」→ 質疑根本，不只症狀
+- 「我們卡住了？」（挫折）→ 你的方法沒奏效
 
 ### 2. Localize
 
