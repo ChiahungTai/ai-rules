@@ -71,11 +71,10 @@ git merge-base --is-ancestor HEAD <branch>   # exit 0 = 當前（trunk）是 arg
 2. **分叉預覽**：判斷 rebase 風險等級
 
 ```bash
-git merge-base --is-ancestor HEAD <branch>   # HEAD 是 base 祖先 → fast-forward
-git merge-base --is-ancestor <branch> HEAD    # base 是 HEAD 祖先 → up-to-date
-# 兩者都不是 → diverged
-git log --oneline HEAD..<branch> | wc -l      # base 獨有 commit 數
-git log --oneline <branch>..HEAD | wc -l      # current 獨有 commit 數（將被 replay）
+git merge-base --is-ancestor HEAD <branch>   # exit 0 = HEAD 落後 base → fast-forward
+git merge-base --is-ancestor <branch> HEAD    # exit 0 = HEAD 已含 base → up-to-date
+# 兩者皆 exit 1 → diverged。單一指令取雙方計數（避免 parallel 鏡像 A..B 結果錯位）：
+git rev-list --left-right --count <branch>...HEAD   # 左=base 獨有，右=current 獨有（將被 replay）
 ```
 
 | 分叉狀態 | 風險 | 說明 |
