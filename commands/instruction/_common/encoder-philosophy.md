@@ -1,14 +1,14 @@
-# Encoder Philosophy — CLAUDE.md 品質標準
+# Encoder Philosophy — instruction 檔品質標準
 
 > **載入時機**: 僅在 `/instruction:*` 命令執行時載入，不放入 `rules/` 避免每個 session 浪費 context。
 
 ---
 
-## 核心概念：CLAUDE.md 是 Encoder
+## 核心概念：instruction 檔是 Encoder
 
-CLAUDE.md 是模組知識的**壓縮表示**（Encoder）。品質的終極驗證是 **Decoder Test**：
+instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）是模組知識的**壓縮表示**（Encoder）。品質的終極驗證是 **Decoder Test**：
 
-給一個 LLM 讀取 CLAUDE.md，然後問它關於這個模組的設計決策、架構約束、非顯而易見的選擇。如果它能正確回答，說明 Encoder 成功捕獲了本質知識。
+給一個 LLM 讀取 instruction 檔，然後問它關於這個模組的設計決策、架構約束、非顯而易見的選擇。如果它能正確回答，說明 Encoder 成功捕獲了本質知識。
 
 **Decoder Test 是 dry run**，不是每個 session 都執行。它在文檔維護時用來驗證品質，不是日常操作。
 

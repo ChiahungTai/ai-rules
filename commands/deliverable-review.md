@@ -21,7 +21,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 按需讀取：
 - [review-engine](../skills/review-engine/SKILL.md) — LSP 查證方法（Phase 2）+ 通用審查邏輯（嚴重度/自證/多層驗證）
 
-受眾模型見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」；理論見 [acceptance-evidence](../rules/acceptance-evidence.md)。
+受眾模型見 root [AGENTS.md](../AGENTS.md)（legacy `../CLAUDE.md`）「命令的受眾視角」；理論見 [acceptance-evidence](../rules/acceptance-evidence.md)。
 
 ---
 
@@ -32,7 +32,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 | 產品形態 | 觸發 | 渲染 |
 |----------|------|------|
 | **code** | `.py`/`.pyx`/`.ts` 等程式碼變更為主 | demo-checklist（feature → 可跑 demo → 你跑 → 確認） |
-| **docs/rules/command** | `.md` 規則 / 命令 / CLAUDE.md 變更為主 | behavior delta（AI 行為改變）+ 影響 UC |
+| **docs/rules/command** | `.md` 規則 / 命令 / instruction 檔（AGENTS.md / CLAUDE.md）變更為主 | behavior delta（AI 行為改變）+ 影響 UC |
 | **混合** | code + docs 同改 | 兩 mode 都列 |
 
 > 不硬套：docs 變更不硬詮釋成「可跑方法」，而是渲染「AI 讀了改的 rule 後會做什麼不同」。
@@ -115,7 +115,7 @@ Rule/Command 變更             AI 行為改變（讀了之後做什麼不同）
 ──────────────────────────────────────────────────────────────────────────────────────────
 human-review → deliverable    審查渲染 demo-checklist 而非 4 lens         post-build 驗收流程
 illustrate 結構 viewport       審查渲染結構拓樸 + 重用枚舉                 post-EP/build 結構審查
-instruction-writing 種子深度       種子指向 method 不停在 class                CLAUDE.md 導航品質
+instruction-writing 種子深度       種子指向 method 不停在 class                instruction 檔導航品質
 ```
 
 覆蓋確認：rule 宣稱的行為，**涵蓋它聲稱的所有 UC 嗎**？（例：新命令宣告 4 種 source mode，每種都有渲染路徑嗎？）

@@ -7,7 +7,7 @@ Produces three things (no full registries — LLM reads files directly):
 2. findings — mechanical cross-validation issues (X-cap-path, X-tag-module, etc.)
 3. fingerprint — lightweight change detection (counts + hashes)
 
-Internal parsing of CLAUDE.md and .kanban/ is kept for computing findings,
+Internal parsing of instruction files (AGENTS.md preferred, CLAUDE.md legacy) and .kanban/ is kept for computing findings,
 but registries are NOT included in output.
 
 Designed for the /scan-project skill + /daily-maintain or /project-review workflow.
@@ -45,6 +45,7 @@ SKIP_DIRS_SCAN = {
     ".claude",
     "build",
     "dist",
+    "ref-docs",  # external harness mirrors — not this repo's instructions
 }
 
 KANBAN_LANES = {"Backlog", "Next-Up", "In-Progress", "Done"}
@@ -81,6 +82,8 @@ def _load_scan_imports(project_root: Path) -> dict | None:
         if path.exists():
             try:
                 spec = importlib.util.spec_from_file_location("scan_imports", path)
+                if spec is None or spec.loader is None:
+                    continue
                 mod = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(mod)
                 package_root = _find_package_root(project_root)
@@ -106,21 +109,34 @@ def _find_package_root(project_root: Path) -> Path | None:
 
 
 # ---------------------------------------------------------------------------
-# CLAUDE.md parsing (with Capabilities table extraction)
+# Instruction-file parsing (AGENTS.md preferred, CLAUDE.md legacy)
 # ---------------------------------------------------------------------------
 
 
-def _find_claude_md_files(project_root: Path) -> list[Path]:
-    """Find all CLAUDE.md files."""
-    results = []
+def _find_instruction_files(project_root: Path) -> list[Path]:
+    """Find each directory's instruction-content file (dual-file aware).
+
+    Per instruction-writing.md dual-file mode: content lives in AGENTS.md
+    (CLAUDE.md is a thin @AGENTS.md wrapper for Claude). Prefer AGENTS.md;
+    fall back to CLAUDE.md for legacy single-file repos. Returns one file
+    per directory.
+    """
+    by_dir: dict[Path, Path] = {}
     for path in project_root.rglob("CLAUDE.md"):
         parts = path.relative_to(project_root).parts
         if any(part in SKIP_DIRS_SCAN for part in parts):
             continue
         if ".claude" in parts:
             continue
-        results.append(path)
-    return sorted(results)
+        by_dir[path.parent] = path
+    for path in project_root.rglob("AGENTS.md"):
+        parts = path.relative_to(project_root).parts
+        if any(part in SKIP_DIRS_SCAN for part in parts):
+            continue
+        if ".claude" in parts:
+            continue
+        by_dir[path.parent] = path  # AGENTS.md preferred (overwrites CLAUDE.md)
+    return sorted(by_dir.values())
 
 
 def parse_claude_md_registry(
@@ -132,7 +148,7 @@ def parse_claude_md_registry(
     """
     claude_md_registry = []
     capabilities_registry = []
-    for md_file in _find_claude_md_files(project_root):
+    for md_file in _find_instruction_files(project_root):
         md_entry, caps_entries = _parse_single_claude_md(md_file, project_root)
         claude_md_registry.append(md_entry)
         capabilities_registry.extend(caps_entries)
@@ -142,7 +158,7 @@ def parse_claude_md_registry(
 def _parse_capabilities_table(
     content: str, source_claude_md: str, module: str
 ) -> list[dict]:
-    """Parse Capabilities table from CLAUDE.md content.
+    """Parse Capabilities table from instruction-file content.
 
     Expected table format (3 columns, no UC ID):
         | 能力 | 入口 | 狀態 |
@@ -399,7 +415,7 @@ def run_cross_validation(
                     }
                 )
 
-    # X6: Module in dep-graph but no CLAUDE.md
+    # X6: Module in dep-graph but no instruction file (AGENTS.md/CLAUDE.md)
     for mod_name, mod_data in modules.items():
         if mod_name in claude_md_modules:
             continue
@@ -407,18 +423,23 @@ def run_cross_validation(
         if file_count < 3:
             continue
         mod_dir = project_root / mod_name
-        if mod_dir.is_dir() and not (mod_dir / "CLAUDE.md").exists():
+        if mod_dir.is_dir() and not (
+            (mod_dir / "CLAUDE.md").exists() or (mod_dir / "AGENTS.md").exists()
+        ):
             pkg_dir = _find_package_root(project_root)
             if pkg_dir:
                 actual_dir = pkg_dir / mod_name
-                if actual_dir.is_dir() and (actual_dir / "CLAUDE.md").exists():
+                if actual_dir.is_dir() and (
+                    (actual_dir / "CLAUDE.md").exists()
+                    or (actual_dir / "AGENTS.md").exists()
+                ):
                     continue
             findings.append(
                 {
                     "check_id": "X6",
                     "severity": "important",
                     "detail": (
-                        f"Module '{mod_name}' has {file_count} files but no CLAUDE.md"
+                        f"Module '{mod_name}' has {file_count} files but no instruction file (AGENTS.md/CLAUDE.md)"
                     ),
                     "module": mod_name,
                 }
@@ -516,7 +537,7 @@ def _compute_fingerprint(
         "kanban_total": len(kanban_registry),
         "kanban_by_lane": dict(kanban_by_lane),
         "kanban_hash": kanban_hash,
-        "claude_md_total": len(claude_md_registry),
+        "instruction_file_total": len(claude_md_registry),
     }
 
 

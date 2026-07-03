@@ -45,7 +45,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 |------|------|
 | 無參數 | Phase 1 → 2 → 3 → 4，每步等待確認 |
 | `--init` | Phase 1 用初始生成模式 |
-| `--quality` | Phase 3 加入 CLAUDE.md signal/noise + 導航有效性檢查 |
+| `--quality` | Phase 3 加入 instruction 檔 signal/noise + 導航有效性檢查 |
 | `--all` | 全部檢查（含過時卡片、SYSTEM-MAP 同步、kanban 完整 hygiene） |
 
 ---

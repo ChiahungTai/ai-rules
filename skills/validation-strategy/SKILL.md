@@ -41,7 +41,7 @@ description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 rep
 - 驗「NT 的 submit_order 在你的 context 怎麼行為」（你的整合）→ 驗
 - 驗「NT submit_order 內部是否正確」（package 內部）→ 不驗（package 自己驗）
 
-## RC-4 邊界：與 test-driven-development
+## 與 test-driven-development 邊界
 
 - [test-driven-development](../test-driven-development/SKILL.md)：RED/GREEN **流程** + Test Classification（單元 / 整合 / 外部 API 分類）。
 - 本 skill：測試類型**選擇紀律**（e2e vs 單元、replay vs live）。

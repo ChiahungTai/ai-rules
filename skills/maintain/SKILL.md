@@ -17,10 +17,10 @@ when_to_use: >
 ## 四階段流程
 
 ```
-Phase 1: Snapshot               Phase 2: CLAUDE.md Sync     Phase 3: Doc Health           Phase 4: Report
+Phase 1: Snapshot               Phase 2: Instruction Sync     Phase 3: Doc Health           Phase 4: Report
 ─────────────────               ──────────────────────      ──────────────────────        ──────────────
 scan_project.py                 /instruction:sync                 /doc-health                    彙總報告
-→ dep_graph / findings / fp     LLM 直接讀 CLAUDE.md        呈現 findings                  跨 phase 關聯
+→ dep_graph / findings / fp     LLM 直接讀 instruction 檔        呈現 findings                  跨 phase 關聯
 diff fingerprint                用 dep_graph 驗證 imports   LLM 直接讀 .kanban/            趨勢追蹤
 更新 dep-graph.md               品質檢查                    品質檢查 + kanban hygiene
 ```
@@ -51,7 +51,7 @@ Mermaid 暗色主題：所有 ````mermaid` 區塊第一行加 `%%{init: {'theme'
 
 `.project-snapshot.json` 隨程式碼一起 commit，作為下次 diff 基準。
 
-### Phase 2: CLAUDE.md 同步
+### Phase 2: Instruction 同步
 
 執行 `/instruction:sync --changed-since yesterday --recursive`。
 
@@ -73,7 +73,7 @@ Snapshot 輔助：
 
 1. **各 Phase 摘要**：通過/警告/失敗統計
 2. **跨 Phase 關聯**：
-   - Phase 1 import 變化 ↔ Phase 2 CLAUDE.md 問題
+   - Phase 1 import 變化 ↔ Phase 2 Instruction 問題
    - Phase 1 findings ↔ Phase 3 doc-health 問題
 3. **趨勢追蹤**：fingerprint 數量變化、findings 增減
 4. **寫晨報檔**：若 `<project-root>/ai-analysis/daily-report/` 目錄存在，把報告寫入 `ai-analysis/daily-report/YYYY-MM-DD.md`（同日覆蓋；格式見下方「晨報檔格式」）。目錄不存在則 skip——這是跨專案 opt-in guard，避免影響沒有晨報慣例的專案。**無待決項時仍寫檔**（內容標「✅ 無待決項」），以證明排程有跑。
@@ -87,7 +87,7 @@ Snapshot 輔助：
 | X-cap-path | 🟢 Low | 自動修正 | 呈現待確認 | 見下方 |
 | X-tag-module | 🟢 Low | 自動修正 | 呈現待確認 | 見下方 |
 | X-ep-ready | 🟡 Medium | 只報告 | 呈現待確認 | EP 可能未建立 |
-| X6 | 🟡 Medium | 只報告 | 呈現待確認 | 需人類決定是否建 CLAUDE.md |
+| X6 | 🟡 Medium | 只報告 | 呈現待確認 | 需人類決定是否建 instruction 檔 |
 
 **分級原則**：修正結果可機械驗證（路徑存在、tag 對應目錄）→ 🟢。需語義判斷 → 🟡。
 
@@ -99,7 +99,7 @@ Snapshot 輔助：
 
 **第一層：同目錄搜尋**（直接比對）
 
-1. Read 目標 CLAUDE.md，找到含該路徑的 Capabilities 行
+1. Read 目標 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy），找到含該路徑的 Capabilities 行
 2. 在模組目錄下搜尋正確檔名：`fd <basename> <module_dir>/`
 3. 單一候選 + class/function 名吻合 → 🟢 更新路徑
 4. 多候選或無候選 → 進入第二層
@@ -195,7 +195,7 @@ Done/ 超過 14 天的卡片：
 ✅ 無變化（fingerprint 與上次一致）
    - dep_graph: N modules, findings: N, capabilities: N, kanban: N
 
-### Phase 2: CLAUDE.md Sync
+### Phase 2: Instruction Sync
 ✅ 無問題（檢查 N 個檔案）
 
 ### Phase 3: Doc Health + Kanban
@@ -217,9 +217,9 @@ Done/ 超過 14 天的卡片：
 - dep_graph: 新增 deps features → data
 - 已更新: Mermaid graph, Direct Dependencies 表
 
-### Phase 2: CLAUDE.md Sync
+### Phase 2: Instruction Sync
 ⚠️ 發現 N 個問題
-- data/CLAUDE.md: 路徑 xxx 已更名 → [自動修正已完成]
+- data/AGENTS.md: 路徑 xxx 已更名 → [自動修正已完成]
 - features/CLAUDE.md: 缺少導航 → 建議新增（🟡 未修正）
 
 ### Phase 3: Doc Health + Kanban
@@ -231,7 +231,7 @@ Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
   - Done 歸檔: N 張 > 14 天已清理
 
 ### Phase 4: Health Report
-- 跨 phase 關聯：Phase 1 新增依賴 ↔ Phase 2 CLAUDE.md 問題
+- 跨 phase 關聯：Phase 1 新增依賴 ↔ Phase 2 Instruction 問題
 - 未解決 🟡: N 筆（需人工確認）
 - 趨勢: capabilities +N（健康），findings +N
 
@@ -250,7 +250,7 @@ Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
 <!-- 無則改標「✅ 無待決項」並仍寫檔，證明排程有跑 -->
 - 🟡 [X-ep-ready / X6 / 需語義判斷] — 為什麼需要你決定 + 建議
 - Kanban stale: `<card>` 已 N 天未動 — 繼續 or 歸檔？
-- 跨 phase 關聯待確認: Phase 1 import 變化 ↔ Phase 2 CLAUDE.md 問題
+- 跨 phase 關聯待確認: Phase 1 import 變化 ↔ Phase 2 Instruction 問題
 
 ## ✅ 已自動處理（你不用管）
 - auto-fixed: X-cap-path(N), X-tag-module(N)

@@ -2,7 +2,7 @@
 name: scan-project
 description: >
   Unified project knowledge scanner. Scans Python imports (via scan_imports.py),
-  CLAUDE.md Capabilities tables, and .kanban/ cards. Produces dep_graph + findings + fingerprint.
+  instruction-file (AGENTS.md preferred, CLAUDE.md legacy) Capabilities tables, and .kanban/ cards. Produces dep_graph + findings + fingerprint.
   Use before /daily-maintain or /project-review, or when setting up a new project.
 when_to_use: >
   Run before daily-maintain, during init, or when you need mechanical
@@ -13,7 +13,7 @@ allowed-tools: Bash(uv run python *)
 
 # /scan-project — 統一專案知識掃描器
 
-掃描 Python import 依賴、CLAUDE.md Capabilities 表格、.kanban/ 卡片，產出 **dep_graph + findings + fingerprint**。
+掃描 Python import 依賴、模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities 表格、.kanban/ 卡片，產出 **dep_graph + findings + fingerprint**。
 
 Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.md)
 
@@ -28,14 +28,14 @@ Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.m
 2. **findings** — 機械性交叉驗證問題（路徑、tag、重複等）
 3. **fingerprint** — 輕量變化偵測（counts + hashes）
 
-內部解析（CLAUDE.md、.kanban/）僅用於計算 findings，**不在輸出中包含 registry**。
+內部解析（instruction 檔（AGENTS.md 為主、CLAUDE.md legacy）、.kanban/）僅用於計算 findings，**不在輸出中包含 registry**。
 
 **LSP 與 dep_graph 的分工（正交，非競爭）**：
 
 | 查詢類型 | 用誰 | 理由 |
 |---------|------|------|
 | 單點依賴（「X 用到 Y 嗎？」「誰呼叫 Z？」） | **LSP** findReferences / incomingCalls | live、無 snapshot 時效衰減 |
-| 否定宣稱（X1：CLAUDE.md「Does NOT depend on」是否為真） | **dep_graph** edges 集合差集 | 證明「不存在」需窮舉邊，LSP 點查詢不擅長否定驗證 |
+| 否定宣稱（X1：instruction 檔「Does NOT depend on」是否為真） | **dep_graph** edges 集合差集 | 證明「不存在」需窮舉邊，LSP 點查詢不擅長否定驗證 |
 | 全域拓撲（fan-out、熱點、blast radius、遞迴閉包） | **dep_graph** | 一次看全圖；LSP 需 N 次點查詢重建 |
 | code↔doc 一致性（X-cap-path / X-tag-module / X6 等 findings） | **scan-project** | LSP 符號世界裡沒有「文檔宣稱什麼」這一側 —— **scan-project 真正不可替代的價值，非 dependency graph 本身** |
 
@@ -85,15 +85,15 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 | `/project-review` | Phase 1 執行本 skill 產出 snapshot（互動模式） |
 | `/instruction:sync` | 可選：載入 dep_graph 用於 import 驗證 |
 | `/instruction:init` | 可選：執行本 skill，用 findings 報告缺口 |
-| `/doc-health` | 步驟 1 消費 findings，LLM 直接讀 CLAUDE.md + .kanban/ 做品質檢查 |
+| `/doc-health` | 步驟 1 消費 findings，LLM 直接讀 instruction 檔（AGENTS.md/CLAUDE.md）+ .kanban/ 做品質檢查 |
 
 ## 交叉驗證（機械性）
 
 | Check | 說明 | 嚴重度 |
 |-------|------|--------|
-| X-cap-path | Capabilities 入口路徑不存在（檢查 project root / package root / CLAUDE.md 目錄） | important |
+| X-cap-path | Capabilities 入口路徑不存在（檢查 project root / package root / instruction 檔目錄（AGENTS.md/CLAUDE.md）） | important |
 | X-tag-module | Kanban 卡片 `[tag:xxx]` 不對應 `<package>/` 子目錄 | important |
 | X-ep-ready | Next-Up/In-Progress 卡片引用的 EP 檔案不存在 | important |
-| X6 | dep-graph 有模組（≥3 files）但無 CLAUDE.md | important |
+| X6 | dep-graph 有模組（≥3 files）但無 instruction 檔（AGENTS.md/CLAUDE.md） | important |
 
 語義性驗證（X1 dep-graph 矛盾、X8 幽靈 Capabilities 引用）由 `/instruction:sync` 和 `/doc-health` 的 LLM 判斷完成。

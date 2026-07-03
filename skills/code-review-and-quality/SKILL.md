@@ -54,7 +54,7 @@ For detailed profiling, read [performance-optimization](../performance-optimizat
 
 ### 6. Capability Coverage
 
-For projects using UC-Driven Development, verify implementation against CLAUDE.md Capabilities tables.
+For projects using UC-Driven Development, verify implementation against module instruction files' Capabilities tables (AGENTS.md preferred, CLAUDE.md legacy).
 
 - Does implementation cover all Capabilities-defined behaviors?
 - Are Capabilities-referenced behaviors present in the diff?

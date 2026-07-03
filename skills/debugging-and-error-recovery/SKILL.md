@@ -26,19 +26,9 @@ When anything unexpected happens:
 
 Don't push past a failing test or broken build. Errors compound.
 
-## Triage Checklist
+## Investigation Mindset
 
-Work through in order. Do not skip steps.
-
-### 1. Reproduce
-
-Make the failure happen reliably. If you can't reproduce it, you can't fix it with confidence.
-
-**Non-reproducible bug decision tree**：
-- **Timing-dependent?** → Add timestamps to logs, try artificial delays to widen race windows
-- **Environment-dependent?** → Compare versions, OS, env vars, data state (empty vs populated)
-- **State-dependent?** → Check leaked state between tests, global variables, shared caches; run in isolation
-- **Truly random?** → Add defensive logging, set up alert for error signature, document conditions
+> 下列三項是貫穿整個除錯過程的**心態紀律**，非序列步驟（與下方 Triage Checklist 的有序步驟不同）。在每個 triage step 都適用。
 
 ### No Guessing
 
@@ -74,8 +64,22 @@ No Guessing 的「2 次猜測 → 加 LOG」是**策略層**熔斷。**≥3 次 
 - 「這不是這樣吧？」/「Is that not happening?」→ 你假設未驗證
 - 「能不能 show 我...？」→ 該加證據收集（LOG）
 - 「不要用猜的」/「Stop guessing」→ 在沒理解下提 fix
-- 「Ultra-think this」→ 質疑根本，不只症狀
+- 「Ultra-Think this」→ 質疑根本，不只症狀
 - 「我們卡住了？」（挫折）→ 你的方法沒奏效
+
+## Triage Checklist
+
+Work through in order. Do not skip steps.
+
+### 1. Reproduce
+
+Make the failure happen reliably. If you can't reproduce it, you can't fix it with confidence.
+
+**Non-reproducible bug decision tree**：
+- **Timing-dependent?** → Add timestamps to logs, try artificial delays to widen race windows
+- **Environment-dependent?** → Compare versions, OS, env vars, data state (empty vs populated)
+- **State-dependent?** → Check leaked state between tests, global variables, shared caches; run in isolation
+- **Truly random?** → Add defensive logging, set up alert for error signature, document conditions
 
 ### 2. Localize
 

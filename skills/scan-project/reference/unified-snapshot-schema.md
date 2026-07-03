@@ -23,9 +23,9 @@
 
 | v3 欄位 | v5 對應 | 說明 |
 |---------|---------|------|
-| `capabilities_registry` | —（移除） | LLM 直接讀 CLAUDE.md |
+| `capabilities_registry` | —（移除） | LLM 直接讀 instruction 檔（AGENTS.md/CLAUDE.md） |
 | `kanban_registry` | —（移除） | LLM 直接讀 .kanban/ |
-| `claude_md_registry` | —（移除） | LLM 直接讀 CLAUDE.md |
+| `claude_md_registry` | —（移除） | LLM 直接讀 instruction 檔（AGENTS.md/CLAUDE.md） |
 | `cross_validation` | `findings` | 重新命名，更新 check IDs |
 | `modules/edges/hotspots` | `dep_graph.modules/edges/hotspots` | 移至 dep_graph 子物件 |
 | (無) | `fingerprint` | 新增：變化偵測用 counts + hashes |
@@ -80,7 +80,7 @@
     {
       "check_id": "X6",
       "severity": "important",
-      "detail": "Module 'services' has 12 files but no CLAUDE.md",
+      "detail": "Module 'services' has 12 files but no instruction file (AGENTS.md/CLAUDE.md)",
       "module": "services"
     }
   ],
@@ -91,7 +91,7 @@
     "kanban_total": 66,
     "kanban_by_lane": { "Backlog": 63, "Next-Up": 2, "Done": 1 },
     "kanban_hash": "0b84e82352fd",
-    "claude_md_total": 71
+    "instruction_file_total": 71
   }
 }
 ```
@@ -127,12 +127,12 @@
 
 | 欄位 | 型別 | 說明 |
 |------|------|------|
-| `capabilities_total` | int | 所有 CLAUDE.md Capabilities ✅ 條目總數 |
+| `capabilities_total` | int | 所有 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities ✅ 條目總數 |
 | `capabilities_hash` | string | sorted capability:module:status 的 MD5 前 12 碼 |
 | `kanban_total` | int | .kanban/ 卡片總數 |
 | `kanban_by_lane` | dict | 各 lane 卡片數 |
 | `kanban_hash` | string | sorted title:lane:tags 的 MD5 前 12 碼 |
-| `claude_md_total` | int | CLAUDE.md 檔案總數 |
+| `instruction_file_total` | int | instruction 檔總數（AGENTS.md + legacy CLAUDE.md） |
 
 ---
 
@@ -140,11 +140,11 @@
 
 | check_id | 檢查邏輯 | severity |
 |----------|---------|----------|
-| `X-cap-path` | Capabilities 入口路徑不存在（檢查 project root / package root / CLAUDE.md 目錄三個候選位置） | important |
+| `X-cap-path` | Capabilities 入口路徑不存在（檢查 project root / package root / instruction 檔目錄（AGENTS.md/CLAUDE.md）三個候選位置） | important |
 | `X-tag-module` | Kanban 卡片的 `[tag:xxx]` 不對應 `mosaic_alpha/` 子目錄 | important |
 | `X-ep-ready` | Next-Up/In-Progress 卡片引用的 EP 檔案在 ai-analysis/ 等目錄找不到 | important |
-| `X6` | dep-graph modules 中有模組（≥3 files）但該模組目錄下無 CLAUDE.md | important |
+| `X6` | dep-graph modules 中有模組（≥3 files）但該模組目錄下無 instruction 檔（AGENTS.md/CLAUDE.md） | important |
 
 **語義性驗證（由 LLM 判斷，不在 findings 中）**：
-- X1：dep-graph 矛盾（CLAUDE.md "Does NOT depend on" vs 實際 import edge）
+- X1：dep-graph 矛盾（instruction 檔 "Does NOT depend on" vs 實際 import edge）
 - X8：幽靈 Capabilities 引用（SYSTEM-MAP.md 提到的能力不在 Capabilities 表格中）

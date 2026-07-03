@@ -6,20 +6,20 @@ argument-hint: "/instruction:clean [目錄路徑] [--recursive] — 預設處理
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 ---
 
-# CLAUDE.md Clean - 清理不必要的元資訊
+# Instruction File Clean — 清理不必要的元資訊
 
 > **instruction file 雙檔模式**：操作範圍含根 `AGENTS.md`（source）+ `CLAUDE.md`（wrapper + 模組導航）——遞迴發現時兩者皆納入。見 [instruction-writing.md](../../rules/instruction-writing.md)。
 
 你是 Markdown 文檔清理專家，專門移除對 AI 無意義的元資訊和低 signal 內容，讓文檔專注於當前有效的核心知識。
 
-> **🔴 強烈警告**: AI 寫作 CLAUDE.md 時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。違反此規則視為嚴重錯誤。詳細約束請參考 `_ai-behavior-constraints.md`（已自動載入）
+> **🔴 強烈警告**: AI 寫作 instruction 檔時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。違反此規則視為嚴重錯誤。詳細約束請參考 `_ai-behavior-constraints.md`（已自動載入）
 
 Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md) — 讀取此檔案以理解 High Signal / Low Noise 分類標準。
 
 ## 🎯 核心目標
 
 **適用文檔**：
-- **CLAUDE.md**：AI 協作指南，不需要人類導向的元資訊
+- **Instruction files（AGENTS.md / CLAUDE.md）**：AI 協作指南，不需要人類導向的元資訊
 - **說明文檔**：描述現有系統運作方式的技術文檔（如 call stack 詳解、工作流說明）
 
 > **不適用**：設計文檔（描述概念、提案、未來計畫）——版本變更歷史可能有其參考價值。
@@ -65,7 +65,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ### 4. 引用語法正確性
 
-依據 [instruction-writing.md](../../rules/instruction-writing.md) 的引用語法規則，檢查 CLAUDE.md 中的引用是否使用了正確語法：
+依據 [instruction-writing.md](../../rules/instruction-writing.md) 的引用語法規則，檢查 instruction 檔中的引用是否使用了正確語法：
 
 | 情境 | 正確語法 | 錯誤語法 |
 |------|---------|---------|
@@ -77,13 +77,13 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 清理完成後，執行 Decoder Test 驗證 Encoder 品質：
 
-**測試方法**：基於清理後的 CLAUDE.md 內容，嘗試回答以下問題：
+**測試方法**：基於清理後的 instruction 檔內容，嘗試回答以下問題：
 1. 這個模組的核心職責是什麼？
 2. 關鍵的設計決策和理由是什麼？
 3. 有哪些不可妥協的約束？
 4. 模組邊界在哪裡（不做什麼）？
 
-**通過標準**：所有問題都能從 CLAUDE.md 內容回答（不需查閱源碼）。
+**通過標準**：所有問題都能從 instruction 檔內容回答（不需查閱源碼）。
 
 **失敗處理**：如果清理過度導致關鍵設計理由遺失，從 `.backup` 還原並重新評估。
 
@@ -96,8 +96,8 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 ### 步驟 2: 讀取並分析
 
 ```bash
-# 讀取目標 CLAUDE.md
-Read $TARGET_CLAUDE_MD
+# 讀取目標 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）
+Read $TARGET_INSTRUCTION_MD
 ```
 
 ### 步驟 3: 識別元資訊
@@ -145,20 +145,20 @@ Read $TARGET_CLAUDE_MD
 ### 基本用法
 
 ```bash
-# 1. 檢查當前目錄的 CLAUDE.md
+# 1. 檢查當前目錄的 instruction 檔
 /instruction:clean
 
 # 2. 檢查指定檔案
-/instruction:clean src/core/CLAUDE.md
+/instruction:clean src/core/AGENTS.md
 
 # 3. 檢查指定目錄（僅該目錄層級）
 /instruction:clean src/core
 
-# 4. 遞歸檢查所有子目錄的 CLAUDE.md
+# 4. 遞迴檢查所有子目錄的 instruction 檔
 /instruction:clean --recursive
 /instruction:clean -r
 
-# 5. 遞歸檢查指定目錄
+# 5. 遞迴檢查指定目錄
 /instruction:clean /path/to/project --recursive
 
 # 6. 預覽模式（不實際修改）
@@ -173,10 +173,10 @@ Read $TARGET_CLAUDE_MD
 
 | 參數 | 說明 |
 |------|------|
-| **無參數** | 檢查當前目錄的 `CLAUDE.md` |
-| **檔案路徑** | 檢查指定的 `CLAUDE.md` 檔案 |
-| **目錄路徑** | 檢查指定目錄下的 `CLAUDE.md`（僅該層） |
-| **--recursive, -r** | 遞歸檢查所有子目錄的 `CLAUDE.md` |
+| **無參數** | 檢查當前目錄的 instruction 檔（AGENTS.md 為主，fallback CLAUDE.md） |
+| **檔案路徑** | 檢查指定的 instruction 檔 |
+| **目錄路徑** | 檢查指定目錄下的 instruction 檔（僅該層） |
+| **--recursive, -r** | 遞迴檢查所有子目錄的 instruction 檔 |
 | **--dry-run** | 預覽模式，顯示發現但不執行清理 |
 | **--force** | 強制清理，不詢問確認 |
 
@@ -185,9 +185,9 @@ Read $TARGET_CLAUDE_MD
 ### 發現元資訊時
 
 ```
-## CLAUDE.md 清理檢查報告
+## Instruction File 清理檢查報告
 
-檔案: /path/to/CLAUDE.md
+檔案: /path/to/AGENTS.md
 
 ### 應該移除的元資訊 (5 項)
 - [ ] 第 3 行：> **版本**: 2.0（版本號）
@@ -209,28 +209,28 @@ Read $TARGET_CLAUDE_MD
 ### 無元資訊時
 
 ```
-## CLAUDE.md 清理檢查報告
+## Instruction File 清理檢查報告
 
-檔案: /path/to/CLAUDE.md
+檔案: /path/to/AGENTS.md
 
 ✅ 文檔乾淨，沒有發現不必要的元資訊。
 
 建議：保持當前狀態，專注於核心規則和約束的內容。
 ```
 
-### 遞歸模式輸出
-遞歸輸出格式: [recursive-output.md](./_common/recursive-output.md)
+### 遞迴模式輸出
+遞迴輸出格式: [recursive-output.md](./_common/recursive-output.md)
 
-### 遞歸清理檢查報告範例
+### 遞迴清理檢查報告範例
 
 ```
-## 遞歸清理檢查報告
+## 遞迴清理檢查報告
 
 目錄: /path/to/project
-發現 CLAUDE.md: 5 個
+發現 instruction 檔: 5 個
 
 ### 🔴 Critical（專案根目錄）
-**檔案**: CLAUDE.md
+**檔案**: AGENTS.md
 - 元資訊: ❌ 需要清理（2 項）
 
 ### 🟠 High（主要模組）
@@ -287,8 +287,8 @@ Read $TARGET_CLAUDE_MD
 - 確保清理後文檔結構完整
 
 ## 🎯 品質檢查清單
-- [ ] 發現了所有 CLAUDE.md 檔案（遞歸模式）
-- [ ] 讀取了 CLAUDE.md
+- [ ] 發現了所有 instruction 檔（遞迴模式）
+- [ ] 讀取了 instruction 檔
 - [ ] 識別了所有不必要的元資訊
 - [ ] 識別了低 signal 內容（可推導內容、完整範例 >5 行）
 - [ ] 檢查了引用語法正確性（`@` vs `[描述](path)`）
@@ -300,6 +300,6 @@ Read $TARGET_CLAUDE_MD
 
 ---
 
-> 💡 **清理哲學**: CLAUDE.md 是模組知識的 Encoder（壓縮表示）。清理不只是移除元資訊，更是提升 signal/noise ratio — 讓 AI 專注於從程式碼猜不到的設計知識。
+> 💡 **清理哲學**: instruction 檔是模組知識的 Encoder（壓縮表示）。清理不只是移除元資訊，更是提升 signal/noise ratio — 讓 AI 專注於從程式碼猜不到的設計知識。
 
-> 🤖 **AI 導向價值**: 高 signal/noise ratio 的 CLAUDE.md 讓 AI 快速理解模組本質，避免被版本歷史、API 簽名等雜訊干擾。
+> 🤖 **AI 導向價值**: 高 signal/noise ratio 的 instruction 檔讓 AI 快速理解模組本質，避免被版本歷史、API 簽名等雜訊干擾。

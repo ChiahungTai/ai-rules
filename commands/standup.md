@@ -59,10 +59,10 @@ fd -e jsonl . ~/.claude/projects/ --max-depth 2 --changed-within 1d
 
 ### 4. Capabilities + Kanban 進度摘要 + SYSTEM-MAP 功能進度
 
-掃描 CLAUDE.md Capabilities 表格和 .kanban/ 卡片的昨日變更，摘要進度。
+掃描模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities 表格和 .kanban/ 卡片的昨日變更，摘要進度。
 
 ```bash
-git log -p --since="yesterday 00:00:00" -- "**/CLAUDE.md" ".kanban/**/*.md"
+git log -p --since="yesterday 00:00:00" -- "**/CLAUDE.md" "**/AGENTS.md" ".kanban/**/*.md"
 ```
 
 摘要：

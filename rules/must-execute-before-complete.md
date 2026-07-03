@@ -1,6 +1,6 @@
 # 修改後必須執行驗證
 
-> **自動載入**: 此檔案位於 `~/.claude/rules/`，會自動載入到所有會話
+> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
 
 ---
 

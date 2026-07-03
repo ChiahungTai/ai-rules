@@ -1,20 +1,20 @@
 # 遞歸發現與處理流程
 
-## 步驟 1: 發現 CLAUDE.md
+## 步驟 1: 發現 instruction 檔
 
 ```bash
 # 單檔案模式
-Read <target-claude-md>
+Read <target-instruction-file>
 
-# 遞歸模式（用 fd，預設排除隱藏檔與 .gitignore）
-fd "CLAUDE.md" <target-dir>
+# 遞歸模式（用 fd，預設排除隱藏檔與 .gitignore；AGENTS.md 為主、CLAUDE.md legacy）
+fd "(AGENTS|CLAUDE)\.md" <target-dir>
 ```
 
 ## 步驟 2: 分類與優先級
 
 ```python
-def categorize_claude_files(files: list) -> dict:
-    """將發現的 CLAUDE.md 按重要性分類"""
+def categorize_instruction_files(files: list) -> dict:
+    """將發現的 instruction 檔（AGENTS.md/CLAUDE.md）按重要性分類"""
 
     categories = {
         "critical": [],    # 專案根目錄

@@ -1,8 +1,8 @@
 # AI 協作開發指南
 
-> **🔗 Symbolic Link 說明**: `~/.claude/CLAUDE.md` 是一個 symbolic link，連結目標為 `ai-rules/ai-development-guide.md`
+> **🔗 部署說明**: 本檔是 harness-neutral source，部署到各 harness 全域位置（Claude `~/.claude/CLAUDE.md` symbolic link → 本檔；ZCode `~/.zcode/AGENTS.md`；OpenCode `~/.config/opencode/AGENTS.md`；Codex `~/.codex/AGENTS.md`）。專案層雙檔模式（AGENTS.md source + CLAUDE.md wrapper）見 [instruction-writing.md](~/Github/ai-rules/rules/instruction-writing.md)。
 
-> **🔴 強烈警告**: AI 寫作或修改 CLAUDE.md 時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。詳細約束請參考 `@~/.claude/rules/_ai-behavior-constraints.md`
+> **🔴 強烈警告**: AI 撰寫或修改 instruction 檔（AGENTS.md source + CLAUDE.md wrapper）時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。詳細約束請參考 `@~/Github/ai-rules/rules/_ai-behavior-constraints.md`
 
 **適用範圍**: 所有軟體開發專案（量化交易專案優先）
 **AI 系統**: Claude Code、KiloCode、Gemini 等
@@ -38,7 +38,7 @@
 - **🟡 中等風險**（新功能、演算法優化、性能改進）→ 核心功能測試 + 經驗分析
 - **🟢 低風險**（樣式、文檔、配置）→ 至少執行一次確保無語法錯誤
 
-> 詳細執行規範見 `~/.claude/rules/must-execute-before-complete.md`；漸進式驗證見 `~/.claude/rules/progressive-validation.md`
+> 詳細執行規範見 `~/Github/ai-rules/rules/must-execute-before-complete.md`；漸進式驗證見 `~/Github/ai-rules/rules/progressive-validation.md`
 
 ### 務實評估約束
 
@@ -51,15 +51,15 @@
 
 ## UC-Driven Development
 
-> **核心原則**：CLAUDE.md Capabilities 記錄已完成能力（✅），.kanban/ 追蹤待辦與進行中任務（📋/🔧）。所有功能開發以 UC（Use Case）定義為前置條件。能力描述和入口路徑是索引鍵。
+> **核心原則**：AGENTS.md Capabilities 記錄已完成能力（✅），.kanban/ 追蹤待辦與進行中任務（📋/🔧）。所有功能開發以 UC（Use Case）定義為前置條件。能力描述和入口路徑是索引鍵。
 
 ### 文檔體系
 
-`CLAUDE.md` 每次 session auto-load；`architecture.md` / `SYSTEM-MAP.md` / `dependency-graph.md` 內容大，用 markdown link on-demand 讀（**不 `@` transclude**，避免撂爆 CLAUDE.md — 機制見 [instruction-writing.md](~/.claude/rules/instruction-writing.md)「長文件按需指引」）：
+`AGENTS.md`（source）/ `CLAUDE.md`（wrapper）每次 session auto-load；`architecture.md` / `SYSTEM-MAP.md` / `dependency-graph.md` 內容大，用 markdown link on-demand 讀（**不 `@` transclude**，避免撂爆 instruction 檔 — 機制見 [instruction-writing.md](~/Github/ai-rules/rules/instruction-writing.md)「長文件按需指引」）：
 
 | 文件 | 角色 | 時間視角 |
 |------|------|---------|
-| `CLAUDE.md` | 導航 + 已完成能力索引（what / where） | 永久 |
+| `AGENTS.md` / `CLAUDE.md` | 導航 + 已完成能力索引（what / where） | 永久 |
 | `architecture.md` | 設計決策 / whole-picture（why）— 有此檔才適用 | 永久 |
 | `SYSTEM-MAP.md` | 跨域功能狀態總覽（status） | 現在 |
 | `dependency-graph.md` | 跨模組依賴 / ripple 風險地圖 — maintain Phase 1.3 維護（非 /consistency 範圍） | 現在 |
@@ -71,20 +71,20 @@
 
 | 標記 | 含義 | 存放位置 |
 |------|------|---------|
-| ✅ | 已完成 | CLAUDE.md Capabilities 表格 |
+| ✅ | 已完成 | AGENTS.md Capabilities 表格（CLAUDE.md wrapper 同步） |
 | 📋 | 待實作 | .kanban/Backlog/ card |
 | ❌ | 已棄用 | 從 Capabilities 移除 |
 | 🔧 | 部分完成 | .kanban/Backlog/ card |
 | 🟡 | 進行中 | .kanban/Next-Up/ 或 In-Progress/ |
-| 🟢 | 部分覆蓋 | CLAUDE.md Capabilities（附限制） |
+| 🟢 | 部分覆蓋 | AGENTS.md Capabilities（附限制；CLAUDE.md wrapper 同步） |
 
 **Capabilities 表格格式**：`| 能力 | 入口 | 狀態 |`（每行一個 ✅ UC，入口含 CLI + 函式路徑）
 
 ### 放置原則（Domain-First）
 
-- ✅ → **主要實作模組的 CLAUDE.md**（如 `mosaic_alpha/data/CLAUDE.md`）
+- ✅ → **主要實作模組的 AGENTS.md**（如 `mosaic_alpha/data/AGENTS.md`，CLAUDE.md wrapper 同步）
 - 📋/🔧 → **.kanban/Backlog/** cards
-- **UC 不重複**：同一能力只在一個 CLAUDE.md 記錄
+- **UC 不重複**：同一能力只在一個 instruction 檔記錄
 - **scripts/ 不放 Capabilities**：scripts/ 是 demo 給老闆的呈現入口（基於 library 重寫，可用 typer），不放 Capabilities
 
 ### 變更規模分級
@@ -115,7 +115,7 @@
 
 ### SOLID 精神
 
-SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介面隔離）/ DIP（依賴反轉）— 實作時遵循，詳見 `~/.claude/rules/code-edit-constraints.md`。
+SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介面隔離）/ DIP（依賴反轉）— 實作時遵循，詳見 `~/Github/ai-rules/rules/code-edit-constraints.md`。
 
 ### 視角非模板
 

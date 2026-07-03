@@ -1,7 +1,7 @@
 # 遞歸處理約束
 
 ### 基本約束
-- **使用 fd**: 正確發現所有 CLAUDE.md（`fd "CLAUDE.md" <dir>`，預設排除隱藏檔與 .gitignore）
+- **使用 fd**: 正確發現所有 instruction 檔（`fd "(AGENTS|CLAUDE)\.md" <dir>`，預設排除隱藏檔與 .gitignore；AGENTS.md 為主、CLAUDE.md legacy）
 - **分類處理**: 按重要性分類（Critical/High/Medium/Low），優先處理關鍵文檔
 - **順序處理**: 從根目錄到深層模組，按重要性順序處理
 - **進度報告**: 每處理一個檔案報告進度
@@ -12,7 +12,7 @@
 
 | 分類 | 說明 | 範例路徑 |
 |------|------|---------|
-| **Critical** | 專案根目錄 | `CLAUDE.md` |
-| **High** | 主要模組 | `src/CLAUDE.md`, `core/CLAUDE.md` |
+| **Critical** | 專案根目錄 | `AGENTS.md`（source）、`CLAUDE.md`（wrapper） |
+| **High** | 主要模組 | `src/AGENTS.md`, `core/CLAUDE.md` |
 | **Medium** | 子模組 | `src/core/utils/CLAUDE.md` |
 | **Low** | 測試、範例、文檔 | `tests/CLAUDE.md`, `examples/CLAUDE.md` |

@@ -1,6 +1,6 @@
 # 協作約束
 
-> **自動載入**: 此檔案位於 `~/.claude/rules/`，會自動載入到所有會話
+> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
 
 ---
 
@@ -35,7 +35,7 @@
 
 ### 破壞性選擇的查證觸發
 
-刪除/整併「看似等價」的無測試保護檔案或版本（新舊版文件、重複設定）時，禁止用檔名直覺判斷保留哪個——先查證專案權威指定（上層索引/README「使用這個」、CLAUDE.md Capabilities 入口、git log 活躍度、內容完整度）。
+刪除/整併「看似等價」的無測試保護檔案或版本（新舊版文件、重複設定）時，禁止用檔名直覺判斷保留哪個——先查證專案權威指定（上層索引/README「使用這個」、instruction 檔 Capabilities 入口（AGENTS.md 為主）、git log 活躍度、內容完整度）。
 
 存活檔 diff 若只剩路徑修正、無實質內容吸收 → 即為刪錯訊號（權威版被刪、內容未搬移），停下重判。
 

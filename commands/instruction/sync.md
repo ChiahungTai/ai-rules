@@ -16,7 +16,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 適用文檔
 
-- **CLAUDE.md**：AI 協作指南，必須與程式碼同步
+- **instruction 檔**（AGENTS.md source + CLAUDE.md wrapper / 模組導航）：AI 協作指南，必須與程式碼同步
 - **說明文檔**：描述現有系統運作的技術文檔，必須與實際程式碼一致
 - **不適用**：設計文檔（描述概念、提案、未來計畫）— 沒有對應的現有程式碼可驗證
 
@@ -24,7 +24,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 價值金字塔
 
-CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（LLM 知道為什麼）→ **品質**（LLM 高效消費）。導航層做不好，其他檢查都沒意義。
+instruction 檔的價值層級：**導航**（LLM 找到程式碼）→ **理解**（LLM 知道為什麼）→ **品質**（LLM 高效消費）。導航層做不好，其他檢查都沒意義。
 
 ---
 
@@ -40,7 +40,7 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 
 | # | 角度 | 層級 | 一行摘要 |
 |---|------|------|---------|
-| 1 | 導航有效性 | 核心 | CLAUDE.md 是否讓 AI 從概念定位到程式碼（最重要） |
+| 1 | 導航有效性 | 核心 | instruction 檔是否讓 AI 從概念定位到程式碼（最重要） |
 | 2 | 程式碼一致性 | 核心 | 檔案路徑、簽名、行為描述是否與實際程式碼一致 |
 | 3 | 涵蓋性 | 完整 | 核心模組和公開 API 是否被文檔記錄 |
 | 4 | 元資訊 | 品質 | 是否存在版本號、日期等對 AI 無意義的內容 |
@@ -49,8 +49,8 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 | 7 | Signal/Noise Ratio | 核心 | High Signal 佔比是否足夠 |
 | 8 | 引用語法 | 品質 | `@` vs `[描述](path)` 選擇是否正確 |
 | 9 | 連鎖影響 | 完整 | 程式碼變更是否影響消費端文檔 |
-| 10 | dep-graph 矛盾 | 完整 | CLAUDE.md "Does NOT depend on" 與 dep-graph import edge 矛盾 |
-| 11 | 模組覆蓋缺口 | 完整 | dep-graph 有模組但無 CLAUDE.md |
+| 10 | dep-graph 矛盾 | 完整 | instruction 檔 "Does NOT depend on" 與 dep-graph import edge 矛盾 |
+| 11 | 模組覆蓋缺口 | 完整 | dep-graph 有模組但無 instruction 檔 |
 | 12 | 通用性 | 完整 | 泛用 rules/commands 是否含真實專案符號（應 `<placeholder>`） |
 
 完整定義和判斷標準：[sync-check-angles.md](./_common/sync-check-angles.md)
@@ -84,7 +84,7 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 | 0.5 | Snapshot 載入 | `.project-snapshot.json` 存在時 |
 | 1 | 遞歸發現 instruction files（根 AGENTS.md + CLAUDE.md） | 預設 |
 | 1.5 | 依賴鏈擴展 | 有 git diff 變更 / --changed-since |
-| 1.6 | Sub-doc 擴展 | CLAUDE.md 引用了 .md 子文件 |
+| 1.6 | Sub-doc 擴展 | instruction 檔引用了 .md 子文件 |
 | 2 | 掃描程式碼結構 | 預設 |
 | 3 | 提取文檔引用 | 預設 |
 | 4 | 驗證一致性 | 預設 |
@@ -106,7 +106,7 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 
 | 參數 | 說明 |
 |------|------|
-| **無參數** | 檢查當前目錄的 `CLAUDE.md` |
+| **無參數** | 檢查當前目錄的 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md） |
 | **檔案/目錄路徑** | 檢查指定檔案或目錄 |
 | **--recursive, -r** | 遞歸檢查所有子目錄 |
 | **--changed-since** | 增量模式：只檢查 git 變更涉及的檔案 |
@@ -128,6 +128,6 @@ CLAUDE.md 的價值層級：**導航**（LLM 找到程式碼）→ **理解**（
 
 ---
 
-> **同步哲學**: CLAUDE.md 是活文檔，必須與程式碼同步演進。當 sync 發現 ⚠️ ≥ 3 個時，建議執行 `/instruction:sync {module} --all` 完整 11 角度深度驗證。
+> **同步哲學**: instruction 檔是活文檔，必須與程式碼同步演進。當 sync 發現 ⚠️ ≥ 3 個時，建議執行 `/instruction:sync {module} --all` 完整 11 角度深度驗證。
 
 > **工作流**: `/instruction:clean` → `/instruction:distill` → `/instruction:sync`

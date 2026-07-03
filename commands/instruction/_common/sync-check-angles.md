@@ -6,7 +6,7 @@
 
 ## 角度一：導航有效性（核心層，最重要）
 
-> **核心原則**：CLAUDE.md 的導航職責是讓 AI 從「概念」定位到「符號」（導航-A）；符號→位置的機械查找由 LSP 接手（導航-B）。讀完 CLAUDE.md 後，AI 應能回答「這個概念的核心符號是什麼？」，再由 LSP 解析到檔案位置。
+> **核心原則**：instruction 檔（AGENTS.md 為主、CLAUDE.md legacy）的導航職責是讓 AI 從「概念」定位到「符號」（導航-A）；符號→位置的機械查找由 LSP 接手（導航-B）。讀完 instruction 檔後，AI 應能回答「這個概念的核心符號是什麼？」，再由 LSP 解析到檔案位置。
 >
 > 導航-A / 導航-B 二分與 LSP 分工定義見 [instruction-writing.md](../../../rules/instruction-writing.md)「導航優先原則」。
 
@@ -14,14 +14,14 @@
 
 | 檢查維度 | 說明 | 驗證方式 |
 |---------|------|----------|
-| **概念→符號連結** | 文檔引入的概念是否有 class/function **符號名**指引（檔案路徑選用） | 抽取 3-5 個關鍵概念，驗證是否能在 CLAUDE.md 找到對應符號名；用 `workspaceSymbol "<符號名>"` 機械驗證符號可解析 |
+| **概念→符號連結** | 文檔引入的概念是否有 class/function **符號名**指引（檔案路徑選用） | 抽取 3-5 個關鍵概念，驗證是否能在 instruction 檔找到對應符號名；用 `workspaceSymbol "<符號名>"` 機械驗證符號可解析 |
 | **職責→符號對應** | 文檔描述的每項職責是否指向具體符號 | 對照職責表或模組描述，驗證每項提到的職責都有對應符號指引 |
-| **跨模組依賴導航** | 外部模組引用是否具體到 class/function（不只是模組名） | 檢查 CLAUDE.md 中提到的外部模組依賴，驗證是否有「哪個 class/function」的指引，而非只寫模組名 |
+| **跨模組依賴導航** | 外部模組引用是否具體到 class/function（不只是模組名） | 檢查 instruction 檔中提到的外部模組依賴，驗證是否有「哪個 class/function」的指引，而非只寫模組名 |
 | **資料流可追蹤性** | 多步驟流程中，step 間的 input/output 是否可追蹤 | 當文檔描述了多步驟流程時，驗證：(1) 每個 step 有入口符號的指引；(2) step 間的產出型別有描述；(3) 下游 step 的輸入來源可追蹤。無多步驟流程的模組標 N/A |
 
 **導航 Decoder Test**：
 
-基於 CLAUDE.md 內容，嘗試回答以下導航問題（不查閱源碼）：
+基於 instruction 檔內容，嘗試回答以下導航問題（不查閱源碼）：
 
 | 問題 | 通過標準 |
 |------|---------|
@@ -31,7 +31,7 @@
 
 **機械驗證（LSP 優先）**：文檔提到的 symbol，用 `workspaceSymbol "<name>"` 確認可解析 —— 比 `test -f file.py` 更準（直接驗證符號存在且 LSP 找得到，取代「檔案路徑是否存在」的間接驗證）。LSP 不可用時（worktree、Cython、無語言伺服器）降級為檢查檔案路徑。
 
-**失敗處理**：若導航問題無法從 CLAUDE.md 回答，標記為導航缺口（navigation gap），產出可執行的 CLAUDE.md 修改建議（見 Sync Summary ACTION 段落）。
+**失敗處理**：若導航問題無法從 instruction 檔回答，標記為導航缺口（navigation gap），產出可執行的修改建議（見 Sync Summary ACTION 段落）。
 
 ---
 
@@ -140,7 +140,7 @@
 
 ## 角度七：Signal/Noise Ratio 評估（核心層）
 
-> **核心原則**：CLAUDE.md 是 Encoder（壓縮知識表示），品質取決於 signal/noise ratio，不是長度。
+> **核心原則**：instruction 檔是 Encoder（壓縮知識表示），品質取決於 signal/noise ratio，不是長度。
 
 | 檢查項目 | 說明 | 判斷方式 |
 |---------|------|----------|
@@ -176,7 +176,7 @@
 
 ## 角度九：消費端文檔連鎖影響（完整層，--all）
 
-> **核心原則**：程式碼變更不只影響同目錄的 CLAUDE.md，還會影響消費端目錄的 CLAUDE.md 和其他相關 .md 文檔。
+> **核心原則**：程式碼變更不只影響同目錄的 instruction 檔（AGENTS.md/CLAUDE.md），還會影響消費端目錄的 instruction 檔和其他相關 .md 文檔。
 
 當目標目錄的程式碼有變更時，必須追蹤 import 鏈找出所有消費端：
 
@@ -184,16 +184,16 @@
 |------|------|----------|
 | 識別變更 | 從 `git diff` 提取被修改的 class/function | diff 分析 |
 | 追蹤 import 鏈 | 搜尋哪些目錄 import 了被修改的模組 | `rg` 搜尋 import 語句（用 LSP findReferences 確保消費端完整覆蓋） |
-| 定位消費端文檔 | 消費端目錄是否有 CLAUDE.md 或相關 .md | `Glob` 搜尋 |
+| 定位消費端文檔 | 消費端目錄是否有 instruction 檔或相關 .md | `Glob` 搜尋 |
 | 檢查連鎖影響 | 消費端文檔是否引用了已變更的 API | `Read` + `rg` 比對 |
 
-**範例**：`<module>/` 的核心 class 變更 → 不只 `<module>/CLAUDE.md`，連 `examples/<module>/CLAUDE.md` 和引用該 API 的說明文檔也需要檢查同步性。
+**範例**：`<module>/` 的核心 class 變更 → 不只 `<module>/` 的 instruction 檔（AGENTS.md/CLAUDE.md），連 `examples/<module>/CLAUDE.md` 和引用該 API 的說明文檔也需要檢查同步性。
 
 ---
 
 ## 角度十：dep-graph 矛盾（完整層，--all）
 
-> **核心原則**：CLAUDE.md 宣告的 "Does NOT depend on" 必須與實際 import 依賴一致。宣告不依賴但實際有 import 是最危險的文檔問題 — 因為它讓 AI 誤判模組邊界。
+> **核心原則**：instruction 檔宣告的 "Does NOT depend on" 必須與實際 import 依賴一致。宣告不依賴但實際有 import 是最危險的文檔問題 — 因為它讓 AI 誤判模組邊界。
 >
 > **為何用 dep_graph 而非 LSP**：X1 是「否定宣稱」—— 證明 data 對 strategies **沒有任何** import 邊。這需窮舉邊集合，LSP 點查詢（findReferences）結構上不擅長否定驗證（要確認每個符號都零引用）。dep_graph 一次靜態分析給完整 `edges`，集合差集即驗證。分工定義見 scan-project SKILL「LSP 與 dep_graph 的分工」。
 
@@ -201,33 +201,33 @@
 
 | 檢查項 | 說明 | 驗證方式 |
 |--------|------|----------|
-| X1 矛盾 | CLAUDE.md 宣告 "Does NOT depend on X" 但 dep-graph 有 import edge → X | LLM 讀取 CLAUDE.md 的 "Does NOT depend on" 段落，比對 `dep_graph.edges[]` |
-| X1 缺失宣告 | dep-graph 顯示模組 A 大量依賴模組 B，但 CLAUDE.md 未宣告邊界 | 分析 `dep_graph.edges[]` 中模組間依賴密度 |
+| X1 矛盾 | instruction 檔宣告 "Does NOT depend on X" 但 dep-graph 有 import edge → X | LLM 讀取 instruction 檔的 "Does NOT depend on" 段落，比對 `dep_graph.edges[]` |
+| X1 缺失宣告 | dep-graph 顯示模組 A 大量依賴模組 B，但 instruction 檔未宣告邊界 | 分析 `dep_graph.edges[]` 中模組間依賴密度 |
 
 **判斷標準**：
 
 - **critical**：明確宣告 "Does NOT depend on" 但有 import edge（矛盾）
 - **suggestion**：高耦合模組對（fan_out > 5）但無 Module Boundaries 段落
 
-**範例**：`data/CLAUDE.md` 宣告 "Does NOT depend on: strategies" 但 dep-graph 顯示 `data.indicators` import `strategies.signal_gen` → 標記為 X1 矛盾。
+**範例**：`data/` 的 instruction 檔（如 `data/AGENTS.md` 或 `data/CLAUDE.md`）宣告 "Does NOT depend on: strategies" 但 dep-graph 顯示 `data.indicators` import `strategies.signal_gen` → 標記為 X1 矛盾。
 
 ---
 
 ## 角度十一：模組覆蓋缺口（完整層，--all）
 
-> **核心原則**：dep-graph 中有明確邊界的模組（≥ 3 個檔案）應有對應的 CLAUDE.md。缺少 CLAUDE.md 的模組對 AI 是知識黑洞。
+> **核心原則**：dep-graph 中有明確邊界的模組（≥ 3 個檔案）應有對應的 instruction 檔（AGENTS.md/CLAUDE.md）。缺少 instruction 檔的模組對 AI 是知識黑洞。
 
 **前置條件**：需要 `.project-snapshot.json`。無 snapshot 時跳過此角度。
 
 | 檢查項 | 說明 | 驗證方式 |
 |--------|------|----------|
-| X6 缺口 | dep-graph 有模組但無 CLAUDE.md | 消費 `findings[]` 中 check_id=X6 的項目；或比對 `dep_graph.modules[]` vs 目錄結構 |
-| X6 小模組 | 模組 < 3 個檔案，CLAUDE.md 非必要 | 過濾 `file_count < 3` |
+| X6 缺口 | dep-graph 有模組但無 instruction 檔 | 消費 `findings[]` 中 check_id=X6 的項目；或比對 `dep_graph.modules[]` vs 目錄結構 |
+| X6 小模組 | 模組 < 3 個檔案，instruction 檔非必要 | 過濾 `file_count < 3` |
 
 **判斷標準**：
 
-- **important**：模組 ≥ 3 個檔案但無 CLAUDE.md
-- **suggestion**：模組 1-2 個檔案，無 CLAUDE.md 可接受
+- **important**：模組 ≥ 3 個檔案但無 instruction 檔
+- **suggestion**：模組 1-2 個檔案，無 instruction 檔可接受
 
 **與角度三（涵蓋性）的區別**：角度三檢查「文檔是否記錄了核心模組」，角度十一用 dep-graph 精確資料驗證「哪些模組缺少文檔」。
 

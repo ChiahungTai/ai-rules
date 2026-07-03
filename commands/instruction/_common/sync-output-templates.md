@@ -7,9 +7,9 @@
 ## 模板 1: 單檔案檢查輸出
 
 ```
-## CLAUDE.md 同步檢查報告
+## instruction 檔同步檢查報告
 
-檔案: /path/to/CLAUDE.md（範例）
+檔案: /path/to/AGENTS.md 或 /path/to/CLAUDE.md（範例）
 
 ### 程式碼一致性檢查
 
@@ -34,7 +34,7 @@
 
 #### 重要模組檢查
 掃描目錄: /path/to/src/
-- ✅ src/core/CLAUDE.md
+- ✅ src/core/ 的 instruction 檔
 - ⚠️  src/api/（未記錄在主文檔）
 - ⚠️  src/utils/（未記錄在主文檔）
 
@@ -142,34 +142,34 @@
 module: {module_name}
 inconsistencies:
   - type: outdated_description
-    location: CLAUDE.md:{行號}
+    location: <instruction-file>:{行號}   # AGENTS.md:42 或 CLAUDE.md:15
     detail: "描述的 <OldClass> 已重構為 <NewClass>"
     confidence: high
     source: <old_module>.py:{行號}
   - type: missing_reference
-    location: CLAUDE.md:{行號}
-    detail: "新模組 <new_module>.py 未在 CLAUDE.md 提及"
+    location: <instruction-file>:{行號}
+    detail: "新模組 <new_module>.py 未在 instruction 檔提及"
     confidence: high
     source: <new_module>.py:1
   - type: signature_changed
-    location: CLAUDE.md:{行號}
+    location: <instruction-file>:{行號}
     detail: "evaluate() 新增參數 strict_mode"
     confidence: high
     source: <file>.py:{行號}
 coverage_gaps:
   - file: new_module.py
-    location: CLAUDE.md:(未提及)
+    location: <instruction-file>:(未提及)
     detail: "新增的 .py 檔案未記錄"
 metadata_issues:
   - type: version_number
-    location: CLAUDE.md:{行號}
+    location: <instruction-file>:{行號}
 navigation_gaps:
   - concept: "{概念名稱}"
-    location: CLAUDE.md:{行號}
+    location: <instruction-file>:{行號}
     detail: "提到概念但無 symbol 指引"
     confidence: high
   - dependency: "{跨模組依賴}"
-    location: CLAUDE.md:{行號}
+    location: <instruction-file>:{行號}
     detail: "只寫模組名，缺少具體 class/function 指引"
     confidence: medium
 signal_noise:
@@ -182,14 +182,14 @@ needs_update: true/false
 
 ---
 
-## 模板 3: Sync Summary ACTION（可執行的 CLAUDE.md 修改）
+## 模板 3: Sync Summary ACTION（可執行的 instruction 檔修改）
 
 > **設計理念**：sync 不只報告問題，還要產出可直接 copy-paste 的修改。只有 High Signal 項目（導航缺口、語義錯誤、設計決策缺失）才產出 ACTION。Low Noise 項目（API 簽名、參數值）跳過。
 
 ```yaml
 actions:
   - type: add_navigation
-    target: "CLAUDE.md:{章節名}"
+    target: "<instruction-file>:{章節名}"
     concept: "{概念名稱}"
     text: |
       - **{概念描述}** → `ClassName`
@@ -197,7 +197,7 @@ actions:
     reason: "導航缺口：概念無程式碼指引"
 
   - type: fix_description
-    target: "CLAUDE.md:{行號}"
+    target: "<instruction-file>:{行號}"
     old: "{現有不正確文字}"
     new: "{修正後文字}"
     signal_level: high
@@ -205,14 +205,14 @@ actions:
     source: "file.py:{行號}"
 
   - type: add_design_decision
-    target: "CLAUDE.md:{章節名}"
+    target: "<instruction-file>:{章節名}"
     text: |
       - **{設計決策名稱}**：{一句話理由} → `ClassName`
     signal_level: high
     reason: "設計決策缺失（從程式碼猜不到）"
 
   - type: remove_noise
-    target: "CLAUDE.md:{行號}"
+    target: "<instruction-file>:{行號}"
     text: "{應移除的 Low Noise 內容}"
     signal_level: low
     reason: "API 簽名/參數表，從程式碼可推導"
@@ -228,15 +228,19 @@ actions:
 ## 遞歸同步檢查報告
 
 目錄: /path/to/project
-發現 CLAUDE.md: 5 個
+發現 instruction 檔: 5 個（AGENTS.md + CLAUDE.md）
 
 ### Critical（專案根目錄）
-**檔案**: CLAUDE.md
+**檔案**: AGENTS.md（source）
 - 程式碼一致性: ✅ 90%
 - 涵蓋性: ⚠️ 75%
 - 內部品質: ⚠️ 85/100（2 個矛盾問題）
 - 元資訊: ❌ 需要清理（版本號、日期）
 - 蒸餾評估: ⚠️ 3 個冗餘、2 個灰色地帶
+
+**檔案**: CLAUDE.md（wrapper）
+- 程式碼一致性: ✅ 90%
+- 元資訊: ✅ 乾淨
 
 ### High（主要模組）
 **檔案**: src/CLAUDE.md
@@ -275,7 +279,7 @@ actions:
 - 元資訊: ✅ 乾淨
 
 ### 整體統計
-- 檔案數量: 5 個
+- instruction 檔數量: 5 個
 - 平均程式碼一致性: 90%
 - 平均涵蓋性: 82%
 - 平均內部品質: 90/100
@@ -292,9 +296,9 @@ actions:
 ## 模板 5: 執行清理後輸出
 
 ```
-## CLAUDE.md 同步檢查 + 清理完成
+## instruction 檔同步檢查 + 清理完成
 
-檔案: /path/to/CLAUDE.md（範例）
+檔案: /path/to/AGENTS.md 或 /path/to/CLAUDE.md（範例）
 
 ### ✅ 檢查完成
 - 一致性: X%（已報告問題）
@@ -309,7 +313,7 @@ actions:
 ### 處理結果
 - 原始行數: N 行
 - 清理後: M 行 (-Z%)
-- 備份檔案: CLAUDE.md.backup
+- 備份檔案: AGENTS.md.backup 或 CLAUDE.md.backup
 ```
 
 ---
@@ -317,9 +321,9 @@ actions:
 ## 模板 6: --all 完整處理輸出
 
 ```
-## CLAUDE.md 完整處理（檢查 + 清理 + 蒸餾）
+## instruction 檔完整處理（檢查 + 清理 + 蒸餾）
 
-檔案: /path/to/CLAUDE.md（範例）
+檔案: /path/to/AGENTS.md 或 /path/to/CLAUDE.md（範例）
 
 ### 步驟 1: 同步檢查
 - 一致性問題: N 項
@@ -339,6 +343,6 @@ actions:
 ### 最終結果
 - 原始: X 行
 - 處理後: Z 行 (-P%)
-- 備份: CLAUDE.md.backup (原始)
-- 備份: CLAUDE.md.pre-distill.md (清理後)
+- 備份: AGENTS.md.backup / CLAUDE.md.backup (原始)
+- 備份: AGENTS.md.pre-distill.md / CLAUDE.md.pre-distill.md (清理後)
 ```

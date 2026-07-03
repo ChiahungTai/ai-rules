@@ -141,7 +141,7 @@ EP UC盤點完成時（自動建卡機制）：
 | 概念 | 追蹤維度 | 生命週期 |
 |------|---------|---------|
 | **Kanban Card** | 時間（現在做什麼） | 建立 → 移動 → 歸檔到 Done |
-| **CLAUDE.md Capabilities** | 功能（系統能做什麼） | 📋 → 🔧 → ✅ |
+| **模組 Capabilities**（AGENTS.md 為主，CLAUDE.md legacy） | 功能（系統能做什麼） | 📋 → 🔧 → ✅ |
 
 **關聯方式**：卡片內用能力描述引用 Capabilities 條目，但不取代 Capabilities 的狀態追蹤。一張卡片可能涉及多個能力，一個能力也可能跨多張卡片完成。
 
@@ -158,5 +158,5 @@ EP UC盤點完成時（自動建卡機制）：
 
 - **不自動建立卡片**：除非用戶明確要求，或是在 `/execution-plan`、`/build` 等流程中依規則建立
 - **不自動刪除卡片**：刪除前必須確認
-- **Tag 管理**：LLM 建立或更新卡片時，依模組目錄掃描決定 tag（見專案 CLAUDE.md「Tag 慣例」）。用戶也可透過 Tasks.md 網頁 UI 手動管理 tag 顏色和自訂 tag
+- **Tag 管理**：LLM 建立或更新卡片時，依模組目錄掃描決定 tag（見專案 root instruction 檔「Tag 慣例」）。用戶也可透過 Tasks.md 網頁 UI 手動管理 tag 顏色和自訂 tag
 - **並行安全**：看板檔案可能同時被網頁 UI 和 LLM 修改，避免同時編輯同一張卡片

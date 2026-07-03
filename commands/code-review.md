@@ -110,7 +110,7 @@ Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mod
 
 ### Capability Coverage — 滿足 Capabilities 描述嗎？
 大型/中型變更時審查：
-- 實作是否涵蓋 CLAUDE.md Capabilities 表格描述的所有行為？
+- 實作是否涵蓋模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）Capabilities 表格描述的所有行為？
 - 是否有 Capabilities 引用的行為在 diff 中沒有對應實作？
 - EP 段落引用的能力描述是否與 Capabilities 表格或 .kanban/ 卡片一致？
 - Capabilities 入口路徑是否指向 library 模組（非 scripts/ —— scripts/ 是 demo 入口非能力入口）？
@@ -124,7 +124,7 @@ Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mod
 - **追蹤後果**：這個修改的下游影響是什麼？依賴模組是否受影響？
 - **審查者自證**：提出問題前必須查證宣稱（LSP 查證方法 + 自我否證義務：找不到 ≠ 不存在）— 完整方法見 [review-engine](../skills/review-engine/SKILL.md)
 
-深層思考框架見 `~/.claude/rules/deep-thinking.md`
+深層思考框架見 `~/Github/ai-rules/rules/deep-thinking.md`
 
 ---
 
@@ -174,7 +174,7 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 | 架構調整、模式統一 | `refactor` | 不改行為的結構改善 |
 | 效能改善 | `perf` | 回應 Performance 軸發現 |
 | 測試補充 | `test` | 回應 Correctness 軸發現 |
-| 文檔、CLAUDE.md | `docs` | 文檔同步 |
+| 文檔、instruction 檔 | `docs` | 文檔同步 |
 
 **產生時機**：審查結論為「無 Critical 問題」或「用戶確認 Critical 可接受」時才產生。有未解決 Critical 問題 → 只輸出審查報告，不產生 commit message。
 

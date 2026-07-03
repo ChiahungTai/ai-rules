@@ -1,6 +1,6 @@
 # 搜尋工具分工
 
-> **自動載入**: 此檔案位於 `~/.claude/rules/`，會自動載入到所有會話
+> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
 
 ---
 
@@ -12,7 +12,7 @@
 - rg：註解、字串、config、文件內容（文字匹配）
 - fd：檔案/目錄名稱搜尋
 
-詳細 LSP 決策樹見 `@~/.claude/rules/lsp-navigation.md`
+詳細 LSP 決策樹見 `@~/Github/ai-rules/rules/lsp-navigation.md`
 
 ---
 

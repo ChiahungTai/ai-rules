@@ -26,7 +26,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 | 漏項 | 偵測 |
 |------|------|
 | EP 歸檔漏 | `execution-plans/` root 有「所有段落已 commit 但未歸檔」的 EP |
-| Capabilities 漏 | git log 近期 commit UC vs 模組 CLAUDE.md `## Capabilities` 表 |
+| Capabilities 漏 | git log 近期 commit UC vs 模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）`## Capabilities` 表 |
 | Kanban 漏 | `.kanban/In-Progress/` 有已完成但未搬 Done 的卡片 |
 | SYSTEM-MAP 漏 | 消費 `/doc-health` findings(SYSTEM-MAP vs Capabilities 不一致) |
 | architecture.md 漏 | 近期設計變更但 arch 未更 |
@@ -55,7 +55,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 
 ### 階段 4:consistency 閘門
 
-對本次動過的 CLAUDE.md / architecture.md / SYSTEM-MAP.md 逐一跑 `/consistency`(單檔內部自洽)。🔴 / 🟡 → 修正後才算完成。
+對本次動過的 instruction 檔（AGENTS.md / CLAUDE.md）/ architecture.md / SYSTEM-MAP.md 逐一跑 `/consistency`(單檔內部自洽)。🔴 / 🟡 → 修正後才算完成。
 
 ---
 

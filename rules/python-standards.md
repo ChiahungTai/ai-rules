@@ -69,7 +69,7 @@ from <package>.common import <EnumClass>
 
 Facade Pattern 的價值在**解耦內部實作與外部介面**——使用者不必知道內部目錄結構，重構時 import 路徑不崩潰。**這個價值在「發佈給外部消費者的套件」為真**：使用者不該知道、也無需知道內部結構。
 
-但內部專案的消費者是同專案的 modules/scripts/tests/AI，本來就靠 CLAUDE.md 導航定位，Facade 的「重構解耦」收益不存在，代價卻突出：
+但內部專案的消費者是同專案的 modules/scripts/tests/AI，本來就靠 instruction 檔（AGENTS.md）導航定位，Facade 的「重構解耦」收益不存在，代價卻突出：
 
 - **import 開銷**：re-export 重型子模組（pandas 等重型依賴），無關消費者被迫等待（見上方實測）
 - **循環依賴風險**：`__init__.py` 一層層 re-export 互相依賴，是循環 import 溫床

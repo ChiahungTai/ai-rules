@@ -1,6 +1,6 @@
 # 驗收證據階層
 
-> **自動載入**: 此檔案位於 `~/.claude/rules/`,會自動載入到所有會話
+> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
 
 ## 核心原則:證據獨立性
 
@@ -80,7 +80,7 @@
 
 ## B 軸人類驗收層
 
-**已落地**:[/deliverable-review](../commands/deliverable-review.md)(交付:demo-checklist + 認知誤差點) + [/illustrate](../commands/illustrate.md)(結構 viewport:whole-picture + 重用枚舉) 是人類 viewport(三層介入,見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」)—— 讓人用大原則判讀 EP 或 code,補 LLM 兩個結構性 blind spot(重造既有 / 偏方向)。
+**已落地**:[/deliverable-review](../commands/deliverable-review.md)(交付:demo-checklist + 認知誤差點) + [/illustrate](../commands/illustrate.md)(結構 viewport:whole-picture + 重用枚舉) 是人類 viewport(三層介入,見 [AGENTS.md](../AGENTS.md)「命令的受眾視角」)—— 讓人用大原則判讀 EP 或 code,補 LLM 兩個結構性 blind spot(重造既有 / 偏方向)。
 
 **仍為設計方向**(viewport 之外,更深的 B 軸演進):
 

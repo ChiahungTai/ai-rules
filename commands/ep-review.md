@@ -12,7 +12,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Agent", "Workflow"]
 
 EP 審查員，在實作前審查 Execution Plan，確保計畫書完整、合規、可執行。
 
-> **受眾**：LLM 執行鏈命令（layer 1 同 session 自判 / layer 2 跨 session），產出回寫 EP 餵回產 EP 的 LLM，**不給人看**。EP 的人類 viewport 是 `/deliverable-review --ep`（layer 3 方向）+ `/illustrate --ep`（layer 3 結構 viewport）。見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」。
+> **受眾**：LLM 執行鏈命令（layer 1 同 session 自判 / layer 2 跨 session），產出回寫 EP 餵回產 EP 的 LLM，**不給人看**。EP 的人類 viewport 是 `/deliverable-review --ep`（layer 3 方向）+ `/illustrate --ep`（layer 3 結構 viewport）。見 root [AGENTS.md](../AGENTS.md)（legacy `../CLAUDE.md`）「命令的受眾視角」。
 
 委託 Skills：
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則
@@ -42,7 +42,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 | 維度 Agent | 審查項目 | 優先級 |
 |-----------|---------|--------|
 | F1 完整性 | 驗收標準、檔案清單、依賴項、邊界情況 | P0 |
-| F2 合規 | 命名、code-edit-constraints、CLAUDE.md | P0 |
+| F2 合規 | 命名、code-edit-constraints、instruction 檔 | P0 |
 | F3 一致性 | 段落依賴順序、檔案修改矛盾、語義約束 | P1 |
 | F4 遺漏 | Demo、測試、__all__、配置、受影響模組 | P2 |
 | F5 場景覆蓋 | Scenario Matrix 是否涵蓋 happy path、錯誤操作、邊界、效能期待差異 | P2 |
@@ -75,7 +75,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 5 個 Dimensio
 
 ### F2: Rules 合規檢查
 
-命名是否符合 `python-standards`？是否遵守 `code-edit-constraints`？是否有違反 `_ai-behavior-constraints` 的內容？是否需要更新 CLAUDE.md？
+命名是否符合 `python-standards`？是否遵守 `code-edit-constraints`？是否有違反 `_ai-behavior-constraints` 的內容？是否需要更新 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）？
 
 ### F3: 一致性 + 架構視角檢查（承接 execution-plan 維度①②④）
 
@@ -120,7 +120,7 @@ F1-F5 檢查「有沒有漏」，深層思考檢查「方向對不對」。
 - **連鎖後果追蹤**：EP 中的設計決策會導致什麼下游影響？至少追蹤兩層
 - **如果錯了**：最壞情境？可以逆轉嗎？逆轉成本？
 
-深層思考框架見 `~/.claude/rules/deep-thinking.md`
+深層思考框架見 `~/Github/ai-rules/rules/deep-thinking.md`
 
 ---
 

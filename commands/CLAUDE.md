@@ -34,7 +34,7 @@
 
 ## 命令索引
 
-> 命令依「產出受眾」分類（LLM 執行鏈 / 人類 viewport / 三層介入）見 [CLAUDE.md](../CLAUDE.md)「命令的受眾視角」。
+> 命令依「產出受眾」分類（LLM 執行鏈 / 人類 viewport / 三層介入）見 [AGENTS.md](../AGENTS.md)「命令的受眾視角」（root CLAUDE.md wrapper 經 `@AGENTS.md` 同載入）。
 
 ### 核心開發流程
 
@@ -83,7 +83,7 @@
 
 ### instruction file 維護
 
-- `/instruction:init` — 為任意專案自動產生 instruction file 體系（AGENTS.md source + CLAUDE.md wrapper + 模組 CLAUDE.md，bottom-up）
+- `/instruction:init` — 為任意專案自動產生 instruction file 體系（root + 模組都雙檔：AGENTS.md source + CLAUDE.md @AGENTS.md wrapper，bottom-up）
 - `/instruction:clean` — 清理 Markdown 元資訊
 - `/instruction:distill` — 蒸餾文檔，提煉核心精華
 - `/instruction:sync` — 檢查文檔與程式碼同步性

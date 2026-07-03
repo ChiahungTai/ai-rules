@@ -16,7 +16,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 適用文檔
 
-- **CLAUDE.md**：AI 協作指南，保留核心原則和約束
+- **AGENTS.md（source）/ CLAUDE.md（wrapper）**：AI 協作指南，保留核心原則和約束
 - **說明文檔**：描述現有系統運作的技術文檔，保留關鍵行為描述和架構
 - **不適用**：設計文檔（描述概念、提案）— 設計演進過程可能需要保留歷史脈絡
 

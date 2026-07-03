@@ -1,6 +1,6 @@
 # 品質約束
 
-> **自動載入**: 此檔案位於 `~/.claude/rules/`，會自動載入到所有會話
+> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
 
 ---
 
@@ -18,16 +18,16 @@
 - 相關測試全部通過
 - 邊界情況妥善處理
 - 文檔同步更新
-- 對應目錄的 CLAUDE.md 同步更新
+- 對應目錄的 instruction 檔（AGENTS.md source + CLAUDE.md wrapper）同步更新
 - 達到可用狀態
 
-### CLAUDE.md 同步檢查
+### instruction 檔同步檢查
 
-實作完成後，檢查修改檔案所在目錄及其上層目錄是否有 CLAUDE.md 需要更新：
+實作完成後，檢查修改檔案所在目錄及其上層目錄是否有 instruction 檔需要更新：
 
 1. **識別變更範圍**：哪些檔案被修改/新增/刪除
-2. **檢查對應 CLAUDE.md**：變更檔案所在目錄及上層目錄的 CLAUDE.md
-3. **判斷是否需要更新**：變更是否影響 CLAUDE.md 中描述的架構、API、模組職責等
+2. **檢查對應 instruction 檔**：變更檔案所在目錄及上層目錄的 AGENTS.md（source）+ CLAUDE.md（wrapper，若存在）
+3. **判斷是否需要更新**：變更是否影響 instruction 檔中描述的架構、API、模組職責等
 
 ### ❓ 停下請示的時機
 
