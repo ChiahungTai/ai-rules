@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-03T03:17:28+00:00",
+  "generated_at": "2026-07-03T14:30:02+00:00",
   "sources": {
     "claude-code": {
       "base": "https://code.claude.com",
@@ -1194,6 +1194,677 @@
           "status": "ok",
           "sha256": "6b45d155006f3a70258fb278445d516d1f177f07116326571b8cef470ff58918",
           "bytes": 7930
+        }
+      ]
+    },
+    "codex": {
+      "base": "https://developers.openai.com",
+      "page_count": 95,
+      "pages": [
+        {
+          "url": "https://developers.openai.com/codex/agent-approvals-security.md",
+          "path": "agent-approvals-security.md",
+          "status": "ok",
+          "sha256": "0e4565feb798d5201c921e447b5c7c357a7715bde53f3d6f0a2a3ce0ea9493af",
+          "bytes": 30236
+        },
+        {
+          "url": "https://developers.openai.com/codex/amazon-bedrock.md",
+          "path": "amazon-bedrock.md",
+          "status": "ok",
+          "sha256": "700e0b975ee9ae699df004865fde1e6c605cff9048d0e884356b7eca33cd3004",
+          "bytes": 18552
+        },
+        {
+          "url": "https://developers.openai.com/codex/app-server.md",
+          "path": "app-server.md",
+          "status": "ok",
+          "sha256": "86e536bad97767b28b2e1e4593d283df9fa65f082e4e80369e1a34be3990b46a",
+          "bytes": 83597
+        },
+        {
+          "url": "https://developers.openai.com/codex/app.md",
+          "path": "app.md",
+          "status": "ok",
+          "sha256": "7b8e9f5312684268c19b127d4960f5d1a53bddf26a88d45117497e988a199cd0",
+          "bytes": 8439
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/automations.md",
+          "path": "app/automations.md",
+          "status": "ok",
+          "sha256": "a2b4118551abe0dd861486b40c238ac168b3909529dd665be7079b1b8b8305c8",
+          "bytes": 12147
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/browser.md",
+          "path": "app/browser.md",
+          "status": "ok",
+          "sha256": "dad2cc99fcf5f3796488b6f7802df3862a0495db25559b484d08e206a07137a2",
+          "bytes": 6779
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/chrome-extension.md",
+          "path": "app/chrome-extension.md",
+          "status": "ok",
+          "sha256": "f38f472639ab2afffacb5ea38bab3733070bc152cb188e0459e9e7bcf637ce42",
+          "bytes": 6980
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/commands.md",
+          "path": "app/commands.md",
+          "status": "ok",
+          "sha256": "8763b1eff14253bc5263c78286310d6f25f6850d7ab4b9f449dd10311492756f",
+          "bytes": 18121
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/computer-use.md",
+          "path": "app/computer-use.md",
+          "status": "ok",
+          "sha256": "c8436baf481e89d4223aecc290193f32bfe6b782725e154f25e8e559cd2ed7e2",
+          "bytes": 9252
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/features.md",
+          "path": "app/features.md",
+          "status": "ok",
+          "sha256": "76b6bff2ee8cfb1afe18cd78e6dea206bb7e83992c95dd2804c3bc4c6eb186f9",
+          "bytes": 18103
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/local-environments.md",
+          "path": "app/local-environments.md",
+          "status": "ok",
+          "sha256": "7524e5e9269577decfcc52303fb0a68bbcae4257cf272efe35fb05e44aa68a3d",
+          "bytes": 2365
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/review.md",
+          "path": "app/review.md",
+          "status": "ok",
+          "sha256": "07f788e403dc85bca54f48a997d8e74b7f1bf79a96d3d73b31aa8586ac60aa35",
+          "bytes": 4280
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/settings.md",
+          "path": "app/settings.md",
+          "status": "ok",
+          "sha256": "15be5bb6e77ae8abda1fa2ec67b20435404f48cec1828343a11746553b92bcf4",
+          "bytes": 6309
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/troubleshooting.md",
+          "path": "app/troubleshooting.md",
+          "status": "ok",
+          "sha256": "197ce2811a279bc0a7b4dad25fb092d1adae472ae3f4556387798753057221c0",
+          "bytes": 5677
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/windows.md",
+          "path": "app/windows.md",
+          "status": "ok",
+          "sha256": "ee3f5063cd32fa350e22b6a48f86f9557bbf7809549fb8eb668da4e81e376ad0",
+          "bytes": 9793
+        },
+        {
+          "url": "https://developers.openai.com/codex/app/worktrees.md",
+          "path": "app/worktrees.md",
+          "status": "ok",
+          "sha256": "f8be2b01b5cd68ac18d1bca2bd461cadf63504d52050c0689006288c4323a69f",
+          "bytes": 12159
+        },
+        {
+          "url": "https://developers.openai.com/codex/appshots.md",
+          "path": "appshots.md",
+          "status": "ok",
+          "sha256": "0c94b5a50ffb1eca38b3c51900f182bdf0ed715a517e229f3452db277361b662",
+          "bytes": 3091
+        },
+        {
+          "url": "https://developers.openai.com/codex/auth.md",
+          "path": "auth.md",
+          "status": "ok",
+          "sha256": "c8716f799b53288fd50d36b96111b6b7b51996a7ed1951cc46652dc1b424a9e0",
+          "bytes": 10631
+        },
+        {
+          "url": "https://developers.openai.com/codex/cli.md",
+          "path": "cli.md",
+          "status": "ok",
+          "sha256": "1e4371e76897a943292f574e46d74eb909c93f5df13e7883856f5a627c7184d5",
+          "bytes": 3044
+        },
+        {
+          "url": "https://developers.openai.com/codex/cli/features.md",
+          "path": "cli/features.md",
+          "status": "ok",
+          "sha256": "650215f1085f8361cfb95ad619c6ac9ad683e334b9e6048b3f1fe0b80f2f4734",
+          "bytes": 16697
+        },
+        {
+          "url": "https://developers.openai.com/codex/cli/reference.md",
+          "path": "cli/reference.md",
+          "status": "ok",
+          "sha256": "c2609972184de40132036b462d1f4384760780454a041bfbbf67601528610bb9",
+          "bytes": 44584
+        },
+        {
+          "url": "https://developers.openai.com/codex/cli/slash-commands.md",
+          "path": "cli/slash-commands.md",
+          "status": "ok",
+          "sha256": "d1de22232d6429d9b76da24f8b854df329c3ab1e087c76200913cc519bd321a1",
+          "bytes": 29585
+        },
+        {
+          "url": "https://developers.openai.com/codex/cloud.md",
+          "path": "cloud.md",
+          "status": "ok",
+          "sha256": "a5312416fe792799e049c34d5b646f9efbb089d4604a394a20377f788563870d",
+          "bytes": 2002
+        },
+        {
+          "url": "https://developers.openai.com/codex/cloud/environments.md",
+          "path": "cloud/environments.md",
+          "status": "ok",
+          "sha256": "0fc6ed4349b4ab47f3d9ab976ca711f6864526236ff24bc065ef8e95b19ba0ab",
+          "bytes": 4364
+        },
+        {
+          "url": "https://developers.openai.com/codex/cloud/internet-access.md",
+          "path": "cloud/internet-access.md",
+          "status": "ok",
+          "sha256": "1d7acfc73de4c512b40f48114fea06cbfbaa3341622dc52f55b1c69cdae8ea99",
+          "bytes": 3774
+        },
+        {
+          "url": "https://developers.openai.com/codex/codex-manual.md",
+          "path": "codex-manual.md",
+          "status": "ok",
+          "sha256": "c6cab8ece947a9353cbcd1a2e79976e416d6f5ac9cfad93bc337578225dcd579",
+          "bytes": 603189
+        },
+        {
+          "url": "https://developers.openai.com/codex/community/codex-for-oss.md",
+          "path": "community/codex-for-oss.md",
+          "status": "ok",
+          "sha256": "4ee0991c6d1bf2a0b5ba198efb3dbfdfbd38bbe4928adfc5df54fcd239371060",
+          "bytes": 1860
+        },
+        {
+          "url": "https://developers.openai.com/codex/concepts/customization.md",
+          "path": "concepts/customization.md",
+          "status": "ok",
+          "sha256": "4984669cb1185c2405d485dc029ab0e9aafd6c18059e3ee64a4ba4db0b06a2c6",
+          "bytes": 9271
+        },
+        {
+          "url": "https://developers.openai.com/codex/concepts/cyber-safety.md",
+          "path": "concepts/cyber-safety.md",
+          "status": "ok",
+          "sha256": "fd05800049945d3ba89b02e64fc724f515509c2225043278f38d987513e0544a",
+          "bytes": 4261
+        },
+        {
+          "url": "https://developers.openai.com/codex/concepts/sandboxing.md",
+          "path": "concepts/sandboxing.md",
+          "status": "ok",
+          "sha256": "9d3eea99ac263ab2d3d499bf74182a5b9e250369e765c7fc05e01040b41e9433",
+          "bytes": 8790
+        },
+        {
+          "url": "https://developers.openai.com/codex/concepts/sandboxing/auto-review.md",
+          "path": "concepts/sandboxing/auto-review.md",
+          "status": "ok",
+          "sha256": "bc8b92c32ea178b6b97f3a7afcb2e7c45222d1cfb4b75b33e3b38b6acf878cd9",
+          "bytes": 7669
+        },
+        {
+          "url": "https://developers.openai.com/codex/concepts/subagents.md",
+          "path": "concepts/subagents.md",
+          "status": "ok",
+          "sha256": "8db6c46df7dd476c3575e57e5972b168bae4e16730f8c20145e2de942e6e24f5",
+          "bytes": 5247
+        },
+        {
+          "url": "https://developers.openai.com/codex/config-advanced.md",
+          "path": "config-advanced.md",
+          "status": "ok",
+          "sha256": "b5df4e0abd53ed1dfc0dedb4c06641fe4b921a0d5ebbfbf5e97285496ec3af64",
+          "bytes": 45514
+        },
+        {
+          "url": "https://developers.openai.com/codex/config-basic.md",
+          "path": "config-basic.md",
+          "status": "ok",
+          "sha256": "10b65fdf18d674f18b2ecce454f160a8523c28cb669969c748f404333fab47cf",
+          "bytes": 10232
+        },
+        {
+          "url": "https://developers.openai.com/codex/config-reference.md",
+          "path": "config-reference.md",
+          "status": "ok",
+          "sha256": "78ba655a5dc192e6828431198f3c36c6ab74bcac269ffbb619497a9ff46f8104",
+          "bytes": 80749
+        },
+        {
+          "url": "https://developers.openai.com/codex/config-sample.md",
+          "path": "config-sample.md",
+          "status": "ok",
+          "sha256": "4a68a22ac7e135305f79f398ef2a48eb33a3964321b45f90c431ba14460bac84",
+          "bytes": 28513
+        },
+        {
+          "url": "https://developers.openai.com/codex/custom-prompts.md",
+          "path": "custom-prompts.md",
+          "status": "ok",
+          "sha256": "1456adde32c0cfeb9aaec5c5c4413f52fb546bbefc854554c7b600c1110fe70c",
+          "bytes": 3190
+        },
+        {
+          "url": "https://developers.openai.com/codex/enterprise/access-tokens.md",
+          "path": "enterprise/access-tokens.md",
+          "status": "ok",
+          "sha256": "433b517f8fa3dc9b806784abe3968a74be6f8378621f7b23121bec101792db8f",
+          "bytes": 10034
+        },
+        {
+          "url": "https://developers.openai.com/codex/enterprise/admin-setup.md",
+          "path": "enterprise/admin-setup.md",
+          "status": "ok",
+          "sha256": "ec7392684496715b28eac55d391cc98cb16d630d736c2dd0e7a5a760daef55f8",
+          "bytes": 24170
+        },
+        {
+          "url": "https://developers.openai.com/codex/enterprise/governance.md",
+          "path": "enterprise/governance.md",
+          "status": "ok",
+          "sha256": "4f6d83de7c590dc75c7423cf8d82b152fafc2ec0d89cad49a6604a2fcd2c9d8b",
+          "bytes": 6529
+        },
+        {
+          "url": "https://developers.openai.com/codex/enterprise/managed-configuration.md",
+          "path": "enterprise/managed-configuration.md",
+          "status": "ok",
+          "sha256": "1f15954b6d7b09c9bbe3b6c1b911883d7b697a07747fb196ab8d066d50212245",
+          "bytes": 24895
+        },
+        {
+          "url": "https://developers.openai.com/codex/environment-variables.md",
+          "path": "environment-variables.md",
+          "status": "ok",
+          "sha256": "9438ddf48834791c180c652409892f85b3a3f1504a034663ea6b11bae3ae67e2",
+          "bytes": 6260
+        },
+        {
+          "url": "https://developers.openai.com/codex/feature-maturity.md",
+          "path": "feature-maturity.md",
+          "status": "ok",
+          "sha256": "d0065403dc0c2e0288a6a8234b1d42602d8eaeb2203cdb5f2815bcbbf59cc352",
+          "bytes": 1458
+        },
+        {
+          "url": "https://developers.openai.com/codex/github-action.md",
+          "path": "github-action.md",
+          "status": "ok",
+          "sha256": "ff8df6fc9b11056a39e6e5c522d5e9f70796ba99e7e388a524d7df09217c61da",
+          "bytes": 7082
+        },
+        {
+          "url": "https://developers.openai.com/codex/glossary.md",
+          "path": "glossary.md",
+          "status": "ok",
+          "sha256": "d016caec18e2878bbfb58ede76bdeef66085c60ff904985b199c627bdd0f5962",
+          "bytes": 25606
+        },
+        {
+          "url": "https://developers.openai.com/codex/guides/agents-md.md",
+          "path": "guides/agents-md.md",
+          "status": "ok",
+          "sha256": "33fdb8ae290dddcb61743abf8596c5f4fa1fdd384890774dfd107c3f614e1848",
+          "bytes": 8158
+        },
+        {
+          "url": "https://developers.openai.com/codex/guides/agents-sdk.md",
+          "path": "guides/agents-sdk.md",
+          "status": "ok",
+          "sha256": "55631b340b6623e915cc0c0d7c2d57860238f6ae7f6100970b548bec2debca63",
+          "bytes": 19367
+        },
+        {
+          "url": "https://developers.openai.com/codex/guides/build-ai-native-engineering-team.md",
+          "path": "guides/build-ai-native-engineering-team.md",
+          "status": "ok",
+          "sha256": "4190b9b7b3780072c8bdbda909795a0180f1da280e7f307a37314e95fdc54c42",
+          "bytes": 36600
+        },
+        {
+          "url": "https://developers.openai.com/codex/hooks.md",
+          "path": "hooks.md",
+          "status": "ok",
+          "sha256": "0000d1822441adbaae7a4193bce2bb8abc9fca44afa59e91cd6cc86d5a406eb1",
+          "bytes": 30551
+        },
+        {
+          "url": "https://developers.openai.com/codex/ide.md",
+          "path": "ide.md",
+          "status": "ok",
+          "sha256": "96180c1ffdae08ca61ddbdfe24bc3aa3d1ce6126e7b98c0b51086b7263a2d503",
+          "bytes": 6619
+        },
+        {
+          "url": "https://developers.openai.com/codex/ide/commands.md",
+          "path": "ide/commands.md",
+          "status": "ok",
+          "sha256": "ad648c6a5a2ae9d53e38e9638eadefc511bdd69f2feb8836e78f1f8c4ff684a0",
+          "bytes": 1611
+        },
+        {
+          "url": "https://developers.openai.com/codex/ide/features.md",
+          "path": "ide/features.md",
+          "status": "ok",
+          "sha256": "25163cca5f2bbe97bc2711bcd7959663774df2f075edd919b8d8bbfc9623bd43",
+          "bytes": 5845
+        },
+        {
+          "url": "https://developers.openai.com/codex/ide/settings.md",
+          "path": "ide/settings.md",
+          "status": "ok",
+          "sha256": "419803c4d5e36cd78e7e8fcf193d22b8328c909c1e4d507857417dbf25b95b28",
+          "bytes": 3892
+        },
+        {
+          "url": "https://developers.openai.com/codex/ide/slash-commands.md",
+          "path": "ide/slash-commands.md",
+          "status": "ok",
+          "sha256": "f3d5c326b54cda83e07347b205d12a7c707ad0e0627cf1f459f077b116e5e025",
+          "bytes": 1745
+        },
+        {
+          "url": "https://developers.openai.com/codex/import.md",
+          "path": "import.md",
+          "status": "ok",
+          "sha256": "d5dc5b8056aa4759c656bda05ef8b3e02efc7006e886029990522d7a9dbf6d86",
+          "bytes": 4640
+        },
+        {
+          "url": "https://developers.openai.com/codex/integrations/github.md",
+          "path": "integrations/github.md",
+          "status": "ok",
+          "sha256": "ca9717997257687a4184805a7948b2bc43ebf1b533c824d739b20788469994e9",
+          "bytes": 4096
+        },
+        {
+          "url": "https://developers.openai.com/codex/integrations/linear.md",
+          "path": "integrations/linear.md",
+          "status": "ok",
+          "sha256": "51eea278cc117f0b254a3654be0d4856fdcb96356c9ec712e610242d4b9d32ac",
+          "bytes": 6818
+        },
+        {
+          "url": "https://developers.openai.com/codex/integrations/slack.md",
+          "path": "integrations/slack.md",
+          "status": "ok",
+          "sha256": "a8e904feb9d6308ec4b615a13841abb546c4810b123896042dc05825ba67fda0",
+          "bytes": 3735
+        },
+        {
+          "url": "https://developers.openai.com/codex/learn/best-practices.md",
+          "path": "learn/best-practices.md",
+          "status": "ok",
+          "sha256": "790e23bd78bffa294d4a058240c012385d599f7aeb9a0d4944e870d5cc06e5ce",
+          "bytes": 15032
+        },
+        {
+          "url": "https://developers.openai.com/codex/mcp.md",
+          "path": "mcp.md",
+          "status": "ok",
+          "sha256": "d06881257c62c1485225404604623d3750eea280a42a40e542e1c2fbdea27f92",
+          "bytes": 7951
+        },
+        {
+          "url": "https://developers.openai.com/codex/memories.md",
+          "path": "memories.md",
+          "status": "ok",
+          "sha256": "4f821a28faa6ffb8b12b053748d31e436103244e25c1b483c1e6eabc7f564ee8",
+          "bytes": 4208
+        },
+        {
+          "url": "https://developers.openai.com/codex/memories/chronicle.md",
+          "path": "memories/chronicle.md",
+          "status": "ok",
+          "sha256": "63facce8dcc8c030749a7a9aa9a2df41de7788ea02a118c5fbb60dd80da72112",
+          "bytes": 7543
+        },
+        {
+          "url": "https://developers.openai.com/codex/models.md",
+          "path": "models.md",
+          "status": "ok",
+          "sha256": "cd7c418aea8b2729aa34e625fea6c8e20c6cbb88ede8f06c071f4630305c32f4",
+          "bytes": 6482
+        },
+        {
+          "url": "https://developers.openai.com/codex/noninteractive.md",
+          "path": "noninteractive.md",
+          "status": "ok",
+          "sha256": "2bf6721391fec35734ce364006cb7369360b957d7a2d6ba8f55fc9079be6e696",
+          "bytes": 14579
+        },
+        {
+          "url": "https://developers.openai.com/codex/open-source.md",
+          "path": "open-source.md",
+          "status": "ok",
+          "sha256": "8f7899c92da97fa640797a9c0b005ab85fafb3dcf560d5653bfbfce6f732b8ba",
+          "bytes": 2620
+        },
+        {
+          "url": "https://developers.openai.com/codex/overview.md",
+          "path": "overview.md",
+          "status": "ok",
+          "sha256": "00c3a95eed5b5b137128e111f835f5414aa10a281264b3553638a3683c92eda8",
+          "bytes": 2540
+        },
+        {
+          "url": "https://developers.openai.com/codex/permissions.md",
+          "path": "permissions.md",
+          "status": "ok",
+          "sha256": "61ff6a6b55bd79dfd5e2801ec3e7db26def65e478e1c1278146ef2d1a52a5588",
+          "bytes": 33801
+        },
+        {
+          "url": "https://developers.openai.com/codex/plugins.md",
+          "path": "plugins.md",
+          "status": "ok",
+          "sha256": "8b912d939a4b846b421f354067985f4d748857ae20ed8fa789cad958f80e6ec1",
+          "bytes": 6167
+        },
+        {
+          "url": "https://developers.openai.com/codex/plugins/build.md",
+          "path": "plugins/build.md",
+          "status": "ok",
+          "sha256": "4ee6b01fbb21c65367ea8e9a14c76030c71748f77fd65535bdcbb973f6eb5684",
+          "bytes": 20015
+        },
+        {
+          "url": "https://developers.openai.com/codex/pricing.md",
+          "path": "pricing.md",
+          "status": "ok",
+          "sha256": "d54abb2fc26253d081dd103c3e65821962182c16cc346d5861446736c96df37b",
+          "bytes": 48308
+        },
+        {
+          "url": "https://developers.openai.com/codex/prompting.md",
+          "path": "prompting.md",
+          "status": "ok",
+          "sha256": "07be122341a7f89b57b9a0ec1a5a7cae5cd8d2fbcb8acfb3bc22c5e57e7b6588",
+          "bytes": 6055
+        },
+        {
+          "url": "https://developers.openai.com/codex/quickstart.md",
+          "path": "quickstart.md",
+          "status": "ok",
+          "sha256": "459281f19389096b9a8f1ceac37ca7c84e9b610dc834bc86eaa1a7b09f1a91b4",
+          "bytes": 19444
+        },
+        {
+          "url": "https://developers.openai.com/codex/record-and-replay.md",
+          "path": "record-and-replay.md",
+          "status": "ok",
+          "sha256": "d93f775603d2c2ea686bbcc806c4134749bfc7b08bf58bcbbf078b5b88863037",
+          "bytes": 3406
+        },
+        {
+          "url": "https://developers.openai.com/codex/remote-connections.md",
+          "path": "remote-connections.md",
+          "status": "ok",
+          "sha256": "42ae7a4917fbfe2babcd8575dbbb64492cf2b84d9697af6738ebd8fcf9679cea",
+          "bytes": 14001
+        },
+        {
+          "url": "https://developers.openai.com/codex/rules.md",
+          "path": "rules.md",
+          "status": "ok",
+          "sha256": "a4888d1e807734d4761ad0c0a55eba8b8b16d057d21de488b4c18f2668d598e0",
+          "bytes": 6049
+        },
+        {
+          "url": "https://developers.openai.com/codex/sdk.md",
+          "path": "sdk.md",
+          "status": "ok",
+          "sha256": "6a04d743c1cc5a87f079a752f1d8975fb20136d0cd6fe44db4cbc04a11f5a760",
+          "bytes": 3815
+        },
+        {
+          "url": "https://developers.openai.com/codex/security.md",
+          "path": "security.md",
+          "status": "ok",
+          "sha256": "2255a1d04492e41d502c5fbc3ba951a27b8d3b913ad7c3603e8145a87842adaa",
+          "bytes": 3395
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/faq.md",
+          "path": "security/faq.md",
+          "status": "ok",
+          "sha256": "8f2dfe15ce21cb25b274710ab88e66893596c12a7cac8958f43794e1c3916609",
+          "bytes": 6525
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/plugin.md",
+          "path": "security/plugin.md",
+          "status": "ok",
+          "sha256": "124a3326b025f1402ac2182b6378bf204c426f09f0a14a1020017beac6b68dd6",
+          "bytes": 5306
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/plugin/changelog.md",
+          "path": "security/plugin/changelog.md",
+          "status": "ok",
+          "sha256": "f1a6f7ecfb7bb9f9c543ac23cfa62e72608417b5243966da981443bd8c07e7da",
+          "bytes": 2162
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/plugin/code-changes.md",
+          "path": "security/plugin/code-changes.md",
+          "status": "ok",
+          "sha256": "da57fec212953b02228c73bf8f6bc20fea5a665213ab6258f508000577c1c2ac",
+          "bytes": 3891
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/plugin/deep-scans.md",
+          "path": "security/plugin/deep-scans.md",
+          "status": "ok",
+          "sha256": "6f4dfe7a127da0253714033242d6b7bc4a26b2ad1e56261123468d6758e413ab",
+          "bytes": 3228
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/plugin/export-findings.md",
+          "path": "security/plugin/export-findings.md",
+          "status": "ok",
+          "sha256": "49cb55bc9787de5cde931881f9391f22a837035169a7068a60f9429d8c7ab20f",
+          "bytes": 5695
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/plugin/fix-findings.md",
+          "path": "security/plugin/fix-findings.md",
+          "status": "ok",
+          "sha256": "d0a3cd0615c16a9c3c70c25007c6514df1bcff0e0408cdef606f86213b0b8811",
+          "bytes": 5309
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/plugin/scans.md",
+          "path": "security/plugin/scans.md",
+          "status": "ok",
+          "sha256": "20f274ce684f810c85ff4517c889bc2f2bb722b2a54f3bb4c66810b6dd83c2e8",
+          "bytes": 4862
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/plugin/triage-backlog.md",
+          "path": "security/plugin/triage-backlog.md",
+          "status": "ok",
+          "sha256": "2556b32d479b050739622f6a993f82914fb996028ba5ed4b8407542eefb88c09",
+          "bytes": 10928
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/setup.md",
+          "path": "security/setup.md",
+          "status": "ok",
+          "sha256": "528736050e7144aea5a9e3022d77cc0f76c6d0a813c3089aa35a194f2e0b3a3c",
+          "bytes": 5130
+        },
+        {
+          "url": "https://developers.openai.com/codex/security/threat-model.md",
+          "path": "security/threat-model.md",
+          "status": "ok",
+          "sha256": "4cc0827239c67dabc95841709827e06e96b5af491857629a1a8f5fe0444c00a2",
+          "bytes": 1995
+        },
+        {
+          "url": "https://developers.openai.com/codex/sites.md",
+          "path": "sites.md",
+          "status": "ok",
+          "sha256": "41080a4ebf38737e905978f76729e55022b7080a33d1d8c537fb4c42f06fb97b",
+          "bytes": 8990
+        },
+        {
+          "url": "https://developers.openai.com/codex/skills.md",
+          "path": "skills.md",
+          "status": "ok",
+          "sha256": "e901f7883b203763bb35b72f53147149d2fc84497d4418a7e9bf694260c0c7ef",
+          "bytes": 9614
+        },
+        {
+          "url": "https://developers.openai.com/codex/speed.md",
+          "path": "speed.md",
+          "status": "ok",
+          "sha256": "d8d29f978e73fa10f586f1ba3a17e2d3e3bd609100a9c0dd678bf649cc725f19",
+          "bytes": 1297
+        },
+        {
+          "url": "https://developers.openai.com/codex/subagents.md",
+          "path": "subagents.md",
+          "status": "ok",
+          "sha256": "bbf85a0ed997360f5021c08679956a5480fa40b76a8c2510048cc70ab20d8b62",
+          "bytes": 14171
+        },
+        {
+          "url": "https://developers.openai.com/codex/videos.md",
+          "path": "videos.md",
+          "status": "ok",
+          "sha256": "b72e3670108621ffc4ef92c40515b8c5c8749b7847954fd9ebb2b595705338f9",
+          "bytes": 1280
+        },
+        {
+          "url": "https://developers.openai.com/codex/windows.md",
+          "path": "windows.md",
+          "status": "ok",
+          "sha256": "ab8a6a5054f1f651c60ae64fae90607db5617d5e748f7b927c6ce281648e2f2c",
+          "bytes": 14106
+        },
+        {
+          "url": "https://developers.openai.com/codex/workflows.md",
+          "path": "workflows.md",
+          "status": "ok",
+          "sha256": "9bd9fe21e038fc24d69d79cbd22dd33fecf07d99cc9dd180470d98313e51b4c6",
+          "bytes": 10965
         }
       ]
     },

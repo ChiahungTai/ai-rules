@@ -2,7 +2,7 @@
 """
 Multi-harness docs mirror crawler.
 
-Mirrors official docs from Claude Code, OpenCode, ZCode into ref-docs/harness/<source>/.
+Mirrors official docs from Claude Code, OpenCode, ZCode, Codex into ref-docs/harness/<source>/.
 Prefers markdown endpoints (llms.txt / .md suffix); falls back to HTML extraction
 (zcode, and Claude blog when .md unavailable). Deterministic: writes a file only
 when its sha256 changed, so refresh produces minimal diff.
@@ -136,6 +136,8 @@ CLAUDE_BASE = "https://code.claude.com"
 CLAUDE_BLOG_BASE = "https://claude.com"  # blog posts live on the marketing host
 OPENCODE_BASE = "https://opencode.ai"
 ZCODE_BASE = "https://zcode.z.ai"
+CODEX_BASE = "https://developers.openai.com"
+CODEX_LLM = "https://developers.openai.com/codex/llms.txt"  # codex-specific index
 
 _CLAUDE_DOC_LINK = re.compile(r"- \[[^\]]+\]\((https?://code\.claude\.com[^)]+\.md)\)")
 # The blog index (code.claude.com/blog) links to claude.com/blog/<slug>; posts have
@@ -240,10 +242,36 @@ def fetch_zcode(page: Page) -> tuple[str, bytes]:
     return "extracted-html", _norm(text)
 
 
+_CODEX_DOC_LINK = re.compile(r"\]\((https?://developers\.openai\.com/codex/[^)]+\.md)\)")
+
+
+def discover_codex() -> list[Page]:
+    # developers.openai.com exposes a codex-specific llms.txt index that lists
+    # every Codex doc page as a verbatim .md link (same scheme as claude-code).
+    llms = fetch_until_ok(CODEX_LLM)
+    if not llms:
+        print("[WARN] codex: /codex/llms.txt unreachable; docs skipped")
+        return []
+    pages: list[Page] = []
+    for url in _CODEX_DOC_LINK.findall(llms):
+        # Strip base + the redundant leading "codex/" (source dir already names it).
+        rel = url.removeprefix(CODEX_BASE).lstrip("/").removeprefix("codex/")
+        pages.append(Page(url, rel))
+    return _dedup(pages)
+
+
+def fetch_codex(page: Page) -> tuple[str, bytes]:
+    status, body = http_get(page.url)
+    if 200 <= status < 300:
+        return "ok", _norm(body)
+    return "fail", b""
+
+
 SOURCES = {
     "claude-code": (CLAUDE_BASE, discover_claude_code, fetch_claude_code),
     "opencode": (OPENCODE_BASE, discover_opencode, fetch_opencode),
     "zcode": (ZCODE_BASE, discover_zcode, fetch_zcode),
+    "codex": (CODEX_BASE, discover_codex, fetch_codex),
 }
 
 
