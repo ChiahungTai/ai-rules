@@ -18,7 +18,7 @@
 - **單一職責（SRP）**：一個 class/function 一個改變理由 — 改 A 不該順便碰 B；職責多時拆分而非堆疊
 - **依賴向內（DIP）**：高層不依賴低層細節，依賴透過 interface（定義在內層）反轉；新增依賴先問「能否透過內層 interface」
 - **不洩漏實作細節**：公開介面不暴露內部資料結構/型別；消費者不該知道實作
-- **SOLID 指標**：SRP/OCP/LSP/ISP/DIP 實作時遵循（頂層總綱見 [架構設計紀律](../ai-development-guide.md)）
+- **SOLID 指標**：SRP/OCP/LSP/ISP/DIP 實作時遵循（頂層總綱見 [架構設計紀律](../AGENTS.md)）
 
 ---
 

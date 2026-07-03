@@ -67,7 +67,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 | `commands/claude/*.md` | `commands/CLAUDE.md` 索引 + 引用此命令的其他 .md | `rg "命令名或檔名" rules/ skills/ commands/` |
 | `skills/*/SKILL.md` | `skills/CLAUDE.md` 索引 + 引用此 skill 的 commands | `rg "skill名" commands/ rules/` |
 | `rules/*.md` | 引用此 rule 的 commands 和 skills | `rg "rule名或檔名" commands/ skills/` |
-| `ai-development-guide.md` | 所有引用 guide 定義的 commands（如 UC 狀態 emoji） | `rg "具體定義文字" commands/` |
+| `AGENTS.md` | 所有引用 guide 定義的 commands（如 UC 狀態 emoji） | `rg "具體定義文字" commands/` |
 
 輸出：列出需檢查的檔案（不是要求全部更新，是提醒檢查是否需要更新）。用戶在階段 5 確認時一併判斷。
 

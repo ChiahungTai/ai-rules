@@ -33,7 +33,7 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 
 | 項目 | 情境 | 做什麼 |
 |------|------|--------|
-| **Capabilities 寫入** | A | 對應模組 CLAUDE.md `## Capabilities` 表格新增 ✅ 行(格式 `\| 能力 \| 入口 \| 狀態 \|`,入口含 CLI + 函式路徑;見 [ai-development-guide](../../ai-development-guide.md)) |
+| **Capabilities 寫入** | A | 對應模組 CLAUDE.md `## Capabilities` 表格新增 ✅ 行(格式 `\| 能力 \| 入口 \| 狀態 \|`,入口含 CLI + 函式路徑;見 [AGENTS](../../AGENTS.md)) |
 | **消費場景寫入** | A | 從 EP Scenario Matrix 提煅引用該 UC 的場景為自包含一句話(不引用 EP/SM 編號),寫入 Capabilities 備註或 Kanban card |
 | **Kanban 搬 Done** | A | 已完成 UC 的卡片從 active lane(In-Progress/Next-Up)移至 `Done/` |
 | **SYSTEM-MAP 結算** | A | 受影響功能生命週期升級(`✅ Built → ✅🔍 Verified`,若有整合驗證);移除已修復 ⚠️;更新全域統計(若有) |

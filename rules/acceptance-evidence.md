@@ -102,7 +102,7 @@
 
 ## 與既有規則的關係
 
-- **風險分級**([ai-development-guide.md](../ai-development-guide.md) 驗證約束)決定「爬到第幾層」— 🟢 低風險不需六層,🔴 高風險才強制爬到對應層。避免過度工程是本階層的內建約束。
+- **風險分級**([AGENTS.md](../AGENTS.md) 驗證約束)決定「爬到第幾層」— 🟢 低風險不需六層,🔴 高風險才強制爬到對應層。避免過度工程是本階層的內建約束。
 - **漸進驗證**([progressive-validation](./progressive-validation.md))是 L1 → L2 → L3 的爬坡順序(DEPTH-MIN → SAMPLE → FULL)。
 - **消費端驗證模式**([quality-constraints](./quality-constraints.md))是 L3 整合層的具體化,本階層為它提供「為什麼」的理論基礎。
 - 階層降低風險,**不消除風險** — 每一層都值得懷疑,包括最頂層(L6 人類觀察會疲勞漏看,L5 POC 可能打自己畫的靶)。
