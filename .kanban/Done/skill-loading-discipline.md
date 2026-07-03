@@ -5,7 +5,7 @@
 **EP**：[ep-skill-loading-discipline.md](../../ai-analysis/execution-plans/ep-skill-loading-discipline.md)（docs mode，EP Review + Dry Run 已完成）
 
 ## 三個槓桿 + settings 修正（B 已於 dry run 後移除）
-- **A（S1）**：`skills/CLAUDE.md` frontmatter 規範解鎖 — description 上限 1024→1536（對齊 `skill-cleaner.ts:49` 真相源）+ 補齊官方欄位文件 + 決策指引（**disable-model-invocation 預設不設** — dry run 實證會斷 AI 自主流程）+ claude-writing.md 指向單一源
+- **A（S1）**：`skills/CLAUDE.md` frontmatter 規範解鎖 — description 上限 1024→1536（對齊 `skill-cleaner.ts:49` 真相源）+ 補齊官方欄位文件 + 決策指引（**disable-model-invocation 預設不設** — dry run 實證會斷 AI 自主流程）+ instruction-writing.md 指向單一源
 - ~~**B（S2）**~~：**已移除** — dry run 掃 732 session 實證 11/22 個 disable 集命令被 AI 高頻 auto-invoke（execution-plan/spec/build/commit…），設了打斷 EP→build→commit 自主鏈；consent 已在 skill 層確保
 - **C（S3）**：skill 拆分與 description 修正（**拆分優先、蒸餾僅限噪音**）— python-type-gap（578 行）拆 reference.md + paths；arch-thinking + review-engine description 觸發詞前置（dry-run 高頻 auto-invoke）；nt-query 驗上限（保持全域）
 - **D（S4）**：新增 dependency-upgrade-watch skill（paths: pyproject.toml 等；偵測 NT/SJ 版本漂移主動建議 /upgrade-nt|/upgrade-sj + 收盤提醒；只建議不執行）—— **dry run 強驗證的主價值**

@@ -15,8 +15,8 @@ review 命令家族的 **domain 層**：跨 ep-review / code-review / audit-test
 
 | vs | review-engine（本 skill） | 對方 |
 |----|--------------------------|------|
-| [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md) | **方法論 + 判定規則**（嚴重度意義、信心水準、自證、為何分離、審查模式判定規則） | **Workflow 執行**：DimensionVerdict schema、兩階段腳本、Finding Record 持久化（判定規則 → 決定讀哪個 schema，依賴方向非耦合） |
-| [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md) | （不重疊） | **Agent Tool 模式執行範本**（3-perspective） |
+| [workflow-review-pattern](../../commands/instruction/_common/workflow-review-pattern.md) | **方法論 + 判定規則**（嚴重度意義、信心水準、自證、為何分離、審查模式判定規則） | **Workflow 執行**：DimensionVerdict schema、兩階段腳本、Finding Record 持久化（判定規則 → 決定讀哪個 schema，依賴方向非耦合） |
+| [agent-review-cycle](../../commands/instruction/_common/agent-review-cycle.md) | （不重疊） | **Agent Tool 模式執行範本**（3-perspective） |
 | [arch-thinking](../arch-thinking/SKILL.md) | **依賴**它（架構審查需要視角/機械） | 提供架構視角/機械能力 |
 | audit-test 三層驗證鏈 | 通用 why（各層都可能錯） | **具體 audit→judge→followup 鏈細節**（test 講最細，留 audit-test） |
 
@@ -95,14 +95,14 @@ workflow-review-pattern 的 schema、各命令的輸出分類，皆引用此。
 
 ## 審查模式判定規則
 
-**本段職責 = 判定規則**（domain：effort/max-agents → 抽象 mode）；**派發到 adapter 範本是命令層職責**（use-case）—— 判定為某 mode 後，各命令自取執行範本（Workflow → [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md)；Agent Tool → [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md)）。不強求消除導覽連結（docs 互指可容忍），重點是 domain 不內嵌派發。
+**本段職責 = 判定規則**（domain：effort/max-agents → 抽象 mode）；**派發到 adapter 範本是命令層職責**（use-case）—— 判定為某 mode 後，各命令自取執行範本（Workflow → [workflow-review-pattern](../../commands/instruction/_common/workflow-review-pattern.md)；Agent Tool → [agent-review-cycle](../../commands/instruction/_common/agent-review-cycle.md)）。不強求消除導覽連結（docs 互指可容忍），重點是 domain 不內嵌派發。
 
 **通用判定規則**（消 build/code-review/ep-review 三處重複定義；例外見下表最右欄）：
 
 | 條件 | 抽象 mode | 例外（不走此 mode） | 命令層自取的執行範本 |
 |------|----------|-------------------|-------------------|
-| effort = ultracode/xhigh **且** max-agents > 1 | **Workflow** | — | [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md)（schema + 兩階段腳本 + adversarial verify） |
-| max-agents = 1 但 effort = ultracode/xhigh | **Agent Tool**（Fallback） | — | [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md)（3-perspective） |
+| effort = ultracode/xhigh **且** max-agents > 1 | **Workflow** | — | [workflow-review-pattern](../../commands/instruction/_common/workflow-review-pattern.md)（schema + 兩階段腳本 + adversarial verify） |
+| max-agents = 1 但 effort = ultracode/xhigh | **Agent Tool**（Fallback） | — | [agent-review-cycle](../../commands/instruction/_common/agent-review-cycle.md)（3-perspective） |
 | effort < ultracode | **Main LLM** | build / ep-review / execution-plan（品質閘門，連 standard effort 也強制獨立 agent、不走 Main LLM；僅 code-review 等無強制分離命令適用） | 主 LLM 直接審（現有行為） |
 
 判定結果決定讀哪個執行範本的 schema/腳本 —— 這是**依賴方向**（判定 → schema），不是耦合。本 skill 只放判定規則，**不重複** schema/腳本（在 workflow-review-pattern）。
@@ -143,7 +143,7 @@ review finding 可經多層驗證，**各層都可能錯**：
    - **③ Correctness（邊界正確性）** 抓邏輯 bugs / 邊界案例（跨日 / 空值 / 溢出 / 空資料）/ 測試充分性〔correctness〕—— **主動質疑邊界事實**，不錨定意圖、不靠 code smell
    - **三者錨定方式不同 → 正交**（故不適用「共享錨定遞減」移除理由）：① 無錨讀 smell / ② 錨 EP / ③ 質疑邊界事實
    - **為何 ③ 同 session 有效**（F1 證偽 agent-review-cycle 舊論述「clean 自然覆蓋正確性」）：clean 是 smell 視角，不主動質疑邊界 → `max(fill_dates)` 跨日 bug 看起來不怪 → 漏。③ Correctness 主動質疑邊界事實，**不共享 writer 意圖假設** → 對**非系統性偏誤**邊界 bug 同 session 可抓。**例外**：系統性偏誤（LLM 普遍弱項，如某類邊界推理）同家族也漏 → layer 2 code-review（見 acceptance-evidence 系統性偏誤）
-   - 單跑任一有盲點，同時跑互補。執行範本見 [agent-review-cycle](../../commands/claude/_common/agent-review-cycle.md) —— 此 3-perspective 是 Agent Tool 範本的 base 視角（build Agent Review 用）；code-review 六軸、ep-review F1-F5 等以**維度 profile** 分配 agent（見各命令 + 上方 mode 表），非此 clean/UC/Correctness 3-perspective。
+   - 單跑任一有盲點，同時跑互補。執行範本見 [agent-review-cycle](../../commands/instruction/_common/agent-review-cycle.md) —— 此 3-perspective 是 Agent Tool 範本的 base 視角（build Agent Review 用）；code-review 六軸、ep-review F1-F5 等以**維度 profile** 分配 agent（見各命令 + 上方 mode 表），非此 clean/UC/Correctness 3-perspective。
 
 5. **>3 配置**（機械特徵觸發，非 LLM 語義判「高風險」；受 max-agents cap）：base 恆 ①+②+③（3）；extra（第 4+）由**消費命令提供的段落風險特徵**觸發 —— **通用風險特徵 → extra agent 映射**（單一源，domain）：`外部整合` → adversarial、`公開簽名變更` → architecture+consumer-perspective、`跨模組` → architecture、`UC 數 >6` → UC-split（extra 拿 UC 子集做深度，唯一給 UC-anchored 開 extra 的情境）。`跨模組` 映射目前無 adapter 接線，保留供未來消費命令。**特徵偵測由消費命令提供**（adapter）；review-engine 只定義映射框架（domain），**不列消費命令特有名詞**（DIP — domain 不被 adapter 污染）。extra 優先序到 cap —— **architecture（axis 3）> adversarial / edge > consumer-perspective**（保留原 agent type 清單與優先序；多特徵命中 + cap 不足依此序取最高，截斷其餘並提示）；**絕不** 2nd clean / 2nd **同一** lens —— 複製 lens 同家族共享盲點，邊際覆蓋 ≈0（UC-split 是不同子集做深度，非複製；多樣性 > 數量）。
 
@@ -151,7 +151,7 @@ review finding 可經多層驗證，**各層都可能錯**：
    - **spawn**（命令內、即時、同家族 LLM 天花板）—— 預設路徑
    - **另開 session**（user 手動、最強獨立、抓 spawn 漏的）—— 高風險建議補跑
    - **另開 handoff 套件** = 持久化 finding（EP review 區段 / kanban，tracked）+ git diff + 標的 / EP / UC 路徑 —— 讓新 session 不靠記憶還原審查標的
-   - **跨 session 鏈**（另開 session 時，persistence 串起每步；不靠對話記憶 —— 跨 session 不在）：`review` 寫 finding → `judge-review` 寫決策（✅ / ❌ / ⚠️）→ apply（主 agent / impl LLM 改）→ `followup-review` 讀持久化逐項驗收（verified / closed / open）。findings 交接格式見 [workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md) Finding Record。
+   - **跨 session 鏈**（另開 session 時，persistence 串起每步；不靠對話記憶 —— 跨 session 不在）：`review` 寫 finding → `judge-review` 寫決策（✅ / ❌ / ⚠️）→ apply（主 agent / impl LLM 改）→ `followup-review` 讀持久化逐項驗收（verified / closed / open）。findings 交接格式見 [workflow-review-pattern](../../commands/instruction/_common/workflow-review-pattern.md) Finding Record。
 
 ---
 

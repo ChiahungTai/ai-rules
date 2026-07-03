@@ -25,7 +25,7 @@ sp 的東西分兩類，借鑒成本天差地別：
 | **P0** | **skill-as-TDD 方法論**（先跑壓力測試看 agent 失敗 → 寫 skill → 看遵守 → 堵漏洞） | ai-rules skill 品質靠事後 `/consistency` `/doc-health`，缺「前置 TDD 迴圈」 | 新建 `writing-skills` skill（on-demand，寫 skill 時載入流程）；或寫進 `skills/CLAUDE.md` 當「寫 skill 前必讀」 | 無 |
 | **P0** | **progress ledger 防 compaction**（`.superpowers/sdd/progress.md` 模式：任務完成寫一行，compaction 後信任 ledger 不重做） | ai-rules 長任務（deep-work、`/build` 多段）跨 compaction 失憶，可能重做已完成段 | 引進 `/build` / `autonomous-execution` skill 機制；載體 = command/skill 步驟 | 無 |
 | **P1** | **SDD file-handoff**（task-brief / report / review-package 用**檔案**交接，不 paste 進 context） | ai-rules `/build` 段落實作的 controller context 肥大問題 | 強化 `agent-workflow` + `self-contained-prompt` skill | 無（ai-rules 已有基礎） |
-| **P1** | **Match the Form to the Failure**（prohibition vs recipe 理論：shaping 問題用 recipe 不用 prohibition；prohibition 在 shaping 上 backfire） | ai-rules 寫 rules/skills 時的手法精度 | 寫進 `claude-writing.md` 或 `encoder-philosophy`（rule 載體，寫文檔時 auto-load） | 無（純理論） |
+| **P1** | **Match the Form to the Failure**（prohibition vs recipe 理論：shaping 問題用 recipe 不用 prohibition；prohibition 在 shaping 上 backfire） | ai-rules 寫 rules/skills 時的手法精度 | 寫進 `instruction-writing.md` 或 `encoder-philosophy`（rule 載體，寫文檔時 auto-load） | 無（純理論） |
 | **P2** | **behavior-shaping 措辭**（Red Flags tables、rationalization lists、「Iron Law」全大寫） | ai-rules 高違規風險 rules（`must-execute-before-complete`、`commit-consent`、`bash-hard-rules`）可更抗 rationalization | 強化既有 rules（不新建載體） | 無 |
 
 > **來源 reference**：借鑒內容的 sp 原始出處 —— `skills/writing-skills/SKILL.md`（skill-as-TDD + Match the Form to the Failure）、`skills/subagent-driven-development/SKILL.md`（file-handoff + progress ledger + Model selection）、各 skill 的 Red Flags/rationalization tables（behavior-shaping 措辭）。

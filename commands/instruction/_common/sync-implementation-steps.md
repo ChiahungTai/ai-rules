@@ -1,6 +1,6 @@
 # Sync 實作步驟詳細定義
 
-> **載入時機**: 僅在 `/claude:sync` 執行時按需讀取。本檔案定義步驟 0.5-10.5 的詳細實作邏輯。
+> **載入時機**: 僅在 `/instruction:sync` 執行時按需讀取。本檔案定義步驟 0.5-10.5 的詳細實作邏輯。
 
 ---
 
@@ -185,7 +185,7 @@ done
 機械性檢查（用 `fd` + `rg`，避免 shell 變數與 `sed`）：
 
 1. 列出所有命令檔：`fd -e md . <target-dir> --exclude CLAUDE.md`
-2. 對每個檔推導命令名稱（去目錄前綴與 `.md`：`claude/clean.md` → `/claude:clean`、`worktree/status.md` → `/worktree:status`）—— 以具體檔名推導，不用 `$TARGET_DIR` 變數
+2. 對每個檔推導命令名稱（去目錄前綴與 `.md`：`claude/clean.md` → `/instruction:clean`、`worktree/status.md` → `/worktree:status`）—— 以具體檔名推導，不用 `$TARGET_DIR` 變數
 3. 逐個驗證是否記錄：`rg -q "<命令名稱>" <target-CLAUDE.md>`（找到 = ✅ 已記錄，未找到 = ❌ 未記錄）
 
 ---
@@ -214,7 +214,7 @@ fi
 ## 步驟 7: 清理元資訊（--clean 選項）
 
 ```bash
-# 呼叫 /claude:clean 功能
+# 呼叫 /instruction:clean 功能
 # 移除版本號、日期、統計等元資訊
 ```
 
@@ -223,7 +223,7 @@ fi
 ## 步驟 8: 蒸餾（--all 選項）
 
 ```bash
-# 呼叫 /claude:distill 功能
+# 呼叫 /instruction:distill 功能
 # 蒸餾精簡 CLAUDE.md
 ```
 

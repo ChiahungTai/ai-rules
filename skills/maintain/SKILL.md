@@ -19,7 +19,7 @@ when_to_use: >
 ```
 Phase 1: Snapshot               Phase 2: CLAUDE.md Sync     Phase 3: Doc Health           Phase 4: Report
 ─────────────────               ──────────────────────      ──────────────────────        ──────────────
-scan_project.py                 /claude:sync                 /doc-health                    彙總報告
+scan_project.py                 /instruction:sync                 /doc-health                    彙總報告
 → dep_graph / findings / fp     LLM 直接讀 CLAUDE.md        呈現 findings                  跨 phase 關聯
 diff fingerprint                用 dep_graph 驗證 imports   LLM 直接讀 .kanban/            趨勢追蹤
 更新 dep-graph.md               品質檢查                    品質檢查 + kanban hygiene
@@ -53,7 +53,7 @@ Mermaid 暗色主題：所有 ````mermaid` 區塊第一行加 `%%{init: {'theme'
 
 ### Phase 2: CLAUDE.md 同步
 
-執行 `/claude:sync --changed-since yesterday --recursive`。
+執行 `/instruction:sync --changed-since yesterday --recursive`。
 
 Snapshot 輔助：
 - `dep_graph` → 精確 import 依賴鏈
@@ -178,7 +178,7 @@ Done/ 超過 14 天的卡片：
 | 無 tag 卡片 | 推導後自動加 | 🟢 low risk |
 | Done/ 歸檔 | > 14 天自動刪 | 🟢 low risk |
 | X-ep-ready / X6 | 只報告 | 🟡 需語義判斷 |
-| /claude:sync --changed-since | `yesterday` | 每日增量 |
+| /instruction:sync --changed-since | `yesterday` | 每日增量 |
 | /doc-health 參數 | 預設（不含 --quality --all） | 核心 findings 即可 |
 | SYSTEM-MAP 同步 | 不執行 | 需人類確認狀態語義 |
 

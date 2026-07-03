@@ -1,6 +1,6 @@
 # Sync 檢查角度完整定義
 
-> **載入時機**: 僅在 `/claude:sync` 執行時按需讀取。本檔案定義 12 個檢查角度的判斷標準和驗證方式。
+> **載入時機**: 僅在 `/instruction:sync` 執行時按需讀取。本檔案定義 12 個檢查角度的判斷標準和驗證方式。
 
 ---
 
@@ -8,7 +8,7 @@
 
 > **核心原則**：CLAUDE.md 的導航職責是讓 AI 從「概念」定位到「符號」（導航-A）；符號→位置的機械查找由 LSP 接手（導航-B）。讀完 CLAUDE.md 後，AI 應能回答「這個概念的核心符號是什麼？」，再由 LSP 解析到檔案位置。
 >
-> 導航-A / 導航-B 二分與 LSP 分工定義見 [claude-writing.md](../../../rules/claude-writing.md)「導航優先原則」。
+> 導航-A / 導航-B 二分與 LSP 分工定義見 [instruction-writing.md](../../../rules/instruction-writing.md)「導航優先原則」。
 
 **判斷標準**：抽取 3-5 個關鍵概念，驗證每個概念是否有指向 class/function **符號名**的導航種子。若無法從文檔定位到符號，標記為導航缺口。檔案路徑非必要（LSP 可從符號名解析）。
 
@@ -153,7 +153,7 @@
 - 需改善：High Signal 40-60%，或有少量 Low Noise
 - 需蒸餾：High Signal < 40%，或有大量 Low Noise
 
-**建議動作**：signal/noise ratio 不足時，建議執行 `/claude:distill` 進行 signal/noise 分離。
+**建議動作**：signal/noise ratio 不足時，建議執行 `/instruction:distill` 進行 signal/noise 分離。
 
 ---
 
@@ -235,7 +235,7 @@
 
 ## 角度十二：通用性（完整層，--all）
 
-> **核心原則**：泛用 rules/commands（非專案特定工具）教 pattern，不應釘死真實專案符號/路徑/數字 —— 否則 fact drift（該專案一改，例子就錯）且跨專案失效。原則定義見 [claude-writing.md](../../../rules/claude-writing.md)「應該避免 → 專案特定事實」。
+> **核心原則**：泛用 rules/commands（非專案特定工具）教 pattern，不應釘死真實專案符號/路徑/數字 —— 否則 fact drift（該專案一改，例子就錯）且跨專案失效。原則定義見 [instruction-writing.md](../../../rules/instruction-writing.md)「應該避免 → 專案特定事實」。
 
 **判斷標準**：泛用 rules/（auto-loaded）、泛用 commands（非某專案專屬，如 `upgrade-*`）中，例子是否用 `<placeholder>` 而非真實專案符號。
 

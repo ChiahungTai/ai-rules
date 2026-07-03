@@ -185,7 +185,7 @@ specs/                     specs/
 | **uncertain** | 邊界情況，無法自動判斷 | review | 需人工確認 |
 | **context_preserve** | API 規格等可簡化但需保留核心定義的內容 | condense | 中等保留 |
 
-分類邏輯的完整 pseudo code 和模式列表：[distill-spec-classification.md](./claude/_common/distill-spec-classification.md)
+分類邏輯的完整 pseudo code 和模式列表：[distill-spec-classification.md](./instruction/_common/distill-spec-classification.md)
 
 ---
 

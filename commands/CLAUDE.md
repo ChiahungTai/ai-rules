@@ -21,7 +21,7 @@
 |------|------|------|
 | `skills/` | 目錄制 + 私有支援檔 | 領域知識、工作流（auto-loadable，model-invoked） |
 | `commands/` | 扁平單檔 | explicit workflow（人類 `/invoke` 觸發） |
-| `commands/claude/_common/` | 共享子範本 | 跨命令共用的流程範本，非 per-skill 支援檔 |
+| `commands/instruction/_common/` | 共享子範本 | 跨命令共用的流程範本，非 per-skill 支援檔 |
 
 ### 轉換觸發（command → skill）
 
@@ -81,12 +81,12 @@
 - `/sync-sources` — 跨檔 single-source invariant 機械檢查（v1：enum + classification 沒被 drift）
 - `/distill-spec` — 蒸餾肥大的 spec 文檔
 
-### CLAUDE.md 維護
+### instruction file 維護
 
-- `/claude:init` — 為任意專案自動產生 CLAUDE.md（bottom-up，從子模組到 Root）
-- `/claude:clean` — 清理 Markdown 元資訊
-- `/claude:distill` — 蒸餾文檔，提煉核心精華
-- `/claude:sync` — 檢查文檔與程式碼同步性
+- `/instruction:init` — 為任意專案自動產生 instruction file 體系（AGENTS.md source + CLAUDE.md wrapper + 模組 CLAUDE.md，bottom-up）
+- `/instruction:clean` — 清理 Markdown 元資訊
+- `/instruction:distill` — 蒸餾文檔，提煉核心精華
+- `/instruction:sync` — 檢查文檔與程式碼同步性
 - `/daily-maintain` — 每日自動維護（cron 用），自動修正低風險問題 + commit
 - `/project-review` — 互動式專案審查（人類用），findings + kanban + doc health
 

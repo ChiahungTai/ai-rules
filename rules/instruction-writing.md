@@ -3,24 +3,33 @@ paths:
   - "**/*.md"
 ---
 
-# CLAUDE.md 撰寫規範
+# Instruction File 撰寫規範
 
-> **🔴 強烈警告**: AI 寫作 CLAUDE.md 時**絕對禁止**加入統計資訊、版本號、更新日期等元資訊。詳細說明請參考 `@~/.claude/rules/_ai-behavior-constraints.md`
+> **🔴 強烈警告**: AI 寫作 instruction file 時**絕對禁止**加入統計資訊、版本號、更新日期等元資訊。詳細說明請參考 `@~/.claude/rules/_ai-behavior-constraints.md`
 
 ## 基本原則
 
-CLAUDE.md 是給 AI 的協作指南，應專注於**核心原則**和**執行約束**，避免冗餘細節。
+instruction file 是給 AI 的協作指南，應專注於**核心原則**和**執行約束**，避免冗餘細節。
 
 ## 命名規範
 
-### 檔案命名
-- 專案層級: `./CLAUDE.md` 或 `./.claude/CLAUDE.md`
-- 命令層級: `commands/claude/{command-name}.md`
-- 符號連結: 用 `@path` 引用共用內容
+### 檔案命名（instruction file 雙檔模式）
+
+> **專案層雙檔模式**：`AGENTS.md`（source）+ `CLAUDE.md`（`@AGENTS.md` wrapper）。多 harness——AGENTS.md 三家都讀、CLAUDE.md 是 Claude 專屬。標準優先：中立內容進 AGENTS.md，Claude 專屬進 CLAUDE.md。
+
+- **`AGENTS.md`**（source, harness-neutral）：**專案指令**的中立原則層——三家 harness（Claude/ZCode/OpenCode）開本專案時都讀。body **禁 Claude 專屬散文**（hooks、`paths:`、`/build` workflow）——其他 harness 讀到是斷裂噪音；frontmatter 欄位可容忍（harness 自動忽略不懂的）
+
+> **⚠️ 全域指南 ≠ 專案 AGENTS.md**：跨專案共用的全域開發指南（如 ai-rules 的 `ai-development-guide.md`）是**獨立檔**，部署到各 harness 全域位置（`~/.claude/CLAUDE.md`、`~/.zcode/AGENTS.md`、`~/.config/opencode/AGENTS.md` → 該檔），**不是專案 root AGENTS.md**。專案 AGENTS.md = 開該專案時讀的專案指令；全域指南 = 所有專案都載入的跨專案規範。兩者各司其職——混為一檔 → 專案失去自己的指令 + 全域指南被專案內容污染。
+- **`CLAUDE.md`**（thin wrapper, Claude 專屬）：開頭 `@AGENTS.md`（把中立規則拉進 Claude session）+ Claude 專屬段（hooks 機制、slash command workflow、repo 結構導航）。只 Claude 讀
+- 專案層級：root `AGENTS.md`（source）+ `CLAUDE.md`（`@AGENTS.md` wrapper）；或 `./.claude/CLAUDE.md`
+- 命令層級：`commands/instruction/{command-name}.md`
+- 符號連結：`@path` 引用（**僅 CLAUDE.md 展開**；AGENTS.md 不展開 `@`——見下方）
+
+> **`@` transclusion 是 Claude Code 專用**：CLAUDE.md 啟動時自動展開 `@path`；AGENTS.md（與 ZCode/OpenCode）**不展開 `@`**。所以 AGENTS.md 內**不可用 `@`** 拉內容——中立內容直接寫在 AGENTS.md，Claude 專屬才放 CLAUDE.md 用 `@`。
 
 ### 命令命名（slash commands）
 - 格式: `/{category}:{action}` 或 `/{action}`
-- 範例: `/claude:clean`, `/commit-message`, `/illustrate`
+- 範例: `/instruction:clean`, `/commit-message`, `/illustrate`
 - 使用小寫和連字線，不用底線
 
 ## 結構規範
@@ -60,7 +69,7 @@ permission-mode: "acceptEdits"
 
 ## 內容規範
 
-> **核心理念**: CLAUDE.md 是模組知識的 Encoder（壓縮表示）。品質標準是 Signal/Noise ratio — 保留從程式碼猜不到的知識，移除可推導的內容。詳細框架見 [encoder-philosophy.md](../commands/claude/_common/encoder-philosophy.md)。
+> **核心理念**: instruction file 是模組知識的 Encoder（壓縮表示）。品質標準是 Signal/Noise ratio — 保留從程式碼猜不到的知識，移除可推導的內容。詳細框架見 [encoder-philosophy.md](../commands/instruction/_common/encoder-philosophy.md)。
 
 ### 應該包含（High Signal）
 - **導航指引（概念→符號）**: 每個關鍵概念必須附帶 symbol name 指引（如 `ClassName` 或 `function_name()`），讓 LLM 能從概念定位到符號、再由 LSP 解析到位置。檔案路徑（`file.py:`）為選用 fallback（判斷：文檔引入了概念但 LLM 不知道對應哪個符號 → 導航缺口）
@@ -95,7 +104,7 @@ permission-mode: "acceptEdits"
 
 **Runtime API 存取模式**：當模組的核心工廠/入口回傳的物件有重要的下游 API 時（如 `create_backtest_engine()` 回傳的 BacktestEngine 的 post-run 提取方法），在「可複用基礎設施」之後以簡短表格記錄常用存取模式。判斷：工廠函式的回傳值在 2+ 個消費端被以相同模式使用 → 值得記錄。
 
-**頂層索引**（專案根 CLAUDE.md）：精選 8-12 項高頻使用項 + 子模組連結，不重複子模組的完整列表。格式：`- module.Class — 用途 → [module](module/CLAUDE.md)`（`Class` 路徑選用，LSP 可解析）
+**頂層索引**（專案根 AGENTS.md）：精選 8-12 項高頻使用項 + 子模組連結，不重複子模組的完整列表。格式：`- module.Class — 用途 → [module](module/CLAUDE.md)`（`Class` 路徑選用，LSP 可解析）
 
 ### 應該避免（Low Noise）
 - **可推導內容**: API 簽名、參數表、欄位列表（從程式碼可直接推導）
@@ -121,7 +130,7 @@ permission-mode: "acceptEdits"
 ```
 
 #### Skill / Command — markdown link 按需讀取
-Skills 不支持 `@` transclusion。使用 markdown link 讓 Claude 知道何時讀取 supporting files。
+Skills 不支持 `@` transclusion。使用 markdown link 讓 AI agent 知道何時讀取 supporting files。
 ```markdown
 # 相對路徑（相對於 SKILL.md 所在目錄）
 Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
@@ -129,7 +138,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 # 引用其他 command
 參考: [clean.md](./clean.md)
 ```
-描述檔案內容讓 Claude 判斷何時讀取，而非無條件載入。
+描述檔案內容讓 AI agent 判斷何時讀取，而非無條件載入。
 
 #### CLAUDE.md — 長文件按需指引（不用 `@`）
 當目標檔案太長或 signal/noise 比例不佳，不值得 `@` 全載，但 AI 需要知道它的存在時，使用 markdown link + 內容描述。
@@ -152,7 +161,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 ### 基本用法
 
 ```bash
-/claude:clean
+/instruction:clean
 ```
 
 ### 輸出範例
@@ -170,24 +179,24 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 導航優先原則
 
-> **核心理念**：CLAUDE.md 的導航職責是提供「概念→符號」的種子；符號→位置的機械查找由 LSP 接手。文檔寫作精力應放在語義知識（設計理由、約束、失敗教訓），而非檔案路徑表。
+> **核心理念**：instruction file 的導航職責是提供「概念→符號」的種子；符號→位置的機械查找由 LSP 接手。文檔寫作精力應放在語義知識（設計理由、約束、失敗教訓），而非檔案路徑表。
 
 ### 導航的兩個子類（LSP 時代）
 
 | 子類 | 內容 | 誰負責 | 說明 |
 |------|------|--------|------|
-| **導航-A：概念→符號** | 「台股除權息調整」→ `backward_adjust()` | **CLAUDE.md（不可約）** | LSP `workspaceSymbol` 要先有名子才能搜；概念是人類用語，符號是程式碼用語，這對應只能人寫 |
+| **導航-A：概念→符號** | 「台股除權息調整」→ `backward_adjust()` | **instruction file（不可約）** | LSP `workspaceSymbol` 要先有名子才能搜；概念是人類用語，符號是程式碼用語，這對應只能人寫 |
 | **導航-B：符號→位置/簽名/引用** | `backward_adjust()` → 哪個檔案、簽名、誰呼叫 | **LSP（可推導）** | `goToDefinition` / `hover` / `findReferences` / `incomingCalls`，live 且 100% 準確 |
 
-**LSP 時代原則**：CLAUDE.md 只需給導航-A（概念→symbol name）；導航-B 交給 LSP。檔案路徑不再是要求。LSP 工具決策樹與分工見 `lsp-navigation.md`（rules/ 自動載入）。
+**LSP 時代原則**：instruction file 只需給導航-A（概念→symbol name）；導航-B 交給 LSP。檔案路徑不再是要求。LSP 工具決策樹與分工見 `lsp-navigation.md`（rules/ 自動載入）。
 
 ### 概念→符號映射（導航-A）
 
-每個 CLAUDE.md 引入的關鍵概念（設計決策、核心演算法、資料結構）都必須附帶 symbol name 種子：
+每個 instruction file 引入的關鍵概念（設計決策、核心演算法、資料結構）都必須附帶 symbol name 種子：
 
 ```markdown
-✅ 有種子：CLAUDE.md 提到「台灣證券分類器」→ 指向 `TWSecurityClassifier`（檔案由 LSP 解析）
-❌ 無種子：CLAUDE.md 提到「證券分類」→ 只有概念，不知道核心符號是什麼
+✅ 有種子：instruction file 提到「台灣證券分類器」→ 指向 `TWSecurityClassifier`（檔案由 LSP 解析）
+❌ 無種子：instruction file 提到「證券分類」→ 只有概念，不知道核心符號是什麼
 ```
 
 ### 導航語法
@@ -247,7 +256,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ### 導航 Decoder Test（自檢）
 
-寫完 CLAUDE.md 後，不查源碼，嘗試回答：
+寫完 instruction file 後，不查源碼，嘗試回答：
 1. 「我要修改 X 的邏輯，核心符號是什麼？」→ 能給出 class/function 名？（檔案路徑由 LSP `workspaceSymbol` / `goToDefinition` 解析即可）
 2. 「Y 這個概念在哪裡實作？」→ 能指向 symbol name？
 3. 「Z 的上游資料從哪來？」→ 能追蹤到上游步驟和產出型別？

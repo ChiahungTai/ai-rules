@@ -28,7 +28,7 @@
 
 | 查證 | 結果 | 證明的盲區 |
 |---|---|---|
-| `rg -l "機械閘門\|LLM 自覺"` | 9 檔跨 4 目錄（rules/、commands/、commands/claude/_common/、ai-analysis/） | 逐檔枚舉漏 `_common/`（被引用的共用範本）+ ai-analysis/（非權威處）|
+| `rg -l "機械閘門\|LLM 自覺"` | 9 檔跨 4 目錄（rules/、commands/、commands/instruction/_common/、ai-analysis/） | 逐檔枚舉漏 `_common/`（被引用的共用範本）+ ai-analysis/（非權威處）|
 | `_common/workflow-review-pattern.md:112` | 引用「機械閘門」但非定義 | _common/ 是「逐檔枚舉必漏」典型（被引用方，非主動方）|
 | 定義源 | `review-commit-workflow-mismatch.md:8`（ai-analysis/ 摩擦文件，非 rules/）| 縫隙 2 真實：定義源在非顯眼處 |
 | `rg -l "共用規範\|與.*共用"` | 12 檔自稱共用 | 語義反向撈的目標群真實存在 |

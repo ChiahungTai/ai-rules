@@ -1,12 +1,14 @@
 ---
 description: "清理 Markdown 文檔中不必要的元資訊（版本號、日期、統計、Changelog）"
-when_to_use: "Remove unnecessary metadata (version numbers, dates, statistics, changelogs) and low-signal content from CLAUDE.md files. Use to improve signal/noise ratio."
-usage: "/claude:clean [目錄路徑] [選項]"
-argument-hint: "/claude:clean [目錄路徑] [--recursive] — 預設處理當前目錄，可指定目錄或 .md 檔案"
+when_to_use: "Remove unnecessary metadata (version numbers, dates, statistics, changelogs) and low-signal content from instruction files (根 AGENTS.md source + CLAUDE.md wrapper/模組 nav). Use to improve signal/noise ratio. 雙檔模式見 instruction-writing.md。"
+usage: "/instruction:clean [目錄路徑] [選項]"
+argument-hint: "/instruction:clean [目錄路徑] [--recursive] — 預設處理當前目錄，可指定目錄或 .md 檔案"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 ---
 
 # CLAUDE.md Clean - 清理不必要的元資訊
+
+> **instruction file 雙檔模式**：操作範圍含根 `AGENTS.md`（source）+ `CLAUDE.md`（wrapper + 模組導航）——遞迴發現時兩者皆納入。見 [instruction-writing.md](../../rules/instruction-writing.md)。
 
 你是 Markdown 文檔清理專家，專門移除對 AI 無意義的元資訊和低 signal 內容，讓文檔專注於當前有效的核心知識。
 
@@ -63,7 +65,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ### 4. 引用語法正確性
 
-依據 [claude-writing.md](../../rules/claude-writing.md) 的引用語法規則，檢查 CLAUDE.md 中的引用是否使用了正確語法：
+依據 [instruction-writing.md](../../rules/instruction-writing.md) 的引用語法規則，檢查 CLAUDE.md 中的引用是否使用了正確語法：
 
 | 情境 | 正確語法 | 錯誤語法 |
 |------|---------|---------|
@@ -87,7 +89,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 📋 執行流程
 
-### 步驟 1: 遞歸發現 CLAUDE.md
+### 步驟 1: 遞歸發現 instruction files（根 AGENTS.md + CLAUDE.md + 模組 CLAUDE.md）
 
 遞歸發現邏輯: [recursive-discovery.md](./_common/recursive-discovery.md)
 
@@ -144,27 +146,27 @@ Read $TARGET_CLAUDE_MD
 
 ```bash
 # 1. 檢查當前目錄的 CLAUDE.md
-/claude:clean
+/instruction:clean
 
 # 2. 檢查指定檔案
-/claude:clean src/core/CLAUDE.md
+/instruction:clean src/core/CLAUDE.md
 
 # 3. 檢查指定目錄（僅該目錄層級）
-/claude:clean src/core
+/instruction:clean src/core
 
 # 4. 遞歸檢查所有子目錄的 CLAUDE.md
-/claude:clean --recursive
-/claude:clean -r
+/instruction:clean --recursive
+/instruction:clean -r
 
 # 5. 遞歸檢查指定目錄
-/claude:clean /path/to/project --recursive
+/instruction:clean /path/to/project --recursive
 
 # 6. 預覽模式（不實際修改）
-/claude:clean --dry-run
-/claude:clean --recursive --dry-run
+/instruction:clean --dry-run
+/instruction:clean --recursive --dry-run
 
 # 7. 強制清理（不詢問）
-/claude:clean --force
+/instruction:clean --force
 ```
 
 ### 參數說明
@@ -201,7 +203,7 @@ Read $TARGET_CLAUDE_MD
 ### 清理預覽
 移除以上 5 項後，文檔將從 387 行減少至約 360 行 (-7%)
 
-是否執行清理？使用 /claude:clean --force 直接執行
+是否執行清理？使用 /instruction:clean --force 直接執行
 ```
 
 ### 無元資訊時
@@ -251,7 +253,7 @@ Read $TARGET_CLAUDE_MD
 - 需要清理: 2 個
 - 已乾淨: 3 個
 
-建議執行: `/claude:clean --recursive --force`
+建議執行: `/instruction:clean --recursive --force`
 ```
 
 ## 💡 清洗原則

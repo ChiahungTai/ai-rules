@@ -1,12 +1,14 @@
 ---
 description: "蒸餾 Markdown 文檔，提煉核心精華，移除可推導內容"
-when_to_use: "Distill CLAUDE.md files by separating signal from noise: keep design rationale and constraints, remove API signatures and derivable content."
-usage: "/claude:distill [目錄路徑] [選項]"
-argument-hint: "/claude:distill [目錄路徑] [--recursive] — 預設處理當前目錄，可指定目錄或 .md 檔案"
+when_to_use: "Distill instruction files (根 AGENTS.md source + CLAUDE.md wrapper/模組 nav) by separating signal from noise: keep design rationale and constraints, remove API signatures and derivable content. 雙檔模式見 instruction-writing.md。"
+usage: "/instruction:distill [目錄路徑] [選項]"
+argument-hint: "/instruction:distill [目錄路徑] [--recursive] — 預設處理當前目錄，可指定目錄或 .md 檔案"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash"]
 ---
 
-# /claude:distill — 蒸餾精簡工具
+# /instruction:distill — 蒸餾精簡工具
+
+> **instruction file 雙檔模式**：蒸餾對象含根 `AGENTS.md`（source）+ `CLAUDE.md`（wrapper + 模組導航）——遞迴發現時兩者皆納入。見 [instruction-writing.md](../../rules/instruction-writing.md)。
 
 Markdown 文檔 signal/noise 分離，提煉高 signal 核心知識。
 
@@ -62,9 +64,9 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 | 參數 | 說明 |
 |------|------|
-| **無參數** | 蒸餾當前目錄的 `CLAUDE.md` |
+| **無參數** | 蒸餾當前目錄的 instruction files（根 AGENTS.md + CLAUDE.md） |
 | **檔案/目錄路徑** | 蒸餾指定檔案或目錄 |
-| **--recursive, -r** | 遞歸處理所有子目錄的 `CLAUDE.md` |
+| **--recursive, -r** | 遞歸處理所有子目錄的 instruction files（AGENTS.md + CLAUDE.md） |
 | **--dry-run** | 預覽模式，不實際修改 |
 | **--aggressive** | 高純度蒸餾，只保留絕對核心原則 |
 | **--moderate** | 標準蒸餾（預設） |

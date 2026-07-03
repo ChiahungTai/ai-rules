@@ -50,7 +50,7 @@
 | **P0** | 借鑒 #2：progress ledger 引進 `/build` / deep-work | ai-rules 側 | 補 compaction 防失憶，高價值低衝突 |
 | **P0** | OpenCode 驗證：在 OpenCode 跑一次 ai-rules 確認 fallback 相容 | ai-rules 側 | 1-2 小時，解 CC 堵 BYOK 焦慮 80%，知道 hooks adapter 長怎樣 |
 | **P1** | 借鑒 #3：SDD file-handoff 強化 `agent-workflow` | ai-rules 側 | 保護 controller context |
-| **P1** | 借鑒 #4：Match the Form to the Failure 寫進 `claude-writing.md` | ai-rules 側 | 寫 rule/skill 手法精度，純理論無衝突 |
+| **P1** | 借鑒 #4：Match the Form to the Failure 寫進 `instruction-writing.md` | ai-rules 側 | 寫 rule/skill 手法精度，純理論無衝突 |
 | **P2** 🔧執行中 | 借鑒 #5：behavior-shaping 補 3 skill 行為骨頭（TDD Iron Law / debugging 熔斷 / review 反 sycophancy）| ai-rules 側 | handoff from sp session；保留量化特化只補骨頭；實讀驗證 2 處調整（項2 深化既有熔斷 / 項3 落點改 judge-review）|
 | **P3** | sp fork 維護：保持 upstream 純粹，不重心改 sp | fork | 重心不在這；upstream 貢獻只挑低門檻（Gemini 清理）|
 

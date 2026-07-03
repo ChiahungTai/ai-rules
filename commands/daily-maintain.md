@@ -51,7 +51,7 @@ Snapshot: capabilities N, kanban N, findings N
 遵循 [daily-maintain skill](../skills/maintain/SKILL.md) 的四階段流程：
 
 1. **Phase 1**: 執行 `/scan-project` → 產出 snapshot → diff fingerprint
-2. **Phase 2**: 執行 `/claude:sync --changed-since yesterday --recursive` → 自動修正路徑問題
+2. **Phase 2**: 執行 `/instruction:sync --changed-since yesterday --recursive` → 自動修正路徑問題
 3. **Phase 3**: 執行 `/doc-health` → 自動修正 🟢 findings + kanban hygiene
 4. **Phase 4**: 彙總報告 → 寫晨報檔到 `ai-analysis/daily-report/YYYY-MM-DD.md`（目錄不存在則 skip）+ commit
 

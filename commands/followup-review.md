@@ -47,7 +47,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 - **拒絕的建議**：讀取相關程式碼 → 對照拒絕理由 → 重新評估原始問題 → 拒絕合理標 `closed`
 - **整體品質檢查**：新引入問題掃描 + 一致性 + 完整性
 
-驗收後更新 `.review/<branch>.md`(或 EP review 區段)finding 的 `status`(格式見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)):`verified`(採納且通過)/ `closed`(拒絕合理)/ 維持 `open`(未通過需再修)。新引入的 Critical / Important 問題,新增 finding(狀態 `open`)。
+驗收後更新 `.review/<branch>.md`(或 EP review 區段)finding 的 `status`(格式見 [workflow-review-pattern.md](./instruction/_common/workflow-review-pattern.md)):`verified`(採納且通過)/ `closed`(拒絕合理)/ 維持 `open`(未通過需再修)。新引入的 Critical / Important 問題,新增 finding(狀態 `open`)。
 
 ---
 

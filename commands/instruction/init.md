@@ -1,19 +1,19 @@
 ---
-description: "為任意專案自動產生 CLAUDE.md（bottom-up，從子模組到 Root）"
-when_to_use: "Generate CLAUDE.md files for a new or unfamiliar codebase. Bottom-up approach: analyze structure, generate module CLAUDE.md files, then synthesize Root CLAUDE.md."
-usage: "/claude:init [目錄路徑]"
-argument-hint: "/claude:init — 預設為當前目錄，可指定專案根目錄"
+description: "為任意專案自動產生 instruction file 體系（AGENTS.md 為 source + CLAUDE.md wrapper + 模組 CLAUDE.md，bottom-up）"
+when_to_use: "Generate instruction files for a new or unfamiliar codebase. Bottom-up: analyze structure, generate module CLAUDE.md (Claude nav), synthesize Root AGENTS.md (source) + CLAUDE.md (@AGENTS.md wrapper). 雙檔模式見 instruction-writing.md。"
+usage: "/instruction:init [目錄路徑]"
+argument-hint: "/instruction:init — 預設為當前目錄，可指定專案根目錄"
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash", "Agent"]
 ---
 
-# /claude:init — CLAUDE.md 自動生成
+# /instruction:init — CLAUDE.md 自動生成
 
 為專案從零產生 CLAUDE.md 導航體系。Bottom-up 策略：先理解子模組，再合成 Root，確保上層導航表準確。
 
 ## 輸入
 
 - 預設：當前工作目錄
-- 可指定：`/claude:init /path/to/project`
+- 可指定：`/instruction:init /path/to/project`
 
 ## 執行步驟
 
@@ -46,9 +46,9 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 
 **無 scan-project 時**：跳過此 phase，Phase 2 使用 Phase 1 的粗略分析。
 
-### Phase 2：Bottom-up 產生 CLAUDE.md
+### Phase 2：Bottom-up 產生 instruction files（模組 CLAUDE.md + Root AGENTS.md/CLAUDE.md wrapper）
 
-從最深層的子模組開始，一路往上寫到 Root CLAUDE.md。
+從最深層的子模組開始，一路往上寫到 Root：**模組**用 CLAUDE.md（Claude 導航）；**Root** 用 AGENTS.md（source，neutral 專案資訊）+ CLAUDE.md（`@AGENTS.md` wrapper）——雙檔模式見 [instruction-writing.md](../../rules/instruction-writing.md)。
 
 **既有 CLAUDE.md 處理**：
 - Phase 1.5 有 snapshot → LLM 直接掃描目錄結構確認哪些目錄已有 CLAUDE.md，跳過
@@ -68,7 +68,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - Use LSP findReferences on module-level symbols to verify module boundaries when dep_graph is unavailable
 - 無 snapshot 時，Module Boundaries 基於 Phase 1 的粗略 import 分析
 
-**Root CLAUDE.md 額外包含**：
+**Root AGENTS.md 包含**（source，neutral 專案資訊——三家 harness 開本專案都讀）：
 
 - 架構總覽（語言組成、分層、核心設計理念）
 - Module Navigation Map（每個重要目錄一行，含 CLAUDE.md 連結）
@@ -76,11 +76,13 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - Build and Development（如何建置、測試、lint）
 - "Finding Things" quick reference（常見問題 → 去哪裡找）
 
+**Root CLAUDE.md** = `@AGENTS.md`（把 neutral 專案資訊拉進 Claude session）+ Claude 專屬段（hooks、slash command workflow——若有）。**thin wrapper，不重複 AGENTS.md 內容**。
+
 ### Phase 3：驗證
 
-- 確認所有 CLAUDE.md 的交叉引用路徑存在
+- 確認所有 instruction files（AGENTS.md + CLAUDE.md）的交叉引用路徑存在
 - 確認 Module Navigation Map 涵蓋所有重要模組
-- 確認 Root CLAUDE.md 的導航表與子模組 CLAUDE.md 一致
+- 確認 Root AGENTS.md 導航表與子模組 CLAUDE.md 一致；Root CLAUDE.md = `@AGENTS.md` wrapper（不重複 neutral 內容）
 - **dep-graph 驗證**（有 Phase 1.5 時）：確認 Module Boundaries 的 "Depends on" 與 `edges[]` 一致
 
 ## 判斷哪些模組需要 CLAUDE.md
@@ -106,12 +108,12 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 產出
 
-1. 每個重要模組目錄下新增 `CLAUDE.md`
-2. 專案根目錄新增 `CLAUDE.md`（導航入口）
+1. 每個重要模組目錄下新增 `CLAUDE.md`（Claude 專屬導航——其他 harness 不讀模組檔）
+2. 專案根目錄新增 `AGENTS.md`（source，harness-neutral）+ `CLAUDE.md`（`@AGENTS.md` wrapper + Claude 專屬段）——見 [instruction-writing.md](../../rules/instruction-writing.md) 雙檔模式
 3. `.project-snapshot.json`（如果 Phase 1.5 有執行）
-4. 最後列出所有新增的 CLAUDE.md 檔案路徑
+4. 最後列出所有新增的 instruction file 路徑
 
-> **下一步**：產出後建議執行 `/claude:sync` 驗證同步性與品質。
+> **下一步**：產出後建議執行 `/instruction:sync` 驗證同步性與品質。
 
 ---
 

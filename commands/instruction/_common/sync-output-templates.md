@@ -1,6 +1,6 @@
 # Sync 輸出格式模板
 
-> **載入時機**: 僅在 `/claude:sync` 執行時按需讀取。本檔案定義 6 組輸出格式模板，供 sync 命令產出標準化報告。
+> **載入時機**: 僅在 `/instruction:sync` 執行時按需讀取。本檔案定義 6 組輸出格式模板，供 sync 命令產出標準化報告。
 
 ---
 
@@ -42,17 +42,17 @@
 發現 N 個公開函數，文檔記錄 M 個
 - ⚠️  遺漏: helper_function(), validate_config(), get_status()
 
-### 元資訊檢查（整合 /claude:clean）
+### 元資訊檢查（整合 /instruction:clean）
 - ❌ 發現版本號: vX.Y
 - ❌ 發現更新日期: YYYY-MM-DD
 - ✅ 可保留: 符號連結說明、專案概述、繼承關係
-- 💡 建議執行 `/claude:sync --clean` 或 `--all` 清理
+- 💡 建議執行 `/instruction:sync --clean` 或 `--all` 清理
 
-### 蒸餾評估（整合 /claude:distill，--all 選項）
+### 蒸餾評估（整合 /instruction:distill，--all 選項）
 - ✅ 精華: N 個核心原則、M 個架構圖
 - ❌ 冗餘: K 個過時範例、L 個重複說明
 - ⚠️ 灰色地帶: P 個（預設保留）
-- 💡 建議執行 `/claude:sync --all` 完整處理
+- 💡 建議執行 `/instruction:sync --all` 完整處理
 
 ### 內部品質檢查
 
@@ -85,7 +85,7 @@
 
 #### 評估結果
 - Signal/Noise Ratio: [X]% [✅/⚠️/❌]
-- 💡 建議動作: [保持現狀 / 執行 /claude:distill]
+- 💡 建議動作: [保持現狀 / 執行 /instruction:distill]
 
 ### 導航有效性檢查
 
@@ -282,9 +282,9 @@ actions:
 - 需要清理: 2 個
 - 需要蒸餾: 1 個
 
-建議執行: `/claude:sync --recursive --clean`
+建議執行: `/instruction:sync --recursive --clean`
 
-> 當 ⚠️ 項目 ≥ 3 個時，建議執行 `/claude:sync {module} --all` 進行完整 11 角度深度驗證。
+> 當 ⚠️ 項目 ≥ 3 個時，建議執行 `/instruction:sync {module} --all` 進行完整 11 角度深度驗證。
 ```
 
 ---

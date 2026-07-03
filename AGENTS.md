@@ -1,151 +1,85 @@
-# AI 協作開發指南
+# ai-rules 專案
 
-> **🔗 Symbolic Link 說明**: `~/.claude/CLAUDE.md` 是一個 symbolic link，連結目標為 `ai-rules/AGENTS.md`
+> 本檔是 **ai-rules 專案指令**（開本 repo 時讀）。**全域開發指南**（演化/驗證/UC-Driven/架構/量化鐵律）是另一份獨立檔 `ai-development-guide.md`，經各 harness 全域位置載入（`~/.claude/CLAUDE.md`、`~/.zcode/AGENTS.md`、`~/.config/opencode/AGENTS.md` → `ai-development-guide.md`），非本檔。
 
-> **🔴 強烈警告**: AI 寫作或修改 CLAUDE.md 時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。詳細約束請參考 `@~/.claude/rules/_ai-behavior-constraints.md`
+本專案管理 AI coding agent 的 rules、skills、commands（跨 harness：Claude Code / ZCode / OpenCode）。
 
-**適用範圍**: 所有軟體開發專案（量化交易專案優先）
-**AI 系統**: Claude Code、KiloCode、Gemini 等
-**核心理念**: 品質導向 + 智能協作 + 持續演化
+所有 rules/skills/commands 的**文件本身供 AI 消費**（AI 讀 `.md` 來執行命令）—— 寫作、審查、修改以「AI 能否正確執行」為準。readability 對 AI = 結構可機械解析、指令可遵行，**不是人類閱讀流暢度**；禁止用「人類讀者需要前置框架/會困惑」這類人類認知論證當審查發現。無需人類式證據出處、版本履歷、精確專案數字（詳見 `rules/_ai-behavior-constraints.md`、`rules/instruction-writing.md`）。
 
----
+> **文件受眾 ≠ 命令受眾**：文件一律給 AI 讀（執行用）；但命令的**產出**服務不同對象 —— LLM 執行鏈（機器消費）或人類 viewport（人消費）。命令的設計、審查、討論一律以「產出受眾」為頂層脊柱（見下）。
 
-## 演化性思維
+## 命令的受眾視角
 
-> **核心原則**：測試保護下的架構重構是可接受的，預設不考慮向後相容。
+> **核心心智模型**：commands 不是按生命週期階段（EP / code）分，是按**產出受眾**分。設計、審查、討論任何命令時，先問「這命令的產出給誰消費」。
 
-- 有測試保護時，大膽進行架構級重構
-- 向後相容只在影響外部系統整合、已有生產數據、部署環境時需確認
-- 持續演化（測試 → 重構 → 確認），而非一次到位
+### 受眾二分
 
----
+| 軌道 | 消費者 | 產出形式 | 誰推動 |
+|------|--------|---------|--------|
+| **① LLM 執行鏈** | 機器自讀自判自修 | 工程化、self-contained（EP、findings、code） | AI 自主（人類開頭觸發） |
+| **② 人類 viewport** | 人類用「大原則」判讀 | 意圖（行為 artifact + 認知誤差點）+ 結構（whole-picture 心智模型） | 人類切入（或 AI 產出、人類讀） |
 
-## 驗證約束
+兩軌道平行不交匯，服務不同讀者。`/ep-review`、`/code-review`、`/audit-test`、`/build` 內部審查、`/judge-review` 屬軌道 ①；`/deliverable-review`（交付）與 `/illustrate`（結構 viewport）是軌道 ② 的兩個命令。
 
-### 風險分級驗證策略
+### 原理：人補 LLM 的結構性 blind spot（direction >> quality）
 
-> **核心原則**：每次修改程式碼後必須執行驗證，驗證深度根據風險調整。
+人類 viewport 補的是 LLM 結構上做不到的兩件事 —— 都靠人的互補認知：
 
-**統一驗證流程**：
-1. 修改程式碼
-2. 強制執行一次修改的程式碼（除非純註解/文檔）
-3. 快速檢查語法和 import
-4. 評估變更風險等級
-5. 根據風險執行對應驗證深度
+| LLM blind spot | 失敗 | 人類互補認知 | 命令 |
+|----------------|------|-------------|------|
+| 缺 whole picture → 重造既有 | 重造 enum / 模組 | 整體直覺（細節忘但感覺得到關係 / 重用） | `/illustrate`（結構 viewport） |
+| 抓不準意圖 → 偏方向 | 漂亮但錯方向 | 持有 vision，判「這是我要的嗎」 | `/deliverable-review` |
 
-**風險分級標準**：
-- **🔴 高風險**（核心架構 — 含跨 context 共用 domain service / 會計總量 / 風控 sizing 路徑、數據庫、安全、API 重大修改）→ 必須完整驗證所有相關功能
-- **🟡 中等風險**（新功能、演算法優化、性能改進）→ 核心功能測試 + 經驗分析
-- **🟢 低風險**（樣式、文檔、配置）→ 至少執行一次確保無語法錯誤
+**優先級：方向 >> 品質**。LLM 預期能做到 Clean Code 等級（頂多需人提點）；災難性、無法靠 polish 彌補的是方向錯 ——「程式碼架構再好也沒用，如果直接做錯方向」。所以 viewport 重度傾斜在**方向驗證**，不浪費人注意力在 code 品質（那是 `/code-review` + LLM 自身能力的事）。
 
-> 詳細執行規範見 `~/.claude/rules/must-execute-before-complete.md`；漸進式驗證見 `~/.claude/rules/progressive-validation.md`
+> viewport 渲染的是人類**用來承載意圖 / 理解結構的 artifact**（use case / scenario / UI / 範例 / 心智模型），不是 code 結構（簽名 / 檔案樹 / drift / 覆蓋率 —— 那是 LLM 鏈的 `/code-review`、`/audit-test`）。
 
-### 務實評估約束
+### 三層介入（證據獨立性遞增）
 
-> **核心原則**：提供相對複雜度評估和風險分析，不預測絕對時間。
+| 層 | 機制 | 獨立性 | 軸 |
+|----|------|--------|-----|
+| 1 | same-session LLM 自判（agent review、`/ep-review` in-pipeline、`/audit-test`） | 低 | A |
+| 2 | 跨 session LLM 第二意見（開新 session 跑 `/code-review`/`/ep-review`，findings 貼回實作 LLM → `/judge-review`） | 中 | A |
+| 3 | `/deliverable-review`（交付）+ `/illustrate`（結構 viewport）：人類 viewport 判讀 | 高（不同智能） | B |
 
-**必須提供**：複雜度評估、風險識別、依賴分析、里程碑規劃、相對排序
-**避免提供**：具體時間預估、精確進度預測、不切實際承諾
+理論底層（A/B 軸、L1-L6 證據階層、證據獨立性）見 `rules/acceptance-evidence.md`。本節是入口摘要，acceptance-evidence 是完整理論。
 
----
+### 核心流程命令分類
 
-## UC-Driven Development
+| 命令 | 受眾 | 層 | 誰呼叫 |
+|------|------|----|--------|
+| `/spec` | LLM（人互動·需求釐清） | 鏈 | 人類觸發 |
+| `/execution-plan` | LLM | 鏈 | 人類觸發 |
+| `/ep-review` | LLM | 1（同 session 自判）/ 2（跨 session） | AI-self / 人類（跨 session） |
+| `/ep-validate` | LLM | 鏈 | AI-self |
+| `/build` | LLM | 鏈 | 人類觸發 |
+| `/audit-test` | LLM | 1 | AI-self |
+| `/code-review` | LLM | 1 / 2（跨 session） | LLM / 人類（跨 session） |
+| `/judge-review` | LLM | 鏈 | AI-self |
+| `/followup-review` | LLM | 2（Review LLM 驗收實作 LLM） | LLM / 人類觸發 |
+| `/fix-test` `/lint-fix` | LLM | 鏈（修復） | AI-self |
+| **`/deliverable-review`** | **人類（交付）** | **3** | **人類** |
+| **`/illustrate`** | **人類（結構 viewport）** | **3** | **人類** |
+| `/commit` | 人類確認 | — | 人類 |
+| `/metadata-sync` | LLM | 1 | 人類 / AI-self |
 
-> **核心原則**：CLAUDE.md Capabilities 記錄已完成能力（✅），.kanban/ 追蹤待辦與進行中任務（📋/🔧）。所有功能開發以 UC（Use Case）定義為前置條件。能力描述和入口路徑是索引鍵。
+工具/維護命令（`/standup`、`/doc-health`、`/consistency`、`/instruction:*` 等）與受眾模型正交，完整索引見 `commands/CLAUDE.md`。
 
-### 文檔體系
+## 專案結構
 
-`CLAUDE.md` 每次 session auto-load；`architecture.md` / `SYSTEM-MAP.md` / `dependency-graph.md` 內容大，用 markdown link on-demand 讀（**不 `@` transclude**，避免撂爆 CLAUDE.md — 機制見 [claude-writing.md](~/.claude/rules/claude-writing.md)「長文件按需指引」）：
+- `rules/` — 行為規範（載入機制因 harness 而異；Claude 端 auto-load，見 CLAUDE.md）
+- `skills/` — 領域知識和工作流（on-demand；SKILL.md 開放標準，跨 harness 可攜）
+- `commands/` — 命令工作流（invocation 因 harness 而異；Claude 端為 slash command，見 CLAUDE.md）
+- `commands/instruction/_common/` — 共用子範本（`instruction:*` 命令的引用單元）
+- `agents/` — Custom subagent 定義（按需委派的專家子能力；Claude 端細節見 CLAUDE.md）
+- `hooks/` — Hook 實作腳本（Claude 專用機制；詳見 CLAUDE.md）
+- `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）
 
-| 文件 | 角色 | 時間視角 |
-|------|------|---------|
-| `CLAUDE.md` | 導航 + 已完成能力索引（what / where） | 永久 |
-| `architecture.md` | 設計決策 / whole-picture（why）— 有此檔才適用 | 永久 |
-| `SYSTEM-MAP.md` | 跨域功能狀態總覽（status） | 現在 |
-| `dependency-graph.md` | 跨模組依賴 / ripple 風險地圖 — maintain Phase 1.3 維護（非 /consistency 範圍） | 現在 |
-| `.kanban/` | 任務追蹤（Kanban lanes） | 暫時（Done/ 歸檔） |
+## 寫作治理
 
-**UC 生命週期**：📋（/execution-plan → Backlog card，UC盤點自動建卡）→ 🟡（/build → InProgress）→ ✅（/build 階段 5a → Capabilities + Done，UC 完成情境）
+新增 rule/skill/command 時遵守：
 
-### UC 狀態標記
-
-| 標記 | 含義 | 存放位置 |
-|------|------|---------|
-| ✅ | 已完成 | CLAUDE.md Capabilities 表格 |
-| 📋 | 待實作 | .kanban/Backlog/ card |
-| ❌ | 已棄用 | 從 Capabilities 移除 |
-| 🔧 | 部分完成 | .kanban/Backlog/ card |
-| 🟡 | 進行中 | .kanban/Next-Up/ 或 In-Progress/ |
-| 🟢 | 部分覆蓋 | CLAUDE.md Capabilities（附限制） |
-
-**Capabilities 表格格式**：`| 能力 | 入口 | 狀態 |`（每行一個 ✅ UC，入口含 CLI + 函式路徑）
-
-### 放置原則（Domain-First）
-
-- ✅ → **主要實作模組的 CLAUDE.md**（如 `mosaic_alpha/data/CLAUDE.md`）
-- 📋/🔧 → **.kanban/Backlog/** cards
-- **UC 不重複**：同一能力只在一個 CLAUDE.md 記錄
-- **scripts/ 不放 Capabilities**：scripts/ 是 demo 給老闆的呈現入口（基於 library 重寫，可用 typer），不放 Capabilities
-
-### 變更規模分級
-
-| 規模 | UC 要求 |
-|------|---------|
-| **大型**（跨模組、新功能） | /execution-plan 自動建立 Kanban Backlog card |
-| **中型**（功能優化） | 更新既有 Capabilities 或 Kanban card |
-| **小型**（bug fix、文檔；結構性修復除外 — 見 [execution-plan](commands/execution-plan.md) simple 邊界） | 不需要 UC |
-
-### 銜接機制
-
-1. **/execution-plan → Backlog**：UC盤點自動建立 .kanban/Backlog/ card（含模組、EP 連結）
-2. **/build → InProgress + 結算**：階段 1 搬 Backlog cards 至 In-Progress/（暫時狀態）；階段 5a 結算 UC 完成情境——新增 Capabilities ✅ 行 + 搬 Done/ + EP 歸檔（working tree，隨 commit 帶走）
-3. **/commit → 純 git 提交**：finalization 已在 build 階段 5a 結算（working tree），commit 一次帶走 code + finalization（**同 commit** 保證，git add 納入 finalization 檔）
-
----
-
-## 架構設計紀律
-
-> **核心原則**：所有設計決策（spec/EP/build/review）用 Clean Architecture + DDD 視角檢視。是**視角非模板**（注入思考，不強制分層、不過度工程）— 補體系缺失的架構紀律層。
-
-### 三主線
-
-- **依賴規則（Clean Architecture 分層）**：domain ← use case ← adapter ← infra，依賴**向內**（內層不依賴外層）。設計時自問「新東西落哪層？依賴方向對嗎？有無循環？」
-- **bounded context（DDD 邊界）**：每個 context 邊界清楚，**不跨域直接存取內部**（`_private`）。設計時自問「這該在哪個 context？有無跨域存取？」
-- **use case 驅動**：先問**消費者要什麼行為**（use case），再設計結構（與 UC-Driven 呼應）。設計時自問「消費者是誰？結構撐得起 use case 嗎？」
-
-### SOLID 精神
-
-SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介面隔離）/ DIP（依賴反轉）— 實作時遵循，詳見 `~/.claude/rules/code-edit-constraints.md`。
-
-### 視角非模板
-
-本紀律是**設計視角**（檢視結構方向），非強制分層模板 — 不要求每個專案套四層。原則通用，範例領域特定（mosaic：domain=策略訊號 / use case=回測下單 / adapter=NT·SJ·catalog / infra）。
-
-> 深入視角（三主線在 spec/illustrate/EP/build 各自怎麼用）見 [arch-thinking](skills/arch-thinking/SKILL.md) skill（與 [api-and-interface-design](skills/api-and-interface-design/SKILL.md) 邊界：本視角檢視整體結構，api-and-interface 設計介面合約）。
-
----
-
-## 量化交易專屬鐵律
-
-量化交易系統有特殊的品質要求，適用 Crash-Only Design 原則。
-
-| 鐵律 | 說明 | 實施策略 |
-|------|------|----------|
-| **數據完整性優先** | 損壞數據比沒有數據更災難 | Fail-fast，無效輸入立即崩潰 |
-| **100% 回測可重現** | hash + config + seed | 波動 >0.01 必須重做 |
-| **Crash-Only 恢復機制** | 崩潰後快速恢復 | 狀態外部化，恢復即初始化 |
-| **Live / Backtest 共用代碼** | 避免條件分支 | 統一處理邏輯 |
-| **算術溢出零容忍** | 數值計算必須嚴格檢查 | 溢出即崩潰，不允許靜默錯誤 |
-| **隨機性完全控制** | seed 必須可注入 | np.random 必須避免 |
-
----
-
-## Summary Instructions（/compact 壓縮策略）
-
-> **觸發時機**：`/compact` 手動或自動壓縮對話時，此區塊引導 compactor 保留關鍵資訊。
-
-When summarizing this conversation, always preserve:
-- File paths that have been read or modified
-- Test results and error messages
-- Decisions made and the reasoning behind them
-- Current task objective and pending items
+1. **先修剪測試**：這行知識從程式碼推導得出嗎？是 → 不寫
+2. **選對載體**：Hook？Rule？Skill？按上面的分界判斷
+3. **驗證附著**：rule/command 是否包含可驗證的標準？沒有驗證的規則是噪音
+4. **長度預算**：CLAUDE.md 越長，AI 越容易忽略重要規則。一條規則一行能說完最好

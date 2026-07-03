@@ -83,8 +83,8 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 |------|-----------------|
 | `/daily-maintain` | Phase 1 執行本 skill 產出 snapshot（自動模式） |
 | `/project-review` | Phase 1 執行本 skill 產出 snapshot（互動模式） |
-| `/claude:sync` | 可選：載入 dep_graph 用於 import 驗證 |
-| `/claude:init` | 可選：執行本 skill，用 findings 報告缺口 |
+| `/instruction:sync` | 可選：載入 dep_graph 用於 import 驗證 |
+| `/instruction:init` | 可選：執行本 skill，用 findings 報告缺口 |
 | `/doc-health` | 步驟 1 消費 findings，LLM 直接讀 CLAUDE.md + .kanban/ 做品質檢查 |
 
 ## 交叉驗證（機械性）
@@ -96,4 +96,4 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 | X-ep-ready | Next-Up/In-Progress 卡片引用的 EP 檔案不存在 | important |
 | X6 | dep-graph 有模組（≥3 files）但無 CLAUDE.md | important |
 
-語義性驗證（X1 dep-graph 矛盾、X8 幽靈 Capabilities 引用）由 `/claude:sync` 和 `/doc-health` 的 LLM 判斷完成。
+語義性驗證（X1 dep-graph 矛盾、X8 幽靈 Capabilities 引用）由 `/instruction:sync` 和 `/doc-health` 的 LLM 判斷完成。

@@ -83,7 +83,7 @@ LLM 直接讀取索引/清單類段落，驗證與實際檔案一致：
 
 ### 步驟 3：CLAUDE.md 品質（--quality）
 
-遵循 [claude-writing.md](../rules/claude-writing.md) 品質標準：
+遵循 [instruction-writing.md](../rules/instruction-writing.md) 品質標準：
 
 - **Signal/Noise**：無可推導內容（API 簽名、參數表）、無統計/版本/日期
 - **導航有效性**：每個關鍵概念有 symbol 種子（位置由 LSP 解析）（導航 Decoder Test）
@@ -103,7 +103,7 @@ LLM 直接讀取索引/清單類段落，驗證與實際檔案一致：
 3. 比對功能生命週期狀態是否一致
 4. `--sync-system-map`：自動推導並更新 SYSTEM-MAP.md（展示 diff 待確認）
 
-生命週期推導規則（**功能層級**狀態 — 聚合該功能內所有 UC；UC 層級狀態 ✅📋❌🔧🟡🟢 見 [AGENTS.md](../AGENTS.md)）：
+生命週期推導規則（**功能層級**狀態 — 聚合該功能內所有 UC；UC 層級狀態 ✅📋❌🔧🟡🟢 見 [ai-development-guide.md](../ai-development-guide.md)）：
 
 | 條件 | 狀態 |
 |------|------|

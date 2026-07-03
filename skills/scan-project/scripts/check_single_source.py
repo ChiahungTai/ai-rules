@@ -31,7 +31,7 @@ INVARIANTS = [
         "source": "skills/review-engine/SKILL.md",  # 唯一定義源
         "values": ["critical", "important", "suggestion"],
         "enforced_by": {
-            "file": "commands/claude/_common/workflow-review-pattern.md",
+            "file": "commands/instruction/_common/workflow-review-pattern.md",
             "schema": "DimensionVerdict",
         },
         "note": "review-engine 是嚴重度唯一定義源；DimensionVerdict schema 必須含 severity 欄位",
@@ -42,7 +42,7 @@ INVARIANTS = [
         "source": "skills/review-engine/SKILL.md",  # 定義源
         "values": ["confirmed", "evidence-based", "inferred"],
         "enforced_by": {
-            "file": "commands/claude/_common/workflow-review-pattern.md",
+            "file": "commands/instruction/_common/workflow-review-pattern.md",
             "schema": "DimensionVerdict",
         },
         "note": "review-engine 宣稱『每個 finding 必須標信心水準』；DimensionVerdict 必須含 "

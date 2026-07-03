@@ -115,7 +115,7 @@ Rule/Command 變更             AI 行為改變（讀了之後做什麼不同）
 ──────────────────────────────────────────────────────────────────────────────────────────
 human-review → deliverable    審查渲染 demo-checklist 而非 4 lens         post-build 驗收流程
 illustrate 結構 viewport       審查渲染結構拓樸 + 重用枚舉                 post-EP/build 結構審查
-claude-writing 種子深度       種子指向 method 不停在 class                CLAUDE.md 導航品質
+instruction-writing 種子深度       種子指向 method 不停在 class                CLAUDE.md 導航品質
 ```
 
 覆蓋確認：rule 宣稱的行為，**涵蓋它聲稱的所有 UC 嗎**？（例：新命令宣告 4 種 source mode，每種都有渲染路徑嗎？）

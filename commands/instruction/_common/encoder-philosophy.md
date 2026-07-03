@@ -1,6 +1,6 @@
 # Encoder Philosophy — CLAUDE.md 品質標準
 
-> **載入時機**: 僅在 `/claude:*` 命令執行時載入，不放入 `rules/` 避免每個 session 浪費 context。
+> **載入時機**: 僅在 `/instruction:*` 命令執行時載入，不放入 `rules/` 避免每個 session 浪費 context。
 
 ---
 

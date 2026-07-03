@@ -23,7 +23,7 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 | **Subagents**（Agent tool + worktree） | 一個 session 內委派 worker，獨立 context 回摘要 | 側任務會用搜尋/日誌/檔案內容淹沒主對話 | 本 skill 主要涵蓋；`/build` Agent Review |
 | **Agent view**（`claude agents` / `--bg`） | 一個螢幕調度 + 監控背景 session（supervisor 接管、survive terminal 關閉） | 多個獨立任務、user-away 可 peek/attach 監控 | **`/deep-work`** substrate layer（研究預覽 v2.1.139+） |
 | **Agent teams** | 多個協調 session，共享任務清單 + 互傳訊息（leader 管理；實驗性，預設禁用） | 要 Claude 自己分派 + 保持 worker 同步 | Claude Code 內建（見官方文檔） |
-| **Dynamic workflows**（Workflow tool / `ultracode`） | JS 腳本協調數十~數百 subagent，可對抗驗證 / 多角度起草 / loop 收斂 | 任務太大、需交叉驗證、大規模遷移/審計 | **`/build` Phase 4** Workflow 模式；[workflow-review-pattern](../../commands/claude/_common/workflow-review-pattern.md) |
+| **Dynamic workflows**（Workflow tool / `ultracode`） | JS 腳本協調數十~數百 subagent，可對抗驗證 / 多角度起草 / loop 收斂 | 任務太大、需交叉驗證、大規模遷移/審計 | **`/build` Phase 4** Workflow 模式；[workflow-review-pattern](../../commands/instruction/_common/workflow-review-pattern.md) |
 
 **其他相關（非並行方法，與上面正交）**：
 
@@ -99,7 +99,7 @@ Pre-flight 檢查：
 
 ## Writer/Reviewer 雙 Session
 
-**新鮮 context 能提升審查品質** — Claude 審查自己剛寫的 code 時有 bias。
+**新鮮 context 能提升審查品質** — AI agent 審查自己剛寫的 code 時有 bias。
 
 ```
 Session A（Writer）                      Session B（Reviewer）

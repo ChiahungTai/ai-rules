@@ -19,7 +19,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 - [security-and-hardening](../skills/security-and-hardening/SKILL.md) — 安全審查細節
 - [performance-optimization](../skills/performance-optimization/SKILL.md) — 效能審查細節
 
-Workflow 執行協調：[workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)（模式判定見 review-engine；Ultracode 下平行六軸審查）
+Workflow 執行協調：[workflow-review-pattern.md](./instruction/_common/workflow-review-pattern.md)（模式判定見 review-engine；Ultracode 下平行六軸審查）
 
 ---
 
@@ -52,7 +52,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 
 **A. Workflow 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 
-使用 Workflow tool，參照 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md) 腳本骨架。
+使用 Workflow tool，參照 [workflow-review-pattern.md](./instruction/_common/workflow-review-pattern.md) 腳本骨架。
 
 | Workflow Phase | 說明 | Agent 數量 |
 |----------------|------|-----------|
@@ -147,7 +147,7 @@ Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mod
 
 ## Finding 呈現
 
-finding 預設留在審查報告/對話，供用戶 `/copy` 搬到實作 LLM（**人主導工作流**，不靠持久化追蹤）。**跨命令自動化場景**（接 `/judge-review`/`/followup-review`）才寫 `.review/<branch>.md`（Finding Record 表格，欄位見 [workflow-review-pattern.md](./claude/_common/workflow-review-pattern.md)）—— code-review 立場 optional（接 `/judge-review`→`/followup-review` 鏈才寫）；一旦進入該鏈，judge-review/followup-review 預設讀寫持久化（它們即此「跨命令自動化場景」，故二者步驟內固定讀寫、非再條件判斷）。`/commit` 階段 6 成功後清除。
+finding 預設留在審查報告/對話，供用戶 `/copy` 搬到實作 LLM（**人主導工作流**，不靠持久化追蹤）。**跨命令自動化場景**（接 `/judge-review`/`/followup-review`）才寫 `.review/<branch>.md`（Finding Record 表格，欄位見 [workflow-review-pattern.md](./instruction/_common/workflow-review-pattern.md)）—— code-review 立場 optional（接 `/judge-review`→`/followup-review` 鏈才寫）；一旦進入該鏈，judge-review/followup-review 預設讀寫持久化（它們即此「跨命令自動化場景」，故二者步驟內固定讀寫、非再條件判斷）。`/commit` 階段 6 成功後清除。
 
 ```
 ## Code Review Findings — <branch>

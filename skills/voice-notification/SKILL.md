@@ -16,7 +16,7 @@ allowed-tools: [Bash]
 
 | 通道 | 觸發 | 載體 | 誰執行 |
 |------|------|------|--------|
-| **系統召回** | Claude 需使用者輸入（權限確認等） | [notification.sh](../../hooks/notification.sh) hook | 機械（Notification event） |
+| **系統召回** | AI agent 需使用者輸入（權限確認等） | [notification.sh](../../hooks/notification.sh) hook | 機械（Notification event） |
 | **進度提醒** | 長任務進行中，每 10 分鐘 | [stop-notification.sh](../../hooks/stop-notification.sh) hook | 機械（Stop event + sentinel） |
 | **完成通知** | 任務完成 | 本 skill say 樣板 | LLM 自主 |
 
@@ -28,7 +28,7 @@ allowed-tools: [Bash]
 
 - **實作**：`/build`、`/deep-work`、`/sequential-batch`
 - **審查**：`/code-review`、`/ep-review`、`/ep-validate`、`/judge-review`、`/followup-review`
-- **分析 / 維護 / 文檔產生**：`/execution-plan`、`/daily-maintain`、`/project-review`、`/claude:init`
+- **分析 / 維護 / 文檔產生**：`/execution-plan`、`/daily-maintain`、`/project-review`、`/instruction:init`
 - **升級**：`/upgrade-nt`、`/upgrade-sj`
 
 快速查詢、建議、`/illustrate`、`/commit`、`/help` 等**不 say**。

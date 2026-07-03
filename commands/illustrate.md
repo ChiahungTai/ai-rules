@@ -27,10 +27,10 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 |------|------|---------|---------------|
 | **A 設計決策** | 「這樣設計對嗎」 | 討論新功能 / 重構 / pre-EP | city map + 流程 + 重用枚舉（調 [arch-thinking](../skills/arch-thinking/SKILL.md) skill）+ **邊界案例列設計替代** |
 | **B 理解既有** | 「這怎麼運作」 | 接手 / 學習套件 / 除錯 | 運作流程 + 資料流 + 概念圖 |
-| **C 審查驗證** | 「對不對 / 好不好」 | code-review 前 / EP 審查 / 重造偵測 / commit 前 | 語義 diff + [假設驗證矩陣](./claude/_common/illustrate-deep-analysis.md) + city map |
+| **C 審查驗證** | 「對不對 / 好不好」 | code-review 前 / EP 審查 / 重造偵測 / commit 前 | 語義 diff + [假設驗證矩陣](./instruction/_common/illustrate-deep-analysis.md) + city map |
 | **D 溝通傳達** | 「畫給別人看」 | 文檔 / demo | Mermaid 圖（md 模式）|
 
-use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate-analysis.md](./claude/_common/illustrate-analysis.md)。結構 viewport 互動（drill）見 [illustrate-structure-viewport.md](./claude/_common/illustrate-structure-viewport.md)。批次檔案分析（`@dir`，≥ 5 Agent 並行）跨 mode 通用。
+use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate-analysis.md](./instruction/_common/illustrate-analysis.md)。結構 viewport 互動（drill）見 [illustrate-structure-viewport.md](./instruction/_common/illustrate-structure-viewport.md)。批次檔案分析（`@dir`，≥ 5 Agent 並行）跨 mode 通用。
 
 ## 現有程式碼優先原則
 
@@ -66,7 +66,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 /illustrate md @src/ @tests/ --output "分析.md" # 自定義輸出
 ```
 
-更多範例：[illustrate-examples.md](./claude/_common/illustrate-examples.md)
+更多範例：[illustrate-examples.md](./instruction/_common/illustrate-examples.md)
 
 ---
 
@@ -83,7 +83,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 
 檔案 ≥ 5 時，Agent tool 並行處理（model 依 [model-routing](../rules/model-routing.md)：session 降一級）：按關聯性分組 → 每組 spawn Agent → 整合結果。
 
-平行處理架構：[illustrate-parallel-architecture.md](./claude/_common/illustrate-parallel-architecture.md)
+平行處理架構：[illustrate-parallel-architecture.md](./instruction/_common/illustrate-parallel-architecture.md)
 
 ---
 
@@ -156,8 +156,8 @@ mode A flag 邊界 / smell 時，給兩條行動路徑 + 取捨，**不替 user 
 
 | 檔案 | 何時讀取 |
 |------|---------|
-| [illustrate-parallel-architecture.md](./claude/_common/illustrate-parallel-architecture.md) | 檔案 ≥ 5 需並行處理時 |
-| [illustrate-deep-analysis.md](./claude/_common/illustrate-deep-analysis.md) | 分析特定類型內容時（含 EP 審查框架） |
-| [illustrate-analysis.md](./claude/_common/illustrate-analysis.md) | use cases / 情境矩陣分析時（mode A/C 組合步驟） |
-| [illustrate-examples.md](./claude/_common/illustrate-examples.md) | 需理解各模式實際輸出時 |
-| [illustrate-structure-viewport.md](./claude/_common/illustrate-structure-viewport.md) | 結構 viewport / drill / pre-EP checkpoint 時 |
+| [illustrate-parallel-architecture.md](./instruction/_common/illustrate-parallel-architecture.md) | 檔案 ≥ 5 需並行處理時 |
+| [illustrate-deep-analysis.md](./instruction/_common/illustrate-deep-analysis.md) | 分析特定類型內容時（含 EP 審查框架） |
+| [illustrate-analysis.md](./instruction/_common/illustrate-analysis.md) | use cases / 情境矩陣分析時（mode A/C 組合步驟） |
+| [illustrate-examples.md](./instruction/_common/illustrate-examples.md) | 需理解各模式實際輸出時 |
+| [illustrate-structure-viewport.md](./instruction/_common/illustrate-structure-viewport.md) | 結構 viewport / drill / pre-EP checkpoint 時 |

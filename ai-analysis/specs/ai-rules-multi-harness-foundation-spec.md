@@ -40,7 +40,7 @@ workaround：無（目前只能在 Claude Code 跑）。
 
 - **UC-1（全域層）**：ai-rules 全域規則可被多 harness 讀取——`ai-development-guide.md`（→ 改名 `AGENTS.md`）內容 harness-neutral 化 + 三 harness 全域位置 symlink（Claude 已存、ZCode/OpenCode 新增）。📋 新增
 - **UC-2（專案層 dogfood）**：ai-rules 自身專案指令 harness-neutral——root `CLAUDE.md` → `AGENTS.md`（source）+ thin `CLAUDE.md`（`@AGENTS.md`）。📋 新增
-- **UC-3（工具層）**：CLAUDE.md 相關 skills/commands（`rules/claude-writing.md`、`commands/claude/`（`init`/`sync`/`clean`/`distill`）、`skills/CLAUDE.md`）AGENTS.md-aware / 多 harness 中立（詞彙 + 內容）。🔧 更新既有
+- **UC-3（工具層）**：CLAUDE.md 相關 skills/commands（`rules/instruction-writing.md`、`commands/instruction/`（`init`/`sync`/`clean`/`distill`）、`skills/CLAUDE.md`）AGENTS.md-aware / 多 harness 中立（詞彙 + 內容）。🔧 更新既有
 - **UC-4（驗證）**：跨 harness 可讀性可驗證——dogfood 在 ZCode/OpenCode 確認 ai-rules 被讀到 + 代表性規則生效。📋 新增
 
 ---
@@ -65,7 +65,7 @@ workaround：無（目前只能在 Claude Code 跑）。
 ## 架構模型（EP 設計依據）
 
 **關鍵機制事實**（grounded）：
-- `@` transclusion 是 **Claude Code 專用**（`claude-writing.md` 明定；contracts.md 驗：ZCode **不展開** `@import`）
+- `@` transclusion 是 **Claude Code 專用**（`instruction-writing.md` 明定；contracts.md 驗：ZCode **不展開** `@import`）
 - symlink 對 file read 透明（`~/.claude/CLAUDE.md` → `ai-development-guide.md` 已是此模式）
 - frontmatter 欄位：harness 自動忽略不懂的（OpenCode 忽略未知 SKILL.md frontmatter；ZCode 只用 name+description）
 - body 散文：harness **不會跳過**，整份當 context 讀 → Claude 專用散文 = 噪音污染
@@ -109,7 +109,7 @@ CLAUDE.md (thin) = @AGENTS.md + Claude 專用段（hooks、/build workflow）→
 | ZCode 讀到 | `~/.zcode/AGENTS.md` symlink 通 + ZCode 啟動讀到 + 代表性規則（如「fd 不用 find」）**在 agent 行為觀察到**（非只 exit 0） |
 | OpenCode 讀到 | 同上（`~/.config/opencode/AGENTS.md`） |
 | Claude 不退化 | `/build`、`/commit` 在 Claude 跑、行為不變 |
-| neutral 純度 | AGENTS.md 無 Claude body 散文（`/claude:sync` 或審查檢查） |
+| neutral 純度 | AGENTS.md 無 Claude body 散文（`/instruction:sync` 或審查檢查） |
 
 **核心防線**：要在 ZCode 看到**代表性規則真的生效**，否則「讀到了」可能只是檔案在、agent 卻沒遵循（silent success 假象）。
 
