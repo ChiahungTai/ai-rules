@@ -4,11 +4,11 @@ harness-scope: neutral
 
 # 文檔自洽性檢查規範
 
-> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
 
 ## 核心檢查原則
 
-在撰寫或修改 CLAUDE.md 時，必須確保文檔的自洽性。
+在撰寫或修改 instruction 檔（AGENTS.md source；Claude 端另有 CLAUDE.md wrapper）時，必須確保文檔的自洽性。
 
 ## 必要檢查項目
 
@@ -23,7 +23,7 @@ harness-scope: neutral
 - **層級合理**: 不跳級（如 `#` 之後直接 `###`）
 
 ### 3. 引用完整性
-- **內部引用**: `@path` 引用的檔案存在
+- **內部引用**: 引用目標存在（Claude 端 `@path` transclusion、各家 markdown link）
 - **外部引用**: 連結檢查可訪問
 - **交叉引用**: 章節間引用相互對應
 
@@ -39,8 +39,8 @@ harness-scope: neutral
 
 ## 快速自檢清單
 
-完成 CLAUDE.md 修改後，檢查：
-- [ ] 所有 `@path` 引用都有效
+完成 instruction 檔修改後，檢查：
+- [ ] 所有引用（Claude `@path` / markdown link）目標存在
 - [ ] 章節編號連續無跳級
 - [ ] 術語使用統一（無同義多詞）
 - [ ] 程式碼範例可執行

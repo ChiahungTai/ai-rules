@@ -1,5 +1,5 @@
 ---
-harness-scope: borderline
+harness-scope: neutral
 paths:
   - "**/*.py"
 ---
@@ -14,7 +14,7 @@ paths:
 
 **print 當索引，Logger 當資料庫。** AI Agent 透過 print 理解執行結果，透過 rg 按需查詢 Logger 檔案取得詳細資訊。
 
-> **搜尋規範**：語義查詢用 LSP，文字搜尋用 `rg`，檔案搜尋用 `fd`。詳見 `@~/Github/ai-rules/rules/lsp-navigation.md` 和 `@~/Github/ai-rules/rules/modern-cli-preference.md`
+> **搜尋規範**：語義查詢用 LSP，文字搜尋用 `rg`，檔案搜尋用 `fd`。詳見各 harness 工具文檔（Claude: `lsp-navigation.md`、`modern-cli-preference.md`）
 
 **print = state transition, not computation trace。**
 
@@ -66,7 +66,7 @@ _logger = Logger("MyService")
 
 ---
 
-## print() 慣例
+## print() 慣例（Python）
 
 ### 格式規範
 
@@ -154,7 +154,7 @@ print(df.head())
 
 ---
 
-## Logger 慣例
+## Logger 慣例（Python）
 
 ### 統一 Prefix
 
@@ -199,7 +199,7 @@ Logger 提供補充細節（print 沒說的），不重複 print 的摘要。
 
 ---
 
-## stdlib `logging` 與框架 Logger 並存
+## stdlib `logging` 與框架 Logger 並存（Python）
 
 stdlib `logging` 與框架內建 Logger 是兩套不相連系統；stdlib logger 無 handler 時走 `lastResort`（INFO/DEBUG 靜默丟棄），框架 log 檔找不到其輸出。
 

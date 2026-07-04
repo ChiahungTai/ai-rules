@@ -8,7 +8,7 @@ paths:
 
 ## 命名約定
 
-- Demo 檔案用 `demo_` 前綴（`demo_<lib>.py`），禁止用 `test_` 前綴。`demo_*.py` 為待處置物（commit 時檔案去處進 scripts/ 或 delete，見 /commit 階段 2.7；若行為值得測，build 時另提煉 `test_<feature>.py`）
+- Demo 檔案用 `demo_` 前綴（`demo_<lib>.py`），禁止用 `test_` 前綴。`demo_*.py` 為待處置物（commit 時檔案去處進 scripts/ 或 delete，見 commit 階段 2.7（Claude: `/commit`）；若行為值得測，build 時另提煉 `test_<feature>.py`）
 - 測試檔案用 `test_` 前綴（`test_main.py`）
 
 ## `__init__.py` 設計
@@ -130,10 +130,10 @@ uv run python script.py
 uv run pytest tests/test_example.py -v
 ```
 
-- **pytest 一律背景跑**（`run_in_background: true`），不論從哪個 command 或 context 觸發
+- **pytest 一律背景跑**（Claude: `run_in_background: true`），不論從哪個 command 或 context 觸發
 - 禁止：`python`、`python3`、`PYTHONPATH=$PWD`、外部 `timeout`/`gtimeout`（macOS 無此命令）
 
-### 🔴 禁止：多行 `python -c` 中換行後使用 `#` 註解
+### 🔴 禁止：多行 `python -c` 中換行後使用 `#` 註解（Claude Code）
 
 Claude Code 偵測引號內「換行後接 `#`」會觸發權限提示。`#` 緊接開頭引號（`"# comment\n..."`）不觸發，但換行後的 `#`（`"\n# comment\n..."`）會。需要註解時改寫為 `.py` 檔案。
 

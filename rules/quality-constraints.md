@@ -4,7 +4,7 @@ harness-scope: neutral
 
 # 品質約束
 
-> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
 
 ---
 
@@ -22,7 +22,7 @@ harness-scope: neutral
 - 相關測試全部通過
 - 邊界情況妥善處理
 - 文檔同步更新
-- 對應目錄的 instruction 檔（AGENTS.md source + CLAUDE.md wrapper）同步更新
+- 對應目錄的 instruction 檔（AGENTS.md source；Claude 端 CLAUDE.md wrapper）同步更新
 - 達到可用狀態
 
 ### instruction 檔同步檢查
@@ -30,7 +30,7 @@ harness-scope: neutral
 實作完成後，檢查修改檔案所在目錄及其上層目錄是否有 instruction 檔需要更新：
 
 1. **識別變更範圍**：哪些檔案被修改/新增/刪除
-2. **檢查對應 instruction 檔**：變更檔案所在目錄及上層目錄的 AGENTS.md（source）+ CLAUDE.md（wrapper，若存在）
+2. **檢查對應 instruction 檔**：變更檔案所在目錄及上層目錄的 AGENTS.md（source）；Claude 端另有 CLAUDE.md wrapper（若存在）
 3. **判斷是否需要更新**：變更是否影響 instruction 檔中描述的架構、API、模組職責等
 
 ### ❓ 停下請示的時機
@@ -110,7 +110,7 @@ def process_trading_data(data):
 - graceful **意外**失敗（不可預期崩潰、極端情境）→ crash-only 後備保證職責 ✓
 - graceful **可預期地壞掉且可修**（整合 bug、配置錯誤、合約違反）→ 該修，**不可**用 crash-only 跳過 ✗
 
-**實例**：mosaic ReplayHost SIGTERM 在 daemon-thread 下 graceful shutdown 失敗（NT loop signal handler 衝突）。曾錯誤主張「crash-only 接受 graceful 不 work，只驗 signals persist」— 用 crash-only 跳過可修 bug。正解是 TDD red（xfail strict 釘住 graceful 目標，見 [test-driven-development](../skills/test-driven-development/SKILL.md)）+ 另開 EP 修復。
+**實例**：mosaic ReplayHost SIGTERM 在 daemon-thread 下 graceful shutdown 失敗（NT loop signal handler 衝突）。曾錯誤主張「crash-only 接受 graceful 不 work，只驗 signals persist」— 用 crash-only 跳過可修 bug。正解是 TDD red（xfail strict 釘住 graceful 目標，見 test-driven-development skill）+ 另開 EP 修復。
 
 ---
 
@@ -190,7 +190,7 @@ def process_trading_data(data):
 ### 適用場景
 
 - 跨多個檔案的重構
-- 多段落實作（`/build` 以外的長任務）
+- 多段落實作（build 以外的長任務；Claude: `/build`）
 - 任何需要 3 個以上步驟的修改
 
 ---

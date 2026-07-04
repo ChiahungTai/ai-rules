@@ -1,10 +1,10 @@
 ---
-harness-scope: borderline
+harness-scope: neutral
 ---
 
 # Commit 同意約束
 
-> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
 
 ---
 
@@ -19,7 +19,7 @@ harness-scope: borderline
 - **展示再確認**：commit 前展示變更摘要和建議的 commit message
 - **等待確認**：用戶必須明確回覆「commit」「確認」「OK」等肯定詞
 - **未確認不 commit**：未收到確認 → 不執行 git commit，不繼續下一步
-- **適用所有命令**：包含 `/build`、`/code-review`、`/judge-review`、`/lint-fix` 等
+- **適用所有場景**：包含 build、review、fix 等任何可能觸發 commit 的流程
 
 ---
 
@@ -29,10 +29,10 @@ harness-scope: borderline
 
 | 場景 | 正確行為 |
 |------|---------|
-| `/build` 段落完成 | 展示結果，不 auto-commit |
-| `/code-review` 發現問題並修正 | 展示修正，等待用戶確認 |
-| `/judge-review` 採納建議 | 展示變更，等待用戶確認 |
-| `/commit` 用戶主動觸發 | 展示 message，等待用戶確認 |
+| 任務段落完成（如 build） | 展示結果，不 auto-commit |
+| review 後發現問題並修正 | 展示修正，等待用戶確認 |
+| 採納 review 建議 | 展示變更，等待用戶確認 |
+| 用戶主動要求 commit | 展示 message，等待用戶確認 |
 
 ---
 
@@ -42,4 +42,4 @@ harness-scope: borderline
 
 ---
 
-完整 commit 流程定義在 [commit.md](../commands/commit.md)。
+完整 commit 流程定義在各自 harness 的 commit 命令文檔（Claude: `commands/commit.md`）。

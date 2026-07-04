@@ -4,7 +4,7 @@ harness-scope: neutral
 
 # 深層思考框架
 
-> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
 
 ---
 
@@ -104,7 +104,7 @@ harness-scope: neutral
 5. **重構建議**：AI 主動發現問題並提出重構
 6. **股票分析**：任何涉及個股或市場走勢的判斷 → 載入 `trading-analysis` skill（三層分析框架：經典 TA → 量化 → 第二層思考整合）
 7. **AI 建議評估**：評估其他 AI 的設計建議或審查意見
-8. **文檔架構決策**：USE-CASES.md / CLAUDE.md 的結構重組、章節劃分、資訊分類方式
+8. **文檔架構決策**：instruction 檔（AGENTS.md；Claude 端 CLAUDE.md wrapper）的結構重組、章節劃分、資訊分類方式
 9. **資訊架構決策**：任何「怎麼組織資訊讓讀者（人類或 AI）最快找到需要的東西」的決策
 
 ---

@@ -4,7 +4,7 @@ harness-scope: neutral
 
 # 修改後必須執行驗證
 
-> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
 
 ---
 
@@ -21,7 +21,7 @@ harness-scope: neutral
 - 建立/修改後，必須 `uv run python <file>` 實際執行
 - 修改多個相關檔案時，每個可執行檔案都必須跑
 - AI 不得在未執行的情況下宣稱「完成」或「正確」
-- **POC 暫時性**：`poc/` 為暫時性驗證產物，僅存活到所屬 EP 段落 build+commit；build 時驗證行為改寫成正式測試，`/commit` 階段 2.7 確認承接後清除
+- **POC 暫時性**：`poc/` 為暫時性驗證產物，僅存活到所屬 EP 段落 build+commit；build 時驗證行為改寫成正式測試，commit 階段 2.7 確認承接後清除（Claude: `/commit`）
 
 ### 測試程式
 
@@ -38,7 +38,7 @@ harness-scope: neutral
 
 ### 例外（可跳過執行）
 
-- 純文檔/CLAUDE.md 修改（非程式碼）— 純文檔指 `rules/`、`skills/`、`commands/` 下的 `.md` 檔案；含程式碼範例但本身不被執行的 `.md` 仍算純文檔
+- 純文檔/instruction 檔修改（非程式碼）— 純文檔指 `rules/`、`skills/`、`commands/` 下的 `.md` 檔案；Claude 端含 CLAUDE.md wrapper；含程式碼範例但本身不被執行的 `.md` 仍算純文檔
 - 純註解修改（不改變執行邏輯）
 - import 排序（由 `ruff check --fix` 處理）
 

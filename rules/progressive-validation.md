@@ -4,7 +4,7 @@ harness-scope: neutral
 
 # 漸進式驗證
 
-> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
 
 ---
 
@@ -36,7 +36,7 @@ harness-scope: neutral
 
 ### 與風險分級的關係
 
-> 定義見 [ai-development-guide.md](../ai-development-guide.md)「驗證約束 → 風險分級標準」
+> 定義見 ai-development-guide「驗證約束 → 風險分級標準」(source 在 ai-rules repo)
 
 風險分級決定最終驗證深度（高風險以 DEPTH-FULL 為標準），但即使高風險也應先跑 DEPTH-MIN 確認基本邏輯正確，再逐步擴大。兩個維度互補：風險分級決定「要驗證多深」，漸進驗證決定「用什麼順序到達那個深度」。
 

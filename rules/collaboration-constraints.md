@@ -4,7 +4,7 @@ harness-scope: neutral
 
 # 協作約束
 
-> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
 
 ---
 
@@ -136,7 +136,7 @@ LLM 的討好傾向在 review 場景最危險 —— 要嘛無腦同意壞建議
 
 ### 強制規則
 
-- **不 cd 到其他 repo**：工作目錄是 Claude Code 啟動時的 Primary working directory，不要 cd 到其他 repo 或 worktree 去做 git 操作
+- **不 cd 到其他 repo**：工作目錄是 harness 啟動時的 Primary working directory（Claude: Claude Code 啟動時目錄），不要 cd 到其他 repo 或 worktree 去做 git 操作
 - **需要讀取其他 repo**：用 `Read` 工具或 `git -C <path>` 讀取，不需要 cd
 - **需要執行其他 repo 的命令**：用 `git -C <path>` 或完整路徑，不 cd && command
 
