@@ -1,3 +1,7 @@
+---
+harness-scope: borderline
+---
+
 # Context 管理
 
 > **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀

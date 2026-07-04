@@ -1,3 +1,7 @@
+---
+harness-scope: neutral
+---
+
 # 文檔自洽性檢查規範
 
 > **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀

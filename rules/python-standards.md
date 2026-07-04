@@ -1,4 +1,5 @@
 ---
+harness-scope: neutral
 paths:
   - "**/*.py"
 ---

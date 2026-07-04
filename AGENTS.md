@@ -72,7 +72,7 @@
 - `commands/` — 命令工作流（invocation 因 harness 而異；Claude 端為 slash command，見 CLAUDE.md）
 - `commands/instruction/_common/` — 共用子範本（`instruction:*` 命令的引用單元）
 - `agents/` — Custom subagent 定義（按需委派的專家子能力；Claude 端細節見 CLAUDE.md）
-- `hooks/` — Hook 實作腳本（Claude 專用機制；詳見 CLAUDE.md）
+- `hooks/` — Hook 實作腳本（Claude `.claude/settings.json` 註冊；目前僅 Claude 端，詳見 CLAUDE.md）
 - `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）
 
 ## 寫作治理
