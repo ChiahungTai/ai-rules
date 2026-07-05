@@ -1,6 +1,6 @@
 ---
 name: nt-query
-description: Query NautilusTrader (NT) correctly — docs-first for capability/concept, LSP-on-Cython-stubs for implementation, designer-intent for usage contract. Use when investigating what NT supports ('NT 支援/能不能/能力/概念', multi-account, OMS, position 計算, accounting, value types, emulated orders), where/how NT implements something (cache, model, execution, backtest config, 'NT symbol 在哪', BacktestEngine, TradingNode, Actor, on_bar, on_order_filled, submit_order), or whether an NT API is safe to call in a given context (thread/loop/caller — '跨線程', node.run/stop/dispose, loop ownership, daemon thread). Prevents over-inferring a capability or usage boundary from one source data structure or method signature.
+description: Query NautilusTrader (NT) correctly — docs-first for capability/concept, LSP-on-Cython-stubs for implementation, designer-intent for usage contract, plus NT type boundary audit. Use when investigating what NT supports ('NT 支援/能不能/能力/概念', multi-account, OMS, position 計算, accounting, value types, emulated orders), where/how NT implements something (cache, model, execution, backtest config, 'NT symbol 在哪', BacktestEngine, TradingNode, Actor, on_bar, on_order_filled, submit_order), whether an NT API is safe to call in a given context (thread/loop/caller — '跨線程', node.run/stop/dispose, loop ownership, daemon thread), or auditing NT type boundaries (Bar/Instrument/InstrumentId/BarType/Strategy/BarDataWrangler 的 import 路徑、stub 正確性、簽名、Cython 邊界型別相容性). Prevents over-inferring a capability or usage boundary from one source data structure or method signature.
 when_to_use: Fires when a consumer project's LLM investigates NautilusTrader — "does NT support X", "NT 能不能", "how does NT compute position", "where is X defined in NT", "is it safe to call X from thread/loop Y" (usage contract — cross-thread node.stop/dispose, loop ownership, daemon thread), or when reading nautilus_trader/ source / .pyi stubs. Load BEFORE diving into NT source.
 ---
 
@@ -120,3 +120,26 @@ Which stub is which + the generator's precision rules (cross-package preservatio
 - **The failure this prevents (case study):** `<NT_REPO>/ai-analysis/analysis/2026-06-16-nt-docs-over-source.md`
 - **Account / balance / equity / margin model** (account_type → 4 layers, two lifecycle paths, gotchas incl. `margin_maint=0` trap): [account-model.md](account-model.md) — load when the query touches account types, balances, equity, margin, or PnL computation
 - **Worked examples (4 query shapes, exact tool calls) + common concept→symbol seeds:** [reference.md](reference.md)
+
+---
+
+## 附錄：NT 型別邊界 audit 表
+
+> NT 型別位於 Cython 邊界後方。LSP 是唯一可靠驗證型別用法的方式 —— `.so` 編譯模組無可讀 Python 原始碼，直接讀原始碼不足以驗證。audit 時遇到以下高風險型別，依表查證。
+
+| Category | Module Path | Common Pitfall |
+|----------|------------|----------------|
+| `Bar` | `nautilus_trader.model.data` | Import from wrong module |
+| `Instrument` | `nautilus_trader.model.instruments` | Missing `.pyi` → Unknown type |
+| `InstrumentId` | `nautilus_trader.model.identifiers` | Constructor vs `from_str()` |
+| `BarType` | `nautilus_trader.model.data` | `from_str()` existence |
+| `Strategy` | `nautilus_trader.trading.strategy` | `on_bar()` signature |
+| `BarDataWrangler` | `nautilus_trader.persistence.wranglers` | Input format requirements |
+
+**Audit checklist**（每個 NT 型別遇到時）：
+1. `LSP hover` → LSP resolve 什麼型別？若 `Unknown`，stub missing/broken
+2. `LSP goToDefinition` → 跳到 `.pyi`？若否，stub sync issue
+3. Constructor/method signature → `LSP hover` 在 call site 驗參數型別
+4. Return type → `LSP hover` 在 variable assignment 驗回傳型別
+
+**Stub health detection**：LSP 回 `Unknown` → 跑 `make sync-stubs`（NT 專案）刷新 stub；或手動從 NT source tree 同步 `.pyi` 到 `stubs/` 與 `.venv/.../nautilus_trader/`。

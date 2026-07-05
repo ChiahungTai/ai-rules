@@ -116,6 +116,16 @@ Claude Code 內建 `LSP` tool（native，非 MCP）。參數：`operation`, `fil
 
 重新命名、改簽名、改回傳型別前，**必須先用 `findReferences` 找出所有呼叫點**。LSP 保證 100% 涵蓋，rg 可能遺漏動態引用。
 
+### 驗證任務 workflow
+
+每次 LSP 驗證任務遵循 5 步：
+
+1. **Start with LSP** — 每個導航動作先 LSP（符號查詢禁 rg 起手）
+2. **Verify with evidence** — 禁「looks correct」，一律 LSP 驗簽名/回傳/呼叫鏈
+3. **Trace full chains** — 被問函式 → 同時追 incomingCalls + outgoingCalls
+4. **Report precise locations** — 每個 finding 附 `file:line`
+5. **Cross-verify** — LSP 結果非預期時用 Read 交叉確認
+
 ---
 
 ## Diagnostics 定位
@@ -148,3 +158,16 @@ diagnostics 不能取代 mypy 在品質閘門中的角色。
 ```
 
 **判斷方式**：如果任務描述包含「簽名」「型別」「定義」「呼叫」「繼承」「Protocol」→ 主工具是 LSP，輔以 rg 確認。如果任務描述包含「字串」「註解」「config」「檔案路徑」→ 主工具是 rg/fd。
+
+---
+
+## 跨命令共用的 LSP 驗證輸出格式
+
+每次 LSP 驗證任務（驗證特定 claim、refs 查證、call chain 追蹤）產出依此格式：
+
+1. **State the question** — 釐清要驗證什麼（例：「`Strategy.on_bar()` 的簽名是否正確？」）
+2. **Show the LSP operation used** — 明示用了哪個 LSP operation（例：`LSP hover on Strategy.on_bar`）
+3. **Report the finding with precise file:line** — 每個 finding 附 `file_path:line_number`（禁「looks correct」，必須引用實際位置）
+4. **Give a clear ✅/❌ conclusion** — 結論明確（通過/不通過），不留模糊
+
+> 此格式跨 audit-test / judge-review / illustrate verify drill / arch-thinking 驗證段通用。LSP 是反應式驗證工具（驗證特定 claim → ✅/❌），不是 holistic 架構判讀——判讀是人類 viewport 的工作（見 arch-thinking skill）。

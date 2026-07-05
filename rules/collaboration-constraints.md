@@ -156,9 +156,21 @@ LLM 的討好傾向在 review 場景最危險 —— 要嘛無腦同意壞建議
 ### 強制規則
 
 - **spawn 前判斷 worktree 能力**：跨 repo 任務優先在目標 repo 的 session 做，不委派給受限 worktree 的 agent（worktree 隔離下 agent 物理上寫不進目標 repo）
-- **agent 寫不進目標 → agent 寫當前 repo，主 session 事後搬運回收**：不要讓 agent 妥協到 /tmp（agent 視角見 `agents/README.md`「檔案寫入紀律」）
+- **agent 寫不進目標 → agent 寫當前 repo，主 session 事後搬運回收**：不要讓 agent 妥協到 /tmp（agent 視角見下方「Agent 檔案寫入紀律」）
 - **禁把「跨 repo 寫入」責任丟給 agent**：worktree 隔離下「前置確認」無效 —— 根因是 spawn 端 routing，不是 agent 意願
+
+### Agent 檔案寫入紀律
+
+> **核心原則**：agent 失敗成本不對稱 —— 跑很久才在末端權限失敗，前面 context 全浪費。寫檔遵循三層。
+
+1. **禁 /tmp** —— 產出絕不寫 /tmp（易丟、不可追溯、session 中斷即消失）；寫在自己當前工作目錄（repo/worktree）內
+2. **寫不進指定路徑（跨 repo / worktree 隔離）→ 回報「環境限制：我寫不進 X」，不自行妥協到 /tmp**；交回主 session 決定（spawn 端回收責任見本段「強制規則」）
+3. **暫時產物**（中間分析、草稿、POC 輸出）→ 集中到 repo 內暫存區，依模式處置（此處「POC 輸出」指 agent 暫存 `.agent-tmp/`，非 `/ep-validate` 的 poc/ 正式生命週期）：
+   - **互動模式**：完成時列出清單詢問保留／刪除
+   - **autonomous / deep-work**：集中到 `.agent-tmp/`（repo 內，權限預期 allow；**各專案須將 `.agent-tmp/` 加入 `.gitignore`**），最終報告列出清單，使用者事後處理（逐一確認會卡死 autonomous flow）
+
+**注入責任**：此三條對「會寫檔的 agent」下指令，但 **agent 不自動載入本 rule 的此段**（subagent 只載自己的 system prompt + CLAUDE.md）。**spawn 會寫檔的 agent 時，主 session 須將此三條寫入紀律注入 agent prompt**。enforcement（spawn 端）視角見本段「強制規則」。
 
 ### 為什麼
 
-agent 跑很久才在末端因跨 repo 寫入被擋 → 前面 context 全浪費。把回收責任放 spawn 端，讓 agent 只寫自己寫得到的地方，失敗收斂到 spawn 時刻（快失敗）。
+agent 跑很久才在末端因跨 repo 寫入被擋 → 前面 context 全浪費。把回收責任放 spawn 端，讓 agent 只寫自己寫得到的地方，失敗收斂到 spawn 時刻（快失敗）。/tmp 是 agent 寫不進目標時的危險第一反應 —— 即使主 session 事後補救，session 中斷在補救前就丟（autonomous 場景尤甚）。
