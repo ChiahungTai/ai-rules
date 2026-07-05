@@ -27,13 +27,41 @@ Methodology for autonomous implementation when user should not be disturbed. All
 
 ## Don't-Self-Decide Boundaries
 
-以下情況**不自行處理**，標記為 ⚠️ 等待用戶：
+以下情況不自主執行，依紅線/黃線分級處置：
 
-- 刪除現有功能或 API
-- 修改數據庫 schema
-- 變更外部系統整合介面
-- 涉及安全相關邏輯
-- 需要付費或消耗資源的操作
+### 🔴 紅線（跳過 + 記錄，絕不自主執行）
+
+**不可逆操作** —— 自主執行風險大於任務完成度。跳過並記錄到 completion report 紅線跳過清單段：
+
+| 類型 | 範例 |
+|------|------|
+| 檔案刪除（不可逆） | `rm -rf`、`find -delete`、`git clean -fd` |
+| Git 遠端 / 歷史破壞 | `git push --force`、`git reset --hard`、影響共享 history 的 `git rebase` |
+| Git commit | `git commit`（commit-consent rule 明文「例外：無」—— 所有 commit 需用戶確認，半夜自主跑亦不例外） |
+| 系統層變更 | `sudo *`、`brew uninstall`、`chmod` 系統路徑、`osascript`（macOS 自動化） |
+| 外部服務狀態 | `docker rm`、`docker stop`、DB `DROP`/`DELETE`、redis `FLUSHDB` |
+| 語意型紅線（既有） | 刪除 API、修改 DB schema、變更外部整合介面、安全邏輯、付費操作 |
+
+> 紅線跳過時 deep-work **不阻塞、不語音通知** —— 早上看 completion report 判讀（呼應 [acceptance-evidence](../../rules/acceptance-evidence.md) L6 人類觀察層：半夜自主跑時人類 viewport 是危險操作的唯一兜底）。
+>
+> **`git commit` 跳過的語義**：deep-work 階段 5 finalization 不自主 commit，變更留在 working tree 等用戶接手（用戶回來後 `/commit` 走 commit-consent 流程）。這對齊 [commit-consent](../../rules/commit-consent.md) rule「例外：無」的硬規則。
+
+### 🟡 黃線（自主決策 + 記錄到 completion report）
+
+**可逆但有風險** —— 選最合理方案繼續，理由寫入 completion report 待確認清單段：
+
+| 類型 | 範例 | 自主策略 |
+|------|------|---------|
+| Git local 可逆 | `git tag`、`git stash`、`git add`（stage 可逆） | 自主執行（`git commit` 見紅線段——commit-consent 要求用戶確認） |
+| 檔案系統可逆 | `mkdir`、`mv`、`touch`、單檔 `rm`（可重建） | 自主執行 |
+| 開發工具執行 | `uv run`、`pytest`、`make`、`docker run`（新增 container） | 自主執行 |
+| 依賴變更 | `uv add`、`uv remove`、`brew install <pkg>` | 自主執行，記錄理由 |
+
+> 黃線是「任務關鍵依賴」時（例如中段必須 commit 才能繼續），LLM 自主判斷降級路徑（git stash、worktree 隔離等）。
+
+### 與「不問問題」原則的關係
+
+本分級**不 override** Core Principles 的「不問問題」——歧義仍選最合理方案並記錄。但紅線操作的本質是「做了就無法事後修正」，不適用「選最合理」——選了不等於安全。
 
 ## Error Self-Healing
 
@@ -88,6 +116,11 @@ Methodology for autonomous implementation when user should not be disturbed. All
 |---|---------|---------|------|------------|
 | 1 | [遇到的問題] | [選了什麼做法] | [為什麼選這個] | [方案A / 方案B] |
 
+### 🔴 紅線跳過清單
+- [紅線操作 / 跳過理由 / 影響範圍]（半夜自主跑時不阻塞，供早上判讀；定義見 Don't-Self-Decide Boundaries 紅線段）
+
 ### ⚠️ 未解決問題
-- [標記為 ⚠️ 的未解決問題]
+- [技術失敗或無法降級的問題]
 ```
+
+> 報告開頭若紅線清單非空 → 加註「⚠️ 含 N 項紅線跳過，需人類判讀」。
