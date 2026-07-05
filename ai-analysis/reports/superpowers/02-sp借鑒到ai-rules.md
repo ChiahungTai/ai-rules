@@ -37,7 +37,7 @@ sp 的東西分兩類，借鑒成本天差地別：
 | sp 機制 | 為何不借 |
 |--------|---------|
 | **session-start bootstrap 強制載入** | ai-rules 已有 rules auto-load 等效（每 session 載入核心 rules）；強制載入跟 on-demand 省 context 衝突；不重寫就沒 bootstrap 層 |
-| **多 harness adapter** | 只用 Claude Code（+ OpenCode 走 fallback 相容，見 [`03-OpenCode退路.md`](03-OpenCode退路.md)）；adapter 層要重寫才有 |
+| **多 harness adapter（tool mapping 層）** | ai-rules 已轉型 multi-harness（`deploy_agents.py` 部署 zcode/opencode/codex 三家），但**不需要 sp 的 tool mapping adapter 層**——adapter 解的是「動作詞彙翻譯成各家 tool name」，而 ai-rules 的 rule 是宣告式約束（跨 harness 讀取等價、無動作詞彙需翻譯）。這不是「scope 邊界」不借，是「**解的問題對宣告式 rule 不存在**」。機制根因與下游缺口詳 [`04-multi-harness機制對照.md`](04-multi-harness機制對照.md) §1-§2 |
 | **drill eval harness（LLM verifier）** | ai-rules 的 B 軸人類 viewport 提示：eval 該是「人類 + 機械」混合，不是純 LLM verifier —— 借鑒 eval 的「前置壓力測試」精神（已併入 P0 skill-as-TDD），但不引進 drill 結構。理論詳 [`03` 附錄黃金連接點](03-OpenCode退路.md) |
 | **Model selection per-task** | ai-rules `model-routing.md` 夠用；`/build` 不是 sp 的 fresh-subagent-per-task 模式 |
 

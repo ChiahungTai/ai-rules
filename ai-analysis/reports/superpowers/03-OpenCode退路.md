@@ -27,6 +27,8 @@ OpenCode 刻意做了 Claude Code 相容（[官方 docs Rules 頁](https://openc
 
 這意味 ai-rules 的核心載體**零成本就能跑在 OpenCode** —— 不用像 sp 寫 `.opencode/plugins/superpowers.js`（複雜 JS adapter + lifecycle + bootstrap injection）。因為 sp 是 **plugin 要被 install**，ai-rules 是**個人 rules/skills/commands** 走 fallback 相容，且 ai-rules 不需要 session-start 強制載入（它的 rules 本來就 auto-load）。
 
+> **深層根因（見 [`04-multi-harness機制對照.md`](04-multi-harness機制對照.md) §1）**：「零成本」不是 fallback 相容的偶然紅利，是**內容性質決定的**——sp 的 skill 是指令性動作（"dispatch a subagent" 要翻譯成各家 tool name），所以必須有 adapter 層；ai-rules 的 rule 是宣告式約束（"禁止 python -c 註解" 跨 harness 一字不差），無動作詞彙需翻譯 → adapter 層結構上無作用。這也是為何 `deploy_agents.py` 能用「單一 bundle 寫三家」而非 sp 的 per-harness manifest。但要注意：bundle 寫到磁碟 ≠ harness 真的讀到且讀對——這層驗證（marker test）ai-rules 還沒有，是 sp 用 acceptance test 防住而 ai-rules 的缺口（[`04`](04-multi-harness機制對照.md) §4.3）。
+
 ---
 
 ## 四大載體遷移成本對應表

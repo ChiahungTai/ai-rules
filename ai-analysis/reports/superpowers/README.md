@@ -14,6 +14,7 @@
 | [`01-結構理解與診斷.md`](01-結構理解與診斷.md) | 三層架構 + skill 拓樸 + skill-as-TDD + 結構債 | 理解 superpowers 是什麼 + 健康度 | 想全面理解時 |
 | [`02-sp借鑒到ai-rules.md`](02-sp借鑒到ai-rules.md) | 5 個內容類借鑒（skill-as-TDD/ledger/file-handoff/form-to-failure/behavior-shaping）+ 不借的結構類 | 借鑒到 ai-rules | 要吸收 sp 手法時 |
 | [`03-OpenCode退路.md`](03-OpenCode退路.md) | CC 堵 BYOK 風險 + OpenCode CC 相容免費保單 + 四大載體對應 + hooks adapter | 業務連續性 | 準備 OpenCode 退路時 |
+| [`04-multi-harness機制對照.md`](04-multi-harness機制對照.md) | sp vs ai-rules multi-harness 機制對照；轉型後回頭檢驗 `02`「不借結構類」；下游缺口（skills/commands/載入語意/acceptance test）；**§7 補 ZCode 3.2.5 權限模型實測**（configuration-file hooks 不支援，官方 issue `zai-org/feedback#32` P2 open；ai-rules 場景採 yolo + 人工把關）| multi-harness 機制是否要借、ZCode 權限決策時 | ai-rules 轉型 multi-harness 後、評估機制借鑒時、用 ZCode 遇權限彈窗問題時 |
 
 ---
 
