@@ -16,15 +16,70 @@ LSP 提供語義級程式碼導航（~50ms，100% 準確），rg/fd 提供文字
 
 > **搜尋前自問（3 秒）**：找的是**符號**（class/def/引用/型別/呼叫鏈）還是**文字**（字串/註解/config/路徑）？符號 → LSP；文字 → rg/fd。直覺想 rg 時停一下 —— 符號查詢 rg 會 truncated/漏動態引用，LSP 100% 涵蓋。
 
-**反例（rg 找符號的陷阱）**：
+**反例（rg 的陷阱：符號查詢 + 依賴枚舉）**：
 
 - `rg "<ServiceClient>\("` 結果被截斷（只顯示 `n`），只能「推測」呼叫端；`LSP findReferences` 精準列出結構化 references（定義 + import + 型別註解 + 唯一實際呼叫點）。
 - **audit 覆蓋判斷（真實案例）**：`rg "list_.*_classes" tests/` → 0 hits，audit 誤報「多個 class 無 membership 斷言」。實際測試用不同符號（列舉函式 / registry 變數），LSP `findReferences` 可找到。**符號覆蓋判斷用 rg 會因命名 pattern 差異 false negative**。
 - **judge-review 查證（真實案例）**：審查者 rg 稱「`<ExecutorClass>` 在 `<module>.py` 無建構點」，LSP `findReferences` 立刻列出 import 行 + 建構行。**符號存在性查證用 rg 會因 pattern 失誤 false negative，把「自己沒查到」誤判為「不存在」**。
 
 - **rg display masking（真實案例）**：`rg "_update_x_axis_labels"` 把 method 名 mask 成 `n`（輸出 `def n(self) -> None:`）—— **看起來像真實輸出但不是**。masking 比 truncation 更危險：truncation 是「少給」（你知道有漏），masking 是「給錯的」（誤以為查到了，停止往下查）。符號引用查詢一律 LSP `findReferences`。
+- **toplevel-only pattern 漏 local import（真實案例）**：`rg "^from mosaic_alpha"` 只抓 toplevel import，漏掉函式內的 `from mosaic_alpha.workflows.watchlist_io import ...  # noqa: PLC0415`（local import，被刻意降級以規避循環依賴）。local import 往往是「開發者知道是違規但就地掩蓋」的信號（`# noqa: PLC0415` 是指紋）— 恰恰是最該被抓出的結構債。**依賴分析不可只錨 `^` toplevel**；需搭配 LSP `findReferences`（涵蓋 import 行 + call site）或 rg 不錨 `^` + 篩 `noqa: PLC0415`。
 
-**結論**：符號查詢用 rg 會 truncated/漏/pattern 失誤/masking（給錯的）；LSP 結構化、不截斷、100% 涵蓋。
+**結論**：符號查詢用 rg 會 truncated/漏/pattern 失誤/masking（給錯的）；LSP 結構化、不截斷、100% 涵蓋。**依賴枚舉用錨定 `^` toplevel 會系統性漏一整類（local import）**。
+
+---
+
+## 任務啟動：Tool Discovery（符號查詢任務強制）
+
+> **此段解決一個結構性失誤模式**：LLM 遇到分析任務（依賴審計、符號引用查證、跨域存取盤點）時，直覺落 rg，全程不碰 LSP — 即使 LSP 工具可用。被動的決策樹（下方）攔不住這個慣性；需要任務啟動時的**主動強制 step**。
+
+### 強制 step：符號查詢任務開頭必須測 LSP 可用性
+
+任務涉及以下關鍵詞之一 → **第一步**調用一次 LSP 工具（如 `workspaceSymbol` 或 `hover`）確認可用性，不可跳過：
+
+- 「查詢/盤點/審計依賴」「引用」「reference」「fan-in」「消費者」「呼叫鏈」
+- 「跨域」「context」「_private」「邊界洩漏」
+- 「循環依賴」「反向耦合」
+- 「簽名」「型別」「定義位置」「實作」
+
+**禁 proxy 測試**：不可用 shell 命令（如 `timeout`、`which`、`command -v`）測 LSP 可用性 — 這些測的是 shell 環境，與 MCP LSP 工具無關。**唯一有效測試是直接調用 LSP 工具本身**。用 proxy 測試下「LSP 不可用」結論 = 未驗證。
+
+### 測試結果處置
+
+| LSP 測試結果 | 行動 |
+|-------------|------|
+| 成功回傳 | 全程符號查詢用 LSP 為主工具；rg 僅輔助（文字、註解、config） |
+| 失敗 / 工具不存在 | 標註「未 LSP 驗證」；rg 為主工具；報告方法論限制段明確記錄 |
+
+### 方法論限制 loopback（報告內部一致性）
+
+> **此段解決「自審與作答共享盲點」**：方法論限制段承認了工具的認知邊界（如「未 LSP 驗證」「rg 可能漏 local import」），但結論段若沒回照這個邊界，會產生**自相矛盾的報告** — 限制段說「可能漏」，結論卻斷言「不存在 / 未發現」。這不是工具問題，是報告紀律問題。
+
+**強制 step**：報告完成前，對「方法論限制段」列出的每一項認知邊界，檢查「結論段 / 發現段」是否回照：
+
+| 方法論限制段的承認 | 結論段必須 |
+|------------------|-----------|
+| 「未 LSP 驗證」 | 該結論標「未確認」而非斷言；或說明為何仍可信 |
+| 「rg 可能漏 local import」 | 依賴邊的「未發現」結論改為「toplevel 未發現，local import 未驗證」 |
+| 「測試覆蓋 proxy 非行覆蓋率」 | 「薄覆蓋」結論標明是 proxy 訊號 |
+
+**反例（本規則的觸發源）**：依賴審計報告的 methodology limitation 段寫「rg `^from` 無法捕捉函式內 lazy import」，但 🔴 反向耦合段的 feed 結論卻寫「feed → workflows 邊不存在」。兩段自相矛盾 — 限制段承認可能漏，結論卻斷言不存在 — 卻沒被發現，因為寫限制與下結論是同一個 LLM 的同一個信念體系（自審與作答共享盲點，理論基礎見 [acceptance-evidence.md](acceptance-evidence.md)「證據獨立性」）。
+
+> **通用性**：此 loopback 紀律雖在 LSP/rg 場景觸發，但適用任何「方法論限制段 vs 結論段」的組合 — 工具限制、測試覆蓋、取樣口徑皆同。未來其他 rule 觸發同類失誤時可 cross-reference 本段。
+
+### 優先級規則：task prompt 條件句不覆蓋全域規則
+
+task prompt 寫「若有 LSP 工具可用...無 LSP 則用 rg」是**提醒確認可用性**，**不是授權默認假設無 LSP**。衝突時優先級：
+
+```
+skill / 全域 rules（本檔）> task prompt 條件句
+```
+
+即：task prompt 的條件句要求你「確認可用性」（調用 LSP 測試），全域規則要求你「符號查詢用 LSP」。兩者一致 — 條件句不構成「跳過 LSP」的授權。
+
+> **真實失誤案例（本規則的觸發源）**：分析任務全程用 rg，理由是「task prompt 寫若有 LSP 則用」。實際上 LSP 工具可用，但 LLM (a) 誤讀條件句為「預設 rg」、(b) 全程未調用 LSP、(c) 被提醒後用 `timeout` 命令（shell 工具）測試並下結論「LSP 不可用」 — 三重失誤全因缺強制啟動 step。
+
+> **與「驗證任務 workflow」的關係**：本段是 **task-level gate**（任務開頭測 LSP 可用性，一次性）；下方「驗證任務 workflow」step 1「Start with LSP」是 **action-level 節奏**（每個導航動作先 LSP）。兩者互補不重複 — gate 確保工具可用，節奏確保每步都用。
 
 ---
 
