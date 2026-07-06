@@ -18,7 +18,7 @@
 1. 讀 `dependency-graph.md`（repo root）取得既有依賴資料
 2. 用 `rg "^from mosaic_alpha|^import mosaic_alpha"` 抽樣驗證關鍵依賴邊
 3. 用 `rg "^from |^import "` 搭配 `fd -e py` 盤點模組邊界
-4. 若有 LSP 工具可用，對可疑的循環依賴用 `findReferences` 驗證；無 LSP 則用 rg 推導（明確標註「未 LSP 驗證」）
+4. 符號查詢（可疑循環依賴、跨域存取）用 LSP `findReferences` 驗證 — 第一步先調用一次 LSP 工具確認可用性（禁用 `timeout`/`which` 等 shell proxy 測試 — 那測的是 shell 環境非 LSP 工具；見 lsp-navigation rule「Tool Discovery」）。LSP 確實不可用才退 rg 推導（標「未 LSP 驗證」）
 
 **報告骨架**（固定小標題，內容自由）：
 ```
@@ -117,7 +117,7 @@
 1. **檔名**：`{harness}-dependency-audit.md` / `{harness}-bounded-context-review.md` / `{harness}-core-leaf-matrix.md`。**`{harness}` 替換為你當前所在的 harness 名稱**（ZCode 環境用 `zcode`，Claude Code 環境用 `claude`，全部小寫）。
 2. **輸出位置**：`/Users/ctai/Github/mosaic_alpha/ai-analysis/analysis/`（**不是** `_done/` 子目錄）
 3. **語言**：繁體中文 + 英文術語
-4. **禁止假設工具可用性**：如果你沒有 LSP 工具，用 rg 推導並明確標註「未 LSP 驗證」。如果你有 LSP，用了就標「LSP 驗證」。**不要假裝用了沒用的工具**。
+4. **LSP 可用性以實測為準**：符號查詢任務開頭調用一次 LSP 工具確認可用性（禁用 `timeout`/`which` 等 shell proxy 測試）。可用 → 用 LSP 並標「LSP 驗證」；不可用 → 退 rg 推導並標「未 LSP 驗證」。**不要假裝用了沒用的工具**。
 5. **禁止編造**：所有 file:line 必須來自實際讀取/搜尋的程式碼。不確定就標「未確認」，不要腦補。
 6. **方法論限制段必填**：每份報告的「方法論限制」段不可省略 — 這段是這次分析的重要產出，不是附屬。
 7. **每份報告獨立**：3 份報告可以互相引用結論（如報告 3 引用報告 1 的依賴資料），但每份必須獨立成檔、獨立可讀。
