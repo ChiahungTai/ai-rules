@@ -26,6 +26,7 @@ import importlib.util
 import json
 from pathlib import Path
 import re
+import tomllib
 
 
 # ---------------------------------------------------------------------------
@@ -47,6 +48,11 @@ SKIP_DIRS_SCAN = {
     "dist",
     "ref-docs",  # external harness mirrors — not this repo's instructions
 }
+
+# Top-level dirs that may carry __init__.py but are never the importable
+# package root. Used only by the _find_package_root fallback to avoid picking
+# tests/ (which often has more .py files than the real package).
+NON_PACKAGE_DIRS = {"tests", "test", "docs", "examples", "stubs"}
 
 KANBAN_LANES = {"Backlog", "Next-Up", "In-Progress", "Done"}
 ACTIVE_KANBAN_LANES = KANBAN_LANES - {"Done"}
@@ -95,17 +101,127 @@ def _load_scan_imports(project_root: Path) -> dict | None:
 
 
 def _find_package_root(project_root: Path) -> Path | None:
-    """Find the Python package root (directory with __init__.py)."""
+    """Find the project's main Python package root, deterministically.
+
+    Selection never depends on filesystem iterdir() order. Unsorted iterdir()
+    previously caused a regression: adding tools/lsp_mcp/__init__.py flipped
+    the iteration order and resolved package_root to tools/ instead of
+    mosaic_alpha/, which made every path/tag check resolve against the wrong
+    base and produced 236 false-positive findings in a single run.
+
+    Priority (each step deterministic):
+    1. project_root itself is a package (has __init__.py).
+    2. pyproject.toml declaration — [tool.setuptools.packages.find] include /
+       [tool.setuptools] packages / [[tool.poetry.packages]] include. This is
+       the authoritative source of "what is this project's package".
+    3. Dir whose name matches [project] name or the repo dir name
+       (PEP 503 normalization: '-' -> '_').
+    4. Deterministic fallback: largest candidate by .py file count, excluding
+       obvious non-package dirs (tests/ etc.); candidates are pre-sorted by
+       name so ties resolve deterministically.
+
+    Limitation: src-layout (packages under src/) is not handled — the scanner's
+    scope is top-level packages. Add where=["src"] resolution if ever needed.
+    """
     if (project_root / "__init__.py").exists():
         return project_root
-    for child in project_root.iterdir():
+
+    candidates = _sorted_package_candidates(project_root)
+    if not candidates:
+        return None
+
+    by_name = {c.name: c for c in candidates}
+
+    # 2. Authoritative: pyproject.toml package declaration
+    pyproject = project_root / "pyproject.toml"
+    if pyproject.exists():
+        for pkg_name in _declared_package_names(pyproject):
+            root_name = pkg_name.split(".")[0].rstrip("*")
+            if root_name in by_name:
+                return by_name[root_name]
+
+    # 3. Name match: [project] name or repo dir name (normalized)
+    for proj_name in _project_name_candidates(project_root):
+        if proj_name in by_name:
+            return by_name[proj_name]
+
+    # 4. Deterministic fallback: largest code candidate; ties -> sorted name
+    code_candidates = [c for c in candidates if c.name not in NON_PACKAGE_DIRS]
+    pool = code_candidates or candidates
+    return max(pool, key=_count_py_files)
+
+
+def _sorted_package_candidates(project_root: Path) -> list[Path]:
+    """Deterministic list of top-level dirs that look like a package root."""
+    result: list[Path] = []
+    for child in sorted(project_root.iterdir(), key=lambda p: p.name):
         if (
             child.is_dir()
             and (child / "__init__.py").exists()
             and not child.name.startswith(".")
+            and child.name not in SKIP_DIRS_SCAN
         ):
-            return child
-    return None
+            result.append(child)
+    return result
+
+
+def _declared_package_names(pyproject: Path) -> list[str]:
+    """Extract declared package names from pyproject.toml (setuptools/poetry).
+
+    Names may be glob patterns ("mosaic_alpha*") or dotted paths
+    ("pkg.sub"); callers take the first dot segment and strip the glob star.
+    """
+    try:
+        with pyproject.open("rb") as f:
+            data = tomllib.load(f)
+    except (OSError, tomllib.TOMLDecodeError):
+        return []
+
+    tool = data.get("tool", {})
+    names: list[str] = []
+
+    # setuptools packages field is overloaded:
+    #   [tool.setuptools] packages = ["pkg_a", "pkg_b"]   -> list
+    #   [tool.setuptools.packages.find] include = [...]   -> dict with .find
+    packages_field = tool.get("setuptools", {}).get("packages", {})
+    if isinstance(packages_field, list):
+        names.extend(packages_field)
+    elif isinstance(packages_field, dict):
+        find_cfg = packages_field.get("find", {})
+        names.extend(find_cfg.get("include", []))
+
+    # poetry: [[tool.poetry.packages]] include = "..."
+    for pkg in tool.get("poetry", {}).get("packages", []):
+        if isinstance(pkg, dict) and "include" in pkg:
+            names.append(pkg["include"])
+
+    return names
+
+
+def _project_name_candidates(project_root: Path) -> list[str]:
+    """Candidate project names (normalized '-' -> '_') for dir matching."""
+    names: list[str] = []
+    pyproject = project_root / "pyproject.toml"
+    if pyproject.exists():
+        try:
+            with pyproject.open("rb") as f:
+                data = tomllib.load(f)
+            proj_name = data.get("project", {}).get("name")
+            if proj_name:
+                names.append(proj_name.replace("-", "_"))
+        except (OSError, tomllib.TOMLDecodeError):
+            pass
+    # Repo dir name (commonly matches the package name)
+    names.append(project_root.name.replace("-", "_"))
+    return names
+
+
+def _count_py_files(path: Path) -> int:
+    """Count .py files in a directory tree (fallback sizing signal only)."""
+    try:
+        return sum(1 for _ in path.rglob("*.py"))
+    except OSError:
+        return 0
 
 
 # ---------------------------------------------------------------------------
@@ -163,7 +279,7 @@ def _parse_capabilities_table(
     Expected table format (3 columns, no UC ID):
         | 能力 | 入口 | 狀態 |
     """
-    entries = []
+    entries: list[dict] = []
 
     header_match = CAPABILITIES_HEADER_RE.search(content)
     if not header_match:
@@ -339,7 +455,7 @@ def _find_valid_tag_names(project_root: Path) -> set[str]:
     Tag convention: tag name = mosaic_alpha/ subdirectory name.
     Shorthand: adapters/sj → sj.
     """
-    valid_tags = set()
+    valid_tags: set[str] = set()
     pkg_root = _find_package_root(project_root)
     if not pkg_root:
         return valid_tags
