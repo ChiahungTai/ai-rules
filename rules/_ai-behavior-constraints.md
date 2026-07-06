@@ -33,7 +33,7 @@ harness-scope: neutral
 
 ## 🔴 Bash 強烈警告：`python -c` 禁止寫註解
 
-> **`python -c` 是 AI 自用驗證，不需人類可讀註解。** 多行 `python -c` 中換行後接 `#` 註解會觸發部分 harness 的權限確認（Claude: Claude CLI 無法判斷跨行 `#` 是否被注入惡意內容，故每次需人工確認）。要驗證想法就寫乾淨單行，或落成 `.py` 檔。Claude 端完整 Bash 硬限制見 `bash-hard-rules.md`（claude-specific）。
+> **`python -c` 是 AI 自用驗證，不需人類可讀註解。** 多行 `python -c` 中換行後接 `#` 註解會觸發部分 harness 的權限確認（Claude: Claude CLI 無法判斷跨行 `#` 是否被注入惡意內容，故每次需人工確認）。要驗證想法就寫乾淨單行，或落成 `.py` 檔。通用工具紀律（uv run / pipe-exit / 禁 sed / agent prompt 指定工具）見 [tool-discipline.md](tool-discipline.md)；Claude 端 `python -c` / `$` 展開限制（Claude: `bash-hard-rules.md`）。
 
 ---
 

@@ -1,10 +1,10 @@
 ---
-harness-scope: claude-specific
+harness-scope: neutral
 ---
 
 # 搜尋工具分工
 
-> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
 
 ---
 
@@ -16,15 +16,15 @@ harness-scope: claude-specific
 - rg：註解、字串、config、文件內容（文字匹配）
 - fd：檔案/目錄名稱搜尋
 
-詳細 LSP 決策樹見 `@~/Github/ai-rules/rules/lsp-navigation.md`
+詳細 LSP 決策樹見 [lsp-navigation.md](lsp-navigation.md)
 
 ---
 
 ## Why
 
-- `find -exec`、`grep -r` 是 Claude Code 系統層級的硬限制，**無法被任何 allow 規則覆蓋**，每次都需手動批准
-- `fd` / `rg` 語法更簡潔，預設可被 auto-allow
-- `rg` 預設排除 `.gitignore` 中的檔案，減少噪音
+- `fd` / `rg` 語法更簡潔，且預設遵守 `.gitignore`，減少噪音
+- `rg` 預設排除 `.gitignore` 中的檔案
+- (Claude: `find -exec`、`grep -r` 是 Claude Code 系統層級硬限制，**無法被任何 allow 規則覆蓋**，每次都需手動批准；`fd`/`rg` 預設可被 auto-allow。其他 harness 無此限制，但 fd/rg 語法優勢通用)
 
 ---
 

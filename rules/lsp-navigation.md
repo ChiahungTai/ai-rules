@@ -1,10 +1,10 @@
 ---
-harness-scope: claude-specific
+harness-scope: neutral
 ---
 
 # LSP 語義導航優先
 
-> **載入機制**: source `~/Github/ai-rules/rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide on-demand 讀
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
 
 ---
 
@@ -71,7 +71,7 @@ LSP 提供語義級程式碼導航（~50ms，100% 準確），rg/fd 提供文字
 
 ## LSP 工具速查
 
-Claude Code 內建 `LSP` tool（native，非 MCP）。參數：`operation`, `filePath`, `line`, `character`。
+LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `hover` 等），呼叫載體因 harness 而異（見下方「跨 harness LSP 載體對照」）。
 
 | Operation | 用途 | 典型場景 |
 |-----------|------|---------|
@@ -84,7 +84,20 @@ Claude Code 內建 `LSP` tool（native，非 MCP）。參數：`operation`, `fil
 | `incomingCalls` | 呼叫者 | 「誰呼叫了 submit_order？」 |
 | `outgoingCalls` | 被呼叫者 | 「handle_order 呼叫了誰？」 |
 
-**被動能力**：每次檔案編輯後，LSP 自動推送 diagnostics（型別錯誤、missing import）。在同一 turn 修正，不需要等到 mypy。
+**被動能力**（Claude: 每次檔案編輯後 LSP 自動推送 diagnostics — 型別錯誤、missing import，在同一 turn 修正，不需等到 mypy）。其他 harness 機制不同，需主動觸發 diagnostics operation。
+
+### 跨 harness LSP 載體對照
+
+當一個概念跨 harness 通用但呼叫方式不同時，用對照表表達（中性化規範的「跨 harness 載體對照」pattern，見 rules/AGENTS.md）：
+
+| harness | LSP 機制 | 呼叫方式 |
+|---------|---------|---------|
+| Claude Code | 原生 plugin set（12 lang：pyright/rust-analyzer/clangd/gopls/jdtls/...）| `LSP` tool（native，非 MCP），參數 `operation`/`filePath`/`line`/`character` |
+| ZCode | 無原生 → 用自建 `lsp-python` MCP server（mosaic_alpha `tools/lsp_mcp/server.py` 參考實作；per-project workspace） | MCP tools（`mcp__lsp-python__hover` / `definition` / `references` / `diagnostics` / 等 7 tool） |
+| OpenCode | 原生 LSP（官方文檔說有，未實測） | 原生 tool |
+| 未來無 native 的 harness | 用 MCP server 支援 | mosaic_alpha `lsp-python` 為 reference impl（per-project http server） |
+
+LSP operation 語義一致，差異只在載體（native tool vs MCP tool）— 決策樹、反例、驗證 workflow 本檔已通用化。
 
 ---
 
@@ -153,8 +166,8 @@ diagnostics 不能取代 mypy 在品質閘門中的角色。
 - 文字搜尋（字串、註解、config）→ 用 rg
 - 檔案搜尋 → 用 fd
 - Cython 模組（.pyx/.so）→ 用 rg + Read（LSP 不索引 Cython）
-- **audit-test 角度 2 覆蓋判斷** → **禁用單一 rg pattern**；registry membership / class 引用 / method call 必須 LSP findReferences 為主、rg 為輔（見 audit-test.md「Registry Membership 流程」）
-- **judge-review 符號查證** → 「X 是否存在 / 在哪引用」必須 LSP findReferences / workspaceSymbol；rg 0 hits 不可直接下「不存在」結論（見 judge-review.md「自我否證義務」）
+- **audit-test 角度 2 覆蓋判斷** → **禁用單一 rg pattern**；registry membership / class 引用 / method call 必須 LSP findReferences 為主、rg 為輔（Claude: `audit-test.md`「Registry Membership 流程」；跨 harness 為測試 audit 流程，路徑從略）
+- **judge-review 符號查證** → 「X 是否存在 / 在哪引用」必須 LSP findReferences / workspaceSymbol；rg 0 hits 不可直接下「不存在」結論（Claude: `judge-review.md`「自我否證義務」；跨 harness 為 review 流程，路徑從略）
 ```
 
 **判斷方式**：如果任務描述包含「簽名」「型別」「定義」「呼叫」「繼承」「Protocol」→ 主工具是 LSP，輔以 rg 確認。如果任務描述包含「字串」「註解」「config」「檔案路徑」→ 主工具是 rg/fd。

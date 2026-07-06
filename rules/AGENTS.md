@@ -4,7 +4,10 @@ harness-scope: meta
 
 # Rules 層指令
 
-rules/ 是 ai-rules 的行為規範庫。Claude 端經 `~/.claude/rules/` symlink auto-load 全載每個 session；非 Claude 端（ZCode/OpenCode/Codex）靠 generator（`scripts/deploy_agents.py`）打包 neutral subset 進各自的 AGENTS.md。
+rules/ 是 ai-rules 的行為規範庫。**Claude 與非 Claude 的 rules 載入架構不同**（成因：rules auto-load 是 Claude 獨有功能，非 Claude 沒有）：
+
+- **Claude 端**（雙路徑）：`~/.claude/CLAUDE.md` 是檔案 symlink → `ai-development-guide.md`（guide）；`~/.claude/rules/` 是**目錄 symlink** → `rules/`（rules auto-load，每 session 全載）。repo 改 → 即時生效，**不需 deploy**。
+- **非 Claude 端**（ZCode/OpenCode/Codex，單檔）：無 rules auto-load 機制 → 靠 `scripts/deploy_agents.py` 把 **guide + neutral rules 拼裝成單一 AGENTS.md**（snapshot），部署到 `~/.{zcode,config/opencode,codex}/AGENTS.md`。改 rule 後須重跑 deploy 才同步。
 
 ## 部署紀律（編輯 rule 時自動生效）
 
@@ -14,9 +17,19 @@ rules/ 是 ai-rules 的行為規範庫。Claude 端經 `~/.claude/rules/` symlin
 uv run python scripts/deploy_agents.py
 ```
 
-→ 重新 bundle guide + neutral rules → 部署到 `~/.{zcode,config/opencode,codex}/AGENTS.md`（非 Claude 端）。
-→ Claude 端**不需** redeploy（rules/ 經 `~/.claude/rules/` auto-load 即時生效）。
-→ 注意：deploy 會將非 Claude 端的 AGENTS.md 從 symlink（live-sync）轉為 generated file（snapshot）— 改 rule 後需重跑 generator 才同步。
+→ 重新 bundle guide + neutral rules → 部署到 `~/.{zcode,config/opencode,codex}/AGENTS.md`（非 Claude 端的 rules 唯一來源）。
+→ Claude 端不需 deploy（`~/.claude/rules/` 目錄 symlink 即時同步）。
+→ 注意：deploy 會將非 Claude 端的 AGENTS.md 從 symlink（live-sync）轉為 generated snapshot — 改 rule 後需重跑 generator 才同步。
+
+### 部署驗證義務（deploy 跑通 ≠ 部署完成）
+
+deploy exit 0 只證明「bundle 生成成功 + 0 斷 ref」，**不證明「各端讀到正確內容」**。改動 rule（尤其 reclassify scope / 拆雙檔 / 新增 rule）後必須獨立驗證**每一端**（架構不同 → 驗證方式不同）：
+
+- **非 Claude 端**（rules 唯一來源是 bundle）：`rg` 抽查 deployed AGENTS.md（如 `~/.zcode/AGENTS.md`）含新/改 rule 的 section marker + 關鍵內容；排除應排除的 claude-specific rule。**漏驗這端 = 非 Claude LLM 讀不到該 rule**（無其他載入途徑）。
+- **Claude 端**（rules 來源是 `~/.claude/rules/` dir symlink）：`rg` 抽查 `~/.claude/rules/<rule>.md`（透過 symlink 讀 repo）含完整內容 — 瘦身後的 claude-specific rule 仍保留 Claude 專屬段。
+- **多端一致性**：`shasum` 比 deployed 三檔 hash 相同（idempotent）；改 deploy script 後比 pre/post hash 相同（簽名改不影響 bundle）。
+
+禁止：只看 deploy stdout 的 `[OK]` 就宣稱部署完成；只驗單端就推論其他端正常。
 
 ## harness-scope 分類
 
@@ -37,14 +50,16 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `context-management` | 🟢 neutral | context 重置原則（Claude 機制用括號註）|
 | `commit-consent` | 🟢 neutral | commit 需用戶確認（場景化，不引用命令名）|
 | `llm-output-convention` | 🟢 neutral | print/Logger 雙通道（Python 段標註）|
-| `bash-hard-rules` | 🔴 claude-specific | Claude 權限系統（find/grep 硬限、`$`/`#` 偵測）|
-| `modern-cli-preference` | 🔴 claude-specific | Claude 權限（fd/rg vs find/grep）|
-| `lsp-navigation` | 🔴 claude-specific | Claude 原生 LSP 工具 |
-| `code-edit-constraints` | 🔴 claude-specific | Claude Edit 工具 |
+| `lsp-navigation` | 🟢 neutral | 符號導航決策樹 + 跨 harness LSP 載體對照 |
+| `modern-cli-preference` | 🟢 neutral | fd/rg CLI 速查（Claude 權限段括號註隔離）|
+| `tool-discipline` | 🟢 neutral | 通用工具紀律（uv run / pipe-exit / 禁 sed / pytest 背景跑）|
+| `edit-discipline` | 🟢 neutral | 通用編輯紀律（SRP/DIP/變更紀律/禁混合寫法）|
+| `bash-hard-rules` | 🔴 claude-specific | Claude 權限偵測（`#` 換行註解 / `$` 展開）|
+| `code-edit-constraints` | 🔴 claude-specific | Claude Edit/Write 工具 API（old_string 精確匹配 / 多位元組降級）|
 | `context7` | 🟢 neutral | MCP 標準（三家支援；Context7 跨 harness 文檔查詢）|
 | `model-routing` | 🔴 claude-specific | Claude subagent 模型階層 |
 
-**default bundle**：auto-discover 所有 `harness-scope: neutral` rule（目前 14 條）。新增 neutral rule → 加 frontmatter `harness-scope: neutral` → 下次 deploy 自動納入（**不需改 script**）。`--scope` 可手動指定其他 scope 組合（進階）。
+**default = neutral**：通用知識預設跨 harness — 新 rule 不標 scope 即進 bundle。Claude 專屬 rule 需顯式標 `harness-scope: claude-specific` 才被排除。`deploy_agents.py` 的斷 ref 檢測會阻塞任何 neutral rule 引用 claude-specific rule 的 deploy（強制修 ref 或重劃 scope）。目前 neutral 18 條、claude-specific 3 條（bash-hard-rules / code-edit-constraints / model-routing）。
 
 ## Rule 寫作原則
 
@@ -90,6 +105,22 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 ```
 
 括號註**不是殘留** — 它是策略：讓 Claude 讀者讀到完整的 Claude 機制資訊，同時讓非 Claude 讀者知道「這是 Claude 特例，我有對應機制即可」。
+
+### 通用模式：跨 harness 載體對照（當工具呼叫方式跨 harness 不同時）
+
+當一個概念跨 harness 通用、但呼叫載體不同時（典型：LSP），用**對照表**表達，而非把某家 harness 的呼叫語法寫成主體。範例見 `lsp-navigation.md`「跨 harness LSP 載體對照」段。模式：
+
+```markdown
+### 跨 harness X 載體對照
+
+| harness | 機制 | 呼叫方式 |
+|---------|------|---------|
+| Claude | ... | ... |
+| ZCode | ... | ... |
+| OpenCode | ... | ... |
+```
+
+判準：一個概念跨 harness 通用、但「怎麼呼叫」各家不同 → 用對照表；若概念本身某家沒有（如 hooks），那不是載體差異而是 scope 差異 → 整段放 claude-specific rule 或括號註。
 
 ### 機械檢查清單（review 用）
 

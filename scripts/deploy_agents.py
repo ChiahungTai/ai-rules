@@ -15,9 +15,17 @@ Rule classification is auto-discovered from per-rule frontmatter:
     ---
 Scopes: neutral | claude-specific | meta
 
-Default bundles 'neutral'. Use --scope for advanced cases (e.g. manual
-inclusion of a one-off scope). borderline scope has been retired -- rules
-that were borderline are adapted to neutral directly.
+Default bundles 'neutral'. New rules without an explicit harness-scope
+default to 'neutral' (generic knowledge defaults to cross-harness). Rules
+that are Claude-specific must declare `harness-scope: claude-specific`
+explicitly to be excluded from the bundle.
+
+Broken-ref guard: scans every neutral rule's markdown links; if a neutral
+rule links to a claude-specific rule, the deploy aborts with an error
+listing each broken ref. This forces fixing the ref (or re-scoping the
+target) before the bundle ships -- non-Claude readers would otherwise hit
+a dead link. Parenthetical Claude notes `(Claude: ...)` are exempt, since
+those are Claude-side pointers that non-Claude readers can ignore.
 
 Bundle slimming: rule bodies may mark sections to drop from the bundle with
     <!-- bundle: skip-start --> ... <!-- bundle: skip-end -->
@@ -56,17 +64,17 @@ HEADER = (
 
 
 def read_scope(path: pathlib.Path) -> str:
-    """Extract harness-scope from YAML frontmatter. Default: claude-specific."""
+    """Extract harness-scope from YAML frontmatter. Default: neutral."""
     content = path.read_text(encoding="utf-8")
     if not content.startswith("---"):
-        return "claude-specific"
+        return "neutral"
     for line in content.split("\n")[1:]:
         if line.strip() == "---":
             break
         if line.strip().startswith("harness-scope:"):
             scope = line.split(":", 1)[1].strip()
-            return scope or "claude-specific"
-    return "claude-specific"
+            return scope or "neutral"
+    return "neutral"
 
 
 def discover_rules(rules_dir: pathlib.Path, target_scopes: set[str]) -> list[pathlib.Path]:
@@ -76,6 +84,63 @@ def discover_rules(rules_dir: pathlib.Path, target_scopes: set[str]) -> list[pat
         if read_scope(path) in target_scopes:
             rules.append(path)
     return rules
+
+
+# Match `(Claude: ...)` parenthetical notes, supporting both ASCII `()`
+# and full-width `（）` parens (CJK convention). Refs inside these are
+# Claude-side pointers non-Claude readers can ignore, so they're stripped
+# before scanning. Allows a single level of nested ASCII parens.
+_OPEN = r"[\(（]"
+_CLOSE = r"[\)）]"
+_NOT_PAREN = r"[^()（）]"
+CLAUDE_NOTE_PATTERN = re.compile(
+    _OPEN
+    + r"Claude[:：]"
+    + _NOT_PAREN + r"*"
+    + r"(?:\([^()]*\)" + _NOT_PAREN + r"*)*"
+    + _CLOSE
+)
+
+# Markdown link `[text](target.md)` — capture target path.
+LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+\.md)\)")
+
+# Backtick-quoted bare rule ref like `` `rule-name.md` ``.
+BACKTICK_REF_PATTERN = re.compile(r"`([a-z][a-z0-9_-]*\.md)`")
+
+
+def check_broken_refs(
+    rules_dir: pathlib.Path,
+) -> list[tuple[str, str, str]]:
+    """Find neutral rules that link to claude-specific rules.
+
+    Returns a list of (source_rule_name, link_target, target_rule_name) tuples.
+    Parenthetical Claude notes `(Claude: ...)` are exempt: their contents are
+    stripped before scanning, so refs inside them don't count as broken.
+
+    The scan scope is a global invariant -- it always checks neutral sources
+    against claude-specific targets, regardless of what deploy is bundling.
+    """
+    neutral_rules = discover_rules(rules_dir, {"neutral"})
+    claude_rules = discover_rules(rules_dir, {"claude-specific"})
+    claude_stems = {p.stem for p in claude_rules}
+
+    broken: list[tuple[str, str, str]] = []
+    for nrule in neutral_rules:
+        content = nrule.read_text(encoding="utf-8")
+        # Strip parenthetical Claude notes so refs inside them are ignored.
+        cleaned = CLAUDE_NOTE_PATTERN.sub("", content)
+        # Markdown links `[text](target.md)`.
+        for _, link_target in LINK_PATTERN.findall(cleaned):
+            stem = pathlib.Path(link_target).stem
+            if stem in claude_stems:
+                broken.append((nrule.name, link_target, stem))
+        # Bare backtick refs `` `rule-name.md` ``.
+        for match in BACKTICK_REF_PATTERN.finditer(cleaned):
+            ref = match.group(1)
+            stem = ref[:-3]  # strip ".md"
+            if stem in claude_stems:
+                broken.append((nrule.name, ref, stem))
+    return broken
 
 
 def slim_for_bundle(content: str, rule_name: str = "") -> str:
@@ -135,6 +200,15 @@ def main() -> int:
     rule_paths = discover_rules(RULES_DIR, target_scopes)
     if not rule_paths:
         print(f"[FAIL] No rules with scope in {target_scopes}", file=sys.stderr)
+        return 1
+
+    broken = check_broken_refs(RULES_DIR)
+    if broken:
+        print(f"[FAIL] {len(broken)} broken ref(s): neutral rules linking to claude-specific rules:",
+              file=sys.stderr)
+        for src, target, name in broken:
+            print(f"  {src} -> {target} ({name} is claude-specific)", file=sys.stderr)
+        print("Fix the ref, or re-scope the target to neutral.", file=sys.stderr)
         return 1
 
     bundle = build_bundle(rule_paths, scopes_label)
