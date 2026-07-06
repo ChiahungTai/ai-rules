@@ -23,9 +23,9 @@ LSP 提供語義級程式碼導航（~50ms，100% 準確），rg/fd 提供文字
 - **judge-review 查證（真實案例）**：審查者 rg 稱「`<ExecutorClass>` 在 `<module>.py` 無建構點」，LSP `findReferences` 立刻列出 import 行 + 建構行。**符號存在性查證用 rg 會因 pattern 失誤 false negative，把「自己沒查到」誤判為「不存在」**。
 
 - **rg display masking（真實案例）**：`rg "_update_x_axis_labels"` 把 method 名 mask 成 `n`（輸出 `def n(self) -> None:`）—— **看起來像真實輸出但不是**。masking 比 truncation 更危險：truncation 是「少給」（你知道有漏），masking 是「給錯的」（誤以為查到了，停止往下查）。符號引用查詢一律 LSP `findReferences`。
-- **toplevel-only pattern 漏 local import（真實案例）**：`rg "^from mosaic_alpha"` 只抓 toplevel import，漏掉函式內的 `from mosaic_alpha.workflows.watchlist_io import ...  # noqa: PLC0415`（local import，被刻意降級以規避循環依賴）。local import 往往是「開發者知道是違規但就地掩蓋」的信號（`# noqa: PLC0415` 是指紋）— 恰恰是最該被抓出的結構債。**依賴分析不可只錨 `^` toplevel**；需搭配 LSP `findReferences`（涵蓋 import 行 + call site）或 rg 不錨 `^` + 篩 `noqa: PLC0415`。
+- **toplevel-only pattern 漏 local import（真實案例）**：`rg "^from <package>"` 只抓 toplevel import，漏掉函式內的 `from <package>.<module> import ...  # noqa: PLC0415`（local import，被刻意降級以規避循環依賴）。local import 往往是「開發者知道是違規但就地掩蓋」的信號（`# noqa: PLC0415` 是指紋）— 恰恰是最該被抓出的結構債。**依賴分析不可只錨 `^` toplevel**；需搭配 LSP `findReferences`（涵蓋 import 行 + call site）或 rg 不錨 `^` + 篩 `noqa: PLC0415`。
 
-**結論**：符號查詢用 rg 會 truncated/漏/pattern 失誤/masking（給錯的）；LSP 結構化、不截斷、100% 涵蓋。**依賴枚舉用錨定 `^` toplevel 會系統性漏一整類（local import）**。
+**結論**：符號查詢用 rg 會 truncated/漏/pattern 失誤/masking（給錯的）；LSP 結構化、不截斷、100% 涵蓋（workspace 索引最新時；過時見「Workspace 狀態相依性」段）。**依賴枚舉用錨定 `^` toplevel 會系統性漏一整類（local import）**。
 
 ---
 
@@ -42,7 +42,9 @@ LSP 提供語義級程式碼導航（~50ms，100% 準確），rg/fd 提供文字
 - 「循環依賴」「反向耦合」
 - 「簽名」「型別」「定義位置」「實作」
 
-**禁 proxy 測試**：不可用 shell 命令（如 `timeout`、`which`、`command -v`）測 LSP 可用性 — 這些測的是 shell 環境，與 MCP LSP 工具無關。**唯一有效測試是直接調用 LSP 工具本身**。用 proxy 測試下「LSP 不可用」結論 = 未驗證。
+反之，純 Read 檔案理解結構、跑 demo、讀 log 等非符號查詢任務不觸發本 gate。
+
+**禁 proxy 測試**：不可用 shell 命令（如 `timeout`、`which`、`command -v`）測 LSP 可用性 — 這些測的是 shell 環境，與 MCP LSP 工具無關。**唯一有效測試是直接調用 LSP 工具本身**。用 proxy 測試下的「不可用」結論屬未驗證（客觀無 LSP 的情況除外，見「何時不用 LSP」段）。
 
 ### 測試結果處置
 
@@ -143,11 +145,11 @@ LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `
 
 ### 跨 harness LSP 載體對照
 
-當一個概念跨 harness 通用但呼叫方式不同時，用對照表表達（中性化規範的「跨 harness 載體對照」pattern，見 rules/AGENTS.md）：
+當一個概念跨 harness 通用但呼叫方式不同時，用對照表表達（中性化規範的「跨 harness 載體對照」pattern，見 [rules/AGENTS.md](AGENTS.md)）：
 
 | harness | LSP 機制 | 呼叫方式 |
 |---------|---------|---------|
-| Claude Code | 原生 plugin set（12 lang：pyright/rust-analyzer/clangd/gopls/jdtls/...）| `LSP` tool（native，非 MCP），參數 `operation`/`filePath`/`line`/`character` |
+| Claude Code | 原生 plugin set（pyright/rust-analyzer/clangd/gopls/jdtls/...）| `LSP` tool（native，非 MCP），參數 `operation`/`filePath`/`line`/`character` |
 | ZCode | 無原生 → 用自建 `lsp-python` MCP server（mosaic_alpha `tools/lsp_mcp/server.py` 參考實作；per-project workspace） | MCP tools（`mcp__lsp-python__hover` / `definition` / `references` / `diagnostics` / 等 7 tool） |
 | OpenCode | 原生 LSP（官方文檔說有，未實測） | 原生 tool |
 | 未來無 native 的 harness | 用 MCP server 支援 | mosaic_alpha `lsp-python` 為 reference impl（per-project http server） |
@@ -193,9 +195,11 @@ LSP 結果是 workspace 狀態相依的 — 若 `findReferences` 回傳意外少
 
 ## 重構前的必要步驟
 
-重新命名、改簽名、改回傳型別前，**必須先用 `findReferences` 找出所有呼叫點**。LSP 保證 100% 涵蓋，rg 可能遺漏動態引用。
+重新命名、改簽名、改回傳型別前，**必須先用 `findReferences` 找出所有呼叫點**。LSP 涵蓋所有已索引引用（workspace 過時見「Workspace 狀態相依性」段，重構前先確認 reindex），rg 可能遺漏動態引用。
 
-### 驗證任務 workflow
+---
+
+## 驗證任務 workflow
 
 每次 LSP 驗證任務遵循 5 步：
 
