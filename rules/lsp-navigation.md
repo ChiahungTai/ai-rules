@@ -154,6 +154,17 @@ LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `
 
 LSP operation 語義一致，差異只在載體（native tool vs MCP tool）— 決策樹、反例、驗證 workflow 本檔已通用化。
 
+### Workspace 狀態相依性（reindex 後再下結論）
+
+LSP 結果是 workspace 狀態相依的 — 若 `findReferences` 回傳意外少的結果（尤其對 `_`-prefixed 私有 symbol），**先觸發 workspace reindex 再下結論**，不要直接推論為工具固有 false-negative。
+
+| harness | reindex 觸發 |
+|---------|-------------|
+| ZCode | `mcp__lsp-python__reload_workspace`（git 操作後、或符號查詢結果異常少時呼叫；5-10s 後重建 client） |
+| Claude Code | 檔案變更自動推送（見上「被動能力」），但 git rebase/reset 大幅變動後仍可能過時 |
+
+**真實案例（cross-harness 驗證）**：同一 `_PREV_COUNT` 符號（mosaic_alpha `structure/wave_scalars.py:50`），Claude session `findReferences` 只回傳 intra-file ref（誤判為工具對私有 symbol 的 false-negative），ZCode session 卻成功回傳跨檔引用 — 差異根因是 pyright workspace reindex 時機，非 LSP 對私有 symbol 的固有限制。**兩 session 結果矛盾時，先懷疑 workspace 狀態，再懷疑工具能力。**
+
 ---
 
 ## 與 rg/fd 的分工

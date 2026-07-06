@@ -156,6 +156,19 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 
 **觸發**：人類要 audit 既有 code 骨幹穩固度（無特定 change）→ 先跑本 lens 產 matrix 分配審查資源，再逐個 core heavy review。對照 Anthropic selective-review：core 重投入、leaf 放過。
 
+### 分析方法論誠實性（報告內部一致性）
+
+**結構審查報告（本 skill 機械產出消費的格式）必含「方法論限制」段** — 誠實記錄用了什麼工具、什麼無法驗證，讓消費者（人 / 下個 session）能判讀結論可信度。這是機械能力落地的**品質閘門**，非附屬。
+
+| 必填欄位 | 說明 |
+|---------|------|
+| 用了哪些工具 | LSP operation（hover/findReferences/...）/ rg / fd — 每類結論標明主工具 |
+| 哪些無法驗證 | 未跑動態依賴分析、未跑 pytest --cov、workspace 在 worktree 非 production 等 |
+| LSP workspace 狀態 | LSP 結果是 workspace 狀態相依（見 [lsp-navigation](../../rules/lsp-navigation.md)「Workspace 狀態相依性」）；私有 symbol findReferences 矛盾時先懷疑 reindex 時機，再懷疑工具能力 |
+| 主觀研判標記 | 「刻意設計 vs 債」「可辯護 vs 該修」基於 DDD/Clean Architecture 原則推論，非機械結論 |
+
+**反例（真實案例，cross-harness 驗證）**：同一 `_PREV_COUNT` 符號，Claude session `findReferences` 只回 intra-file（誤推論為「LSP 對私有 symbol 固有 false-negative」），ZCode session 卻成功回傳跨檔引用 — 根因是 pyright workspace reindex 時機。**方法論限制段誠實記錄此差異，比「LSP 不可靠」的錯誤結論更有價值** — 它讓下個 session 知道要 reindex 而非換工具。
+
 ## 三、流程注入點（spec/EP/build/review 各階段）
 
 設計視角三主線在各階段的注入：
