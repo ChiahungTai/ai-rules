@@ -45,6 +45,8 @@ Methodology for autonomous implementation when user should not be disturbed. All
 > 紅線跳過時 deep-work **不阻塞、不語音通知** —— 早上看 completion report 判讀（呼應 [acceptance-evidence](../../rules/acceptance-evidence.md) L6 人類觀察層：半夜自主跑時人類 viewport 是危險操作的唯一兜底）。
 >
 > **`git commit` 跳過的語義**：deep-work 階段 5 finalization 不自主 commit，變更留在 working tree 等用戶接手（用戶回來後 `/commit` 走 commit-consent 流程）。這對齊 [commit-consent](../../rules/commit-consent.md) rule「例外：無」的硬規則。
+>
+> **`git commit` 不因 session 性質改變**：紅線「跳過 + 等用戶接手」涵蓋所有 autonomous 場景 —— 半夜無人（記錄到 completion report 後續）、long session 中用戶回來互動（停下來、展示 commit message、等獨立確認）。autonomous mode 的「連續執行」vibe **不延伸到 commit** —— commit 永遠是互動式 gate，即使用戶剛授權過上一個 commit，下一個仍需獨立確認（一次授權 ≠ 永久授權）。
 
 ### 🟡 黃線（自主決策 + 記錄到 completion report）
 
