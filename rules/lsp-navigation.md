@@ -150,11 +150,11 @@ LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `
 | harness | LSP 機制 | 呼叫方式 |
 |---------|---------|---------|
 | Claude Code | 原生 plugin set（pyright/rust-analyzer/clangd/gopls/jdtls/...）| `LSP` tool（native，非 MCP），參數 `operation`/`filePath`/`line`/`character` |
-| ZCode | 無原生 → 用自建 `lsp-python` MCP server（mosaic_alpha `tools/lsp_mcp/server.py` 參考實作；per-project workspace） | MCP tools（`mcp__lsp-python__hover` / `definition` / `references` / `diagnostics` / 等 7 tool） |
+| ZCode | 無原生 → 用自建 `lsp-python` MCP server（mosaic_alpha `tools/lsp_mcp/server.py` 參考實作；per-project workspace） | **單一 `mcp__lsp-python__lsp(operation=...)` tool**（CC-aligned dispatch：operation 值 camelCase 對齊 CC `LSP` tool，如 `goToDefinition`/`findReferences`/`hover`/...；hybrid input position + symbol_name fallback；`character` 非 `column`） |
 | OpenCode | 原生 LSP（官方文檔說有，未實測） | 原生 tool |
 | 未來無 native 的 harness | 用 MCP server 支援 | mosaic_alpha `lsp-python` 為 reference impl（per-project http server） |
 
-LSP operation 語義一致，差異只在載體（native tool vs MCP tool）— 決策樹、反例、驗證 workflow 本檔已通用化。
+LSP operation 語義一致，差異只在載體（native tool vs MCP tool）— 決策樹、反例、驗證 workflow 本檔已通用化。mosaic_alpha `lsp-python` MCP 已進一步對齊 CC：單一 tool + `operation` 參數 + camelCase operation 值，跨 harness 呼叫結構一致（差異僅 `LSP` vs `mcp__lsp-python__lsp` 前綴）。goToImplementation：CC 有、ZCode pyright 不支援（`implementationProvider` 未實作）。
 
 ### Workspace 狀態相依性（reindex 後再下結論）
 
@@ -162,7 +162,7 @@ LSP 結果是 workspace 狀態相依的 — 若 `findReferences` 回傳意外少
 
 | harness | reindex 觸發 |
 |---------|-------------|
-| ZCode | `mcp__lsp-python__reload_workspace`（git 操作後、或符號查詢結果異常少時呼叫；5-10s 後重建 client） |
+| ZCode | `mcp__lsp-python__lsp(operation="reloadWorkspace")`（git 操作後、或符號查詢結果異常少時呼叫）。行為依 transport：**http**（共用 WorkspacePool）5-10s 重建 client；**stdio**（無 pool）回降級訊息、需手動重啟 server 觸發 reindex |
 | Claude Code | 檔案變更自動推送（見上「被動能力」），但 git rebase/reset 大幅變動後仍可能過時 |
 
 **真實案例（cross-harness 驗證）**：同一 `_PREV_COUNT` 符號（mosaic_alpha `structure/wave_scalars.py:50`），Claude session `findReferences` 只回傳 intra-file ref（誤判為工具對私有 symbol 的 false-negative），ZCode session 卻成功回傳跨檔引用 — 差異根因是 pyright workspace reindex 時機，非 LSP 對私有 symbol 的固有限制。**兩 session 結果矛盾時，先懷疑 workspace 狀態，再懷疑工具能力。**
