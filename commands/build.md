@@ -68,6 +68,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./instruction/_common/workf
 
 **前置：working tree 乾淨度檢查**：`git status` 確認 working tree 變更都屬於本 EP 範圍。若有**其他功能的 untracked/modified 檔**（與本 EP 無關）→ 提示隔離（`EnterWorktree` / 新 branch / 先 commit 或 stash 舊功能），避免 build/commit 時混入不相關變更（靠 `/commit` 階段 2 git status 兜底，但前置隔離更省事）。
 
+**A/B 分流**：上述隔離僅針對**與本 EP 無關**的改動（另 session in-flight、舊功能殘留）。**與 EP 相關的 ripple / 同 session 發現的順帶修正**（如 instruction 檔同步、metadata 結算）→ 不隔離，在階段 5 自行 fold in 為 working-tree 編輯（不需 commit-consent，見階段 5a「為什麼結算在 build 不在 commit」+ autonomous-execution 🟡 黃線；commit 仍在末端 🔴 紅線 gate）。
+
 1. 讀取 Execution Plan，識別段落結構、依賴關係
 2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在階段 5a 結算時執行）
 3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）。LSP `goToDefinition` 驗證 dependency anchors 的定義端，`findReferences` 驗證消費端，`hover` 確認關鍵參數型別
