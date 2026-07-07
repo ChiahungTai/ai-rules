@@ -148,7 +148,6 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 | 檢查 | 條件 | 嚴重度 | 自動修正 |
 |------|------|--------|---------|
 | Stale card | Next-Up > 7 天、In-Progress > 14 天無修改 | 🟡 | 不修正（只報告） |
-| Done/ 歸檔 | Done/ 卡片 > 14 天 | 🟢 | auto: 移至歸檔或刪除 |
 | Lane 限額 | Backlog > 100 張 | 🟡 | 不修正（只報告） |
 | 無 tag 卡片 | 卡片第一行無 `[tag:xxx]` | 🟢 | auto: 從內容推導 tag（同 X-tag-module 修正邏輯） |
 
@@ -159,11 +158,9 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 3. 單一匹配 → 加上 `[tag:xxx]` 到第一行
 4. 多重匹配或模糊 → 標記待人工確認
 
-### Done/ 歸檔
+### Done/ 不做年齡清理
 
-Done/ 超過 14 天的卡片：
-- 自動模式：直接刪除（已完成的任務，資訊已在 Capabilities 表格）
-- 互動模式：列出待確認
+Done/ 是歷史檔案庫（全域開發指南 `ai-development-guide.md` 明文 `.kanban/` 時間視角為「暫時（Done/ 歸檔）」），**不對 Done 卡套年齡 stale heuristic**。年齡清理只適用活躍 lane（Next-Up/In-Progress）；Done 卡的價值正是歷史追溯（決策脈絡、驗收紀錄），自動刪除會損失 Capabilities prose 未捕捉的脈絡。若 Done/ 真過大，由人類在 `/project-review` 留意規模並判斷（非自動偵測）。
 
 ---
 
@@ -176,7 +173,6 @@ Done/ 超過 14 天的卡片：
 | X-cap-path 修正 | 自動修 | 🟢 low risk |
 | X-tag-module 修正 | 自動修 | 🟢 low risk |
 | 無 tag 卡片 | 推導後自動加 | 🟢 low risk |
-| Done/ 歸檔 | > 14 天自動刪 | 🟢 low risk |
 | X-ep-ready / X6 | 只報告 | 🟡 需語義判斷 |
 | /instruction:sync --changed-since | `yesterday` | 每日增量 |
 | /doc-health 參數 | 預設（不含 --quality --all） | 核心 findings 即可 |
@@ -228,7 +224,6 @@ Done/ 超過 14 天的卡片：
 - [X-tag-module] 卡片 'xxx' tag 錯誤 → [自動修正已完成]
 Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
   - Stale: Next-Up 'xxx' 已 8 天未更新
-  - Done 歸檔: N 張 > 14 天已清理
 
 ### Phase 4: Health Report
 - 跨 phase 關聯：Phase 1 新增依賴 ↔ Phase 2 Instruction 問題
@@ -254,7 +249,7 @@ Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
 
 ## ✅ 已自動處理（你不用管）
 - auto-fixed: X-cap-path(N), X-tag-module(N)
-- Kanban: Done/ 清理(N), 無 tag 卡片補 tag(N)
+- Kanban: 無 tag 卡片補 tag(N)
 
 ## 📈 趨勢
 - fingerprint: capabilities X→Y, findings X→Y

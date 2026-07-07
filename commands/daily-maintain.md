@@ -21,7 +21,6 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 | 🟢 低風險 findings（X-cap-path, X-tag-module） | **自動修正**，不詢問 |
 | 🟡 中風險 findings（X-ep-ready, X6） | **只報告**，不修正 |
 | Kanban 無 tag 卡片 | 自動推導並加上 tag |
-| Kanban Done/ > 14 天 | 自動刪除 |
 | Kanban stale cards | 只報告 |
 | Commit | 自動 commit 🟢 修正 + snapshot（見下方豁免） |
 | SYSTEM-MAP 同步 | 不執行（需人類確認狀態語義） |
