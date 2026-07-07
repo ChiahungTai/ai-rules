@@ -103,6 +103,19 @@
 
 ---
 
+## Solo + AI 開發工作流
+
+> **核心原則**：一人與 AI 協作（非團隊、無 CI）。工作單元與 session 緊綁，context 稀缺——流程要在這現實下成立。
+
+- **一 EP = 一 session**：一次 session 推進一個 Execution Plan；跨 session 接續靠 EP 段落自足 + 進度結算（段落自包含、可結算可接續）。
+- **model 退化就換 session，不硬撐**：長 session 後 LLM 行為變怪 → **結算 EP 進度 → 開新 session 接續**（跨 session：`/handoff`；usage 用盡：`/at`）。累積失敗嘗試比乾淨 context 更糟。
+- **`/compact` 節奏**：對話壓縮分佈 EP 各階段（規劃後、逐段 build 間）；命令在 compact 壓力下仍可接續。
+- **Writer/Reviewer 分離**：審查自己剛寫的 code 有 bias → 開新/跨 session 審查；review 命令支援「產出 finding → 跨 session 貼回 → 判讀」鏈。
+
+> 消費端共通工作流。專案特定變體（如多 worktree + trunk 模型）由各專案自訂。
+
+---
+
 ## 架構設計紀律
 
 > **核心原則**：所有設計決策（spec/EP/build/review）用 Clean Architecture + DDD 視角檢視。是**視角非模板**（注入思考，不強制分層、不過度工程）— 補體系缺失的架構紀律層。
