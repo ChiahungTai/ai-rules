@@ -76,7 +76,7 @@ Snapshot 輔助：
    - Phase 1 import 變化 ↔ Phase 2 Instruction 問題
    - Phase 1 findings ↔ Phase 3 doc-health 問題
 3. **趨勢追蹤**：fingerprint 數量變化、findings 增減
-4. **寫晨報檔**：若 `<project-root>/ai-analysis/daily-report/` 目錄存在，把報告寫入 `ai-analysis/daily-report/YYYY-MM-DD.md`（同日覆蓋；格式見下方「晨報檔格式」）。目錄不存在則 skip——這是跨專案 opt-in guard，避免影響沒有晨報慣例的專案。**無待決項時仍寫檔**（內容標「✅ 無待決項」），以證明排程有跑。
+4. **寫晨報檔**：若 `<project-root>/ai-analysis/daily-report/` 目錄存在，把報告寫入 `ai-analysis/daily-report/YYYY-MM-DD.md`（**同日 merge 非覆蓋**——重寫 top title + intro + 🔥/✅/📈 owned section，保留其他 op append 的外來 section；格式 + merge 規則見下方「晨報檔格式」）。目錄不存在則 skip——這是跨專案 opt-in guard，避免影響沒有晨報慣例的專案。**無待決項時仍寫檔**（內容標「✅ 無待決項」），以證明排程有跑。
 
 ---
 
@@ -261,7 +261,11 @@ Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
 - 🔥 段每項必附「**為什麼需要人類決定** + 建議方向」，不只是列項目——這是晨報的核心價值，呼應 description 的 morning report 承諾
 - ✅ 段簡短摘要即可，細節已在 stdout log（`$MOSAIC_OPS_LOG_DIR/daily-maintain-YYYYMMDD.log`）
 - 無 🟡 時 🔥 段標「✅ 無待決項」——**仍寫檔**，讓「沒檔」一致意味著「排程沒跑」（避免「沒事」與「沒跑」混淆，正是 2026-06-30 晨報斷更調查的教訓）
-- 檔名日期用排程觸發日；同日重跑覆蓋
+- 檔名日期用排程觸發日；同日重跑 **merge**（非覆蓋）：
+  - **owned section**（Phase 4 重寫）：top `# Daily Briefing` title + intro（含 blockquote）+ `## 🔥` / `## ✅` / `## 📈`
+  - **foreign section**（保留）：其他 op append 的 `## test-regression` / `## audit-test` / `## 📝 昨日活動`
+  - **owned 判定（prefix match，去 `## ` 前綴）**：每個 `## ` section 去掉開頭 `## ` 後，header 若 startswith `🔥` / `✅ 已自動處理` / `📈` 即 owned（容忍 `✅` 括號變體：`## ✅ 已自動處理（你不用管）` → 去 `## ` → `✅ 已自動處理（你不用管）` → match）；其餘為 foreign。**比對前必先去 `## `，否則 header 以 `## ` 開頭 ≠ 以 emoji 開頭 → owned 誤判 foreign → 重寫時 duplicate**
+  - **merge 流程**：讀現檔 → split `## ` section（不含 top title / pre-first-h2 intro）→ 去 `## ` 前綴比對 owned/foreign → 留 foreign → `merged = new_briefing(含 title+intro+🔥✅📈) + foreign sections` → 寫回。top title + intro + blockquote 隨 new_briefing 每次重生（屬 Phase 4 owned）。
 
 ---
 

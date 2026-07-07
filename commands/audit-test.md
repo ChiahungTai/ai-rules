@@ -34,7 +34,7 @@ allowed-tools: ["Read", "Bash"]
 |------|------|---------|------|
 | **Diff Audit** | 無參數 | uncommitted test files | pre-commit gate |
 | **Commit Audit** | `fd7a50e8` | 該 commit 的 test file 變更 | post-commit review |
-| **Daily Scan** | `--daily` | 全部 test files | 每晚排程 → 整合至 /standup |
+| **Daily Scan** | `--daily` | 全部 test files | 每晚排程（nightly-sequence op3）→ append `## audit-test` section 進 daily-report |
 
 ### 掃描範圍判定
 
@@ -337,7 +337,7 @@ fd -e py . tests/
 
 ### 步驟 10：產出報告
 
-按輸出格式模板產出報告。Daily Scan 時，報告寫入 `/Users/ctai/logs/claude-sync-{YYYYMMDD}.log`（由夜間排程腳本管理），供 `/standup` 步驟 5 消費。
+按輸出格式模板產出報告。Daily Scan 時，報告寫入 `/Users/ctai/logs/claude-sync-{YYYYMMDD}.log`（由夜間排程腳本管理）；nightly-sequence op3 直接 append `## audit-test` section 進 daily-report（不經 standup——test-quality 在報告裡有自己的 section）。
 
 ---
 
@@ -346,7 +346,7 @@ fd -e py . tests/
 | 命令 | 與 /audit-test 的關係 |
 |------|---------------------|
 | `/fix-test` | 互補：fix-test 修**失敗**的測試，audit-test 偵測**通過但品質差**的測試 |
-| `/standup` | Daily Scan 結果整合至晨間簡報（步驟 5） |
+| nightly-sequence op3 | Daily Scan 結果直接 append `## audit-test` section 進 daily-report（standup skill 不再消費——已退役整合） |
 | `/code-review` | Correctness 軸可引用 audit-test 發現 |
 | `/build` | 段落完成後跑 audit-test 確認測試品質 |
 | `/commit` | pre-commit gate：audit-test 無 Critical 才建議 commit |

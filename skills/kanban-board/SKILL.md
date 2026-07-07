@@ -106,13 +106,15 @@ mv .kanban/Next-Up/feature-X.md .kanban/In-Progress/feature-X.md
 
 ## 與現有流程的整合
 
-### /standup 整合
+### standup skill 整合
 
-每日晨間簡報時，順便回報看板狀態：
+standup skill（`/standup`，nightly-sequence op4）的 transition digest 涵蓋 `.kanban/**/*.md` 昨日變更——摘狀態變化於晨間簡報的 `## 📝 昨日活動` section：
 
-1. 列出 `In-Progress/` 和 `Next-Up/` 的卡片
-2. 昨日 `Done/` 新增的卡片（用 git log 或修改時間判斷）
-3. 建議今日聚焦的卡片
+- 📋 新增 Backlog 卡片
+- Kanban lane 變動（卡片移動）
+- Backlog 剩餘總數
+
+（舊 `/standup` command 的「列 In-Progress/Next-Up + 昨日 Done + 建議聚焦」3 步，已由 skill 的 git-log transition digest 取代——見 `skills/standup/SKILL.md`。）
 
 ### /build 整合
 

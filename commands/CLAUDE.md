@@ -30,7 +30,7 @@
 - **長出私有、非共享支援檔**：command 需專屬 template/examples/scripts → 轉 skill 目錄放進去
 - **該被 auto-load**：內容是相關時自動載入的領域知識，非人類顯式觸發 → 本來就該是 skill
 
-**不要 blanket merge**：`_common/` 共享子範本不被 per-skill 目錄取代（轉了要嘛複製違反 DRY、要嘛仍留共享目錄）；單檔 command（`/standup`、`/commit`）無私有支援檔需求。
+**不要 blanket merge**：`_common/` 共享子範本不被 per-skill 目錄取代（轉了要嘛複製違反 DRY、要嘛仍留共享目錄）；單檔 command（如 `/commit`）無私有支援檔需求。
 
 ## 命令索引
 
@@ -97,7 +97,6 @@
 
 ### 日常工具
 
-- `/standup` — 每日晨間簡報（昨日 commits、未 commit 變更、跨 session 對話摘要、UC 進度 + SYSTEM-MAP 功能進度）
 - `/task-status` — Kanban-centric 進度儀表板（Capabilities 完成率 + Kanban lane 分佈 + 模組 Breakdown）
 - `/doc-health` — Capabilities + Kanban 健康檢查（12 角度驗證文件準確性）；`--report` 產出完整能力地圖；`--sync-system-map` 用 Capabilities 狀態同步 SYSTEM-MAP.md
 - `/rebase <branch> [--autostash]` — Trunk-based rebase。**原則：trunk 永不被 rebase**，故已對齊的 feature 由 trunk 上 `merge --ff-only` 吸收（非 rebase）；feature 可 rebase onto trunk 或另個 feature；Phase 3 報告其他 feature 落後狀況 + 提示自行同步，不自動 rebase

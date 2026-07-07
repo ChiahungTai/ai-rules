@@ -82,7 +82,7 @@
 | `/commit` | 人類確認 | — | 人類 |
 | `/metadata-sync` | LLM | 1 | 人類 / AI-self |
 
-工具/維護命令（`/standup`、`/doc-health`、`/consistency`、`/instruction:*` 等）與受眾模型正交，完整索引見 `commands/CLAUDE.md`。
+工具/維護命令（`/doc-health`、`/consistency`、`/instruction:*` 等）與受眾模型正交，完整索引見 `commands/CLAUDE.md`（standup 已遷移至 `skills/`，見 `skills/CLAUDE.md`）。
 
 ## 專案結構
 
