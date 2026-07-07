@@ -39,7 +39,7 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 | **SYSTEM-MAP 結算** | A | 受影響功能生命週期升級(`✅ Built → ✅🔍 Verified`,若有整合驗證);移除已修復 ⚠️;更新全域統計(若有) |
 | **SYSTEM-MAP 預覽** | B | 中間段:生命週期 `📋→✅ Built`(全 UC ✅ + 測試通過 + build loop 收斂);**不升級 Verified**;loop 未收斂 → 阻止升級 + 標 ⚠️;**全域統計由情境 A 結算,預覽不動** |
 | **architecture.md** | A(條件) | 本次涉及設計決策 / 原則 / 模組結構 / 新抽象層 → 同步更新對應段落;純 feature(不改設計)跳過 |
-| **EP 歸檔** | A, D | EP 所有段落實作完成 → `mv ai-analysis/execution-plans/<ep>.md _done/`;子目錄 EP 跨目錄 mv 到統一 `_done/`;綱要 EP(blueprint)等所有衍生子 EP 完成才歸檔 master |
+| **EP 歸檔** | A, D | **歸檔前查證（防 ghost-done）**：列 EP 交付物（UC盤點/收尾/各段 deliverable）逐項 rg/fd/Read 驗落地——「段落完成」≠ codebase 真有（曾發生整份 EP 100% ghost-done 誤歸檔）；有 ghost-done 不歸檔（補做或標 🔧）。全綠才歸檔 → `mv ai-analysis/execution-plans/<ep>.md _done/`;子目錄 EP 跨目錄 mv 到統一 `_done/`;綱要 EP(blueprint)等所有衍生子 EP 完成才歸檔 master |
 | **flow-feedback 歸檔** | A | 本次實作解決的 `ai-analysis/flow-feedback/*.md`(root)→ `mv _done/`(`_done/` 不存在先建);討論中 / 未解決的不歸檔。**判斷是 judgment 非機械**(feedback↔change 非 1:1,不像 EP↔段落明確)→ forgetting 風險靠兩段式執行的「展示清單 + 用戶確認」把關(同 standalone mode) |
 | **consistency 閘門** | A, B, D | 對本次動過的 AGENTS.md / CLAUDE.md / architecture.md / SYSTEM-MAP.md 逐一跑 `/consistency`(單檔內部自洽);🔴 / 🟡 inconsistency → 修正後才算完成 |
 
