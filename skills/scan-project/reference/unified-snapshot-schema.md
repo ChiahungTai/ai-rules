@@ -36,7 +36,7 @@
 
 ```json
 {
-  "project": "mosaic_alpha",
+  "project": "my_package",
   "scan_timestamp": "2026-06-09T10:30:00+08:00",
   "schema_version": 5,
 
@@ -54,7 +54,7 @@
       { "source": "mod_a", "target": "mod_b", "weight": 3, "imports": ["path1", "path2"] }
     ],
     "hotspots": [
-      { "import_path": "mosaic_alpha.common.enums", "imported_by": ["data", "features"], "fan_out": 5 }
+      { "import_path": "my_package.common.enums", "imported_by": ["data", "features"], "fan_out": 5 }
     ]
   },
 
@@ -62,13 +62,13 @@
     {
       "check_id": "X-cap-path",
       "severity": "important",
-      "detail": "Capabilities entry path 'runner.py' does not exist (in mosaic_alpha/data/CLAUDE.md)",
-      "source_claude_md": "mosaic_alpha/data/CLAUDE.md"
+      "detail": "Capabilities entry path 'runner.py' does not exist (in my_package/data/AGENTS.md)",
+      "source_claude_md": "my_package/data/AGENTS.md"
     },
     {
       "check_id": "X-tag-module",
       "severity": "important",
-      "detail": "Card '騰落線指標' has tag 'nonexistent' which does not match any mosaic_alpha/ subdirectory",
+      "detail": "Card '騰落線指標' has tag 'nonexistent' which does not match any package subdirectory or top-level dir",
       "kanban_source": ".kanban/Backlog/騰落線指標.md"
     },
     {
@@ -141,7 +141,7 @@
 | check_id | 檢查邏輯 | severity |
 |----------|---------|----------|
 | `X-cap-path` | Capabilities 入口路徑不存在（檢查 project root / package root / instruction 檔目錄（AGENTS.md/CLAUDE.md）三個候選位置） | important |
-| `X-tag-module` | Kanban 卡片的 `[tag:xxx]` 不對應 `mosaic_alpha/` 子目錄 | important |
+| `X-tag-module` | Kanban 卡片的 `[tag:xxx]` 不對應 package 子目錄或頂層 dir | important |
 | `X-ep-ready` | Next-Up/In-Progress 卡片引用的 EP 檔案在 ai-analysis/ 等目錄找不到 | important |
 | `X6` | dep-graph modules 中有模組（≥3 files）但該模組目錄下無 instruction 檔（AGENTS.md/CLAUDE.md） | important |
 

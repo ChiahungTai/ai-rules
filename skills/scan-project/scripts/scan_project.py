@@ -104,10 +104,10 @@ def _find_package_root(project_root: Path) -> Path | None:
     """Find the project's main Python package root, deterministically.
 
     Selection never depends on filesystem iterdir() order. Unsorted iterdir()
-    previously caused a regression: adding tools/lsp_mcp/__init__.py flipped
-    the iteration order and resolved package_root to tools/ instead of
-    mosaic_alpha/, which made every path/tag check resolve against the wrong
-    base and produced 236 false-positive findings in a single run.
+    previously caused a regression: adding a dev utility's __init__.py flipped
+    the iteration order and resolved package_root to that utility dir instead
+    of the real package, which made every path/tag check resolve against the
+    wrong base and produced 236 false-positive findings in a single run.
 
     Priority (each step deterministic):
     1. project_root itself is a package (has __init__.py).
@@ -168,7 +168,7 @@ def _sorted_package_candidates(project_root: Path) -> list[Path]:
 def _declared_package_names(pyproject: Path) -> list[str]:
     """Extract declared package names from pyproject.toml (setuptools/poetry).
 
-    Names may be glob patterns ("mosaic_alpha*") or dotted paths
+    Names may be glob patterns ("my_package*") or dotted paths
     ("pkg.sub"); callers take the first dot segment and strip the glob star.
     """
     try:
@@ -450,28 +450,50 @@ def _parse_kanban_card(card_file: Path, lane: str, project_root: Path) -> dict:
 
 
 def _find_valid_tag_names(project_root: Path) -> set[str]:
-    """Find valid tag names from mosaic_alpha/ subdirectories.
+    """Find valid tag names from package root subdirectories + top-level dirs.
 
-    Tag convention: tag name = mosaic_alpha/ subdirectory name.
-    Shorthand: adapters/sj → sj.
+    Tag convention: tag name = a real directory in the repo.
+    Sources (combined, both generic — no project-specific hardcoding):
+      1. Package root (e.g. my_package/) subdirectories — the library modules.
+         Shorthand: adapters/sj → sj (nested package with __init__.py).
+      2. Project root top-level dirs — cross-cutting domains that live outside
+         the importable package (tools/, deploy/, scripts/, tests/). These host
+         real product-adjacent work (dev utilities, launchd ops, CLI entries)
+         and carry kanban cards, so their names are valid tags.
+
+    Excluded: SKIP_DIRS_SCAN + dotdirs + transient/experimental top-level dirs
+    (poc/, lab/) — temporary or deprecated, not stable tag targets.
     """
     valid_tags: set[str] = set()
-    pkg_root = _find_package_root(project_root)
-    if not pkg_root:
-        return valid_tags
 
-    for child in sorted(pkg_root.iterdir()):
+    # Source 1: package root subdirectories (library modules)
+    pkg_root = _find_package_root(project_root)
+    if pkg_root:
+        for child in sorted(pkg_root.iterdir()):
+            if not child.is_dir():
+                continue
+            if child.name.startswith((".", "_")):
+                continue
+            if child.name in SKIP_DIRS_SCAN:
+                continue
+            valid_tags.add(child.name)
+            # Add shorthand for nested modules (e.g. adapters/sj → sj)
+            for nested in sorted(child.iterdir()):
+                if nested.is_dir() and (nested / "__init__.py").exists():
+                    valid_tags.add(nested.name)
+
+    # Source 2: project root top-level dirs (cross-cutting domains outside package)
+    transient_top_dirs = {"poc", "lab"}  # temporary / deprecated — not stable tags
+    for child in sorted(project_root.iterdir()):
         if not child.is_dir():
             continue
         if child.name.startswith((".", "_")):
             continue
-        if child.name in SKIP_DIRS_SCAN:
+        if child.name in SKIP_DIRS_SCAN or child.name in transient_top_dirs:
             continue
+        if pkg_root is not None and child == pkg_root:
+            continue  # package root itself (already covered by source 1)
         valid_tags.add(child.name)
-        # Add shorthand for nested modules (e.g. adapters/sj → sj)
-        for nested in sorted(child.iterdir()):
-            if nested.is_dir() and (nested / "__init__.py").exists():
-                valid_tags.add(nested.name)
 
     return valid_tags
 
@@ -499,7 +521,7 @@ def run_cross_validation(
         if not entry:
             continue
         # Extract first path-like segment (before any description)
-        # e.g. "CLI `mosaic data daily-close`" → skip (CLI commands)
+        # e.g. "CLI `mycli data daily-close`" → skip (CLI commands)
         # e.g. "`indicators/engine.py:apply_indicators()`" → extract path
         path_match = re.search(r"`?([a-z_][a-z0-9_./]+\.py)", entry)
         if path_match:
@@ -563,7 +585,7 @@ def run_cross_validation(
 
     # --- Kanban checks ---
 
-    # X-tag-module: tag does not correspond to a mosaic_alpha/ subdirectory
+    # X-tag-module: tag does not correspond to any valid module/domain directory
     valid_tags = _find_valid_tag_names(project_root)
     if valid_tags:
         for e in kanban_registry:
@@ -575,8 +597,8 @@ def run_cross_validation(
                             "severity": "important",
                             "detail": (
                                 f"Card '{e['title']}' has tag '{tag}' "
-                                f"which does not match any mosaic_alpha/ "
-                                f"subdirectory"
+                                f"which does not match any package "
+                                f"subdirectory or top-level dir"
                             ),
                             "kanban_source": e["source_file"],
                         }
