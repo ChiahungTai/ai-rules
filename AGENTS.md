@@ -8,6 +8,25 @@
 
 > **文件受眾 ≠ 命令受眾**：文件一律給 AI 讀（執行用）；但命令的**產出**服務不同對象 —— LLM 執行鏈（機器消費）或人類 viewport（人消費）。命令的設計、審查、討論一律以「產出受眾」為頂層脊柱（見下）。
 
+## 消費端 context（know your customer）
+
+> ai-rules 的 rules/skills/commands 部署到每個消費端專案、直接塑造其 session 行為——**設計決策 downstream 影響所有消費端**。設計/修改任何 command/skill/rule 前，先對照本段：它在消費端的真實工作情境下仍合理嗎？
+
+**消費端畫像**：
+- **solo developer + AI agent**（非團隊、無 CI）——一人與 AI 協作；沒有 code review 文化、沒有 CI 自動把關
+- **工作單元 = 一 EP = 一 session**——一次 session 推進一個 Execution Plan；context 是稀缺資源
+- **model 會退化**——長 session 後 LLM 行為變怪；消費端實務是「不硬撐：結算 EP 進度 → 開新 session 接續」（接續：`/at`、`/handoff`、EP 段落自足）
+- **context 節奏**：`/compact` 分佈在 EP 各階段；command 必須在 compact 壓力下仍可接續
+- **git 多軌**：多 worktree + 單一 trunk，feature 單向 rebase onto trunk（並行開發軌；軌名各專案自訂）
+- **review 模式**：Writer/Reviewer 平行 session 分離（同 LLM 自審有 bias → 開新 session 審）
+
+**設計含義**（設計 command/skill 時核對）：
+- **自足**：段落自包含、進度可結算可接續（消費端會 compact、跨 session）
+- **不依賴外部服務**：預設無 CI、無團隊 review——需人類判讀的走 viewport 命令（`/deliverable-review`、`/illustrate`），不假設 CI
+- **git 認知**：涉及 git 的 command 尊重 worktree+trunk（不交互 rebase、trunk 永不被 rebase）
+- **review 鏈**：review command 支援「產出 finding → 跨 session 貼回 → `/judge-review`」多 session 鏈
+- **自主性**：自主 command（`/deep-work`、cron 排程）假設人類不在場——紅線/黃線分級 + 完成報告
+
 ## 命令的受眾視角
 
 > **核心心智模型**：commands 不是按生命週期階段（EP / code）分，是按**產出受眾**分。設計、審查、討論任何命令時，先問「這命令的產出給誰消費」。
