@@ -93,7 +93,7 @@ permission-mode: "acceptEdits"
 <!-- bundle: skip-start -->
 #### 可複用基礎設施段落規範
 
-**段落結構**（放置位置：Navigation Table 之後、Core API 之前）：
+**段落結構**（放置位置：`## 模組導航` 之後、`## 核心 API` 之前）：
 ```markdown
 ## 可複用基礎設施
 
@@ -119,6 +119,7 @@ permission-mode: "acceptEdits"
 - **過時範例**: 無法實際執行的範例
 - **專案特定事實**: 真實專案符號/路徑/數字（如 `myproject.common.enums.MyEnum`）—— 泛用 rules/commands 教 pattern，用 `<placeholder>`（`<package>`、`<EnumClass>` 等）。例子釘死專案現狀 → 該專案一改就 drift、其他專案讀無關。專案特定工具（upgrade-* 等）例外
 - **重複描述（反模式是重複，不是集中）**: 集中清單（Symbol Map / Index 段落）與 per-concept 種子重複描述同概念 —— 寫兩遍浪費 token 且易 drift。集中段落（如「可複用基礎設施」）只用於跨模組共用 symbol（distinct purpose），不可與 per-concept 種子重複
+- **Class→檔案映射表（LSP 可推導）**: 整張「檔案 | Class/函式 | 職責」表的前兩欄是 LSP `goToDefinition` / `workspaceSymbol` 的機械產出（含 `_private` 私有 symbol），屬 Low Noise。集中表必然 drift —— 重構 rename/搬檔後過時，且無機制強制同步，過時表比無表更危險（誤導讀者）。職責語義用 per-concept 內嵌種子或 Capabilities 入口欄承載。**移除既有映射表前必須逐行查證 High Signal 是否與下方段落矛盾**（過時 drift 比單純冗餘更危險）
 
 <!-- bundle: skip-start -->
 ### 引用語法（依檔案類型選擇）
@@ -250,9 +251,9 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 | 標題 | 內容 | 形式 / 適用 |
 |------|------|--------|
 | `## 模組定位` | 一句話職責 + 邊界（不做什麼） | 必有 |
-| `## 模組導航` | 概念→符號種子（導航-A）。符號多→表（`Class/Function` \| `檔案` \| 職責）；符號少→描述性文字即可，不必強制表格 | 有公開符號 |
+| `## 模組導航` | 概念→符號種子（導航-A）。**預設用 per-concept 內嵌描述**（符號旁帶一句職責，見下方「內容要求 vs 形式選擇」）；符號多時用 `### 類別小標題` 分組（非 Class→檔案映射表）。**禁止 Class→檔案集中映射表** —— 前兩欄 LSP 可推導（見「應該避免」Class→檔案映射表條目），必然 drift | 有公開符號 |
 | `## 可複用基礎設施` | 跨模組共用 symbol（格式見上方「可複用基礎設施段落規範」） | 有跨模組消費者 |
-| `## 模組檔案結構` | 目錄樹（`檔案:symbol`） | 檔案數多到值得展示組織 |
+| `## 模組檔案結構` | 目錄樹（code block 格式，`檔案:symbol` inline 註釋）。**禁止 markdown table 格式**（`\| 檔案 \| Class \| 職責 \|` = Class→檔案映射表，見「應該避免」條目）—— table 形式是映射表，code block 形式才是目錄樹 | 檔案數多到值得展示組織 |
 | `## Capabilities` | UC 能力表（能力 \| 入口 \| 狀態） | 有已完成 UC |
 | `## 核心 API` | import 範例 | 有公開 API |
 
@@ -263,6 +264,16 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 **禁止標題變體**：導航表統一「模組導航」，**禁止** "Navigation" / "導航" / "Navigation Table" 等變體 — 多種標題讓 `rg "模組導航"` 漏掉其他寫法，是 LSP 時代 audit/sync 的機械識別障礙。
 
 **設計決策類**：同義的「關鍵設計決策」/「核心設計決策」/「設計決策」統一為 `## 設計決策`；語義不同的「設計理由」(why) /「設計約束」(constraint) /「設計原則」(principle) 保留，不合併。
+
+### 既有映射表的 drift 查證（移除前義務）
+
+移除既有 Class→檔案映射表前，**必須逐行查證每條 High Signal 是否與同檔下方段落（設計決策 / Capabilities / 可複用基礎設施）矛盾**。集中表無同步機制，重構後過時是常態 —— 過時表比無表更危險（誤導讀者）。
+
+查證步驟：
+1. 逐行讀映射表「職責」欄的 High Signal（設計決策、閾值、行為分支、deprecated 標記）
+2. 對每條 High Signal，確認下方段落是否已涵蓋且**語意一致**
+3. 發現矛盾（映射表說 A、下方說 B）→ 以下方段落為準刪除過時資訊，不搬移錯誤內容
+4. 只在下方段落完全沒有的 High Signal → 搶救搬移到對應段落（per-concept / Capabilities / 設計決策）
 
 ### 導航 Decoder Test（自檢）
 
