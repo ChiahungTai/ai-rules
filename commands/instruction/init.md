@@ -55,7 +55,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - 無 Phase 1.5 → 目錄已有 AGENTS.md 時預設跳過。使用者可明確確認覆蓋
 - legacy 單檔模組（只有 CLAUDE.md，無 AGENTS.md）：從 CLAUDE.md 抽中立內容寫進 AGENTS.md source，CLAUDE.md 改為 `@AGENTS.md` thin wrapper
 
-**每個模組 AGENTS.md 包含**（source，三家 harness 都讀）：
+**每個模組 AGENTS.md 包含**（source，四家 harness 都讀）：
 
 - **模組職責**：這個模組做什麼、不做什麼
 - **架構定位**：在整體系統中的角色
@@ -69,7 +69,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - Use LSP findReferences on module-level symbols to verify module boundaries when dep_graph is unavailable
 - 無 snapshot 時，Module Boundaries 基於 Phase 1 的粗略 import 分析
 
-**Root AGENTS.md 包含**（source，neutral 專案資訊——三家 harness 開本專案都讀）：
+**Root AGENTS.md 包含**（source，neutral 專案資訊——四家 harness 開本專案都讀）：
 
 - 架構總覽（語言組成、分層、核心設計理念）
 - Module Navigation Map（每個重要目錄一行，含模組 AGENTS.md 連結）
@@ -91,7 +91,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 ## 判斷哪些模組需要 instruction 檔
 
 **需要**：
-- 包含 >3 個原始碼檔案的目錄
+- 包含 ≥3 個原始碼檔案的目錄
 - 架構關鍵層（core、model、engine、config 等）
 - 外部參考頻繁的區域（docs、examples）
 
@@ -111,7 +111,7 @@ Signal/noise framework: [encoder-philosophy.md](./_common/encoder-philosophy.md)
 
 ## 產出
 
-1. 每個重要模組目錄新增 `AGENTS.md`（source，三家 harness 讀）+ `CLAUDE.md`（`@AGENTS.md` thin wrapper，Claude 讀）
+1. 每個重要模組目錄新增 `AGENTS.md`（source，四家 harness 讀）+ `CLAUDE.md`（`@AGENTS.md` thin wrapper，Claude 讀）
 2. 專案根目錄新增 `AGENTS.md`（source，harness-neutral）+ `CLAUDE.md`（`@AGENTS.md` wrapper + Claude 專屬段）——見 [instruction-writing.md](../../rules/instruction-writing.md) 雙檔模式
 3. `.project-snapshot.json`（如果 Phase 1.5 有執行）
 4. 最後列出所有新增的 instruction file 路徑

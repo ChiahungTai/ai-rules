@@ -56,7 +56,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `edit-discipline` | 🟢 neutral | 通用編輯紀律（SRP/DIP/變更紀律/禁混合寫法）|
 | `bash-hard-rules` | 🔴 claude-specific | Claude 權限偵測（`#` 換行註解 / `$` 展開）|
 | `code-edit-constraints` | 🔴 claude-specific | Claude Edit/Write 工具 API（old_string 精確匹配 / 多位元組降級）|
-| `context7` | 🟢 neutral | MCP 標準（三家支援；Context7 跨 harness 文檔查詢）|
+| `context7` | 🟢 neutral | MCP 標準（三家 non-Claude 支援：ZCode 已驗證、OpenCode/Codex 預計；Context7 跨 harness 文檔查詢）|
 | `model-routing` | 🔴 claude-specific | Claude subagent 模型階層 |
 
 **default = neutral**：通用知識預設跨 harness — 新 rule 不標 scope 即進 bundle。Claude 專屬 rule 需顯式標 `harness-scope: claude-specific` 才被排除。`deploy_agents.py` 的斷 ref 檢測會阻塞任何 neutral rule 引用 claude-specific rule 的 deploy（強制修 ref 或重劃 scope）。目前 neutral 18 條、claude-specific 3 條（bash-hard-rules / code-edit-constraints / model-routing）。
