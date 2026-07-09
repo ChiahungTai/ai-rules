@@ -44,7 +44,7 @@ harness-scope: neutral
 
 **3-signal correlation**:判讀 passing test 是真通過還是 silent drift,須關聯三訊號 — ① 原始 test intent(story 建立時擷取)② 當前 test result ③ 引入的 code changes。任一單獨不足以判斷。coverage 增加 ≠ 能指出「code 仍做意圖中的事」。
 
-**別混淆三個 Type A/B**:本處的 Type A/B(intent drift 動靜態)≠ fix-test 的 Type A/B(test-failure 分類:實作缺陷 vs 契約變更,Claude command)≠ 既有 impl-discovery / design-error(認知誤差來源)— 三者語義正交,勿混為一談。
+**別混淆三組二分法**:本處的 Type A/B(intent drift 動靜態)≠ fix-test 的 Type A/B(test-failure 分類:實作缺陷 vs 契約變更,Claude command)≠ 既有 impl-discovery / design-error(認知誤差兩型,非 Type A/B 標籤)— 三者語義正交,勿混為一談。
 
 ## 證據階層
 
@@ -121,7 +121,7 @@ producer 的 case_X 處理（從沒被觸發 — 死碼）
 
 **multi-point placement**(範例 placement,領域特定非規則本體):runtime check 放多個 defense-in-depth 點,依專案生命週期選。範例(量化領域):test-time assert / 對帳外部 truth(broker / account,獨立於內部 state)/ 生產 monitor / 本地 pre-commit(solo 無 CI 時取代 CI gate)。
 
-**降級路徑**(專案無 runtime monitor infra 時):原則不退化為空話 — 至少 (i) source-time 強制列舉 invariant(人列,不讓 AI 列)+ (ii) test-time assert 作 monitor 替代。標「不足但有」。
+**降級路徑**(專案無 runtime monitor infra 時):原則不退化為空話 — 至少 ① source-time 強制列舉 invariant(人列,不讓 AI 列)+ ② test-time assert 作 monitor 替代。標「不足但有」。
 
 **asymmetric drift 警覺**(原則層,禁寫死研究數字):AI 在 complex / competing-demand 壓力下傾向破壞 constraint(risk limit 首要受害)→ constraint invariant 的 check 必須**機械、不可被 AI lobby**(AI 產 claim「沒影響 risk」時,assertion 照跑、違規照崩)。
 
