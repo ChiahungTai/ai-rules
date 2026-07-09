@@ -40,7 +40,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `deep-thinking` | 🟢 neutral | 決策框架（第一性原理＋第二層）|
 | `progressive-validation` | 🟢 neutral | DEPTH-MIN/SAMPLE/FULL 驗證 |
 | `quality-constraints` | 🟢 neutral | crash-only / fail-loud / 消費端驗證 |
-| `acceptance-evidence` | 🟢 neutral | L1-L6 證據階層 / A/B 軸 |
+| `acceptance-evidence` | 🟢 neutral | L1-L6 證據階層 / A/B 軸 / Runtime Invariant Assurance / Claim→Evidence→Trust / Intent Drift Type A/B |
 | `must-execute-before-complete` | 🟢 neutral | 改了要跑、非靜態檢查 |
 | `collaboration-constraints` | 🟢 neutral | anti-sycophancy / 事實查證 |
 | `self-consistency` | 🟢 neutral | 文檔自洽檢查 |

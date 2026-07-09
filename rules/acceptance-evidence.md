@@ -14,6 +14,12 @@ harness-scope: neutral
 
 **判斷準則**:驗收證據的強度,取決於「證據來源是否獨立於被驗證物」。AI 同寫 test + impl = 零獨立性 = 證據強度低。
 
+### Claim→Evidence→Trust(no-impact claim 校驗)
+
+證據獨立性的直接 operationalization:當 AI/producer 宣稱「不影響 X」(accounting/risk/invariant)時,這個 claim 須有**獨立機械證據**反證(git diff / rg 殘留 / LSP findReferences),否則 claim 退化為 self-report — AI 同時產 code 與 claim,claim 是非獨立自述,受同一 mental model drift 污染(呼應上方證據獨立性)。**AI 誠實說「沒影響」時最危險** — 獨立性塌縮點。
+
+此為跨 harness 通用原則:具體機制(Agent 產出 vs git diff 校驗)見 build.md Agent 產出機械驗證(Claude command);非 Claude harness 靠自家 review 機制套用同一原則 — 任何「沒影響 X」的 claim 都須獨立證據,不接受自述。
+
 ## 核心原則(續):認知誤差與 EP 的預見極限
 
 證據獨立性解決「驗證者的偏誤」(AI 不能自己驗自己),但解決不了「驗證基準本身可能是錯的」。**規劃層(EP)是人類 + AI 對需求理解的最佳猜測,不是真理**。兩種認知誤差只能在實作呈現時被發現:
@@ -28,6 +34,17 @@ harness-scope: neutral
 - **前線實作 LLM 有裁量權**:實作時發現 EP 的問題(規劃層預見極限外的真相),可調整。這不是「偷懶不照 EP」,而是「實作層有發現真相的責任」 — 死守 EP 會實作一個「忠實但錯誤」的東西,反而妨礙人類在呈現時發現認知誤差。
 - **仍要架構化**:實作接近 EP(避免失控)+ 記錄偏差(可追溯)。
 - **呈現是唯一觸發器**:認知誤差只能靠「實作呈現給人類判讀」(L6)揭露。沒有可觀察的呈現,認知誤差永遠潛伏 — 這是 B 軸人類驗收層不可省略的根本理由。
+
+## Intent Drift 的兩型(Type A/B)+ 3-signal correlation
+
+認知誤差(上方)是「EP/設計本身可能錯」;intent drift 是另一軸 — **AI 的產出偏離了人類意圖**,即使 code 正確、test 通過(passing test ≠ business intent)。分兩型,偵測法不同:
+
+- **Type A(Specification Drift,靜態)**:AI 誤解 prompt → code 完全正確但不是要的。偵測:意圖先於 code 寫下並保留(story / plan);completion analysis 把生成碼 + transcript 對照原 plan。
+- **Type B(Context/Goal Drift,動態)**:AI 不知 project convention / hidden invariant / 歷史 bug,或隨段落推進 / 跨 session 目標悄然偏移。偵測:invariant check + pattern divergence 偵測 + 跨 session 目標描述 drift。
+
+**3-signal correlation**:判讀 passing test 是真通過還是 silent drift,須關聯三訊號 — ① 原始 test intent(story 建立時擷取)② 當前 test result ③ 引入的 code changes。任一單獨不足以判斷。coverage 增加 ≠ 能指出「code 仍做意圖中的事」。
+
+**別混淆三個 Type A/B**:本處的 Type A/B(intent drift 動靜態)≠ fix-test 的 Type A/B(test-failure 分類:實作缺陷 vs 契約變更,Claude command)≠ 既有 impl-discovery / design-error(認知誤差來源)— 三者語義正交,勿混為一談。
 
 ## 證據階層
 
@@ -94,6 +111,22 @@ producer 的 case_X 處理（從沒被觸發 — 死碼）
 
 過時測試比沒測試更危險 — 它給虛假信心。**重構後必須重新確認證據有效**,否則 L2 證據 silently 貶值。偵測見 audit-test 角度 6,修正見 fix-test 必要性審查(Claude commands,跨 harness 路徑從略)。
 
+## Runtime Invariant Assurance(設計方向)
+
+證據階層的 test 是**時間點證據**(build-time 通過);runtime monitor 是**持續保證**。silent-corruption path(bug 不 crash 但污染下游資料)的 invariant,須有 **runtime 機械檢查**作為 test 之後的持續守衛 — 區分「test-passed-at-build-time」vs「holds-at-runtime」。source review 看得到語法 / 邏輯,看不到 runtime silent corruption。
+
+**獨立性**:runtime check 機械執行,**獨立於 AI mental model**(呼應證據獨立性)。AI 可幫寫 check code,但「該驗什麼 invariant」必須人定 — AI 可能正確實作錯誤模型,讓 AI 列 invariant 會把同一 drift 帶進 spec。
+
+**spec 是上限**:runtime monitor 的上限 = 寫進 spec 的 invariant 完整度。沒寫進 spec 的 invariant = 永遠測不到。
+
+**multi-point placement**(範例 placement,領域特定非規則本體):runtime check 放多個 defense-in-depth 點,依專案生命週期選。範例(量化領域):test-time assert / 對帳外部 truth(broker / account,獨立於內部 state)/ 生產 monitor / 本地 pre-commit(solo 無 CI 時取代 CI gate)。
+
+**降級路徑**(專案無 runtime monitor infra 時):原則不退化為空話 — 至少 (i) source-time 強制列舉 invariant(人列,不讓 AI 列)+ (ii) test-time assert 作 monitor 替代。標「不足但有」。
+
+**asymmetric drift 警覺**(原則層,禁寫死研究數字):AI 在 complex / competing-demand 壓力下傾向破壞 constraint(risk limit 首要受害)→ constraint invariant 的 check 必須**機械、不可被 AI lobby**(AI 產 claim「沒影響 risk」時,assertion 照跑、違規照崩)。
+
+> cross-ref:silent-corruption path 的識別見 execution-plan §1b Invariant Impact(producer 端規劃時識別,Claude command);本段承接其 runtime 保證層(建議 §1b 加 forward-ref 指本段)。本原則(機械檢查 > AI 自述 / 人審)是 mechanical-gate-philosophy 的具體應用(該 general framework 待建成獨立 skill)。
+
 ## A / B 雙軸分工
 
 | 軸 | 職責 | 證據層 | 天花板 |
@@ -102,6 +135,8 @@ producer 的 case_X 處理（從沒被觸發 — 死碼）
 | **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:deliverable-review(交付) + illustrate(結構 viewport) = 人類 viewport(三層介入);完整 L4-L6 執行驗收仍為設計方向(見下) |
 
 **鐵律**:A 是必要不充分,B 是充分性的來源。A 軸深化有邊際效益遞減 — 天花板是 AI 自洽,真正的驗收鴻溝在 B 軸。Agent Review 的「獨立 context」≠「獨立智能」:同家族 LLM 共享系統性偏誤,quorum 對共同盲點無效,A 軸的深層防線最終仍由 B 軸兜底。
+
+**人審結構上限**(reviewer 認知上限):人審(B 軸 L6 / reviewer)亦有**結構上限** — 疲勞、注意力瓶頸、確認偏差是認知結構限制,**經驗無關**(資深 reviewer 同樣漏看)。故 P0 invariant 不能只靠人審(B 軸),需 Runtime Invariant Assurance(見上段)補人審結構上限 — A 軸機械、B 軸人審、runtime assurance 三層共同守 silent-corruption invariant。
 
 ## B 軸人類驗收層
 
@@ -115,7 +150,8 @@ producer 的 case_X 處理（從沒被觸發 — 死碼）
 2. **可觀察性合約**:SM 的「預期行為」欄位 = 人類可判讀的結論。執行 SM 場景的 stdout 必須對應預期行為,且至少跑一個錯誤/邊界場景(避免只演 happy path 的 AI 公關稿)。
 3. **自動化對照(A/B diff)**:跑新舊版 / 兩 branch / 兩參數比對,人類只判讀 diff 合理性。把「讀」外包給機器,這是長期最該投資的模式。
 4. **流程末端驗收步驟**:build / deep-work(Claude commands)在 commit 前缺「執行 SM 代表性場景讓人判讀」的步驟;現有 demo/POC 驗證只驗 exit code 0,不驗輸出內容(silent failure / 語義錯誤偵測不到)。
-5. **人類介入點前移到 RED**:GREEN 後人類讀不完;RED 時刻判讀「失敗是否符合預期」更便宜,是意圖偏移的最早訊號。
+5. **人類介入點前移到 RED(operational)**:GREEN 後人類讀不完;RED 時刻判讀「失敗是否符合預期」更便宜,是意圖偏移的最早訊號。**operational step**:build 在每段 RED 時刻印出「失敗訊號 + EP 該段預期行為」對照,標「人類 RED checkpoint」(prospective 可選暫停點)。明文 prospective vs retrospective:此 checkpoint 前瞻判意圖,有別於 fix-test(Claude command)retrospective 判舊測試意圖。
+6. **session-boundary review**:跨 session 接續時,判讀累積目標是否漂移。**誠實標記**:跨 session 場景目前**無觸發機制**(全 repo 無 resume-review trigger;at / handoff / standup 命令(Claude commands)皆非 intent-drift review),本原則效果限**單 session batch-ceiling 軟觸發**(見 build.md batch ceiling,Claude command);跨 session 觸發待獨立 command(見 `.kanban/Backlog/` deferred card)。
 
 ### 內部跨層接線的真實邊界歸屬(A 軸天花板,B 軸補強)
 
@@ -130,4 +166,4 @@ producer 的 case_X 處理（從沒被觸發 — 死碼）
 - **風險分級**(ai-development-guide「驗證約束」段;source 在 ai-rules repo)決定「爬到第幾層」— 🟢 低風險不需六層,🔴 高風險才強制爬到對應層。避免過度工程是本階層的內建約束。
 - **漸進驗證**([progressive-validation](./progressive-validation.md))是 L1 → L2 → L3 的爬坡順序(DEPTH-MIN → SAMPLE → FULL)。
 - **消費端驗證模式**([quality-constraints](./quality-constraints.md))是 L3 整合層的具體化,本階層為它提供「為什麼」的理論基礎。
-- 階層降低風險,**不消除風險** — 每一層都值得懷疑,包括最頂層(L6 人類觀察會疲勞漏看,L5 POC 可能打自己畫的靶)。
+- 階層降低風險,**不消除風險** — 每一層都值得懷疑,包括最頂層(L6 人類觀察會疲勞漏見 — 結構上限見上方「人審結構上限」,需 runtime assurance 補;L5 POC 可能打自己畫的靶)。

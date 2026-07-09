@@ -138,6 +138,22 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 
 > 真實歷史案例：修「漏算 SHORT proceeds」的 compute 函式（缺陷 A）沒拆上游 sizing 函式裡手動 `+ proceeds` 的補丁（B）→ proceeds 算兩次 → baseline 虛高 → 風控 breaker 永不觸發。`findReferences(A)` 不會帶到 B（B 不引用 A，B 抵消的是 A 的 bug）。
 
+### 變更路徑計數（mutation-path counting）
+
+**觸及 mutable state / invariant-bearing 模組時的變更審查**（條件必填 — leaf / 純 docs 跳過）。assumption delta 的手動紀律:自問「這個改動新增第幾條 state mutation path?破了哪個 invariant?」—— 語義 diff 工具只到 AST / behavior 層,無 invariant 層（research gap），solo 須手動計數。
+
+**機械**（用 LSP `findReferences` / rg 找所有 write site）:
+
+1. 找所有 write site（含 in-place field mutation），逐項計數，**不歸一類**
+2. **判斷粒度（核心認知增量）**:被改的 state 是 domain invariant（跨層守恆，如 cash / position / risk limit）還是 local overlay（strategy-local optimistic update）?
+3. 多 writer:by-design（optimistic update 多 site）還是 invariant 破壞?
+4. ordering / atomicity
+5. **CONCLUDE:single-writer 在哪個粒度成立** —— **ownership 粒度**（單一 owning class，多 write-site 仍 by-design overlay）vs **write-site 粒度**（單一寫入點）。多 write-site 但單一 ownership = by-design overlay，非 invariant 破壞。
+
+**與補償邏輯盤點（上方）的關係**:compensating-pair 反向（誰抵消我的 bug，修缺陷語境）;mutation-path 正向（我新增幾條 writer，審查變更語境）—— 方向相反，正交不重疊，並列使用。
+
+> 真實案例（mosaic POC A/B）:strategy `self.positions` overlay —— baseline（無此 step）找 6 writer 答「single-writer = no」（淺，易誤判該修）;treatment（含粒度判斷）找 12 writer（含 in-place mutation）答「single-writer = yes at class boundary（ownership 粒度）」—— ownership vs write-site 粒度區分是核心認知增量，避免「多 write-site = 該修」的淺判。
+
 ### core identification for review prioritization
 
 **消費前述機械產出做「審查優先序」判定** — 把 dep weight / 消費者數 / hotspot / ripple 框成 core vs leaf 判定 + 審查深度建議，供 `/illustrate`（人 viewport，B 軸）渲染 selective review matrix 讓人判讀「先審哪、審多深」。**受眾中性**（見本文 §受眾中性）：產判定 + 建議，**不產**機器 finding、不釘嚴重度、不給 file:line 處方（那交 `/code-review`）。
@@ -146,6 +162,7 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 - **core**（heavy human review）：高 `消費者數`（`imported_by`）+ lean/廣用 + 高 ripple（在 `dependency-graph.md` Ripple Impact Rules）的模組；**或**位於 domain critical path（bug 會 silent-corrupt 全下游）。
 - **leaf**（放過 / behavior-only）：terminal consumer（library 內少被依賴）+ 低 ripple + 非 critical path。
 - **審查深度 tier**：deep human review（core，逐行讀）/ structure viewport + spot-read（中）/ behavior-only（leaf）。
+- **change-type triage**（「需不需要審」入口 gate，**非深度加權軸**）：變更類型先 triage —— generated / reproducible（protobuf stub、build artifact）→ 放行（可證偽判準：一旦 hand-modified 即升 source 必審）;rename / comment / logging → 放行;money-path / tribal-knowledge → 必審（已被 core / silent-corruption path 涵蓋，此處明示）;其餘隨 core / leaf 深度。**不另立深度軸** —— 修缺陷的高價值審查由補償邏輯盤點承接;本 triage 僅補「需不需要審」的入口判斷。change-type triage（此處，入口 gate）≠ risk-tier（acceptance-evidence，證據深度）≠ scope（execution-plan，planning gate）—— 語義不同，**勿機械套用為第四深度軸**（過度工程：第四軸強迫 LLM 自覺加權，是最弱形式）。
 
 **資料來源（reference，不重造）**：
 - [`scan-project`](../scan-project/SKILL.md) `dep_graph.modules.imported_by[]`（消費者數）+ `hotspots[]`（hotspot tier）。

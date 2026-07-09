@@ -61,7 +61,7 @@
 | 2 | 跨 session LLM 第二意見（開新 session 跑 `/code-review`/`/ep-review`，findings 貼回實作 LLM → `/judge-review`） | 中 | A |
 | 3 | `/deliverable-review`（交付）+ `/illustrate`（結構 viewport）：人類 viewport 判讀 | 高（不同智能） | B |
 
-理論底層（A/B 軸、L1-L6 證據階層、證據獨立性）見 `rules/acceptance-evidence.md`。本節是入口摘要，acceptance-evidence 是完整理論。
+理論底層（A/B 軸、L1-L6 證據階層、證據獨立性、Runtime Invariant Assurance、Claim→Evidence→Trust、Intent Drift Type A/B）見 `rules/acceptance-evidence.md`。本節是入口摘要，acceptance-evidence 是完整理論。
 
 ### 核心流程命令分類
 

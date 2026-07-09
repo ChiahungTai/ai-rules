@@ -7,3 +7,8 @@
 屬 docs mode（rule + skill 皆 `.md`）。
 
 **來源**：`hermes-agent-synthesis` §7（自我改進安全檢查表）+ 兩筆 feedback
+
+**回收點（EP `ep-review-assurance-uplift` 2026-07-09 落地，待本 skill 建成統一回收）**：mechanical-gate 原則（機械檢查 > AI 自述 / 人審）目前三處引用，建成本 skill 時須回收為 canonical example：
+- **A1 錨點**：`rules/acceptance-evidence.md`「Runtime Invariant Assurance」段（silent-corruption invariant → runtime 機械 check，獨立於 AI mental model）—— 原則的具體機制落點
+- **A4 引用點**：`rules/acceptance-evidence.md`「Claim→Evidence→Trust」+ `commands/build.md` Agent 產出機械驗證（no-impact claim 須獨立機械證據）
+- **A5 引用點**：`commands/build.md`「complex-change constraint tightening」（constraint check 機械、不可被 AI lobby）

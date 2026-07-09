@@ -143,8 +143,9 @@ UC-3 除權息調整         apply_adjustment()    scripts/demo_adj.py          
 | **詮釋假設** | 「你說 X，我理解成 Y」 |
 | **歧義選擇** | 「Z 兩種解讀，我選 A 因為…」 |
 | **推斷行為** | 「spec 沒寫死，我推斷的」 |
+| **動態漂移（Type B）** | 「跨段落 / 跨 session 目標悄然偏移，我後來做的已偏離最初意圖」（有別於上方單時點詮釋偏差 = Type A） |
 
-每點附確認問題，讓你一句「對/不對」校正。
+每點附確認問題，讓你一句「對/不對」校正。前三類（詮釋假設 / 歧義選擇 / 推斷行為）是**靜態**詮釋偏差（Type A，單時點）;動態漂移（Type B）是累積偏移 —— 兩型 intent drift 見 [acceptance-evidence](../rules/acceptance-evidence.md)「Intent Drift 的兩型」。
 
 ### D. 意圖情境完整性（該 demo 的 feature 想全了嗎）
 

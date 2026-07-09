@@ -73,7 +73,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 5 個 Dimensio
 
 每段是否有驗收標準？檔案是否完整列出？依賴項是否遺漏？邊界情況是否考量？Use LSP goToDefinition to verify file paths mentioned in EP actually contain the referenced symbols.
 
-**§1b Invariant Impact（觸發時才檢查）**：若段落觸及 invariant-bearing 模組（見 [execution-plan](./execution-plan.md) §1b 觸發定義），檢查 §1b 是否含：① 受影響 domain invariant、② §4 驗證對齊。**關鍵：驗證對齊的 test 是否真覆蓋該 invariant 行為**（非僅符號存在——同 acceptance-evidence L3 符號 vs 路徑覆蓋）。producer 宣告的完整性由本維度把關（build 只機械確認 test 存在通過，不判斷 producer 是否漏列 invariant——漏列的 invariant 無人查，§1b 退化為 self-report）。
+**§1b Invariant Impact（觸發時才檢查）**：若段落觸及 invariant-bearing 模組（見 [execution-plan](./execution-plan.md) §1b 觸發定義），檢查 §1b 是否含：① 受影響 domain invariant、② §4 驗證對齊。**關鍵：驗證對齊的 test 是否真覆蓋該 invariant 行為**（非僅符號存在——同 acceptance-evidence L3 符號 vs 路徑覆蓋）。producer 宣告的完整性由本維度把關（build 只機械確認 test 存在通過，不判斷 producer 是否漏列 invariant——漏列的 invariant 無人查，§1b 退化為 self-report）—— 此即 Claim→Evidence→Trust 缺口（原則見 [acceptance-evidence](../rules/acceptance-evidence.md)「Claim→Evidence→Trust」：producer 宣告「沒動 X invariant」= no-impact claim，須獨立證據反證，不接受自述）。
 
 ### F2: Rules 合規檢查
 

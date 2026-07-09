@@ -22,6 +22,7 @@ Six-axis review with quality gates. Every change gets reviewed before merge — 
 - Error paths handled (not just happy path)?
 - Tests cover the change and actually test the right things?
 - Off-by-one errors, race conditions, state inconsistencies?
+  - 多 writer / state mutation invariant 破壞的判定（ownership vs write-site 粒度）見 [arch-thinking](../arch-thinking/SKILL.md)「變更路徑計數（mutation-path counting）」step —— 條件必填（觸及 mutable state 時）
 
 ### 2. Readability & Simplicity
 - Names descriptive and consistent with project conventions?

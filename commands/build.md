@@ -64,6 +64,8 @@ Workflow 審查協調：[workflow-review-pattern.md](./instruction/_common/workf
 
 整合器型段落標記後，在階段 2/3 對應加嚴（路徑覆蓋硬閘門 + 真實邊界整合測試）。
 
+**complex-change constraint tightening**（與整合器加嚴並列的第二 escalation trigger）：當變更觸及「會被未來目標 rationalize 放寬的約束」（風控 limit / 會計守恆 / single-writer）且 complex / competing-demand 升高時，constraint invariant 審查自動加嚴（不只 IO 邊界觸發加嚴，複雜度-約束也觸發）。asymmetric drift 原則（AI 壓力下傾向破壞 constraint，check 須機械、不可被 lobby）見 [acceptance-evidence](../rules/acceptance-evidence.md)「Runtime Invariant Assurance」段 —— 本處只加 trigger 機制（IO 邊界 + 複雜度-約束雙 escalation），不重述原則。
+
 ### 階段 1：準備
 
 **前置：working tree 乾淨度檢查**：`git status` 確認 working tree 變更都屬於本 EP 範圍。若有**其他功能的 untracked/modified 檔**（與本 EP 無關）→ 提示隔離（`EnterWorktree` / 新 branch / 先 commit 或 stash 舊功能），避免 build/commit 時混入不相關變更（靠 `/commit` 階段 2 git status 兜底，但前置隔離更省事）。
@@ -98,7 +100,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./instruction/_common/workf
 1. 依賴圖分層為 waves
 2. 同 wave 平行 Agent（上限 max-agents）
 3. Wave 合併：讀取 Agent 產出 → 應用到主 worktree → `ruff check --fix && ruff format`
-4. **Agent 產出機械驗證**（agent 自述是 L2 同義反覆風險、`git diff` 是 L1 機械證據，見 [acceptance-evidence](../rules/acceptance-evidence.md)）：
+4. **Agent 產出機械驗證 = Claim→Evidence→Trust 校驗**（原則見 [acceptance-evidence](../rules/acceptance-evidence.md)「證據獨立性 + Claim→Evidence→Trust」—— agent 自述是 L2 同義反覆風險、`git diff` 是 L1 機械證據）。**此模式適用所有 no-impact claim**（agent / producer 宣稱「沒影響 X」：accounting / risk / invariant）：claim 須獨立機械證據反證，否則退化為 self-report：
    - `git diff --name-only` 列實際變更檔（機械事實）
    - 比對各 Agent 自述「改了哪些檔 / 幾處」vs git 實際 → flag mismatch（**稱「零修改」但 git 顯示有改**最危險，曾釀 scope-creep 近乎 ship）
    - scope-creep：diff 檔是否超出該 Agent prompt 指定 scope → flag 超出（附 prompt scope 引用）
@@ -122,6 +124,7 @@ Workflow 審查協調：[workflow-review-pattern.md](./instruction/_common/workf
 - 記錄偏差：與 Pseudo Code 有出入時記錄原因（偏差是發現認知誤差的線索，不是違規）
 - 記錄疑慮不中斷：先選最合理方案繼續，最後統一讓用戶確認
 - 錯誤自癒：連續 3 次失敗 → 標記 ⚠️ 繼續下一段
+- **batch ceiling**：累積多段未經人類判讀 → 建議暫停跑 session-boundary review（防 context 累積漂移;session-boundary review 原則見 [acceptance-evidence](../rules/acceptance-evidence.md) B 軸人類驗收層）—— 單段重試上限（連續 3 次）vs batch ceiling（累積段落上限），雙 ceiling
 - **依賴錨點 drift check**：實作每段前驗證錨點，drift 時先更新 EP
 
 #### 驗證
