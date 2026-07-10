@@ -26,6 +26,8 @@ allowed-tools:
 
 要「自己之後繼續」→ `/at`；要「別人現在接」→ `/handoff`。
 
+> **STATE.md 非交接選項**：STATE.md（Last session 觀察，每 session 覆寫）不是命令、非 `/at`/`/handoff` 替代。`/at` resume 時讀它補 observation（寫入步驟見 [state-md-write](./instruction/_common/state-md-write.md)）；交接決策仍是 `/at` vs `/handoff` 二選一。
+
 ---
 
 ## 執行流程

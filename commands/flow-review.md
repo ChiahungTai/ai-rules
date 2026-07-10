@@ -1,5 +1,5 @@
 ---
-description: "定期讀 ai-analysis/flow-feedback/ 累積回饋，找重複摩擦 + 聚合 type-2 設計缺陷，跟 user 討論怎改善 skills/commands。/flow-review [--since <date>]"
+description: "定期讀 ai-analysis/flow-feedback/ 累積回饋，找重複摩擦 + 聚合 type-2 設計缺陷 + memory-routing 判定（程序記憶→Skill / 專案記憶→STATE / 一次性→棄）+ Skill 兩層判定，跟 user 討論怎改善 skills/commands。/flow-review [--since <date>]"
 when_to_use: "Periodic review of accumulated flow-feedback. User fires when they have time. LLM globs all feedback files, finds recurring friction (systemic) + aggregates type-2 design-flaw candidates, then discusses improvement directions with the user. B-axis: human judgment drives the improvement decisions. Output → /execution-plan (big change; /spec to clarify requirements if needed) or kanban card (small change) → /build."
 usage: "/flow-review [--since <date>]"
 argument-hint: "無參數讀全部 / --since YYYY-MM-DD 限定日期後"
@@ -25,13 +25,29 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 - **type-2 聚合**：跨筆的設計缺陷候選合併、強化
 - **摩擦 heatmap**：哪個 command/skill 最多摩擦（tags 聚合）
 
-### 3. 討論（互動，B 軸）
+### 3. memory-routing 判定（教訓→記憶去向）
+
+聚合分析後、action-routing（決策段）前，先判**教訓的記憶去向**——與 action-routing（共識→EP/kanban/留）正交兩軸，**先判記憶去向再判 action 去向**。
+
+**機械 proxy 先判**（降隨意性）：看教訓的**引用形態**——引用具體 module/class/file path → 專案特定候選；引用工具/流程/pattern 名 → 跨專案候選。再判通用性 + 重複性。
+
+| 教訓性質 | 記憶去向 |
+|---------|---------|
+| 跨專案通用（程序記憶） | **Skill**（symlink 跨專案——寫進 Skill = 自動跨專案） |
+| 專案特定（專案記憶） | **STATE.md / session**（見 [context-management](../rules/context-management.md)「STATE.md」） |
+| 一次性（不再發生） | **棄** |
+
+> **基建已在**：symlink 讓「寫進 Skill = 自動跨專案」——本步補**觸發判定**，非基建。**不替代人類判斷（B 軸）**：memory-routing 是結構化提示，最終人類討論定案（見 step 4 討論）。
+>
+> **STATE.md 生命週期提醒**：STATE.md 每次 session 結束覆寫——routed 到 STATE.md 的專案記憶是**下一 session 接續用**（短期 continuity，非永久）；持久專案慣例應進該專案 AGENTS.md / rule。
+
+### 4. 討論（互動，B 軸）
 - 報告聚合發現（重複 + heatmap + type-2 候選）
 - **挑戰 type-1**：這真的是時機問題，還是 type-2 設計問題被誤判成時機？（防 type-1 掩蓋 type-2）
 - **深 type-2**：設計缺陷確認 + 改善方向探討
 - 開放討論，不急結論（可多次 review 才定案）
 
-### 4. 決策 → 落地
+### 5. 決策 → 落地
 
 | 共識類型 | 去向 |
 |---------|------|

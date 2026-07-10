@@ -6,4 +6,6 @@
 
 **deferred 決策**（EP `ep-review-assurance-uplift` DT-2，2026-07-09）：本 EP 不建新 command（scope）。待獨立 EP 設計：resume/接續時自動觸發「上一 session 累積產出 vs 原始 EP intent」的 intent-drift review（Type B 動態漂移偵測，見 acceptance-evidence「Intent Drift 的兩型」）。
 
+**部分落地（EP-A `ep-autonomous-execution-reliability` S2，2026-07-10）**：autonomous-execution「Session 級 Recovery」已提供 **substrate + 觸發器**——resume 時 crash-only reconciliation（re-derive「git diff vs EP scope」差異報告），為本原則提供事實層 + resume 觸發點。**仍 deferred（本 card 追蹤）**：完整 intent-drift review **command**（判讀層：差異報告 → intent 是否漂移）——substrate ≠ review，review 本身仍待獨立 EP。
+
 **來源**：solo+AI review guide（session-boundary review）+ EP `ep-review-assurance-uplift` DT-2

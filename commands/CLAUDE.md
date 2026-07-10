@@ -67,10 +67,10 @@
 
 ### 自主實作
 
-- `/deep-work` — 用戶離開時的自主實作引擎
+- `/deep-work` — 用戶離開時的自主實作引擎（收尾寫 STATE.md Last session 觀察）
 - `/sequential-batch` — 序列批次任務處理器（避免 rate limit）
-- `/at` — 排程工作接續（對應 Unix `at`，LLM provider reset usage 後自動 resume）
-- `/handoff` — 產出 self-contained 交接 prompt（進度+決策脈絡+下一步），交另一個 session/repo/provider；與 /at 分工（handoff 交別人 / /at 自己續）
+- `/at` — 排程工作接續（對應 Unix `at`，LLM provider reset usage 後自動 resume；resume 讀 STATE.md 補 observation）
+- `/handoff` — 產出 self-contained 交接 prompt（進度+決策脈絡+下一步），交另一個 session/repo/provider；與 /at 分工（handoff 交別人 / /at 自己續）；STATE.md 非交接選項（Last session 觀察 / 每 session 覆寫，/at resume 讀）
 
 ### 品質工具
 
@@ -93,7 +93,7 @@
 ### 流程演化回饋
 
 - `/flow-feedback` — session 摩擦收集器：不順 session 後，user 植入摩擦 + AI map 到 skills/commands，產 type-1（時機）/type-2（設計）建議 + 具體例子，寫 `ai-analysis/flow-feedback/`
-- `/flow-review` — 定期讀累積 flow-feedback，找重複摩擦 + 聚合 type-2 設計缺陷，跟 user 討論改善 skills/commands（B 軸）；定案 → /execution-plan（大改，必要時先 /spec 釐清需求）/ kanban（小改）→ /build
+- `/flow-review` — 定期讀累積 flow-feedback，找重複摩擦 + 聚合 type-2 設計缺陷 + memory-routing 判定（教訓→Skill/STATE/棄），跟 user 討論改善 skills/commands（B 軸）；定案 → /execution-plan（大改，必要時先 /spec 釐清需求）/ kanban（小改）→ /build
 
 ### 日常工具
 

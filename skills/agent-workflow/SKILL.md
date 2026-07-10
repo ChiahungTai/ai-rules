@@ -1,6 +1,6 @@
 ---
 name: agent-workflow
-description: Guides Agent spawning, worktree isolation, concurrency control, and parallel execution patterns. Use when spawning agents, using worktrees, running parallel tasks, invoking /build with --max-agents, or setting up Writer/Reviewer patterns. Triggers on: agent, worktree, spawn, parallel, isolation, subagent, background task, auto mode.
+description: "Guides Agent spawning, worktree isolation, concurrency control, parallel execution, and delegation. Use when spawning agents, using worktrees, running parallel tasks, delegating to agents, handling scope-external discoveries, invoking /build with --max-agents, or setting up Writer/Reviewer patterns. Triggers on: agent, worktree, spawn, parallel, delegation, side-discovery, scope redirect, manager-delegate, isolation, subagent, background task, auto mode."
 allowed-tools:
   - Read
   - Write
@@ -59,6 +59,30 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 | 中型實作（3-8 檔案） | 1-N 個 Agent + worktree | 按模型並發上限控制 |
 | 大型改動（20+ 檔案） | `/batch` 命令 | 自動拆分 5-30 單元，每單元獨立 worktree |
 
+### 委派框架（Delegation Philosophy）
+
+agent-workflow 偏控制導向（scope fence / git diff 驗產出 / classifier / gate），但放手碎片零散未連貫（[autonomous-execution](../autonomous-execution/SKILL.md)「不交半成品」、[build.md](../../commands/build.md)「裁量權」+ context handoff、scope fence「創造性例外」）。連貫化為 **delegate(goal + tools + context) → let go(within guardrails) → verify(outcome)** 模型。
+
+**連貫模型**：
+
+- **goal**：EP segment / 任務目標（清晰可驗收）
+- **tools**：delegation 前配工具集——依任務領域匹配 skill description 觸發詞（任務含「測試」→ TDD skill、含「錯誤」→ debugging skill）；[build.md](../../commands/build.md) Agent Prompt 已有完整 skill invoke 實作清單（rules-reminder / test-driven-development / incremental-implementation / autonomous-execution），此處概念化引用不重列
+- **context**：[build.md](../../commands/build.md) context handoff 已是最完整實作——引用不重述
+- **let go**：實作層裁量權（build.md「EP 為收斂方向，實作層有發現真相的責任」）；放手底線 = [autonomous-execution](../autonomous-execution/SKILL.md) 紅線/黃線
+- **verify**：[build.md](../../commands/build.md) git diff + Agent Review——引用不重述
+
+**平衡（delegate + verify，非 delegate + trust）**：
+
+- **防過度放手**：verify 是委派的**共同體**非事後補丁——純放手無驗證 = scope-creep 近乎 ship 重演。**強度上限**：delegate+verify 假設 verifier（主 LLM）可靠；deep-work 長 session 的 verifier 退化（context fatigue）是已知上限，由 build.md batch ceiling 部分緩解但不完全覆蓋。
+- **防過度控制**：創造性任務（設計/實作）**不加 fence**（scope fence 已排除創造性）。委派光譜：機械任務 = tight delegation（fence）；創造性任務 = loose delegation（goal+tools+放手）；混合型（部分機械 + 部分判斷，如重構提升可讀性）= medium delegation（goal + 精簡 fence，只 fence 不可碰區域 + 放手判斷空間）。
+- **fence vs 委派非矛盾**：兩者適用**不同任務類型**（同光譜兩端）——fence 是委派的特殊形態（目標極明確時的 tight delegation），委派框架是 scope fence 的上層框架。
+
+**delegate→verify loop（與 Recovery 段互补）**：委派（本段）上游 → 降低 false-done；[autonomous-execution](../autonomous-execution/SKILL.md)「Session 級 Recovery」completeness validation（false-done 偵測）下游 → 捕捉殘餘。兩者形成 loop，**互补非重複**。**邊界**：verify 的 git diff 半邊（scope/claim 校驗）與 Recovery 段 completeness 互補不重疊；Agent Review 半邊關注**單段 code 正確性**（段落級），Recovery 段 completeness 關注**跨段落 EP 完成度**（EP 級）——builder 寫 verify 時引用 build.md Agent Review（段落級），不重述 Recovery 段的 EP 級 completeness。
+
+**委派時 side-discovery**：agent 發現 scope 外 → Side-Discovery 段（scope-fence 負空間 redirect）是委派框架的 redirect 應用。
+
+> **docs-mode 強度上限**：委派是**判斷框架**非機械閘門（無 server-side enforcement）；其 verify 半邊的機械性來自 build.md git diff（已存在）。理論支撐：ref-docs Ch19 AI Contract 四 pillar（Formalized Contract / Dynamic Negotiation / Quality-Focused Iterative Execution / Hierarchical Subcontracts）+ Ch6 Planning「does the how need to be discovered, or is it already known?」判準（控制 vs 放手）——外部靈感來源；核心論證用內部已查證引用（build.md 裁量權 / 紅線）承載。
+
 ### Worktree 隔離
 
 **Worktree 基於 committed state 建立，看不到 uncommitted changes。**
@@ -69,6 +93,8 @@ Pre-flight 檢查：
 3. **多 Agent 協作**：先把前置工作 commit 到 feature branch，再從該 branch spawn
 
 **Prompt 路徑紀律**：Agent 在 worktree 中 CWD 是 worktree 目錄。**用相對路徑**，不要用主 worktree 絕對路徑。
+
+**安全不變量**（path-in-root / symlink-escape 偵測 / 優先 EnterWorktree）定義見 [autonomous-execution](../autonomous-execution/SKILL.md)「機械空間不變量」段；此處僅為 worktree 用法，不重述安全不變量定義（single-source）。
 
 何時用 `isolation: "worktree"`：PoC 驗證、平行實作、風險操作。
 何時不用：純研究（foreground Agent 即可）、單檔案修改、改動少時不用 isolation 更簡單。
@@ -90,6 +116,26 @@ Pre-flight 檢查：
 - 完成後自驗：`rg <pattern> <edited_file>` 確認沒碰不該碰的
 
 **適用判準**：機械任務（pattern 明確、意圖單一）強制；設計 / 實作任務（需創造性判斷）不強制。與 build 階段 2「Agent 產出機械驗證」攻守 —— fence 事前預防、git diff 事後驗證。
+
+### Side-Discovery（scope-fence 負空間 redirect）
+
+Scope Fence（上）擋機械任務 agent「順手重構」scope 外區塊，但 fence 是**死路**——擋擴大卻無 redirect，發現的 scope 外改進被丟棄。Side-discovery 補 **redirect 通道**：agent 發現 scope 外 meaningful 改進 → 建 Backlog 卡（非擴大 scope、非丟棄）。fence 說「不擴大」、side-discovery 說「scope 外工作去哪」——兩者共置（single-source），否則 fence 負空間是死路（擋擴大 + 無 redirect = 工作遺失）。
+
+**觸發**：agent 審查/實作時發現 **scope 外 meaningful 改進**（非當前任務目標，但值得做）。
+
+**triage 決策**：
+
+- **defer**（default）：建 Backlog 卡供日後排程
+- **accept**：擴大 scope——**需用戶/EP 確認，非自主擴大**（與 scope fence「不擴大」一致）；**自主模式（deep-work 半夜跑）用戶不可得 → accept 預設降級為 defer**（建 Backlog 卡 + completion report 標記待用戶確認，對齊 [autonomous-execution](../autonomous-execution/SKILL.md) 紅線 git commit 自主處置）
+- **decline**：明確不值得，丟棄（記錄原因，避免重複發現）
+
+**建卡**（defer 時）：用 [kanban-board](../kanban-board/SKILL.md) 卡片模板（標題 / 目標 / 相關 / 驗收標準——欄位名對齊模板，不在此重複定義）。依賴關係在「備註」欄標 `[blocked-by: <當前任務>]`（blockedBy 非標準欄位，見 kanban-board 模板）。
+
+**防氾濫三層**：
+
+- **threshold**：「meaningful」= 獨立發現時會 warrant 一張卡/EP 的改進（非 trivial 觀察）
+- **batch**：side-discovery 先記錄到 completion report，**段落/任務結束時統一建卡**（非執行中斷流程）；研究 agent（Explore 等）不產 completion report → 記錄於 spawn prompt 回覆，由 spawner 代建卡
+- **人類 triage**：kanban 每週回顧（kanban-board）清理低價值卡
 
 ### `/build` 整合
 

@@ -78,6 +78,8 @@ fd -e md . .kanban/In-Progress/
 [額外資訊]
 ```
 
+> **卡片來源之一**：agent-workflow [Side-Discovery](../agent-workflow/SKILL.md)（agent 發現 scope 外 meaningful 改進 → 建 Backlog 卡）用此模板；依賴關係寫「備註」欄標 `[blocked-by: <當前任務>]`（blockedBy 非模板標準欄位，故入「備註」）。
+
 **檔名規則**：
 - **中文標題**：檔名使用繁體中文，保留必要的英文縮寫（如 NT、SJ、SMA、LGBM）
 - **純描述性**：檔名只描述功能，不含編號 prefix

@@ -28,7 +28,7 @@
 - `arch-thinking` — Clean Architecture + DDD 設計視角 + 結構機械（分層依賴/bounded context/use case 驅動[含共用層外溢]；city map/dep weight/Pattern Radar/domain grounding/LSP 查證/補償邏輯盤點；視角非模板；受眾中性；與 api-and-interface-design 分工）
 - `debugging-and-error-recovery` — 系統性根因除錯（非猜測）
 - `external-api-investigation` — 外部 API / 整合器真實行為調查（monkey-patch dry-run、查 stub、問 domain；實證優先於讀 code 推理）
-- `autonomous-execution` — 無人介入自主執行的決策 / 錯誤恢復 / 完成回報
+- `autonomous-execution` — 無人介入自主執行的決策 / 錯誤恢復 / 完成回報 / workspace safety / path invariants / session recovery（false-done 偵測）
 
 ### 品質與審查
 - `review-engine` — review 命令家族通用審查邏輯 domain 真相源（嚴重度/信心水準/審查者自證/LSP 查證/審查模式判定/Writer-Reviewer 分離/多層驗證/**review 執行預設單一源**：force 獨立 / max-agents / model / 視角 / spawn-vs-session）；ep-review/code-review/audit-test/execution-plan EP Review/build Agent Review 共用
@@ -54,7 +54,7 @@
 - `scan-project` — 統一專案知識掃描（imports + Capabilities + kanban → dep_graph / findings）
 - `standup` — 每日晨間簡報昨日活動 digest（跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition；nightly-sequence op4 整合）
 - `context-engineering` — session 起始 / 品質退化 / 任務切換時的 context 與 rules 設置
-- `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / Writer-Reviewer
+- `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / 委派框架（delegation）/ side-discovery / Writer-Reviewer
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
 - `dependency-upgrade-watch` — 偵測 nautilus_trader / shioaji 版本漂移，主動建議 /upgrade-nt|/upgrade-sj（碰 pyproject.toml 時 auto-load）

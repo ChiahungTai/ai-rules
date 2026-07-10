@@ -1,6 +1,6 @@
 ---
 name: autonomous-execution
-description: Guides autonomous execution — decision-making, error recovery, completion reporting. Use when implementing without user interaction, such as EP-based build or deep-work mode. Triggers on: autonomous execution, self-healing, deferred questions, completion report, don't-self-decide boundaries.
+description: "Guides autonomous execution — decision-making, error recovery, completion reporting, workspace safety, session-level recovery. Use when implementing without user interaction, such as EP-based build or deep-work mode. Triggers on: autonomous execution, self-healing, session recovery, false-done 偵測, workspace safety, path invariants, deferred questions, completion report, don't-self-decide boundaries."
 ---
 
 # Autonomous Execution
@@ -48,6 +48,21 @@ Methodology for autonomous implementation when user should not be disturbed. All
 >
 > **`git commit` 不因 session 性質改變**：紅線「跳過 + 等用戶接手」涵蓋所有 autonomous 場景 —— 半夜無人（記錄到 completion report 後續）、long session 中用戶回來互動（停下來、展示 commit message、等獨立確認）。autonomous mode 的「連續執行」vibe **不延伸到 commit** —— commit 永遠是互動式 gate，即使用戶剛授權過上一個 commit，下一個仍需獨立確認（一次授權 ≠ 永久授權）。
 
+### 機械空間不變量（workspace safety）
+
+紅線清單（上）是**行為枚舉**（`rm -rf`、`git push --force`…），必然漏新形態（新型 symlink 攻擊、路徑遍歷變體）。補**機械空間不變量**雙層——agent 在 worktree 內執行 Bash 時，自我驗證路徑運算不逃逸 worktree root。
+
+> **docs-mode 強度上限**：機械不變量在此是「指導」非 code-level enforce——LLM 可能不遵循。hook 補強（`settings.json` PreToolUse 攔截 Bash 路徑逃逸）列為**未來方向（另一 EP）**，本段不實作。
+
+**執行時不變量**（agent 在 worktree 內跑 Bash 時自我驗證）：
+
+- **path-in-root**：所有 Bash 路徑運算（讀寫、`cd`、`find`/`rg` 範圍）相對於當前 worktree root，**不寫絕對路徑到 worktree 外**。判定：路徑 resolve 後須落在 worktree root 子樹內。
+- **symlink-escape 偵測**：不跟隨 canonical path 逃出 worktree root 的 symlink——expanded path 在 root 內但 canonical path 在 root 外即 escape，拒絕。判定法：對路徑 segment-by-segment canonicalize，canonical 結果逃出 root 即拒絕。
+
+**建立時決策**（觸發時機與執行時不變量不同，分開標記）：
+
+- **優先 EnterWorktree**（建立時已限 path `.claude/worktrees/` + name `[A-Za-z0-9._-]`），非裸 `git worktree add`；若必須裸 git worktree，name 需手動 sanitize 同白名單。建立時保護已有，本段聚焦執行時不變量。
+
 ### 🟡 黃線（自主決策 + 記錄到 completion report）
 
 **可逆但有風險** —— 選最合理方案繼續，理由寫入 completion report 待確認清單段：
@@ -75,6 +90,39 @@ Methodology for autonomous implementation when user should not be disturbed. All
   → 仍失敗 → 換一種修法
   → 連續 3 次失敗 → 記錄問題，標記為 ⚠️，繼續下一個任務
 ```
+
+## Session 級 Recovery（false-done 偵測 + crash-only reconciliation）
+
+Error Self-Healing（上）是 per-error（單一錯誤重試 ceiling）。**缺 session 級**：LLM 自稱段落 done 但 EP 未真完整（false-done）；跨 session resume 無結算對賬。本段補兩個 solo 形態——continuation retry（normal-exit≠done）+ crash-only reconciliation（resume re-derive 真相）。solo 無 always-on tick、無外部 truth source（如 issue tracker），故兩形態皆 **episodic**（在確定時機觸發一次，非持續監督）。
+
+> **delegate→verify loop（上游見 agent-workflow）**：本段 false-done 偵測是 loop **下游**——上游委派框架（[agent-workflow](../agent-workflow/SKILL.md)「委派框架」delegate→verify）降低 false-done 發生率，本段捕捉殘餘。互补非重複。
+
+### completeness validation（false-done 偵測）
+
+- solo 最危險 drift = 「LLM 自稱 done 但 EP 段落未真完整」（false-done，normal-exit≠done）
+- **觸發點**：completion report 生成時（solo 無 always-on tick，改在完成報告這個確定時機——不算太晚，攔截 false-done 後 LLM 可繼續補完）
+- **機制**：completion report 對照 EP planned deliverable（段落矩陣全 done？）；未完整 → 標記「normal-exit≠done」+ 列缺漏，**不宣稱 EP 完成**
+- **命名釐清**：用「completeness validation」/「false-done 偵測」，**不用「stall 偵測」**——stall = 行程活著不推進；本機制 = 正常 exit 但工作未完整，本質不同
+- **範圍限制**：本機制**僅偵測虛假完成聲明**；真正的 silent stall（LLM 從不宣稱 done / 卡住）**不可偵測**，需 session 超時 / 用戶返回等外部機制（超出本段範圍）
+
+### crash-only reconciliation（resume re-derive）
+
+- **solo 真相源** = git state（事實：working-tree diff vs session 前基準）+ EP 段落定義（意圖：每段 scope + 成功標準，靜態文檔）對照
+- **觸發點**：跨 session resume（`/at` resume 主要；手動開新 session 次之；handoff 交他人另議）
+- **機制**：resume 時 re-derive（git diff 推斷已做事實 vs EP 段落 scope 定義對照 → 推斷哪些段落 done）；**不 restore in-memory**（session 記憶不可信）；**不依賴顯式 done 標記**（deep-work 不 commit，無持久進度追蹤檔）；不符 → 結算差異報告（做了未涵蓋 / 涵蓋未做）
+- **intent 來源**：EP 段落定義本身（靜態文檔：scope + 成功標準），**非動態「進度檔」**——reconciliation = 事實（git diff）vs 意圖（EP scope）對照推斷完成度，不需先讀進度追蹤檔
+
+### 與既有機制的分工（避免重疊）
+
+| 機制 | 作用域 | 觸發點 |
+|------|--------|--------|
+| **Session 級 Recovery**（本段） | 段落/EP 級 done 驗證 + resume 結算 | completion report 生成 / resume |
+| batch ceiling（[build.md](../../commands/build.md) 階段 2） | 單 session 內 context 累積防漂移 | 累積多段未經人類判讀（軟觸發） |
+| session-boundary review（[acceptance-evidence](../../rules/acceptance-evidence.md) B 軸） | 跨 session intent drift 審查 | resume 時觸發（本段提供觸發器） |
+
+三者作用域不同（段落級 completeness / 單 session context fatigue / 跨 session intent direction），觸發點不重疊。
+
+> **substrate vs review 邊界**：本段 reconciliation = 機械真相 re-derivation（**事實層**：git vs EP scope → 差異報告）；session-boundary intent-drift review = **判讀層**（差異報告 → intent 是否漂移）。本段是 intent-drift review 的 **substrate + 觸發器，不是 review 本身**——避免寫成完整 intent-drift review（scope creep）或只 dump git log（過窄）。本段部分回應 deferred card `session-boundary-intent-drift-review.md`（resume 機械觸發 + re-derive）。
 
 ## Permission Minimization
 

@@ -61,6 +61,8 @@ project_path: "{當前專案路徑}"
 3. 完成後刪除此檔案
 ```
 
+**寫 STATE.md**（session 結束）：若本 session 有轉向 / 卡點觀察，寫 repo root `STATE.md` 補「為什麼」（覆寫非累積；步驟見 [state-md-write](./instruction/_common/state-md-write.md)）。`.at-contexts` 維持一次性 ephemeral lifecycle（session-only、resume 後刪、gitignore），STATE.md 是持久觀察層——**兩者不取代**（不同 lifecycle，不可混溶）。
+
 ### Phase 3：建立 CronCreate
 
 呼叫 `CronCreate`：
@@ -88,7 +90,7 @@ prompt: |
   → 不要靜默結束
 ```
 
-> `{context_file_path}` = `.at-contexts/at-context-{YYYYMMDD-HHMM}.md`（Phase 2 Step 1 寫入的絕對/相對路徑）
+> `{context_file_path}` = `.at-contexts/at-context-{YYYYMMDD-HHMM}.md`（Phase 2 寫入的 context 檔路徑）
 
 ### Phase 4：確認 + 通知
 
@@ -111,10 +113,11 @@ prompt: |
 Resume 觸發時，LLM 應：
 
 1. **讀 context 檔案** → 了解**任務目標**（`.at-contexts/` 非 protected path，讀取零摩擦）
-2. **看當前進度** → `git log --oneline -10` + `git status` 知做到哪（**不比對排程時 snapshot** — quota 期間進度可能已變，看當前才準）
-3. **接續未完成** → 建進度提醒 sentinel（`touch /tmp/.claude-voice-pending`），根據任務目標 + 當前進度，自主完成剩餘（同 `/deep-work` 模式）
-4. **清理** → 完成後刪除 context 檔案
-5. **通知** → 清 sentinel（`rm -f /tmp/.claude-voice-pending`）+ 套 [voice-notification skill](../skills/voice-notification/SKILL.md)「任務完成」樣板 say（隨機稱謂）
+2. **讀 STATE.md**（repo root，若存在）→ 補 **Last session 觀察**（卡在哪、為何轉向、下次起手點）——「為什麼」參考；**完成度走 recovery 事實層**（git + EP re-derive，見 [autonomous-execution](../skills/autonomous-execution/SKILL.md)「Session 級 Recovery」），STATE 不覆蓋完成度
+3. **看當前進度** → `git log --oneline -10` + `git status` 知做到哪（**不比對排程時 snapshot** — quota 期間進度可能已變，看當前才準）
+4. **接續未完成** → 建進度提醒 sentinel（`touch /tmp/.claude-voice-pending`），根據任務目標 + 當前進度，自主完成剩餘（同 `/deep-work` 模式）
+5. **清理** → 完成後刪除 context 檔案
+6. **通知** → 清 sentinel（`rm -f /tmp/.claude-voice-pending`）+ 套 [voice-notification skill](../skills/voice-notification/SKILL.md)「任務完成」樣板 say（隨機稱謂）
 
 ---
 

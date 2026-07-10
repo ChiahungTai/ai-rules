@@ -151,7 +151,7 @@ producer 的 case_X 處理（從沒被觸發 — 死碼）
 3. **自動化對照(A/B diff)**:跑新舊版 / 兩 branch / 兩參數比對,人類只判讀 diff 合理性。把「讀」外包給機器,這是長期最該投資的模式。
 4. **流程末端驗收步驟**:build / deep-work(Claude commands)在 commit 前缺「執行 SM 代表性場景讓人判讀」的步驟;現有 demo/POC 驗證只驗 exit code 0,不驗輸出內容(silent failure / 語義錯誤偵測不到)。
 5. **人類介入點前移到 RED(operational)**:GREEN 後人類讀不完;RED 時刻判讀「失敗是否符合預期」更便宜,是意圖偏移的最早訊號。**operational step**:build 在每段 RED 時刻印出「失敗訊號 + EP 該段預期行為」對照,標「人類 RED checkpoint」(prospective 可選暫停點)。明文 prospective vs retrospective:此 checkpoint 前瞻判意圖,有別於 fix-test(Claude command)retrospective 判舊測試意圖。
-6. **session-boundary review**:跨 session 接續時,判讀累積目標是否漂移。**誠實標記**:跨 session 場景目前**無觸發機制**(全 repo 無 resume-review trigger;at / handoff / standup 命令(Claude commands)皆非 intent-drift review),本原則效果限**單 session batch-ceiling 軟觸發**(見 build.md batch ceiling,Claude command);跨 session 觸發待獨立 command(見 `.kanban/Backlog/` deferred card)。
+6. **session-boundary review**:跨 session 接續時,判讀累積目標是否漂移。**部分落地**:跨 session resume 觸發的 **substrate + 觸發器已落地** —— autonomous-execution「Session 級 Recovery」crash-only reconciliation(resume 時 re-derive「git diff vs EP scope」差異報告);at / handoff / standup 命令(Claude commands)仍非 intent-drift review。本原則效果:單 session batch-ceiling 軟觸發(見 build.md batch ceiling,Claude command)+ 跨 session resume 機械 re-derive(autonomous-execution)。**仍 deferred**:完整 intent-drift review **command**(判讀層:差異報告 → intent 是否漂移,Type B 動態漂移偵測見本檔「Intent Drift 的兩型」)——見 `.kanban/Backlog/` deferred card。
 
 ### 內部跨層接線的真實邊界歸屬(A 軸天花板,B 軸補強)
 

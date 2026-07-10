@@ -20,6 +20,7 @@
 .review/
 .agent-tmp/
 .at-contexts/
+STATE.md
 
 # Python bytecode
 __pycache__/
