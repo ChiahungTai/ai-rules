@@ -87,6 +87,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - 確認 Root AGENTS.md 的 Module Navigation Map 涵蓋所有重要模組，且連結指向模組 AGENTS.md source
 - 確認每個模組 CLAUDE.md = `@AGENTS.md` thin wrapper（不重複 AGENTS.md neutral 內容）；Root CLAUDE.md 同
 - **dep-graph 驗證**（有 Phase 1.5 時）：確認 Module Boundaries 的 "Depends on" 與 `edges[]` 一致
+- **元資訊自檢**（強制，防產出導向任務漏禁令）：對所有產出的 instruction 檔跑元資訊掃描，採 `/instruction:clean` 步驟 3 的**錨定 pattern**（見 [clean.md](clean.md)：`行數:`/`wc:`/`lines:`/`> **版本**:` 等，帶冒號錨定；裸匹配 `wc`/`lines` 會誤命中合法 CLI 範例如 `wc -l` 或 size 指引如 `~100 lines`）。命中標記為候選，判讀確認為元資訊後移除（非盲目刪）。常見漏點：模組描述的 `(N lines)` 行數標註、`（v3: ...）` 版號標註（dogfood 實證：外部 repo init 產出含 `(1951 lines)`）。此為 `_ai-behavior-constraints.md` 硬規則，產出時易忘，須機械掃描兜底。
 
 ## 判斷哪些模組需要 instruction 檔
 
