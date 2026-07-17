@@ -135,7 +135,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 展示變更摘要 + 建議 commit message + Capabilities/Kanban 狀態提醒（如適用）→ **等待用戶明確確認**。
 
-**遵守 `commit-consent` rule**：未收到確認絕不執行 git commit。
+**遵守 `outward-action-consent` rule（commit 場景）**：未收到確認絕不執行 git commit。
 
 ### 階段 6：執行 Commit
 
@@ -153,7 +153,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 ## 執行約束
 
-- **遵守 `commit-consent` rule**：未經確認絕不 commit
+- **遵守 `outward-action-consent` rule（commit 場景）**：未經確認絕不 commit
 - **ruff + mypy 必須雙通過才 commit**（pre-existing 問題也需在此時處理：加 per-file-ignores / type: ignore 或直接修）
 - **TEMP diagnostic log 掃描**（防殘留）：commit 前掃描 diff 有無 debug-only log 模式（`Diagnostic:`、`[OK] ...`、症狀導向 debug 變數如 `<debug_var> =` 等 ad-hoc 偵錯輸出）。命中 → flag 給用戶確認移除。未移除的 debug log 不得進 commit（違反 llm-output-convention：print 只用於 state transition）。
 - **description 必須繁體中文**（技術術語保留英文）

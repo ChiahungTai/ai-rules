@@ -285,11 +285,11 @@ Snapshot: capabilities N, kanban N, findings N
 Morning report: ai-analysis/daily-report/YYYY-MM-DD.md
 ```
 
-**commit-consent 豁免**：調用 `/daily-maintain`（自動模式）即隱含同意 🟢 低風險修正的 commit。🟡 中風險不 commit。
+**outward-action-consent 豁免**：調用 `/daily-maintain`（自動模式）即隱含同意 🟢 低風險修正的 commit。🟡 中風險不 commit。
 
 ### 互動模式（/project-review）
 
-遵循 commit-consent 規則：展示 diff，等待用戶確認後 commit。
+遵循 outward-action-consent 規則（commit 場景）：展示 diff，等待用戶確認後 commit。
 
 ---
 

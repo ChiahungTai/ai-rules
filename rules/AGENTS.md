@@ -48,7 +48,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `instruction-writing` | 🟢 neutral | 雙檔模型 meta-rule（large 但仍打包）|
 | `python-standards` | 🟢 neutral | Python 標準（language；Python 專案適用）|
 | `context-management` | 🟢 neutral | context 重置原則（Claude 機制用括號註）|
-| `commit-consent` | 🟢 neutral | commit 需用戶確認（場景化，不引用命令名）|
+| `outward-action-consent` | 🟢 neutral | outward action 需用戶授權（commit / deploy / push / send / live order；reversibility test + AUTH line）|
 | `llm-output-convention` | 🟢 neutral | print/Logger 雙通道（Python 段標註）|
 | `lsp-navigation` | 🟢 neutral | 符號導航決策樹 + 跨 harness LSP 載體對照 |
 | `modern-cli-preference` | 🟢 neutral | fd/rg CLI 速查（Claude 權限段括號註隔離）|

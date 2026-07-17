@@ -37,14 +37,14 @@ Methodology for autonomous implementation when user should not be disturbed. All
 |------|------|
 | 檔案刪除（不可逆） | `rm -rf`、`find -delete`、`git clean -fd` |
 | Git 遠端 / 歷史破壞 | `git push --force`、`git reset --hard`、影響共享 history 的 `git rebase` |
-| Git commit | `git commit`（commit-consent rule 明文「例外：無」—— 所有 commit 需用戶確認，半夜自主跑亦不例外） |
+| Git commit | `git commit`（[outward-action-consent](../../rules/outward-action-consent.md) commit 段「無例外」—— 所有 commit 需用戶確認，半夜自主跑亦不例外） |
 | 系統層變更 | `sudo *`、`brew uninstall`、`chmod` 系統路徑、`osascript`（macOS 自動化） |
 | 外部服務狀態 | `docker rm`、`docker stop`、DB `DROP`/`DELETE`、redis `FLUSHDB` |
 | 語意型紅線（既有） | 刪除 API、修改 DB schema、變更外部整合介面、安全邏輯、付費操作 |
 
 > 紅線跳過時 deep-work **不阻塞、不語音通知** —— 早上看 completion report 判讀（呼應 [acceptance-evidence](../../rules/acceptance-evidence.md) L6 人類觀察層：半夜自主跑時人類 viewport 是危險操作的唯一兜底）。
 >
-> **`git commit` 跳過的語義**：deep-work 階段 5 finalization 不自主 commit，變更留在 working tree 等用戶接手（用戶回來後 `/commit` 走 commit-consent 流程）。這對齊 [commit-consent](../../rules/commit-consent.md) rule「例外：無」的硬規則。
+> **`git commit` 跳過的語義**：deep-work 階段 5 finalization 不自主 commit，變更留在 working tree 等用戶接手（用戶回來後 `/commit` 走 outward-action-consent 流程）。這對齊 [outward-action-consent](../../rules/outward-action-consent.md) commit 段「無例外」的硬規則。
 >
 > **`git commit` 不因 session 性質改變**：紅線「跳過 + 等用戶接手」涵蓋所有 autonomous 場景 —— 半夜無人（記錄到 completion report 後續）、long session 中用戶回來互動（停下來、展示 commit message、等獨立確認）。autonomous mode 的「連續執行」vibe **不延伸到 commit** —— commit 永遠是互動式 gate，即使用戶剛授權過上一個 commit，下一個仍需獨立確認（一次授權 ≠ 永久授權）。
 
@@ -69,10 +69,12 @@ Methodology for autonomous implementation when user should not be disturbed. All
 
 | 類型 | 範例 | 自主策略 |
 |------|------|---------|
-| Git local 可逆 | `git tag`、`git stash`、`git add`（stage 可逆） | 自主執行（`git commit` 見紅線段——commit-consent 要求用戶確認） |
+| Git local 可逆 | `git tag`、`git stash`、`git add`（stage 可逆） | 自主執行（`git commit` 見紅線段——outward-action-consent 要求用戶確認） |
 | 檔案系統可逆 | `mkdir`、`mv`、`touch`、單檔 `rm`（可重建） | 自主執行 |
 | 開發工具執行 | `uv run`、`pytest`、`make`、`docker run`（新增 container） | 自主執行 |
 | 依賴變更 | `uv add`、`uv remove`、`brew install <pkg>` | 自主執行，記錄理由 |
+
+> **紅線清單與通用 rule 的邊界**：紅線清單是 outward action 的 deep-work 場景列舉（快查子集），通用定義（reversibility test + AUTH line + source of truth 邊界）見 [outward-action-consent](../../rules/outward-action-consent.md)。
 
 > 黃線是「任務關鍵依賴」時（例如中段必須 commit 才能繼續），LLM 自主判斷降級路徑（git stash、worktree 隔離等）。
 

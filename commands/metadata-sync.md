@@ -42,7 +42,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 
 ### 階段 3:確認 + 執行
 
-展示清單 → **等待用戶確認**(遵循 [commit-consent](../rules/commit-consent.md) 精神)→ 執行修補:
+展示清單 → **等待用戶確認**(遵循 [outward-action-consent](../rules/outward-action-consent.md) 精神)→ 執行修補:
 
 - Capabilities:寫入 ✅ 行
 - Kanban:`mv` 卡片至 `Done/`
@@ -76,7 +76,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 
 ## 執行約束
 
-- **未確認不執行**:finalization 改的是永久導航狀態,須用戶確認(同 commit-consent 精神)
+- **未確認不執行**:finalization 改的是永久導航狀態,須用戶確認(同 outward-action-consent 精神)
 - **機械事實優先**:偵測靠 `rg` / `fd` / `git log`,不靠 LLM 記憶
 - **消費不重造**:SYSTEM-MAP 偵測消費 doc-health findings;單檔自洽 invoke `/consistency`
 - **容錯**:無對應檔案(SYSTEM-MAP.md / `.kanban/` / architecture.md / flow-feedback)→ 該項跳過(邏輯見 [metadata-sync](../skills/metadata-sync/SKILL.md)「容錯(兩 mode 共用)」段,單一源)

@@ -99,7 +99,7 @@ effort: medium                      # 作用時覆寫 effort
 
 ### 欄位決策原則
 
-- **`disable-model-invocation` 預設不設** —— AI 在自主流程（deep-work、EP→build→commit 鏈）會高頻自動 invoke dev-loop 命令；設了會打斷既有工作流（transcript 實證：execution-plan/spec/build/commit 等在自主流程被 AI 高頻自動 invoke）。consent（如 commit-consent）已在 skill 層確保，**不需**在 invocation 層再加。只有「transcript 實證 AI 不會想 invoke」的純人類工具命令才考慮設 —— 依據 transcript 非受眾表
+- **`disable-model-invocation` 預設不設** —— AI 在自主流程（deep-work、EP→build→commit 鏈）會高頻自動 invoke dev-loop 命令；設了會打斷既有工作流（transcript 實證：execution-plan/spec/build/commit 等在自主流程被 AI 高頻自動 invoke）。consent（如 outward-action-consent）已在 skill 層確保，**不需**在 invocation 層再加。只有「transcript 實證 AI 不會想 invoke」的純人類工具命令才考慮設 —— 依據 transcript 非受眾表
 - **`paths`** 限縮 auto-load 範圍 —— 領域特化 skill（查特定套件、特定副檔名）用 glob 避免跨專案誤觸發；注意 paths 只擋 body auto-load，**description 仍在 listing**
 - **`context: fork`** 隔離長任務 —— 適合 self-contained 任務（無對話歷史依賴），用 `agent:` 選 subagent 型別
 - **`allowed-tools` vs settings 權限**：`allowed-tools` 是 skill 作用時的預批准；基礎權限仍由 settings.json 管理

@@ -75,7 +75,7 @@
 ### 品質工具
 
 - `/lint-fix` — ruff + mypy 自動修正
-- `/fix-test` — 測試失敗分類修復（先分類 A/B/C/D/E 再修復，防止盲目讓測試通過）
+- `/fix-test` — 測試失敗分類修復（先分類 A/B/C/D/E 再修復，防止盲目讓測試通過）+ 階段 4.5 TWINS 同類缺陷 sweep
 - `/audit-test` — 測試品質稽核（反模式偵測、覆蓋對稱性、mock 健康度，只讀不寫）
 - `/consistency` — 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度、Signal/Noise）
 - `/sync-sources` — 跨檔 single-source invariant 機械檢查（v1：enum + classification 沒被 drift）

@@ -142,6 +142,34 @@ uv run pytest <targets> -v --tb=short
 
 每個修復完成後立即驗證該測試。全部完成後跑一次受影響的完整測試套件（背景跑）。
 
+### 階段 4.5：Twin Sweep（每修完一個缺陷後強制）
+
+每完成一個修復並驗證通過後，立即執行本階段（嵌入階段 4 的 per-fix loop 內），再進行下一個修復。搜尋同類缺陷的其他位置。單點修復不是完成。
+
+**強制輸出 line**（必須出現於修復報告）：
+
+```
+TWINS: searched <pattern> - found <N> other sites: <files, or "none">
+```
+
+- **pattern**：剛修的錯誤構造（rg/LSP 搜尋的精確 pattern）
+- **N=0**：完成
+- **N>0**：列出位置；建議是否一併修（同一 commit 或分拆由用戶決定）
+
+**搜尋工具**：符號查詢用 LSP `findReferences` / `workspaceSymbol`；文字 pattern 用 rg（工具選擇見 [lsp-navigation](../rules/lsp-navigation.md)）。
+
+**pattern 範例**（依 fix-test 失敗類型）：
+
+| 類型 | pattern 範例 | 搜尋目標 |
+|------|-------------|---------|
+| A 實作缺陷 | `rg "if x is None:"`（應為 `is not` 的邏輯翻轉） | 同類邏輯錯誤 |
+| B 契約變更 | `rg "<old_signature>"`（舊 signature 殘留） | 其他用舊契約的 caller |
+| C 測試腐化 | LSP `findReferences` on private method | 其他耦合同 private 的測試 |
+| D 基礎設施 | `rg "fixture_<name>"` 或 `rg "conftest"` | 同類 fixture 過時 |
+| E 測試過時 | `rg "@pytest.mark.<marker>"`（標記的過時意圖） | 其他同類過時測試 |
+
+**與 acceptance-evidence filter trap 的差異**：filter trap 是反向（移除補丁前查 caller 是否阻斷 case）；TWINS 是正向（修缺陷後查同類）。方向相反、正交不衝突（工具重疊但用途不同），並列使用。
+
 ---
 
 ## 禁止行為
@@ -171,4 +199,5 @@ uv run pytest <targets> -v --tb=short
 - [ ] 用戶確認後才開始修復
 - [ ] 每個修復後都驗證該測試通過
 - [ ] 全部修復後跑完整受影響測試套件
+- [ ] 修復報告含 `TWINS:` line（階段 4.5）
 - [ ] 未使用任何禁止行為
