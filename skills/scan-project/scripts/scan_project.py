@@ -523,7 +523,7 @@ def run_cross_validation(
         # Extract first path-like segment (before any description)
         # e.g. "CLI `mycli data daily-close`" → skip (CLI commands)
         # e.g. "`indicators/engine.py:apply_indicators()`" → extract path
-        path_match = re.search(r"`?([a-z_][a-z0-9_./]+\.py)", entry)
+        path_match = re.search(r"`?([a-z_][a-z0-9_./]+\.pyi?)", entry)
         if path_match:
             rel_path = path_match.group(1).split(":")[0]
             # Candidate locations to check
