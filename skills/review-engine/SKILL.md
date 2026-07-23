@@ -78,6 +78,8 @@ workflow-review-pattern 的 schema、各命令的輸出分類，皆引用此。
 | 註解、字串、config 值、日誌、TODO | rg（LSP 不索引非程式碼） |
 | 檔案搜尋 | fd（LSP 不處理檔案系統） |
 
+> **圖譜 facts 後備（CRG，companion）**：衝擊半徑 / transitive callers / affected flows / community 等**圖譜級**結構事實，在 CRG 裝了的專案用 CRG（見 [crg-query](../crg-query/SKILL.md)）—— LSP 查單一 symbol（定義/簽名/單點引用），CRG 查 transitive impact/flows（review 的 Architecture 軸 ripple、change scoping）。LSP-vs-CRG 分工 + assume/warn-if-absent + anti-over-reliance（graph=structure≠behavior，dynamic dispatch/config 不在圖裡）見 crg-query；CRG 未安裝 → `[WARN]` + fallback LSP/scan-project（不靜默降級）。
+
 ### 自我否證義務
 
 **「找不到」≠「不存在」**。查證 0 hits 時必須：

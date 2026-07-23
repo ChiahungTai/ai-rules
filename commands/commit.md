@@ -47,6 +47,8 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 手動修正後仍無法通過 → 提示 `/lint-fix`，中止。
 
+> **全量測試驗證不在 commit**（在 `/build` 階段 3，見 [build.md](./build.md)）：commit 只守 lint + mypy。若本次變更**未經 `/build`**（如直接修完就 commit），commit 前先跑專案全量測試（如 `make test`）確保無 regression。
+
 ### 階段 2：Git 狀態分析
 
 `git status --porcelain` + `git diff` + `git diff --cached` + `git log --oneline -10`

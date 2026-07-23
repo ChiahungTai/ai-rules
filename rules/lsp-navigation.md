@@ -163,9 +163,21 @@ LSP 結果是 workspace 狀態相依的 — 若 `findReferences` 回傳意外少
 | harness | reindex 觸發 |
 |---------|-------------|
 | ZCode | `mcp__lsp-python__lsp(operation="reloadWorkspace")`（git 操作後、或符號查詢結果異常少時呼叫）。行為依 transport：**http**（共用 WorkspacePool）5-10s 重建 client；**stdio**（無 pool）回降級訊息、需手動重啟 server 觸發 reindex |
-| Claude Code | 檔案變更自動推送（見上「被動能力」），但 git rebase/reset 大幅變動後仍可能過時 |
+| Claude Code | 原生 plugin **無 reloadWorkspace**（檔案變更自動推送 diagnostics，見上「被動能力」，但 git rebase/reset 大幅變動後仍可能過時；stale 時無法主動 reindex → 見下「條件式 fallback」）|
 
 **真實案例（cross-harness 驗證）**：同一 `_PREV_COUNT` 符號（mosaic_alpha `structure/wave_scalars.py:50`），Claude session `findReferences` 只回傳 intra-file ref（誤判為工具對私有 symbol 的 false-negative），ZCode session 卻成功回傳跨檔引用 — 差異根因是 pyright workspace reindex 時機，非 LSP 對私有 symbol 的固有限制。**兩 session 結果矛盾時，先懷疑 workspace 狀態，再懷疑工具能力。**
+
+### 條件式 fallback（無原生 reloadWorkspace 的 harness）
+
+CC 原生 LSP plugin **無 `reloadWorkspace`** —— workspace stale（冷啟動 index 未完成、git 大幅變動）時，原生 `findReferences` 回可疑少（典型症狀：只回 intra-file refs、跨檔全消失），無法主動 reindex 只能乾等。解法：連接 `lsp-python` MCP（http 模式，ZCode 已在用的同一 server）作**條件式 fallback**（非常駐取代原生）：
+
+1. 原生 `findReferences` 回**可疑少**（只 intra-file / 跨檔消失）→ 判 stale，**非符號沒人用**
+2. → 切 MCP `lsp` dispatch 立刻拿正確跨檔結果（`mcp__lsp-python__lsp(operation="findReferences", ...)`——**單一 dispatch tool**，Claude/ZCode 同 server 同 API；`symbol_name` + `current_file`（name-based）或 `line` + `character`（position-based）皆可，兩組參數同一 tool，無「分立 references tool」）
+3. 必要時 `mcp__lsp-python__lsp(operation="reloadWorkspace")`（http 有效；stdio 降級）觸發 reindex
+
+**refs 數比對差異**：原生 `findReferences` 含定義點，MCP `lsp(operation="findReferences")` 不含 → 同符號原生恆多 1，語義一致；行號隨 index 漂移（未提交改動 + reindex），比 refs「數」與跨檔覆蓋非精確行號。
+
+**reload_workspace 對原生恢復的因果（實測）**：觀測 reload_workspace 後原生也從 stale 恢復，但 T0→reload→T3 間有時間推移，原生冷啟動本就背景 indexing，可能「時間到了」（相關非因果）。**fallback 成立不依賴此點** — MCP 立刻給正確答案才是核心。
 
 ---
 

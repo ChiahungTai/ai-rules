@@ -124,6 +124,8 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 
 **機械分工**：scan-project / Pattern Radar **枚舉**（撈全 + 相似）= primary；**LSP 驗證**（特定 claim → ✅/❌，見 [lsp-navigation](../../rules/lsp-navigation.md)）= secondary（人鎖定嫌疑後才上驗證）。
 
+> **圖譜 facts（CRG，companion）**：transitive impact radius / 跨檔 callers·flows / hub·community 等**圖譜級**結構事實，在 CRG 裝了的專案用 CRG（見 [crg-query](../crg-query/SKILL.md)）—— 三層 facts 互補：scan-project 給 folder/module 級枚舉、LSP 查單一 symbol、CRG 查 transitive graph。本 skill 的 City Map 資料 / hub / dep weight 在 CRG 專案可由 CRG `get_hub_nodes`/`get_impact_radius` 機械產，取代手推（但仍受 crg-query anti-over-reliance 約束：graph=structure≠behavior）。CRG 沒裝 → `[WARN]` + fallback scan-project/LSP（crg-query 的 assume+warn-if-absent）。
+
 ### 補償邏輯盤點（compensating pair detection）
 
 **修缺陷前的反向搜尋** — 補 `findReferences` 的盲區。`findReferences` 查「誰依賴 X」（反向依賴），抓不到「誰在抵消 X 的 bug」（補償邏輯）：補償點 B **不引用**缺陷函式 A，B 引用「A 算錯」這個事實。修 A 不拆 B → A 從「錯但被抵消」變「對但重複」（double-count）或「對但歸零」。

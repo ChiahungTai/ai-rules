@@ -62,6 +62,7 @@
 ### 工具與查詢
 - `context7-mcp` — library / framework / API 文檔查詢（context7 MCP）
 - `nt-query` — NautilusTrader 能力 / 實作 / 用法合約查詢（docs-first + LSP-on-Cython-stubs + designer intent）
+- `crg-query` — code-review-graph 知識圖譜查詢紀律（LSP-vs-CRG 分工：symbol→LSP / impact·callers·flows·community→CRG；assume + warn-if-absent；anti-over-reliance：graph=structure 非 behavior；CRG 裝了才 fire，平行 nt-query）
 - `mermaid` — pragmatism-first Mermaid 圖表生成
 - `rules-reminder` — 常被違反的 Bash 規則（rg/fd、無 `#`、`uv run`、無 `$` 展開）
 - `voice-notification` — 三通道語音通知（系統召回 / 進度提醒 / 完成通知）

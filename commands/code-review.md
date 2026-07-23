@@ -106,6 +106,7 @@ Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mod
 
 ### axis 3：Architecture — 調用 [arch-thinking](../skills/arch-thinking/SKILL.md) skill
 - **機器產 finding（A 軸）**：city map / dep weight / 重用枚舉 / LSP 查證，調用 skill 取結構資料 → 產 finding（變更融入既有結構？在重造？）
+  - **CRG（若裝了）**：axis 3 的 impact radius / 跨檔 callers / affected flows 用 CRG `get_impact_radius` / `query_graph callers_of` / `get_affected_flows` 機械產（取代手動 LSP 逐層追蹤）；change scoping 用 `detect_changes` + `get_minimal_context`（只讀 impacted nodes）。LSP-vs-CRG 分工 + assume+warn-if-absent 見 [crg-query](../skills/crg-query/SKILL.md)。
 - **受眾明文**：axis 3 與 `/illustrate` 用同一 skill，但 axis 3 產**機器 finding**（A 軸）、illustrate **渲染給人判讀**（B 軸）
 
 ### Capability Coverage — 滿足 Capabilities 描述嗎？
