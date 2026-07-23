@@ -106,7 +106,7 @@ skill / 全域 rules（本檔）> task prompt 條件句
 │  → LSP documentSymbol
 │
 ├─ 介面的具體實作
-│  → LSP goToImplementation
+│  → LSP goToImplementation（ZCode pyright 不支援，見「跨 harness LSP 載體對照」）
 │
 ├─ 呼叫鏈（誰呼叫它 / 它呼叫誰）
 │  → LSP incomingCalls / outgoingCalls

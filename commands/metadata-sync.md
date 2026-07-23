@@ -81,4 +81,4 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 - **消費不重造**:SYSTEM-MAP 偵測消費 doc-health findings;單檔自洽 invoke `/consistency`
 - **容錯**:無對應檔案(SYSTEM-MAP.md / `.kanban/` / architecture.md / flow-feedback)→ 該項跳過(邏輯見 [metadata-sync](../skills/metadata-sync/SKILL.md)「容錯(兩 mode 共用)」段,單一源)
 
-禁止:未確認就改檔 / 跳過偵測直接宣稱「無漏項」 / 把文檔內容同步(程式碼→描述)混入(那屬 build 5c)
+禁止:未確認就改檔 / 跳過偵測直接宣稱「無漏項」 / 把文檔內容同步(程式碼→描述)混入(那屬 build 5b)
