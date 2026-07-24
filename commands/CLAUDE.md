@@ -77,7 +77,7 @@
 - `/lint-fix` — ruff + mypy 自動修正
 - `/fix-test` — 測試失敗分類修復（先分類 A/B/C/D/E 再修復，防止盲目讓測試通過）+ 階段 4.5 TWINS 同類缺陷 sweep
 - `/audit-test` — 測試品質稽核（反模式偵測、覆蓋對稱性、mock 健康度，只讀不寫）
-- `/human-review` — folder baseline audit（per-folder 審查既有 code：2D tier ripple×test + 跨 folder invariant + smart scan；產 `ai-analysis/human-review/` 狀態；`--stale` 抓審完後 drift；非 change-driven，用 /code-review）
+- `/codebase-sweep` — 全面性 codebase 審查 + 架構 onboarding（per-directory 廣到精細：README+architecture+review+state.yaml；`<dir>` / `--status` / `--stale` / `--architecture`/`--arch` / `--invariants`；baseline 一次性 + drift；_invariants/ 命令生成結構 + 人保留 design_lessons；非 change-driven，用 /code-review）
 - `/consistency` — 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度、Signal/Noise）
 - `/sync-sources` — 跨檔 single-source invariant 機械檢查（v1：enum + classification 沒被 drift）
 - `/distill-spec` — 蒸餾肥大的 spec 文檔

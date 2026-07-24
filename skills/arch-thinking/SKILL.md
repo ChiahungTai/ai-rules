@@ -124,7 +124,7 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 
 **機械分工**：scan-project / Pattern Radar **枚舉**（撈全 + 相似）= primary；**LSP 驗證**（特定 claim → ✅/❌，見 [lsp-navigation](../../rules/lsp-navigation.md)）= secondary（人鎖定嫌疑後才上驗證）。
 
-> **圖譜 facts（CRG，companion）**：transitive impact radius / 跨檔 callers·flows / hub·community 等**圖譜級**結構事實，在 CRG 裝了的專案用 CRG（見 [crg-query](../crg-query/SKILL.md)）—— 三層 facts 互補：scan-project 給 folder/module 級枚舉、LSP 查單一 symbol、CRG 查 transitive graph。本 skill 的 City Map 資料 / hub / dep weight 在 CRG 專案可由 CRG `get_hub_nodes`/`get_impact_radius` 機械產，取代手推（但仍受 crg-query anti-over-reliance 約束：graph=structure≠behavior）。CRG 沒裝 → `[WARN]` + fallback scan-project/LSP（crg-query 的 assume+warn-if-absent）。
+> **圖譜 facts（CRG — CRG 專案 = co-equal primary，否則 companion fallback）**：transitive impact radius / 跨檔 callers·flows / hub·community 等**圖譜級**結構事實，**CRG 裝了的專案以 CRG 為 primary**（見 [crg-query](../crg-query/SKILL.md)）—— 三層 facts 互補：scan-project 給 folder/module 級枚舉、LSP 查單一 symbol、CRG 查 transitive graph。本 skill 的 City Map 資料 / hub / dep weight / bridge 在 CRG 專案**優先由 CRG 機械產**（`get_hub_nodes`/`get_bridge_nodes`/`get_impact_radius`/`list_communities`），scan-project 為非 CRG 專案 fallback（仍受 crg-query anti-over-reliance 約束：graph=structure≠behavior；**community ≠ module boundary** — 用目錄+AGENTS.md 為模組真相，community 只當 coupling hint）。CRG 沒裝 → `[WARN]` + fallback scan-project/LSP（crg-query 的 assume+warn-if-absent）。
 
 ### 補償邏輯盤點（compensating pair detection）
 

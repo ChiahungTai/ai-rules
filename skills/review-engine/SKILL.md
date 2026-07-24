@@ -174,3 +174,5 @@ review finding 可經多層驗證，**各層都可能錯**：
 - **audit-test**：不經模式判定（read-only 單一 agent 偵測，不做平行審查）
 
 維度知識（架構視角/機械）依賴 arch-thinking，非本 skill 包含。
+
+> **`/codebase-sweep`（非 review 命令家族，但複用本 skill 的 severity/confidence 框架標其 §HR findings）**：baseline per-directory sweep，產 `codebase-review/<dir>/` 4 檔；**非** change-driven（不審 diff、不 spawn review agents）→ **不適用本段執行預設**（force 獨立/max-agents/3-perspective 是 change review 的）；自有 baseline 流程（廣到精細 + 受眾分離，見 [codebase-sweep](../../commands/codebase-sweep.md)）。
