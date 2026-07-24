@@ -43,8 +43,8 @@ allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mc
 > **教訓**(indicators/ rollout 實證):首次用平行 StructuredOutput workflow(6 agents,nested schema + 多 required)→ **6/6 retry-exhausted**(agents 做了 224 tool uses 真實分析但 schema 太嚴產不出,全廢);改**直接執行(單 session)**→ 一次成。
 
 - **預設直接執行**(單 session):目錄核心檔通常 ~6 個,§HR 深審分析 fit 一個 session(common/ + indicators/ 實證)。讀 reference → 讀核心檔 → 真實 `uv run`/LSP/CRG → 寫 4 檔。
-- **目錄極大才用 workflow**(如 50+ 檔):若用,agent 產出是**給主 session 組 4 檔的原料**(非 agent 直接交付)→ 用 **free-text 或極簡 schema**(單層、少 required、optional 多);**禁 complex nested StructuredOutput**(strict schema 對「產大量結構化分析」的 agent 是 anti-pattern → retry-exhaust,真實分析全廢)。複雜結構交主 session 從 free-text parse。
-- 詳見 [agent-workflow](../skills/agent-workflow/SKILL.md)「Subagent 產出格式:schema 嚴格度」。
+- **目錄極大才用 workflow**(如 50+ 檔;未達此規模仍預設直接執行):若用,agent 產出是**給主 session 組 4 檔的原料**(非 agent 直接交付)→ 用 **free-text 或極簡 schema**(單層、少 required、optional 多);**禁 complex nested StructuredOutput**(strict schema 對「產大量結構化分析」的 agent 是 anti-pattern → retry-exhaust,真實分析全廢)。複雜結構交主 session 從 free-text parse。
+- 詳見 [agent-workflow](../skills/agent-workflow/SKILL.md)「Subagent 產出格式：schema 嚴格度」。
 
 ## Flow(5 步,per directory)
 
