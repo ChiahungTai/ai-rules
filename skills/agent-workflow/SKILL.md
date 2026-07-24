@@ -59,6 +59,24 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 | 中型實作（3-8 檔案） | 1-N 個 Agent + worktree | 按模型並發上限控制 |
 | 大型改動（20+ 檔案） | `/batch` 命令 | 自動拆分 5-30 單元，每單元獨立 worktree |
 
+### Subagent 產出格式：schema 嚴格度（raw material vs deliverable）
+
+spawn agent 時，依「agent 產出是**原料**還是**直接交付**」選 schema 嚴格度：
+
+| 產出性質 | schema | 為什麼 |
+|---|---|---|
+| **原料**（給主 session 組裝/parse，如 §HR 深審內容、findings 清單） | **free-text 或極簡 schema**（單層、少 required） | agent 價值在分析；strict schema 是約束不是助力 |
+| **直接交付**（agent 產出即最終結構，如 rename edit list、verdict 物件） | StructuredOutput schema OK | 結構本身是 deliverable，值得強制 |
+
+**🔴 anti-pattern：complex nested StructuredOutput + 多 required 用於「原料」產出** → **retry-exhausted**（agent 做完真實分析但無法 fit 進 nested schema，反覆重試全廢）。實證：`/codebase-sweep` indicators/ rollout 用 6-agent workflow（nested io_contracts/test_map schema）→ 6/6 retry-exhausted（224 tool uses 白費）；改直接執行（單 session）一次成。
+
+**恢復路徑**（遭遇 retry-exhausted）：
+1. **直接執行**（單 session，主 LLM 自己做）— 目錄/任務規模 fit 一個 session 時首選
+2. 或 **free-text schema** + 主 session 從 free-text parse 結構
+3. 禁：重跑同一 strict schema（必然再 retry-exhaust）
+
+判準自問：「agent 回傳的東西，我是直接用，還是要再組裝/parse？」要再組裝 → free-text。
+
 ### 委派框架（Delegation Philosophy）
 
 agent-workflow 偏控制導向（scope fence / git diff 驗產出 / classifier / gate），但放手碎片零散未連貫（[autonomous-execution](../autonomous-execution/SKILL.md)「不交半成品」、[build.md](../../commands/build.md)「裁量權」+ context handoff、scope fence「創造性例外」）。連貫化為 **delegate(goal + tools + context) → let go(within guardrails) → verify(outcome)** 模型。
