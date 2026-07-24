@@ -69,7 +69,7 @@ allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mc
 ### 4. architecture.md(illustrate + CRG)
 illustrate 渲染 5 張圖:**emoji-first,color 僅 accent 每圖 1-3 節點**:
 1. 內部分層(依賴向內)
-2. keystone fan-out(common/此目錄 → 消費者鏈)
+2. keystone fan-out(common/此目錄 → 消費者鏈;**消費者規模數字必須精確計數** — CRG `importers_of` 或 `rg -l | wc -l`,**禁 `rg -l | head` 截斷後人工數**,見 [modern-cli-preference.md](../rules/modern-cli-preference.md))
 3. critical path 拓樸(如 single-writer 匯流)
 4. invariant flow(cross-folder 消費者,grounded in CRG `callers_of`)
 5. domain overlay 輻射(silent-corruption path)
@@ -128,4 +128,4 @@ ai-analysis/codebase-review/
 - [illustrate](illustrate.md) — B 軸人類 viewport 渲染
 - [review-engine](../skills/review-engine/SKILL.md) — severity/confidence(severity/confidence only;codebase-sweep 非 review 命令家族,自有 baseline 預設)
 - [mermaid](../skills/mermaid/SKILL.md) — dark-theme 安全色(產圖前必讀)
-- [acceptance-evidence](../../rules/acceptance-evidence.md) — coverage ≠ assertion 強度(L2 trap)
+- [acceptance-evidence](../rules/acceptance-evidence.md) — coverage ≠ assertion 強度(L2 trap)

@@ -67,6 +67,20 @@ rg -o -r '$1' "(\w+)\.py" # 捕獲群組替換輸出（$1 是 rg 語法，非 sh
 - **alternation 陷阱**：`rg "a\|b"` 搜尋的是 literal `a|b`（`\|` 是 regex literal pipe），**不是**「a 或 b」。多選一用 `rg "a|b"`（雙引號內 `|` 不被 shell 當 pipe，直傳 rg 作 alternation）或 `rg -e a -e b`
 - **gitignored 檔盲點**（如 `settings.json`）：rg/fd 預設跳過 `.gitignore` 內檔案 —— 殘留檢查若漏了這點會 false-negative 誤判「全綠」（本 session 真實案例：settings.json 殘留被 rg 跳過）。查 gitignored 檔用 `rg --no-ignore` / `-uu` 或顯式指定檔名（详见上「隱藏檔陷阱」）
 
+## 統計/計數用途禁用 head 截斷
+
+> **核心原則**：rg「展示用途」（看有哪些檔/範例）與「統計用途」（得數字寫進文檔/claim）命令不同。統計用途禁 `| head -N` 截斷後人工數，必須用計數命令得完整數字。
+
+| 用途 | 命令 |
+|------|------|
+| 展示（看範例/看有哪些） | `rg -l "pattern" \| head -N` |
+| **統計:檔案數**（寫進文檔/claim） | `rg -l "pattern" \| wc -l`（**禁 head 截斷**） |
+| 統計:per-file match 數 | `rg -c "pattern"`（多檔輸出 `file:count` 多行;語境不同於檔案數） |
+
+**反例（truncation 陷阱）**：`rg -l "from pkg" | head -20` → 看到 20 行人工數 → 截斷的部分被當完整 → 數字錯（實際可能 41）。
+
+**真實案例**（features codebase-sweep）：`rg -l "from mosaic_alpha.features" | head -20` 截斷 → consumers **41 誤寫 20**（head-20 截斷:排序在前的子目錄先列完才輪到其餘 → 某子目錄實際 32 檔只顯示 11）；多處文檔一致寫錯，**自審抓不到**（claim 與截斷證據共享盲點，需獨立第三方 rg 才揭露）。同類陷阱不同載體:符號查詢的 truncation/stale 見 [lsp-navigation.md](lsp-navigation.md)（**rg** 符號查詢會 truncation/masking,**LSP findReferences** 是解方 100% 涵蓋;LSP workspace stale 時亦回傳少）。
+
 ## 搜尋策略
 
 - **找檔案**：`fd` 或 `rg -l "pattern"` — 只需檔名

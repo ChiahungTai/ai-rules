@@ -18,6 +18,8 @@ harness-scope: neutral
 
 證據獨立性的直接 operationalization:當 AI/producer 宣稱「不影響 X」(accounting/risk/invariant)時,這個 claim 須有**獨立機械證據**反證(git diff / rg 殘留 / LSP findReferences),否則 claim 退化為 self-report — AI 同時產 code 與 claim,claim 是非獨立自述,受同一 mental model drift 污染(呼應上方證據獨立性)。**AI 誠實說「沒影響」時最危險** — 獨立性塌縮點。
 
+**數字/清單類 claim 同理**(計數、規模、盤點清單):寫進文檔前用獨立計數命令(`rg | wc -l` / `rg -c`)核對原命令完整輸出,不靠印象或截斷結果人工數 — AI 寫盤點清單時易憑印象混入/漏掉成員(真實案例:features leaf 清單把 VolumeFeature 寫成 KeyCandleFeature,與 `list_feature_classes` 實際輸出不符,自審抓不到;consumers 數 41 誤寫 20 因 `rg | head -20` 截斷)。
+
 此為跨 harness 通用原則:具體機制(Agent 產出 vs git diff 校驗)見 build.md Agent 產出機械驗證(Claude command);非 Claude harness 靠自家 review 機制套用同一原則 — 任何「沒影響 X」的 claim 都須獨立證據,不接受自述。
 
 ## 核心原則(續):認知誤差與 EP 的預見極限
