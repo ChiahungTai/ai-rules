@@ -58,7 +58,7 @@ Signal/noise framework: [encoder-philosophy.md](./instruction/_common/encoder-ph
 
 **目標只有兩種合法來源**：
 
-1. **`$ARGUMENTS` 空**（無參數調用）→ 走 git diff fallback（下方）自動偵測最近變更的 `.md`
+1. **`$ARGUMENTS` 空**（無參數調用）→ 走 git diff fallback（下方）自動偵測**未 commit** 的 `.md`
 2. **`$ARGUMENTS` 是一個存在的 `.md` 檔案路徑，且該路徑 ≠ 本命令定義檔（`commands/consistency.md`）** → 直接檢查該檔，跳過 fallback
 
 > **🔴 fail-fast guard（防 silent 自檢 — 無論如何不得繞過）**
@@ -70,15 +70,18 @@ Signal/noise framework: [encoder-philosophy.md](./instruction/_common/encoder-ph
 >
 > **為什麼絕對禁止**：拿不到目標卻退而求其次去檢查任意 `.md`（尤其定義檔自身），等於在沒有真實檢查對象的情況下產出分數——虛假信心，比「沒跑」更危險（違反 fail-loud）。silent 自檢（檢查定義檔自己）是最危險的形式：報告看起來完整，但檢查的是錯誤對象。
 
-**git diff fallback**（僅當 `$ARGUMENTS` 空）— 依序嘗試：
-1. `git diff --name-only` — 未 commit 的變更文檔
-2. `git diff --cached --name-only` — 已 staged 但未 commit 的文檔
-3. `git diff --name-only HEAD~1 HEAD` — 最近一次 commit 修改的文檔
+**git diff fallback**（僅當 `$ARGUMENTS` 空）— 只取**未 commit** 變更，不 fallback 到已 commit：
+
+1. 合併 `git diff --name-only`（unstaged）+ `git diff --cached --name-only`（staged），去重 = working tree 與 HEAD 的全部落差
+2. **禁止 fallback 到 `HEAD~1 HEAD`**：自動偵測的服務對象是「剛改完待檢查」的未 commit 狀態 —— 已 commit 的文檔不在服務範圍（提交前閘門非 Always：純 `.md` 常繞過 `/build` 直接 `/commit`、且 `/build` 5d 僅大型/中型；故不假設「已 commit = 已被 consistency 檢查」），要審請顯式 `/consistency <path>`。無未 commit 變更 = 提示用戶並結束（fail-loud，不硬擠目標）
 
 從結果篩選 `.md`，**排除 `commands/consistency.md`（定義檔自身）**，作為檢查目標。若無任何 `.md`，提示用戶並結束。
 
-### 步驟 1: 讀取文檔
-完整讀取目標文檔內容。
+### 步驟 1: 完整讀取文檔（whole-document，禁只看 diff hunk）
+
+**完整讀取整份目標文檔**（第一行到最後一行）—— **禁止只讀 git diff hunk 或「修改過的段落」**。
+
+**為什麼必須 whole-document**：consistency 的六維度（自洽／矛盾／順序／自包含／精準／S-N）本質需要全文視角 —— 術語前後矛盾（第 10 行用 A、第 200 行用 B）、章節順序跳級、cross-section 引用斷裂，只看修改處的 diff hunk 結構上抓不到。git diff 告訴你「改了什麼」；consistency 要判斷「改動後整份文檔還自洽嗎」—— 兩者視角不同。
 
 ### 步驟 2: 執行六維度檢查
 依序檢查上述六個維度，記錄發現的問題。
@@ -135,7 +138,8 @@ Signal/noise framework: [encoder-philosophy.md](./instruction/_common/encoder-ph
 - **快速執行**: 不啟動多 Agent，直接分析
 - **簡潔輸出**: 報告精簡但資訊完整
 - **可執行建議**: 提供具體的改善方向
-- **Git 感知**: 未指定文檔時自動從 git diff 或最近 commit 決定檢查目標
+- **Whole-document**: 完整讀取文檔，禁只看 diff hunk（見步驟 1）
+- **Git 感知**: 無參時只從**未 commit** 變更決定檢查目標（不 fallback 到已 commit）
 
 ---
 
@@ -154,7 +158,7 @@ Signal/noise framework: [encoder-philosophy.md](./instruction/_common/encoder-ph
 ## 📝 使用範例
 
 ```bash
-# 自動偵測：優先檢查未 commit 的 .md，其次檢查最近 commit 的 .md
+# 自動偵測：檢查未 commit 的 .md（無未 commit 變更則提示，不 fallback 到已 commit）
 /consistency
 
 # 檢查指定文檔

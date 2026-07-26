@@ -1,6 +1,6 @@
 ---
 description: "全面性 codebase 審查 + 架構 onboarding — 一次性 per-directory 廣到精細 sweep(README+architecture+review+state.yaml),CRG 驅動,產 ai-analysis/codebase-review/ baseline。之後日常改動用 /code-review 輕審 delta。非 change-driven。"
-usage: "/codebase-sweep <directory> [--status|--stale|--architecture|--invariants]"
+usage: "/codebase-sweep [<directory>|--status|--stale [<dir>]|--architecture|--arch|--invariants]"
 argument-hint: "<directory> | --status | --stale [dir] | --architecture (--arch) | --invariants"
 allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mcp__code-review-graph__*"]
 ---
@@ -36,7 +36,7 @@ allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mc
 
 1. `mcp__code-review-graph__list_graph_stats_tool` 看 `head_matches_build`。
 2. 若 `false` → `mcp__code-review-graph__build_or_update_graph_tool`(incremental refresh)→ 確保含當前 test 檔(如 `<guard test>`)。
-3. refresh 後才信任 impact/caller/community 結果。CRG 未裝 → `[WARN]` + fallback scan-project/LSP(crg-query assume+warn-if-absent,**不靜默降級**)。
+3. refresh 後才信任 impact/caller/community 結果。CRG 未裝 → `[WARN]` + fallback [scan-project](../skills/scan-project/SKILL.md)/LSP(crg-query assume-present + warn-if-absent,**不靜默降級**)。
 
 ## 執行模式(直接執行優先,勿過度 workflow)
 

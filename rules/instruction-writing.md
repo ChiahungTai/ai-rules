@@ -117,7 +117,7 @@ permission-mode: "acceptEdits"
 - **完整範例**: 超過 5 行的程式碼範例（精簡為一句話 + 源碼引用）
 - **元資訊**: 版本號、更新日期、統計資訊、Changelog
 - **過時範例**: 無法實際執行的範例
-- **專案特定事實**: 真實專案符號/路徑/數字（如 `myproject.common.enums.MyEnum`）—— 泛用 rules/commands 教 pattern，用 `<placeholder>`（`<package>`、`<EnumClass>` 等）。例子釘死專案現狀 → 該專案一改就 drift、其他專案讀無關。專案特定工具（upgrade-* 等）例外
+- **專案特定事實**: 真實專案符號/路徑/數字（如 `myproject.common.enums.MyEnum`）—— 泛用 rules/commands 教 pattern，用 `<placeholder>`（`<package>`、`<EnumClass>` 等）。例子釘死專案現狀 → 該專案一改就 drift、其他專案讀無關。例外：① 專案特定工具（upgrade-* 等）；② **失敗教訓真實案例** —— 保留專案符號以維持 failure-lesson 可信度，但須含「真實案例」marker（機械可辨識），且教訓本身不依賴該符號現狀（符號改名/消失，教訓仍成立）
 - **重複描述（反模式是重複，不是集中）**: 集中清單（Symbol Map / Index 段落）與 per-concept 種子重複描述同概念 —— 寫兩遍浪費 token 且易 drift。集中段落（如「可複用基礎設施」）只用於跨模組共用 symbol（distinct purpose），不可與 per-concept 種子重複
 - **Class→檔案映射表（LSP 可推導）**: 整張「檔案 | Class/函式 | 職責」表的前兩欄是 LSP `goToDefinition` / `workspaceSymbol` 的機械產出（含 `_private` 私有 symbol），屬 Low Noise。集中表必然 drift —— 重構 rename/搬檔後過時，且無機制強制同步，過時表比無表更危險（誤導讀者）。職責語義用 per-concept 內嵌種子或 Capabilities 入口欄承載。**移除既有映射表前必須逐行查證 High Signal 是否與下方段落矛盾**（過時 drift 比單純冗餘更危險）
 

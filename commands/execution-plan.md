@@ -158,7 +158,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 **執行**：spawn Explore Agent（model 依 [model-routing](../rules/model-routing.md)：session 降一級）深度掃描相關模組：
 
 1. **可複用基礎設施盤點**：搜尋需求涉及的模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + LSP `workspaceSymbol` 搜尋相關 class/function，找出可複用的 utilities、base classes、protocols
-2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用。**CRG（若裝了）**：transitive impact radius / 跨檔 callers / flows 用 CRG `get_impact_radius` / `query_graph callers_of`（LSP 查單 symbol，CRG 查 transitive graph —— EP 的 ripple / 影響範圍靠 CRG 機械產）—— LSP-vs-CRG 分工 + assume+warn-if-absent 見 [crg-query](../skills/crg-query/SKILL.md)
+2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用。**CRG（若裝了）**：transitive impact radius / 跨檔 callers / flows 用 CRG `get_impact_radius` / `query_graph callers_of`（LSP 查單 symbol，CRG 查 transitive graph —— EP 的 ripple / 影響範圍靠 CRG 機械產）—— LSP-vs-CRG 分工 + assume-present + warn-if-absent 見 [crg-query](../skills/crg-query/SKILL.md)
 3. **類似實作**：LSP `workspaceSymbol` 搜尋相似名稱的 class/function，rg 補充搜尋字串和註解
 4. **風險假設識別**：列出高風險技術假設（外部 API、SDK 行為、架構假設），標注由哪個段落的驗證策略 POC 驗證（吸收舊 `/spec` Phase 3 前期 POC 職責）
    - **致命先驗**：標注為「致命」等級的假設（假設錯了整個 EP 要重寫，等級定義見 [/ep-validate](./ep-validate.md)）—— 先跑 `poc/poc_*.py` 驗證可行性再繼續設計段落，避免寫完整 EP 才發現方向死掉；高等級與中等級保留在各段落驗證策略
