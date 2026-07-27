@@ -20,6 +20,8 @@ harness-scope: neutral
 
 **數字/清單類 claim 同理**(計數、規模、盤點清單):寫進文檔前用獨立計數命令(`rg | wc -l` / `rg -c`)核對原命令完整輸出,不靠印象或截斷結果人工數 — AI 寫盤點清單時易憑印象混入/漏掉成員(真實案例:features leaf 清單把 VolumeFeature 寫成 KeyCandleFeature,與 `list_feature_classes` 實際輸出不符,自審抓不到;consumers 數 41 誤寫 20 因 `rg | head -20` 截斷)。
 
+**silent-failure claim 同理**(silent drift / silent corruption / 靜默失效):宣稱「行為 silent」須附**執行證據**(跑了該輸入、觀察到靜默通過,非靜態推論)。**silent vs loud 不對稱風險** — 誤判 loud(實為 silent)以為會炸卻靜默腐敗(危險);誤判 silent(實為 loud)虛驚、跑測試推翻(安全)。故 silent-claim 舉證責任更高:無執行證據時**預設標 'inferred loud',禁標 'silent'**。真實案例:codebase-sweep state.yaml 把 Interval 自創名稱(如 `"1M"`)標「silent drift」— 靜態推論「1M 撞 1m」沒跑 `Interval("1M")`;實證 StrEnum 精確比對 + raise → loud crash 非 silent。同類:tilde bug 靜態推論「消費端 inline 沒問題」沒執行 → 實證推翻。教訓通用(silent-claim 須執行),不依賴特定符號現狀。
+
 此為跨 harness 通用原則:具體機制(Agent 產出 vs git diff 校驗)見 build.md Agent 產出機械驗證(Claude command);非 Claude harness 靠自家 review 機制套用同一原則 — 任何「沒影響 X」的 claim 都須獨立證據,不接受自述。
 
 ## 核心原則(續):認知誤差與 EP 的預見極限
