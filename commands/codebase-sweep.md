@@ -69,7 +69,7 @@ allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mc
 ### 4. architecture.md(illustrate + CRG)
 illustrate 渲染 5 張圖:**emoji-first,color 僅 accent 每圖 1-3 節點**:
 1. 內部分層(依賴向內)
-2. keystone fan-out(common/此目錄 → 消費者鏈;**消費者規模數字必須精確計數** — CRG `importers_of` 或 `rg -l | wc -l`,**禁 `rg -l | head` 截斷後人工數**,見 [modern-cli-preference.md](../rules/modern-cli-preference.md))
+2. keystone fan-out(common/此目錄 → 消費者鏈;**codebase 統計數字(importer/模組/test/graph node 數)人類檔顯示用 magnitude**(數十/數百/幾乎全 codebase/上萬),**禁寫精確整數** — 精確數只進 state.yaml(機器);人類檔寫精確整數必 drift 且零邊際信號(「數百」與「342」對讀者決策等效)。如實計數用於 tiering,計數法 CRG `importers_of` / `rg -l | wc -l`,禁 `rg -l | head` 截斷人工數,見 [modern-cli-preference.md](../rules/modern-cli-preference.md))
 3. critical path 拓樸(如 single-writer 匯流)
 4. invariant flow(cross-folder 消費者,grounded in CRG `callers_of`)
 5. domain overlay 輻射(silent-corruption path)
