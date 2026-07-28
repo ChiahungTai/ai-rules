@@ -209,6 +209,8 @@ allowed-tools: ["Read", "Bash"]
 
 **與角度 1 的區別**：角度 1「同義反覆」是靜態（test/source 同值）；角度 6「過時」是動態（重構後 test 被改迎合）。角度 1 抓不到動態漂移。
 
+**與靜態隱含覆蓋的區別（/human-review 判準 2 補充）**：本角度（動態過時）與「靜態他處已測 = 冗餘」語義不同 — 後者指測試的行為已被**另一個測試**隱含驅動（如測 thin wrapper，但 wrapper 本體已被別處測；或同行為不同入口重複測）。靜態隱含覆蓋的查證與判斷見 [human-review skill](../skills/human-review/SKILL.md) 判準 2；本命令聚焦動態過時 + 反模式，不重疊。
+
 **3-signal correlation（升級 2-signal → 3-signal，捕 intent drift）**：判讀 passing test 是真通過還是 silent drift，單看「過時」（動態）不夠 —— 須關聯三訊號：① 原始 test intent（story / 建立時擷取）② 當前 test result ③ 引入的 code changes。三者不一致 = intent drift 訊號（test 還過但已不驗原意圖）。coverage 增加也不保證 test 仍驗意圖。3-signal taxonomy 見 [acceptance-evidence](../rules/acceptance-evidence.md)「Intent Drift 的兩型 + 3-signal correlation」。
 
 ---

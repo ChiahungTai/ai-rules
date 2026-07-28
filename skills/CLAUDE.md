@@ -33,6 +33,7 @@
 ### 品質與審查
 - `review-engine` — review 命令家族通用審查邏輯 domain 真相源（嚴重度/信心水準/審查者自證/LSP 查證/審查模式判定/Writer-Reviewer 分離/多層驗證/**review 執行預設單一源**：force 獨立 / max-agents / model / 視角 / spawn-vs-session）；ep-review/code-review/audit-test/execution-plan EP Review/build Agent Review 共用
 - `code-review-and-quality` — code 六軸審查 profile（what to check）；通用邏輯見 review-engine
+- `human-review` — /human-review 命令 domain 層（判準 4 命名/設計質疑 + 判準 5 mixed-tree framing + 編排 audit-test + 誠信 stance；source 側 audit-test 放大鏡）
 - `code-simplification` — 不改行為的重構簡化
 - `security-and-hardening` — 未信任輸入 / 外部整合的安全強化
 - `performance-optimization` — 效能瓶頸 profiling 與優化
