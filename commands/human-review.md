@@ -8,7 +8,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "LSP"]
 
 # /human-review — 以人類 viewport 審 AI 產出的放大鏡
 
-> **genesis（第 4 次，直面前 3 次失敗）**：本命令經歷 3 次失敗（Pattern Radar → 4-lens → 2D tier matrix），死因都是「分類軸思維 + token 牆 + 重造機械」（認罪：「取代 human-review，被棄 3 次，根因：過度投資 AI 機械、欠投資人類產出」）。本次定位翻轉：**source 側的 audit-test** — 借 audit-test 成熟範式（偵測器 stance + 問題/建議格式）+ 機械全委外既有 skill + 用戶判準封裝成 viewport。
+> **genesis**：前次設計死因是「分類軸思維 + token 牆 + 重造機械」（過度投資 AI 機械、欠投資人類產出）。本次定位翻轉：**source 側的 audit-test** — 借 audit-test 成熟範式（偵測器 stance + 問題/建議格式）+ 機械全委外既有 skill + 用戶判準封裝成 viewport。
 
 ## 定位（三向 + 分工）
 
@@ -57,7 +57,7 @@ scope 極大（50+ 檔）才用 Agent（free-text 產出，主 session 組報告
 | # | 判準（用戶 viewport） | 機械查證 | 既有引用（不重寫） |
 |---|---|---|---|
 | 1 | **YAGNI 嚴格**（沒用就刪） | LSP `findReferences` + rg 確認零消費者；filter trap 區分（YAGNI 往刪 / 驗證不能刪） | [collaboration-constraints](../rules/collaboration-constraints.md) YAGNI check + [acceptance-evidence](../rules/acceptance-evidence.md) filter trap |
-| 2 | **測試要有實際價值** | 隱含覆蓋查證（行為別處已測 = 冗餘）；不為覆蓋率寫 | 委外 [audit-test](audit-test.md) 角度 6 + **補靜態隱含覆蓋**（見下方） |
+| 2 | **測試要有實際價值** | 隱含覆蓋查證（行為別處已測 = 冗餘）；不為覆蓋率寫 | 委外 [audit-test](audit-test.md) 角度 6 + **補靜態隱含覆蓋**（audit-test 補充段） |
 | 3 | **嚴格不放水** | 機械查證不靠善意；對抗性自查（挑戰自己判斷） | [collaboration-constraints](../rules/collaboration-constraints.md) 反 Sycophancy + [review-engine](../skills/review-engine/SKILL.md) 審查者自證 |
 | 4 | **質疑命名/設計** | 命名碰撞（LSP）/ domain 一致 / phantom API（rg + LSP 確認符號存在） | **本 skill 自帶**（分散承載 → 封裝即價值） |
 | 5 | **scope 釐清** | mixed-tree 分組（`git status`）+ 結論 framing 對應 scope | **本 skill 自帶**（完全無既有承載） |
@@ -89,8 +89,8 @@ scope 極大（50+ 檔）才用 Agent（free-text 產出，主 session 組報告
 <details>方法論限制 + 歷史回顧（若有）</details>
 ```
 
-**關鍵（避開 3 次失敗陷阱）**：
-- **推薦先行**（非選項清單）：每個 finding 給「建議 X，因為 Y」，不給「A or B 你選」— 這是「省 prompt」初衷（前 3 次失敗都在過程導向，把判斷推回人類）
+**關鍵（避開前次失敗陷阱）**：
+- **推薦先行**（非選項清單）：每個 finding 給「建議 X，因為 Y」，不給「A or B 你選」— 這是「省 prompt」初衷（前次設計為過程導向，把判斷推回人類）
 - **查證誠信段必含**：記錄翻案（撤銷）/ 深化 / 確認，展示「批判性追查」— human-review 對 audit-test 的差異化（audit-test 機械列，不追查過程）
 - **撤銷的 finding 保留**（標 ❌）：查證推翻不刪除，示範自我否證建立信任
 - **ASCII 圖**（problem → fix 對照）：每個 finding 一張；md 模式可升 Mermaid

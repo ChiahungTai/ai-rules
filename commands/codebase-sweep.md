@@ -11,7 +11,7 @@ allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mc
 >
 > **核心理念**:**人類產出格式優先**(genesis 教訓 — `/human-review` 3× 失敗都在重造 AI 機械、欠投資人類產出 → token 牆 → 「人類不會看」)。本命令把設計預算花在**人類可讀產出**(廣到精細 + 受眾分離 + emoji-first Mermaid),AI 機械(tiering/CRG/渲染)委外給既有 skills。
 >
-> **human-review 復活註記**:`/human-review` 第 4 次復活(新設計 = source 側 audit-test,定位「放大鏡」與本命令正交:sweep 盤點既有穩固度 / human-review 質疑 AI 是否亂加)。上述「人類產出優先」教訓仍為本命令設計依據;human-review 復活詳見 [human-review](human-review.md) genesis 註記。
+> **與 /human-review 的區隔**:`/human-review`(source 側 audit-test,定位「放大鏡」)與本命令正交 — sweep 盤點既有穩固度 / human-review 質疑 AI 是否亂加(詳見 [human-review](human-review.md))。「人類產出優先」教訓為兩命令共同設計依據。
 >
 > **vs `/code-review`**:code-review = change-driven(pre-merge diff);codebase-sweep = baseline-sweep(既有 code + 週期)。正交不合併。
 
