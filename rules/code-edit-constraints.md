@@ -31,6 +31,23 @@ harness-scope: claude-specific
 # 3. 若需再次 Edit → 先 Read 取得更新後的內容
 ```
 
+### ❌ replace_all 改名的子串陷阱
+
+`replace_all` 用**子串匹配**（非整詞邊界），改名 `A→B` 時所有含 `A` 子串的都會被改 — 包括不想改的。Edit 工具無整詞邊界選項（不像 regex `\b`），只能事後 rg 查。
+
+```markdown
+## ❌ 錯誤：replace_all 改名誤改子串
+# 改名 RateLimiter → SyncRateLimiterProtocol (replace_all)
+# SyncRateLimiter (含 "RateLimiter" 子串) → SyncSyncRateLimiterProtocol (誤改!)
+
+## ✅ 正確：replace_all 改名後 rg 確認無子串誤改
+# 1. 改名前 rg "<目標詞>" 看是否是其他符號的子串（如 rg "RateLimiter" → 發現 SyncRateLimiter 含子串）
+# 2. 改名後 rg "<新名><新名>" (如 rg "SyncSync") 確認無雙重重複
+# 3. 或改用 Edit 逐處替換（非 replace_all），精確控制每處
+```
+
+> 真實案例：`SyncSyncRateLimiterProtocol`（rate_limiter 改名 `RateLimiter`→`SyncRateLimiterProtocol` 時，replace_all 誤改 `SyncRateLimiter`）— review 時抓到。
+
 ### 連續 Edit 失敗處理
 
 連續兩次 Edit 同一檔案失敗時：
@@ -74,3 +91,4 @@ Edit 工具在跨行匹配含多位元組字元（中文等）時可能失敗，
 - [ ] 已嘗試編輯現有檔案而非創建新檔案
 - [ ] 如果需要破壞性變更，確認不影響外部整合
 - [ ] 架構改進有測試保護
+- [ ] replace_all 改名後，rg 確認無子串誤改（如 `rg "SyncSync"` 查雙重重複）

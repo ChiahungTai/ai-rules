@@ -56,7 +56,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 
 ## 執行模式選擇
 
-判定規則（effort/max-agents → 模式）見 [review-engine](../skills/review-engine/SKILL.md)；max-agents 上限查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md)。下表為交付渲染的平行化判定（借用相同條件）：
+判定規則（effort/max-agents → 模式）見 [review-engine](../skills/review-engine/SKILL.md)；max-agents 上限查 [agent-workflow 並發表](../skills/agent-workflow/SKILL.md)。下表為交付渲染的平行化判定（借用相同條件）。**注意：review-engine 的 force 獨立（取消 Main LLM 自審）僅適用 review 命令（Writer/Reviewer 分離需求）；交付渲染無此需求，Main LLM 序列渲染合法**（Phase 2 互動必須 Main LLM）：
 
 **Phase 1（交付渲染）**：
 
