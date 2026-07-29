@@ -1,6 +1,6 @@
 ---
 name: review-engine
-description: 決定 finding 嚴重度（Critical/Important/Suggestion）、標信心水準（confirmed/evidence-based/inferred）、查證審查宣稱、選審查模式（Workflow/Agent Tool/Main LLM）、理解多層驗證鏈、決定 review 執行預設（force 獨立/max-agents/model/視角/spawn-vs-session）時使用。review 命令家族通用審查邏輯的 domain 真相源 — 審查者自證、LSP 查證方法、Writer-Reviewer 分離、多層驗證設計；ep-review/code-review/audit-test/execution-plan EP Review/build Agent Review 共用。
+description: 決定 finding 嚴重度（Critical/Important/Suggestion）、標信心水準（confirmed/evidence-based/inferred）、查證審查宣稱、選審查模式（Workflow/Agent Tool）、理解多層驗證鏈、決定 review 執行預設（force 獨立/max-agents/model/視角/spawn-vs-session）時使用。review 命令家族通用審查邏輯的 domain 真相源 — 審查者自證、LSP 查證方法、Writer-Reviewer 分離、多層驗證設計；ep-review/code-review/audit-test/execution-plan EP Review/build Agent Review 共用。
 ---
 
 # review-engine — 通用審查邏輯 domain 層
@@ -105,7 +105,7 @@ workflow-review-pattern 的 schema、各命令的輸出分類，皆引用此。
 |------|----------|-------------------|-------------------|
 | effort = ultracode/xhigh **且** max-agents > 1 | **Workflow** | — | [workflow-review-pattern](../../commands/instruction/_common/workflow-review-pattern.md)（schema + 兩階段腳本 + adversarial verify） |
 | max-agents = 1 但 effort = ultracode/xhigh | **Agent Tool**（Fallback） | — | [agent-review-cycle](../../commands/instruction/_common/agent-review-cycle.md)（3-perspective） |
-| effort < ultracode | **Main LLM** | build / ep-review / execution-plan（品質閘門，連 standard effort 也強制獨立 agent、不走 Main LLM；僅 code-review 等無強制分離命令適用） | 主 LLM 直接審（現有行為） |
+| effort < ultracode | **Agent Tool**（預設 force 獨立） | — | 同上（agent-review-cycle 3-perspective）— **取消 Main LLM 自審**（code-review 不再例外；實證:獨立 agent 抓自審盲點,見 acceptance-evidence「同 LLM 審自己 = 零獨立性」） |
 
 判定結果決定讀哪個執行範本的 schema/腳本 —— 這是**依賴方向**（判定 → schema），不是耦合。本 skill 只放判定規則，**不重複** schema/腳本（在 workflow-review-pattern）。
 
@@ -133,7 +133,7 @@ review finding 可經多層驗證，**各層都可能錯**：
 
 > 各 review 命令（ep-review / code-review / audit-test / execution-plan EP Review / build Agent Review）的**執行層預設**集中於此 —— 消除「預設行為跨命令重複定義且 drift」。各命令保留自己的 profile（維度）+ 產出動作，執行預設（force 獨立 / max-agents / model / 視角 / spawn-vs-session）引用本段。
 
-1. **不 auto-detect，force 獨立 agent（預設）**：review 命令預設 spawn 獨立 agent（Workflow / Agent Tool），**不接受 LLM 在裁量點偷懶退 Main LLM 自審**（實證：auto-detect 時 LLM 偷懶 / 搞錯退 Main LLM）。合法 Main LLM（mode 表判定的低 effort code-review）與 spawn 失敗降級（顯式標記 fallback，見 [agent-workflow](../agent-workflow/SKILL.md)「spawn 失敗階梯」）除外。
+1. **不 auto-detect，force 獨立 agent（預設）**：review 命令預設 spawn 獨立 agent（Workflow / Agent Tool），**不接受 LLM 在裁量點偷懶退 Main LLM 自審**（實證：auto-detect 時 LLM 偷懶 / 搞錯退 Main LLM）。**所有 review 命令含 code-review 都 force 獨立**（取消「低 effort code-review 合法 Main LLM」例外 — 實證:獨立 agent 抓自審盲點）。spawn 失敗降級（顯式標記 fallback，見 [agent-workflow](../agent-workflow/SKILL.md)「spawn 失敗階梯」）除外。
 
 2. **agent 數量 = max-agents**（預設 **3**，與 [build](../../commands/build.md) 一致；受並發上限 cap，Claude: `rules/model-routing.md`）。
 
@@ -169,7 +169,7 @@ review finding 可經多層驗證，**各層都可能錯**：
 | execution-plan EP Review / build Agent Review | EP / code | 各自 profile | 回寫 EP / apply |
 
 **模式使用**（審查模式判定規則見上「審查模式判定規則」段；此處說明各命令實際用哪些）：
-- **code-review**：完整三模式（Workflow / Agent Tool / **Main LLM**）— 可選審查，effort 低時允許主 LLM 直接審
+- **code-review**：兩模式（Workflow / Agent Tool）— 可選審查，**force 獨立**（effort 低也 spawn agent，取消 Main LLM 自審；實證：獨立 agent 抓自審盲點）
 - **ep-review / execution-plan EP Review / build Agent Review**：總用獨立 agent（Workflow / Agent Tool），**刻意不走 Main LLM** —— 內建流程的強制品質閘門（Writer/Reviewer 分離）
 - **audit-test**：不經模式判定（read-only 單一 agent 偵測，不做平行審查）
 

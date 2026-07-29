@@ -168,7 +168,7 @@ review 執行預設（force 獨立 / max-agents 預設 3 / model inherit / 3-per
 
 #### Step 2: 選擇審查模式
 
-審查模式判定規則（effort/max-agents → Workflow/Agent Tool/Main LLM）見 [review-engine](../skills/review-engine/SKILL.md)。偵測 effort level，印出確認：`[Review Mode] effort=ultracode, workflow=true, max=N` 或 `[Review Mode] effort=standard, workflow=false, max=N`
+審查模式判定規則（effort/max-agents → Workflow/Agent Tool）見 [review-engine](../skills/review-engine/SKILL.md)。偵測 effort level，印出確認：`[Review Mode] effort=ultracode, workflow=true, max=N` 或 `[Review Mode] effort=standard, workflow=false, max=N`
 
 **A. Workflow 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 

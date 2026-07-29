@@ -80,6 +80,7 @@
 | **`/deliverable-review`** | **人類（交付）** | **3** | **人類** |
 | **`/illustrate`** | **人類（結構 viewport）** | **3** | **人類** |
 | **`/codebase-sweep`** | **人類（baseline sweep）** | **3** | **人類** |
+| **`/human-review`** | **人類（放大鏡）** | **3** | **人類** |
 | `/commit` | 人類確認 | — | 人類 |
 | `/metadata-sync` | LLM | 1 | 人類 / AI-self |
 

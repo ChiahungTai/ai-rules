@@ -65,7 +65,7 @@ scope 極大（50+ 檔）才用 Agent（free-text 產出，主 session 組報告
 
 ## 輸出格式（問題 + 建議 + 圖 + 查證誠信）
 
-> 倒金字塔（結論先行）+ 每個 finding「問題 + 建議 + 圖」一組 + 查證誠信段。標竿實作見 project 端 `ai-analysis/human-review/<scope>.md`。
+> 倒金字塔（結論先行）+ 每個 finding「問題 + 建議 + 圖」一組 + 查證誠信段。標竿實作見 project 端 `ai-analysis/human-review/<dir>/<scope>.md`。
 
 ```
 # Human-Review — <scope>
@@ -73,13 +73,13 @@ scope 極大（50+ 檔）才用 Agent（free-text 產出，主 session 組報告
 > ✅ 結論：<一句話，行動導向 — 健康或有 N 個債，建議改 X>
 
 ## Source 問題 + 建議
-### <F1> 🟡 <問題標題>
+### <F1> 🟡 <問題標題> ［狀態：待修｜不修｜已修｜已驗］
 **問題**：<描述，含 file:line>
 **建議：<明確推薦>** — <理由>
 <ASCII 圖：現況 vs 建議>
 
 ## Test 問題 + 建議
-### <T1> <❌撤銷|✅保留|💡可改> <標題>
+### <T1> <❌撤銷|✅保留|💡可改> <標題> ［狀態：待修｜不修｜已修｜已驗］
 ... （同上格式）
 
 ## 查證誠信（過程記錄）
@@ -115,6 +115,20 @@ scope 極大（50+ 檔）才用 Agent（free-text 產出，主 session 組報告
 | 變更 diff 正確性 | `/code-review` |
 | 模組 baseline 盤點 | `/codebase-sweep` |
 | 評估 AI review 建議 | `/judge-review` |
+
+## Finding → 修正 → 驗證 workflow（human-in-the-loop）
+
+human-review 是 read-only（產 finding + 建議，不改 code）。後續修正 + 驗證用其他命令接力 — human 在判讀 / 決策 / 確認介入：
+
+| 階段 | 規模 | 命令 |
+|------|------|------|
+| 修正 | 輕量（文件 / 刪碼） | 對話 |
+| 修正 | 大型（跨檔 / 邏輯） | `/build`（EP 驅動） |
+| **品質閘門** | 所有 code 修正 | ruff + mypy + test（範例：`uv run ruff check --fix .` + `uv run mypy .` + `make test`）— 確認 code 沒壞（純文件修正可跳過；action 修正必跑） |
+| 驗證 | action 修正（刪碼 / 改邏輯） | `/followup-review`（對照 finding 驗收 + 機械查證 test / 副作用） |
+| 驗證 | 輕量修正（文件） | 重跑 `/human-review`（before/after：finding 消除 = 修對） |
+
+報告 finding 標狀態（待修 / 不修 / 已修 / 已驗）追蹤跨階段。configmanager F3 dogfood 實證 action 軌：human-review F3 → 刪 4 vestigial methods → followup 驗收（0 呼叫 + test + 無副作用）；binning F3 dogfood 實證輕量軌：docstring 補 action/noun → 重跑確認 finding 消除。
 
 ## 流程位置
 

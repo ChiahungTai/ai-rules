@@ -9,7 +9,7 @@ allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mc
 
 > **Purpose**:一次性全面審查每個目錄的核心檔 + 建立 baseline(深審 + invariant CI-guarded)+ 架構 onboarding(快速掌握整個 codebase)。目標:foundations 審一次 → 後續 AI coding 改動是非核心 delta → `/code-review` 輕審即可。
 >
-> **核心理念**:**人類產出格式優先**(genesis 教訓 — `/human-review` 3× 失敗都在重造 AI 機械、欠投資人類產出 → token 牆 → 「人類不會看」)。本命令把設計預算花在**人類可讀產出**(廣到精細 + 受眾分離 + emoji-first Mermaid),AI 機械(tiering/CRG/渲染)委外給既有 skills。
+> **核心理念**:**人類產出格式優先**(genesis 教訓 — `/human-review` 前次設計失敗都在重造 AI 機械、欠投資人類產出 → token 牆 → 「人類不會看」)。本命令把設計預算花在**人類可讀產出**(廣到精細 + 受眾分離 + emoji-first Mermaid),AI 機械(tiering/CRG/渲染)委外給既有 skills。
 >
 > **與 /human-review 的區隔**:`/human-review`(source 側 audit-test,定位「放大鏡」)與本命令正交 — sweep 盤點既有穩固度 / human-review 質疑 AI 是否亂加(詳見 [human-review](human-review.md))。「人類產出優先」教訓為兩命令共同設計依據。
 >

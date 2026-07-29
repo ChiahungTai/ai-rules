@@ -48,7 +48,7 @@ Workflow 執行協調：[workflow-review-pattern.md](./instruction/_common/workf
 
 ## 審查模式選擇
 
-review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」—— **code-review 是唯一允許 Main LLM 模式**的 review 命令（低 effort 主 LLM 直接審；其餘 review 命令刻意覆蓋為恆獨立）。模式判定規則（effort/max-agents → A/B/C）見 [review-engine](../skills/review-engine/SKILL.md)；max-agents 查 [model-routing 並發上限](../rules/model-routing.md)（agent-workflow defer 到此、不自帶數字）。下方 A/B/C 為本命令的六軸啟用配置：
+review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../skills/review-engine/SKILL.md)「review 執行預設」—— code-review **預設 spawn 獨立 agent**（與其他 review 命令一致，force 獨立；取消 Main LLM 自審 — 實證：獨立 agent 抓自審盲點）。模式判定規則（effort/max-agents → A/B）見 [review-engine](../skills/review-engine/SKILL.md)；max-agents 查 [model-routing 並發上限](../rules/model-routing.md)（agent-workflow defer 到此、不自帶數字）。下方 A/B 為本命令的六軸啟用配置（C 已廢除，見下方 C 段）：
 
 **A. Workflow 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 
@@ -86,13 +86,11 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 印出確認：`[Code Review Mode] effort=ultracode, workflow=true, max=N`
 
-**B. Agent Tool 模式**（Fallback；判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
+**B. Agent Tool 模式**（**預設 force 獨立**；判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 
-單一 Explore agent 做所有啟用軸（Writer/Reviewer 分離效果）。印出確認：`[Code Review Mode] effort=ultracode, workflow=false, agent=true`
+單一 Explore agent 做所有啟用軸（Writer/Reviewer 分離效果）。印出確認：`[Code Review Mode] effort=<ultracode|standard>, workflow=false, agent=true`
 
-**C. Main LLM 模式**（判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
-
-Main LLM 直接做所有軸（現有行為）。印出確認：`[Code Review Mode] effort=standard, workflow=false`
+**C. Main LLM 模式 — 已廢除**：取消（force 獨立 — 與其他 review 命令一致）。effort < ultracode 走 B（Agent Tool）。理由：[acceptance-evidence](../rules/acceptance-evidence.md)「同 LLM 審自己 = 零獨立性」；實證獨立 agent 抓 changeset 作者漏的 drift（本 session dogfood：fresh-eyes agent 抓 3 reference 層錯、code-review agent 抓 5 跨檔 drift — changeset 作者自審漏的，獨立 agent 抓到）。
 
 ---
 

@@ -32,7 +32,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 
 ### 無參數模式（推薦）
 
-1. **優先讀持久化 finding**：讀 `.review/<branch>.md`(或 EP review 區段)的 finding 清單
+1. **優先讀持久化 finding**：讀 `.review/<branch>.md`(或 EP review 區段)的 finding 清單；或 `/human-review` 報告（`ai-analysis/human-review/<dir>/<scope>.md`，finding 帶 ID F1/F2/T1...）— 兩者皆可作為驗收 baseline（human-review 報告是 read-only 偵測器產出，finding + 建議 + 查證誠信，可直接對照驗收）
 2. finding 存在 → 逐項驗收(讀修改後程式碼對照原始問題)
 3. **無持久化檔才 fallback** `git diff` + `git status` 推斷(舊行為)
 4. 變更範圍超出可推斷範圍 → 向用戶確認
