@@ -50,7 +50,7 @@
 - **討論/規劃期**：`/illustrate`（結構，人 viewport，pre-EP 軟 gate 提醒，可多次）
 - **review 期**：post-build 可選 `/illustrate`（漂移/重造檢查，B 軸）→ `/code-review`（六軸含 axis 3 結構 = arch 吸收，top-down，A 軸機器）→ `/judge-review`（**一次**）
 - **不再** arch→judge→code→judge 兩次 judge（code review 已含結構軸，judge 一次即可）
-- **既有 core 審查（無 change，純審穩固度）**：P1 識別 → selective review matrix（[arch-thinking](../skills/arch-thinking/SKILL.md)「core identification」lens）→ 依風險排序逐個 core 跑 `/illustrate` mode B（city map / call path，B 軸人 viewport）+ **人讀 code**（VS Code Cmd+Click 跳轉）→（可選）P2 邊界驗證。B 軸；不排 `/code-review`（正確性靠人讀，非機器 finding）；Console 或 MD 模式。Anthropic selective-review：core = heavy human review、leaf = 放過。
+- **既有 core 審查（無 change，純審穩固度）**：P1 識別 → selective review matrix（[arch-thinking](../skills/arch-thinking/SKILL.md)「core identification」lens）→ 依風險排序逐個 core 跑 `/illustrate` mode B（artifact menu：call graph / sequence / class slice / data-flow / boundary，B 軸人 viewport）+ **人讀 code**（VS Code Cmd+Click 跳轉）→（可選）P2 邊界驗證。B 軸；不排 `/code-review`（正確性靠人讀，非機器 finding）；Console 或 MD 模式。Anthropic selective-review：core = heavy human review、leaf = 放過。
 
 - `/spec` — 需求釐清（User Story + UC 定位 + Scenario Matrix + 邊界，純輔助；`--write` 寫需求 MD）
 - `/execution-plan` — 段落式實作計畫書，自足生成 Self-Contained Segments（含段落0全域研究 + UC盤點 + Scenario Matrix + EP Review Cycle；ep_type blueprint/implementation 支援大型任務綱要+子 EP 結構），掃描 SYSTEM-MAP.md 取得功能上下文
@@ -60,7 +60,7 @@
 - `/build` — 基於 Execution Plan 逐段實作（TDD + 階段 5a metadata-sync 結算：UC 狀態 + SYSTEM-MAP + EP 歸檔）
 - `/code-review` — 深層思考六軸代碼審查（含 axis 3 結構 = arch 吸收，top-down；UC 覆蓋度）
 - `/deliverable-review` — 人類 viewport 交付軸（layer 3）：天才工程師向老闆 demo 完成的功能——product-type-aware（code: demo-checklist / docs: behavior delta），--ep 審 planned deliverable；方向 >> 品質，不做逐行正確性（交 /code-review）、不審結構（交 /illustrate 結構 viewport）
-- `/illustrate` — 結構 viewport + 技術圖解（city map / call stack / drill / 流程；console / md）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build 漂移檢查，見上圖），結構能力調 arch-thinking skill
+- `/illustrate` — 結構 viewport + 技術圖解（SA/SD artifact menu：call graph / sequence / class slice / data-flow / boundary；city map / drill / drift detection；console / md）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build drift detection，見上圖），結構能力調 arch-thinking skill
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → message → 確認）；finalization 已在 build 階段 5a 結算，commit 前可跑 `/metadata-sync` 更新
 - `/metadata-sync` — metadata finalization 獨立更新/補漏入口（commit 前更新或事後補漏：偵測漏掉的 Capabilities/Kanban/SYSTEM-MAP/arch/EP 歸檔/flow-feedback，確認後修補）；build 階段 5a 結算 + 本命令 standalone 補漏共用同一 skill

@@ -164,6 +164,8 @@ LLM 直接讀取索引/清單類段落，驗證與實際檔案一致：
 
 ## 執行約束
 
+- **release-gate（drop-module 後必跑）**：刪除整檔/整模組的 refactor 後，跑本命令 + `rg -F "<deleted-symbol>"` 掃導航文檔（root AGENTS.md / architecture.md / dependency-graph.md / SYSTEM-MAP.md + 各模組 AGENTS.md）當 release-gate。真實案例：清理日刪 facade 後 ≥6 個導航檔仍引用它，靠事後審計才抓——drop-module 不跑此 gate = 文檔 drift 漏到下個 session。
+- **前瞻 vs 回溯分工**：本命令的 X-cap-path 是**回溯查**（既有 Capabilities 路徑還在嗎）；**前瞻查**（這次 doc 編輯有沒有新增指向虛無的引用）屬 `/code-review` docs mode 的「前瞻 phantom 偵測」——兩者互補，不重疊。
 - **容錯**：無 `.project-snapshot.json` 時降級為純 LLM 檢查，不報錯
 - **容錯**：無 .kanban/ 目錄時只檢查 Capabilities，不報錯
 - **容錯**：無 SYSTEM-MAP.md 時跳過步驟 5，不報錯

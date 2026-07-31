@@ -81,6 +81,42 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 - `dataframe_utils`（heavy, 3 consumers）
 - ⚠️ polars helper 抽進 `catalog_utils`（lean）→ 反向耦合 flag
 
+### Call Graph 資料生成（函數級，非渲染）
+
+**生成資料**（函數/方法級 caller→callee edges，scoped 至 entry symbol + N hops，**非全系統**）；**視覺渲染**（graph pruned subgraph）留 `/illustrate`（既有渲染引擎）。每條 edge 標 parse-time-static。
+
+**Fuel**：CRG-first（`query_graph` callers_of/callees_of direct + `get_impact_radius` transitive blast——LSP 無法高效做）→ LSP-fallback（`incomingCalls`/`outgoingCalls` 跨 N symbol AGGREGATION walk，bounded depth，`[WARN]` 無 transitive degraded）→ scan-project dep_graph 模組級脈絡。**CRG 缺 → emit `[WARN]`（crg-query GATE，assume-present）+ LSP fallback**。
+
+CRG-sourced edges 附 anti-over-reliance label（graph=structure≠behavior；dynamic dispatch/config/reflection 不可見）。
+
+資料範例（供 illustrate 渲染）：
+- `Strategy.on_bar() → Executor.submit_order()`（direct, 2 callers）
+- `RiskGuard.check() → Strategy.on_bar()`（caller chain）
+
+### Type Structure 資料生成（contract slice，非渲染）
+
+**生成資料**（**僅 abstract/Protocol/繼承 realization edges**；concrete members 不產——derivable、low-signal、違 instruction-writing + 人審結構上限）；**視覺渲染**（classDiagram contract slice）留 `/illustrate`。
+
+**Fuel**：**LSP-primary**（CRG 此處弱——持 call/import edges 非 type edges）：`hover` 取 base classes + `documentSymbol` 取 members + `goToImplementation` 取 subclass overrides（Claude 有 / ZCode pyright 無 → `findReferences` on base + rg fallback）+ chaining 組裝繼承鏈。
+
+**誠實限制**：pyright 無專用 typeHierarchy operation（Claude / ZCode 兩家皆無），繼承是 chaining 非 single call；best-effort，complex hierarchy / metaclass 產 partial edges。
+
+資料範例（供 illustrate 渲染）：
+- `Strategy(abstract) ◀── RiskGuard, Executor（realization）`
+- `OrderProtocol ◀── NTOrder, SJOrder（implements）`
+
+### Data-Flow 資料生成（靜態骨架，非 runtime 值）
+
+**生成資料**（producer→transform→consumer edges，每條附靜態 type/contract 可推導時）；**視覺渲染**（flowchart LR lineage）留 `/illustrate`。**吸收既有「欄位 ← 發布者」authority annotation**（illustrate-structure-viewport.md）為 first-class edge type。
+
+**Fuel**：hybrid 無單一 source——CRG flows（`get_affected_flows`/`get_flow`）+ LSP `outgoingCalls`（type-bearing edges，`hover` 取型別）+ scan-project dep_graph（模組級方向）。**CRG 缺 → emit `[WARN]`（crg-query GATE）+ LSP/scan-project fallback**。
+
+**HARD BOUNDARY**：runtime data VALUES out-of-scope（三者皆不產，須 read/run code，acceptance-evidence L4-L5）；與 acceptance-evidence Runtime Invariant Assurance 互補（本能力=靜態結構骨架；Runtime Invariant Assurance=持續 runtime 監控 silent-corruption invariant——不同軸、不重疊）。
+
+資料範例：
+- `<balance> ← <exec_client>`（authority edge）
+- `catalog.fetch() → transform.adjust() → feature.compute()`（producer→transform→consumer）
+
 ### Pattern Radar（重用枚舉）
 
 三類重複偵測：
@@ -126,9 +162,15 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 
 > **圖譜 facts（CRG — CRG 專案 = co-equal primary，否則 companion fallback）**：transitive impact radius / 跨檔 callers·flows / hub·community 等**圖譜級**結構事實，**CRG 裝了的專案以 CRG 為 primary**（見 [crg-query](../crg-query/SKILL.md)）—— 三層 facts 互補：scan-project 給 folder/module 級枚舉、LSP 查單一 symbol、CRG 查 transitive graph。本 skill 的 City Map 資料 / hub / dep weight / bridge 在 CRG 專案**優先由 CRG 機械產**（`get_hub_nodes`/`get_bridge_nodes`/`get_impact_radius`/`list_communities`），scan-project 為非 CRG 專案 fallback（仍受 crg-query anti-over-reliance 約束：graph=structure≠behavior；**community ≠ module boundary** — 用目錄+AGENTS.md 為模組真相，community 只當 coupling hint）。CRG 沒裝 → `[WARN]` + fallback scan-project/LSP（crg-query 的 assume-present + warn-if-absent）。
 
+> **反應式驗證 vs AGGREGATION（釐清）**：本段既有 LSP 查證 = 單一 symbol 的反應式驗證（claim → ✅/❌）；上方 call graph / type structure / data-flow 資料生成 = 多 symbol AGGREGATION（產生資料集，非驗證單一 claim）——同工具、不同 consumption pattern，刻意並列不合併。
+
 ### 補償邏輯盤點（compensating pair detection）
 
-**修缺陷前的反向搜尋** — 補 `findReferences` 的盲區。`findReferences` 查「誰依賴 X」（反向依賴），抓不到「誰在抵消 X 的 bug」（補償邏輯）：補償點 B **不引用**缺陷函式 A，B 引用「A 算錯」這個事實。修 A 不拆 B → A 從「錯但被抵消」變「對但重複」（double-count）或「對但歸零」。
+**修缺陷前 + 刪除/refactor 前的反向搜尋** — 補 `findReferences` 的盲區。`findReferences` 查「誰依賴 X」（反向依賴），抓不到「誰在抵消 X 的 bug」（補償邏輯）：補償點 B **不引用**缺陷函式 A，B 引用「A 算錯」這個事實。修 A 不拆 B → A 從「錯但被抵消」變「對但重複」（double-count）或「對但歸零」。**刪除亦然（被刪的可能是補償 pair 任一側）**：刪「死碼」時，被刪的可能正是補償 pair 的一側——
+- 被刪的是**補丁 B**（被誤判死碼）→ B 抵消的 bug（在 bug 本體 A，沒被刪）**復活**（dead-code-deletion 最常見的危險）；
+- 被刪的是**bug 本體 A**（被誤判死碼）→ 補丁 B 失去抵消對象，變 **over-correction**（反向錯誤）。
+
+兩種都：被刪的側**不引用**「另一側」，故 `findReferences` 查不到關係——必須反向搜補償訊號（offset/compensate/workaround/互相矛盾的 docstring）。故**刪除整檔/整 class/整 method 前，同修缺陷前一樣必跑反向補償搜尋**（共享「動到一側就要查另一側」義務；修缺陷改的是 bug 本體 A，刪除則可能動 A 或 B——兩者都得查對側）。
 
 **機械**（修缺陷函式 A 前，反向搜尋補丁 B）：
 1. 反向 rg 補償訊號：`offset|compensate|手動補|workaround|FIXME|hack` + docstring「不含 X，在 Y」「為了抵銷」
@@ -142,7 +184,7 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 
 ### 變更路徑計數（mutation-path counting）
 
-**觸及 mutable state / invariant-bearing 模組時的變更審查**（條件必填 — leaf / 純 docs 跳過）。assumption delta 的手動紀律:自問「這個改動新增第幾條 state mutation path?破了哪個 invariant?」—— 語義 diff 工具只到 AST / behavior 層,無 invariant 層（research gap），solo 須手動計數。
+**觸及 mutable state / invariant-bearing 模組、或 refactor 遷移 logic 改變 ownership 歸屬時的變更審查**（條件必填 — leaf / 純 docs 跳過）。assumption delta 的手動紀律:自問「這個改動新增第幾條 state mutation path?破了哪個 invariant?ownership 粒度變了嗎?」—— 語義 diff 工具只到 AST / behavior 層,無 invariant 層（research gap），solo 須手動計數。
 
 **機械**（用 LSP `findReferences` / rg 找所有 write site）:
 
@@ -220,3 +262,6 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 - **渲染心智模型**（節點 + 箭頭視覺）→ `/illustrate`
 - **產 finding 格式**（嚴重度 / file:line）→ `/code-review`
 - **決定受眾**（給人 / 機器）→ 消費命令
+- **動態 sequence / runtime call stack 萃取** → 不做（需 runtime tracing 工具，屬工具層 gap 非 skill 範疇；靜態 call graph 資料由 §二 產，動態 sequence 渲染交 `/illustrate` 以概念流程呈現）
+- **drift-signal 分類**（+edge/-edge/+type/broken-caller/boundary-crossing）→ 不做（viewport/消費者的 framing 非 structural fact；skill 只產 graph facts `{caller, callee, transitive set, type edges, data edges}`，消費命令套用受眾專屬 framing——`/illustrate` overlay marker vs `/code-review` severity-tagged finding）
+- **EP-claimed structure extraction + drift diff + drift 渲染** → `/illustrate`（viewport-specific，非結構機械事實）

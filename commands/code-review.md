@@ -74,6 +74,8 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 
 **docs mode（純文檔變更）**：Security / Performance 軸 N/A（文檔不涉及 HTTP/auth/credential、無 N+1/無界操作），跳過此二軸避免噪音；Correctness / Readability & Simplicity / Architecture / Capability Coverage 仍適用（文檔正確性、可讀、結構、行為覆蓋）。docs mode 觸發判準見 [execution-plan.md](./execution-plan.md) docs mode 段。
 
+**docs mode 必跑：前瞻 phantom 偵測** — 文檔 diff 不只回溯查「既有路徑還在嗎」（刪了 module 後 doc 是否仍引用 = 回溯），更要**前瞻查「這次編輯有沒有新增指向虛無的引用」**：diff 中每個**新增**的 symbol/path/link，用 rg/LSP 驗證目標存在。真實案例：清理日一個「修 phantom doc」的 commit 反而**新增** phantom（寫了不存在的 routing 機制）——只回溯查會漏掉這種前瞻引入；教訓通用（phantom 偵測須雙向：回溯 + 前瞻）。回溯查是 `/doc-health` 的 X-cap-path，前瞻查是本處。
+
 每個 Review agent prompt 包含：
 - `git diff` 範圍
 - 該軸的檢查項目清單（如上表）
@@ -82,7 +84,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 - rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
 - schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
-Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → 分三級（Critical/Important/Suggestion）→ POC/Demo 影響檢查 → commit message 產生。
+Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → 分三級（Critical/Important/Suggestion）→ 消費端影響檢查 → label-vs-diff 驗證 → commit message 產生。
 
 印出確認：`[Code Review Mode] effort=ultracode, workflow=true, max=N`
 
@@ -103,8 +105,9 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 **top-down 審查順序**：axis 3（Architecture，結構）先於細部正確性（Correctness 等）— 結構錯了正確性審白費。
 
 ### axis 3：Architecture — 調用 [arch-thinking](../skills/arch-thinking/SKILL.md) skill
-- **機器產 finding（A 軸）**：city map / dep weight / 重用枚舉 / LSP 查證，調用 skill 取結構資料 → 產 finding（變更融入既有結構？在重造？）
+- **機器產 finding（A 軸）**：city map / dep weight / 重用枚舉 / LSP 查證 / call graph（函數級）/ type structure（contract slice）/ data-flow（靜態骨架），調用 skill 取結構資料 → 產 finding（變更融入既有結構？在重造？）
   - **CRG（若裝了）**：axis 3 的 impact radius / 跨檔 callers / affected flows 用 CRG `get_impact_radius` / `query_graph callers_of` / `get_affected_flows` 機械產（取代手動 LSP 逐層追蹤）；change scoping 用 `detect_changes` + `get_minimal_context`（只讀 impacted nodes）。LSP-vs-CRG 分工 + assume-present + warn-if-absent 見 [crg-query](../skills/crg-query/SKILL.md)。
+- **條件機制 activation（刪除/refactor 必觸發）**：diff 含刪除整檔/整 class、或 refactor 遷移 logic 時，**必須**調用 arch-thinking 的「補償邏輯盤點」+「變更路徑計數」——兩者預設條件觸發（修缺陷 / 觸及 mutable state），但刪除/refactor 同樣該觸發：刪除可能拆掉補償 pair 另一側（double-count / zero-out），refactor 可能改變 mutation-path ownership。未觸發 = axis 3 漏抓 over-deletion 與補償迴歸（清理日實證：這些機制沒被刪除 diff 觸發 → over-deletion 漏到事後審計才抓）。
 - **受眾明文**：axis 3 與 `/illustrate` 用同一 skill，但 axis 3 產**機器 finding**（A 軸）、illustrate **渲染給人判讀**（B 軸）
 
 ### Capability Coverage — 滿足 Capabilities 描述嗎？
@@ -127,12 +130,11 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 ---
 
-## POC/Demo 影響檢查
+## 消費端影響檢查（API 變更 + 刪除）
 
-不向後相容原則下，API 變更必須同步更新所有消費端：
-1. 識別變更的 class/function
-2. LSP `findReferences` 找到所有消費者，再用 rg 搜尋 `demo_*.py`、`poc/` 中的字串引用（不含 `examples/`——`scripts/demo_*.py` 已擔負 demo 職責）
-3. 驗證受影響的消費端是否需要更新
+不向後相容原則下，API 變更或**刪除**必須同步更新所有消費端。**刪除是最高風險**——「零 caller」是 no-impact self-claim，須獨立全消費端驗證，不採信 commit/EP 自述（見 [acceptance-evidence](../rules/acceptance-evidence.md) Claim→Evidence→Trust「刪除/死碼自述同理」）。
+
+**全消費端列舉的 what-to-check 真相源在 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md)「Dead Code Hygiene」**（LSP findReferences + rg scripts/lab/configs + 動態派發 + import 測試）——本節是 Main LLM post-flow 步驟的執行點，不重抄清單（避免 single-source drift）。切記消費端**不只 demo/poc**：**scripts/、lab/、saved config** 是清理日 over-deletion 的典型盲區。
 
 ---
 
@@ -174,6 +176,12 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 | 效能改善 | `perf` | 回應 Performance 軸發現 |
 | 測試補充 | `test` | 回應 Correctness 軸發現 |
 | 文檔、instruction 檔 | `docs` | 文檔同步 |
+
+**Label-vs-diff 一致性驗證**（產生後必跑 — message 是 claim 非 output）：commit message 的 type 與「無行為變更」/「行為變更」宣稱必須與 diff 語意一致。message 不只是從 diff 產出的 artifact，也是一個要被驗證的 claim。不一致 → flag 並重新產生：
+
+- **「無行為變更」/`refactor` 但 diff 含行為變更**：control-flow / error-path / 值 / validation / 預設參數改動，**不是**「無行為變更」（真實案例：清理日 commit 標「無行為變更」但實新增 CHARTING 欄位 + 改 validation；另一 commit 把 crash 改 silent skip 也標「無行為變更」——自述反映「低風險」意圖，非事實）。
+- **`fix` 但實為 tuning**：`fix` = 修正違反 spec 的缺陷；調整 spec 內的參數（預設值、週期、閾值）是 tuning，不是 fix（真實案例：參數 25→10 標「fix 對齊 spec」，但 spec 也是 25，實為 tuning 決策；教訓通用：別把 tuning 包裝成 fix）。
+- **`refactor` 夾帶 correctness fix**：主體是 refactor 但 diff 含真實 bug fix → 拆 commit 或改 type（避免 fix 被埋在 refactor 型 commit，未來 git bisect 漏）。
 
 **產生時機**：審查結論為「無 Critical 問題」或「用戶確認 Critical 可接受」時才產生。有未解決 Critical 問題 → 只輸出審查報告，不產生 commit message。
 

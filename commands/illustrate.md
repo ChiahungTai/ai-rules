@@ -1,6 +1,6 @@
 ---
-description: "圖解技術概念、架構設計或流程 + 結構 viewport（city map/call stack/drill，三時點 pre-EP/post-EP/post-build）。可指定 @目錄或 @檔案讓 AI 先讀再圖解，支援 console（即時）和 md（寫檔）兩種輸出模式。"
-when_to_use: "Illustrate technical concepts, architecture, or processes. Also structure viewport (city map, call stack, reuse candidates, drill) at pre-EP / post-EP / post-build. Supports console (ASCII) and md (Mermaid) output. Use with @dir or @file for code-based explanations."
+description: "圖解技術概念、架構設計或流程 + 結構 viewport（SA/SD artifact menu：call graph/sequence/class slice/data-flow/boundary；city map/drill/drift detection，三時點 pre-EP/post-EP/post-build）。可指定 @目錄或 @檔案讓 AI 先讀再圖解，支援 console（即時）和 md（寫檔）兩種輸出模式。"
+when_to_use: "Illustrate technical concepts, architecture, or processes. Also structure viewport via SA/SD artifact menu (boundary/data-flow/call-graph/sequence/class-slice) + drift detection at pre-EP / post-EP / post-build. Supports console (ASCII) and md (Mermaid) output. Use with @dir or @file for code-based explanations."
 usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 ---
 
@@ -21,12 +21,12 @@ usage: "/illustrate [console|md] <主題|@目錄|@檔案1 @檔案2 ...>"
 
 ## 核心：4 mode（從使用者 use case 歸納，非內部能力）
 
-> /illustrate 從**使用者日常開發 use case** 歸納 4 個高層 mode（意圖）。**mode = 意圖，能力 = 手段（跨 mode 共用）** — 能力（city map / 假設驗證 / diff / 概念圖）服務 mode，不是 mode 本身（同一能力可服務多 mode）。
+> /illustrate 從**使用者日常開發 use case** 歸納 4 個高層 mode（意圖）。**mode = 意圖，能力 = 手段（跨 mode 共用）** — 能力（city map / 假設驗證 / diff / SA/SD artifact）服務 mode，不是 mode 本身（同一能力可服務多 mode）。
 
 | mode | 意圖 | 典型情境 | 主要能力（手段）|
 |------|------|---------|---------------|
 | **A 設計決策** | 「這樣設計對嗎」 | 討論新功能 / 重構 / pre-EP | city map + 流程 + 重用枚舉（調 [arch-thinking](../skills/arch-thinking/SKILL.md) skill）+ **邊界案例列設計替代** |
-| **B 理解既有** | 「這怎麼運作」 | 接手 / 學習套件 / 除錯 | 運作流程 + 資料流 + 概念圖 |
+| **B 理解既有** | 「這怎麼運作」 | 接手 / 學習套件 / 除錯 | [artifact menu](./instruction/_common/illustrate-artifact-menu.md)：call graph / sequence / class slice / data-flow / boundary（default=boundary；非 freehand）|
 | **C 審查驗證** | 「對不對 / 好不好」 | code-review 前 / EP 審查 / 重造偵測 / commit 前 | 語義 diff + [假設驗證矩陣](./instruction/_common/illustrate-deep-analysis.md) + city map |
 | **D 溝通傳達** | 「畫給別人看」 | 文檔 / demo | Mermaid 圖（md 模式）|
 
@@ -103,6 +103,8 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 
 **結構 viewport 三時點**（同一載體，三觸發點）：pre-EP（本段，軟 gate）/ post-EP（EP 審查模式渲染提案結構撐得起嗎，見決策流程）/ post-build（懷疑結構漂移或重造既有時，重畫 city map 比對）。
 
+**drift spine**（post-EP / post-build 核心，回應「程式碼失控」恐懼）：SEED `git diff`（機械恆可用）→ GENERATE change-scoped graph facts（調 arch-thinking §二）→ BASELINE degradation ladder（① EP-claimed optional gold → ② last commit 機械主幹 → ③ HEAD~1 → ④ current-only）→ DIFF 5 signal class → RENDER overlay（**no-severity**：僅「this moved; you judge direction」，非 finding）。完整 spec見 [illustrate-artifact-menu.md](./instruction/_common/illustrate-artifact-menu.md)「Drift Overlay Spec」。
+
 ---
 
 ## 決策流程（mode 驅動）
@@ -114,7 +116,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
   A 設計決策（討論新功能 / pre-EP / 重構 / 架構取捨）
     → 讀 code → city map + 流程 + 重用枚舉（調 skill）→ 邊界案例列 2-3 設計替代 + tradeoff → 渲染 → 人判讀
   B 理解既有（@模組 / 概念 / 除錯 / 學習套件）
-    → 讀 code → 運作流程 / 資料流 / 概念圖 → 渲染 → 人理解
+    → 讀 code → 依方向問題從 artifact menu 選 artifact（default boundary）→ grounded 渲染 → 人理解
   C 審查驗證（無參數 diff / @ep / 重造偵測 / commit 前）
     → 讀 code → 語義 diff / 假設驗證矩陣 / city map → 渲染 → 人判讀
   D 溝通傳達（文檔 / demo / 主題）
@@ -145,10 +147,16 @@ mode A flag 邊界 / smell 時，給兩條行動路徑 + 取捨，**不替 user 
 | 語義 diff / 缺口 | 本體（無參數行為）| ❌ 留（簡單 + 特有）|
 | use cases + 情境矩陣分析 | `illustrate-analysis.md` | ❌ 留（分析步驟，特有）|
 | drill / Phase 2 互動 | `illustrate-structure-viewport.md` | ❌ 留（mode A 互動）|
+| call graph（函數級）資料生成 | `arch-thinking` skill §二 | ✅ 已沉（跨 illustrate/code-review/ep-review）|
+| type structure（contract slice）資料生成 | `arch-thinking` skill §二 | ✅ 已沉（跨命令）|
+| data-flow（靜態骨架）資料生成 | `arch-thinking` skill §二 | ✅ 已沉（跨命令）|
+| artifact menu（5 artifact + drift overlay spec）| `illustrate-artifact-menu.md` | ❌ 留（illustrate 特有渲染）|
+| drift diff（5 signal class）| `illustrate-artifact-menu.md` | ❌ 留（viewport framing）|
+| drift rendering（Console/MD overlay）| `illustrate-structure-viewport.md` | ❌ 留（viewport 渲染）|
 
 委託 Skills：
 - [rules-reminder](../skills/rules-reminder/SKILL.md) — Bash 規則
-- [arch-thinking](../skills/arch-thinking/SKILL.md) — 結構 viewport 能力來源（city map 資料/dep weight/Pattern Radar/LSP 查證；視角 §一、機械 §二；本命令渲染給人判讀）
+- [arch-thinking](../skills/arch-thinking/SKILL.md) — 結構 viewport 能力來源（city map 資料/dep weight/Pattern Radar/LSP 查證/call graph（函數級）/type structure（contract slice）/data-flow（靜態骨架）；視角 §一、機械 §二；本命令渲染給人判讀）
 
 ---
 
@@ -161,3 +169,4 @@ mode A flag 邊界 / smell 時，給兩條行動路徑 + 取捨，**不替 user 
 | [illustrate-analysis.md](./instruction/_common/illustrate-analysis.md) | use cases / 情境矩陣分析時（mode A/C 組合步驟） |
 | [illustrate-examples.md](./instruction/_common/illustrate-examples.md) | 需理解各模式實際輸出時 |
 | [illustrate-structure-viewport.md](./instruction/_common/illustrate-structure-viewport.md) | 結構 viewport / drill / pre-EP checkpoint 時 |
+| [illustrate-artifact-menu.md](./instruction/_common/illustrate-artifact-menu.md) | mode B code 解釋 / drift checkpoint（5 SA/SD artifact + drift overlay spec）|

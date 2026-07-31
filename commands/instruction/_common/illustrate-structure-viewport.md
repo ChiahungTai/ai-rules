@@ -1,18 +1,21 @@
 # 結構 viewport — drill 與機械分工
 
 > **載體**：[illustrate.md](../../illustrate.md) 的結構 viewport 模式（人類 viewport，B 軸）支撐檔。
-> **能力來源**：[arch-thinking](../../../skills/arch-thinking/SKILL.md) skill —— City Map 資料 / dep weight / Pattern Radar / domain grounding / LSP 查證 / product-type 雙軌都在 skill（視角 §一、機械 §二）。本檔定義**人 viewport 的互動式 drill 與機械分工** —— 渲染結構心智模型讓人判讀（不產機器 finding，那是 `/code-review` axis 3）。
+> **能力來源**：[arch-thinking](../../../skills/arch-thinking/SKILL.md) skill —— City Map 資料 / dep weight / Pattern Radar / domain grounding / LSP 查證 / call graph（函數級）/ type structure（contract slice）/ data-flow（靜態骨架）/ product-type 雙軌都在 skill（視角 §一、機械 §二）。本檔定義**人 viewport 的互動式 drill 與機械分工** —— 渲染結構心智模型讓人判讀（不產機器 finding，那是 `/code-review` axis 3）。
 
 ## drill 指令（whole-picture → 嫌疑）
 
 whole-picture 渲染完（city map / flows / boundaries / 重用枚舉，資料來自 skill），人用 drill 深入：
 
 ```
-city <module>      — 放大某模組的依賴細節
-flow <use-case>    — 畫另一個 use case 的 flow
-reuse <RC-XXX>     — 深入某重用嫌疑（含 LOW confidence）
-verify <symbol>    — 鎖定嫌疑，用 LSP findReferences / call chain 驗證（見 rules/lsp-navigation.md）
-boundary <module>  — 細看某模組邊界
+artifact <type> <target>  — mid-session 切 active menu artifact（如 `artifact sequence <use-case>`、`artifact class-slice <module>`、`artifact data-flow <field>`、`artifact call-graph <symbol>`）；type 見 [illustrate-artifact-menu](./illustrate-artifact-menu.md) 詞彙表
+city <module>      — 放大某模組的依賴細節（= boundary artifact）
+flow <use-case>    — 畫另一個 use case 的 flow（= sequence artifact）
+reuse <RC-XXX>     — 深入某重用嫌疑（含 LOW confidence；Pattern Radar，mode A）
+verify <symbol>    — 鎖定嫌疑，用 LSP findReferences / call chain 驗證（見 rules/lsp-navigation.md；反應式驗證，非 holistic 判讀）
+boundary <module>  — 細看某模組邊界（= boundary artifact）
+
+> menu artifact selection replaces 舊鬆散 運作流程/資料流/概念圖 labels；drill switches artifact，verify stays reactive。
 ```
 
 或用自然語言描述「這感覺在重造什麼」。完成後說 `done` 或 `summary`。
@@ -51,6 +54,16 @@ city map 預設渲染到**模組層**（不過載）。但 user 審 **authority 
 範例：`<欄位> ← <發布 client>`（如 `<balance> ← <exec_client>`、`<price> ← <data_client>`——替換成你的專案符號）。
 
 **觸發判準**：authority 語境才加（避免噪音）；一般結構檢視不加。
+
+## drift rendering 格式（drift checkpoint — post-EP / post-build）
+
+drift detection 細節（5 signal class / baseline degradation ladder / no-severity 硬規）見 [illustrate-artifact-menu](./illustrate-artifact-menu.md)「Drift Overlay Spec」——本檔定義 viewport 端渲染格式。
+
+**Console**：ASCII call graph with drift markers（`+`/`-`/`!` inline on edges + legend mapping marker→signal-class；對應 3 bucket：added / removed-broken / violated）。
+
+**MD**：Mermaid `flowchart`/`classDiagram` with **3 styled bucket**（max-3-styled-group 硬限制，marker 重用 style 不倍增）：added`{+edge,+type}` / removed-broken`{-edge,broken-caller}` / violated`{boundary-crossing}`；fill+color 成對；emoji 優先標狀態。位置用 repo-root 相對 path:line（VS Code Cmd+Click，沿用上方「位置標示」慣例）。
+
+**no-severity 硬規**（layer-3 viewport 線）：NO severity、NO file:line fix、NO「this is wrong」verdict——僅「this moved; you judge direction」。每個 drift-rendering site 重複此 constraint，防 audience split 崩潰。
 
 ## Selective Review Matrix（既有 core 審查 artifact）
 

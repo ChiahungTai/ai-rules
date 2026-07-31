@@ -20,6 +20,7 @@ Six-axis review with quality gates. Every change gets reviewed before merge — 
 - Matches spec/task requirements?
 - Edge cases handled (null, empty, boundary values)?
 - Error paths handled (not just happy path)?
+- **Loud→silent regression**（diff 改 error handling 時必查）：diff 含 `raise`→`return None`、新增/拓寬 `try/except`、crash→filter、validation 緩步化時，flag 為**潛在 silent-corruption 引入**。「error paths handled」檢查的是**有無**錯誤路徑；本項檢查的是 diff 是否**把原本大聲的錯誤靜默化**——loud→silent 危險（會炸卻靜默腐敗下游），silent→loud 安全（虛驚、測試推翻）。不限交易 critical path，任何 error-path 改動都套用。見 [acceptance-evidence](../../rules/acceptance-evidence.md)「silent vs loud 不對稱風險」。
 - Tests cover the change and actually test the right things?
 - Off-by-one errors, race conditions, state inconsistencies?
   - 多 writer / state mutation invariant 破壞的判定（ownership vs write-site 粒度）見 [arch-thinking](../arch-thinking/SKILL.md)「變更路徑計數（mutation-path counting）」step —— 條件必填（觸及 mutable state 時）
@@ -87,13 +88,19 @@ Walk through code with the six axes.
 
 ## Dead Code Hygiene
 
-After refactoring, check for orphaned code. **Ask before deleting** — don't silently remove things you're not sure about.
+After refactoring, check for orphaned code. **Deletion is a no-impact self-claim** ("zero callers") — treat it as Claim→Evidence→Trust: independently verify across the **full consumer surface** before removing; don't trust the author/commit self-claim (see [acceptance-evidence](../../rules/acceptance-evidence.md) Claim→Evidence→Trust「刪除/死碼自述同理」). This is the routine-review counterpart of what `/human-review` 判準 1 does on demand — the gap it fills is that post-build `/code-review` previously trusted the self-claim.
+
+**Full consumer surface for "zero callers"** (LSP findReferences alone is insufficient — it misses dynamic dispatch and non-library consumers):
+- LSP `findReferences` (static imports)
+- rg the symbol name across .py/.yaml/.json — including `scripts/`, `lab/`, demo, `poc/`, saved configs (not just the module's own tree)
+- dynamic dispatch: getattr/importlib, registry auto-discovery, StrEnum string-values-in-config
+- for whole-file / whole-class deletion: actually execute an import of the affected consumers (`uv run python -c "import <consumer>"`) — static zero-hit ≠ runtime zero-consumer
 
 ```
 DEAD CODE IDENTIFIED:
 - formatLegacyDate() — replaced by formatDate()
 - OldTaskCard component — replaced by TaskCard
-→ Safe to remove these?
+→ Verified zero callers across full surface? (LSP + rg scripts/lab/configs + import test)
 ```
 
 ## 通用審查邏輯（見 review-engine）

@@ -45,7 +45,7 @@
 ## 程式碼分析模式
 
 ### 技術實作層面
-- **代碼架構分析**：關鍵類別、方法、設計模式
+- **代碼架構分析**：調 [arch-thinking](../../../skills/arch-thinking/SKILL.md) skill（City Map 模組級 + call graph 函數級 + type structure contract slice + data-flow lineage）；渲染 artifact 見 [illustrate-artifact-menu](./illustrate-artifact-menu.md)
 - **性能考量**：時間/空間複雜度、瓶頸分析
 - **技術選型依據**：框架選擇理由、技術棧權衡
 
@@ -55,7 +55,7 @@
 - **錯誤處理策略**：異常情況、容錯機制
 
 ### 系統整合分析
-- **模組間依賴**：介面定義、數據傳遞
+- **模組間依賴**：data-flow lineage artifact（producer→transform→consumer，見 [illustrate-artifact-menu](./illustrate-artifact-menu.md)）
 - **擴展性設計**：未來需求、架構彈性
 - **測試策略**：單元測試、整合測試重點
 
