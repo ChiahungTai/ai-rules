@@ -138,6 +138,16 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 ---
 
+## 架構文檔 ripple 提醒（結構變更 → 文檔）
+
+> 補盲區：消費端影響檢查看 **code consumer**（API/刪除 → scripts/lab/config）；本節看 **arch doc consumer**（結構變更 → 架構文檔）。code-review 只 **flag 提醒**，不做 sync。
+
+偵測 structural signal（新/移/改名 module、跨模組 import edge 變、觸及 hub/ripple component、新抽象層；非 file-count）→ 產 finding 提醒檢查架構文檔（`dependency-graph.md` / 模組 AGENTS.md 架構段 / `SYSTEM-MAP.md`），**每個 finding 指向其 owner tool**（what-to-check 真相源在 [code-review-and-quality](../skills/code-review-and-quality/SKILL.md)「Architecture Doc Drift Reminder」，不重抄——single-source drift 防護）。
+
+**為什麼獨立成節**：`dependency-graph.md` 無 build-time owner（只有 `/daily-maintain`、`/scan-project`），是架構文檔最易 silent drift 的；axis 3 被「≥3 files」gate 擋住，會漏 1-file 高 ripple 改動（如改 hub module 的單檔），故獨立、signal-triggered 接住。
+
+---
+
 ## 輸出格式
 
 問題分三級（Critical/Important/Suggestion 的定義 + 信心水準標註）見 [review-engine](../skills/review-engine/SKILL.md) 嚴重度框架。
