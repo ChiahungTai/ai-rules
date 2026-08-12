@@ -77,6 +77,7 @@
 
 ### 領域特定
 - `trading-analysis` — 股票 / 市場走勢三層分析（經典 TA → 量化 → 第二層思考）
+- `broker-flow-analysis` — 台股券商分點進出（BSR）盤底接手 playbook + 單分點角色診斷（反散槍 focal-point 紀律）
 
 ## Frontmatter 配置
 
