@@ -18,8 +18,8 @@ description: 台股券商分點進出(BSR / broker flow / 主力進出 / 分點�
 
 > 針對「先手接手 → 後手發動」**兩段式反轉結構**(盤底 / 吸籌 / 反轉)。單階段結構(純造市 / 隔日沖 / 純 grid)不走此 playbook,用下方「角色診斷透鏡」。
 
-1. **建立價位 context** — 日K + 分K 定位當日 low/open/close 與關鍵價位;確認該價位對應真實盤中區段(如開盤急殺段)。
-2. **依價位帶 filter,按分點 group** — 目標帶 = `[當日低點, 關鍵價位]`,算每分點 buy/sell/net,net 降序,**買方 top-N 與賣方 top-N 都列**。polars:`df.filter((pl.col("price")>=day_low)&(pl.col("price")<=anchor)).group_by("broker_code").agg(...)`,net=buy−sell,集中度=買量÷當日成交量。⚠️ **分倉**:若懷疑同集團多分點分倉,group 前按集團合計(broker_name 前綴 split),否則單分點低估主力。
+1. **建立價位 context + 識別 anchor** — 日K 定位當日 low/open/close;**1 分K 結構化找 anchor(非猜),並確認 anchor 對應可解釋的盤中區段**(急殺後反轉 / 突破回踩,非圖表假象)。底部 anchor 識別法之一:**長下影線**是視覺 cue(先手吸籌足跡);結構定義 = 1 分K **N字 L-H-L**(上→回→上,且**低點抬高** l2>l1)→ anchor = **h1 = 第一個 N字的左邊高點**(後續 N 突破的 level);第二個 N字若貼近則兩個一起考量,取 cluster 最左高點(即第一個 N 的左高)。**第一個 N字最關鍵(案例觀察,待驗證)**。anchor = 「先手接手 ↔ 後手發動」**相位邊界**(接手↔發動 兩階段轉換點;接 step 5)。此為底部識別法之一,非唯一。
+2. **依價位帶 filter,按分點 group** — 目標帶 = `[當日低點, anchor]`,算每分點 buy/sell/net,net 降序,**買方 top-N 與賣方 top-N 都列**。polars:`df.filter((pl.col("price")>=day_low)&(pl.col("price")<=anchor)).group_by("broker_code").agg(...)`,net=buy−sell,集中度=買量÷當日成交量。⚠️ **分倉**:若懷疑同集團多分點分倉,group 前按集團合計(broker_name 前綴 split),否則單分點低估主力。
 3. **對比買方結構 vs 賣方結構** — 接手**集中**(單一大戶)或**分散**(一群中實戶 each +十幾張合力)?算該帶總淨:>0 = 買方蓋過賣壓。
 4. **交叉每個買方的多日累計庫存曲線** — 建議回溯 ≥20 交易日(系統 BSR 通常只近期,**長期庫存曲線需外部歷史**);分類:連續單向累積(留倉)/ 當日來回(平倉)/ 長期斜率≈0 → 區分「先手底座」vs「後手投機」+ 判造市/方向/grid(見下)。
 5. **驗證「穩住 → 後手」因果鏈(僅兩段式結構)** — 證明後手(發動者)在**更高價位帶**操作、盤底確立後才進場。先手創造條件,後手才敢發動。若無兩段式結構,跳過此步。
@@ -61,7 +61,7 @@ description: 台股券商分點進出(BSR / broker flow / 主力進出 / 分點�
 
 ## 個案指標(完整敘事在 project doc)
 
-源案例:一檔股票盤前利空殺到日低,用戶錨定「後手發動點」這個關鍵價位,萃取其下買盤 → **分散式中實戰合力吃掉少數大戶的集中賣壓(割肉 + 放空 + 追殺)穩住底部 → 後手在更高帶進場拉抬**;另有一分點長期零庫存但含方向性大單,最終判讀為「非純造市、有方向判斷」。完整方法 + 陷阱 + 全敘事見 mosaic 專案 `ai-analysis/analysis/daytrade-bsr-analysis.md`(該處的「6 方法」是廣度分析,本 skill 的「6 步 playbook」是 focal-point 紀律精煉,兩者不同)。
+源案例:一檔股票盤前利空殺到日低,用戶錨定「後手發動點」這個關鍵價位,萃取其下買盤 → **分散式中實戰合力吃掉少數大戶的集中賣壓(割肉 + 放空 + 追殺)穩住底部 → 後手在更高帶進場拉抬**;另有一分點長期零庫存但含方向性大單,最終判讀為「非純造市、有方向判斷」。完整方法 + 陷阱 + 全敘事見 mosaic 專案 `ai-analysis/analysis/daytrade-bsr-analysis.md`(該處的「6 方法」是廣度分析,本 skill 的「6 步 playbook」是 focal-point 紀律精煉,兩者不同)。**程式 verdict**(anchor / dispersion / absorption / band_net,Code-computes)見 mosaic `mosaic_alpha/broker_flow_analysis/` 模組 + CLI `scripts/research/analyze_focal_point.py`;本 skill 補 LLM 判讀層(step 5 因果 / 角色邊界 / 敘事)。
 
 ## 工具慣例
 
