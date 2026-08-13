@@ -78,6 +78,8 @@
 ### 領域特定
 - `trading-analysis` — 股票 / 市場走勢三層分析（經典 TA → 量化 → 第二層思考）
 - `broker-flow-analysis` — 台股券商分點進出（BSR）盤底接手 playbook + 單分點角色診斷（反散槍 focal-point 紀律）
+- `golden-sample-research` — golden-sample 研究方法論（正樣本收割→歸納 setup 籤名→分類器；過程紀律 domain 中立）
+- `pre-attack-setup` — 台股攻擊前 setup 分類（收斂/多頭拉回）→ 大漲 watchlist + 分K策略路由
 
 ## Frontmatter 配置
 
