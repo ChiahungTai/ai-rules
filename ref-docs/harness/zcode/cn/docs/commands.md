@@ -1,25 +1,31 @@
 Command | ZCODE Docs
 开始使用
-ZCode for GLM-5.2
+ZCode for GLM-5.3
 安装
 连接模型
 用户反馈与支持
 核心功能
 ZCode Agent
-目标模式（Goal）
-Remote Control
+目标模式
+浏览器自动化
 任务与文件管理
-Bot Channel
+Wiki
+Memory
+自动化
+闲时任务
 编辑历史对话
+远程开发
+Remote Control
+Bot Channel
 子智能体
-Skill
-MCP 服务器
 Plugin
+Skill
+MCP
 Command
+Hooks
 使用统计
 深度集成
 安全操作确认
-远程开发
 智能体开发环境工具
 帮助
 快捷键表

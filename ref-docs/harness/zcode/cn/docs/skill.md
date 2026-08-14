@@ -1,25 +1,31 @@
 Skill | ZCODE Docs
 开始使用
-ZCode for GLM-5.2
+ZCode for GLM-5.3
 安装
 连接模型
 用户反馈与支持
 核心功能
 ZCode Agent
-目标模式（Goal）
-Remote Control
+目标模式
+浏览器自动化
 任务与文件管理
-Bot Channel
+Wiki
+Memory
+自动化
+闲时任务
 编辑历史对话
+远程开发
+Remote Control
+Bot Channel
 子智能体
-Skill
-MCP 服务器
 Plugin
+Skill
+MCP
 Command
+Hooks
 使用统计
 深度集成
 安全操作确认
-远程开发
 智能体开发环境工具
 帮助
 快捷键表
@@ -48,6 +54,20 @@ description: Review code changes with a focused checklist for correctness, regre
 Use this skill when reviewing a pull request, merge request, or local diff.
 Focus on correctness, regressions, missing tests, risky API changes, and maintainability.
 创建或修改后，回到 设置 -> 技能 点击 刷新，确认技能出现在对应来源下，并保持开关开启。
+格式限制
+frontmatter 必须包含 name 和 description，缺失时该技能会被忽略，并在设置页的诊断里给出原因。
+description 上限 1024 字符。超出后整个技能会被丢弃（诊断显示「description 超过 1024 字符」），不是截断——请把长说明放进正文。
+SKILL.md 正文超过 100KB 时会被截断加载。
+技能数量与上下文占用
+每轮对话会把所有已启用技能的元数据（名称 + 描述摘要，单条描述最多 250 字符）注入模型上下文，正文只在技能被调用时按需加载。全部技能的元数据共享一个固定预算：安装大量技能导致超出预算时，注入会降级为只保留技能名，模型将难以判断何时该用哪个技能，自动触发率会明显下降。建议只启用常用技能——停用的技能不注入上下文、也不能被调用。
+「/ 面板里能看到，模型却不主动用」排查
+/ 面板与模型看到的是同一份技能清单，不存在「只给面板、不给模型」的开关。技能在面板可见但模型不主动调用时，按以下顺序排查：
+元数据被降级：技能装得太多、超出上述预算后，模型只能看到技能名（描述丢失），自动触发率骤降——停用不常用的技能即可恢复。
+描述写得太泛：description 没有写清「什么时候用」，模型无从判断。触发条件写得越具体，自动触发越可靠。
+在子智能体里：子智能体定义文件若声明了自定义 tools 白名单，技能工具可能不在允许列表内，子智能体便无法调用任何技能——删掉 tools 字段或把技能工具加入白名单。
+所属插件被停用：插件停用后其技能立即从会话移除，面板列表刷新可能略有延迟。
+分发技能
+ZCode 没有独立的技能市场。想把一组技能分发给团队，可以把它们打包成插件（skills/<技能名>/SKILL.md 的单层目录结构），通过插件市场分发——插件市场支持自建源（GitHub 仓库、git URL 或本地目录）。注意插件内的技能必须放在单层目录下，嵌套分组目录里的技能不会被 Agent 识别。
 从外部 Agent 导入技能
 如果你已经在 Claude Code、Codex CLI、OpenClaw、Augment、Windsurf 等其他 AI 编程工具里维护了技能，不必在 ZCode 里重新创建。在 设置 -> 技能 页面右上角点击 导入 图标，ZCode 会自动扫描这些外部 Agent 的技能目录，列出可一键导入的技能。
 在弹窗中可以：
@@ -64,6 +84,13 @@ Focus on correctness, regressions, missing tests, risky API changes, and maintai
 $code-review-checklist 帮我 review 当前改动
 $release-notes 根据这次提交写一版发版说明
 ZCode 会把被引用的技能交给当前 Agent，让它按技能里的说明处理任务。
+除了 $，斜杠菜单里也有「技能」分组，输入 / 后同样能找到它们。
+内置的配置向导技能
+ZCode 自带一个 zcode-configuration-guide 技能，随应用安装、默认启用，不用自己配。它把技能、命令、MCP、Hooks、插件和 AGENTS.md 这六类扩展的配置位置、作用域和冲突规则整理在一处：
+$zcode-configuration-guide 我想给这个项目加一个只在本仓库生效的命令，该放哪
+配套还有几个诊断技能，专门排查扩展不生效的问题——技能没被识别、命令调不出来、MCP 连不上、Hooks 没触发、插件装不上，都可以让 Agent 帮你从症状一路查到修复办法。
+把技能同步到远程主机
+用户级技能存在本机，远程工作区里的 Agent 默认看不到它们。连上 SSH 或 WSL 远程后，可以在工作区标题栏的 同步 下拉里选择 同步 Skill，把它们复制到远端。详见 远程开发 → 把本地配置同步到远端。
 适合沉淀成 Skill 的内容
 任务有固定流程，例如 code review、接口排查、发版说明、测试报告。
 团队对输出格式有固定要求。
@@ -73,12 +100,18 @@ ZCode 会把被引用的技能交给当前 Agent，让它按技能里的说明�
 下一步
 Command
 将常用提示词保存为可重用的快捷命令。
-MCP 服务器
+MCP
 为 Agent 接入文件系统、浏览器、记忆等外部工具。
 On this page
 管理技能
 创建技能
+格式限制
+技能数量与上下文占用
+「/ 面板里能看到，模型却不主动用」排查
+分发技能
 从外部 Agent 导入技能
 在聊天中使用
+内置的配置向导技能
+把技能同步到远程主机
 适合沉淀成 Skill 的内容
 下一步
