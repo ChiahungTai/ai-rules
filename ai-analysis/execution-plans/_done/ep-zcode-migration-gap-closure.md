@@ -1,5 +1,7 @@
 # EP: ZCode 遷移差距閉合（hooks / MCP / shioaji / LSP / commands）
 
+> **2026-08 修訂**：本 EP 的 hooks 相關結論——「完全不可遷移」「hooks 是 Claude 專屬功能」（S4 修訂目標文本）、「hooks/ 已標 Claude 專屬」（S2 不動作清單）、SM-8 的「hooks 不響＝預期行為」（ZCode 3.7.7 起 stop-notification.sh 已註冊、會響）——皆基於 ZCode 3.2.5，已由 3.7.7 實測翻案，見 [04-multi-harness機制對照 §7 修訂](../../reports/superpowers/04-multi-harness機制對照.md)。不受影響的段落：S4 的 `~/.agents/commands` symlink 部分、MCP / shioaji / LSP 段落。
+
 > **ep_type**: implementation（docs mode — config + .md 變更，無 .py logic）
 
 ## 動機（self-contained 背景）

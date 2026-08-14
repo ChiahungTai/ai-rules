@@ -1,0 +1,30 @@
+{
+  "enabled": true,
+  "events": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "process",
+            "command": "python3",
+            "args": ["/Users/ctai/Github/ai-rules/hooks/block-python-c-comment.py"],
+            "timeoutMs": 10000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "process",
+            "command": "/bin/bash",
+            "args": ["/Users/ctai/Github/ai-rules/hooks/stop-notification.sh"],
+            "timeoutMs": 10000
+          }
+        ]
+      }
+    ]
+  }
+}

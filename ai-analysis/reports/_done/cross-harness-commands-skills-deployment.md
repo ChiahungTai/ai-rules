@@ -60,7 +60,7 @@
 |---|---|---|---|---|---|
 | **Rules** | `.claude/rules/*.md`（LLM 行為，auto-load）| AGENTS.md + `opencode.json.instructions` | **無 auto-load**（需注入 AGENTS.md/skill）| `~/.codex/rules/*.rules`（**Starlark**，命令控管 ≠ LLM 行為）| GEMINI.md |
 | **Agents** | `.claude/agents/`（md）| `.opencode/agents/`（md + `mode`/`model`/`temperature`）| `~/.zcode/agents/`（md，user-level Beta）| `.codex/agents/*.toml`（**TOML**）| （未確認）|
-| **Hooks** | settings.json（豐富事件）| （鏡像未提及）| （鏡像未提及）| `hooks.json` / config.toml（需 `features.hooks=true`）| （未確認）|
+| **Hooks** | settings.json（豐富事件）| （鏡像未提及）| （鏡像未提及）**→ 2026-08 修訂：ZCode 3.7.7 實測可用（user-level config），見 [04 報告 §7 修訂](../superpowers/04-multi-harness機制對照.md)** | `hooks.json` / config.toml（需 `features.hooks=true`）| （未確認）|
 
 **不可攜警告**：(a) Codex rules 是 **Starlark 命令控管**，語意 ≠ Claude `.md` LLM 行為規則 — rules 體系**跨不過 Codex**。(b) Codex agents 是 **TOML** ≠ Claude md。(c) `@` transclusion 僅 Claude 展開。
 
@@ -142,8 +142,8 @@ infra         =  各 harness runtime（Claude/ZCode/OpenCode/Codex/Gemini）
 | **Commands** | 無共用路徑 → per-harness symlink | Claude + ZCode + OpenCode（各別）| Codex 棄用、Gemini .toml |
 | **Context** | `ai-development-guide.md` → 各家 `~/.xxx/AGENTS.md` | OpenCode + ZCode + Codex（+ Claude @import / Gemini opt-in）| Claude 需 @import、Gemini 需 opt-in |
 | **Rules** | 不可攜（語意分歧）| Claude + OpenCode + ZCode（.md 注入）| Codex Starlark ≠ LLM 規則 |
-| **Agents** | 不可攜（格式分歧 md/toml）| 各自維護 | Codex .toml ≠ Claude .md |
-| **Hooks** | Claude 專屬（OpenCode/ZCode 鏡像未提）| Claude（+ Codex 有）| 跨 harness 無對等 |
+| **Agents** | 不可攜（格式分歧 md/toml）| 各自維護。**（2026-08 修訂：Claude/ZCode 皆 md + frontmatter 同構——共用定義 + symlink 部署已落地，見 [agents/AGENTS.md](../../../agents/AGENTS.md)；Codex .toml 仍分歧）** | Codex .toml ≠ Claude .md |
+| **Hooks** | Claude 專屬（OpenCode/ZCode 鏡像未提）| Claude（+ Codex 有）| 跨 harness 無對等。**（2026-08 修訂：ZCode 3.7.7 翻案——user-level config hooks 實測可用，見 [04-multi-harness機制對照 §7 修訂](../superpowers/04-multi-harness機制對照.md)；OpenCode 走 plugin lifecycle 對應）** |
 
 ---
 

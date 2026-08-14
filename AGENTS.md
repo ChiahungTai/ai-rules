@@ -1,6 +1,6 @@
 # ai-rules 專案
 
-> 本檔是 **ai-rules 專案指令**（開本 repo 時讀）。**全域開發指南**（演化/驗證/UC-Driven/架構/量化鐵律）是另一份獨立檔 `ai-development-guide.md`，經各 harness 全域位置載入（`~/.claude/CLAUDE.md` symlink、`~/.zcode/AGENTS.md`、`~/.config/opencode/AGENTS.md`、`~/.codex/AGENTS.md` → `ai-development-guide.md` bundle），非本檔。
+> 本檔是 **ai-rules 專案指令**（開本 repo 時讀）。**全域開發指南**（演化/驗證/UC-Driven/架構/量化鐵律）是另一份獨立檔 `ai-development-guide.md`，經各 harness 全域位置載入——非 Claude 端：`~/.zcode/AGENTS.md` 等三家 → guide bundle；Claude 端：`~/.claude/CLAUDE.md` symlink → guide + `~/.claude/rules/` auto-load（不走 bundle）——非本檔。
 
 本專案管理 AI coding agent 的 rules、skills、commands（跨 harness：Claude Code / ZCode / OpenCode / Codex）。
 
@@ -92,8 +92,9 @@
 - `skills/` — 領域知識和工作流（on-demand；SKILL.md 開放標準，跨 harness 可攜）
 - `commands/` — 命令工作流（invocation 因 harness 而異；Claude 端為 slash command，見 CLAUDE.md）
 - `commands/instruction/_common/` — 共用子範本（`instruction:*` 命令的引用單元）
-- `hooks/` — Hook 實作腳本（**Claude 專屬**：ZCode 3.2.5 實測 configuration-file 與 plugin hooks 對 native ZCode Agent 皆無效，見 [`zai-org/feedback#32`](https://github.com/zai-org/feedback/issues/32) P2 open；OpenCode/Codex 機制待考。Claude 端 hook 全綁 `~/.claude/settings.json` 的 PreToolUse/Stop/Notification 事件）
-- `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）
+- `hooks/` — Hook 實作腳本（跨 Claude/ZCode 單一來源。hooks 無目錄載入點，**不能 symlink**——兩家 config 以絕對路徑引用本目錄腳本：Claude `~/.claude/settings.json`；ZCode 3.7.7+ user-level hooks，註冊範本 `hooks/zcode-registration.json`——**範本內容是 `~/.zcode/cli/config.json` `hooks:` 鍵下的子樹值，merge 進去而非整檔覆蓋**（整檔覆蓋會毀掉 config 的 mcp/plugins 區塊）、`notification.sh` 不移植。詳細實測與 ZCode 限制（事件子集、專案層忽略、per-session 快照）見 [04 報告 §7 修訂](ai-analysis/reports/superpowers/04-multi-harness機制對照.md)）
+- `agents/` — 跨 harness subagent 定義（`~/.claude/agents`、`~/.zcode/agents` symlink → 本目錄；欄位相容策略、tools 清單陷阱與 ZCode Beta 限制見 [agents/AGENTS.md](agents/AGENTS.md)）
+- `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）。`ref-docs/harness/` 是四家 harness 官方文檔鏡像（claude-code/opencode/zcode/codex）+ `contracts.md` 對照分析——**更新鏡像用既有工具 `ref-docs/harness/crawl.py`**（`uv run python ref-docs/harness/crawl.py [--source zcode]`，discover + sha256 增量寫入 + manifest 維護；不要手動逐頁鏡像）
 
 ## 寫作治理
 

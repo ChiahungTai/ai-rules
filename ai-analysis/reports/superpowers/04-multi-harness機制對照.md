@@ -186,7 +186,7 @@ ai-rules 的 multi-harness **完全沒有對等驗證**：
 
 ### 結論
 
-ZCode 3.2.5（build 2316）**沒有等價於 Claude `permissions.allow` 的宣告式白名單**。「自動編輯」GUI 模式只放行 Write/Edit，Bash 一律彈窗；唯一可程式化的 PermissionRequest hook 在 3.2.5 binary 對 native ZCode Agent **觸發但執行失敗**（詳見下方）。ai-rules 場景（純文檔 + 唯讀查詢為主）採用「完全訪問」(yolo) GUI 模式 + 人工把關。
+ZCode 3.2.5（build 2316）**沒有等價於 Claude `permissions.allow` 的宣告式白名單**。「自動編輯」GUI 模式只放行 Write/Edit，Bash 一律彈窗；唯一可程式化的 PermissionRequest hook 在 3.2.5 binary 對 native ZCode Agent **觸發但執行失敗**（詳見下方；3.7.7 已翻案，見「修訂」節）。ai-rules 場景（純文檔 + 唯讀查詢為主）採用「完全訪問」(yolo) GUI 模式 + 人工把關。
 
 ### 跨 harness 權限模型差異
 
@@ -197,7 +197,16 @@ ZCode 3.2.5（build 2316）**沒有等價於 Claude `permissions.allow` 的宣�
 | **per-operation 記憶** | runtime 累積進 `permissions.allow` | 「始終允許本項目」存 SQLite `local_setting` table（`ruleContent` = **完整命令字串精確匹配**，非 glob） |
 | **可程式化 hook** | 無需（宣告式已足夠） | **PermissionRequest hook 在 3.2.5 觸發但執行失敗**（見下方 issue） |
 
-### hooks 在 ZCode 端完全不可遷移（config-file + plugin 雙路徑）
+### hooks 在 ZCode 端完全不可遷移（config-file + plugin 雙路徑）— 3.2.5 紀錄，3.7.7 已翻案
+
+> **修訂（ZCode 3.7.7 實測，2026-08-14）**：以下 3.2.5 的「完全不可遷移」結論已過時。3.7.7 user-level config hooks 對 native ZCode Agent **觸發且執行成功**：
+>
+> - SessionStart probe hook（`~/.zcode/cli/config.json` hooks 區塊 + `enabled: true`）在新 session 實際執行，probe log 出現完整 stdin payload（probe log 為暫存證據、驗證後已清理；alias 契約另由官方文檔獨立確認）；log 無 `hook.run.failed`、無 `config_project_hooks_ignored`
+> - stdin 契約實證：同一 payload 同時含 ZCode camelCase（`hookEventName`/`sessionId`）與 Claude snake_case alias（`hook_event_name`/`session_id`/`transcript_path`）——Claude hook 腳本零改動可攜；transcript 暫存目錄命名 `zcode-claude-hook-*`（ZCode 走 Claude 相容層；session 實錄，暫存目錄已清理）
+> - 官方文檔已刊出（zcode.z.ai/cn/docs/hooks）；issue #32 仍 open 但 runtime 已修；plugin hooks 路徑未重新實測（user config 已足夠）
+> - 3.7.7 事件子集：SessionStart / UserPromptSubmit / PreToolUse / PermissionRequest / PostToolUse / PostToolUseFailure / Stop——**無 Notification、無 SessionEnd**（Claude 端 notification.sh 無對應事件故不移植；stop-notification.sh 的 SessionEnd 清理分支不觸發——殘留 sentinel 會週期性重複誤報（每 ≥600s，含超過間隔後新 session 的首個 Stop）直到人工移除，僅語音提醒無害）
+> - 生效來源限 user config 與 plugin `hooks/hooks.json`；專案層 `<workspace>/.zcode/config.json` hooks 被整體忽略（安全策略）；配置 per-session 快照（改 config 需新 session）
+> - 落地：`block-python-c-comment.py`（PreToolUse/Bash）與 `stop-notification.sh`（Stop）已註冊進 `~/.zcode/cli/config.json`，範本 `hooks/zcode-registration.json`
 
 `diagnosing-hooks` skill 描述的 spec（`~/.zcode/cli/config.json` top-level `hooks.events.<Event>`）在 ZCode 3.2.5 binary 對 native ZCode Agent（桌面 app 路徑）**觸發但執行失敗**：
 
@@ -216,11 +225,11 @@ ZCode 3.2.5（build 2316）**沒有等價於 Claude `permissions.allow` 的宣�
 
 1. **`diagnosing-hooks` skill 是 spec 不是 binary**：未來用 skill 文檔設計時必須實測驗證，不能假設文檔與 binary 一致（acceptance-evidence L4+ 精神 — 文檔宣稱不算證據）
 2. **跨 harness 對照需附版本**：「ZCode 支援 hooks」這句話在 3.2.5 為假，未來版本可能成真 — 紀錄時附 `CFBundleShortVersionString` 才準確
-3. **hooks 在 ZCode 端完全不可遷移**（修訂）：binary 對 native ZCode Agent（桌面 app 路徑）的 hook 觸發後執行失敗（07-04 log 38 個 `hook.run.failed`，0 個成功）；plugin hooks 也對 native Agent 不支援（[`zai-org/feedback#32`](https://github.com/zai-org/feedback/issues/32) 回報者測過兩者）。hooks 是 Claude 專屬，跨 harness 用 rules/skills/commands 替代。
+3. **hooks 在 ZCode 端完全不可遷移**（修訂；已實測 3.2.5 失效、3.7.7 翻案，中間版本未測——user-level config hooks 現已可用，見上節修訂）：binary 對 native ZCode Agent（桌面 app 路徑）的 hook 觸發後執行失敗（07-04 log 38 個 `hook.run.failed`，0 個成功）；plugin hooks 也對 native Agent 不支援（[`zai-org/feedback#32`](https://github.com/zai-org/feedback/issues/32) 回報者測過兩者）。3.7.7+ 起 hooks 跨 Claude/ZCode 可共用腳本（僅註冊 config per-harness）。
 4. **LSP 跨 harness 採分層策略**：各家 harness 有自己的 LSP 機制——Claude/OpenCode 原生內建（Claude 12-lang LSP plugin set：pyright/rust-analyzer/clangd/gopls/jdtls/...）；ZCode 無原生 → mosaic_alpha 自建 `lsp-python` MCP server（http，per-project，`tools/lsp_mcp/server.py`）替代；未來無 native 的 harness 用 MCP server 支援（mosaic_alpha `lsp-python` 為 reference impl）。deploy scope neutral 化後，LSP 決策樹（`lsp-navigation.md`）已跨 harness 進 bundle — 操作語義一致（`findReferences`/`hover`/...），差異只在載體（native tool vs MCP tool），用對照表表達（見 rules/AGENTS.md「跨 harness 載體對照」pattern）。
-5. **若未來要用 hook**：等 #32 修復，或包成 marketplace plugin（但 #32 作者測試 plugin hooks 也無效，未必可行）
+5. **若未來要用 hook**：（3.7.7 已可用——user-level config hooks 實測成功，見上節修訂）3.2.5 時代的舊結論是「等 #32 修復，或包成 marketplace plugin（但 #32 作者測試 plugin hooks 也無效，未必可行）」
 
-> **§7 資料來源**：`ref-docs/harness/zcode/cn/docs/safety-confirm.md:36,50`、`~/.claude/settings.json` permissions 區塊、`~/.zcode/cli/log/zcode-2026-07-{04,05}.jsonl`（07-04 含 38 個 `hook.run.failed` 事件 source=`config.<Event>.<i>.<j>`；07-05 config 無 hooks 區塊 → 0 個事件；`tool.permission.resolved` 98 個事件 context 只有 `decision`/`mode`/`reason` 等 GUI 模式決策欄位，**無 ruleId 等 rule-based 白名單欄位**）、`~/.zcode/cli/db/db.sqlite` `local_setting` table schema、`zai-org/feedback` issues #18/#32/#42/#44、`/Applications/ZCode.app/Contents/Info.plist` CFBundleShortVersionString=3.2.5 build 2316、`mosaic_alpha/.zcode/config.json`（lsp-python http MCP）+ `mosaic_alpha/tools/lsp_mcp/server.py`（13 個 `@mcp.tool()` decorator，7 個獨特 tool）、`~/.claude/plugins/marketplaces/claude-plugins-official/plugins/*-lsp/`（12 個 LSP plugin 子目錄）。
+> **§7 資料來源**：`ref-docs/harness/zcode/cn/docs/safety-confirm.md:36,50`、`~/.claude/settings.json` permissions 區塊、`~/.zcode/cli/log/zcode-2026-07-{04,05}.jsonl`（07-04 含 38 個 `hook.run.failed` 事件 source=`config.<Event>.<i>.<j>`；07-05 config 無 hooks 區塊 → 0 個事件；`tool.permission.resolved` 98 個事件 context 只有 `decision`/`mode`/`reason` 等 GUI 模式決策欄位，**無 ruleId 等 rule-based 白名單欄位**）、`~/.zcode/cli/db/db.sqlite` `local_setting` table schema、`zai-org/feedback` issues #18/#32/#42/#44、`/Applications/ZCode.app/Contents/Info.plist` CFBundleShortVersionString=3.2.5 build 2316、`mosaic_alpha/.zcode/config.json`（lsp-python http MCP）+ `mosaic_alpha/tools/lsp_mcp/server.py`（13 個 `@mcp.tool()` decorator，7 個獨特 tool）、`~/.claude/plugins/marketplaces/claude-plugins-official/plugins/*-lsp/`（12 個 LSP plugin 子目錄）、ZCode 3.7.7 實測（2026-08-14）：`/Applications/ZCode.app/Contents/Info.plist` CFBundleShortVersionString=3.7.7、SessionStart probe payload（camelCase + snake_case 並存實證）、`~/.zcode/cli/log/zcode-2026-08-14.jsonl`（0 個 `hook.run.failed`——log 無任何 hook 事件記錄，屬負面證據；正面證據為已清理之 probe log 與官方文檔 alias 契約）、zcode.z.ai/cn/docs/hooks（事件子集與配置來源）。
 
 ---
 
@@ -232,6 +241,6 @@ ZCode 3.2.5（build 2316）**沒有等價於 Claude `permissions.allow` 的宣�
 | [`01`](01-結構理解與診斷.md) | sp 三層全貌；本檔 §1.2 引用其 1.1 三層架構，補「為什麼必須三層」的內容性質論證 |
 | [`02`](02-sp借鑒到ai-rules.md) | **本檔直接接續**——轉型後回頭檢驗其「不借結構類」；結論不變但理由精確化（§2.2），並補 `02` 寫作時不存在的下游缺口（§4） |
 | [`03`](03-OpenCode退路.md) | OpenCode 退路；本檔 §4.2 的 `@`-include 語意差異是其「CC 相容 fallback」的延伸驗證點 |
-| [`cross-harness-commands-skills-deployment.md`](../cross-harness-commands-skills-deployment.md) | commands/skills 跨 harness 設計提案；本檔 §4.1 引用其「家家分歧」結論，指出 `deploy_agents.py` 只解了 rules 沒解 skills/commands |
+| [`cross-harness-commands-skills-deployment.md`](../_done/cross-harness-commands-skills-deployment.md) | commands/skills 跨 harness 設計提案；本檔 §4.1 引用其「家家分歧」結論，指出 `deploy_agents.py` 只解了 rules 沒解 skills/commands |
 
 > **§1-6 資料來源**：superpowers fork checkout（`~/Github/superpowers`）實讀——`docs/porting-to-a-new-harness.md`（Part 1-8 + Appendix）、`hooks/session-start`、`hooks/hooks.json`、各家 `plugin.json`/`marketplace.json`、`skills/using-superpowers/SKILL.md` + `references/*.md`；ai-rules 側——`scripts/deploy_agents.py`、`rules/*.md` frontmatter、`~/.{zcode,config/opencode,codex,claude}/` 部署狀態實證、git log `431a1d9`→`077753c`。

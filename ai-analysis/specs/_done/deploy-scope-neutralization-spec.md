@@ -79,7 +79,7 @@
 | 6 | 無斷 ref | deploy 跑完 0 error |
 | 7 | LSP case 驗證：ZCode LLM 讀到 lsp-navigation 決策樹 | 新 session 觸發 LSP 查詢情境，LLM 知道用 LSP |
 | 8 | bash-hard-rules case 驗證：pipe-exit 原則在 ZCode bundle | grep bundle 含 pipe-exit |
-| 9 | hooks case 驗證：hooks 仍只在 Claude | hooks 不在 bundle（無 neutral rule 提 hooks 為跨 harness） |
+| 9 | hooks case 驗證：hooks 不進 neutral bundle（per-harness config；2026-08 起跨 Claude/ZCode，但仍非 neutral rule） | hooks 不在 bundle |
 
 ## 驗證 cases（3 個）
 
@@ -93,9 +93,9 @@
 - **預期**：ZCode 讀者拿到 pipe-exit / uv run / 禁 sed / pytest 背景跑；不拿到 Claude 權限系統
 - **驗證**：deploy → grep bundle 含 tool-discipline + 不含 `#` 觸發權限
 
-### Case 3: hooks（全 Claude 專屬）
+### Case 3: hooks（當時全 Claude 專屬；2026-08 起跨 Claude/ZCode，但仍為 per-harness config、不進 neutral bundle — 測試本體不變）
 - **測什麼**：hooks 不進 bundle（無 neutral rule）
-- **預期**：ZCode bundle 完全無 hooks 相關 rule（hooks 是 Claude settings.json 配置，不是 rules/ 範疇）
+- **預期**：ZCode bundle 完全無 hooks 相關 rule（hooks 是 per-harness config——Claude settings.json / ZCode config.json，不是 rules/ 範疇）
 - **驗證**：deploy → grep bundle 無 hooks
 
 ## UC 定位

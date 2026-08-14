@@ -77,7 +77,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --out
 - Build and Development（如何建置、測試、lint）
 - "Finding Things" quick reference（常見問題 → 去哪裡找）
 
-**Root CLAUDE.md** = `@AGENTS.md`（把 neutral 專案資訊拉進 Claude session）+ Claude 專屬段（hooks、slash command workflow——若有）。**thin wrapper，不重複 AGENTS.md 內容**。
+**Root CLAUDE.md** = `@AGENTS.md`（把 neutral 專案資訊拉進 Claude session）+ Claude 專屬段（Claude 端 hook 註冊細節、slash command workflow——若有）。**thin wrapper，不重複 AGENTS.md 內容**。
 
 **模組 CLAUDE.md** = `@AGENTS.md` thin wrapper（通常只一行——模組層少有 Claude 專屬機制；純粹讓 Claude 讀到模組 AGENTS.md source）。其他 harness（ZCode/OpenCode/Codex）直接讀模組 AGENTS.md，不需此 wrapper。
 
