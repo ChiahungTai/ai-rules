@@ -90,7 +90,19 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 **B. Agent Tool 模式**（**預設 force 獨立**；判定條件見 [review-engine](../skills/review-engine/SKILL.md)）：
 
-單一 Explore agent 做所有啟用軸（Writer/Reviewer 分離效果）。印出確認：`[Code Review Mode] effort=<ultracode|standard>, workflow=false, agent=true`
+**Dual-context 雙審查者**（變更 ≥ 3 files，中型以上）：平行 spawn 兩個**信念環境不同**的 agent（互補盲點，非 quorum 印證——quorum 對共同盲點無效，刻意讓兩 agent 前提不同）：
+
+| Agent | 定義 | context（spawn prompt 餵） | 抓什麼 |
+|-------|------|---------------------------|--------|
+| fresh-eyes | `agents/code-reviewer.md` | **只餵 diff**，不給任何意圖文件 | 實作層真相：邏輯錯、邊界、silent regression、幻覺 API（不被作者意圖合理化） |
+| primed | `agents/code-reviewer-primed.md` | diff + EP + 模組 AGENTS.md Capabilities + `dependency-graph.md` | Type A intent drift：意圖對齊、架構契合、測試精簡且完整、YAGNI↔過度工程光譜 |
+
+- **context 差異在 spawn prompt，非 agent 定義**（ZCode subagent 自動注入 AGENTS.md，「空 context」不可能全空；可控制的是不餵 EP/架構文檔）
+- **無 EP 時降級規則**（dual 情境）：EP 是 primed 側的意圖合約核心；無 EP（跨 session resume、非 build 場景）→ 降級單 fresh-eyes agent 並印 `[WARN] no EP for primed context`（primed 缺 EP 仍跑 = 架構契合/完整度光譜可審、意圖對齊空轉，findings 噪音可能多於信號）
+- **findings 合併**：同 file:line 去重；**矛盾不裁決**——標 `conflict` 欄（兩方意點並列）交 `/judge-review` 裁決層；合併/衝突規則真相源見 [review-engine](../skills/review-engine/SKILL.md)「dual-context 編排」
+- 小型變更（< 3 files）單 agent（fresh-eyes 即可——方向審查對小 diff 報酬低）
+
+印出確認：`[Code Review Mode] effort=<ultracode|standard>, workflow=false, agent=dual|single`
 
 **C. Main LLM 模式 — 已廢除**：取消（force 獨立 — 與其他 review 命令一致）。effort < ultracode 走 B（Agent Tool）。理由：[acceptance-evidence](../rules/acceptance-evidence.md)「同 LLM 審自己 = 零獨立性」；實證獨立 agent 抓 changeset 作者漏的 drift（本 session dogfood：fresh-eyes agent 抓 3 reference 層錯、code-review agent 抓 5 跨檔 drift — changeset 作者自審漏的，獨立 agent 抓到）。
 

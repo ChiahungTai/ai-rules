@@ -72,6 +72,7 @@
 | `/ep-review` | LLM | 1（同 session 自判）/ 2（跨 session） | AI-self / 人類（跨 session） |
 | `/ep-validate` | LLM | 鏈 | AI-self |
 | `/build` | LLM | 鏈 | 人類觸發 |
+| `/post-build` | LLM | 鏈（build 後收尾鏈編排） | 人類觸發 |
 | `/audit-test` | LLM | 1 | AI-self |
 | `/code-review` | LLM | 1 / 2（跨 session） | LLM / 人類（跨 session） |
 | `/judge-review` | LLM | 鏈 | AI-self |
