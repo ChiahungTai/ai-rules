@@ -58,7 +58,6 @@
 ### 工作流 skills — 自主實作
 
 - `/deep-work` — 用戶離開時的自主實作引擎（收尾寫 STATE.md Last session 觀察）
-- `/sequential-batch` — 序列批次任務處理器（避免 rate limit）
 - `/at` — 排程工作接續（對應 Unix `at`，LLM provider reset usage 後自動 resume；resume 讀 STATE.md 補 observation）
 - `/handoff` — 產出 self-contained 交接 prompt（進度+決策脈絡+下一步），交另一個 session/repo/provider；與 /at 分工（handoff 交別人 / /at 自己續）；STATE.md 非交接選項（Last session 觀察 / 每 session 覆寫，/at resume 讀）
 
@@ -76,8 +75,7 @@
 ### 工作流 skills — instruction file 維護
 
 - `/instruction-init` — 為任意專案自動產生 instruction file 體系（root + 模組都雙檔：AGENTS.md source + CLAUDE.md @AGENTS.md wrapper，bottom-up）
-- `/instruction-clean` — 清理 Markdown 元資訊
-- `/instruction-distill` — 蒸餾文檔，提煉核心精華
+- `/instruction-clean` — 清理 Markdown 元資訊；`--distill` 蒸餾低 signal 內容（保守防護欄：預設 conservative、NEVER 清單禁觸失敗教訓/設計理由/約束、換形為主僅元資訊直刪、縮減 >30% 逐條列出）
 - `/instruction-sync` — 檢查文檔與程式碼同步性
 - `/daily-maintain` — 每日自動維護（cron 用），自動修正低風險問題 + commit
 - `/project-review` — 互動式專案審查（人類用），findings + kanban + doc health
@@ -103,31 +101,22 @@
 - `/swing-analysis` — Swing Analysis 協作模式（Trajectory Viewer + 日誌監控）
 
 ### 開發流程（spec → 交付）
-- `spec-driven-development` — 開新專案/功能前先寫 spec（需求不明或無規格時）
-- `planning-and-task-breakdown` — 把 spec/需求拆成有序可執行任務
-- `incremental-implementation` — 跨多檔變更增量交付（避免一次寫一大坨）
-- `test-driven-development` — TDD 驅動實作（RED → GREEN → 重構）
-- `source-driven-development` — 每個實作決策 grounding 於官方文檔
+- `test-driven-development` — TDD 驅動實作（RED → GREEN → 重構；AI 失敗模式反制：反 rationalization、mock 階層、xfail strict）
 - `arch-thinking` — Clean Architecture + DDD 設計視角 + 結構機械（分層依賴/bounded context/use case 驅動[含共用層外溢]；city map/dep weight/Pattern Radar/domain grounding/LSP 查證/補償邏輯盤點/call graph（函數級）/type structure（contract slice）/data-flow（靜態骨架）；視角非模板；受眾中性；與 api-and-interface-design 分工）
-- `debugging-and-error-recovery` — 系統性根因除錯（非猜測）
+- `debugging-and-error-recovery` — 系統性根因除錯（非猜測；no-guessing 熔斷、用戶糾正訊號表）
 - `external-api-investigation` — 外部 API / 整合器真實行為調查（monkey-patch dry-run、查 stub、問 domain；實證優先於讀 code 推理）
 - `autonomous-execution` — 無人介入自主執行的決策 / 錯誤恢復 / 完成回報 / workspace safety / path invariants / session recovery（false-done 偵測）
 
+> 通用方法論（發散收斂、任務分解/垂直切片、增量交付、spec-first、官方文檔 grounding）屬 LLM 原生能力，不設 skill——相關委託點已改為就地摘要。
+
 ### 品質與審查
 - `review-engine` — review 命令家族通用審查邏輯 domain 真相源（嚴重度/信心水準/審查者自證/LSP 查證/審查模式判定/Writer-Reviewer 分離/多層驗證/**review 執行預設單一源**：force 獨立 / max-agents / model / 視角 / spawn-vs-session）；ep-review/code-review/audit-test/execution-plan EP Review/implement Agent Review 共用
-- `code-review-and-quality` — code 六軸審查 profile（what to check）；通用邏輯見 review-engine
-- `code-simplification` — 不改行為的重構簡化
-- `security-and-hardening` — 未信任輸入 / 外部整合的安全強化
-- `performance-optimization` — 效能瓶頸 profiling 與優化
+- `code-review-and-quality` — code 六軸審查 profile（what to check，含 Security/Performance 軸 checklist 與 Capability Coverage 單源）；通用邏輯見 review-engine
 - `python-type-gap` — 第三方套件型別缺口的四層策略
 - `validation-strategy` — 驗證策略紀律（e2e 優先/交易 replay>live/放 scripts//不重驗 package；與 TDD 流程分工）
 
 ### 架構與演進
-- `api-and-interface-design` — 穩定 API / 模組邊界 / 公開介面設計
-- `deprecation-and-migration` — 舊系統 / API 棄用與遷移
-- `documentation-and-adrs` — 架構決策與文檔記錄（ADR）
-- `ci-cd-and-automation` — CI/CD pipeline 與品質閘門
-- `shipping-and-launch` — 上線前檢查 / 監控 / 漸進部署 / 回滾
+- `api-and-interface-design` — 穩定 API / 模組邊界 / 公開介面設計（Hyrum's Law、邊界驗證、agent-friendly interface）
 
 ### 專案維運
 - `git-workflow-and-versioning` — git commit / branch / 衝突 / 平行流
@@ -135,25 +124,20 @@
 - `maintain` — `/daily-maintain`（自動）與 `/project-review`（互動）共用的 4-phase 維護核心（勿直接呼叫）
 - `scan-project` — 統一專案知識掃描（imports + Capabilities + kanban → dep_graph / findings）
 - `standup` — 每日晨間簡報昨日活動 digest（跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition；nightly-sequence op4 整合）
-- `context-engineering` — session 起始 / 品質退化 / 任務切換時的 context 與 rules 設置
-- `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / 委派框架（delegation）/ side-discovery / Writer-Reviewer
+- `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
 - `dependency-upgrade-watch` — 偵測 nautilus_trader / shioaji 版本漂移，主動建議 /upgrade-nt|/upgrade-sj（碰 pyproject.toml 時 auto-load）
 
 ### 工具與查詢
-- `context7-mcp` — library / framework / API 文檔查詢（context7 MCP）
 - `nt-query` — NautilusTrader 能力 / 實作 / 用法合約查詢（docs-first + LSP-on-Cython-stubs + designer intent）
 - `crg-query` — code-review-graph 知識圖譜查詢紀律（LSP-vs-CRG 分工：symbol→LSP / impact·callers·flows·community→CRG；assume-present + warn-if-absent；anti-over-reliance：graph=structure 非 behavior；CRG 裝了才 fire，平行 nt-query）
-- `mermaid` — pragmatism-first Mermaid 圖表生成
+- `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀）
 - `rules-reminder` — 常被違反的 Bash 規則（rg/fd、無 `#`、`uv run`、無 `$` 展開）
 - `voice-notification` — 三通道語音通知（系統召回 / 進度提醒 / 完成通知）
-- `idea-refine` — 結構化發散 / 收斂的想法精煉
-- `using-agent-skills` — skill 發現與呼叫的 meta-skill
 
 ### UI / 協作
 - `frontend-ui-engineering` — Panel/Bokeh 互動 dashboard / 視覺化
-- `browser-testing-with-devtools` — 真實瀏覽器 DevTools 測試
 - `ui-collab` — 互動式 UI 的 LLM 協作模式（`[ACTION]` 操作日誌）
 
 ### 領域特定

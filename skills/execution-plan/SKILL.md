@@ -12,7 +12,6 @@ EP 自足生成段落式實作計畫書（`/spec` 為純輔助需求釐清，有
 
 委託 Skills：
 - [rules-reminder](../rules-reminder/SKILL.md) — Bash 規則
-- [planning-and-task-breakdown](../planning-and-task-breakdown/SKILL.md) — 依賴圖分析、垂直切片、task sizing
 - [agent-workflow](../agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 規範
 
 ---
@@ -224,7 +223,7 @@ POC/demo 設計 + 測試計畫 + 完成檢查 + 整合測試。**測試類型選
 
 ## 段落劃分原則
 
-依賴圖分析、垂直切片、task sizing 遵循 [planning-and-task-breakdown](../planning-and-task-breakdown/SKILL.md)。
+依賴圖分析、垂直切片、task sizing 屬 LLM 原生規劃能力，直接規劃（無 external skill 委託）。
 
 EP 專屬約束：
 - **語義顯式化**：段落間共享的隱含假設必須顯式標記

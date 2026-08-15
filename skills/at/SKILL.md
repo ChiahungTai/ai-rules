@@ -1,9 +1,9 @@
 ---
 name: at
 
-description: "排程工作接續 — 在指定時間自動 resume 當前工作（CronCreate one-shot，session-only）"
+description: "排程工作接續 — 在指定時間自動 resume 當前工作（CronCreate one-shot）"
 when_to_use: "LLM provider reset usage 後需要自動接續工作時"
-argument-hint: "HH:MM 或 +Xh/+Xm | 任務簡述（可選）"
+argument-hint: "HH:MM | 任務簡述（可選）"
 allowed-tools: ["Read", "Write", "Bash", "Glob", "CronCreate", "CronDelete", "CronList"]
 ---
 
@@ -11,7 +11,7 @@ allowed-tools: ["Read", "Write", "Bash", "Glob", "CronCreate", "CronDelete", "Cr
 
 在指定時間自動 resume 當前工作。對應 Unix `at` 命令（one-shot 排程）。
 
-適用 LLM provider usage reset 後自動接續。Terminal 需保持開啟。
+適用 LLM provider usage reset 後自動接續。排程觸發時 host 必須開啟（Claude Code = terminal session；ZCode = app）。
 
 > **與 `/handoff` 分工**：本命令是「時間接續」（usage 用盡，**自己 resume**）；要把工作交給**另一個** session/provider 並行或接手，用 [`/handoff`](../handoff/SKILL.md)。
 
@@ -26,10 +26,10 @@ allowed-tools: ["Read", "Write", "Bash", "Glob", "CronCreate", "CronDelete", "Cr
    | 輸入格式 | 解析方式 | 範例 |
    |---------|---------|------|
    | `HH:MM` | 今天指定時間；已過 → 明天 | `14:30` → 今天 14:30 |
-   | `+Xh` | 相對 X 小時後 | `+5h` → 5 小時後 |
-   | `+Xm` | 相對 X 分鐘後 | `+30m` → 30 分鐘後 |
 
-   計算 cron 表達式（5-field：`分 時 日 月 週`），pinned 到具體日/月，DoW = `*`。
+   計算 cron 表達式（5-field：`分 時 日 月 週`），pinned 到具體日/月（當前日期以 `date` 輸出為準），DoW = `*`。
+
+> **不支援相對時間**（`+Xh`/`+Xm`）：相對延遲須 LLM 自算換算成絕對時刻，註冊瞬間時刻已過會靜默滾到一年後才觸發。用戶給相對時間時，用 `date` 查當前時間換算成絕對時刻（跨日時明確向用戶確認目標日期），再排程。
 
 2. **提取 task hint**：時間之後的所有文字為任務簡述（**任務目標** — resume 接續的依據）；無則標記「用戶未提供具體描述，resume 時看 git log 推斷進度」。
 
@@ -62,7 +62,7 @@ project_path: "{當前專案路徑}"
 3. 完成後刪除此檔案
 ```
 
-**寫 STATE.md**（session 結束）：若本 session 有轉向 / 卡點觀察，寫 repo root `STATE.md` 補「為什麼」（覆寫非累積；步驟見 [state-md-write](../_common/state-md-write.md)）。`.at-contexts` 維持一次性 ephemeral lifecycle（session-only、resume 後刪、gitignore），STATE.md 是持久觀察層——**兩者不取代**（不同 lifecycle，不可混溶）。
+**寫 STATE.md**（session 結束）：若本 session 有轉向 / 卡點觀察，寫 repo root `STATE.md` 補「為什麼」（覆寫非累積；步驟見 [state-md-write](../_common/state-md-write.md)）。`.at-contexts` 維持一次性 ephemeral lifecycle（排程時建立 → resume 後刪、gitignore），STATE.md 是持久觀察層——**兩者不取代**（不同 lifecycle，不可混溶）。
 
 ### Phase 3：建立 CronCreate
 
@@ -115,7 +115,7 @@ Resume 觸發時，LLM 應：
 
 1. **讀 context 檔案** → 了解**任務目標**（`.at-contexts/` 非 protected path，讀取零摩擦）
 2. **讀 STATE.md**（repo root，若存在）→ 補 **Last session 觀察**（卡在哪、為何轉向、下次起手點）——「為什麼」參考；**完成度走 recovery 事實層**（git + EP re-derive，見 [autonomous-execution](../autonomous-execution/SKILL.md)「Session 級 Recovery」），STATE 不覆蓋完成度
-3. **看當前進度** → `git log --oneline -10` + `git status` 知做到哪（**不比對排程時 snapshot** — quota 期間進度可能已變，看當前才準）
+3. **看當前進度** → `git log --oneline -10` + `git status` 知做到哪（**不比對排程時 snapshot**，理由見 Phase 1）
 4. **接續未完成** → 建進度提醒 sentinel（`touch /tmp/.claude-voice-pending`），根據任務目標 + 當前進度，自主完成剩餘（同 `/deep-work` 模式）
 5. **清理** → 完成後刪除 context 檔案
 6. **通知** → 清 sentinel（`rm -f /tmp/.claude-voice-pending`）+ 套 [voice-notification skill](../voice-notification/SKILL.md)「任務完成」樣板 say（隨機稱謂）
@@ -130,20 +130,14 @@ Resume 觸發時，LLM 應：
 
 # 指定時間 + 任務簡述
 /at 14:30 繼續 /implement docs/execution-plan.md 段落 3
-
-# 相對時間（5 小時後）
-/at +5h
-
-# 相對時間 + 任務
-/at +5h 重構 data_loader.py
 ```
 
 ---
 
 ## 執行約束
 
-- **Terminal 必須保持開啟**：CronCreate 在 Claude Code session 中觸發
-- **session-only 排程（不持久化）**：cron 存活在當前 session，靠 terminal 保持開啟維持；session 結束即消失。一次性接續用途足夠（善用 usage reset 後的配額窗口內接續工作）
+- **觸發時 host 必須開啟**：排程由 host 進程在觸發時刻 dispatch — Claude Code 是 terminal session、ZCode 是 app；關閉期間到點不觸發，重開後排程定義仍在但補觸發無保證，需接續就把 host 開到觸發時刻
+- **生命週期因 harness 而異**：Claude Code 綁 session，session 結束排程即消失；ZCode automation 持久於 workspace（跨重啟存活、one-shot 跑完留 completed 記錄不自動刪）— 殘留檢查用 CronList、清理用 CronDelete。一次性接續用途足夠（善用 usage reset 後的配額窗口內接續工作）
 - **清理**：Resume 完成後必須刪除 context 檔案，避免殘留
 - **多個排程**：若 `.at-contexts/` 已有 `at-context-*` 檔案，提示用戶確認是否有衝突
 - **版控排除（一次性設定，與 auto-mode 放行無關）**：`.at-contexts/` 含任務目標描述，建議加入該專案 `.gitignore` 或全域 `core.excludesFile`，避免誤 commit

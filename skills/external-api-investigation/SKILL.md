@@ -10,7 +10,7 @@ description: Guides investigation of external API / integrator behavior — actu
 ## 與既有 skill 的邊界
 
 - `debugging-and-error-recovery`：除**自己 code** 的 bug（根因診斷）。本 skill 調查**外部組件**的真實行為。
-- `source-driven-development`：實作 **grounding 於官方文檔**（API 用法）。本 skill 調查文檔不講的 runtime 行為（實際送什麼參數、用量多少）。
+- 實作 grounding 於官方文檔（API 用法查 Context7 / 官方文檔，LLM 原生紀律）：本 skill 調查文檔不講的 runtime 行為（實際送什麼參數、用量多少）。
 - `acceptance-evidence`：測試/驗收的**證據階層**（L1-L6）。本 skill 是 L4（runtime 實證）在「外部 API 調查」場景的具體化。
 
 ---
@@ -61,5 +61,5 @@ description: Guides investigation of external API / integrator behavior — actu
 ## 不適用
 
 - 純自己 code 的 bug → `debugging-and-error-recovery`
-- 查 API 怎麼呼叫（用法）→ `source-driven-development` / `context7-mcp`
+- 查 API 怎麼呼叫（用法）→ Context7 MCP / 官方文檔
 - 測試/驗收證據分級 → `acceptance-evidence`

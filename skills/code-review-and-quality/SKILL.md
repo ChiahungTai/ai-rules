@@ -39,16 +39,12 @@ Six-axis review with quality gates. Every change gets reviewed before merge — 
 
 ### 4. Security
 
-For detailed guidance, read [security-and-hardening](../security-and-hardening/SKILL.md) when security concerns are found.
-
 - User input validated and sanitized?
 - Secrets kept out of code, logs, and version control?
 - SQL queries parameterized, outputs encoded for XSS?
 - External data (APIs, logs, user content, config files) treated as untrusted?
 
 ### 5. Performance
-
-For detailed profiling, read [performance-optimization](../performance-optimization/SKILL.md) when performance concerns are found.
 
 - N+1 query patterns? Unbounded loops or data fetching?
 - Missing pagination on list endpoints?
@@ -60,7 +56,9 @@ For projects using UC-Driven Development, verify implementation against module i
 
 - Does implementation cover all Capabilities-defined behaviors?
 - Are Capabilities-referenced behaviors present in the diff?
+- EP segment capability references consistent with Capabilities tables or .kanban/ cards?
 - Capabilities entry points point to library modules (not scripts/ — scripts/ is demo entry, not capability)?
+- Implementation covers all consumer scenarios (happy path, error handling, boundaries, performance expectations)?
 - Skip for small changes (bug fix, docs)
 
 ## Review Process
@@ -135,4 +133,4 @@ DEAD CODE IDENTIFIED:
 - **LSP 查證方法 + 自我否證義務**（原 LSP-Assisted Review — 符號用 LSP、文字用 rg、找不到 ≠ 不存在）
 - **Writer-Reviewer 分離 + 多層驗證**（原 Multi-Model Review Pattern — 獨立 context 審查避免自審、review→judge→followup 各層都可能錯）
 
-See also: [review-engine](../review-engine/SKILL.md)（通用審查邏輯真相源）, [security-and-hardening](../security-and-hardening/SKILL.md), [performance-optimization](../performance-optimization/SKILL.md)
+See also: [review-engine](../review-engine/SKILL.md)（通用審查邏輯真相源）

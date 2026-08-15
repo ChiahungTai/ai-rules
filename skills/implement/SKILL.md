@@ -18,7 +18,6 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "Workf
 委託 Skills（實作時提供方法論）：
 - [rules-reminder](../rules-reminder/SKILL.md) — Bash 規則
 - [test-driven-development](../test-driven-development/SKILL.md) — TDD 循環
-- [incremental-implementation](../incremental-implementation/SKILL.md) — 範圍紀律
 - [debugging-and-error-recovery](../debugging-and-error-recovery/SKILL.md) — 系統化除錯
 - [autonomous-execution](../autonomous-execution/SKILL.md) — 自主決策框架
 - [python-type-gap](../python-type-gap/SKILL.md) — 第三方套件 type gap（mypy 失敗時）
@@ -117,7 +116,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 - 語義約束
 - POC/demo 映射（Agent 回報前必須執行至少一個 demo 驗證）
 - 相關檔案路徑（必讀 / 可修改 / 禁止修改）
-- Skills invoke 指示（rules-reminder, test-driven-development, incremental-implementation, autonomous-execution）
+- Skills invoke 指示（rules-reminder, test-driven-development, autonomous-execution）
 
 #### EP 專屬約束
 

@@ -48,7 +48,7 @@
 - ✅ 可保留: 符號連結說明、專案概述、繼承關係
 - 💡 建議執行 `/instruction-sync --clean` 或 `--all` 清理
 
-### 蒸餾評估（整合 /instruction-distill，--all 選項）
+### 蒸餾評估（整合 /instruction-clean --distill，--all 選項）
 - ✅ 精華: N 個核心原則、M 個架構圖
 - ❌ 冗餘: K 個過時範例、L 個重複說明
 - ⚠️ 灰色地帶: P 個（預設保留）
@@ -85,7 +85,7 @@
 
 #### 評估結果
 - Signal/Noise Ratio: [X]% [✅/⚠️/❌]
-- 💡 建議動作: [保持現狀 / 執行 /instruction-distill]
+- 💡 建議動作: [保持現狀 / 執行 /instruction-clean --distill]
 
 ### 導航有效性檢查
 

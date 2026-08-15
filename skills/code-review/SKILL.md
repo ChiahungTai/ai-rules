@@ -14,11 +14,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 委託 Skills：
 - [rules-reminder](../rules-reminder/SKILL.md) — Bash 規則
 - [review-engine](../review-engine/SKILL.md) — 通用審查邏輯（嚴重度/信心水準/審查者自證/LSP 查證/審查模式判定規則/多層驗證）
-- [code-review-and-quality](../code-review-and-quality/SKILL.md) — code 六軸審查方法論（what to check）
-
-按需讀取：
-- [security-and-hardening](../security-and-hardening/SKILL.md) — 安全審查細節
-- [performance-optimization](../performance-optimization/SKILL.md) — 效能審查細節
+- [code-review-and-quality](../code-review-and-quality/SKILL.md) — code 六軸審查方法論（what to check；Security/Performance 軸的 checklist 亦在該檔，細節判斷屬 LLM 原生能力）
 
 Workflow 執行協調：[workflow-review-pattern.md](../_common/workflow-review-pattern.md)（模式判定見 review-engine；Ultracode 下平行六軸審查）
 
@@ -81,7 +77,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 - `git diff` 範圍
 - 該軸的檢查項目清單（如上表）
 - 相關檔案路徑（必讀）
-- 方法論引用（code-review-and-quality；Architecture 軸引用 arch-thinking（視角+機械）；Security 軸額外引用 security-and-hardening）
+- 方法論引用（code-review-and-quality；Architecture 軸引用 arch-thinking（視角+機械））
 - rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
 - schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
@@ -124,13 +120,8 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 - **受眾明文**：axis 3 與 `/illustrate` 用同一 skill，但 axis 3 產**機器 finding**（A 軸）、illustrate **渲染給人判讀**（B 軸）
 
 ### Capability Coverage — 滿足 Capabilities 描述嗎？
-大型/中型變更時審查：
-- 實作是否涵蓋模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）Capabilities 表格描述的所有行為？
-- 是否有 Capabilities 引用的行為在 diff 中沒有對應實作？
-- EP 段落引用的能力描述是否與 Capabilities 表格或 .kanban/ 卡片一致？
-- Capabilities 入口路徑是否指向 library 模組（非 scripts/ —— scripts/ 是 demo 入口非能力入口）？
-- 實作是否涵蓋「消費場景」描述的所有情境（happy path、錯誤操作、邊界、效能期待差異）？
-小型變更（bug fix）跳過此軸。
+
+**checklist 單一真相源在 [code-review-and-quality](../code-review-and-quality/SKILL.md) ### 6**（涵蓋行為、diff 對應、入口指向 library 非 scripts/、小型變更跳過）。本命令僅定義執行時機：大型/中型變更時審查，小型變更（bug fix）跳過；審查題材為模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）Capabilities 表格 + EP 段落引用 + 「消費場景」情境（happy path、錯誤操作、邊界、效能期待差異）。
 
 ### 深層思考（第一性原理 + 第二層思考）
 - **讀相關程式碼**：不只看 diff，讀取被修改檔案引用的其他模組

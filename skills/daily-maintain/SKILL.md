@@ -35,14 +35,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 
 理由：用戶透過 launchd 排程此命令 = 明確授權自動維護。只有 🟢 項目（路徑修正、tag 修正）會被 commit，🟡 項目絕不 commit。
 
-Commit message 格式：
-```
-chore(maintain): daily auto-maintain — X findings fixed, Y reported
-
-Auto-fixed: X-cap-path(N), X-tag-module(N)
-Reported: X6(N)
-Snapshot: capabilities N, kanban N, findings N
-```
+Commit message 格式與自動 commit 範圍：見 [maintain](../maintain/SKILL.md)「Commit 規則 — 自動模式」（單一真相源，此處不重複）。
 
 ---
 
@@ -75,13 +68,7 @@ claude -p "/daily-maintain --only doc-health"
 
 ## 參數
 
-| 參數 | 說明 |
-|------|------|
-| 無參數 | 依序執行 Phase 1 → 2 → 3 → 4 |
-| `--init` | Phase 1 用初始生成模式 |
-| `--only dep-graph` | 只跑 Phase 1 |
-| `--only sync` | 只跑 Phase 2 |
-| `--only doc-health` | 只跑 Phase 3 |
+參數定義見 [maintain](../maintain/SKILL.md)「參數」表（單一真相源：無參數全跑、`--init`、`--only dep-graph|sync|doc-health`）。
 
 ---
 

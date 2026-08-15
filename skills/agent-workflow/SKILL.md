@@ -49,16 +49,6 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 
 **spawn Agent 前必須印出確認**：`[Agent] model=<依 model-routing 任務類型>, max=N, current=M`
 
-### 任務分級
-
-| 場景 | Agent 使用 | 說明 |
-|------|-----------|------|
-| 簡單修改（1-2 檔案） | 不用 Agent | 主 session 直接做更快 |
-| 研究探索 | 1 個 foreground Agent（`Explore` 類型） | 只需 Read/Grep，不需要 worktree |
-| 技術驗證 PoC | 1 個 Agent + `isolation: "worktree"` | 失敗自動清理，零污染 |
-| 中型實作（3-8 檔案） | 1-N 個 Agent + worktree | 按模型並發上限控制 |
-| 大型改動（20+ 檔案） | `/batch` 命令 | 自動拆分 5-30 單元，每單元獨立 worktree |
-
 ### Subagent 產出格式：schema 嚴格度（raw material vs deliverable）
 
 spawn agent 時，依「agent 產出是**原料**還是**直接交付**」選 schema 嚴格度：
@@ -84,7 +74,7 @@ agent-workflow 偏控制導向（scope fence / git diff 驗產出 / classifier /
 **連貫模型**：
 
 - **goal**：EP segment / 任務目標（清晰可驗收）
-- **tools**：delegation 前配工具集——依任務領域匹配 skill description 觸發詞（任務含「測試」→ TDD skill、含「錯誤」→ debugging skill）；[build.md](../implement/SKILL.md) Agent Prompt 已有完整 skill invoke 實作清單（rules-reminder / test-driven-development / incremental-implementation / autonomous-execution），此處概念化引用不重列
+- **tools**：delegation 前配工具集——依任務領域匹配 skill description 觸發詞（任務含「測試」→ TDD skill、含「錯誤」→ debugging skill）；[build.md](../implement/SKILL.md) Agent Prompt 已有完整 skill invoke 實作清單（rules-reminder / test-driven-development / autonomous-execution），此處概念化引用不重列
 - **context**：[build.md](../implement/SKILL.md) context handoff 已是最完整實作——引用不重述
 - **let go**：實作層裁量權（build.md「EP 為收斂方向，實作層有發現真相的責任」）；放手底線 = [autonomous-execution](../autonomous-execution/SKILL.md) 紅線/黃線
 - **verify**：[build.md](../implement/SKILL.md) git diff + Agent Review——引用不重述
@@ -95,7 +85,7 @@ agent-workflow 偏控制導向（scope fence / git diff 驗產出 / classifier /
 - **防過度控制**：創造性任務（設計/實作）**不加 fence**（scope fence 已排除創造性）。委派光譜：機械任務 = tight delegation（fence）；創造性任務 = loose delegation（goal+tools+放手）；混合型（部分機械 + 部分判斷，如重構提升可讀性）= medium delegation（goal + 精簡 fence，只 fence 不可碰區域 + 放手判斷空間）。
 - **fence vs 委派非矛盾**：兩者適用**不同任務類型**（同光譜兩端）——fence 是委派的特殊形態（目標極明確時的 tight delegation），委派框架是 scope fence 的上層框架。
 
-**delegate→verify loop（與 Recovery 段互补）**：委派（本段）上游 → 降低 false-done；[autonomous-execution](../autonomous-execution/SKILL.md)「Session 級 Recovery」completeness validation（false-done 偵測）下游 → 捕捉殘餘。兩者形成 loop，**互补非重複**。**邊界**：verify 的 git diff 半邊（scope/claim 校驗）與 Recovery 段 completeness 互補不重疊；Agent Review 半邊關注**單段 code 正確性**（段落級），Recovery 段 completeness 關注**跨段落 EP 完成度**（EP 級）——builder 寫 verify 時引用 build.md Agent Review（段落級），不重述 Recovery 段的 EP 級 completeness。
+**delegate→verify loop（與 Recovery 段互補）**：委派（本段）上游 → 降低 false-done；[autonomous-execution](../autonomous-execution/SKILL.md)「Session 級 Recovery」completeness validation（false-done 偵測）下游 → 捕捉殘餘。兩者形成 loop，**互補非重複**。**邊界**：verify 的 git diff 半邊（scope/claim 校驗）與 Recovery 段 completeness 互補不重疊；Agent Review 半邊關注**單段 code 正確性**（段落級），Recovery 段 completeness 關注**跨段落 EP 完成度**（EP 級）——builder 寫 verify 時引用 build.md Agent Review（段落級），不重述 Recovery 段的 EP 級 completeness。
 
 **委派時 side-discovery**：agent 發現 scope 外 → Side-Discovery 段（scope-fence 負空間 redirect）是委派框架的 redirect 應用。
 
@@ -163,27 +153,7 @@ Scope Fence（上）擋機械任務 agent「順手重構」scope 外區塊，但
 
 ## Writer/Reviewer 雙 Session
 
-**新鮮 context 能提升審查品質** — AI agent 審查自己剛寫的 code 時有 bias。
-
-```
-Session A（Writer）                      Session B（Reviewer）
-─────────────────────                    ─────────────────────
-實作 rate limiter
-                                         審查 @src/middleware/rateLimiter.ts
-                                         找 edge cases、race conditions、
-                                         與現有 middleware 的一致性
-根據 Session B 的 feedback 修正
-```
-
-也可以用於測試：一個 session 寫測試，另一個寫通過測試的程式碼。
-
----
-
-## Agent Teams
-
-自動協調多個 session 的平行工作流。適合需要 shared tasks、messaging 和 team lead 的複雜場景。
-
-（此功能為 Claude Code 內建，詳細設定見 Claude Code 官方文檔。）
+新鮮 context 提升審查品質（同 LLM 自審有 bias）——原則與流程見全域 guide「Solo + AI 開發工作流」的 Writer/Reviewer 分離段（always-loaded，此處不重述）。
 
 ---
 
@@ -217,6 +187,16 @@ spawn 失敗處理依失敗類型分階梯 —— classifier unavailable retry �
 
 ---
 
+## Rule Freshness（spawn 時注入）
+
+Rules 檔在 session 啟動時載入，但**更新不會傳播到已 spawn 的 agent 或執行中的任務**——agent 帶著 spawn 當下的 context 跑完全程。「它在 rules 裡」不等於「agent 會遵守」：
+
+- 高頻被違反的規則（mock patterns、property patching）→ **spawn prompt 直接注入該規則摘錄**，不假設 agent 會自己讀 rules 檔
+- 高風險 rule 更新後 → 下一個依賴該規則的任務前先 reset context（`/clear` 或重新載入 rule）
+- 熱點規則值得在關鍵流程點（audit 角度、agent prompt 模板）重複出現，而非只靠單次載入
+
+---
+
 ## 自檢清單
 
 ### Agent tool spawn 前
@@ -224,9 +204,8 @@ spawn 失敗處理依失敗類型分階梯 —— classifier unavailable retry �
 - [ ] 已偵測自身模型，查「並發上限」表確認（Claude: `rules/model-routing.md`）；Agent **model 依任務類型**
 - [ ] 已印出 `[Agent] model=X, max=N, current=M`
 - [ ] 當前 Agent 數量未超過上限
-- [ ] 任務確實需要 Agent
-- [ ] Prompt 包含足夠 context + 相對路徑 + rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules，必須在 prompt 開頭明確寫入：`fd` 取代 `find`、`rg` 取代 `grep`、`uv run` 前綴 Python、禁止 `sed` 修改 `.py/.md`、禁止 `$` shell 展開、輸出繁體中文）
-- [ ] **若任務涉及 mock / PropertyMock / fixture**：prompt 主動注入專案 `tests/AGENTS.md`（legacy `tests/CLAUDE.md`）的 mock 規範段落摘要（agent 不會自己讀專案 instruction 檔，必須主動注入；見 [context-engineering](../context-engineering/SKILL.md)「Rule Freshness」）
+- [ ] Prompt 包含足夠 context + 相對路徑 + rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules，必須在 prompt 開頭明確寫入：多行 `python -c` 禁 `#` 註解、`rg`/`fd` 取代 `grep`/`find`、`uv run` 前綴 Python、禁止 `sed` 修改 `.py/.md`、禁止 `$` shell 展開、輸出繁體中文）
+- [ ] **若任務涉及 mock / PropertyMock / fixture**：prompt 主動注入專案 `tests/AGENTS.md`（legacy `tests/CLAUDE.md`）的 mock 規範段落摘要（agent 不會自己讀專案 instruction 檔，必須主動注入；見上方「Rule Freshness」）
 - [ ] Uncommitted changes：需要 → 先 commit；Branch：不正確 → 先 checkout
 - [ ] 失敗 Agent 的 worktrees 已清理（`git worktree list`）
 - [ ] Agent 產出 commit 前需用戶確認（[outward-action-consent](../../rules/outward-action-consent.md)）
@@ -236,12 +215,3 @@ spawn 失敗處理依失敗類型分階梯 —— classifier unavailable retry �
 - [ ] 互動式平行實作 → Agent tool + worktree
 - [ ] 無偏差審查 → Writer/Reviewer 雙 session（開新 terminal）
 - [ ] 無人值守 → Auto mode（`--permission-mode auto`）
-
-### 常見失敗模式
-
-| 模式 | 症狀 | 修正 |
-|------|------|------|
-| **Kitchen sink** | 一個 session 塞太多不相關任務 | `/clear` 切換任務 |
-| **反覆修正** | 同一問題修正 2 次仍失敗 | `/clear` + 重寫更好的 prompt |
-| **過度探索** | "investigate" 不限範圍，讀了幾百個檔案 | 限縮範圍或用 subagent |
-| **信任未驗證** | 產出看似合理但沒驗證 | 必須提供驗證（測試、截圖、腳本） |

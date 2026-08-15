@@ -22,7 +22,7 @@ Phase 1: Snapshot               Phase 2: Instruction Sync     Phase 3: Doc Healt
 scan_project.py                 /instruction-sync                 /doc-health                    彙總報告
 → dep_graph / findings / fp     LLM 直接讀 instruction 檔        呈現 findings                  跨 phase 關聯
 diff fingerprint                用 dep_graph 驗證 imports   LLM 直接讀 .kanban/            趨勢追蹤
-更新 dep-graph.md               品質檢查                    品質檢查 + kanban hygiene
+更新 dependency-graph.md               品質檢查                    品質檢查 + kanban hygiene
 ```
 
 ### Phase 1: 統一知識快照
@@ -45,7 +45,7 @@ uv run python ${CLAUDE_SKILL_DIR}/../scan-project/scripts/scan_project.py --proj
 **步驟 1.3：更新 dependency-graph.md**
 
 根據 dep_graph 資料更新 Mermaid graph、Direct Dependencies、Hotspots、Ripple Impact Rules。
-Mermaid 暗色主題：所有 ````mermaid` 區塊第一行加 `%%{init: {'theme': 'dark'}}%%`。
+Mermaid 樣式遵循 [mermaid](../mermaid/SKILL.md)：禁 `%%{init}%%`、fill+color 成對（跨 Dark/Light 主題可讀）。
 
 **步驟 1.4：Commit snapshot**
 

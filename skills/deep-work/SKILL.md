@@ -62,7 +62,7 @@ permission mode 是 CLI 啟動旗標 / dir 設定，**命令本身無法中途�
   │   • observed：/implement、/execution-plan、/code-review、/ep-review、/ep-validate
   │   • reasonable：/fix-test、/lint-fix（自癒 loop）、/audit-test（測試）、/consistency（文檔自洽）、
   │                /followup-review（驗收）、/metadata-sync（commit 前更新 + 補漏）、
-  │                /handoff（跨 provider）、/sequential-batch（rate-limit 批次）
+  │                /handoff（跨 provider）
   │
   ├─ ARG = 任務描述 → deep-work 自選程序：
   │   • 複雜（需規劃）→ /execution-plan 產 EP →（可選 /ep-validate、/ep-review）→ /implement
@@ -71,7 +71,7 @@ permission mode 是 CLI 啟動旗標 / dir 設定，**命令本身無法中途�
   │
   └─ ARG 內含接續/substrate 指令：
       • /at <time> → 跨 session 接續修飾詞（reset 後 resume；inline，非獨立分支）
-      • substrate 見「前置」（agent-view / -p / /handoff / /sequential-batch）
+      • substrate 見「前置」（agent-view / -p / /handoff）
 ```
 
 - **ARGUMENTS = `/implement <EP>`**（observed 主路徑）：流程骨架**委派 [build.md](../implement/SKILL.md)**（階段 0-6 全跑），deep-work 自身階段 1-5 **不執行**。**不得省略的 build 步驟**（無人在場時唯一機械防線）：階段 0「EP 快檢」強制輸出、階段 1「POC + demo 盤點」映射表、**階段 2「整合路徑覆蓋硬閘門」**（`rg "<新參數>=" tests/`）、**階段 3「全量測試 exit 0 完成閘門」**、階段 5c `/audit-test` —— 絕不靜默跳過（`/deep-work /implement` 時硬閘門在最需要它的無人路徑必須生效）。

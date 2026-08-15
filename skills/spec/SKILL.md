@@ -16,9 +16,6 @@ EP 前的**需求層**澄清。把「討論一下感覺對了」的鬆散共識�
 
 UC-Driven Development 方法論見 [ai-development-guide.md](../../ai-development-guide.md) 的「UC-Driven Development」章節。
 
-委託 Skills：
-- [spec-driven-development](../spec-driven-development/SKILL.md) — 假設浮出、邊界定義、成功條件量化（取其 Phase 1 Specify 子集；該 skill 是通用方法論，非本命令專屬）
-
 ---
 
 ## 參數
@@ -52,7 +49,7 @@ User Story 格式（參考）：
 現在怎麼處理：[workaround]
 ```
 
-**假設浮出**（遵循 [spec-driven-development](../spec-driven-development/SKILL.md)）：對齊時立即列出假設，不靜默填補模糊需求。
+**假設浮出**：對齊時立即列出假設，不靜默填補模糊需求。
 ```
 ASSUMPTIONS I'M MAKING:
 1. [假設]（來源：用戶確認 / 既有討論）

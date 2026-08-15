@@ -35,7 +35,7 @@ Trust internal code. Validate at system edges: API route handlers, form submissi
 
 ### Prefer Addition Over Modification
 
-Extend interfaces without breaking existing consumers. Add optional fields; don't change existing field types or remove fields. See [deprecation-and-migration](../deprecation-and-migration/SKILL.md) for safe removal.
+Extend interfaces without breaking existing consumers. Add optional fields; don't change existing field types or remove fields. 移除既有欄位前先驗證全消費端（LSP findReferences + rg 字串引用 + 非 library 消費者）。
 
 ### Consistent Error Semantics
 

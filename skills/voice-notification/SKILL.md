@@ -26,10 +26,11 @@ allowed-tools: [Bash]
 
 語音通知只適用以下 command，**其餘一律不 say**（消除「該不該通知」的判斷負擔）：
 
-- **實作**：`/implement`、`/deep-work`、`/sequential-batch`
+- **實作**：`/implement`、`/deep-work`
 - **審查**：`/code-review`、`/ep-review`、`/ep-validate`、`/judge-review`、`/followup-review`
 - **分析 / 維護 / 文檔產生**：`/execution-plan`、`/daily-maintain`、`/project-review`、`/instruction-init`
 - **升級**：`/upgrade-nt`、`/upgrade-sj`
+- **排程接續**：`/at`（排程確認 + resume 完成）
 
 快速查詢、建議、`/illustrate`、`/commit`、`/help` 等**不 say**。
 

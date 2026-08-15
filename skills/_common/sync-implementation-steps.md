@@ -223,7 +223,7 @@ fi
 ## 步驟 8: 蒸餾（--all 選項）
 
 ```bash
-# 呼叫 /instruction-distill 功能
+# 呼叫 /instruction-clean --distill 功能
 # 蒸餾精簡 instruction 檔
 ```
 

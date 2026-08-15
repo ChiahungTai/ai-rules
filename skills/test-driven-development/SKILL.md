@@ -70,10 +70,6 @@ Every test must encode **why** the behavior matters. A test that can't fail when
 
 For complex bug fixes, spawn a subagent to write the reproduction test. The main agent then verifies the test fails, implements the fix, and verifies it passes. This separation ensures the test is written without knowledge of the fix.
 
-## Browser Testing
-
-For anything that runs in a browser, combine unit tests with runtime verification via Chrome DevTools MCP — DOM inspection, console errors, network requests, screenshots. See [browser-testing-with-devtools](../browser-testing-with-devtools/SKILL.md).
-
 ## Test Classification
 
 在 RED 階段，先分類每個測試的類型，再決定放哪裡、用什麼 fixture。

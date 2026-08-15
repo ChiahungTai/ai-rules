@@ -148,7 +148,7 @@ CRG-sourced edges 附 anti-over-reliance label（graph=structure≠behavior；dy
 - 觸發訊號：宣稱含「X 支援/不做 Y」「X 底層是 Z」「跨模型成立」等能力邊界語句
 - **未 grounding 標 `open`（未驗證）非 `verified`** — 不隨 fix 寫進 instruction file 變正式宣稱
 
-**RC-3 邊界**：domain grounding = **review / 結構審查時** grounding；與 [source-driven-development](../source-driven-development/SKILL.md)（實作 grounding）/ [external-api-investigation](../external-api-investigation/SKILL.md)（runtime 調查）/ [nt-query](../nt-query/SKILL.md)（能力查詢）區分，非第四個過載。
+**RC-3 邊界**：domain grounding = **review / 結構審查時** grounding；與 實作 grounding（grounding 於官方文檔，LLM 原生紀律）/ [external-api-investigation](../external-api-investigation/SKILL.md)（runtime 調查）/ [nt-query](../nt-query/SKILL.md)（能力查詢）區分，非第四個過載。
 
 ### LSP 查證（call chain）
 
@@ -245,7 +245,7 @@ CRG-sourced edges 附 anti-over-reliance label（graph=structure≠behavior；dy
 
 ## 四、與既有 skill 邊界
 
-- [source-driven-development](../source-driven-development/SKILL.md)：實作時 grounding 於文檔。本 skill 是**結構視角**（非文檔查證）+ domain grounding 是**審查時** grounding（非實作 grounding）— 兩者不重疊（domain grounding 四路區分詳 §二 RC-3）。
+- 實作 grounding 於官方文檔（LLM 原生紀律 + Context7 MCP）：本 skill 是**結構視角**（非文檔查證）+ domain grounding 是**審查時** grounding（非實作 grounding）— 兩者不重疊（domain grounding 四路區分詳 §二 RC-3）。
 - [debugging-and-error-recovery](../debugging-and-error-recovery/SKILL.md)：除**自己 code** 的 bug。本 skill 是**設計視角**（預防性，非除錯）。
 - [acceptance-evidence](../../rules/acceptance-evidence.md)：測試 / 驗收**證據階層**。本 skill 是設計層（證據階層是驗收層）。
 - [api-and-interface-design](../api-and-interface-design/SKILL.md)：見 RC-2 邊界。
@@ -254,7 +254,7 @@ CRG-sourced edges 附 anti-over-reliance label（graph=structure≠behavior；dy
 
 **不適用**（場景排除）：
 - 除錯 → `debugging-and-error-recovery`
-- 查 API 用法 / 文檔 → `source-driven-development` / `context7-mcp`
+- 查 API 用法 / 文檔 → Context7 MCP（`rules/context7.md`）
 - 測試策略 → `test-driven-development` / `validation-strategy`
 - 強制套四層模板（本 skill 是視角，非模板）
 
