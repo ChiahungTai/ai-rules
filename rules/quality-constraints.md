@@ -190,7 +190,7 @@ def process_trading_data(data):
 ### 適用場景
 
 - 跨多個檔案的重構
-- 多段落實作（build 以外的長任務；Claude: `/build`）
+- 多段落實作（build 以外的長任務；Claude: `/implement`）
 - 任何需要 3 個以上步驟的修改
 
 ---

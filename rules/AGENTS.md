@@ -75,9 +75,9 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 
 | ❌ 禁止 | ✅ 改成 |
 |---|---|
-| 裸 slash command `/build` `/commit` `/execution-plan` | 流程名 `build` / `commit` / `execution-plan`（無 slash）；Claude 端原文放 `(Claude: /build)` 括號註 |
+| 裸 slash command `/implement` `/commit` `/execution-plan` | 流程名 `build` / `commit` / `execution-plan`（無 slash）；Claude 端原文放 `(Claude: /implement)` 括號註 |
 | `@~/...` 或 `@/path` transclusion | 一般 markdown link；`@` 僅在描述 Claude 機制時用，並標明「Claude 端」 |
-| `../commands/xxx.md` `../skills/xxx/SKILL.md` 跨域 ref | 描述該 command/skill 名稱 + `(Claude: commands/xxx.md)` 括號註；或泛化為「跨 harness 機制，路徑從略」 |
+| `../skills/xxx/SKILL.md` 跨域 ref | 描述該 skill 名稱（slash `/xxx` 語意跨 harness 有效）；或泛化為「跨 harness 機制，路徑從略」 |
 | 未標註的 `CLAUDE.md wrapper` | 「Claude 端 CLAUDE.md wrapper」或「instruction 檔（AGENTS.md source；Claude 端 CLAUDE.md wrapper）」 |
 | `~/Github/ai-rules/rules/xxx.md` user-specific 絕對路徑 | repo-relative markdown link `[xxx.md](xxx.md)`（同目錄）或 `xxx.md`（純名 + 「source 在 ai-rules repo」） |
 | 「Claude 端 `~/.claude/rules/` symlink auto-load」作為主要描述 | 標準載入機制註記（見下方）|
@@ -97,11 +97,11 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 ```markdown
 # ✅ 正確：原則為主，Claude 機制括號註
 - **任務切換時重置 context**（Claude: `/clear`）
-- **commit 需用戶確認**（完整流程見 commit 命令文檔；Claude: `commands/commit.md`）
+- **commit 需用戶確認**（完整流程見 commit 命令文檔；Claude: `skills/commit/SKILL.md`）
 
 # ❌ 錯誤：Claude 機制作為主要指令
 - **任務切換用 `/clear`**
-- **完整流程見 `../commands/commit.md`**
+- **完整流程見 `../skills/commit/SKILL.md`**
 ```
 
 括號註**不是殘留** — 它是策略：讓 Claude 讀者讀到完整的 Claude 機制資訊，同時讓非 Claude 讀者知道「這是 Claude 特例，我有對應機制即可」。

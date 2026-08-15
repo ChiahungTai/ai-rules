@@ -38,7 +38,7 @@
 | **① LLM 執行鏈** | 機器自讀自判自修 | 工程化、self-contained（EP、findings、code） | AI 自主（人類開頭觸發） |
 | **② 人類 viewport** | 人類用「大原則」判讀 | 意圖（行為 artifact + 認知誤差點）+ 結構（whole-picture 心智模型） | 人類切入（或 AI 產出、人類讀） |
 
-兩軌道平行不交匯，服務不同讀者。`/ep-review`、`/code-review`、`/audit-test`、`/build` 內部審查、`/judge-review` 屬軌道 ①；`/deliverable-review`（交付）、`/illustrate`（結構 viewport）、`/codebase-sweep`（baseline sweep）與 `/human-review`（放大鏡）是軌道 ② 的命令。
+兩軌道平行不交匯，服務不同讀者。`/ep-review`、`/code-review`、`/audit-test`、`/implement` 內部審查、`/judge-review` 屬軌道 ①；`/deliverable-review`（交付）、`/illustrate`（結構 viewport）、`/codebase-sweep`（baseline sweep）與 `/human-review`（放大鏡）是軌道 ② 的命令。
 
 ### 原理：人補 LLM 的結構性 blind spot（direction >> quality）
 
@@ -71,7 +71,7 @@
 | `/execution-plan` | LLM | 鏈 | 人類觸發 |
 | `/ep-review` | LLM | 1（同 session 自判）/ 2（跨 session） | AI-self / 人類（跨 session） |
 | `/ep-validate` | LLM | 鏈 | AI-self |
-| `/build` | LLM | 鏈 | 人類觸發 |
+| `/implement` | LLM | 鏈 | 人類觸發 |
 | `/post-build` | LLM | 鏈（build 後收尾鏈編排） | 人類觸發 |
 | `/audit-test` | LLM | 1 | AI-self |
 | `/code-review` | LLM | 1 / 2（跨 session） | LLM / 人類（跨 session） |
@@ -85,14 +85,13 @@
 | `/commit` | 人類確認 | — | 人類 |
 | `/metadata-sync` | LLM | 1 | 人類 / AI-self |
 
-工具/維護命令（`/doc-health`、`/consistency`、`/instruction:*` 等）與受眾模型正交，完整索引見 `commands/CLAUDE.md`（standup 已遷移至 `skills/`，見 `skills/CLAUDE.md`）。
+工具/維護命令（`/doc-health`、`/consistency`、`/instruction-*` 等）與受眾模型正交，完整索引見 `skills/CLAUDE.md`。
 
 ## 專案結構
 
 - `rules/` — 行為規範（載入機制因 harness 而異；部署紀律 + scope 分類見 `rules/AGENTS.md`）
-- `skills/` — 領域知識和工作流（on-demand；SKILL.md 開放標準，跨 harness 可攜）
-- `commands/` — 命令工作流（invocation 因 harness 而異；Claude 端為 slash command，見 CLAUDE.md）
-- `commands/instruction/_common/` — 共用子範本（`instruction:*` 命令的引用單元）
+- `skills/` — 領域知識和工作流 skills（on-demand；SKILL.md 開放標準，跨 harness 可攜；Claude 端 `/name` slash 與 Skill tool 皆可觸發，工作流 skills 索引見 `skills/CLAUDE.md`）
+- `skills/_common/` — 共用子範本（跨 skill 引用單元，非 skill；`instruction-*` 等使用）
 - `hooks/` — Hook 實作腳本（跨 Claude/ZCode 單一來源。hooks 無目錄載入點，**不能 symlink**——兩家 config 以絕對路徑引用本目錄腳本：Claude `~/.claude/settings.json`；ZCode 3.7.7+ user-level hooks，註冊範本 `hooks/zcode-registration.json`——**範本內容是 `~/.zcode/cli/config.json` `hooks:` 鍵下的子樹值，merge 進去而非整檔覆蓋**（整檔覆蓋會毀掉 config 的 mcp/plugins 區塊）、`notification.sh` 不移植。詳細實測與 ZCode 限制（事件子集、專案層忽略、per-session 快照）見 [04 報告 §7 修訂](ai-analysis/reports/superpowers/04-multi-harness機制對照.md)）
 - `agents/` — 跨 harness subagent 定義（`~/.claude/agents`、`~/.zcode/agents` symlink → 本目錄；欄位相容策略、tools 清單陷阱與 ZCode Beta 限制見 [agents/AGENTS.md](agents/AGENTS.md)）
 - `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）。`ref-docs/harness/` 是四家 harness 官方文檔鏡像（claude-code/opencode/zcode/codex）+ `contracts.md` 對照分析——**更新鏡像用既有工具 `ref-docs/harness/crawl.py`**（`uv run python ref-docs/harness/crawl.py [--source zcode]`，discover + sha256 增量寫入 + manifest 維護；不要手動逐頁鏡像）

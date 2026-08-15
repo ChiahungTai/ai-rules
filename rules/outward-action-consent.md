@@ -115,4 +115,4 @@ autonomous shortcut:autonomous session（deep-work、排程執行、半夜自主
 
 ---
 
-完整 commit 流程定義在各自 harness 的 commit 命令文檔（Claude: `commands/commit.md`；其他 harness 見各自 commands 目錄）。
+完整 commit 流程定義在各自 harness 的 commit 命令文檔（Claude: `skills/commit/SKILL.md`；其他 harness 見各自 commands 目錄）。

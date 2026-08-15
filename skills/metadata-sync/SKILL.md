@@ -1,6 +1,6 @@
 ---
 name: metadata-sync
-description: metadata finalization 單一真相源 — build 後的文檔狀態結算(模組 Capabilities 寫入——AGENTS.md 為主、CLAUDE.md legacy、Kanban 搬 Done、SYSTEM-MAP 生命週期、architecture.md、EP 歸檔、flow-feedback 歸檔、導航文檔 /consistency 閘門)。兩 mode(build 依情境結算 / standalone 補漏)。被 /build 階段5、/metadata-sync 共用 invoke。觸發詞：metadata finalization、commit 收尾、Capabilities 同步、Kanban 搬 Done、EP 歸檔、SYSTEM-MAP 更新、architecture.md、漏掉 finalization、build 完更新文檔、flow-feedback 歸檔、文檔狀態結算。
+description: metadata finalization 單一真相源 — build 後的文檔狀態結算(模組 Capabilities 寫入——AGENTS.md 為主、CLAUDE.md legacy、Kanban 搬 Done、SYSTEM-MAP 生命週期、architecture.md、EP 歸檔、flow-feedback 歸檔、導航文檔 /consistency 閘門)。兩 mode(build 依情境結算 / standalone 補漏)。被 /implement 階段5、/metadata-sync 共用 invoke。觸發詞：metadata finalization、commit 收尾、Capabilities 同步、Kanban 搬 Done、EP 歸檔、SYSTEM-MAP 更新、architecture.md、漏掉 finalization、build 完更新文檔、flow-feedback 歸檔、文檔狀態結算。
 ---
 
 # Metadata Sync — metadata finalization 單一真相源
@@ -13,7 +13,7 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 
 | mode | 觸發者 | 職責 |
 |------|--------|------|
-| **build** | `/build` 階段 5 | 依情境結算(見情境矩陣)—— 結算是 working tree 編輯,不需 outward-action-consent(commit 場景) |
+| **build** | `/implement` 階段 5 | 依情境結算(見情境矩陣)—— 結算是 working tree 編輯,不需 outward-action-consent(commit 場景) |
 | **standalone** | `/metadata-sync`(獨立入口) | 偵測漏項/過時 → 補(commit 前更新 + 事後補漏共用) |
 
 > **為什麼結算在 build 不在 commit**:finalization 是 working tree 編輯(改 CLAUDE.md / mv EP / 搬 Kanban),不是 git 寫入 —— build 階段 5 自主做,commit 退回純 git 提交(一次帶走 code + finalization)。舊設計(commit 階段 3 內嵌)對 LLM 是建議性、會漏跑(實證:commit 歷史多個「補漏」單獨 commit)。working tree 編輯沒 commit 就不永久,跟 code 一起 stash/checkout,不會「Capabilities 標 ✅ 但沒進 git」不一致 —— 真正風險是選擇性 commit(只 commit code 不 commit CLAUDE.md),靠 commit `git add` 納入 finalization 檔規範。
@@ -27,7 +27,7 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 | **C** | **純 refactor**(無新 UC) | ❌ | **跳過** |
 | **D** | **docs-mode EP**(無 .py UC,EP 完成) | EP 完成、無 UC | **EP 歸檔 only**(無 Cap/Kanban) |
 
-> deep-work `/build` 委派 build 全流程,繼承情境 A–D;deep-work 純 fix/debug(不走 build)= 情境 C 跳過。**code-review 後改 code**(UC 已結算過,入口可能變)= standalone mode 更新(冪等重跑);**事後發現漏結算** = standalone mode 補漏。
+> deep-work `/implement` 委派 build 全流程,繼承情境 A–D;deep-work 純 fix/debug(不走 build)= 情境 C 跳過。**code-review 後改 code**(UC 已結算過,入口可能變)= standalone mode 更新(冪等重跑);**事後發現漏結算** = standalone mode 補漏。
 
 ## finalization 項目(build mode 依情境執行子集)
 
@@ -55,7 +55,7 @@ build 情境 A 憑整合驗證升 Verified;情境 B(中間段)只到 Built 預�
 
 ## standalone 偵測維度(獨立入口核心智能)
 
-`/metadata-sync`(standalone mode)用於 **commit 前更新**(code-review 後 code 變了)或**事後補漏** —— 兩者都從現狀推導「哪些 finalization 漏了 / 過時」:
+`/metadata-sync`(standalone mode)用於 **commit 前更新**(code-review 後 code 變了)或**事後補漏** —— 兩者都從現狀推導「哪些 finalization 漏了 / 過時」。`--check` flag = 只跑兩段式第 1 步(偵測 + 報告),不執行
 
 | 漏項 | 偵測方式 |
 |------|---------|
@@ -86,14 +86,14 @@ build 情境 A 憑整合驗證升 Verified;情境 B(中間段)只到 Built 預�
 | 無 architecture.md | architecture.md 條件更新 |
 | 無 `ai-analysis/flow-feedback/` | flow-feedback 歸檔 |
 
-> `/metadata-sync` command 不重列容錯(指向本段,單一源)。
+> 容錯定義僅此一處（單一源）。
 
 ## 與既有邊界
 
-- [`/doc-health`](../../commands/doc-health.md):**檢查 / 報告**(問「文件準確嗎」),消費 scan findings + LLM 讀取驗證,含 `--sync-system-map`。本 skill 是**執行修補**(問「finalization 該做的做了嗎,沒做就補」)。SYSTEM-MAP 偵測消費 doc-health findings,不重造。
-- [`/consistency`](../../commands/consistency.md):**單檔內部自洽**(術語 / 章節 / 引用 / 邏輯 / 格式)。本 skill 的 consistency 閘門 invoke 它,非重造自洽邏輯。
+- [`/doc-health`](../doc-health/SKILL.md):**檢查 / 報告**(問「文件準確嗎」),消費 scan findings + LLM 讀取驗證,含 `--sync-system-map`。本 skill 是**執行修補**(問「finalization 該做的做了嗎,沒做就補」)。SYSTEM-MAP 偵測消費 doc-health findings,不重造。
+- [`/consistency`](../consistency/SKILL.md):**單檔內部自洽**(術語 / 章節 / 引用 / 邏輯 / 格式)。本 skill 的 consistency 閘門 invoke 它,非重造自洽邏輯。
 - [`kanban-board`](../kanban-board/SKILL.md):看板卡片**通用 CRUD 工具**。本 skill 的「Kanban 搬 Done」是綁定 build 結算語意的特定操作(可用 kanban-board 的移動能力執行)。
-- [`/audit-test`](../../commands/audit-test.md):**測試品質**稽核(反模式 / 覆蓋 / mock)。與文檔 metadata 正交。
+- [`/audit-test`](../audit-test/SKILL.md):**測試品質**稽核(反模式 / 覆蓋 / mock)。與文檔 metadata 正交。
 - build 階段 5b(instruction 檔 / arch **內容**同步):反映程式碼變更到文檔描述(導航-A 種子、模組職責),屬 [instruction-writing](../../rules/instruction-writing.md) 職責,**非**狀態結算;與本 skill 結算在同一段 5 協調(5a 結算寫 ✅ 行、5b 同步描述)。
 
 ## 不適用

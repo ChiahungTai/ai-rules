@@ -21,7 +21,7 @@ Tasks.md 是自架的 Markdown 任務看板。每個 lane 是一個目錄，每�
 └── Done/          ← 完成歸檔（無限制）
 ```
 
-> **無 Review lane**：AI 開發流程已內建 review（/build 含 Agent Review → /code-review → /commit），不需要獨立的 Review lane。In-Progress 完成後直接移至 Done。
+> **無 Review lane**：AI 開發流程已內建 review（/implement 含 Agent Review → /code-review → /commit），不需要獨立的 Review lane。In-Progress 完成後直接移至 Done。
 
 ### `.gitkeep` 規則
 
@@ -29,7 +29,7 @@ Tasks.md 是自架的 Markdown 任務看板。每個 lane 是一個目錄，每�
 
 - 所有 lane 統一加 `.gitkeep`，不假設某個 lane「不會空」
 - 初始化 `.kanban/` 時，建立目錄同時建立 `.gitkeep`
-- `/instruction:init` 或任何建立 kanban 的流程都必須遵守
+- `/instruction-init` 或任何建立 kanban 的流程都必須遵守
 
 ### WIP 限制（Work In Progress）
 
@@ -118,7 +118,7 @@ standup skill（`/standup`，nightly-sequence op4）的 transition digest 涵蓋
 
 （舊 `/standup` command 的「列 In-Progress/Next-Up + 昨日 Done + 建議聚焦」3 步，已由 skill 的 git-log transition digest 取代——見 `skills/standup/SKILL.md`。）
 
-### /build 整合
+### /implement 整合
 
 EP 段落完成後：
 
@@ -160,7 +160,7 @@ EP UC盤點完成時（自動建卡機制）：
 
 ## 注意事項
 
-- **不自動建立卡片**：除非用戶明確要求，或是在 `/execution-plan`、`/build` 等流程中依規則建立
+- **不自動建立卡片**：除非用戶明確要求，或是在 `/execution-plan`、`/implement` 等流程中依規則建立
 - **不自動刪除卡片**：刪除前必須確認
 - **Tag 管理**：LLM 建立或更新卡片時，依模組目錄掃描決定 tag（見專案 root instruction 檔「Tag 慣例」）。用戶也可透過 Tasks.md 網頁 UI 手動管理 tag 顏色和自訂 tag
 - **並行安全**：看板檔案可能同時被網頁 UI 和 LLM 修改，避免同時編輯同一張卡片

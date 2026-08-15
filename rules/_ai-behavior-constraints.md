@@ -110,7 +110,7 @@ API 中的實際方法名或常數名包含版號時（如 `full_pipeline_v2()`�
 
 1. **移除發現的元資訊**，不保留
 2. **不添加新的元資訊**，即使其他檔案有
-3. **使用 `/instruction:clean` 驗證**（Claude slash command；跨 harness 用各家的 instruction 清理工具或人工檢查）
+3. **使用 `/instruction-clean` 驗證**（Claude slash command；跨 harness 用各家的 instruction 清理工具或人工檢查）
 
 ---
 

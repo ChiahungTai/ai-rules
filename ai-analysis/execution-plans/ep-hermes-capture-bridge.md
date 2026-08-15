@@ -2,7 +2,7 @@
 
 ## 動機（self-contained 背景）
 
-ai-rules 的演化輸入**結構性偏狹**：`/flow-feedback` 是唯一摩擦收集器，但它寫相對路徑 `ai-analysis/flow-feedback/`（`commands/flow-feedback.md:46`），在消費端 session（mosaic / NT）跑時依 cwd 寫進消費端 repo，**永遠到不了 ai-rules**。實證：`ai-analysis/flow-feedback/_done/` 歷史 3 筆，**全部來自 ai-rules dogfood 自己**（`/consistency`、dogfood `/execution-plan`、dogfood `/code-review`），0 筆來自消費端真實使用。
+ai-rules 的演化輸入**結構性偏狹**：`/flow-feedback` 是唯一摩擦收集器，但它寫相對路徑 `ai-analysis/flow-feedback/`（`skills/flow-feedback/SKILL.md:46`），在消費端 session（mosaic / NT）跑時依 cwd 寫進消費端 repo，**永遠到不了 ai-rules**。實證：`ai-analysis/flow-feedback/_done/` 歷史 3 筆，**全部來自 ai-rules dogfood 自己**（`/consistency`、dogfood `/execution-plan`、dogfood `/code-review`），0 筆來自消費端真實使用。
 
 結果：ai-rules 只看得到「怎麼操作 ai-rules」的摩擦，看不到「規則在 mosaic/NT 真實使用時哪裡不準」——dogfood 迴音室。
 
@@ -37,14 +37,14 @@ ai-rules 的演化輸入**結構性偏狹**：`/flow-feedback` 是唯一摩擦�
 - 元專案無 SYSTEM-MAP.md（正當跳過：ai-rules 自身無跨域功能狀態總覽）。
 
 ### 掃描範圍
-- `commands/flow-feedback.md`、`commands/flow-review.md`（受影響命令）
+- `skills/flow-feedback/SKILL.md`、`skills/flow-review/SKILL.md`（受影響命令）
 - `rules/`（S2 新增 rule 的落點）
 
 ### 既有 UC 狀態
 | 能力 | 入口 | 狀態 |
 |------|------|------|
-| 摩擦收集（user 植入 → type-1/type-2 建議） | `commands/flow-feedback.md` | ✅ → S1 更新（路徑＋source） |
-| 摩擦聚類＋人類決策 | `commands/flow-review.md` | ✅ → S3 更新（消費 auto-signal） |
+| 摩擦收集（user 植入 → type-1/type-2 建議） | `skills/flow-feedback/SKILL.md` | ✅ → S1 更新（路徑＋source） |
+| 摩擦聚類＋人類決策 | `skills/flow-review/SKILL.md` | ✅ → S3 更新（消費 auto-signal） |
 
 ### 新增 UC
 | 能力 | 狀態 | 實作路徑 |
@@ -68,24 +68,24 @@ ai-rules 的演化輸入**結構性偏狹**：`/flow-feedback` 是唯一摩擦�
 ## S1: `/flow-feedback` 寫入路徑修正 ＋ source provenance
 
 ### Context
-- **背景**：`commands/flow-feedback.md:46` 寫相對路徑，消費端 session 依 cwd 寫錯 repo。修正後，**手動**捕捉也能從消費端落地——即使 S2 不做，S1 單獨就打破 dogfood 偏狹。
+- **背景**：`skills/flow-feedback/SKILL.md:46` 寫相對路徑，消費端 session 依 cwd 寫錯 repo。修正後，**手動**捕捉也能從消費端落地——即使 S2 不做，S1 單獨就打破 dogfood 偏狹。
 - **UC 引用**：更新既有「摩擦收集」能力
 - **依賴**：無（基礎設施段落）
-- **語義約束**：與 S2/S3 共享「ai-rules repo 錨點 = `commands/flow-feedback.md` 命令檔所在 repo」
-- **依賴錨點**：`commands/flow-feedback.md:46`（寫入路徑定義行）
+- **語義約束**：與 S2/S3 共享「ai-rules repo 錨點 = `skills/flow-feedback/SKILL.md` 命令檔所在 repo」
+- **依賴錨點**：`skills/flow-feedback/SKILL.md:46`（寫入路徑定義行）
 - **成功標準**：
   - [ ] `flow-feedback.md` 寫入指示含 ai-rules repo 錨點（命令檔所在 repo），非裸相對路徑
   - [ ] 輸出格式模板新增 frontmatter `source`（`human-seed` | `auto-signal`）；既有檔案不強制回填
   - [ ] 模擬：在 cwd ≠ ai-rules 下，AI 依指示把寫入目標解析為 ai-rules repo
 
 ### 修改要點
-1. **`commands/flow-feedback.md:46` 寫入路徑段**：明確「寫入 **ai-rules repo**（即本命令檔 `commands/flow-feedback.md` 所在的 repo），路徑 `ai-analysis/flow-feedback/{YYYY-MM-DD}-{topic-slug}.md`」。以命令檔位置為可移植錨點，不寫死絕對路徑。
+1. **`skills/flow-feedback/SKILL.md:46` 寫入路徑段**：明確「寫入 **ai-rules repo**（即本命令檔 `skills/flow-feedback/SKILL.md` 所在的 repo），路徑 `ai-analysis/flow-feedback/{YYYY-MM-DD}-{topic-slug}.md`」。以命令檔位置為可移植錨點，不寫死絕對路徑。
 2. **輸出格式模板**：加 frontmatter `source`。user 植入 → `human-seed`；S2 自動捕捉 → `auto-signal`。
 
 ### 驗證策略（docs mode）
-- **rg 鍘門**：`rg "ai-analysis/flow-feedback" commands/flow-feedback.md` 確認路徑說明綁定 ai-rules repo 錨點
-- **跨檔一致**：`commands/flow-review.md` 讀取路徑（S3）與 S1 寫入路徑一致
-- **`/consistency`**：跑 `commands/flow-feedback.md` 自洽性檢查
+- **rg 鍘門**：`rg "ai-analysis/flow-feedback" skills/flow-feedback/SKILL.md` 確認路徑說明綁定 ai-rules repo 錨點
+- **跨檔一致**：`skills/flow-review/SKILL.md` 讀取路徑（S3）與 S1 寫入路徑一致
+- **`/consistency`**：跑 `skills/flow-feedback/SKILL.md` 自洽性檢查
 - **模擬驗收**：在非 ai-rules cwd 下要求 AI 複述寫入目標，確認指向 ai-rules repo
 
 ---
@@ -131,7 +131,7 @@ ai-rules 的演化輸入**結構性偏狹**：`/flow-feedback` 是唯一摩擦�
 - **UC 引用**：更新既有「摩擦聚類＋人類決策」能力
 - **依賴**：S1（`source` 欄位）、S2（auto-signal 候選來源 + 訊號清單）
 - **語義約束**：聚類分組維度（訊號類型 × repo）與 S2 訊號清單一致
-- **依賴錨點**：`commands/flow-review.md`（讀取 + 聚類邏輯）
+- **依賴錨點**：`skills/flow-review/SKILL.md`（讀取 + 聚類邏輯）
 - **成功標準**：
   - [ ] flow-review 讀取含 `source: auto-signal` 的候選
   - [ ] 聚類維度：**訊號類型 × 發生 repo**，報告 dogfood（ai-rules）vs 消費端（mosaic/NT/...）比例——直接量化 capture gap 改善
@@ -139,14 +139,14 @@ ai-rules 的演化輸入**結構性偏狹**：`/flow-feedback` 是唯一摩擦�
   - [ ] 人類決策落地（B 軸）：升級項走既有 `/spec` / kanban 流程，不自動動 rule
 
 ### 修改要點
-1. **`commands/flow-review.md` 讀取段**：纳入 `source: auto-signal` 候選（與 `human-seed` 並列）
+1. **`skills/flow-review/SKILL.md` 讀取段**：纳入 `source: auto-signal` 候選（與 `human-seed` 並列）
 2. **聚類邏輯**：加「訊號類型 × repo」分組；輸出含 dogfood vs 消費端比例（可觀測 capture gap 是否縮小）
 3. **輸出模板**：auto-signal triage 區塊（升級 / 丟棄 / 觀察 三欄）
 
 ### 驗證策略（docs mode）
-- **rg 鍘門**：`rg "auto-signal" commands/flow-review.md` 命中
+- **rg 鍘門**：`rg "auto-signal" skills/flow-review/SKILL.md` 命中
 - **跨檔一致**：訊號清單與 S2 `rules/capture-feedback.md` 一致（`diff` 兩處列舉）
-- **`/consistency`**：跑 `commands/flow-review.md` 自洽性
+- **`/consistency`**：跑 `skills/flow-review/SKILL.md` 自洽性
 - **模擬（SM-5）**：餵入混合 `human-seed` + `auto-signal` 候選 → 確認聚類 + repo 分佈報告 + triage 三欄輸出
 
 ---

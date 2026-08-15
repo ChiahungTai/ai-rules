@@ -5,15 +5,15 @@ description: 把工作交給另一個 LLM/session/repo 時，打包成對方讀�
 
 # self-contained-prompt — 交接 prompt 設計原則 domain 層
 
-把工作交給另一個 LLM / session / repo 時，**對方讀不到你的對話 context**（決策脈絡、進度、為何這樣做都只在對話裡）。本 skill 是把這些「對話結晶」打包成 self-contained prompt 的原則唯一真相源，被 [`/handoff`](../../commands/handoff.md)（產交接 prompt）與 [agent-review-cycle](../../commands/instruction/_common/agent-review-cycle.md)（subagent prompt）共用。
+把工作交給另一個 LLM / session / repo 時，**對方讀不到你的對話 context**（決策脈絡、進度、為何這樣做都只在對話裡）。本 skill 是把這些「對話結晶」打包成 self-contained prompt 的原則唯一真相源，被 [`/handoff`](../handoff/SKILL.md)（產交接 prompt）與 [agent-review-cycle](../_common/agent-review-cycle.md)（subagent prompt）共用。
 
 ## 與既有機制邊界
 
 | vs | 本 skill（原則） | 對方 |
 |----|---------------|------|
-| [`/handoff`](../../commands/handoff.md) | 三層、schema、drift、機密 | **動作**（收集進度→套 schema→產出 block）|
-| [agent-review-cycle](../../commands/instruction/_common/agent-review-cycle.md) | subagent prompt 也遵循本原則（同環境・審查型）| 3-perspective 執行範本 |
-| [`/at`](../../commands/at.md) | 不重疊 | **usage reset resume**（5h limit，自己續）|
+| [`/handoff`](../handoff/SKILL.md) | 三層、schema、drift、機密 | **動作**（收集進度→套 schema→產出 block）|
+| [agent-review-cycle](../_common/agent-review-cycle.md) | subagent prompt 也遵循本原則（同環境・審查型）| 3-perspective 執行範本 |
+| [`/at`](../at/SKILL.md) | 不重疊 | **usage reset resume**（5h limit，自己續）|
 
 **handoff vs `/at`**：`/at` 解「時間接續」（usage 用盡，自己 resume）；handoff 解「空間分工」（交另一個 session/provider 並行或接手）。不互斥、不重疊。
 

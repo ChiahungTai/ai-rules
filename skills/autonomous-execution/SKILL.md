@@ -119,7 +119,7 @@ Error Self-Healing（上）是 per-error（單一錯誤重試 ceiling）。**缺
 | 機制 | 作用域 | 觸發點 |
 |------|--------|--------|
 | **Session 級 Recovery**（本段） | 段落/EP 級 done 驗證 + resume 結算 | completion report 生成 / resume |
-| batch ceiling（[build.md](../../commands/build.md) 階段 2） | 單 session 內 context 累積防漂移 | 累積多段未經人類判讀（軟觸發） |
+| batch ceiling（[build.md](../implement/SKILL.md) 階段 2） | 單 session 內 context 累積防漂移 | 累積多段未經人類判讀（軟觸發） |
 | session-boundary review（[acceptance-evidence](../../rules/acceptance-evidence.md) B 軸） | 跨 session intent drift 審查 | resume 時觸發（本段提供觸發器） |
 
 三者作用域不同（段落級 completeness / 單 session context fatigue / 跨 session intent direction），觸發點不重疊。

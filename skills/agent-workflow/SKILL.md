@@ -1,6 +1,6 @@
 ---
 name: agent-workflow
-description: "Guides Agent spawning, worktree isolation, concurrency control, parallel execution, and delegation. Use when spawning agents, using worktrees, running parallel tasks, delegating to agents, handling scope-external discoveries, invoking /build with --max-agents, or setting up Writer/Reviewer patterns. Triggers on: agent, worktree, spawn, parallel, delegation, side-discovery, scope redirect, manager-delegate, isolation, subagent, background task, auto mode."
+description: "Guides Agent spawning, worktree isolation, concurrency control, parallel execution, and delegation. Use when spawning agents, using worktrees, running parallel tasks, delegating to agents, handling scope-external discoveries, invoking /implement with --max-agents, or setting up Writer/Reviewer patterns. Triggers on: agent, worktree, spawn, parallel, delegation, side-discovery, scope redirect, manager-delegate, isolation, subagent, background task, auto mode."
 allowed-tools:
   - Read
   - Write
@@ -16,14 +16,14 @@ Claude Code 提供多種平行模式，依任務規模和協調需求選擇。
 
 ## 平行模式選擇
 
-Claude Code 官方四個**首類並行方法**（[官方比較](https://code.claude.com/docs/zh-TW/agents)），依「誰協調 / worker 是否互通 / 是否編輯同檔」選擇。**執行細節落在執行層命令**（`/deep-work` substrate、`/build` Phase 4），本 skill 是選擇參考。
+Claude Code 官方四個**首類並行方法**（[官方比較](https://code.claude.com/docs/zh-TW/agents)），依「誰協調 / worker 是否互通 / 是否編輯同檔」選擇。**執行細節落在執行層命令**（`/deep-work` substrate、`/implement` Phase 4），本 skill 是選擇參考。
 
 | 方法 | 它是什麼 | 何時用 | 執行落點 |
 |------|---------|--------|---------|
-| **Subagents**（Agent tool + worktree） | 一個 session 內委派 worker，獨立 context 回摘要 | 側任務會用搜尋/日誌/檔案內容淹沒主對話 | 本 skill 主要涵蓋；`/build` Agent Review |
+| **Subagents**（Agent tool + worktree） | 一個 session 內委派 worker，獨立 context 回摘要 | 側任務會用搜尋/日誌/檔案內容淹沒主對話 | 本 skill 主要涵蓋；`/implement` Agent Review |
 | **Agent view**（`claude agents` / `--bg`） | 一個螢幕調度 + 監控背景 session（supervisor 接管、survive terminal 關閉） | 多個獨立任務、user-away 可 peek/attach 監控 | **`/deep-work`** substrate layer（研究預覽 v2.1.139+） |
 | **Agent teams** | 多個協調 session，共享任務清單 + 互傳訊息（leader 管理；實驗性，預設禁用） | 要 Claude 自己分派 + 保持 worker 同步 | Claude Code 內建（見官方文檔） |
-| **Dynamic workflows**（Workflow tool / `ultracode`） | JS 腳本協調數十~數百 subagent，可對抗驗證 / 多角度起草 / loop 收斂 | 任務太大、需交叉驗證、大規模遷移/審計 | **`/build` Phase 4** Workflow 模式；[workflow-review-pattern](../../commands/instruction/_common/workflow-review-pattern.md) |
+| **Dynamic workflows**（Workflow tool / `ultracode`） | JS 腳本協調數十~數百 subagent，可對抗驗證 / 多角度起草 / loop 收斂 | 任務太大、需交叉驗證、大規模遷移/審計 | **`/implement` Phase 4** Workflow 模式；[workflow-review-pattern](../_common/workflow-review-pattern.md) |
 
 **其他相關（非並行方法，與上面正交）**：
 
@@ -79,15 +79,15 @@ spawn agent 時，依「agent 產出是**原料**還是**直接交付**」選 sc
 
 ### 委派框架（Delegation Philosophy）
 
-agent-workflow 偏控制導向（scope fence / git diff 驗產出 / classifier / gate），但放手碎片零散未連貫（[autonomous-execution](../autonomous-execution/SKILL.md)「不交半成品」、[build.md](../../commands/build.md)「裁量權」+ context handoff、scope fence「創造性例外」）。連貫化為 **delegate(goal + tools + context) → let go(within guardrails) → verify(outcome)** 模型。
+agent-workflow 偏控制導向（scope fence / git diff 驗產出 / classifier / gate），但放手碎片零散未連貫（[autonomous-execution](../autonomous-execution/SKILL.md)「不交半成品」、[build.md](../implement/SKILL.md)「裁量權」+ context handoff、scope fence「創造性例外」）。連貫化為 **delegate(goal + tools + context) → let go(within guardrails) → verify(outcome)** 模型。
 
 **連貫模型**：
 
 - **goal**：EP segment / 任務目標（清晰可驗收）
-- **tools**：delegation 前配工具集——依任務領域匹配 skill description 觸發詞（任務含「測試」→ TDD skill、含「錯誤」→ debugging skill）；[build.md](../../commands/build.md) Agent Prompt 已有完整 skill invoke 實作清單（rules-reminder / test-driven-development / incremental-implementation / autonomous-execution），此處概念化引用不重列
-- **context**：[build.md](../../commands/build.md) context handoff 已是最完整實作——引用不重述
+- **tools**：delegation 前配工具集——依任務領域匹配 skill description 觸發詞（任務含「測試」→ TDD skill、含「錯誤」→ debugging skill）；[build.md](../implement/SKILL.md) Agent Prompt 已有完整 skill invoke 實作清單（rules-reminder / test-driven-development / incremental-implementation / autonomous-execution），此處概念化引用不重列
+- **context**：[build.md](../implement/SKILL.md) context handoff 已是最完整實作——引用不重述
 - **let go**：實作層裁量權（build.md「EP 為收斂方向，實作層有發現真相的責任」）；放手底線 = [autonomous-execution](../autonomous-execution/SKILL.md) 紅線/黃線
-- **verify**：[build.md](../../commands/build.md) git diff + Agent Review——引用不重述
+- **verify**：[build.md](../implement/SKILL.md) git diff + Agent Review——引用不重述
 
 **平衡（delegate + verify，非 delegate + trust）**：
 
@@ -155,9 +155,9 @@ Scope Fence（上）擋機械任務 agent「順手重構」scope 外區塊，但
 - **batch**：side-discovery 先記錄到 completion report，**段落/任務結束時統一建卡**（非執行中斷流程）；研究 agent（Explore 等）不產 completion report → 記錄於 spawn prompt 回覆，由 spawner 代建卡
 - **人類 triage**：kanban 每週回顧（kanban-board）清理低價值卡
 
-### `/build` 整合
+### `/implement` 整合
 
-`/build --max-agents N` 的 N 由用戶指定，預設 3（受並發上限 cap；Claude: `rules/model-routing.md`）。
+`/implement --max-agents N` 的 N 由用戶指定，預設 3（受並發上限 cap；Claude: `rules/model-routing.md`）。
 
 ---
 

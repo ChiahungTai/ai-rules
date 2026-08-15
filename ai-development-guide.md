@@ -93,7 +93,7 @@
 |------|---------|
 | **大型**（跨模組、新功能） | execution-plan 自動建立 Kanban Backlog card |
 | **中型**（功能優化） | 更新既有 Capabilities 或 Kanban card |
-| **小型**（bug fix、文檔；結構性修復除外 — 見 execution-plan simple 邊界，Claude: `commands/execution-plan.md`） | 不需要 UC |
+| **小型**（bug fix、文檔；結構性修復除外 — 見 execution-plan simple 邊界，Claude: `skills/execution-plan/SKILL.md`） | 不需要 UC |
 
 ### 銜接機制
 
@@ -118,7 +118,7 @@
 
 ## 架構設計紀律
 
-> **核心原則**：所有設計決策（spec/EP/build/review）用 Clean Architecture + DDD 視角檢視。是**視角非模板**（注入思考，不強制分層、不過度工程）— 補體系缺失的架構紀律層。
+> **核心原則**：所有設計決策（spec/EP/implement/review）用 Clean Architecture + DDD 視角檢視。是**視角非模板**（注入思考，不強制分層、不過度工程）— 補體系缺失的架構紀律層。
 
 ### 三主線
 
@@ -134,7 +134,7 @@ SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介�
 
 本紀律是**設計視角**（檢視結構方向），非強制分層模板 — 不要求每個專案套四層。原則通用，範例領域特定（mosaic：domain=策略訊號 / use case=回測下單 / adapter=NT·SJ·catalog / infra）。
 
-> 深入視角（三主線在 spec/illustrate/EP/build 各自怎麼用）見 arch-thinking skill（與 api-and-interface-design skill 邊界：本視角檢視整體結構，api-and-interface 設計介面合約；跨 harness skill 機制各家不同，路徑從略）。
+> 深入視角（三主線在 spec/illustrate/EP/implement 各自怎麼用）見 arch-thinking skill（與 api-and-interface-design skill 邊界：本視角檢視整體結構，api-and-interface 設計介面合約；跨 harness skill 機制各家不同，路徑從略）。
 
 ---
 

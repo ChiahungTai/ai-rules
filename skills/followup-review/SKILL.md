@@ -1,0 +1,110 @@
+---
+name: followup-review
+
+description: "審查者回頭驗收實作結果，確認修改合理性和不修改的合理性。/followup-review [審查報告]（無參數則從 git 變更推斷）"
+when_to_use: "Verify that code changes from a previous review were implemented correctly. Use after /judge-review decisions have been applied."
+argument-hint: "可選：貼上原始審查報告和 judge-review 的決策結果；無參數時自動從 git 變更推斷"
+allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
+---
+
+# /followup-review — 審查者驗收實作結果
+
+你是原始 Code Reviewer，回頭驗收實作 AI 的處理結果。確認修改是否合理、不修改是否合理。
+
+委託 Skills：
+- [rules-reminder](../rules-reminder/SKILL.md) — Bash 規則
+
+## 核心目標
+
+**「對照原始審查 → 查證實際變更 → 判斷合理性 → 輸出驗收報告」**
+
+### 角色定位
+
+你是**原始審查者**：確認你的問題被正確解決、被拒絕的建議有合理理由、發現新引入的問題。
+
+### 驗收標準
+
+**修改合理性**：確實解決原始問題？未引入新問題？解法合理（不需完美）？
+**不修改合理性**：拒絕理由基於事實？原始問題確實不存在？
+
+---
+
+## 執行流程
+
+### 無參數模式（推薦）
+
+1. **優先讀持久化 finding**：讀 `.review/<branch>.md`(或 EP review 區段)的 finding 清單；或 `/human-review` 報告（`ai-analysis/human-review/<dir>/<scope>.md`，finding 帶 ID F1/F2/T1...）— 兩者皆可作為驗收 baseline（human-review 報告是 read-only 偵測器產出，finding + 建議 + 查證誠信，可直接對照驗收）
+2. finding 存在 → 逐項驗收(讀修改後程式碼對照原始問題)
+3. **無持久化檔才 fallback** `git diff` + `git status` 推斷(舊行為)
+4. 變更範圍超出可推斷範圍 → 向用戶確認
+
+### 有參數模式
+
+提供持久化 finding(`/judge-review` 已標 `decision`)→ 按標準流程對照驗收。
+
+### 逐項驗收
+
+- **採納的建議**：讀取修改後程式碼 → 對照原始問題 → 檢查是否引入新問題 → 通過標 `verified`
+- **拒絕的建議**：讀取相關程式碼 → 對照拒絕理由 → 重新評估原始問題 → 拒絕合理標 `closed`
+- **整體品質檢查**：新引入問題掃描 + 一致性 + 完整性
+
+驗收後更新 `.review/<branch>.md`(或 EP review 區段)finding 的 `status`(格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)):`verified`(採納且通過)/ `closed`(拒絕合理)/ 維持 `open`(未通過需再修)。新引入的 Critical / Important 問題,新增 finding(狀態 `open`)。
+
+---
+
+## 輸出格式
+
+```markdown
+## 📋 Followup Review 驗收報告
+
+### 驗收總覽
+| 審查建議 | 決策 | 驗收結果 | 說明 |
+|----------|------|----------|------|
+
+### 🟢 通過項目 / 🔴 未通過項目 / 拒絕合理性驗證
+### 🆕 新發現問題（如有）
+
+### 驗收結論
+✅ 全部通過 / ⚠️ 部分需修正 / ❌ 需要重做
+```
+
+---
+
+## 執行約束
+
+- **必須查證實際程式碼**：用 git diff + Read 確認
+- **必須逐項驗收**：每個建議都有驗收結論
+- **合理不等於完美**：確實解決問題即可
+- **拒絕不等於錯誤**：有合理依據的拒絕應被接受
+- **聚焦實質問題**：不吹毛求疵，關注真正影響品質的問題
+- **不重新展開完整 code review**（只驗收，不重審）
+
+---
+
+## 語音通知
+
+遵循 [voice-notification skill](../voice-notification/SKILL.md)（隨機稱謂、sentinel 進度提醒、say 樣板見 skill）：
+
+- **開始**（第一個動作前）：建進度提醒 sentinel + say 開始
+  ```bash
+  touch /tmp/.claude-voice-pending
+  say -v Meijia -r 180 "開始追蹤驗收"
+  ```
+- **完成**（輸出結果後）：清 sentinel + 套 skill「任務完成」樣板 say（隨機稱謂，填「追蹤驗收完成」）
+  ```bash
+  rm -f /tmp/.claude-voice-pending
+  ```
+
+---
+
+## 流程位置
+
+前置：`/code-review` → `/judge-review` → 實作 AI 完成修改
+後續：未通過 → 再次修正 → `/followup-review`；全部通過 → `/commit`
+
+### review 驗收迴圈（canonical 全流程見 [code-review.md](../code-review/SKILL.md)）
+
+```
+/code-review（Review LLM）→ /judge-review（Implementation LLM）
+→ 實作修改 → /followup-review（Review LLM 驗收）
+```

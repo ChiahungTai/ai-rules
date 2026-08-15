@@ -38,7 +38,7 @@ harness-scope: neutral
 
 ### 例外（可跳過執行）
 
-- 純文檔/instruction 檔修改（非程式碼）— 純文檔指 `rules/`、`skills/`、`commands/` 下的 `.md` 檔案；Claude 端含 CLAUDE.md wrapper；含程式碼範例但本身不被執行的 `.md` 仍算純文檔
+- 純文檔/instruction 檔修改（非程式碼）— 純文檔指 `rules/`、`skills/`（含 `_common/`）下的 `.md` 檔案；Claude 端含 CLAUDE.md wrapper；含程式碼範例但本身不被執行的 `.md` 仍算純文檔
 - 純註解修改（不改變執行邏輯）
 - import 排序（由 `ruff check --fix` 處理）
 

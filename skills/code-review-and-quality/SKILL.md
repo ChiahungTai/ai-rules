@@ -105,7 +105,7 @@ DEAD CODE IDENTIFIED:
 
 ## Architecture Doc Drift Reminder
 
-> 補 axis 6（只看「改到目錄的 Capabilities 表」）的盲區：**跨模組結構變更 → 架構文檔可能需更新**。code-review 是 read-only，只 **flag 提醒**（finding 指向 owner tool），不做 sync、不重複 [doc-health](../../commands/doc-health.md) 的 accuracy check（doc-health 問「文件準確嗎」；本項問「這結構變更該不該觸發文檔更新提醒」——正交）。
+> 補 axis 6（只看「改到目錄的 Capabilities 表」）的盲區：**跨模組結構變更 → 架構文檔可能需更新**。code-review 是 read-only，只 **flag 提醒**（finding 指向 owner tool），不做 sync、不重複 [doc-health](../doc-health/SKILL.md) 的 accuracy check（doc-health 問「文件準確嗎」；本項問「這結構變更該不該觸發文檔更新提醒」——正交）。
 
 **觸發（structural signal — 非 file-count；1-file 高 ripple 也觸發，file-count gate 會漏此類改動）**：
 - 新增 / 移除 / 改名 module（目錄）或 top-level package
@@ -119,7 +119,7 @@ DEAD CODE IDENTIFIED:
 | 架構文檔 | owner | 何時該更新 |
 |---|---|---|
 | `dependency-graph.md` | `/scan-project`（重生成）/ `/daily-maintain` | 新/移/改名 module、import edge 變、hub component 改 — **無 build-time owner，最易 silent drift** |
-| 模組 AGENTS.md 架構段 / `architecture.md` | build 5b（未跑 /build 則手動） | 設計決策 / 新抽象 / 模組結構 / 依賴方向 變更 |
+| 模組 AGENTS.md 架構段 / `architecture.md` | build 5b（未跑 /implement 則手動） | 設計決策 / 新抽象 / 模組結構 / 依賴方向 變更 |
 | `SYSTEM-MAP.md`（lifecycle） | metadata-sync / build 5a | 功能生命週期變化（新功能完成、狀態升級） |
 
 **嚴重度**：Suggestion（mild signal）→ Important（強信號：新/移除 module 必更 `dependency-graph.md`）。

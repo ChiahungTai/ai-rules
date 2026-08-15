@@ -1,6 +1,6 @@
 ---
 name: arch-thinking
-description: 架構設計、clean architecture、分層依賴、bounded context、use case 驅動、DDD、SOLID、依賴方向、模組邊界、city map、dep weight、Pattern Radar、重用枚舉、Jaccard、domain grounding、結構 viewport、結構查證、LSP 查證、反向耦合、補償邏輯（compensating pair）、挖東牆補西牆、double-count、共用層外溢時使用。提供 Clean Architecture + DDD 設計視角（domain←use case←adapter←infra 分層、bounded context、use case 驅動檢視整體結構）+ 結構機械能力（City Map 資料/dep weight/Pattern Radar 重用枚舉/domain grounding/LSP 查證/lean-heavy），用於 spec/EP/build/review 的設計決策與結構審查。視角非模板。
+description: 架構設計、clean architecture、分層依賴、bounded context、use case 驅動、DDD、SOLID、依賴方向、模組邊界、city map、dep weight、Pattern Radar、重用枚舉、Jaccard、domain grounding、結構 viewport、結構查證、LSP 查證、反向耦合、補償邏輯（compensating pair）、挖東牆補西牆、double-count、共用層外溢時使用。提供 Clean Architecture + DDD 設計視角（domain←use case←adapter←infra 分層、bounded context、use case 驅動檢視整體結構）+ 結構機械能力（City Map 資料/dep weight/Pattern Radar 重用枚舉/domain grounding/LSP 查證/lean-heavy），用於 spec/EP/implement/review 的設計決策與結構審查。視角非模板。
 ---
 
 # Architecture Thinking — Clean Architecture + DDD 視角 + 結構機械
@@ -230,7 +230,7 @@ CRG-sourced edges 附 anti-over-reliance label（graph=structure≠behavior；dy
 
 **反例（真實案例，cross-harness 驗證）**：同一 `_PREV_COUNT` 符號，Claude session `findReferences` 只回 intra-file（誤推論為「LSP 對私有 symbol 固有 false-negative」），ZCode session 卻成功回傳跨檔引用 — 根因是 pyright workspace reindex 時機。**方法論限制段誠實記錄此差異，比「LSP 不可靠」的錯誤結論更有價值** — 它讓下個 session 知道要 reindex 而非換工具。
 
-## 三、流程注入點（spec/EP/build/review 各階段）
+## 三、流程注入點（spec/EP/implement/review 各階段）
 
 設計視角三主線在各階段的注入：
 

@@ -31,7 +31,7 @@ INVARIANTS = [
         "source": "skills/review-engine/SKILL.md",  # 唯一定義源
         "values": ["critical", "important", "suggestion"],
         "enforced_by": {
-            "file": "commands/instruction/_common/workflow-review-pattern.md",
+            "file": "skills/_common/workflow-review-pattern.md",
             "schema": "DimensionVerdict",
         },
         "note": "review-engine 是嚴重度唯一定義源；DimensionVerdict schema 必須含 severity 欄位",
@@ -42,7 +42,7 @@ INVARIANTS = [
         "source": "skills/review-engine/SKILL.md",  # 定義源
         "values": ["confirmed", "evidence-based", "inferred"],
         "enforced_by": {
-            "file": "commands/instruction/_common/workflow-review-pattern.md",
+            "file": "skills/_common/workflow-review-pattern.md",
             "schema": "DimensionVerdict",
         },
         "note": "review-engine 宣稱『每個 finding 必須標信心水準』；DimensionVerdict 必須含 "
@@ -52,7 +52,7 @@ INVARIANTS = [
         "id": "audience_self_declare",
         "type": "classification",
         "source": "CLAUDE.md",  # 受眾模型（外部分類源）
-        "commands": ["commands/illustrate.md", "commands/deliverable-review.md"],  # layer 3 人類 viewport
+        "consumers": ["skills/illustrate/SKILL.md", "skills/deliverable-review/SKILL.md"],  # layer 3 人類 viewport
         "must_contain_any": ["layer 3", "人類 viewport", "B 軸", "受眾"],
         "note": "CLAUDE.md 分類為 layer 3 的命令本體必須自標受眾 —— 與 /code-review axis 3 "
                 "共用 arch-thinking skill 的消歧對稱（外部分類 + 命令不自知 = drift 溫床）",
