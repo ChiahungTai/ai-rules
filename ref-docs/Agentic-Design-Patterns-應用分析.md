@@ -1,5 +1,7 @@
 # Agentic Design Patterns → ai-rules → mosaic_alpha 應用分析
 
+> ⚠️ 快照註記：本文撰寫於 2026-08-16 skills 大掃除之前——文中引用的部分 skill（using-agent-skills、source-driven-development、idea-refine、context-engineering 等）已刪除，skills 現況以 `skills/CLAUDE.md` 索引為準。
+
 > 本文分析 Antonio Gulli《Agentic Design Patterns — A Hands-On Guide》(482 頁,21 patterns)如何能幫助 `ai-rules`,進而幫助消費者 `mosaic_alpha` 的開發。
 >
 > 方法:4 平行 research agent 各讀一域(ai-rules 設計原理、mosaic 消費模型、書 Part1+2、書 Part3+ 附錄)→ 主 session arch-thinking 合成 → **2 個 grounding agent 逐一驗證每個映射/建議對照實際檔案**(初版發生 false-gap:R2/R3/R4 誤報 + Memory 虛構,已校正)。本文為 grounding 校正後版本,所有 verdict 附 path:line 證據。

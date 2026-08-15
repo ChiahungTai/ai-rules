@@ -77,7 +77,7 @@ illustrate 渲染 5 張圖:**emoji-first,color 僅 accent 每圖 1-3 節點**:
 4. invariant flow(cross-folder 消費者,grounded in CRG `callers_of`)
 5. domain overlay 輻射(silent-corruption path)
 
-**Mermaid 約束**(必讀 [mermaid](../mermaid/SKILL.md)):dark-theme 安全色 `#3b82f6`(🔵 source)/ `#f59e0b`(🟡 critical)/ `#10b981`(🟢 guard);**arch 圖禁紅底 `#ef4444`**(刺眼;mermaid 認可紅用於真正 error 節點,但 arch 圖刻意不用 — 子集政策)/ 禁淺 tint / 禁 stroke-only;`fill`+`color` 必同時;classDef ≤ 3;禁 `%%{init}%%`。
+**Mermaid 約束**(必讀 [mermaid](../mermaid/SKILL.md)):跨主題安全色 `#3b82f6`(🔵 source)/ `#f59e0b`(🟡 critical)/ `#10b981`(🟢 guard);**arch 圖禁紅底 `#ef4444`**(刺眼;mermaid 認可紅用於真正 error 節點,但 arch 圖刻意不用 — 子集政策)/ 禁淺 tint / 禁 stroke-only;`fill`+`color` 必同時;classDef ≤ 3;禁 `%%{init}%%`。
 **合規檢查**:`rg -i '#dc2626|#b91c1c|#ef4444|#fee|#fdd|#fef|fill:#fff|fill:#ffffff|stroke:#' <dir>/architecture.md ai-analysis/codebase-review/architecture.md` → 0 hits(範圍僅 arch 圖檔,紅留 review.md 標 error 用);`rg -c classDef <dir>/architecture.md` → ≤3。
 
 ### 5. Verdict → 4 檔(受眾分離)
@@ -130,5 +130,5 @@ ai-analysis/codebase-review/
 - [crg-query](../crg-query/SKILL.md) — CRG facts 紀律(LSP-vs-CRG、warn-if-absent、anti-over-reliance、mega-cluster caveat)
 - [illustrate](../illustrate/SKILL.md) — B 軸人類 viewport 渲染
 - [review-engine](../review-engine/SKILL.md) — severity/confidence(severity/confidence only;codebase-sweep 非 review 命令家族,自有 baseline 預設)
-- [mermaid](../mermaid/SKILL.md) — dark-theme 安全色(產圖前必讀)
+- [mermaid](../mermaid/SKILL.md) — 跨主題安全色(產圖前必讀)
 - [acceptance-evidence](../../rules/acceptance-evidence.md) — coverage ≠ assertion 強度(L2 trap)

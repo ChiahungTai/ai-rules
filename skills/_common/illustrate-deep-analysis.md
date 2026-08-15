@@ -45,7 +45,7 @@
 ## 程式碼分析模式
 
 ### 技術實作層面
-- **代碼架構分析**：調 [arch-thinking](../../../skills/arch-thinking/SKILL.md) skill（City Map 模組級 + call graph 函數級 + type structure contract slice + data-flow lineage）；渲染 artifact 見 [illustrate-artifact-menu](./illustrate-artifact-menu.md)
+- **代碼架構分析**：調 [arch-thinking](../arch-thinking/SKILL.md) skill（City Map 模組級 + call graph 函數級 + type structure contract slice + data-flow lineage）；渲染 artifact 見 [illustrate-artifact-menu](./illustrate-artifact-menu.md)
 - **性能考量**：時間/空間複雜度、瓶頸分析
 - **技術選型依據**：框架選擇理由、技術棧權衡
 

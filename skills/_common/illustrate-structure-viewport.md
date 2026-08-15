@@ -1,7 +1,7 @@
 # 結構 viewport — drill 與機械分工
 
-> **載體**：[illustrate.md](../../illustrate.md) 的結構 viewport 模式（人類 viewport，B 軸）支撐檔。
-> **能力來源**：[arch-thinking](../../../skills/arch-thinking/SKILL.md) skill —— City Map 資料 / dep weight / Pattern Radar / domain grounding / LSP 查證 / call graph（函數級）/ type structure（contract slice）/ data-flow（靜態骨架）/ product-type 雙軌都在 skill（視角 §一、機械 §二）。本檔定義**人 viewport 的互動式 drill 與機械分工** —— 渲染結構心智模型讓人判讀（不產機器 finding，那是 `/code-review` axis 3）。
+> **載體**：[illustrate.md](../illustrate/SKILL.md) 的結構 viewport 模式（人類 viewport，B 軸）支撐檔。
+> **能力來源**：[arch-thinking](../arch-thinking/SKILL.md) skill —— City Map 資料 / dep weight / Pattern Radar / domain grounding / LSP 查證 / call graph（函數級）/ type structure（contract slice）/ data-flow（靜態骨架）/ product-type 雙軌都在 skill（視角 §一、機械 §二）。本檔定義**人 viewport 的互動式 drill 與機械分工** —— 渲染結構心智模型讓人判讀（不產機器 finding，那是 `/code-review` axis 3）。
 
 ## drill 指令（whole-picture → 嫌疑）
 
@@ -33,7 +33,7 @@ boundary <module>  — 細看某模組邊界（= boundary artifact）
 
 ## 機械分工（何時用哪個工具）
 
-> **核心**：枚舉（撈全 + 相似）用 scan-project / Pattern Radar；驗證（特定 claim）用 LSP（見 [lsp-navigation](../../../rules/lsp-navigation.md)）。**人鎖定嫌疑後才上驗證**。
+> **核心**：枚舉（撈全 + 相似）用 scan-project / Pattern Radar；驗證（特定 claim）用 LSP（見 [lsp-navigation](../../rules/lsp-navigation.md)）。**人鎖定嫌疑後才上驗證**。
 
 | 子任務 | 工具 | 角色 |
 |--------|------|------|
@@ -67,12 +67,12 @@ drift detection 細節（5 signal class / baseline degradation ladder / no-sever
 
 ## Selective Review Matrix（既有 core 審查 artifact）
 
-**既有 core 骨幹審查（無 change，純審穩固度）的 P1 產物** —— core vs leaf 判定 + 審查深度建議，讓人決定「先審哪、審多深」（Anthropic selective-review：core heavy human review、leaf 放過）。**判定 / 資料來自 [arch-thinking](../../../skills/arch-thinking/SKILL.md)「core identification」lens**（消費 `dep_graph.modules.imported_by` / `hotspots` + `dependency-graph.md` ripple）—— 本檔只 spec **渲染格式**，不做判定（分層）。
+**既有 core 骨幹審查（無 change，純審穩固度）的 P1 產物** —— core vs leaf 判定 + 審查深度建議，讓人決定「先審哪、審多深」（Anthropic selective-review：core heavy human review、leaf 放過）。**判定 / 資料來自 [arch-thinking](../arch-thinking/SKILL.md)「core identification」lens**（消費 `dep_graph.modules.imported_by` / `hotspots` + `dependency-graph.md` ripple）—— 本檔只 spec **渲染格式**，不做判定（分層）。
 
 **欄位**：`| 模組 | dep weight | 消費者數 | ripple/hotspot tier | domain core overlay? | core/leaf | 建議審查深度 | 位置 |`
 
 - **位置欄**：repo-root 相對 path:line（沿用上方「位置標示」慣例，VS Code Cmd+Click 跳轉）。
-- **Console**：ASCII 表；**MD**：markdown 表 + Mermaid city map（沿用 [illustrate.md](../../illustrate.md) 雙模式，MD 寫 `ai-analysis/reports/`）。
+- **Console**：ASCII 表；**MD**：markdown 表 + Mermaid city map（沿用 [illustrate.md](../illustrate/SKILL.md) 雙模式，MD 寫 `ai-analysis/reports/`）。
 
 **輸出範例**：
 

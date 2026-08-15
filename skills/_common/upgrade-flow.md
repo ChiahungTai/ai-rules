@@ -1,5 +1,7 @@
 # Upgrade Flow — 套件升級共同骨架（upgrade-nt / upgrade-sj 共用）
 
+> 本骨架服務 mosaic_alpha 雙 worktree 專案（專案特定工具，worktree/SJ 測試路徑不抽象化）。
+
 > 佔位符：`<REPO>`（GitHub repo）、`<PACKAGE>`（Python 套件名）、`<SPEC>`（pyproject 相依 spec）、`<IMPORT_CHECK>`（升級後 import 驗證語句）、`<NAME>`（語音通知用簡稱）、`<VERSION>`（目標版號）、`<TARGET_VERSION>`（pyproject 下限版號）。各 skill 定義自己的掃描項目表（與風險區域，如有），流程骨架一律引用本檔。
 
 ## 前置條件（共用）

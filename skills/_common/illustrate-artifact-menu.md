@@ -1,8 +1,8 @@
 # Illustrate Artifact Menu — SA/SD code 解釋 artifact
 
-> **載體**：[illustrate.md](../../illustrate.md) mode B（理解既有）的 artifact menu 支撐檔。**on-demand**（mode B / drift checkpoint 時讀，非每 session auto-load）。
+> **載體**：[illustrate.md](../illustrate/SKILL.md) mode B（理解既有）的 artifact menu 支撐檔。**on-demand**（mode B / drift checkpoint 時讀，非每 session auto-load）。
 > **受眾**：layer-3 人類 viewport（B 軸）——渲染結構 artifact 給人判讀方向。**不產 file:line finding**（那是 `/code-review` axis 3）。
-> **資料來源**：靜態結構資料由 [arch-thinking](../../../skills/arch-thinking/SKILL.md) skill §二 生成（City Map 模組級 + call graph 函數級 + type structure contract slice + data-flow 靜態骨架）；本檔定義**渲染產物**（Mermaid 模板 / 方向問題 / anti-pattern）——illustrate 特有，不沉 skill（capability-sink rule）。
+> **資料來源**：靜態結構資料由 [arch-thinking](../arch-thinking/SKILL.md) skill §二 生成（City Map 模組級 + call graph 函數級 + type structure contract slice + data-flow 靜態骨架）；本檔定義**渲染產物**（Mermaid 模板 / 方向問題 / anti-pattern）——illustrate 特有，不沉 skill（capability-sink rule）。
 >
 > **docs mode 消費端**（無 `.py` 的 repo）：dep_graph/LSP 不適用 → artifact 降級為 rg 跨檔畫命令/skill 拓樸（arch-thinking §二 product-type 雙軌 docs 軌）；data-flow/call graph/class-slice artifact 在純 docs 場景降級為「文件引用拓樸」，標「docs mode：結構靠 rg 跨檔，非 AST/LSP」。
 
@@ -78,7 +78,7 @@ artifact 詞彙 = drill `artifact <type>` 的 type，全程一致（無同義變
 
 ## 完整 Mermaid 範例（build agent 可抄模板）
 
-遵守 [mermaid](../../../skills/mermaid/SKILL.md) 約束：禁 `%%{init}%%`、fill+color 成對、最多 3 styled group、安全 4 色、禁純黑/白/灰、emoji 優先、emoji 節點名引號。
+遵守 [mermaid](../mermaid/SKILL.md) 約束：禁 `%%{init}%%`、fill+color 成對、最多 3 styled group、安全 4 色、禁純黑/白/灰、emoji 優先、emoji 節點名引號。
 
 ### Boundary artifact（default）範例
 

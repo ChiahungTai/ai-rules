@@ -129,6 +129,6 @@ instruction 檔的價值層級：**導航**（LLM 找到程式碼）→ **理解
 
 ---
 
-> **同步哲學**: instruction 檔是活文檔，必須與程式碼同步演進。當 sync 發現 ⚠️ ≥ 3 個時，建議執行 `/instruction-sync {module} --all` 完整 11 角度深度驗證。
+> **同步哲學**: instruction 檔是活文檔，必須與程式碼同步演進。當 sync 發現 ⚠️ ≥ 3 個時，建議執行 `/instruction-sync {module} --all` 完整 12 角度深度驗證。
 
 > **工作流**: `/instruction-clean [--distill]` → `/instruction-sync`

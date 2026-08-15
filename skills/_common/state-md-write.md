@@ -1,6 +1,6 @@
 # STATE.md 寫入步驟（共享段）
 
-> 共享子範本——`/at`、`/handoff`、`/deep-work` 在 session 結束寫 STATE.md 時引用此處，不各自重寫（DRY，防三處 drift）。STATE.md **定義**（職責 / 邊界 / lifecycle / 路徑）見 [context-management](../../../rules/context-management.md)「STATE.md Last session 觀察層」段；本段僅定義**寫入操作**。
+> 共享子範本——`/at`、`/handoff`、`/deep-work` 在 session 結束寫 STATE.md 時引用此處，不各自重寫（DRY，防三處 drift）。STATE.md **定義**（職責 / 邊界 / lifecycle / 路徑）見 [context-management](../../rules/context-management.md)「STATE.md Last session 觀察層」段；本段僅定義**寫入操作**。
 
 ## 寫入時機
 
@@ -16,7 +16,7 @@ repo root `STATE.md`，**覆寫**（非累積——每次自主 session（at/dee
 
 ## A↔C 邊界紀律（negative guidance，強制）
 
-**STATE.md = 觀察層；禁含完成度宣稱**——完成度走事實層（git + EP re-derive，見 [autonomous-execution](../../../skills/autonomous-execution/SKILL.md)「Session 級 Recovery」）。「卡在哪/為何轉向」本質隱含 soft completion signal（轉向=未完成 X），resume LLM 讀到不會自發做觀察/事實區分——須嚴守：
+**STATE.md = 觀察層；禁含完成度宣稱**——完成度走事實層（git + EP re-derive，見 [autonomous-execution](../autonomous-execution/SKILL.md)「Session 級 Recovery」）。「卡在哪/為何轉向」本質隱含 soft completion signal（轉向=未完成 X），resume LLM 讀到不會自發做觀察/事實區分——須嚴守：
 
 - ✗ **不寫完成度**：「segment 3 未完成、做到一半」「段落 X done」「進度 80%」
 - ✓ **寫觀察**：「retry 間隔計算產生 0，推測 BackoffCalculator 邊界條件」「改用 schema-based approach，因 Y 效能瓶頸」

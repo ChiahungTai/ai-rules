@@ -1,6 +1,6 @@
 # illustrate-analysis — use cases + 情境矩陣分析步驟
 
-> **載體**：[illustrate.md](../../illustrate.md) 的**分析步驟**支撐檔。use cases 分析 + 情境矩陣分析是**步驟**（可被 mode A 設計決策 / mode C 審查驗證 組合），**不是新模式**。
+> **載體**：[illustrate.md](../illustrate/SKILL.md) 的**分析步驟**支撐檔。use cases 分析 + 情境矩陣分析是**步驟**（可被 mode A 設計決策 / mode C 審查驗證 組合），**不是新模式**。
 >
 > **與 EP Scenario Matrix 的關係**：此檔定義「產出情境矩陣」的**步驟方法**（可重用）；EP 開頭的 Scenario Matrix 是此步驟的**一次產出**（該 EP 專屬 SM）— 非 兩個不同東西。
 

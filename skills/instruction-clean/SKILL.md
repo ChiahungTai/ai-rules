@@ -40,6 +40,10 @@ Signal/noise framework: [encoder-philosophy.md](../_common/encoder-philosophy.md
 | 版本號 | `> **版本**: 2.0` | AI 不關心 v1→v2 |
 | 生效日期 | `> **生效日期**: 2025-01-01` | 不影響規則內容 |
 
+### 識別 pattern（冒號錨定）
+
+掃描用**帶冒號錨定**的 pattern：`**版本**:`、`> **更新日期**:`、`> **生效日期**:`、`行數:`、`字數:`、`wc:`、`lines:`、`## 變更歷史`、`## Changelog`。**禁裸匹配** `wc`/`lines`——會誤命中合法 CLI 範例（`wc -l`）或 size 指引（`~100 lines`）。常見漏點：模組描述的 `(N lines)` 行數標註、`（v3: ...）` 版號標註。
+
 ### 可以保留
 
 符號連結說明、專案概述、繼承關係——AI 理解結構所需。

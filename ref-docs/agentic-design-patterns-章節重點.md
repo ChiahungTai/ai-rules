@@ -1,5 +1,7 @@
 # Agentic Design Patterns — 全書章節重點
 
+> ⚠️ 快照註記：本文撰寫於 2026-08-16 skills 大掃除之前——文中引用的部分 skill（using-agent-skills、source-driven-development、idea-refine、context-engineering 等）已刪除，skills 現況以 `skills/CLAUDE.md` 索引為準。
+
 > Antonio Gulli《Agentic Design Patterns — A Hands-On Guide》(482 頁,21 patterns)章節重點。繁中 + 英文術語,基於第一手逐章精讀。
 > 配套:[Agentic-Design-Patterns-應用分析.md](./Agentic-Design-Patterns-應用分析.md)(書 → ai-rules → mosaic 應用分析)。
 > 三框架:LangChain/LangGraph(顯式控制流)、Crew AI(角色/任務宣告式)、Google ADK(Agent+Tool+Session/State/Memory 原生抽象)。全書隱喻:agent 開發 = 在 canvas(底層 infrastructure)上創作。

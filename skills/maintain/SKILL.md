@@ -22,7 +22,7 @@ Phase 1: Snapshot               Phase 2: Instruction Sync     Phase 3: Doc Healt
 scan_project.py                 /instruction-sync                 /doc-health                    彙總報告
 → dep_graph / findings / fp     LLM 直接讀 instruction 檔        呈現 findings                  跨 phase 關聯
 diff fingerprint                用 dep_graph 驗證 imports   LLM 直接讀 .kanban/            趨勢追蹤
-更新 dependency-graph.md               品質檢查                    品質檢查 + kanban hygiene
+更新 dependency-graph.md          品質檢查                    品質檢查 + kanban hygiene
 ```
 
 ### Phase 1: 統一知識快照

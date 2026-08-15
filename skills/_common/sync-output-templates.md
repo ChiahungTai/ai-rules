@@ -288,7 +288,7 @@ actions:
 
 建議執行: `/instruction-sync --recursive --clean`
 
-> 當 ⚠️ 項目 ≥ 3 個時，建議執行 `/instruction-sync {module} --all` 進行完整 11 角度深度驗證。
+> 當 ⚠️ 項目 ≥ 3 個時，建議執行 `/instruction-sync {module} --all` 進行完整 12 角度深度驗證。
 ```
 
 ---

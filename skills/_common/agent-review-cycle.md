@@ -37,7 +37,7 @@ Writer/Reviewer 分離的品質閘門 — 用獨立 Agent context 審查，避�
 
 ## 自適應：max-agents
 
-偵測 effort level 和 max-agents（見 [agent-workflow 並發表](../../../skills/agent-workflow/SKILL.md)）。
+偵測 effort level 和 max-agents（見 [agent-workflow 並發表](../agent-workflow/SKILL.md)）。
 
 | 條件 | 模式 |
 |------|------|
@@ -47,22 +47,22 @@ Writer/Reviewer 分離的品質閘門 — 用獨立 Agent context 審查，避�
 
 印出確認：`[Review Agent] max=N, mode=3-perspective | 2-agent | single`
 
-> review agent 模型預設 = 主 session（inherit）；可調降一級（review command agent 覆蓋 model-routing 通用 review→降級，見 [review-engine](../../../skills/review-engine/SKILL.md)「review 執行預設」）。spawn `model` param 填對的 literal。
+> review agent 模型預設 = 主 session（inherit）；可調降一級（review command agent 覆蓋 model-routing 通用 review→降級，見 [review-engine](../review-engine/SKILL.md)「review 執行預設」）。spawn `model` param 填對的 literal。
 
 ### >3 配置（機械特徵觸發，非語義 opt-in）
 
-extra agent 由**消費命令提供的段落風險特徵**機械觸發（非 LLM 語義判「高風險」）。映射框架（通用風險特徵 → extra agent）定義在 [review-engine](../../../skills/review-engine/SKILL.md)「review 執行預設」點 5（單一源，此處不重複以免 drift）；base 恆 ① clean + ② UC-anchored + ③ Correctness。build 的 adapter 接線（build 機械信號 → 通用特徵）見 [build.md](../../implement.md) 階段 4「adaptive 觸發映射」。執行範本據此組 prompt。
+extra agent 由**消費命令提供的段落風險特徵**機械觸發（非 LLM 語義判「高風險」）。映射框架（通用風險特徵 → extra agent）定義在 [review-engine](../review-engine/SKILL.md)「review 執行預設」點 5（單一源，此處不重複以免 drift）；base 恆 ① clean + ② UC-anchored + ③ Correctness。build 的 adapter 接線（build 機械信號 → 通用特徵）見 [build.md](../implement/SKILL.md) 階段 4「adaptive 觸發映射」。執行範本據此組 prompt。
 
 ---
 
 ## Agent Prompt
 
-> subagent prompt 遵循 [self-contained-prompt](../../../skills/self-contained-prompt/SKILL.md) 原則（本場景 = **同環境・審查型**：subagent 讀得到 repo，給路徑不嵌內容）。
+> subagent prompt 遵循 [self-contained-prompt](../self-contained-prompt/SKILL.md) 原則（本場景 = **同環境・審查型**：subagent 讀得到 repo，給路徑不嵌內容）。
 
 **三 agent 共含**：
 - `git diff` 範圍（所有產出的變更）
 - 相關檔案路徑（必讀）
-- [review-engine](../../../skills/review-engine/SKILL.md) 通用審查邏輯（嚴重度/信心水準/審查者自證/LSP 查證/模式判定）+ [code-review-and-quality](../../../skills/code-review-and-quality/SKILL.md) 六軸方法論
+- [review-engine](../review-engine/SKILL.md) 通用審查邏輯（嚴重度/信心水準/審查者自證/LSP 查證/模式判定）+ [code-review-and-quality](../code-review-and-quality/SKILL.md) 六軸方法論
 - rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
 
 **① clean 額外**：明示「**不給任何 intent 提示，純讀 code 自身評估** — 哪裡怪、冗餘、缺、可疑、過度設計」
@@ -81,7 +81,7 @@ findings 若需持久化（跨 session / `.review/` / EP 回寫），用 [workfl
 
 ## 與 Workflow 路徑的關係
 
-Workflow（ultracode）和 Agent Tool（本檔）**共存**，分支點在 effort level 偵測（判定規則真相源見 [review-engine](../../../skills/review-engine/SKILL.md)）：
+Workflow（ultracode）和 Agent Tool（本檔）**共存**，分支點在 effort level 偵測（判定規則真相源見 [review-engine](../review-engine/SKILL.md)）：
 
 - effort = ultracode/xhigh 且 max-agents > 1 → [Workflow](./workflow-review-pattern.md)（schema + adversarial verify）
 - 其餘 → 本檔（3-perspective）
