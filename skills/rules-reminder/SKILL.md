@@ -1,7 +1,6 @@
 ---
 name: rules-reminder
-description: Enforces the most frequently violated Claude Code rules to prevent permission prompts. Use when writing any Bash command. Covers: rg/fd instead of grep/find, no # after newline in python -c, no $ shell expansion, uv run for Python, no sed for code, Traditional Chinese output.
----
+description: "Enforces the most frequently violated Claude Code rules to prevent permission prompts. Use when writing any Bash command. Covers: rg/fd instead of grep/find, no # after newline in python -c, no $ shell expansion, uv run for Python, no sed for code, Traditional Chinese output."---
 
 # Rules Reminder — 最常被忘記的規則
 
