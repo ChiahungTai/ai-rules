@@ -43,6 +43,18 @@ harness-scope: neutral
 | kanban Backlog | 任務 / 跨 session 未結案追蹤（含 Open failures） |
 | **STATE.md** | **Last session 觀察（獨有）** |
 
+## Memory 寫入紀律（cluster-first）
+
+harness auto memory 預設「one file = one fact」的「fact」操作定義 = **一個主題的教訓群（cluster）**，非一個事故；「check for an existing file — update rather than duplicate」的 update 目標 = 既有主題檔**加段**（非開新檔）。
+
+寫入決策（新教訓產生時）：
+
+1. 先掃 `MEMORY.md` 索引＋`rg` 主題詞找同主題既有檔
+2. 命中 → **加段**：段標題保留原始條目 name、標 original type（cluster 慣例）；索引行不動
+3. 無相似主題 → 才開新檔＋新索引行
+
+索引行數隨**主題數**成長，非事故數。量化清理（同主題散檔合併、索引軟上限、計畫完結收斂）由 [memory-audit](../skills/memory-audit/SKILL.md) 承載，寫入端只管 cluster-first。
+
 **生命周期**：Last session **每次自主 session（at/deep-work）結束覆寫**（非累積；互動 session 不寫，故兩次自主 session 間的工作不記入 → 可能偏舊——但觀察層非權威，recovery 的 git 事實才是真相）。增長上限由本 rule 的 context 約束。首次 session 無 STATE.md = 正常，resume 跳過讀取。
 
 **路徑**：repo root `STATE.md`（避 `.claude/` protected path——auto-mode 下寫入會被擋）；per-project 語義（每個消費專案自己的 session 觀察）；gitignore 由各專案（本地 session 觀察，default gitignore）。
