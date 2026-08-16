@@ -25,7 +25,7 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from html.parser import HTMLParser
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -242,7 +242,9 @@ def fetch_zcode(page: Page) -> tuple[str, bytes]:
     return "extracted-html", _norm(text)
 
 
-_CODEX_DOC_LINK = re.compile(r"\]\((https?://developers\.openai\.com/codex/[^)]+\.md)\)")
+_CODEX_DOC_LINK = re.compile(
+    r"\]\((https?://developers\.openai\.com/codex/[^)]+\.md)\)"
+)
 
 
 def discover_codex() -> list[Page]:
@@ -320,7 +322,7 @@ def run_source(name: str, base: str, discover, fetch, limit: int) -> dict:
             page = futs[fut]
             try:
                 status, content = fut.result()
-            except Exception as exc:  # noqa: BLE001 — isolate per-page failure
+            except Exception as exc:
                 print(f"[FAIL] {name}: {page.url}: {exc}")
                 status, content = "fail", b""
             sha = ""
@@ -395,7 +397,7 @@ def main() -> int:
         base, discover, fetch = SOURCES[name]
         sources[name] = run_source(name, base, discover, fetch, args.limit)
     manifest = {
-        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "sources": dict(sorted(sources.items())),
     }
     write_manifest(manifest)

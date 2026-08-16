@@ -22,13 +22,10 @@ Usage:
 """
 
 import argparse
-from datetime import datetime
-from datetime import timedelta
-from datetime import timezone
 import json
-from pathlib import Path
 import subprocess
-
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 LOCAL_TZ = datetime.now().astimezone().tzinfo
 PROJECTS_DIR = Path.home() / ".claude" / "projects"
@@ -87,7 +84,7 @@ def _parse_timestamp(raw: str) -> datetime | None:
     except (ValueError, TypeError):
         return None
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     return dt.astimezone(LOCAL_TZ)
 
 
@@ -129,9 +126,7 @@ def _user_text(content) -> str:
     return ""
 
 
-def digest_session(
-    jsonl_path: Path, events: list[dict], worktree_name: str
-) -> dict:
+def digest_session(jsonl_path: Path, events: list[dict], worktree_name: str) -> dict:
     """Reduce a session's events to structured material for LLM narrative."""
     user_msgs: list[str] = []
     conclusions: list[str] = []
@@ -154,7 +149,11 @@ def digest_session(
                     if btype == "text" and b.get("text", "").strip():
                         conclusions.append(b["text"])
                     elif btype == "tool_use":
-                        inp = b.get("input", {}) if isinstance(b.get("input"), dict) else {}
+                        inp = (
+                            b.get("input", {})
+                            if isinstance(b.get("input"), dict)
+                            else {}
+                        )
                         target = inp.get("file_path") or inp.get("description") or ""
                         name = b.get("name", "")
                         key = (name, target)
@@ -178,7 +177,7 @@ def digest_session(
 def resolve_target_date(date_arg: str):
     """Resolve --date ('yesterday' or YYYY-MM-DD) to a local date."""
     if date_arg == "yesterday":
-        return (datetime.now(LOCAL_TZ).date() - timedelta(days=1))
+        return datetime.now(LOCAL_TZ).date() - timedelta(days=1)
     return datetime.strptime(date_arg, "%Y-%m-%d").date()
 
 

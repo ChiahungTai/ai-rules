@@ -11,6 +11,7 @@ schema 卻沒欄位）。本檔是當初少開的那張處方：把 single-sourc
 Run: uv run python skills/scan-project/scripts/check_single_source.py
 Exit: non-zero if any critical/important finding（未來可掛 commit gate）。
 """
+
 import re
 import sys
 from pathlib import Path
@@ -46,16 +47,20 @@ INVARIANTS = [
             "schema": "DimensionVerdict",
         },
         "note": "review-engine 宣稱『每個 finding 必須標信心水準』；DimensionVerdict 必須含 "
-                "confidence 欄位，否則 Workflow 模式（唯一有 schema 強制的模式）結構性丟棄此訊號",
+        "confidence 欄位，否則 Workflow 模式（唯一有 schema 強制的模式）結構性丟棄此訊號",
     },
     {
         "id": "audience_self_declare",
         "type": "classification",
         "source": "CLAUDE.md",  # 受眾模型（外部分類源）
-        "consumers": ["skills/illustrate/SKILL.md", "skills/debrief/SKILL.md", "skills/smell-detector/SKILL.md"],  # layer 3 人類 viewport
+        "consumers": [
+            "skills/illustrate/SKILL.md",
+            "skills/debrief/SKILL.md",
+            "skills/smell-detector/SKILL.md",
+        ],  # layer 3 人類 viewport
         "must_contain_any": ["layer 3", "人類 viewport", "B 軸", "受眾"],
         "note": "CLAUDE.md 分類為 layer 3 的命令本體必須自標受眾 —— 與 /code-review axis 3 "
-                "共用 arch-thinking skill 的消歧對稱（外部分類 + 命令不自知 = drift 溫床）",
+        "共用 arch-thinking skill 的消歧對稱（外部分類 + 命令不自知 = drift 溫床）",
     },
     {
         "id": "skill_allowlist_coverage",
@@ -67,9 +72,9 @@ INVARIANTS = [
             "extract": r"Skill\(([^)]+)\)",  # 從 allow-list 提取已授權 skill name 集合
         },
         "note": "skills/*/SKILL.md 的 name 是 skill 唯一定義源；settings.json allow-list 必須覆蓋每個 "
-                "Skill(<name>) — rename 後新名缺 allow-list = drift（memory code-review-settings-sync "
-                "反覆性，靠機械閘門根治）。單向：只抓 missing；dead entry（舊名殘留）因 settings 含 "
-                "commands/built-in/plugin 需分類不抓，危害僅 noise 且 rename 必伴隨 missing 觸發修復。",
+        "Skill(<name>) — rename 後新名缺 allow-list = drift（memory code-review-settings-sync "
+        "反覆性，靠機械閘門根治）。單向：只抓 missing；dead entry（舊名殘留）因 settings 含 "
+        "commands/built-in/plugin 需分類不抓，危害僅 noise 且 rename 必伴隨 missing 觸發修復。",
     },
     {
         "id": "base_perspective",
@@ -77,8 +82,8 @@ INVARIANTS = [
         "source": "skills/review-engine/SKILL.md",
         "must_contain_any": ["預設 3 agent", "3-perspective"],
         "note": "review-engine base 點 4 定義 3-perspective（clean/UC/Correctness）為單一源 —— "
-                "防未來 drift 回 2-perspective。消費者反向（活躍文檔 rg 2-perspective 應 0 hits）"
-                "靠 rg + EP Review 兜底（消費者引用形態不一，機械反向 check 留未來）",
+        "防未來 drift 回 2-perspective。消費者反向（活躍文檔 rg 2-perspective 應 0 hits）"
+        "靠 rg + EP Review 兜底（消費者引用形態不一，機械反向 check 留未來）",
     },
 ]
 
@@ -121,12 +126,22 @@ def check_enforced_by(inv: dict) -> list[tuple[str, str, str]]:
     if schema_name:
         block = extract_schema_block(text, schema_name)
         if block is None:
-            return [(inv["id"], "important",
-                     f"{eb['file']} 找不到 schema 區段 '{schema_name}'（標題或 ```json 格式變了？）")]
+            return [
+                (
+                    inv["id"],
+                    "important",
+                    f"{eb['file']} 找不到 schema 區段 '{schema_name}'（標題或 ```json 格式變了？）",
+                )
+            ]
         if f'"{field}"' not in block:
-            return [(inv["id"], "critical",
-                     f"{eb['file']} 的 {schema_name} schema 缺少 '{field}' 欄位 —— "
-                     f"定義在 {inv['source']} 卻未反映在強制 schema（定義源/schema 源分離 drift）")]
+            return [
+                (
+                    inv["id"],
+                    "critical",
+                    f"{eb['file']} 的 {schema_name} schema 缺少 '{field}' 欄位 —— "
+                    f"定義在 {inv['source']} 卻未反映在強制 schema（定義源/schema 源分離 drift）",
+                )
+            ]
     else:
         if f'"{field}"' not in text:
             return [(inv["id"], "critical", f"{eb['file']} 缺少 '{field}'")]
@@ -146,8 +161,13 @@ def check_classification(inv: dict) -> list[tuple[str, str, str]]:
             continue
         text = read_text(p)
         if not any(t in text for t in must):
-            out.append((inv["id"], "important",
-                        f"{cmd} 被 {inv['source']} 分類但本體未自標受眾（需含其一: {must}）"))
+            out.append(
+                (
+                    inv["id"],
+                    "important",
+                    f"{cmd} 被 {inv['source']} 分類但本體未自標受眾（需含其一: {must}）",
+                )
+            )
     return out
 
 
@@ -164,7 +184,9 @@ def check_coverage(inv: dict) -> list[tuple[str, str, str]]:
     if inv.get("type") != "coverage":
         return []
     src_files = sorted(REPO_ROOT.glob(inv["source_glob"]))
-    field_pat = re.compile(rf"^{re.escape(inv['source_field'])}:\s*(.+?)\s*$", re.MULTILINE)
+    field_pat = re.compile(
+        rf"^{re.escape(inv['source_field'])}:\s*(.+?)\s*$", re.MULTILINE
+    )
     defined: dict[str, str] = {}
     for f in src_files:
         m = field_pat.search(read_text(f))
@@ -176,9 +198,12 @@ def check_coverage(inv: dict) -> list[tuple[str, str, str]]:
         return []  # enforced_by 檔不存在（settings.json 是 local/gitignored）→ skip，不 false positive
     allowed = set(re.findall(eb["extract"], read_text(ef)))
     return [
-        (inv["id"], "important",
-         f"skill '{name}'（{src}）未在 {eb['file']} allow-list 找到 "
-         f"（缺 Skill({name}) — rename 後新名未同步 allow-list？）")
+        (
+            inv["id"],
+            "important",
+            f"skill '{name}'（{src}）未在 {eb['file']} allow-list 找到 "
+            f"（缺 Skill({name}) — rename 後新名未同步 allow-list？）",
+        )
         for name, src in defined.items()
         if name not in allowed
     ]
@@ -192,8 +217,13 @@ def check_source_contains(inv: dict) -> list[tuple[str, str, str]]:
     if not src.exists():
         return [(inv["id"], "important", f"source 檔不存在: {inv['source']}")]
     if not any(t in read_text(src) for t in inv["must_contain_any"]):
-        return [(inv["id"], "critical",
-                 f"{inv['source']} 缺少定義源應含的: {inv['must_contain_any']} —— drift 回非預期值？")]
+        return [
+            (
+                inv["id"],
+                "critical",
+                f"{inv['source']} 缺少定義源應含的: {inv['must_contain_any']} —— drift 回非預期值？",
+            )
+        ]
     return []
 
 

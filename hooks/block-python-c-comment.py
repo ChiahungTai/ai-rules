@@ -9,6 +9,7 @@ PreToolUse hook: 攔截 python -c 命令含換行 + # 註解。
 對應 rule: rules/bash-hard-rules.md「python -c 禁止寫註解」。
 偵測邏輯見 is_violation()。hook crash（非 0 非 2 exit）為非阻斷，工具仍執行。
 """
+
 import json
 import re
 import sys

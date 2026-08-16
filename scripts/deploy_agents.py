@@ -34,6 +34,7 @@ get the slimmed version. No-op for rules without markers.
 
 Run after editing rules/ (deploy discipline in rules/AGENTS.md). Idempotent.
 """
+
 import argparse
 import pathlib
 import re
@@ -77,7 +78,9 @@ def read_scope(path: pathlib.Path) -> str:
     return "neutral"
 
 
-def discover_rules(rules_dir: pathlib.Path, target_scopes: set[str]) -> list[pathlib.Path]:
+def discover_rules(
+    rules_dir: pathlib.Path, target_scopes: set[str]
+) -> list[pathlib.Path]:
     """Scan rules/*.md, return those whose harness-scope is in target_scopes."""
     rules = []
     for path in sorted(rules_dir.glob("*.md")):
@@ -96,8 +99,11 @@ _NOT_PAREN = r"[^()（）]"
 CLAUDE_NOTE_PATTERN = re.compile(
     _OPEN
     + r"Claude[:：]"
-    + _NOT_PAREN + r"*"
-    + r"(?:\([^()]*\)" + _NOT_PAREN + r"*)*"
+    + _NOT_PAREN
+    + r"*"
+    + r"(?:\([^()]*\)"
+    + _NOT_PAREN
+    + r"*)*"
     + _CLOSE
 )
 
@@ -153,8 +159,10 @@ def slim_for_bundle(content: str, rule_name: str = "") -> str:
     ends = content.count("<!-- bundle: skip-end -->")
     if starts != ends:
         loc = f" in {rule_name}" if rule_name else ""
-        print(f"[WARN] unbalanced bundle markers{loc}: {starts} start vs {ends} end",
-              file=sys.stderr)
+        print(
+            f"[WARN] unbalanced bundle markers{loc}: {starts} start vs {ends} end",
+            file=sys.stderr,
+        )
     return SKIP_PATTERN.sub("", content)
 
 
@@ -164,7 +172,11 @@ def build_bundle(rule_paths: list[pathlib.Path], scopes_label: str) -> str:
     parts.append("")
     for rule_path in rule_paths:
         parts.append(f"\n---\n<!-- rules/{rule_path.name} -->\n")
-        parts.append(slim_for_bundle(rule_path.read_text(encoding="utf-8"), rule_path.name).strip())
+        parts.append(
+            slim_for_bundle(
+                rule_path.read_text(encoding="utf-8"), rule_path.name
+            ).strip()
+        )
         parts.append("")
     return "\n".join(parts)
 
@@ -183,11 +195,19 @@ def deploy(target: pathlib.Path, bundle: str) -> None:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Deploy bundled AGENTS.md to non-Claude harnesses.")
-    ap.add_argument("--scope", default="neutral",
-                    help="comma-separated harness-scopes to bundle (default: neutral)")
-    ap.add_argument("--dry-run", action="store_true",
-                    help="preview bundle stats without writing (stats only; use `cat` on a deployed target or import build_bundle to inspect content)")
+    ap = argparse.ArgumentParser(
+        description="Deploy bundled AGENTS.md to non-Claude harnesses."
+    )
+    ap.add_argument(
+        "--scope",
+        default="neutral",
+        help="comma-separated harness-scopes to bundle (default: neutral)",
+    )
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="preview bundle stats without writing (stats only; use `cat` on a deployed target or import build_bundle to inspect content)",
+    )
     args = ap.parse_args()
 
     target_scopes = {s.strip() for s in args.scope.split(",")}
@@ -204,8 +224,10 @@ def main() -> int:
 
     broken = check_broken_refs(RULES_DIR)
     if broken:
-        print(f"[FAIL] {len(broken)} broken ref(s): neutral rules linking to claude-specific rules:",
-              file=sys.stderr)
+        print(
+            f"[FAIL] {len(broken)} broken ref(s): neutral rules linking to claude-specific rules:",
+            file=sys.stderr,
+        )
         for src, target, name in broken:
             print(f"  {src} -> {target} ({name} is claude-specific)", file=sys.stderr)
         print("Fix the ref, or re-scope the target to neutral.", file=sys.stderr)
@@ -219,7 +241,9 @@ def main() -> int:
     rule_names = [p.name for p in rule_paths]
     print(f"[OK] bundle: {len(rule_paths)} rules (scope={scopes_label}) + guide")
     print(f"     rules: {', '.join(rule_names)}")
-    print(f"     size: {bundle_lines} lines, {bundle_bytes:,} bytes (~{tok_est}K tokens est)")
+    print(
+        f"     size: {bundle_lines} lines, {bundle_bytes:,} bytes (~{tok_est}K tokens est)"
+    )
 
     if args.dry_run:
         print("[DRY-RUN] skipping deploy")
@@ -234,7 +258,9 @@ def main() -> int:
         except Exception as exc:
             print(f"  [FAIL] {target}: {exc}", file=sys.stderr)
     print(f"[OK] deployed to {deployed}/{len(TARGETS)} non-Claude harnesses")
-    print(f"     Claude (~/.claude/CLAUDE.md) untouched -- rules via ~/.claude/rules/ auto-load")
+    print(
+        "     Claude (~/.claude/CLAUDE.md) untouched -- rules via ~/.claude/rules/ auto-load"
+    )
     return 0
 
 

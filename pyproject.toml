@@ -1,0 +1,25 @@
+[project]
+name = "ai-rules"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.3",
+]
+
+[tool.ruff]
+target-version = "py312"
+extend-exclude = ["*.md"]  # md code block 不做格式化（文檔 churn 非 lint 標的）
+
+[tool.ruff.lint]
+ignore = [
+    "EXE001",  # 腳本經直譯器路徑調用（config 絕對路徑 / uv run python），非直接執行
+    "BLE001",  # ops 腳本刻意 best-effort 寬捕（錯誤印出後繼續，如 deploy 逐目標部署）
+    "S110",    # 可選插件載入失敗靜默跳過（scan-project graceful degradation）
+    "ISC004",  # 多行 f-string 隱式串接為既有風格
+    "DTZ007",  # date-only 字串解析無 tz 語意
+    "RUF012",  # HTMLParser class attrs 為常數集合（不會 mutate）
+    "FURB162", # fromisoformat Z 替換冗餘但移除屬 unsafe fix（保守保留）
+]

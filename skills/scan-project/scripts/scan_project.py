@@ -18,16 +18,14 @@ Usage:
 """
 
 import argparse
-from collections import defaultdict
-from datetime import datetime
-from datetime import timezone
 import hashlib
 import importlib.util
 import json
-from pathlib import Path
 import re
 import tomllib
-
+from collections import defaultdict
+from datetime import UTC, datetime
+from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -728,7 +726,7 @@ def scan_project(project_root: Path) -> dict:
 
     return {
         "project": project_name,
-        "scan_timestamp": datetime.now(tz=timezone.utc).isoformat(),
+        "scan_timestamp": datetime.now(tz=UTC).isoformat(),
         "schema_version": 5,
         "dep_graph": {
             "modules": modules,
