@@ -40,27 +40,17 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 | 情境 | 現有程式碼的角色 | 關注點 |
 |------|----------------|--------|
 | EP 審查（`@ep-*.md`） | **Ground Truth** — EP 假設對不對？ | 依賴錨點、API 簽名、行號、架構假設逐一比對 |
-| 變更審查（無參數） | **Baseline** — 改動融入得好不好？ | 語義 diff、架構一致性、下游缺口 |
+| 變更審查（明示 diff / post-build drift） | **Baseline** — 改動融入得好不好？ | 語義 diff、架構一致性、下游缺口 |
 | 一般圖解 | **Context** — 現有結構是什麼？ | 先理解再解釋 |
 
 ## 無參數行為
 
-未提供任何參數時，自動圖解**當前 repo 尚未 commit 的變更**：
-
-1. **讀受影響檔案的現有程式碼**（建立 baseline）— 理解架構、風格、慣例
-2. 執行 `git diff` + `git diff --cached` 取得變更
-3. **無 uncommitted 變更時**，自動 fallback 到 `git diff HEAD~1`（上一個 commit）
-4. 以 Console 模式圖解：
-   - **語義 diff**：不只看行數，看能力/行為的變更
-   - **交疊偵測**：同一檔案被多個改動觸及的風險
-   - **缺口偵測**：下游消費者、索引、文件是否同步更新
-
-此行為等同於 `/illustrate @git-diff`，但不需要使用者記憶語法。
+未提供任何參數時，**委派 [debrief](../debrief/SKILL.md)**（AI 改動理解簡報）——「改完 code 想理解改了啥」是理解意圖而非審查，理解簡報是 debrief 的職責（七段：意圖／行為黑盒子／前後差異／檔案地圖／波及缺口／驗證證據／認知誤差點；diff fallback 鏈 working tree → staged → HEAD~1 兩邊一致）。單一真理源在 debrief，本 skill 不重複展開變更理解的渲染。
 
 ## 使用方式
 
 ```bash
-/illustrate                                    # 無參數 → 圖解未 commit 變更
+/illustrate                                    # 無參數 → 委派 /debrief（改動理解簡報）
 /illustrate 微服務架構                         # Console 模式
 /illustrate md Kubernetes 叢集管理              # MD 模式 → ai-analysis/reports/
 /illustrate @src/components/                   # 目錄分析
@@ -118,12 +108,12 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
     → 讀 code → city map + 流程 + 重用枚舉（調 skill）→ 邊界案例列 2-3 設計替代 + tradeoff → 渲染 → 人判讀
   B 理解既有（@模組 / 概念 / 除錯 / 學習套件）
     → 讀 code → 依方向問題從 artifact menu 選 artifact（default boundary）→ grounded 渲染 → 人理解
-  C 審查驗證（無參數 diff / @ep / 重造偵測 / commit 前）
+  C 審查驗證（@ep / 重造偵測 / commit 前）
     → 讀 code → 語義 diff / 假設驗證矩陣 / city map → 渲染 → 人判讀
   D 溝通傳達（文檔 / demo / 主題）
     → 主題 → Mermaid（md）→ 可分享
 
-輸入判斷線索：無參數→C（diff）；@ep→C（假設驗證）；@模組/概念→B；主題+md→D；架構/邊界討論→A
+輸入判斷線索：無參數→委派 debrief；@ep→C（假設驗證）；@模組/概念→B；主題+md→D；架構/邊界討論→A
 ```
 
 ### 邊界案例的行動路徑分流（mode A 輸出指引）

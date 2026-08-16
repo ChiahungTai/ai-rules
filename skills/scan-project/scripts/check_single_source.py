@@ -52,7 +52,7 @@ INVARIANTS = [
         "id": "audience_self_declare",
         "type": "classification",
         "source": "CLAUDE.md",  # 受眾模型（外部分類源）
-        "consumers": ["skills/illustrate/SKILL.md", "skills/deliverable-review/SKILL.md"],  # layer 3 人類 viewport
+        "consumers": ["skills/illustrate/SKILL.md", "skills/debrief/SKILL.md", "skills/smell-detector/SKILL.md"],  # layer 3 人類 viewport
         "must_contain_any": ["layer 3", "人類 viewport", "B 軸", "受眾"],
         "note": "CLAUDE.md 分類為 layer 3 的命令本體必須自標受眾 —— 與 /code-review axis 3 "
                 "共用 arch-thinking skill 的消歧對稱（外部分類 + 命令不自知 = drift 溫床）",

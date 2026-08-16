@@ -26,7 +26,7 @@ harness-scope: neutral
 
 真實案例:清理日刪一個被歸類為「死 demo」的檔案,commit 自述「雙工具驗證零 caller」,實際 scripts/ 有 hard-import caller → runtime `ModuleNotFoundError`;自述反映「這是死碼」的意圖非事實(呼應本節頂層:AI 誠實說沒影響時最危險)。教訓通用(刪除自述須獨立全消費端驗證),不依賴該符號現狀。
 
-**silent-failure claim 同理**(silent drift / silent corruption / 靜默失效):宣稱「行為 silent」須附**執行證據**(跑了該輸入、觀察到靜默通過,非靜態推論)。**silent vs loud 不對稱風險** — 誤判 loud(實為 silent)以為會炸卻靜默腐敗(危險);誤判 silent(實為 loud)虛驚、跑測試推翻(安全)。故 silent-claim 舉證責任更高:無執行證據時**預設標 'inferred loud',禁標 'silent'**。真實案例:codebase-sweep state.yaml 把 Interval 自創名稱(如 `"1M"`)標「silent drift」— 靜態推論「1M 撞 1m」沒跑 `Interval("1M")`;實證 StrEnum 精確比對 + raise → loud crash 非 silent。同類:tilde bug 靜態推論「消費端 inline 沒問題」沒執行 → 實證推翻。教訓通用(silent-claim 須執行),不依賴特定符號現狀。
+**silent-failure claim 同理**(silent drift / silent corruption / 靜默失效):宣稱「行為 silent」須附**執行證據**(跑了該輸入、觀察到靜默通過,非靜態推論)。**silent vs loud 不對稱風險** — 誤判 loud(實為 silent)以為會炸卻靜默腐敗(危險);誤判 silent(實為 loud)虛驚、跑測試推翻(安全)。故 silent-claim 舉證責任更高:無執行證據時**預設標 'inferred loud',禁標 'silent'**。真實案例:codebase-sweep（原時期命令，現 smell-detector baseline）state.yaml 把 Interval 自創名稱(如 `"1M"`)標「silent drift」— 靜態推論「1M 撞 1m」沒跑 `Interval("1M")`;實證 StrEnum 精確比對 + raise → loud crash 非 silent。同類:tilde bug 靜態推論「消費端 inline 沒問題」沒執行 → 實證推翻。教訓通用(silent-claim 須執行),不依賴特定符號現狀。
 
 **Review 雙向應用**:上述 silent vs loud 不對稱風險不只用於「驗證 silent-claim」,也用於**審查 loud→silent 的 diff**——看到 `raise`→`return None`、新增/拓寬 `try/except`、crash→filter、validation 緩步化的改動時,視為潛在 silent-corruption **引入**(危險方向,不限交易 critical path,任何 error-path 改動把大聲錯誤靜默化都套用)。review 的 operational lens 見 code-review-and-quality skill ###1 Correctness「Loud→silent regression」（Claude: `skills/code-review-and-quality/SKILL.md`；非 Claude harness 靠自家 review profile 套用同一 loud→silent lens）。
 
@@ -144,7 +144,7 @@ producer 的 case_X 處理（從沒被觸發 — 死碼）
 | 軸 | 職責 | 證據層 | 天花板 |
 |--|--|--|--|
 | **A 機器自驗** | 內部實作細節的正確性 | L1-L3 | **AI 內部自洽** — 機器斷言跳不出 AI 信念體系 |
-| **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:deliverable-review(交付) + illustrate(結構 viewport) = 人類 viewport(三層介入);完整 L4-L6 執行驗收仍為設計方向(見下) |
+| **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:debrief(理解+驗證證據) + illustrate(結構 viewport) + smell-detector(壞味道) = 人類 viewport(三層介入);完整 L4-L6 執行驗收仍為設計方向(見下) |
 
 **鐵律**:A 是必要不充分,B 是充分性的來源。A 軸深化有邊際效益遞減 — 天花板是 AI 自洽,真正的驗收鴻溝在 B 軸。Agent Review 的「獨立 context」≠「獨立智能」:同家族 LLM 共享系統性偏誤,quorum 對共同盲點無效,A 軸的深層防線最終仍由 B 軸兜底。
 
@@ -152,13 +152,13 @@ producer 的 case_X 處理（從沒被觸發 — 死碼）
 
 ## B 軸人類驗收層
 
-**已落地**:deliverable-review(交付:demo-checklist + 認知誤差點) + illustrate(結構 viewport:whole-picture + 重用枚舉) 是人類 viewport(三層介入,見 AGENTS.md「命令的受眾視角」)(Claude commands 與路徑,跨 harness 從略)—— 讓人用大原則判讀 EP 或 code,補 LLM 兩個結構性 blind spot(重造既有 / 偏方向)。
+**已落地**:debrief(理解簡報:demo-checklist 驗證證據 + 認知誤差點，承接原 deliverable-review 交付軸) + illustrate(結構 viewport:whole-picture + 重用枚舉) + smell-detector(壞味道:存在質疑/baseline 盤點) 是人類 viewport(三層介入,見 AGENTS.md「命令的受眾視角」)(Claude commands 與路徑,跨 harness 從略)—— 讓人用大原則判讀 EP 或 code,補 LLM 兩個結構性 blind spot(重造既有 / 偏方向)。
 
 **仍為設計方向**(viewport 之外,更深的 B 軸演進):
 
 `must-execute-before-complete.md` 把 `.py / demo / poc/ / example` 全歸為「可執行 → 必須 uv run」是**生產側視角**(確保 AI 跑過),完全缺**消費側視角**(給誰看、怎麼看)。B 軸的演進方向:
 
-1. **UC 場景執行驗收(B 軸核心)**:驗收單位是 UC 場景(execution-plan,Claude command)(EP Scenario Matrix,下稱 SM),不是泛泛 demo。SM 欄位「觸發 / 預期行為」是現成的可執行輸入 + 人類可判讀預期,且必須涵蓋 happy / 錯誤 / 邊界 / 效能。**人的角色**:deliverable-review 元件 D(意圖情境完整性)審「該驗哪些」(範圍,不親跑);LLM 跑場景、人觀察產出 = L6。素材 EP 已產出,不需另發明。
+1. **UC 場景執行驗收(B 軸核心)**:驗收單位是 UC 場景(execution-plan,Claude command)(EP Scenario Matrix,下稱 SM),不是泛泛 demo。SM 欄位「觸發 / 預期行為」是現成的可執行輸入 + 人類可判讀預期,且必須涵蓋 happy / 錯誤 / 邊界 / 效能。**人的角色**:debrief 第 6 段(驗證證據+清單完整性)審「該驗哪些」(範圍,不親跑);LLM 跑場景、人觀察產出 = L6。素材 EP 已產出,不需另發明。
 2. **可觀察性合約**:SM 的「預期行為」欄位 = 人類可判讀的結論。執行 SM 場景的 stdout 必須對應預期行為,且至少跑一個錯誤/邊界場景(避免只演 happy path 的 AI 公關稿)。
 3. **自動化對照(A/B diff)**:跑新舊版 / 兩 branch / 兩參數比對,人類只判讀 diff 合理性。把「讀」外包給機器,這是長期最該投資的模式。
 4. **流程末端驗收步驟**:build / deep-work(Claude commands)在 commit 前缺「執行 SM 代表性場景讓人判讀」的步驟;現有 demo/POC 驗證只驗 exit code 0,不驗輸出內容(silent failure / 語義錯誤偵測不到)。

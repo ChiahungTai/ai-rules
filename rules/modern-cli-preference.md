@@ -79,7 +79,7 @@ rg -o -r '$1' "(\w+)\.py" # 捕獲群組替換輸出（$1 是 rg 語法，非 sh
 
 **反例（truncation 陷阱）**：`rg -l "from pkg" | head -20` → 看到 20 行人工數 → 截斷的部分被當完整 → 數字錯（實際可能 41）。
 
-**真實案例**（features codebase-sweep）：`rg -l "from mosaic_alpha.features" | head -20` 截斷 → consumers **41 誤寫 20**（head-20 截斷:排序在前的子目錄先列完才輪到其餘 → 某子目錄實際 32 檔只顯示 11）；多處文檔一致寫錯，**自審抓不到**（claim 與截斷證據共享盲點，需獨立第三方 rg 才揭露）。同類陷阱不同載體:符號查詢的 truncation/stale 見 [lsp-navigation.md](lsp-navigation.md)（**rg** 符號查詢會 truncation/masking,**LSP findReferences** 是解方 100% 涵蓋;LSP workspace stale 時亦回傳少）。
+**真實案例**（features codebase-sweep 時期——該命令現為 smell-detector baseline）：`rg -l "from mosaic_alpha.features" | head -20` 截斷 → consumers **41 誤寫 20**（head-20 截斷:排序在前的子目錄先列完才輪到其餘 → 某子目錄實際 32 檔只顯示 11）；多處文檔一致寫錯，**自審抓不到**（claim 與截斷證據共享盲點，需獨立第三方 rg 才揭露）。同類陷阱不同載體:符號查詢的 truncation/stale 見 [lsp-navigation.md](lsp-navigation.md)（**rg** 符號查詢會 truncation/masking,**LSP findReferences** 是解方 100% 涵蓋;LSP workspace stale 時亦回傳少）。
 
 ## 搜尋策略
 

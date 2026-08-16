@@ -280,7 +280,9 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 > ⚠️ 本 build 僅 layer 1（AI 自洽天花板）。此變更觸及 [跨模組/公開簽名/外部整合]，**建議跑跨 session `/code-review`（layer 2）** 抓全貌漣漪 / 同 session 盲點（段落自檢 + Agent Review 都是 layer 1，看不全跨模組 ripple）。
 
-此旗標是**新增**硬性 code-review 導向提示；檔尾「與其他命令的協作」段的既有軟提醒（涵蓋 deliverable-review/illustrate/code-review）**保留不動**。
+此旗標是**新增**硬性 code-review 導向提示；檔尾「與其他命令的協作」段的既有軟提醒（涵蓋 debrief/illustrate/code-review）**保留不動**。
+
+> **終點聲明**：implement 止於本完成報告——commit 屬 `/commit`（人類確認硬規則，見 [post-build](../post-build/SKILL.md)），不由本 skill 觸發。
 
 ---
 
@@ -301,6 +303,7 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 - ❌ 使用 `sed` 修改程式碼
 - ❌ 段落範圍外修改
 - ❌ 中間狀態提交破損程式碼
+- ❌ 未經用戶明確指示執行 git commit / push——implement 止於階段 6 完成報告，commit 屬 `/commit`（人類確認；見 [post-build](../post-build/SKILL.md) 止步硬規則）。EP 內的 commit 分組描述是規劃語境、並行 session 的 commit 行為，皆不構成授權
 - ❌ 跳過收尾步驟宣稱完成
 
 ---
@@ -308,12 +311,12 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 ## 與其他命令的協作
 
 ```
-/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review）→ [/ep-validate] → post-EP: /deliverable-review --ep（layer 3 方向）→ /illustrate --ep（layer 3 結構）→ /implement（含 Agent Review + /audit-test, LLM 鏈）→ post-build（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport）/ /deliverable-review（layer 3 demo 交付）→ /post-build（收尾鏈編排：code-review [dual-context] → judge-review → 修正迴圈 → consistency → metadata-sync；可拆開單跑）→ /commit
+/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review）→ [/ep-validate] → post-EP: /illustrate --ep（layer 3 結構；方向確認 = 人讀 EP SM 情境 + /ep-review）→ /implement（含 Agent Review + /audit-test, LLM 鏈）→ post-build（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport）/ /debrief（layer 3 改動理解簡報：改了啥/證據/認知誤差點）→ /post-build（收尾鏈編排：code-review [dual-context] → judge-review → 修正迴圈 → consistency → metadata-sync；可拆開單跑）→ /commit
 ```
 
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。
 
-> **Agent Review Cycle（LLM 鏈, layer 1）已完成。** 機器自驗天花板 = AI 自洽,commit 前建議跑 `/deliverable-review`（layer 3 demo 交付）跨越認知誤差、`/illustrate`（layer 3 結構 viewport）跨越重造盲點;如需 LLM 第二意見可跑獨立 `/code-review`（layer 1/2）。
+> **Agent Review Cycle（LLM 鏈, layer 1）已完成。** 機器自驗天花板 = AI 自洽,commit 前建議跑 `/debrief`（layer 3 改動理解簡報：驗證證據+認知誤差點）跨越認知誤差、`/illustrate`（layer 3 結構 viewport）跨越重造盲點;如需 LLM 第二意見可跑獨立 `/code-review`（layer 1/2）。
 
 ---
 

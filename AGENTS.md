@@ -22,7 +22,7 @@
 
 **設計含義**（設計 command/skill 時核對）：
 - **自足**：段落自包含、進度可結算可接續（消費端會 compact、跨 session）
-- **不依賴外部服務**：預設無 CI、無團隊 review——需人類判讀的走 viewport 命令（`/deliverable-review`、`/illustrate`），不假設 CI
+- **不依賴外部服務**：預設無 CI、無團隊 review——需人類判讀的走 viewport 命令（`/debrief`、`/illustrate`、`/smell-detector`），不假設 CI
 - **git 認知**：涉及 git 的 command 尊重 worktree+trunk（不交互 rebase、trunk 永不被 rebase）
 - **review 鏈**：review command 支援「產出 finding → 跨 session 貼回 → `/judge-review`」多 session 鏈
 - **自主性**：自主 command（`/deep-work`、cron 排程）假設人類不在場——紅線/黃線分級 + 完成報告
@@ -38,7 +38,7 @@
 | **① LLM 執行鏈** | 機器自讀自判自修 | 工程化、self-contained（EP、findings、code） | AI 自主（人類開頭觸發） |
 | **② 人類 viewport** | 人類用「大原則」判讀 | 意圖（行為 artifact + 認知誤差點）+ 結構（whole-picture 心智模型） | 人類切入（或 AI 產出、人類讀） |
 
-兩軌道平行不交匯，服務不同讀者。`/ep-review`、`/code-review`、`/audit-test`、`/implement` 內部審查、`/judge-review` 屬軌道 ①；`/deliverable-review`（交付）、`/illustrate`（結構 viewport）、`/codebase-sweep`（baseline sweep）與 `/human-review`（放大鏡）是軌道 ② 的命令。
+兩軌道平行不交匯，服務不同讀者。`/ep-review`、`/code-review`、`/audit-test`、`/implement` 內部審查、`/judge-review` 屬軌道 ①；`/debrief`（改動理解）、`/illustrate`（結構 viewport）、`/smell-detector`（壞味道：zoom 放大鏡 / baseline 盤點）是軌道 ② 的命令。
 
 ### 原理：人補 LLM 的結構性 blind spot（direction >> quality）
 
@@ -47,7 +47,7 @@
 | LLM blind spot | 失敗 | 人類互補認知 | 命令 |
 |----------------|------|-------------|------|
 | 缺 whole picture → 重造既有 | 重造 enum / 模組 | 整體直覺（細節忘但感覺得到關係 / 重用） | `/illustrate`（結構 viewport） |
-| 抓不準意圖 → 偏方向 | 漂亮但錯方向 | 持有 vision，判「這是我要的嗎」 | `/deliverable-review` |
+| 抓不準意圖 → 偏方向 | 漂亮但錯方向 | 持有 vision，判「這是我要的嗎」 | `/debrief` |
 
 **優先級：方向 >> 品質**。LLM 預期能做到 Clean Code 等級（頂多需人提點）；災難性、無法靠 polish 彌補的是方向錯 ——「程式碼架構再好也沒用，如果直接做錯方向」。所以 viewport 重度傾斜在**方向驗證**，不浪費人注意力在 code 品質（那是 `/code-review` + LLM 自身能力的事）。
 
@@ -59,7 +59,7 @@
 |----|------|--------|-----|
 | 1 | same-session LLM 自判（agent review、`/ep-review` in-pipeline、`/audit-test`） | 低 | A |
 | 2 | 跨 session LLM 第二意見（開新 session 跑 `/code-review`/`/ep-review`，findings 貼回實作 LLM → `/judge-review`） | 中 | A |
-| 3 | `/deliverable-review`（交付）+ `/illustrate`（結構 viewport）+ `/codebase-sweep`（baseline sweep）+ `/human-review`（放大鏡）：人類 viewport 判讀 | 高（不同智能） | B |
+| 3 | `/debrief`（改動理解+驗證證據）+ `/illustrate`（結構 viewport）+ `/smell-detector`（壞味道：zoom 放大鏡/baseline 盤點）：人類 viewport 判讀 | 高（不同智能） | B |
 
 理論底層（A/B 軸、L1-L6 證據階層、證據獨立性、Runtime Invariant Assurance、Claim→Evidence→Trust、Intent Drift Type A/B）見 `rules/acceptance-evidence.md`。本節是入口摘要，acceptance-evidence 是完整理論。
 
@@ -78,10 +78,9 @@
 | `/judge-review` | LLM | 鏈 | AI-self |
 | `/followup-review` | LLM | 2（Review LLM 驗收實作 LLM） | LLM / 人類觸發 |
 | `/fix-test` `/lint-fix` | LLM | 鏈（修復） | AI-self |
-| **`/deliverable-review`** | **人類（交付）** | **3** | **人類** |
+| **`/debrief`** | **人類（改動理解簡報）** | **3** | **人類** |
 | **`/illustrate`** | **人類（結構 viewport）** | **3** | **人類** |
-| **`/codebase-sweep`** | **人類（baseline sweep）** | **3** | **人類** |
-| **`/human-review`** | **人類（放大鏡）** | **3** | **人類** |
+| **`/smell-detector`** | **人類（壞味道偵測）** | **3** | **人類** |
 | `/commit` | 人類確認 | — | 人類 |
 | `/metadata-sync` | LLM | 1 | 人類 / AI-self |
 

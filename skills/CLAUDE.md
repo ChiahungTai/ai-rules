@@ -29,9 +29,9 @@
 ```
 〔pre-EP 軟 gate〕對話討論新功能 →〔提醒〕/illustrate 結構化提案（city map/重用，軟 gate 不硬擋）→ 人判讀 → 確認
 /spec（純輔助·需求釐清，可選）→ /execution-plan（自足：段落0全域研究 + UC盤點 + EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
-          ↓ post-EP checkpoint: /deliverable-review --ep（layer 3 方向：打算做對嗎）→ /illustrate --ep（layer 3 結構：撐得起嗎）
+          ↓ post-EP checkpoint: /illustrate --ep（layer 3 結構：撐得起嗎；方向確認 = 人讀 EP SM 情境 + /ep-review）
   → /implement（含 Agent Review + /audit-test + 階段 5a metadata-sync 結算 [UC 狀態+SYSTEM-MAP+EP 歸檔]，LLM 鏈）
-          ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport，漂移/重造檢查）/ /deliverable-review（layer 3 demo 交付）→ /post-build（收尾鏈編排：/code-review [dual-context] → /judge-review → 修正迴圈 → /consistency → /metadata-sync）→ /commit（純 git 提交；post-build 可拆開手動單跑各命令）
+          ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport，漂移/重造檢查）/ /debrief（layer 3 改動理解簡報：改了啥/證據/認知誤差點）→ /post-build（收尾鏈編排：/code-review [dual-context] → /judge-review → 修正迴圈 → /consistency → /metadata-sync）→ /commit（純 git 提交；post-build 可拆開手動單跑各命令）
 ```
 
 **review-pipeline recipe**（變更類型 → review 序列）：
@@ -49,7 +49,7 @@
 - `/implement` — 基於 Execution Plan 逐段實作（TDD + 階段 5a metadata-sync 結算：UC 狀態 + SYSTEM-MAP + EP 歸檔）（原 `/build`，ZCode 保留名改名；文內「build 階段」即本 skill 階段）
 - `/post-build` — build 後收尾鏈編排（diff triage → code 鏈 [dual-context code-review → judge-review → 修正迴圈] → docs 鏈 [consistency → metadata-sync] → 收尾報告；止步於 /commit 前）
 - `/code-review` — 深層思考六軸代碼審查（含 axis 3 結構 = arch 吸收，top-down；UC 覆蓋度；中型以上 dual-context 雙審查者：fresh-eyes + primed）
-- `/deliverable-review` — 人類 viewport 交付軸（layer 3）：天才工程師向老闆 demo 完成的功能——product-type-aware（code: demo-checklist / docs: behavior delta），--ep 審 planned deliverable；方向 >> 品質，不做逐行正確性（交 /code-review）、不審結構（交 /illustrate 結構 viewport）
+- `/debrief` — AI 改動理解簡報（layer 3，行動後）：七段倒金字塔——意圖／行為黑盒子（行為 vs 純結構判定；docs 變更渲染 behavior delta）／前後差異／分組檔案地圖／波及缺口／驗證證據（demo-checklist，NONE 逼問+清單完整性）／認知誤差點；無參數=uncommitted（fallback HEAD~1）；`--ep` 方向確認已移除（改人讀 EP + /ep-review）
 - `/illustrate` — 結構 viewport + 技術圖解（SA/SD artifact menu：call graph / sequence / class slice / data-flow / boundary；city map / drill / drift detection；console / md）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build drift detection，見上圖），結構能力調 arch-thinking skill
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → message → 確認）；finalization 已在 build 階段 5a 結算，commit 前可跑 `/metadata-sync` 更新
@@ -66,8 +66,7 @@
 - `/lint-fix` — ruff + mypy 自動修正
 - `/fix-test` — 測試失敗分類修復（先分類 A/B/C/D/E 再修復，防止盲目讓測試通過）+ 階段 4.5 TWINS 同類缺陷 sweep
 - `/audit-test` — 測試品質稽核（反模式偵測、覆蓋對稱性、mock 健康度，只讀不寫）
-- `/human-review` — 以人類 viewport 審既有 code 的放大鏡（預設質疑 AI 失敗模式：phantom API / 命名盲點；source + test 批判性查證：問題+建議+圖+查證誠信；想質疑 code 存在價值時，典型：懷疑 AI 亂加 code/test（不必先懷疑）；`<dir|files>`；與 code-review/audit-test/codebase-sweep 正交；判準 4/5 domain 層內建）
-- `/codebase-sweep` — 全面性 codebase 審查 + 架構 onboarding（per-directory 廣到精細：README+architecture+review+state.yaml；`<dir>` / `--status` / `--stale` / `--architecture`/`--arch` / `--invariants`；baseline 一次性 + drift；_invariants/ 命令生成結構 + 人保留 design_lessons；非 change-driven，用 /code-review）
+- `/smell-detector` — 壞味道偵測（layer 3，行動前/審既有）：架構審查＋重構前期研究＋測試優化盤點；兩 mode——`<dir|files>` zoom 變焦批判（質疑存在：6 判準+查證誠信+Domain 層判準 4/5）/ `--baseline <dir>` 廣角盤點（per-directory 4 檔+invariants+--status/--stale/--arch）；測試 smell 三類（資源/怪獸/結構，與 /audit-test 正交）；read-only 偵測器，修復走 /implement、/fix-test
 - `/consistency` — 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度、Signal/Noise）
 - `/sync-sources` — 跨檔 single-source invariant 機械檢查（v1：enum + classification 沒被 drift）
 - `/distill-spec` — 蒸餾肥大的 spec 文檔
@@ -127,6 +126,7 @@
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
+- `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離）
 - `dependency-upgrade-watch` — 偵測 nautilus_trader / shioaji 版本漂移，主動建議 /upgrade-nt|/upgrade-sj（碰 pyproject.toml 時 auto-load）
 
 ### 工具與查詢

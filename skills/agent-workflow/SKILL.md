@@ -58,7 +58,7 @@ spawn agent 時，依「agent 產出是**原料**還是**直接交付**」選 sc
 | **原料**（給主 session 組裝/parse，如 §HR 深審內容、findings 清單） | **free-text 或極簡 schema**（單層、少 required） | agent 價值在分析；strict schema 是約束不是助力 |
 | **直接交付**（agent 產出即最終結構，如 rename edit list、verdict 物件） | StructuredOutput schema OK | 結構本身是 deliverable，值得強制 |
 
-**🔴 anti-pattern：complex nested StructuredOutput + 多 required 用於「原料」產出** → **retry-exhausted**（agent 做完真實分析但無法 fit 進 nested schema，反覆重試全廢）。實證：`/codebase-sweep` indicators/ rollout 用 6-agent workflow（nested io_contracts/test_map schema）→ 6/6 retry-exhausted（224 tool uses 白費）；改直接執行（單 session）一次成。
+**🔴 anti-pattern：complex nested StructuredOutput + 多 required 用於「原料」產出** → **retry-exhausted**（agent 做完真實分析但無法 fit 進 nested schema，反覆重試全廢）。實證：`/codebase-sweep`（現 smell-detector baseline mode）indicators/ rollout 用 6-agent workflow（nested io_contracts/test_map schema）→ 6/6 retry-exhausted（224 tool uses 白費）；改直接執行（單 session）一次成。
 
 **恢復路徑**（遭遇 retry-exhausted）：
 1. **直接執行**（單 session，主 LLM 自己做）— 目錄/任務規模 fit 一個 session 時首選

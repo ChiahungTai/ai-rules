@@ -86,7 +86,7 @@ Walk through code with the six axes.
 
 ## Dead Code Hygiene
 
-After refactoring, check for orphaned code. **Deletion is a no-impact self-claim** ("zero callers") — treat it as Claim→Evidence→Trust: independently verify across the **full consumer surface** before removing; don't trust the author/commit self-claim (see [acceptance-evidence](../../rules/acceptance-evidence.md) Claim→Evidence→Trust「刪除/死碼自述同理」). This is the routine-review counterpart of what `/human-review` 判準 1 does on demand — the gap it fills is that post-build `/code-review` previously trusted the self-claim.
+After refactoring, check for orphaned code. **Deletion is a no-impact self-claim** ("zero callers") — treat it as Claim→Evidence→Trust: independently verify across the **full consumer surface** before removing; don't trust the author/commit self-claim (see [acceptance-evidence](../../rules/acceptance-evidence.md) Claim→Evidence→Trust「刪除/死碼自述同理」). This is the routine-review counterpart of what `/smell-detector` zoom 判準 1 does on demand — the gap it fills is that post-build `/code-review` previously trusted the self-claim.
 
 **Full consumer surface for "zero callers"** (LSP findReferences alone is insufficient — it misses dynamic dispatch and non-library consumers):
 - LSP `findReferences` (static imports)
