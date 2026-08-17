@@ -78,7 +78,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 - 該軸的檢查項目清單（如上表）
 - 相關檔案路徑（必讀）
 - 方法論引用（code-review-and-quality；Architecture 軸引用 arch-thinking（視角+機械））
-- rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
+- rules-reminder 規則摘要（Agent 看不到 auto-loaded rules）
 - schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → 分三級（Critical/Important/Suggestion）→ 消費端影響檢查 → label-vs-diff 驗證 → commit message 產生。

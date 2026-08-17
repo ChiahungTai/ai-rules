@@ -1,12 +1,13 @@
 ---
 name: rules-reminder
-description: "Enforces the most frequently violated Claude Code rules to prevent permission prompts. Use when writing any Bash command. Covers: rg/fd instead of grep/find, no # after newline in python -c, no $ shell expansion, uv run for Python, no sed for code, Traditional Chinese output."---
+description: "Enforces the most frequently violated Claude Code rules to prevent permission prompts. Use when writing any Bash command. Covers: rg/fd instead of grep/find, no # after newline in python -c, no $ shell expansion, uv run for Python, no sed for code, Traditional Chinese output, independent tool calls batched in one block, Read target file before Edit/Write."
+---
 
 # Rules Reminder — 最常被忘記的規則
 
 > **典型觸發情境**：使用者看到 LLM 用了 `find`/`grep`，或多行 `python -c` 中用了 `#` 註解，這些都會觸發權限提示卡關。立即停下手邊動作，改用 `fd`/`rg`，或移除 `#` 註解。
 
-以下是 LLM 最常犯、每次都會觸發權限提示的錯誤。**現在起嚴格遵守，不再犯。**
+以下是 LLM 最常犯的錯誤（多數觸發權限提示，少數浪費 request 或直接失敗）。**現在起嚴格遵守，不再犯。**
 
 ---
 
@@ -131,11 +132,21 @@ uv run python scripts/check.py
 
 ---
 
+## 7. 獨立呼叫批次化 + 改檔前先 Read
+
+多個**獨立**無依賴的工具呼叫（Read、rg/fd、git 查詢、LSP 查不同 anchor、跨檔 Edit）在**同一個 block 一次發出**——每個獨立 call 各耗一個 model request，逐一發是浪費。機械驗證序列（lint/type/test）組成單一命令（`uv run` 前綴、輸出重導再 Read、`|| echo "x:FAIL"` 帶出失敗段）。
+
+**Edit/Write 前目標檔必須已 Read**（harness 硬規則：未 Read 直接失敗；Read 後檔案又被外部改 = 過時失敗 → re-Read 再改）。
+
+**規則**：獨立就同 block 發；改檔前必 Read；鄰近一行式小修合併成一個 Edit。
+
+---
+
 ## 記憶口訣
 
-> **`#` 是毒藥、`$` 是禁區、`grep`/`find` 是禁區、`uv run` 是王道、`sed` 是地雷、`簡體字是違規`**
+> **`#` 是毒藥、`$` 是禁區、`grep`/`find` 是禁區、`uv run` 是王道、`sed` 是地雷、`簡體字是違規`、獨立同發、先 Read 再改**
 
-每次寫 Bash 命令前，默念這六條。
+每次寫 Bash 命令或批次修改前，默念這幾條。
 
 ---
 

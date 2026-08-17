@@ -53,7 +53,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 - 該維度的檢查項目清單（F1-F5 各自定義）
 - 計畫書提到的檔案路徑（必讀）
 - 方法論引用（code-review-and-quality）
-- rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
+- rules-reminder 規則摘要（Agent 看不到 auto-loaded rules）
 - schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 5 個 DimensionVerdict → 執行回寫（回寫原則見下方）。

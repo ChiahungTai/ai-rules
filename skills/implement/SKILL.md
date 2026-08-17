@@ -76,7 +76,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 1. 讀取 Execution Plan，識別段落結構、依賴關係
 2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在階段 5a 結算時執行）
-3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）。LSP `goToDefinition` 驗證 dependency anchors 的定義端，`findReferences` 驗證消費端，`hover` 確認關鍵參數型別
+3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）。LSP `goToDefinition` 驗證 dependency anchors 的定義端，`findReferences` 驗證消費端，`hover` 確認關鍵參數型別——三者對不同 anchor 獨立，同 block 併發（[tool-discipline](../../rules/tool-discipline.md) 批次化）
 4. **POC + demo 盤點**：掃描 `poc/**/*.py`、`demo_*.py`、`scripts/demo_*.py`、`notebooks/*.ipynb`，建立 `{module} → [poc/demo paths]` 映射表
 5. 檢查清單：Kanban InProgress ✓ | POC/demo 映射表 ✓ | 測試檔案 ✓ | instruction 檔同步 ✓ | 依賴完整 ✓
 
@@ -101,7 +101,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 **max-agents > 1 且有可平行段落**時：
 1. 依賴圖分層為 waves
 2. 同 wave 平行 Agent（上限 max-agents）
-3. Wave 合併：讀取 Agent 產出 → 應用到主 worktree → `ruff check --fix && ruff format`
+3. Wave 合併：讀取 Agent 產出 → 應用到主 worktree → `uv run ruff check --fix && uv run ruff format`
 4. **Agent 產出機械驗證 = Claim→Evidence→Trust 校驗**（原則見 [acceptance-evidence](../../rules/acceptance-evidence.md)「證據獨立性 + Claim→Evidence→Trust」—— agent 自述是 L2 同義反覆風險、`git diff` 是 L1 機械證據）。**此模式適用所有 no-impact claim**（agent / producer 宣稱「沒影響 X」：accounting / risk / invariant）：claim 須獨立機械證據反證，否則退化為 self-report：
    - `git diff --name-only` 列實際變更檔（機械事實）
    - 比對各 Agent 自述「改了哪些檔 / 幾處」vs git 實際 → flag mismatch（**稱「零修改」但 git 顯示有改**最危險，曾釀 scope-creep 近乎 ship）
@@ -131,7 +131,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 #### 驗證
 
-每段完成後：**整合路徑覆蓋檢查** → `ruff check --fix && ruff format` → LSP diagnostics（即時型別檢查）→ `mypy .`（完整驗證）→ `pytest <test> -v`（背景跑）→ POC/demo 驗證
+每段完成後：**整合路徑覆蓋檢查**（rg）與機械驗證**組合命令**同 block 併發（一次 call 取代逐條，見 [tool-discipline](../../rules/tool-discipline.md)「獨立呼叫批次化」）：`mkdir -p .agent-tmp; uv run ruff check --fix . > .agent-tmp/v.out 2>&1 || echo "ruff:FAIL"; uv run ruff format . >> .agent-tmp/v.out 2>&1 || echo "fmt:FAIL"; uv run mypy . > .agent-tmp/m.out 2>&1 || echo "mypy:FAIL"; uv run pytest <test> -v > .agent-tmp/p.out 2>&1 || echo "pytest:FAIL"`——無 FAIL 行 = 全綠，輸出重導檔案再 Read（段級短測試隨組合跑；全量背景跑在階段 3）。LSP diagnostics 被動推送不耗 request。之後 POC/demo 驗證
 
 > ⚠️ **mypy/pytest 閘門禁 `| tail/grep`**（exit code 被遮蔽 → 誤判通過，見 [bash-hard-rules](../../rules/bash-hard-rules.md)）；看 output 重導檔案再 Read。
 
@@ -215,7 +215,7 @@ base ① clean + ② UC-anchored + ③ Correctness 之外，extra agent 由**段
 
 #### 主 LLM — Apply Changes
 
-根據 judge-review 的 ✅ 採納清單修改 code。修改完跑 `ruff check --fix && ruff format`。
+根據 judge-review 的 ✅ 採納清單修改 code——**先規劃整批、再批次套用**：逐項定位修改點與改法（目標檔先 Read，見 tool-discipline「檔案修改禁令」Read 紀律），多個 Edit 同 block 一次發出：跨檔獨立、同檔不同位置（old_string 不重疊）皆可；同檔鄰近一行式小修合併為單一較大 Edit。只有真依賴（先改簽名看結果再改 caller）才序列。修改完跑 `uv run ruff check --fix && uv run ruff format`。
 
 #### loop 迭代收斂（Loop engineering — apply 後 re-review）
 

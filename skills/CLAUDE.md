@@ -134,7 +134,7 @@
 - `nt-v1-query` — NautilusTrader **v1**（legacy Cython runtime — 消費端現行 runtime）查詢（docs-first + LSP-on-Cython-stubs + designer intent；消費端遷移 v2 後退休）
 - `crg-query` — code-review-graph 知識圖譜查詢紀律（LSP-vs-CRG 分工：symbol→LSP / impact·callers·flows·community→CRG；assume-present + warn-if-absent；anti-over-reliance：graph=structure 非 behavior；CRG 裝了才 fire，平行 nt-query）
 - `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀）
-- `rules-reminder` — 常被違反的 Bash 規則（rg/fd、無 `#`、`uv run`、無 `$` 展開）
+- `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
 - `voice-notification` — 三通道語音通知（系統召回 / 進度提醒 / 完成通知）
 
 ### UI / 協作

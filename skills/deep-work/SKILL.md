@@ -144,8 +144,8 @@ permission mode 是 CLI 啟動旗標 / dir 設定，**命令本身無法中途�
 
 ## Agent Spawn 規則
 
-Agent prompt 開頭加上 /rules-reminder 六條規則摘要：
-`#` 是毒藥、`$` 是禁區、`rg/fd` 取代 `grep/find`、`uv run` 是王道、`sed` 是地雷、繁體中文
+Agent prompt 開頭加上 /rules-reminder 規則摘要：
+`#` 是毒藥、`$` 是禁區、`rg/fd` 取代 `grep/find`、`uv run` 是王道、`sed` 是地雷、繁體中文、獨立同發、先 Read 再改
 
 ---
 

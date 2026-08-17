@@ -315,7 +315,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 - 該維度的檢查項目清單（見 [/ep-review](../ep-review/SKILL.md) 五維度 + 維度映射表）
 - 相關檔案路徑（必讀）
 - 引用 [review-engine](../review-engine/SKILL.md)（通用：嚴重度/信心水準/審查者自證/LSP 查證/模式判定規則）+ [arch-thinking](../arch-thinking/SKILL.md)（Clean Arch 視角 §一 + 結構機械 §二）+ [code-review-and-quality](../code-review-and-quality/SKILL.md) 方法論
-- rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules）
+- rules-reminder 規則摘要（Agent 看不到 auto-loaded rules）
 
 > **agents→skills 統一**（#B12 探討）：agent 審查知識（通用審查邏輯、Clean Arch 視角、結構機械能力、方法論）沉 skill 統一引用，agent prompt 只組裝 — 非各命令內嵌審查邏輯。EP review agent 引用 review-engine（通用）+ arch-thinking（視角+機械維度）+ code-review-and-quality（方法論），與 `/code-review`、`/illustrate` 共用同一組 skill（整脊「能力下沉」一致性）。
 

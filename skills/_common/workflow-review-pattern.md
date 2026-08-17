@@ -229,7 +229,7 @@ return {
 2. 該維度的檢查項目清單
 3. 相關檔案路徑（必讀）
 4. 方法論引用（code-review-and-quality / 對應 skill）
-5. rules-reminder 六條規則摘要（agent 看不到 auto-loaded rules）
+5. rules-reminder 規則摘要（agent 看不到 auto-loaded rules）
 
 ---
 

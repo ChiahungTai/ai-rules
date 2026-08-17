@@ -204,7 +204,7 @@ Rules 檔在 session 啟動時載入，但**更新不會傳播到已 spawn 的 a
 - [ ] 已偵測自身模型，查「並發上限」表確認（Claude: `rules/model-routing.md`）；Agent **model 依任務類型**
 - [ ] 已印出 `[Agent] model=X, max=N, current=M`
 - [ ] 當前 Agent 數量未超過上限
-- [ ] Prompt 包含足夠 context + 相對路徑 + rules-reminder 六條規則摘要（Agent 看不到 auto-loaded rules，必須在 prompt 開頭明確寫入：多行 `python -c` 禁 `#` 註解、`rg`/`fd` 取代 `grep`/`find`、`uv run` 前綴 Python、禁止 `sed` 修改 `.py/.md`、禁止 `$` shell 展開、輸出繁體中文）
+- [ ] Prompt 包含足夠 context + 相對路徑 + rules-reminder 規則摘要（Agent 看不到 auto-loaded rules，必須在 prompt 開頭明確寫入：多行 `python -c` 禁 `#` 註解、`rg`/`fd` 取代 `grep`/`find`、`uv run` 前綴 Python、禁止 `sed` 修改 `.py/.md`、禁止 `$` shell 展開、輸出繁體中文、獨立工具呼叫同 block 批次發、改檔前先 Read）
 - [ ] **若任務涉及 mock / PropertyMock / fixture**：prompt 主動注入專案 `tests/AGENTS.md`（legacy `tests/CLAUDE.md`）的 mock 規範段落摘要（agent 不會自己讀專案 instruction 檔，必須主動注入；見上方「Rule Freshness」）
 - [ ] Uncommitted changes：需要 → 先 commit；Branch：不正確 → 先 checkout
 - [ ] 失敗 Agent 的 worktrees 已清理（`git worktree list`）
