@@ -1,145 +1,122 @@
 ---
 name: nt-query
-description: Query NautilusTrader (NT) correctly — docs-first for capability/concept, LSP-on-Cython-stubs for implementation, designer-intent for usage contract, plus NT type boundary audit. Use when investigating what NT supports ('NT 支援/能不能/能力/概念', multi-account, OMS, position 計算, accounting, value types, emulated orders), where/how NT implements something (cache, model, execution, backtest config, 'NT symbol 在哪', BacktestEngine, TradingNode, Actor, on_bar, on_order_filled, submit_order), whether an NT API is safe to call in a given context (thread/loop/caller — '跨線程', node.run/stop/dispose, loop ownership, daemon thread), or auditing NT type boundaries (Bar/Instrument/InstrumentId/BarType/Strategy/BarDataWrangler 的 import 路徑、stub 正確性、簽名、Cython 邊界型別相容性). Prevents over-inferring a capability or usage boundary from one source data structure or method signature.
-when_to_use: Fires when a consumer project's LLM investigates NautilusTrader — "does NT support X", "NT 能不能", "how does NT compute position", "where is X defined in NT", "is it safe to call X from thread/loop Y" (usage contract — cross-thread node.stop/dispose, loop ownership, daemon thread), or when reading nautilus_trader/ source / .pyi stubs. Load BEFORE diving into NT source.
+description: Query NautilusTrader v2 (Rust + PyO3 runtime) correctly — docs-first for capability/concept, in-repo AGENTS.md hubs for orientation, LSP on in-package generated stubs for implementation, designer-intent for usage contract, MIGRATION_V2.md for v1→v2 mapping. Use when investigating what NT v2 supports ('NT 支援/能不能/能力/概念' against the v2 runtime), v1→v2 migration impact (import flattening, API renames, behavior changes), where/how v2 implements something (LiveNode, DataActor, BacktestEngine, on_quote/on_bar, cache, portfolio, Rust crates), whether a v2 API is safe to call in a given context (loop ownership, node run/start/poll/stop), or porting consumer code from v1 to v2. Prevents over-inferring a capability or usage boundary from one source data structure, and prevents writing v1 names from memory into v2 contexts. For the legacy v1 Cython runtime use the nt-v1-query skill.
+when_to_use: Fires when a consumer project's LLM investigates NautilusTrader v2 — "does v2 support X", "v2 API", "PyO3", "migration to v2", "MIGRATION_V2", porting v1 code (renames like on_quote_tick→on_quote, TradingNode→LiveNode, Actor→DataActor), reading python/nautilus_trader stubs, or Rust crates/ source. Load BEFORE diving into v2 source or migration work.
 ---
 
-# nt-query — Query NautilusTrader correctly
+# nt-query — Query NautilusTrader v2 correctly
 
-You're investigating **NautilusTrader (NT)** — the Cython+Rust quant platform. NT has two distinct knowledge layers; confusing them causes the most expensive mistake.
+You're investigating **NautilusTrader v2** — the **Rust core + PyO3 Python package** under `python/` (the go-forward runtime; v1 Cython is legacy and lives in a separate skill/checkout). NT has two distinct knowledge layers; confusing them causes the most expensive mistake.
 
 ## The one rule
 
 > **Docs decide CAPABILITY. Source reveals IMPLEMENTATION. Never infer a capability boundary from a single data structure.**
 
-`dict[Venue, AccountId]` (a 1:1 helper index) is an *implementation choice*, not proof that "one venue = one account" is a hard limit. A data structure shows how something is built today — not what the platform can do.
-
-**Corollary — don't extrapolate behavior from one code path.** NT behavior often splits by lifecycle stage or account type, and each split is a separate code path. Example: margin reservation has a *pending-order* path (`_update_margin_init`) and a *filled-position* path (`calculate_margin_maint`); a finding from one (e.g. "market order has no price → skipped") does not describe the other. When a concern splits, verify the **specific path your scenario hits**. Same anti-pattern shape as the one rule — don't describe the whole from one part. The account/margin map and its two paths are written up in [account-model.md](account-model.md).
+A data structure shows how something is built today — not what the platform can do. When a concern splits by lifecycle stage or code path, verify the **specific path your scenario hits** — don't describe the whole from one part.
 
 ## Locate the NT repo — resolve `<NT_REPO>` once
 
-This skill needs a local NautilusTrader checkout (with `docs/concepts/`). All paths below use `<NT_REPO>`; resolve it in this order, then substitute everywhere (do this once per session):
+1. **Override** — env var `NT_REPO_PATH` is set → use it.
+2. **Default** — `~/Github/nautilus_trader` (branch `main`, tracks `upstream/nightly` — the daily snapshot of develop, the more stable dev channel). Verify with `test -d ~/Github/nautilus_trader/python/nautilus_trader`.
+3. **Not found** — stop and tell the user: "nt-query needs the v2 NautilusTrader checkout; set `NT_REPO_PATH` or give me the path."
 
-1. **Override** — env var `NT_REPO_PATH` is set → use it. (A consumer may set this in `.claude/settings.json` `env` to point at a specific checkout or worktree.)
-2. **Default** — `~/Github/nautilus_trader`; verify with `test -d ~/Github/nautilus_trader/docs/concepts`.
-3. **Discover** — `fd -t d nautilus_trader ~` (or `find ~ -type d -name nautilus_trader -maxdepth 5`); pick the checkout that contains `docs/concepts/` (not a `.venv` site-packages copy).
-4. **Not found** — stop and tell the user: "nt-query needs a local NautilusTrader checkout with `docs/concepts/`; set `NT_REPO_PATH` or give me the path."
+**Layout reality (v2):** the Python package lives under `python/nautilus_trader/` — there is **no root `nautilus_trader/`**. Each subpackage (`model`, `common`, `config`, `live`, …) is a thin `__init__.py` star-importing the compiled `_libnautilus` Rust extension (`_fixup.fixup_module_names` remaps module paths), so **v1 deep paths** (`nautilus_trader.common.component`, `nautilus_trader.model.identifiers`) **do not exist** — import from the flat subpackage (`from nautilus_trader.common import Logger`). v1 and v2 both import as `nautilus_trader` — never install both into one venv; test migration in a separate environment. Real Python logic exists only in a handful of places — `analysis/` (tearsheet reporting), `testkit/providers.py`, `persistence/loaders.py`, `core/datetime.py`, `config/` (aggregation re-export), `adapters/binance/instruments.py` — every other subpackage is a pure shell. Python also has **no Kernel/Trader/LiveEngine**: orchestration entry points are `LiveNode` / `BacktestEngine` (Rust pyclass), and `trading.Controller` is actually `PyController` from `nautilus_system` mounted into the trading domain.
 
-If you are working inside an NT worktree, `<NT_REPO>` is that worktree's root (its `docs/concepts/` matches the code you're editing).
+## In-repo navigation layer — AGENTS.md hubs (read first)
 
-## Upstream docs vs this fork — pick the right truth
+This checkout ships a module-level AGENTS.md navigation layer (if those files are absent — not kept — fall back to the path rules in this skill):
 
-- **context7 / online docs** describe **upstream NT** — fine for general concepts and syntax (not fork-state claims).
-- **`<NT_REPO>`** describes **this fork's runtime**, which diverges from upstream: Cython runtime in use, Rust/PyO3 migration incomplete (e.g. cache's PostgreSQL backing is still WIP).
-- For any claim about what THIS fork actually does — capability, architecture, language layer, enabled features — ground in `<NT_REPO>`, not context7. context7 structurally cannot see this fork's state.
-- Cautionary case: an overview once claimed "Cache is in Rust" (drawn from upstream-general context7). Ground truth is layered — `cache.pyx:Cache` (the in-memory core) is **Cython for hot-path performance**; only the DB-backing adapters wrap Rust (`nautilus_pyo3`). Two errors compounded: upstream-vs-fork drift **and** generalizing one layer's language (Rust backing) to the whole module — the same anti-pattern as the one rule (don't infer the whole from one part). When a module mixes layers, name the layer.
+- `<NT_REPO>/crates/AGENTS.md` — Rust workspace layering (who depends on whom), crate↔Python-domain map (with misalignments), per-crate navigation table, suggested reading order
+- `<NT_REPO>/python/nautilus_trader/AGENTS.md` — shell loading mechanism, the "where real Python logic lives" table, domain→crate mapping
+- `<NT_REPO>/python/AGENTS.md` — maturin/uv build, stub & docstring generation workflow, pytest entry points
+
+For "where is X / which side owns Y" questions, read the relevant hub's mapping table before scanning source.
+
+## Upstream docs vs this checkout — pick the right truth
+
+- This checkout's `main` **tracks `upstream/nightly`** (the daily snapshot of develop), **and it is a fork** (origin = ChiahungTai/nautilus_trader; remote `upstream` = nautechsystems) carrying a thin patch layer on adapters (polymarket / lighter / derive). Upstream docs/context7 describe upstream v2 — released docs may **lag the rc-era branch**, and fork-patched adapters may diverge from upstream; verify rc-specific and adapter-behavior claims against `<NT_REPO>`.
+- **`<NT_REPO>/MIGRATION_V2.md` is the authoritative v1→v2 contract** — import-path table, API renames, behavior changes, known limitations. For any "v1 did X, what does v2 do" question, ground the answer there before synthesizing.
 
 ## Step 1 — Classify the query
 
 | Shape | Signal words | Authoritative source |
 |---|---|---|
-| **Capability / concept** | "does NT support…", "can NT…", "is X a hard limit", "NT 能力/概念/支援" | `docs/concepts/` **first** → Step 2 |
-| **Implementation / symbol** | "where is X", "signature of Y", "who calls Z", "NT symbol 在哪/實作" | **LSP on `.pyi`** → `.pyx` source → Step 3-4 |
-| **API contract** | "what params does X take" | `docs/api_reference/` OR `.pyi` + docstring → Step 3 |
-| **Usage contract / context** | "is it safe to call X from thread/loop Y", "can stop/dispose run cross-thread", "NT 跨線程 / loop ownership" | **Designer intent** → Step 2b |
+| **Capability / concept** | "does v2 support…", "can NT…", "NT 能力/概念/支援" | `docs/concepts/` **first** → cutover limits (Step 2) |
+| **Migration impact** | "v1→v2", "port X", "why did X break" | **`MIGRATION_V2.md`** → stubs (Step 3) |
+| **Implementation / symbol** | "where is X", "signature of Y", "who calls Z" | **LSP on in-package `.pyi`** → Rust source (Step 3-4) |
+| **Usage contract / context** | "is it safe to call X from loop Y", node `run/start/poll/stop` ownership | **Designer intent** → Step 2b |
 
-Most real questions are **mixed** ("can NT do X, and how do I call it?") → run the **capability path first**, then implementation.
+Most real questions are **mixed** → run capability/migration path first, then implementation.
 
 ## Step 2 — Capability path (docs-first)
 
-1. Open `<NT_REPO>/docs/concepts/CLAUDE.md`. It maps each concept → doc file → source module, with a **"Non-derivable knowledge"** column that tells you what only the docs can answer.
-2. Read the concept file (e.g. `accounting.md`, `positions.md`). Extract: (a) what NT explicitly says it supports, (b) any symbol names mentioned, (c) `:::note` / `:::warning` behavioral contracts.
-3. **The docs statement IS the answer.** If `accounting.md` says "multi-account venues", multi-account is supported — full stop.
-4. 🔴 **GATE — the failure this skill exists to prevent:** before concluding "NT can / cannot do X", you must hold **docs evidence** — an explicit statement, a `:::note`/`:::warning`, or a verified absence in the relevant concept doc. A source data structure is **not** evidence of a capability ceiling. If you only have a structure, stop and return to Step 2.1.
-5. **The GATE follows claims, not query type.** It applies to any "NT can / cannot / is X" statement wherever it appears — including a line dropped inside an overview or a casual answer, not only when you run a dedicated capability query. Overview framing does not suspend verification: a specific, falsifiable, fork-dependent claim needs docs / `<NT_REPO>` evidence even mid-sentence. "Probably right, I'll leave it" is not evidence — some unverified claims are already wrong, and you cannot tell which without grounding.
+1. Open `<NT_REPO>/docs/concepts/` — **restructured into subdirectories** (`data/`, `events/`, `orders/`, `instruments/`, `backtesting/`, …) with per-topic pages; `index.md` in each dir is the entry. No v1-style concept→source map file exists.
+2. Read the concept file. Extract: (a) explicit support statements, (b) symbol names, (c) `:::note` / `:::warning` behavioral contracts.
+3. **The docs statement IS the answer** — full stop.
+4. 🔴 **GATE — cutover limits are capability boundaries:** v2's supported surface is scoped. Before concluding "v2 can / cannot do X", check the **known limitations / cutover limits** section of `MIGRATION_V2.md` (e.g. deferred: Python joined-response callbacks, LiveNode Redis/SQL backing injection, SQL cache loads/state persistence/heartbeat, v1 StreamingConfig/DataCatalogConfig iterator workflow, some adapter instrument-provider filters, external msgbus publishing of order/position snapshots). "Supported workflows" are listed in the release notes / migration doc — something outside that list is *deferred*, not impossible; say which (the upstream roadmap issue #4042 tracks the wider post-cutover surface).
+5. Same GATE discipline as v1: a source data structure is **not** evidence of a capability ceiling; and the GATE follows claims anywhere they appear, including casual lines in an overview.
+6. **State & recovery questions** ("v2 怎麼存/恢復狀態", "is the cache the source of truth") route to `docs/concepts/event_sourcing.md` + `docs/concepts/reconciliation.md`: the **event store is the durable authority**, the **cache is a write-through projection**, and **market data stays in the data catalog** (don't conflate catalog with event store). The event store itself is Rust-internal (`crates/event_store`); its API surface is still evolving (per that page's own note).
 
 ## Step 2b — Usage-contract path (designer intent)
 
-"Method exists" ≠ "callable in any context." NT APIs — especially lifecycle (`node.run/stop/dispose`), threading, loop ownership, Actor registration timing — carry a **design contract** about *where/how* they're meant to be called. Violating it produces symptoms that look like "NT bug" but are contract violations (e.g. calling `node.stop()/dispose()` cross-thread while the loop runs in a daemon thread → `loop.stop()` interrupts `run_until_complete` → `RuntimeError("Event loop stopped before Future completed")`).
+"Method exists" ≠ "callable in any context." v2's Rust runtime owns the loop; the **`run()` / `start()` / `poll()` / `stop()` contract** (who owns the loop, what `poll()` services, residual-event grace) is documented in `MIGRATION_V2.md "Live node inspection and host-loop integration"`. Backtest-side inspection changes live in the same doc's "Inspection and state renames" and "Backtest node post-run inspection" sections. Designer-intent sources:
 
-**This is a third knowledge layer** — not docs/concepts (capability, Step 2), not stubs (implementation, Step 3). The source is **NT designer intent**:
+- **`<NT_REPO>/examples/`** — current live-node builders, adapter factories, strategies (the v1-flavored tutorials are known-stale; trust examples + stubs + tests over tutorials).
+- **`<NT_REPO>/python/tests/`** — acceptance tests (`acceptance/test_backtest.py`) and reference strategies (`strategies/ema_cross.py`) show sanctioned usage, including the v2 StrategyConfig custom-fields pattern.
+- **API shape**: if the runtime wanted you to call it cross-loop, it would expose a scheduling API — check how the node itself schedules work.
 
-- **NT's own examples** (`<NT_REPO>/examples/live/**`): **mixed — don't generalize from one family.** Most (binance/bybit/dydx…) use main-thread `node.run()` block + SIGINT stop + `finally: node.dispose()`. But several IB examples (`connect_with_tws.py`, `with_databento_client.py`, `connect_with_dockerized_gateway.py`) call `node.stop()` from a `daemon=True` timer thread — and only get away with it because `stop()` swallows the resulting `RuntimeError` (see source bullet). **That swallowed error is the tell, not a sanction.**
-- **NT's own source** (`nautilus_trader/live/node.py:stop`, ~L381): `stop()` schedules via in-loop-only `loop.create_task(self.stop_async())`, wrapped in `try/except RuntimeError`. A cross-thread call hits `create_task` from the wrong thread → `RuntimeError` → silently swallowed by the except. **Stronger evidence than any example survey** (immune to the over-generalization above) and the real reason a cross-thread `stop` "doesn't crash."
-- **NT's own tests** (`<NT_REPO>/tests/live/**`): what usage does NT itself test?
-- **NT's own API choices**: when NT needs cross-thread scheduling, what does it use? (`asyncio.run_coroutine_threadsafe` is the sanctioned cross-thread API — NT uses it in `adapters/interactive_brokers/client/client.py`; `loop.create_task` is in-loop only. If NT never routes `stop` through `run_coroutine_threadsafe`, `stop` isn't designed for cross-thread call.)
+## Step 3 — Implementation path (LSP on in-package stubs)
 
-Combine with arch-thinking: loop/thread lifecycle is NT's internal (bounded context) — don't operate it from outside the owning thread.
-
-🔴 **GATE — same shape as the one rule:** before concluding "I can call X from context Y (thread/loop/caller)", hold designer-intent evidence — an example, a test, or NT's own API-choice pattern. A method's existence or signature is **not** evidence of usage safety. "It's a public method" = inferring usage from structure = the same anti-pattern this skill exists to prevent.
-
-## Step 3 — Implementation path (LSP on the stub layer)
-
-Use the symbol names from Step 2 (or the query) as seeds:
-
-- `workspaceSymbol "<Name>"`, or `documentSymbol` on the `.pyi` → locate the class/method
-- `hover` → signature. Stubs are now **cross-package-precise** — `hover`/`findReferences` give real types (`order() -> Order | None`, `Cache(CacheFacade)`) wherever the symbol's dependency has a deployed `.pyi`. Some remain `Any` — the generator couldn't resolve certain return types (e.g. `cache.mark_price() -> Any`; its docstring gives `MarkPriceUpdate | None`), plus the PyO3 layer. **Still `Read` the `.pyi` docstring** for semantics types can't express (behavioral notes, "X or None" intent).
-- `findReferences` / `incomingCalls` → who uses it
-
-NT `.pyi` sit next to the `.pyx`/`.so`; in a consumer repo they reach the LSP via `make sync-stubs`.
+- Stubs are **in-package generated** (`python/nautilus_trader/**/*.pyi`, pyo3_stub_gen) — they are the **supported Python contract**; LSP works directly off the checkout (or off an installed v2 wheel — stubs ship with it). No sync workflow, no fork-side stub layer.
+- Stubs **and** Python docstrings are **generated artifacts** (sources: `crates/*/src/python/` `py_*` wrappers; regenerate via `make py-stubs` / `python/generate_docstrings.py`; drift checked by `make check-generated-drift`) — never hand-edit them; a stub defect is fixed at the Rust source or the generator.
+- `workspaceSymbol` / `hover` / `findReferences` as usual; classes are `@typing.final` where marked (e.g. `ParquetDataCatalog`, wranglers) — **subclassing is not a capability** unless the Rust side opts in (contrast: `FeeModel` is explicitly Python-subclassable; `FeeModel.get_commission` must be overridden).
+- Known stub gaps (callable at runtime, absent from stubs): Kraken `edit_orders_batch` / `submit_orders_batch` variants, adapter wire-DTO runtime attributes — don't report these as "missing API".
 
 ## Step 4 — Source truth (only when docs/stubs are insufficient)
 
-`rg` the `.pyx` for the real internal structure. This answers *how* something is implemented — never *whether* it is possible.
+Implementation lives in **Rust**: `<NT_REPO>/crates/<domain>/` (core/model/common/execution/live/…), PyO3 bindings under `crates/<domain>/src/python/*.rs`, adapters under `crates/adapters/<venue>/`. Python-side `__init__.py` files are thin star-import shims. Label every source finding as IMPLEMENTATION, not CAPABILITY.
 
-**Discipline:** label every source finding as IMPLEMENTATION, not CAPABILITY. `cache._index_venue_account: dict[Venue, AccountId]` = "there is a venue→account lookup index" (implementation), NOT "NT allows only one account per venue" (capability — check docs).
+Workspace layering (dependency direction): core ← model ← common ← execution/data ← portfolio/risk/trading ← system ← backtest/live/event_store; `crates/pyo3` aggregates all bindings into the `_libnautilus` extension module; adapters are injected via factories (**system never imports adapters**). Use this to reason about "where would X live / who can call whom". The standard adapter crate anatomy (config / factories / data / execution / http / websocket / signing + the `python/` binding layer, with credential redaction) is documented in `crates/adapters/AGENTS.md`.
 
-## 🔴 Symbol-name discipline — verify before you write
+**Adapter authoring reality:** the v2 Python surface has **no client base classes** (`LiveDataClient`/`LiveExecutionClient` etc. do not exist as Python classes) — adapters are Rust/PyO3, registered via `LiveNodeBuilder.add_data_client(name, factory, config)`. Custom adapters must be written in Rust against the crates; reference existing `crates/adapters/<venue>/` structure. The conceptual adapter component model (HTTP/WS clients, instrument provider, data/execution clients) is documented in `docs/concepts/adapters.md`, and per-venue capabilities in `docs/integrations/`. v2's `nautilus_trader.network` Python surface is only the `TransportBackend` enum — v1's generic Python HTTP/WebSocket/rate-limit clients have no v2 Python equivalent (that machinery is Rust-internal in `crates/network`).
 
-Before **writing down** any NT class / method / function name (in your notes, a `CLAUDE.md`, code, or this skill), confirm it exists in the **Cython runtime**. Do NOT infer a name from naming symmetry, an abbreviation, or the Rust/PyO3 layer — that blind spot has repeatedly produced wrong symbols:
+## 🔴 Symbol-name discipline — v2 names, verified
 
-- `calculate_maintenance_margin` is the **Rust/PyO3** name; the Cython runtime method is `calculate_margin_maint`.
-- a private `_update_margin_init` was assumed to have a `_update_margin_maint` sibling — **it does not exist** (the maintenance path is the public `update_positions`).
-- the leading `_` on private `cdef` methods (`_update_balance_locked`, `_update_margin_init`) was dropped.
+**Never write an NT name from v1 memory into a v2 context.** The v1→v2 rename surface is large; classic traps: `on_quote_tick`→`on_quote`, `subscribe_quote_ticks`→`subscribe_quotes`, `cache.quote_tick()`→`cache.quote()`, `TradingNode`→`LiveNode` (+ builder pattern), `Actor`→`DataActor`, `ActorConfig`→`DataActorConfig`, `LoggingConfig`→`LoggerConfig`, `ExecAlgorithm`→`ExecutionAlgorithm`, portfolio `is_flat()`→`is_net_flat()`, `FeeModel.get_order_filled_fee`→`get_commission`, `register_currency()`→`Currency.register()`, plus properties→methods (`Order.events()`). The full tables live in `MIGRATION_V2.md`.
 
-**Verify before writing — 0 hits means the name is wrong or from another layer; do not use it:**
+**Verify before writing — 0 hits means the name is wrong or from the other version:**
 
-- `rg "def <name>|cdef .*<name>|cpdef .*<name>" <NT_REPO>/nautilus_trader/<dir>/`, **or**
+- `rg "<name>" <NT_REPO>/python/nautilus_trader/<subpackage>/__init__.pyi`, **or**
 - `LSP workspaceSymbol "<name>"`.
-
-NT naming is often **asymmetric** (pending path is private `_update_margin_init`, filled path is public `update_positions`) — never assume a counterpart exists.
 
 ## Fallback — LSP is blind / stub looks wrong
 
-**LSP can't resolve NT Cython symbols** (`workspaceSymbol` empty, `attr-defined` / `Unknown` on `Bar` / `Price` / `Quantity` / `InstrumentId`):
-→ stubs aren't synced to this repo's venv. Interim: `rg` the `.pyi` / `.pyx` directly. **Flag the user: run `make sync-stubs` in the consumer repo** (common cause: `uv sync` or an NT upgrade wiped the venv `.pyi`). Known recurring failure — don't struggle silently.
-
-**LSP resolves but a type/signature looks wrong or a method is missing** (e.g. return should be `X | None` but isn't; `unknown import symbol`; method absent):
-→ the stub **content** is stale — not a sync issue. Fix fork-side in `<NT_REPO>`:
-- **Auto-gen stub** (most modules): regenerate — `uv run python scripts/lsp_stubs/generate_nt_stubs.py nautilus_trader/<mod>/<file>.pyx` → then `make sync-stubs` in consumer. **Don't hand-edit** (regen overwrites). If the generator itself is the limit (dependency lacks `.pyi` → stays `Any`; C-only `cdef` call artifact), that's a generator-evolution item — flag it, don't paper over with `# type: ignore`.
-- **Hand-written stub** (11: `model/{data,objects,identifiers}`, `trading/strategy`, `core/correctness`, `persistence/wranglers`, `indicators/{averages,momentum,trend,volatility,volume}`): hand-edit directly (they're audited for unmangled signatures).
-
-Which stub is which + the generator's precision rules (cross-package preservation, Optional-ize, elide): `<NT_REPO>/scripts/lsp_stubs/README.md`.
+- LSP can't resolve v2 symbols → confirm the query targets the v2 checkout (python/ layout) and the venv (if any) installed a v2 wheel (`--pre`), not a v1 wheel. Both install as `nautilus_trader` — a v1 venv resolving v2 imports is a version-mix symptom.
+- Stub content wrong/missing → it's an **upstream issue** (this checkout tracks upstream; there is no fork stub layer to fix locally). Report it; optionally pin/avoid the API in consumer code.
 
 ## Reference material
 
-- **Concept → doc → source map (authoritative — do not re-derive):** `<NT_REPO>/docs/concepts/CLAUDE.md`
-- **Docs root navigation:** `<NT_REPO>/docs/CLAUDE.md`
-- **NT module guide + LSP stub workflow:** `<NT_REPO>/CLAUDE.md`
-- **LSP stub generation tools:** `<NT_REPO>/scripts/lsp_stubs/README.md`
-- **The failure this prevents (case study):** `<NT_REPO>/ai-analysis/analysis/2026-06-16-nt-docs-over-source.md`
-- **Account / balance / equity / margin model** (account_type → 4 layers, two lifecycle paths, gotchas incl. `margin_maint=0` trap): [account-model.md](account-model.md) — load when the query touches account types, balances, equity, margin, or PnL computation
-- **Worked examples (4 query shapes, exact tool calls) + common concept→symbol seeds:** [reference.md](reference.md)
+- **v1→v2 migration contract (authoritative):** `<NT_REPO>/MIGRATION_V2.md` — import tables, renames, behavior changes (e.g. `Order.avg_px`/`slippage` now `Decimal`; `use_mark_prices` defaults true), known limitations
+- **Concept docs:** `<NT_REPO>/docs/concepts/` (subdirectory layout, per-topic pages)
+- **State & recovery concepts:** `<NT_REPO>/docs/concepts/event_sourcing.md`, `reconciliation.md` (event store = durable authority; cache = projection; market data stays in the catalog)
+- **Per-venue capabilities:** `<NT_REPO>/docs/integrations/` + `docs/concepts/adapters.md` (adapter component model)
+- **Python contract:** generated stubs in `<NT_REPO>/python/nautilus_trader/**/*.pyi`
+- **Sanctioned usage examples:** `<NT_REPO>/examples/` + `<NT_REPO>/python/tests/` (acceptance backtest, reference strategies)
+- **Rust implementation:** `<NT_REPO>/crates/` (bindings in `src/python/`, adapters in `crates/adapters/`)
+- **In-repo navigation hubs:** `<NT_REPO>/crates/AGENTS.md` (workspace layering + Python↔Rust map), `<NT_REPO>/python/nautilus_trader/AGENTS.md` (shell mechanism + real-Python map), `<NT_REPO>/python/AGENTS.md` (build / stubs / tests)
+- **Release-specific breaking changes:** `<NT_REPO>/RELEASES.md`
+- **Install / channels:** `<NT_REPO>/docs/getting_started/installation.md` (nightly vs develop wheel cadence; `--pre` install; separate venv rule)
 
 ---
 
-## 附錄：NT 型別邊界 audit 表
+## 附錄：v2 遷移查證快捷（消費端移植工作）
 
-> NT 型別位於 Cython 邊界後方。LSP 是唯一可靠驗證型別用法的方式 —— `.so` 編譯模組無可讀 Python 原始碼，直接讀原始碼不足以驗證。audit 時遇到以下高風險型別，依表查證。
-
-| Category | Module Path | Common Pitfall |
-|----------|------------|----------------|
-| `Bar` | `nautilus_trader.model.data` | Import from wrong module |
-| `Instrument` | `nautilus_trader.model.instruments` | Missing `.pyi` → Unknown type |
-| `InstrumentId` | `nautilus_trader.model.identifiers` | Constructor vs `from_str()` |
-| `BarType` | `nautilus_trader.model.data` | `from_str()` existence |
-| `Strategy` | `nautilus_trader.trading.strategy` | `on_bar()` signature |
-| `BarDataWrangler` | `nautilus_trader.persistence.wranglers` | Input format requirements |
-
-**Audit checklist**（每個 NT 型別遇到時）：
-1. `LSP hover` → LSP resolve 什麼型別？若 `Unknown`，stub missing/broken
-2. `LSP goToDefinition` → 跳到 `.pyi`？若否，stub sync issue
-3. Constructor/method signature → `LSP hover` 在 call site 驗參數型別
-4. Return type → `LSP hover` 在 variable assignment 驗回傳型別
-
-**Stub health detection**：LSP 回 `Unknown` → 跑 `make sync-stubs`（NT 專案）刷新 stub；或手動從 NT source tree 同步 `.pyi` 到 `stubs/` 與 `.venv/.../nautilus_trader/`。
+| 問題形態 | 查證順序 |
+|---|---|
+| 「這個 v1 import 在 v2 對應什麼」 | `MIGRATION_V2.md` import 表 → `rg` v2 `__init__.pyi` 確認 |
+| 「這個 v1 API 名還在嗎」 | `MIGRATION_V2.md` rename 表 → `workspaceSymbol` → 0 hits = 改名或移除 |
+| 「v2 有沒有支援 X」 | `docs/concepts/` → `MIGRATION_V2.md` known limitations（deferred ≠ impossible） |
+| 「v2 怎麼存/恢復狀態」 | `docs/concepts/event_sourcing.md` + `reconciliation.md`（cache 是 projection，不是真相） |
+| 「v2 config 怎麼讀回/敏感值怎麼顯示」 | `MIGRATION_V2.md` "Config readback and sensitive values" 段 |
+| 「行為跟 v1 一樣嗎」 | `MIGRATION_V2.md` Behavior changes 段 → 有列 = v2 契約；沒列也要驗（rc 演進中） |
+| 「自訂 adapter / FeeModel 怎麼寫」 | Step 4 adapter reality；FeeModel = 可 subclass（`get_commission`）；client = 僅 Rust |

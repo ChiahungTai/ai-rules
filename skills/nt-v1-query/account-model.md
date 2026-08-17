@@ -1,4 +1,4 @@
-# nt-query — Account, Balance & Equity Model
+# nt-v1-query — Account, Balance & Equity Model
 
 Loaded on demand for questions about account types, balances, equity, margin, or PnL computation. `<NT_REPO>` is resolved in SKILL.md. This file gives the **non-derivable design model** (how `account_type` fans out across layers), the **two lifecycle paths** that most often get conflated, the **margin-model side capabilities** (init vs maint), navigation seeds, and the failure modes that trap investigators. Authoritative concept docs: `<NT_REPO>/docs/concepts/accounting.md` and `portfolio.md` — read them first.
 

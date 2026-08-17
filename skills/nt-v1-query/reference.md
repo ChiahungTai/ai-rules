@@ -1,4 +1,4 @@
-# nt-query — Worked Examples & Concept→Symbol Seeds
+# nt-v1-query — Worked Examples & Concept→Symbol Seeds
 
 Loaded on demand. `<NT_REPO>` is resolved in SKILL.md ("Locate the NT repo"). The full concept→doc→source map lives in `<NT_REPO>/docs/concepts/CLAUDE.md` (authoritative); this file adds (A) worked examples showing the exact tool sequence, and (B) common symbol seeds so you can `hover` immediately.
 

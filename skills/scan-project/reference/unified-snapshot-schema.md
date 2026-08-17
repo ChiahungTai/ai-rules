@@ -1,4 +1,4 @@
-# Unified Snapshot Schema（v5）
+# Unified Snapshot Schema（v6）
 
 > JSON 合約定義：scan_project.py 產出格式，供 daily-maintain / doc-health / sync 消費。
 
@@ -10,14 +10,15 @@
 - `schema_version: 2` — USE-CASES.md 格式（含 uc_registry/uc_edges）
 - `schema_version: 3` — 三層文件格式（含 capabilities_registry/kanban_registry/claude_md_registry/cross_validation）
 - `schema_version: 5` — 精簡格式（dep_graph/findings/fingerprint，不含 registry）
-- **向前不相容**：v5 移除所有 registry，改為 findings + fingerprint
+- `schema_version: 6` — 無工具依賴 + 多語言（dep_graph.source 標示來源、內建 import 掃描 fallback、rust_workspace、dir_inventory、instruction_files）
+- **向前不相容**：v5 移除所有 registry，改為 findings + fingerprint；v6 為新增欄位（v5 消費端讀 v6 不崩，但拿不到新區段）
 
-### v3 → v5 遷移
+### v3 → v5+ 遷移
 
 消費端遇到 `schema_version < 5` 的 snapshot 時：
 1. **刪除舊 snapshot**：`rm .project-snapshot.json`
-2. **重新掃描**：執行 `/scan-project` 產出 v5 snapshot
-3. 無需手動遷移——scan_project.py 只產出 v5，不支援向下相容寫入
+2. **重新掃描**：執行 `/scan-project` 產出最新（v6）snapshot
+3. 無需手動遷移——scan_project.py 只產出最新版（v6），不支援向下相容寫入
 
 舊欄位對應：
 
@@ -38,9 +39,10 @@
 {
   "project": "my_package",
   "scan_timestamp": "2026-06-09T10:30:00+08:00",
-  "schema_version": 5,
+  "schema_version": 6,
 
   "dep_graph": {
+    "source": "builtin",
     "modules": {
       "mod_name": {
         "file_count": 88,
@@ -57,6 +59,42 @@
       { "import_path": "my_package.common.enums", "imported_by": ["data", "features"], "fan_out": 5 }
     ]
   },
+
+  "rust_workspace": {
+    "root": ".",
+    "crates": [
+      {
+        "name": "nautilus-model",
+        "dir": "crates/model",
+        "internal_deps": ["nautilus-core"],
+        "has_python_bindings": true
+      }
+    ]
+  },
+
+  "dir_inventory": {
+    "max_depth": 3,
+    "truncated": false,
+    "dirs": [
+      {
+        "path": "docs/concepts",
+        "depth": 2,
+        "subdirs": ["backtesting", "orders"],
+        "files_total": 29,
+        "file_exts": { "md": 29 },
+        "files": ["architecture.md", "overview.md"]
+      }
+    ]
+  },
+
+  "instruction_files": [
+    {
+      "path": "crates/model/AGENTS.md",
+      "module": "model",
+      "has_module_boundaries": true,
+      "has_capabilities_table": false
+    }
+  ],
 
   "findings": [
     {
@@ -104,11 +142,31 @@
 
 | 欄位 | 型別 | 說明 |
 |------|------|------|
-| `modules` | dict | 模組依賴結構（key = module name） |
+| `source` | string | `scan_imports`（目標專案 tools/scan_imports.py，較豐富）/ `builtin`（內建 AST fallback）/ `none` |
+| `modules` | dict | 模組依賴結構（key = module name；builtin 模組 = package root 第一層目錄，另含 `(root)`） |
 | `edges` | array | 模組間 import edges |
 | `hotspots` | array | 高 fan-out imports |
 
-如果專案沒有 `tools/scan_imports.py`，三個欄位皆為空（`{}`、`[]`、`[]`）。
+dep_graph 不需要目標專案自帶工具：無 `tools/scan_imports.py` 時自動降級為內建掃描；連 package root 都沒有時三個欄位為空（`{}`、`[]`、`[]`）。
+
+### rust_workspace
+
+Cargo workspace 的機械解析（無 Rust 時為 `null`）。
+
+| 欄位 | 型別 | 說明 |
+|------|------|------|
+| `root` | string | workspace **目錄**相對路徑（非 manifest 檔路徑；workspace 在 repo 根時為 `"."`） |
+| `crates[].name` / `dir` | string | crate 名與目錄 |
+| `crates[].internal_deps` | array | 只含指向其他 workspace 成員的依賴（分層圖的邊） |
+| `crates[].has_python_bindings` | bool | 有無 `src/python/`（PyO3 綁定層——truth/shell 分離訊號） |
+
+### dir_inventory
+
+機械目錄盤點（深度 ≤3、目錄數上限 800、`truncated` 標記截斷）——結構性列舉的 ground truth。`files`（檔名）僅在直接檔案 ≤60 時列出，否則只有 `files_total`。
+
+### instruction_files
+
+各目錄 instruction 檔（AGENTS.md 優先、CLAUDE.md legacy）的位置與 `has_module_boundaries` / `has_capabilities_table` 標記——init/sync 流程判斷「哪些目錄已有檔」的機械依據。
 
 ### findings
 
@@ -143,7 +201,7 @@
 | `X-cap-path` | Capabilities 入口路徑不存在（檢查 project root / package root / instruction 檔目錄（AGENTS.md/CLAUDE.md）三個候選位置） | important |
 | `X-tag-module` | Kanban 卡片的 `[tag:xxx]` 不對應 package 子目錄或頂層 dir | important |
 | `X-ep-ready` | Next-Up/In-Progress 卡片引用的 EP 檔案在 ai-analysis/ 等目錄找不到 | important |
-| `X6` | dep-graph modules 中有模組（≥3 files）但該模組目錄下無 instruction 檔（AGENTS.md/CLAUDE.md） | important |
+| `X6` | dep-graph modules 中有模組（≥3 files）但該模組目錄下無 instruction 檔（AGENTS.md/CLAUDE.md）；模組目錄在 project root 與 package root 兩處都檢查 | important |
 
 **語義性驗證（由 LLM 判斷，不在 findings 中）**：
 - X1：dep-graph 矛盾（instruction 檔 "Does NOT depend on" vs 實際 import edge）

@@ -18,12 +18,15 @@ Usage:
 """
 
 import argparse
+import ast
 import hashlib
 import importlib.util
 import json
+import os
 import re
 import tomllib
 from collections import defaultdict
+from collections.abc import Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -44,6 +47,8 @@ SKIP_DIRS_SCAN = {
     ".claude",
     "build",
     "dist",
+    "target",  # Rust/Cargo build artifacts
+    "_build",  # Sphinx and similar doc builds
     "ref-docs",  # external harness mirrors — not this repo's instructions
 }
 
@@ -128,7 +133,13 @@ def _find_package_root(project_root: Path) -> Path | None:
     if not candidates:
         return None
 
-    by_name = {c.name: c for c in candidates}
+    # Same-name collision (e.g. root pkg vs python/<pkg> shell remnant):
+    # more .py files wins — a deeper lookalike must not shadow the real package.
+    by_name: dict[str, Path] = {}
+    for cand in candidates:  # pre-sorted by path: deterministic tie order
+        prev = by_name.get(cand.name)
+        if prev is None or _count_py_files(cand) > _count_py_files(prev):
+            by_name[cand.name] = cand
 
     # 2. Authoritative: pyproject.toml package declaration
     pyproject = project_root / "pyproject.toml"
@@ -149,18 +160,41 @@ def _find_package_root(project_root: Path) -> Path | None:
     return max(pool, key=_count_py_files)
 
 
+def _iter_files(root: Path, suffix: str) -> Iterator[Path]:
+    """Yield files whose name ends with suffix, pruning noise dirs, deterministic order.
+
+    os.walk with in-place dir pruning (SKIP_DIRS_SCAN + dot-dirs) — unlike
+    rglob this never descends into build artifacts (target/, .venv/, ...).
+    """
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = sorted(
+            d for d in dirnames if d not in SKIP_DIRS_SCAN and not d.startswith(".")
+        )
+        for name in sorted(filenames):
+            if name.endswith(suffix):
+                yield Path(dirpath) / name
+
+
 def _sorted_package_candidates(project_root: Path) -> list[Path]:
-    """Deterministic list of top-level dirs that look like a package root."""
+    """Deterministic list of package-top candidates.
+
+    A package top = dir with __init__.py whose PARENT lacks __init__.py.
+    Search depth ≤ 3 so python/<pkg> workspace layouts resolve; deeper
+    nesting is rare and intentionally out of scope. Non-package dirs
+    (tests/ etc.), hidden and skip dirs are excluded. Sorted by path so
+    selection never depends on filesystem iteration order.
+    """
     result: list[Path] = []
-    for child in sorted(project_root.iterdir(), key=lambda p: p.name):
-        if (
-            child.is_dir()
-            and (child / "__init__.py").exists()
-            and not child.name.startswith(".")
-            and child.name not in SKIP_DIRS_SCAN
-        ):
-            result.append(child)
-    return result
+    for init in _iter_files(project_root, "__init__.py"):
+        parts = init.relative_to(project_root).parts
+        if len(parts) > 4:  # depth-3 dir + __init__.py
+            continue
+        if init.parent.name in NON_PACKAGE_DIRS:
+            continue
+        if (init.parent.parent / "__init__.py").exists():
+            continue  # nested subpackage, not a package top
+        result.append(init.parent)
+    return sorted(set(result), key=lambda p: str(p))
 
 
 def _declared_package_names(pyproject: Path) -> list[str]:
@@ -233,22 +267,13 @@ def _find_instruction_files(project_root: Path) -> list[Path]:
     Per instruction-writing.md dual-file mode: content lives in AGENTS.md
     (CLAUDE.md is a thin @AGENTS.md wrapper for Claude). Prefer AGENTS.md;
     fall back to CLAUDE.md for legacy single-file repos. Returns one file
-    per directory.
+    per directory. Uses pruned walk (_iter_files) — never descends into
+    build artifacts.
     """
     by_dir: dict[Path, Path] = {}
-    for path in project_root.rglob("CLAUDE.md"):
-        parts = path.relative_to(project_root).parts
-        if any(part in SKIP_DIRS_SCAN for part in parts):
-            continue
-        if ".claude" in parts:
-            continue
+    for path in _iter_files(project_root, "CLAUDE.md"):
         by_dir[path.parent] = path
-    for path in project_root.rglob("AGENTS.md"):
-        parts = path.relative_to(project_root).parts
-        if any(part in SKIP_DIRS_SCAN for part in parts):
-            continue
-        if ".claude" in parts:
-            continue
+    for path in _iter_files(project_root, "AGENTS.md"):
         by_dir[path.parent] = path  # AGENTS.md preferred (overwrites CLAUDE.md)
     return sorted(by_dir.values())
 
@@ -552,34 +577,39 @@ def run_cross_validation(
                 )
 
     # X6: Module in dep-graph but no instruction file (AGENTS.md/CLAUDE.md)
+    # Module dirs may live at project root OR under the package root
+    # (python/<pkg>/<mod> layouts) — check both before reporting.
     for mod_name, mod_data in modules.items():
-        if mod_name in claude_md_modules:
+        if mod_name in claude_md_modules or mod_name == "(root)":
             continue
         file_count = mod_data.get("file_count", 0)
         if file_count < 3:
             continue
-        mod_dir = project_root / mod_name
-        if mod_dir.is_dir() and not (
-            (mod_dir / "CLAUDE.md").exists() or (mod_dir / "AGENTS.md").exists()
-        ):
-            pkg_dir = _find_package_root(project_root)
-            if pkg_dir:
-                actual_dir = pkg_dir / mod_name
-                if actual_dir.is_dir() and (
-                    (actual_dir / "CLAUDE.md").exists()
-                    or (actual_dir / "AGENTS.md").exists()
-                ):
-                    continue
-            findings.append(
-                {
-                    "check_id": "X6",
-                    "severity": "important",
-                    "detail": (
-                        f"Module '{mod_name}' has {file_count} files but no instruction file (AGENTS.md/CLAUDE.md)"
-                    ),
-                    "module": mod_name,
-                }
+        candidate_dirs = [
+            d
+            for d in (
+                project_root / mod_name,
+                pkg_root / mod_name if pkg_root else None,
             )
+            if d is not None and d.is_dir()
+        ]
+        if not candidate_dirs:
+            continue
+        if any(
+            (d / "CLAUDE.md").exists() or (d / "AGENTS.md").exists()
+            for d in candidate_dirs
+        ):
+            continue
+        findings.append(
+            {
+                "check_id": "X6",
+                "severity": "important",
+                "detail": (
+                    f"Module '{mod_name}' has {file_count} files but no instruction file (AGENTS.md/CLAUDE.md)"
+                ),
+                "module": mod_name,
+            }
+        )
 
     # --- Kanban checks ---
 
@@ -631,6 +661,233 @@ def run_cross_validation(
             )
 
     return findings
+
+
+# ---------------------------------------------------------------------------
+# Built-in scans (no target-project tooling required)
+# ---------------------------------------------------------------------------
+
+
+def _builtin_import_scan(project_root: Path) -> dict | None:
+    """Fallback import scan when the project has no tools/scan_imports.py.
+
+    AST-parses all .py files under the package root and reduces imports to
+    module-level edges (module = first directory under the package root).
+    Relative imports are resolved against the importing file's location.
+    Import paths falling into a non-package directory (e.g. a bindings shim
+    without __init__.py) are skipped rather than misattributed.
+    """
+    pkg_root = _find_package_root(project_root)
+    if pkg_root is None:
+        return None
+    pkg_name = pkg_root.name
+    module_dirs = {
+        d.name
+        for d in pkg_root.iterdir()
+        if d.is_dir() and (d / "__init__.py").exists() and not d.name.startswith(".")
+    }
+
+    modules: dict[str, dict] = {}
+
+    def _entry(owner: str) -> dict:
+        return modules.setdefault(
+            owner,
+            {
+                "file_count": 0,
+                "internal_deps": {},
+                "external_deps": {},
+                "imported_by": [],
+                "fan_out": 0,
+            },
+        )
+
+    hotspot_importers: dict[str, set] = {}
+
+    for py_file in _iter_files(pkg_root, ".py"):
+        rel_parts = py_file.relative_to(pkg_root).parts
+        owner = rel_parts[0] if len(rel_parts) > 1 else "(root)"
+        entry = _entry(owner)
+        entry["file_count"] += 1
+        try:
+            tree = ast.parse(py_file.read_text(encoding="utf-8", errors="replace"))
+        except (SyntaxError, ValueError, OSError):
+            continue
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imports = [(alias.name, 0) for alias in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                imports = [(node.module or "", node.level)]
+            else:
+                continue
+            for name, level in imports:
+                if level == 0:
+                    parts = tuple(name.split(".")) if name else ()
+                else:
+                    base = list(rel_parts[:-1])
+                    cut = level - 1
+                    if cut > len(base):
+                        continue
+                    resolved = base[: len(base) - cut] + (
+                        name.split(".") if name else []
+                    )
+                    parts = tuple(resolved)
+                if not parts:
+                    continue
+                first_party = level > 0 or parts[0] == pkg_name
+                if first_party:
+                    if len(parts) <= 1 or parts[1] not in module_dirs:
+                        continue
+                    target = parts[1]
+                    if target != owner:
+                        paths = entry["internal_deps"].setdefault(target, [])
+                        import_path = ".".join(parts[:2])
+                        if import_path not in paths:
+                            paths.append(import_path)
+                        hotspot_importers.setdefault(import_path, set()).add(owner)
+                else:
+                    ext = parts[0]
+                    paths = entry["external_deps"].setdefault(ext, [])
+                    if name not in paths and len(paths) < 3:
+                        paths.append(name)
+
+    edges = []
+    for source in sorted(modules):
+        entry = modules[source]
+        entry["fan_out"] = len(entry["internal_deps"])
+        for target in sorted(entry["internal_deps"]):
+            paths = entry["internal_deps"][target]
+            edges.append(
+                {
+                    "source": source,
+                    "target": target,
+                    "weight": len(paths),
+                    "imports": paths[:5],
+                }
+            )
+            tgt = modules.get(target)
+            if tgt is not None and source not in tgt["imported_by"]:
+                tgt["imported_by"].append(source)
+
+    hotspots = [
+        {"import_path": p, "imported_by": sorted(owners), "fan_out": len(owners)}
+        for p, owners in sorted(hotspot_importers.items(), key=lambda kv: -len(kv[1]))[
+            :10
+        ]
+    ]
+
+    return {
+        "project": pkg_name,
+        "modules": modules,
+        "edges": edges,
+        "hotspots": hotspots,
+    }
+
+
+def _scan_rust_workspace(project_root: Path) -> dict | None:
+    """Parse the shallowest Cargo workspace: members + internal crate deps.
+
+    Internal dep = a [dependencies] key naming another workspace member.
+    has_python_bindings marks crates with src/python/ (PyO3 binding layer) —
+    the truth↔shell signal for Rust-core + binding-shell repos.
+    """
+    manifests = sorted(
+        _iter_files(project_root, "Cargo.toml"),
+        key=lambda p: (len(p.relative_to(project_root).parts), str(p)),
+    )
+    workspace_manifest = None
+    workspace_data = None
+    for manifest in manifests:
+        try:
+            with manifest.open("rb") as f:
+                data = tomllib.load(f)
+        except (OSError, tomllib.TOMLDecodeError):
+            continue
+        if "workspace" in data:
+            workspace_manifest = manifest
+            workspace_data = data
+            break
+    if workspace_manifest is None:
+        return None
+    ws_root = workspace_manifest.parent
+
+    member_dirs: set[Path] = set()
+    for pattern in workspace_data.get("workspace", {}).get("members", []):
+        for d in ws_root.glob(pattern):
+            if d.is_dir() and (d / "Cargo.toml").exists():
+                member_dirs.add(d)
+    if "package" in workspace_data:
+        member_dirs.add(ws_root)
+
+    crate_by_dir: dict[Path, tuple[str, dict]] = {}
+    for d in sorted(member_dirs, key=str):
+        try:
+            with (d / "Cargo.toml").open("rb") as f:
+                data = tomllib.load(f)
+        except (OSError, tomllib.TOMLDecodeError):
+            continue
+        name = data.get("package", {}).get("name")
+        if name:
+            crate_by_dir[d] = (name, data)
+
+    member_names = {name for name, _ in crate_by_dir.values()}
+    crates = []
+    for d, (name, data) in sorted(crate_by_dir.items(), key=lambda kv: kv[1][0]):
+        deps_table = data.get("dependencies", {})
+        internal = sorted(
+            dep
+            for dep in (deps_table if isinstance(deps_table, dict) else {})
+            if dep in member_names and dep != name
+        )
+        crates.append(
+            {
+                "name": name,
+                "dir": str(d.relative_to(project_root)),
+                "internal_deps": internal,
+                "has_python_bindings": (d / "src" / "python").is_dir(),
+            }
+        )
+    return {"root": str(ws_root.relative_to(project_root)), "crates": crates}
+
+
+def _dir_inventory(project_root: Path, max_depth: int = 3, cap: int = 800) -> dict:
+    """Mechanical directory inventory (bounded) — the enumeration ground truth.
+
+    Structural listings consumed by instruction-init / doc flows must come
+    from mechanical output, not from LLM prose summaries. File NAMES are
+    included only for dirs with ≤60 direct files (larger dirs get counts
+    only) to keep the snapshot bounded.
+    """
+    dirs_out: list[dict] = []
+    truncated = False
+    for dirpath, dirnames, filenames in os.walk(project_root):
+        current = Path(dirpath)
+        depth = len(current.relative_to(project_root).parts)
+        dirnames[:] = sorted(
+            d for d in dirnames if d not in SKIP_DIRS_SCAN and not d.startswith(".")
+        )
+        subdirs = sorted(dirnames)
+        if depth >= max_depth:
+            dirnames[:] = []  # stop descent; subdirs above still reports children
+        if depth == 0:
+            continue
+        if len(dirs_out) >= cap:
+            truncated = True
+            break
+        ext_counts: dict[str, int] = {}
+        for fn in sorted(filenames):
+            ext = Path(fn).suffix.lstrip(".").lower() or "(noext)"
+            ext_counts[ext] = ext_counts.get(ext, 0) + 1
+        entry = {
+            "path": str(current.relative_to(project_root)),
+            "depth": depth,
+            "subdirs": subdirs,
+            "files_total": len(filenames),
+            "file_exts": dict(sorted(ext_counts.items(), key=lambda kv: -kv[1])[:6]),
+        }
+        if len(filenames) <= 60:
+            entry["files"] = sorted(filenames)
+        dirs_out.append(entry)
+    return {"max_depth": max_depth, "truncated": truncated, "dirs": dirs_out}
 
 
 # ---------------------------------------------------------------------------
@@ -691,8 +948,12 @@ def scan_project(project_root: Path) -> dict:
     """
     project_root = project_root.resolve()
 
-    # Phase 1: Import scan (from scan_imports.py if available)
+    # Phase 1: Import scan — target tools/scan_imports.py (rich) > built-in fallback
     import_data = _load_scan_imports(project_root)
+    import_source = "scan_imports"
+    if not import_data:
+        import_data = _builtin_import_scan(project_root)
+        import_source = "builtin" if import_data else "none"
     if import_data:
         modules = import_data.get("modules", {})
         edges = import_data.get("edges", [])
@@ -703,6 +964,10 @@ def scan_project(project_root: Path) -> dict:
         edges = []
         hotspots = []
         project_name = project_root.name
+
+    # Phase 1b: Rust workspace + mechanical directory inventory (no project tooling needed)
+    rust_workspace = _scan_rust_workspace(project_root)
+    dir_inventory = _dir_inventory(project_root)
 
     # Phase 2: Parse CLAUDE.md files (internal — not in output)
     claude_md_registry, capabilities_registry = parse_claude_md_registry(project_root)
@@ -727,12 +992,24 @@ def scan_project(project_root: Path) -> dict:
     return {
         "project": project_name,
         "scan_timestamp": datetime.now(tz=UTC).isoformat(),
-        "schema_version": 5,
+        "schema_version": 6,
         "dep_graph": {
+            "source": import_source,
             "modules": modules,
             "edges": edges,
             "hotspots": hotspots,
         },
+        "rust_workspace": rust_workspace,
+        "dir_inventory": dir_inventory,
+        "instruction_files": [
+            {
+                "path": e["path"],
+                "module": e["module"],
+                "has_module_boundaries": e["has_module_boundaries"],
+                "has_capabilities_table": e["has_capabilities_table"],
+            }
+            for e in claude_md_registry
+        ],
         "findings": findings,
         "fingerprint": fingerprint,
     }
@@ -773,10 +1050,16 @@ def main():
         args.output.write_text(output_json, encoding="utf-8")
         fp = result["fingerprint"]
         findings_count = len(result["findings"])
-        dep_modules = len(result["dep_graph"]["modules"])
+        dep = result["dep_graph"]
+        dep_modules = len(dep["modules"])
+        rust_crates = len((result.get("rust_workspace") or {}).get("crates", []))
+        inv_dirs = len(result.get("dir_inventory", {}).get("dirs", []))
         print(
-            f"Written to {args.output} "
-            f"(dep_graph: {dep_modules} modules, "
+            f"[OK] Written to {args.output} "
+            f"(dep_graph[{dep.get('source', 'scan_imports')}]: {dep_modules} modules, "
+            f"rust: {rust_crates} crates, "
+            f"inventory: {inv_dirs} dirs, "
+            f"instruction_files: {fp['instruction_file_total']}, "
             f"findings: {findings_count}, "
             f"fingerprint: {fp['capabilities_total']} caps / "
             f"{fp['kanban_total']} cards)"

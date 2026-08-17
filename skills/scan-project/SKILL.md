@@ -1,9 +1,12 @@
 ---
 name: scan-project
 description: >
-  Unified project knowledge scanner. Scans Python imports (via scan_imports.py),
-  instruction-file (AGENTS.md preferred, CLAUDE.md legacy) Capabilities tables, and .kanban/ cards. Produces dep_graph + findings + fingerprint.
-  Use before /daily-maintain or /project-review, or when setting up a new project.
+  Unified project knowledge scanner. Scans Python imports (built-in AST scan; auto-upgrades via the
+  target project's tools/scan_imports.py), Rust Cargo workspaces (members + internal crate deps +
+  PyO3 binding marker), mechanical directory inventory, instruction files (AGENTS.md preferred,
+  CLAUDE.md legacy), and .kanban/ cards. Produces dep_graph + rust_workspace + dir_inventory +
+  instruction_files + findings + fingerprint. Use before /daily-maintain or /project-review, or
+  when setting up a new project.
 when_to_use: >
   Run before daily-maintain, during init, or when you need mechanical
   cross-validation findings. Also use when dependency graph may be stale.
@@ -13,7 +16,7 @@ allowed-tools: Bash(uv run python *)
 
 # /scan-project — 統一專案知識掃描器
 
-掃描 Python import 依賴、模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities 表格、.kanban/ 卡片，產出 **dep_graph + findings + fingerprint**。
+掃描 Python import 依賴（內建；目標專案有 `tools/scan_imports.py` 時自動升級）、Rust Cargo workspace、機械目錄盤點、模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities 表格、.kanban/ 卡片，產出 **dep_graph + rust_workspace + dir_inventory + instruction_files + findings + fingerprint**。
 
 Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.md)
 
@@ -23,10 +26,13 @@ Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.m
 
 **scan_project.py 做機械性檢查，不產出完整 registry。LLM 需要細節時直接讀取檔案。**
 
-三個產出：
-1. **dep_graph** — AST-parsed Python import 關係（LLM 無法自行計算）
-2. **findings** — 機械性交叉驗證問題（路徑、tag、重複等）
-3. **fingerprint** — 輕量變化偵測（counts + hashes）
+產出：
+1. **dep_graph** — Python import 關係（LLM 無法自行可靠計算）。`source` 標示來源：`scan_imports`（目標專案 `tools/scan_imports.py`，較豐富）/ `builtin`（內建 AST fallback，模組 = package root 第一層目錄）/ `none`
+2. **rust_workspace** — Cargo workspace members、crate 間內部依賴、`has_python_bindings`（PyO3 綁定層標記——truth/shell 分離 repo 的關鍵訊號）；無 Rust workspace 時為 `null`
+3. **dir_inventory** — 機械目錄盤點（深度 ≤3；檔名僅在 ≤60 時列出）——**結構性列舉的 ground truth**，LLM prose 摘要不可取代
+4. **instruction_files** — 各目錄 instruction 檔位置 + 邊界/能力表有無
+5. **findings** — 機械性交叉驗證問題（路徑、tag、重複等）
+6. **fingerprint** — 輕量變化偵測（counts + hashes）
 
 內部解析（instruction 檔（AGENTS.md 為主、CLAUDE.md legacy）、.kanban/）僅用於計算 findings，**不在輸出中包含 registry**。
 
@@ -58,10 +64,11 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 
 ## Graceful Degradation
 
-- 如果目標專案有 `tools/scan_imports.py`：自動 import 並擴展（dep-graph 資料完整）
-- 如果沒有：dep-graph 欄位為空，findings 仍正常運作
+- 如果目標專案有 `tools/scan_imports.py`：自動 import 並採用（`source: scan_imports`，dep-graph 較豐富）
+- 如果沒有：**內建 AST 掃描 fallback**（模組 = package root 下第一層目錄；`source: builtin`）；連 package root 都沒有才為空（`source: none`）
+- 沒有 Cargo workspace：`rust_workspace` 為 `null`
 - 如果沒有 `.kanban/` 目錄：kanban 相關 findings 不產出
-- 輸出格式 schema_version: 5
+- 輸出格式 schema_version: 6
 
 ## 產出
 
@@ -69,9 +76,13 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 
 | Section | 來源 | 說明 |
 |---------|------|------|
-| `dep_graph.modules` | scan_imports.py（如有） | 模組依賴結構（file_count, internal_deps, fan_out 等） |
-| `dep_graph.edges` | scan_imports.py（如有） | 模組間 import edges |
-| `dep_graph.hotspots` | scan_imports.py（如有） | 高 fan-out imports |
+| `dep_graph.source` | — | `scan_imports` / `builtin` / `none` |
+| `dep_graph.modules` | scan_imports.py 或內建掃描 | 模組依賴結構（file_count, internal_deps, fan_out 等） |
+| `dep_graph.edges` | scan_imports.py 或內建掃描 | 模組間 import edges |
+| `dep_graph.hotspots` | scan_imports.py 或內建掃描 | 高 fan-out imports |
+| `rust_workspace` | Cargo.toml 解析 | workspace 成員 + crate 內部依賴 + `has_python_bindings` |
+| `dir_inventory` | 檔案系統盤點 | 深度 ≤3 目錄清單（subdirs、檔名/副檔統計）——列舉 ground truth |
+| `instruction_files` | instruction 檔掃描 | 各目錄 AGENTS.md/CLAUDE.md 位置 + 邊界/能力表有無 |
 | `findings` | 機械性交叉檢查 | X-cap-path / X-tag-module / X-ep-ready / X6 |
 | `fingerprint` | 計數 + 雜湊 | capabilities_total, kanban_total, kanban_by_lane, hashes |
 
