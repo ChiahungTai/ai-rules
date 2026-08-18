@@ -23,13 +23,26 @@ Usage:
 
 import argparse
 import json
+import sqlite3
 import subprocess
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, time, timedelta
 from pathlib import Path
 
 LOCAL_TZ = datetime.now().astimezone().tzinfo
 PROJECTS_DIR = Path.home() / ".claude" / "projects"
+ZCODE_DB = Path.home() / ".zcode" / "cli" / "db" / "db.sqlite"
 CONVERSATIONAL_TYPES = ("user", "assistant")
+NOISE_PREFIXES = (
+    "<system-reminder",
+    "<task-notification>",
+    "The TodoWrite tool hasn't been used",
+    "Caveat: The messages below",
+    "[Request interrupted",
+)
+
+
+def _is_noise_user_text(text: str) -> bool:
+    return any(text.startswith(p) for p in NOISE_PREFIXES)
 
 
 def git_worktree_paths(repo_root: Path) -> list[Path]:
@@ -138,7 +151,7 @@ def digest_session(jsonl_path: Path, events: list[dict], worktree_name: str) -> 
         content = msg.get("content")
         if d.get("type") == "user":
             text = _user_text(content)
-            if text:
+            if text and not _is_noise_user_text(text.strip()):
                 user_msgs.append(text)
         elif d.get("type") == "assistant":
             if isinstance(content, list):
@@ -174,6 +187,101 @@ def digest_session(jsonl_path: Path, events: list[dict], worktree_name: str) -> 
     }
 
 
+def zcode_sessions(worktrees: list[Path], target_date) -> list[dict]:
+    """ZCode sessions for the repo's worktrees from the global db.sqlite.
+
+    主力開發已移 ZCode（2026-08 起）——Claude JSONL 掃描單獨跑會漏互動工作
+    （daily-report 2026-08-19 實證）。message/part 承載內容：part.type='text'
+    為對話文字（role 在 message.data）、part.type='tool' 為工具呼叫（tool 名
+    ＋state.input）。時間＝epoch ms，本地日界過濾（同 Claude 口徑，非 mtime）。
+    """
+    if not worktrees or not ZCODE_DB.exists():
+        return []
+    day_start = datetime.combine(target_date, time.min, tzinfo=LOCAL_TZ)
+    day_end = datetime.combine(target_date + timedelta(days=1), time.min, tzinfo=LOCAL_TZ)
+    wt_by_dir = {str(p.resolve()): p for p in worktrees}
+    try:
+        con = sqlite3.connect(f"file:{ZCODE_DB}?mode=ro", uri=True)
+        rows = con.execute(
+            "SELECT s.id, s.directory, m.data, p.data "
+            "FROM message m JOIN session s ON m.session_id = s.id "
+            "LEFT JOIN part p ON p.message_id = m.id "
+            "WHERE m.time_created >= ? AND m.time_created < ? "
+            "ORDER BY m.time_created, m.sequence",
+            (int(day_start.timestamp() * 1000), int(day_end.timestamp() * 1000)),
+        ).fetchall()
+        con.close()
+    except sqlite3.Error:
+        return []
+
+    acc: dict[str, dict] = {}
+    for sid, directory, mdata_raw, pdata_raw in rows:
+        wt = wt_by_dir.get(str(Path(directory).resolve()))
+        if wt is None:
+            continue
+        try:
+            mdata = json.loads(mdata_raw) if mdata_raw else {}
+        except json.JSONDecodeError:
+            mdata = {}
+        role = mdata.get("role", "")
+        if role not in CONVERSATIONAL_TYPES:
+            continue
+        s = acc.setdefault(
+            sid,
+            {
+                "worktree": wt.name,
+                "user_msgs": [],
+                "conclusions": [],
+                "tool_calls": [],
+                "seen_tools": set(),
+            },
+        )
+        try:
+            pdata = json.loads(pdata_raw) if pdata_raw else {}
+        except json.JSONDecodeError:
+            pdata = {}
+        ptype = pdata.get("type")
+        if ptype == "text":
+            text = (pdata.get("text") or "").strip()
+            if not text:
+                continue
+            if role == "user":
+                if not _is_noise_user_text(text):
+                    s["user_msgs"].append(text)
+            else:
+                s["conclusions"].append(text)
+        elif ptype == "tool":
+            name = pdata.get("tool", "")
+            inp = pdata.get("state", {}).get("input", {}) or {}
+            target = (
+                inp.get("file_path")
+                or inp.get("description")
+                or (inp.get("command", "") or "")[:80]
+            )
+            key = (name, target)
+            if key in s["seen_tools"]:
+                continue
+            s["seen_tools"].add(key)
+            s["tool_calls"].append({"name": name, "target": target})
+
+    out: list[dict] = []
+    for sid, s in acc.items():
+        user_msgs = s["user_msgs"]
+        out.append(
+            {
+                "harness": "zcode",
+                "worktree": s["worktree"],
+                "session_id": sid[:16],
+                "first_user_msg": user_msgs[0][:200] if user_msgs else "",
+                "user_message_count": len(user_msgs),
+                "user_messages": user_msgs,
+                "tool_calls": s["tool_calls"],
+                "conclusions": s["conclusions"],
+            }
+        )
+    return out
+
+
 def resolve_target_date(date_arg: str):
     """Resolve --date ('yesterday' or YYYY-MM-DD) to a local date."""
     if date_arg == "yesterday":
@@ -193,7 +301,11 @@ def aggregate(repo_root: Path, date_arg: str) -> dict:
             events = extract_events(jsonl, target_date)
             if not events:
                 continue
-            sessions.append(digest_session(jsonl, events, wt_name))
+            claude = digest_session(jsonl, events, wt_name)
+            claude["harness"] = "claude"
+            sessions.append(claude)
+
+    sessions.extend(zcode_sessions(worktrees, target_date))
 
     return {
         "date": target_date.isoformat(),

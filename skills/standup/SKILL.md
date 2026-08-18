@@ -20,7 +20,7 @@ nightly-sequence op4 用 stream-json 抓**所有 assistant text block** append �
 
 ## 機械素材萃取(必做第一步)
 
-跑 `aggregate_sessions.py` 取結構化 session 素材(scan-project pattern:腳本撈素材,LLM 寫敘事):
+跑 `aggregate_sessions.py` 取結構化 session 素材(scan-project pattern:腳本撈素材,LLM 寫敘事;**雙 harness**——Claude JSONL＋ZCode db.sqlite,session dict 含 `harness` 欄,主力開發在 ZCode 後單掃 Claude 會漏互動工作〔2026-08-19 daily-report 實證〕):
 
 ```bash
 uv run python ${CLAUDE_SKILL_DIR}/scripts/aggregate_sessions.py --project-root .
@@ -28,7 +28,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/aggregate_sessions.py --project-root .
 
 產出 JSON:`{date, repo, worktrees[], sessions[]}`;每個 session 含 `worktree` / `first_user_msg` / `user_messages[]` / `tool_calls[]` / `conclusions[]`。
 
-**範圍界定**(drift-tolerant):腳本用 `git worktree list` 列當前 main repo 的所有 wt,normalize(`_`≡`-`)比對 `~/.claude/projects/` 找 session dir——容忍 wt 改名歷史(hyphen/underscore drift)。**時間過濾**:JSONL top-level `timestamp`(UTC)轉 local tz 後取 date,比對昨日——非檔案 mtime。
+**範圍界定**(drift-tolerant):腳本用 `git worktree list` 列當前 main repo 的所有 wt;Claude 側 normalize(`_`≡`-`)比對 `~/.claude/projects/` 找 session dir,ZCode 側以 session.directory 精確比對 worktree 路徑——容忍 wt 改名歷史(hyphen/underscore drift)。**時間過濾**:JSONL top-level `timestamp`(UTC)轉 local tz 後取 date,比對昨日——非檔案 mtime。
 
 ## workflow
 
