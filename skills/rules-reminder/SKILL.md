@@ -1,6 +1,6 @@
 ---
 name: rules-reminder
-description: "Enforces the most frequently violated Claude Code rules to prevent permission prompts. Use when writing any Bash command. Covers: rg/fd instead of grep/find, no # after newline in python -c, no $ shell expansion, uv run for Python, no sed for code, Traditional Chinese output, independent tool calls batched in one block, Read target file before Edit/Write."
+description: "Enforces the most frequently violated Claude Code rules to prevent permission prompts. Use when writing any Bash command. Covers: rg/fd instead of grep/find, no # after newline in python -c, no $ shell expansion, uv run for Python, no sed for code, Traditional Chinese output, independent tool calls batched in one block, Read target file before Edit/Write, re-read large files via rg/partial Read not full re-read."
 ---
 
 # Rules Reminder — 最常被忘記的規則
@@ -138,7 +138,7 @@ uv run python scripts/check.py
 
 **Edit/Write 前目標檔必須已 Read**（harness 硬規則：未 Read 直接失敗；Read 後檔案又被外部改 = 過時失敗 → re-Read 再改）。
 
-**規則**：獨立就同 block 發；改檔前必 Read；鄰近一行式小修合併成一個 Edit。
+**規則**：獨立就同 block 發；改檔前必 Read；鄰近一行式小修合併成一個 Edit；已讀檔重查用 rg 或片段 Read，不再全讀（小檔除外）。
 
 ---
 

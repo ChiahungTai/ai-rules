@@ -41,6 +41,12 @@ harness-scope: neutral
 - 需看 output 用重導檔案再 Read（`uv run mypy . > /tmp/mypy.log` 再 Read）
 - 或 `set -o pipefail` 讓 pipe exit = 最後一個非 0 退出碼
 
+## Read 紀律（context 佔用）
+
+- **同 session 已完整讀過的檔案，重查細節禁再無參數全讀**——每次全讀 = 同內容全量重複注入 context（實測：86KB 架構檔單一 session 重讀 19 次，每次 25-30K tokens 佔死後續所有 request）。重查改用：`rg -n -C 10 "關鍵詞" <file>`（回片段）或片段 Read（`offset`/`limit`——已實測滿足 Edit 的 read-state 前置，可同 block，順序依賴見下「獨立呼叫批次化」）
+- 為回答**具體問題**而讀未讀過的大檔 → 先 `rg -n` 定位再讀片段；首次為**整體理解**全讀可接受（浪費在重讀，不在首讀）
+- 小檔（數 KB 內）全讀無妨；call 帳 neutral——重查本來就是 1 call，換成輸出小兩個數量級的那種
+
 ## 獨立呼叫批次化
 
 > **核心原則**：獨立無依賴的工具呼叫在**同一個 block 一次發出**——每個獨立 call 各耗一個 model request，逐一發純浪費。

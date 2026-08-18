@@ -14,7 +14,9 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 | mode | 觸發者 | 職責 |
 |------|--------|------|
 | **build** | `/implement` 階段 5 | 依情境結算(見情境矩陣)—— 結算是 working tree 編輯,不需 outward-action-consent(commit 場景) |
-| **standalone** | `/metadata-sync`(獨立入口) | 偵測漏項/過時 → 補(commit 前更新 + 事後補漏共用) |
+| **standalone** | `/metadata-sync`(獨立入口) | 偵測漏項/過時 → 補(commit 前更新 + 事後補漏共用;偵測 git 錨定見下方 standalone 段) |
+
+> **build mode 零偵測**:build 是變更的 producer——EP 路徑、UC 清單、情境矩陣都在自己 context 內,結算項**由情境矩陣 + EP 內容直接推導**,不跑 standalone 的偵測流程(producer 不 rediscover 自己剛做的變更)。
 
 > **為什麼結算在 build 不在 commit**:finalization 是 working tree 編輯(改 CLAUDE.md / mv EP / 搬 Kanban),不是 git 寫入 —— build 階段 5 自主做,commit 退回純 git 提交(一次帶走 code + finalization)。舊設計(commit 階段 3 內嵌)對 LLM 是建議性、會漏跑(實證:commit 歷史多個「補漏」單獨 commit)。working tree 編輯沒 commit 就不永久,跟 code 一起 stash/checkout,不會「Capabilities 標 ✅ 但沒進 git」不一致 —— 真正風險是選擇性 commit(只 commit code 不 commit CLAUDE.md),靠 commit `git add` 納入 finalization 檔規範。
 
@@ -22,7 +24,7 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 
 | # | 情境 | UC/EP 完成變化 | 結算動作 |
 |---|------|--------------|---------|
-| **A** | EP **最後段**,UC 全完成 | ✅ 新 UC + EP 完成 | **全項結算**(Cap+Kanban+SM 原子 + EP 歸檔 + flow-feedback 歸檔 + consistency) |
+| **A** | EP **最後段**,UC 全完成 | ✅ 新 UC + EP 完成 | **全項結算**(Capabilities+Kanban+SYSTEM-MAP 原子三件 + 消費場景寫入 + EP 歸檔 + flow-feedback 歸檔 + architecture.md(條件) + consistency) |
 | **B** | EP **中間段** | ❌ UC 未全完成 | **預覽 only**(SM 📋→✅ Built,不寫 ✅、不升 Verified) |
 | **C** | **純 refactor**(無新 UC) | ❌ | **跳過** |
 | **D** | **docs-mode EP**(無 .py UC,EP 完成) | EP 完成、無 UC | **EP 歸檔 only**(無 Cap/Kanban) |
@@ -39,7 +41,7 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 | **SYSTEM-MAP 結算** | A | 受影響功能生命週期升級(`✅ Built → ✅🔍 Verified`,若有整合驗證);移除已修復 ⚠️;更新全域統計(若有) |
 | **SYSTEM-MAP 預覽** | B | 中間段:生命週期 `📋→✅ Built`(全 UC ✅ + 測試通過 + build loop 收斂);**不升級 Verified**;loop 未收斂 → 阻止升級 + 標 ⚠️;**全域統計由情境 A 結算,預覽不動** |
 | **architecture.md** | A(條件) | 本次涉及設計決策 / 原則 / 模組結構 / 新抽象層 → 同步更新對應段落;純 feature(不改設計)跳過 |
-| **EP 歸檔** | A, D | **歸檔前查證（防 ghost-done）**：列 EP 交付物（UC盤點/收尾/各段 deliverable）逐項 rg/fd/Read 驗落地——「段落完成」≠ codebase 真有（曾發生整份 EP 100% ghost-done 誤歸檔）；有 ghost-done 不歸檔（補做或標 🔧）。全綠才歸檔 → `mv ai-analysis/execution-plans/<ep>.md _done/`;子目錄 EP 跨目錄 mv 到統一 `_done/`;綱要 EP(blueprint)等所有衍生子 EP 完成才歸檔 master |
+| **EP 歸檔** | A, D | **歸檔前查證（防 ghost-done）**：列 EP 交付物（UC盤點/收尾/各段 deliverable）逐項 rg/fd/Read 驗落地——「段落完成」≠ codebase 真有（曾發生整份 EP 100% ghost-done 誤歸檔）；有 ghost-done 不歸檔（補做或標 🔧）。全綠才歸檔 → `mv ai-analysis/execution-plans/<ep>.md _done/`(`_done/` 不存在先建);子目錄 EP 跨目錄 mv 到統一 `_done/`;綱要 EP(blueprint)等所有衍生子 EP 完成才歸檔 master |
 | **flow-feedback 歸檔** | A | 本次實作解決的 `ai-analysis/flow-feedback/*.md`(root)→ `mv _done/`(`_done/` 不存在先建);討論中 / 未解決的不歸檔。**判斷是 judgment 非機械**(feedback↔change 非 1:1,不像 EP↔段落明確)→ forgetting 風險靠兩段式執行的「展示清單 + 用戶確認」把關(同 standalone mode) |
 | **consistency 閘門** | A, B, D | 對本次動過的 AGENTS.md / CLAUDE.md / architecture.md / SYSTEM-MAP.md 逐一跑 `/consistency`(單檔內部自洽);🔴 / 🟡 inconsistency → 修正後才算完成 |
 
@@ -53,18 +55,31 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 
 build 情境 A 憑整合驗證升 Verified;情境 B(中間段)只到 Built 預覽。
 
-## standalone 偵測維度(獨立入口核心智能)
+## standalone 偵測(git 錨定,獨立入口核心智能)
 
-`/metadata-sync`(standalone mode)用於 **commit 前更新**(code-review 後 code 變了)或**事後補漏** —— 兩者都從現狀推導「哪些 finalization 漏了 / 過時」。`--check` flag = 只跑兩段式第 1 步(偵測 + 報告),不執行
+`/metadata-sync`(standalone mode)用於 **commit 前更新**(code-review 後 code 變了)或**事後補漏**。`--check` flag = 只跑兩段式第 1 步(偵測 + 報告),不執行
 
-| 漏項 | 偵測方式 |
-|------|---------|
-| EP 歸檔漏 | `ai-analysis/execution-plans/` root 有「所有段落已 commit 但未歸檔」的 EP(git log 比對 EP 段落 vs commit 訊息) |
-| Capabilities 漏 | git log 近期 commit 的 UC vs 該模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）`## Capabilities` 表(已 commit UC 但表內無對應 ✅ 行) |
-| Kanban 漏 | `.kanban/In-Progress/` 有「已完成但未搬 Done」的卡片(卡片 UC 已在 Capabilities ✅) |
-| SYSTEM-MAP 漏 | SYSTEM-MAP 生命週期 vs Capabilities 狀態不一致(**消費 `/doc-health` findings,不重造偵測**) |
-| architecture.md 漏 | 近期 commit 涉及設計變更(新模組 / 新抽象 / 依賴方向調整)但 architecture.md 對應段落未更 |
-| flow-feedback 漏 | `ai-analysis/flow-feedback/` root 有已解決但未歸檔的 feedback |
+> **偵測入口 = git 事實,非倉庫掃描**。漏項是 delta 問題——用事件(git 變更)推狀態,不從倉庫快照反推(實測教訓:無錨點偵測以 `ls` 全目錄 + `rg` 內容掃描起頭,數十 call 收斂不了)。git 錨定 = 1-2 個 call 得變更檔集,掃描 = O(全倉文件) 猜測。
+
+**第一步——變更檔集(情境選一)**:
+
+| 情境 | 命令 |
+|------|------|
+| commit 前(uncommitted) | `git status --porcelain` + `git diff --name-only`(含 `--cached`) |
+| 事後補漏(committed) | `git log --oneline -15 --name-only` |
+
+**第二步——路徑模式分類(變更檔集 → 命中項,只驗命中項;未命中 = 該項跳過)**:
+
+| 漏項 | 觸發訊號(變更檔集模式) | 窄驗證 |
+|------|----------------------|--------|
+| EP 歸檔漏 | EP 段落交付物已 commit(code/test)且 EP 檔不在同批 commit | `fd -e md -E _done . ai-analysis/execution-plans/`(單 call,涵蓋子目錄 EP,排除已歸檔)比對已交付未歸檔 |
+| Capabilities 漏 | feat/fix commit 觸及模組目錄,但該模組 AGENTS.md(CLAUDE.md legacy)不在變更檔集 | 讀**該模組** AGENTS.md Capabilities 表比對(窄讀) |
+| Kanban 漏 | Capabilities 漏命中 | `ls .kanban/In-Progress/` 查命中 UC 卡片 |
+| SYSTEM-MAP 漏 | Capabilities 漏命中 | 消費 `/doc-health` findings(不重造偵測) |
+| architecture.md 漏 | commit 觸及新模組/新抽象/依賴方向,且 architecture.md 不在變更檔集 | 讀對應段落窄比對 |
+| flow-feedback 漏 | 修復型 commit(fix) | `ls ai-analysis/flow-feedback/*.md`(單 call) |
+
+**禁令**:偵測段禁全倉內容掃描(無路徑限定的 `rg`)與逐檔讀——一切從變更檔集出發。ghost-done 歸檔前查證(EP 交付物逐項驗落地,任一 mode)是**執行段**查證,不屬偵測段、不受此禁令影響。
 
 ## 兩段式執行(build / standalone 共用)
 
