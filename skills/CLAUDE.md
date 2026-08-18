@@ -49,7 +49,7 @@
 - `/implement` — 基於 Execution Plan 逐段實作（TDD + 階段 5a metadata-sync 結算：UC 狀態 + SYSTEM-MAP + EP 歸檔）（原 `/build`，ZCode 保留名改名；文內「build 階段」即本 skill 階段）
 - `/post-build` — build 後收尾鏈編排（diff triage → code 鏈 [dual-context code-review → judge-review → 修正迴圈] → docs 鏈 [consistency → metadata-sync] → 收尾報告；止步於 /commit 前）
 - `/code-review` — 深層思考六軸代碼審查（含 axis 3 結構 = arch 吸收，top-down；UC 覆蓋度；中型以上 dual-context 雙審查者：fresh-eyes + primed）
-- `/debrief` — AI 改動理解簡報（layer 3，行動後）：七段倒金字塔——意圖／行為黑盒子（行為 vs 純結構判定；docs 變更渲染 behavior delta）／前後差異／分組檔案地圖／波及缺口／驗證證據（demo-checklist，NONE 逼問+清單完整性）／認知誤差點；無參數=uncommitted（fallback HEAD~1）；`--ep` 方向確認已移除（改人讀 EP + /ep-review）
+- `/debrief` — AI 改動理解簡報（layer 3，行動後）：七段倒金字塔——意圖／行為黑盒子（行為 vs 純結構判定；docs 變更渲染 behavior delta）／前後差異／分組檔案地圖／波及缺口／驗證證據（demo-checklist，NONE 逼問+清單完整性）／認知誤差點；無參數=uncommitted（fallback：EP baseline 任務弧，無則 HEAD~1）；`--ep` 方向確認已移除（改人讀 EP + /ep-review）
 - `/illustrate` — 結構 viewport + 技術圖解（SA/SD artifact menu：call graph / sequence / class slice / data-flow / boundary；city map / drill / drift detection；console / md）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build drift detection，見上圖），結構能力調 arch-thinking skill
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → message → 確認）；finalization 已在 build 階段 5a 結算，commit 前可跑 `/metadata-sync` 更新

@@ -1,6 +1,6 @@
 ---
 name: debrief
-description: "AI 改完 code 想理解改了啥 / what changed / 聽取報告 / 檢查 AI 產出 / brief / debrief——七段理解簡報（意圖/行為黑盒子/前後差異/檔案地圖/波及缺口/驗證證據/認知誤差點）。理解非審判：機器 finding 交 /code-review、結構交 /illustrate。無參數=簡報 uncommitted 變更（fallback HEAD~1）。"
+description: "AI 改完 code 想理解改了啥 / what changed / 聽取報告 / 檢查 AI 產出 / brief / debrief——七段理解簡報（意圖/行為黑盒子/前後差異/檔案地圖/波及缺口/驗證證據/認知誤差點）。理解非審判：機器 finding 交 /code-review、結構交 /illustrate。無參數=簡報 uncommitted 變更（fallback：EP baseline 任務弧，無則 HEAD~1）。"
 when_to_use: "After AI coding: understand what changed (behavior / before-after / file map), force runnable evidence per feature (NONE 逼問), surface cognitive gaps. NOT for: diff correctness findings (/code-review), structure viewport (/illustrate), existence skepticism (/smell-detector)."
 argument-hint: "無參數=uncommitted | commit hash | branch | --md"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
@@ -20,7 +20,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 
 ## 黑盒子（input → output）
 
-- **input**：變更範圍——`git diff` + `git diff --cached`（uncommitted）；commit hash / branch 參數指定；**無變更時 fallback `git diff HEAD~1`**
+- **input**：變更範圍——`git diff` + `git diff --cached`（uncommitted）；commit hash / branch 參數指定；**uncommitted 空/trivial 時 fallback：context EP 記有 baseline → `git diff <baseline>..HEAD`（任務弧，機制見 [code-review](../code-review/SKILL.md)「任務弧模式」），否則 `git diff HEAD~1`**
 - **output**：七段倒金字塔簡報——Console（預設，ASCII 精簡）；`--md` 寫 `ai-analysis/reports/debrief-<scope>.md`（多級標題完整展開，Mermaid 可用）
 
 ## grounding 紀律（不是只看 diff 說故事）

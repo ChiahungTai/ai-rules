@@ -45,7 +45,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 
 ## 無參數行為
 
-未提供任何參數時，**委派 [debrief](../debrief/SKILL.md)**（AI 改動理解簡報）——「改完 code 想理解改了啥」是理解意圖而非審查，理解簡報是 debrief 的職責（七段：意圖／行為黑盒子／前後差異／檔案地圖／波及缺口／驗證證據／認知誤差點；diff fallback 鏈 working tree → staged → HEAD~1 兩邊一致）。單一真理源在 debrief，本 skill 不重複展開變更理解的渲染。
+未提供任何參數時，**委派 [debrief](../debrief/SKILL.md)**（AI 改動理解簡報）——「改完 code 想理解改了啥」是理解意圖而非審查，理解簡報是 debrief 的職責（七段：意圖／行為黑盒子／前後差異／檔案地圖／波及缺口／驗證證據／認知誤差點；diff fallback 鏈兩邊一致，見 debrief input 段）。單一真理源在 debrief，本 skill 不重複展開變更理解的渲染。
 
 ## 使用方式
 

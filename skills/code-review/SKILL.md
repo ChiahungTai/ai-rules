@@ -1,9 +1,9 @@
 ---
 name: code-review
 
-description: "深層思考代碼審查。/code-review [branch] [base]"
-when_to_use: "Review uncommitted changes or a feature branch using multi-axis methodology and deep-thinking (first-principles + second-level consequence tracing)."
-argument-hint: "無參數審查 uncommitted / branch 名稱審查該 branch"
+description: "深層思考代碼審查。/code-review [branch] [base]；<hash> 通盤審任務弧（逐段 commit 後整弧）"
+when_to_use: "Review uncommitted changes, a feature branch, or a task arc (baseline-hash..HEAD after per-segment commits) using multi-axis methodology and deep-thinking (first-principles + second-level consequence tracing)."
+argument-hint: "無參數審查 uncommitted / branch 名稱審查該 branch / baseline hash 通盤審任務弧"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Workflow"]
 ---
 
@@ -24,9 +24,17 @@ Workflow 執行協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 | 用法 | 實際執行 | 場景 |
 |------|---------|------|
-| `/code-review` | `git diff` + `git diff --cached` + `git ls-files --others --exclude-standard` | 審查 uncommitted（預設，含 untracked files） |
+| `/code-review` | `git diff` + `git diff --cached` + `git ls-files --others --exclude-standard` | 審查 uncommitted（預設，含 untracked files；空/trivial 時見下方任務弧模式——**禁靜默以空範圍通過**） |
 | `/code-review feat/xxx` | `git diff HEAD...feat/xxx` | 審查 feature branch |
 | `/code-review feat/xxx main` | `git diff main...feat/xxx` | 審查 branch（指定 base） |
+| `/code-review <hash>` | `git diff <hash>..HEAD` + uncommitted | **任務弧**：逐段 commit 後的整弧通盤審查（hash = EP baseline commit） |
+
+**任務弧模式（逐段 commit 後的整弧審查）**：implement 的並行 pre-flight commit 與逐段檢查點會讓變更在 build 中途落地，無參調用只剩尾段殘留甚至空 diff——逐 commit 或只看 uncommitted 都會漏跨段互動（大規模刪除段只有對照抽取段才看得出是遷移不是丟失）。
+
+- **觸發**：① 明確傳 baseline hash；② 無參且 uncommitted 空/trivial 且 context EP 記有 baseline → 自動切弧模式（印 `[Code Review] mode=arc baseline=<hash>`）；空且無 EP baseline → 印 `[WARN] no diff（弧模式需 EP baseline）` 終止（fail-loud，同 post-build）
+- **baseline 來源**：EP 整合策略的 `baseline: <hash>`（記錄：execution-plan 建 EP 時；implement 階段 1 補記）——優於 merge-base 推導：同 branch 可能混入他任務 commits，拓撲邊界 ≠ 任務邊界
+- **非本任務 commits 註明**：`<hash>..HEAD` 範圍內不屬本 EP 的 commits 列進 reviewer prompt（避免誤判 scope；diff 連續仍涵蓋它們）
+- dual-context 兩側吃同一份 diff——範圍錯則兩側同瞎，範圍判定先於 spawn
 
 **Untracked files 處理**：新檔案沒有「變更前/後」可比對，審查時以完整檔案內容為對象（等同 diff against `/dev/null`），重點檢查架構一致性、命名慣例、與既有程式碼的整合點。
 

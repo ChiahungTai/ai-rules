@@ -385,6 +385,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 - **位置**：`ai-analysis/execution-plans/`（相對於專案根目錄）
 - **檔名**：從任務描述自動衍生（kebab-case，`ep-` 前綴）
 - **結構**：實作總覽 → **UC 盤點** → Scenario Matrix → 段落劃分原則 → 各段落（Context → 要點 → Pseudo Code → 驗證）→ 整合策略 → 收尾步驟
+- **整合策略必含 baseline 記錄**：一行 `baseline: <hash>`（`git rev-parse HEAD`，EP 建立當下）——下游 `/post-build`/`/code-review` 任務弧審查的範圍邊界，由 EP 攜帶跨 session 不重新推導（缺漏由 implement 階段 1 補記；模式見 [code-review](../code-review/SKILL.md)「任務弧模式」）
 
 > **🔴 路徑警告**：Claude Code plan mode 的硬編碼路徑是 `~/.claude/plans/`，**那不是 EP 的存放位置**。EP 必須寫到專案目錄下的 `ai-analysis/execution-plans/ep-<name>.md`。若已寫入 `~/.claude/plans/`，完成後必須複製到正確位置。
 

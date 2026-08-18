@@ -74,6 +74,8 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 **A/B 分流**：上述隔離僅針對**與本 EP 無關**的改動（另 session in-flight、舊功能殘留）。**與 EP 相關的 ripple / 同 session 發現的順帶修正**（如 instruction 檔同步、metadata 結算）→ 不隔離，在階段 5 自行 fold in 為 working-tree 編輯（不需 `outward-action-consent` rule（commit 場景），見階段 5a「為什麼結算在 build 不在 commit」+ autonomous-execution 🟡 黃線；commit 仍在末端 🔴 紅線 gate）。
 
+**前置：EP baseline 記錄**：EP 整合策略缺 `baseline: <hash>` 時補記當下 `git rev-parse HEAD`（= build 首個 code commit 的 parent）——`/post-build`/`/code-review` 任務弧審查的範圍邊界由 EP 攜帶，跨 session 不重新推導（見 [code-review](../code-review/SKILL.md)「任務弧模式」）。
+
 1. 讀取 Execution Plan，識別段落結構、依賴關係
 2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在階段 5a 結算時執行）
 3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）。LSP `goToDefinition` 驗證 dependency anchors 的定義端，`findReferences` 驗證消費端，`hover` 確認關鍵參數型別——三者對不同 anchor 獨立，同 block 併發（[tool-discipline](../../rules/tool-discipline.md) 批次化）

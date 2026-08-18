@@ -1,7 +1,7 @@
 ---
 name: post-build
 when_to_use: "After /implement (or any substantial change set) to orchestrate the review chain automatically: diff triage decides which sub-chains run."
-argument-hint: "無參數；自動 triage uncommitted diff"
+argument-hint: "無參數；自動 triage（uncommitted 或 EP baseline 任務弧）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Edit", "Write", "Agent"]
 description: build 後收尾鏈編排 — code-review → judge-review → 修正迴圈 → consistency → metadata-sync 一次觸發。只做編排與 diff triage，方法論真相源在各被編排命令/skill。觸發詞：build 後收尾、post-build、收尾鏈、review chain 自動化、commit 前收尾。
 ---
@@ -26,13 +26,15 @@ description: build 後收尾鏈編排 — code-review → judge-review → 修�
 | 僅 `.md` 變更 | ❌ 跳過 | ✅ 跑 |
 | 兩者皆有 | ✅ 先跑 | ✅ 後跑（code 修正可能再動 doc，先收斂 code 再驗 doc，避免驗兩次） |
 
+**逐段 commit 後（弧模式）**：uncommitted 空（或僅尾段殘留）且 context EP 記有 baseline → 切**弧模式**：triage 與階段 1 的審查對象改為 `git diff <baseline>..HEAD`（+ uncommitted；模式細則見 [code-review](../code-review/SKILL.md)「任務弧模式」）。uncommitted 空且無 EP baseline → 印 `[WARN] no diff（逐段 commit 已落地？弧模式需 EP baseline）` 並停止——收尾鏈靜默 no-op 等於大聲錯誤被靜默化。
+
 **Resume 場景**：若 `.review/<branch>.md` 已存在且有 `open` 狀態 findings（跨 session 從 reviewer session 帶回），跳過 code-review，直接從階段 2 接續。
 
-印出 triage 結果：`[Post-Build] code=<yes/no> docs=<yes/no> resume=<yes/no>`
+印出 triage 結果：`[Post-Build] code=<yes/no> docs=<yes/no> resume=<yes/no> mode=<uncommitted|arc>`
 
 ## 階段 1 — Code Review（僅 code 鏈）
 
-執行 `code-review`（[skills/code-review/SKILL.md](../code-review/SKILL.md)；無參 = uncommitted diff；dual-context 雙審查者規則見該命令模式 B）。本 skill 是**跨命令自動化場景**，code-review 產出寫 `.review/<branch>.md`（Finding Record 表格）供後續 judge/followup 讀。primed 側 context 依 code-review 模式 B 餵料清單（EP 路徑由 build 上下文帶入；無 EP 時依模式 B 降級規則處理）。
+執行 `code-review`（[skills/code-review/SKILL.md](../code-review/SKILL.md)；無參 = uncommitted diff，弧模式（階段 0 判定）= EP baseline..HEAD——見該命令「任務弧模式」；dual-context 雙審查者規則見該命令模式 B）。本 skill 是**跨命令自動化場景**，code-review 產出寫 `.review/<branch>.md`（Finding Record 表格）供後續 judge/followup 讀。primed 側 context 依 code-review 模式 B 餵料清單（EP 路徑由 build 上下文帶入；無 EP 時依模式 B 降級規則處理）。
 
 findings 全空 → 報告並直接進 docs 鏈。
 
