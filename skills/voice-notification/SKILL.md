@@ -30,7 +30,7 @@ allowed-tools: [Bash]
 - **審查**：`/code-review`、`/ep-review`、`/ep-validate`、`/judge-review`、`/followup-review`
 - **分析 / 維護 / 文檔產生**：`/execution-plan`、`/daily-maintain`、`/project-review`、`/instruction-init`
 - **升級**：`/upgrade-nt`、`/upgrade-sj`
-- **排程接續**：`/at`（排程確認 + resume 完成）
+- **排程接續**：`/at`（排程確認 + resume 完成）、`/usage-ping`（排程確認 say；落地召回走 Stop hook ping sentinel，非 LLM say）
 
 快速查詢、建議、`/illustrate`、`/commit`、`/help` 等**不 say**。
 
@@ -52,7 +52,7 @@ T=("主人" "帥哥" "前輩" "道友" "陛下" "道祖"); say -v Meijia -r 180 
 
 > 逐字複製此樣板，不要改寫成 python 或拆多行。稱謂隨機交給 bash 陣列 `${T[$((RANDOM % ${#T[@]}))]}`，LLM 不做選擇（消除判斷負擔）。
 
-## 進度提醒 sentinel 規範（長任務專用）
+## Stop hook sentinel 規範（進度提醒 + usage-ping 召回）
 
 長任務（白名單中多步驟者，如 build/deep-work/execution-plan）開始時建立 sentinel，讓 Stop hook 機械執行進度提醒：
 
@@ -68,6 +68,8 @@ rm -f /tmp/.claude-voice-pending
 - **不判斷完成**：sentinel 存在就提醒，中途被提醒 = 進度提醒（用戶要的，非誤報）
 - 完成 `rm` sentinel = 停止提醒；SessionEnd hook 會清殘留
 - **僅長任務建 sentinel**：快速任務（單步完成）不建，避免多餘提醒
+
+**usage-ping 召回 sentinel**（`/usage-ping` 排程時建立）：`/tmp/.usage-ping-pending`，內容 = 首 rung 絕對時刻 epoch。與進度 sentinel 不同——**一次性、時間閘控、不自動重複**：Stop hook 只在 [T, T+90min) 內有 turn 結束時 say「{隨機稱謂}，配額回來了，該回來工作囉」並自清（配額死 = 無 turn = 無誤報）；逾時靜默自清。目的：召回不靠落地 rung（落地單 call 紀律、零工具）。時窗 90 分鐘定義於 hooks/stop-notification.sh `PING_STALE=5400`（sync 副本——改 /usage-ping 階梯幾何時 hook 與兩份 skill 文檔同改）。
 
 ## say 格式規則
 

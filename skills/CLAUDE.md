@@ -59,6 +59,7 @@
 
 - `/deep-work` — 用戶離開時的自主實作引擎（收尾寫 STATE.md Last session 觀察）
 - `/at` — 排程工作接續（對應 Unix `at`，LLM provider reset usage 後自動 resume；resume 讀 STATE.md 補 observation）
+- `/usage-ping` — usage reset 探測叫醒（one-shot 階梯：Claude Code 3 發有界重試 / ZCode 單發 session 限制；落地即確認配額回來；每 trigger 1 call 零工具、召回走 Stop hook sentinel；只寫時間不接任務，接任務用 /at）
 - `/handoff` — 產出 self-contained 交接 prompt（進度+決策脈絡+下一步），交另一個 session/repo/provider；與 /at 分工（handoff 交別人 / /at 自己續）；STATE.md 非交接選項（Last session 觀察 / 每 session 覆寫，/at resume 讀）
 
 ### 工作流 skills — 品質工具
