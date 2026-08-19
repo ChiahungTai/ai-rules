@@ -1,8 +1,8 @@
 ---
 name: daily-maintain
 
-description: "每日自動維護（cron 用）— 掃描 + 自動修正低風險問題 + commit + morning report"
-when_to_use: "Automated daily maintenance run by cron (launchd). Auto-fixes low-risk findings, commits, and generates a morning report. Do NOT use interactively — use /project-review instead."
+description: "每日自動維護（排程用）— 掃描 + 自動修正低風險問題 + commit + morning report"
+when_to_use: "Automated daily maintenance run by scheduled agent (ZCode 23:20 定時任務, 2026-08 起; 舊 nightly claude -p 載體已退役). Auto-fixes low-risk findings, commits, and generates a morning report. Do NOT use interactively — use /project-review instead."
 argument-hint: "/daily-maintain — 全部執行 | --only dep-graph | --init"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 ---
@@ -33,7 +33,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 
 **調用 `/daily-maintain` 即隱含同意 🟢 低風險修正的 commit。**
 
-理由：用戶透過 launchd 排程此命令 = 明確授權自動維護。只有 🟢 項目（路徑修正、tag 修正）會被 commit，🟡 項目絕不 commit。
+理由：用戶透過排程載體（ZCode 23:20 定時任務）排程此命令 = 明確授權自動維護。只有 🟢 項目（路徑修正、tag 修正）會被 commit，🟡 項目絕不 commit。
 
 Commit message 格式與自動 commit 範圍：見 [maintain](../maintain/SKILL.md)「Commit 規則 — 自動模式」（單一真相源，此處不重複）。
 
@@ -52,16 +52,18 @@ Commit message 格式與自動 commit 範圍：見 [maintain](../maintain/SKILL.
 
 ---
 
-## 與 launchd 的配合
+## 與排程載體的配合
+
+2026-08 起 nightly `claude -p` 載體退役——本 skill 由 **ZCode 每日 23:20 定時任務**執行（讀 skill 檔依規範跑 Phase 1-3；Phase 4 晨報寫檔 skip，report 主體由 nightly-thin 22:57 組裝、判讀節由該任務產生）。手動補跑仍可用：
 
 ```bash
-# 完整四合一
-claude -p "/daily-maintain"
+# 完整四合一（互動 session 觸發）
+/daily-maintain
 
 # 拆開執行（避免單次 session 過長）
-claude -p "/daily-maintain --only dep-graph"
-claude -p "/daily-maintain --only sync"
-claude -p "/daily-maintain --only doc-health"
+/daily-maintain --only dep-graph
+/daily-maintain --only sync
+/daily-maintain --only doc-health
 ```
 
 ---

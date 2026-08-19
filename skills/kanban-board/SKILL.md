@@ -110,7 +110,7 @@ mv .kanban/Next-Up/feature-X.md .kanban/In-Progress/feature-X.md
 
 ### standup skill 整合
 
-standup skill（`/standup`，nightly-sequence op4）的 transition digest 涵蓋 `.kanban/**/*.md` 昨日變更——摘狀態變化於晨間簡報的 `## 📝 昨日活動` section：
+standup skill（`/standup`，ZCode 23:20 定時任務整合）的 transition digest 涵蓋 `.kanban/**/*.md` 昨日變更——摘狀態變化於晨間簡報的 `## 📝 昨日活動` section：
 
 - 📋 新增 Backlog 卡片
 - Kanban lane 變動（卡片移動）

@@ -2,7 +2,7 @@
 name: audit-test
 
 description: "測試品質稽核 — 反模式偵測、覆蓋對稱性、mock 健康度。只讀不寫。"
-when_to_use: "Audit test quality: detect anti-patterns, coverage gaps, and over-mocking. Use after /implement, before /commit, or in nightly scheduled scans. Read-only report, does not modify any files."
+when_to_use: "Audit test quality: detect anti-patterns, coverage gaps, and over-mocking. Use after /implement, before /commit, or in scheduled scans. Read-only report, does not modify any files."
 argument-hint: "/audit-test — uncommitted | /audit-test fd7a50e8 — commit | /audit-test --daily — 全專案"
 allowed-tools: ["Read", "Bash"]
 ---
@@ -35,7 +35,7 @@ allowed-tools: ["Read", "Bash"]
 |------|------|---------|------|
 | **Diff Audit** | 無參數 | uncommitted test files | pre-commit gate |
 | **Commit Audit** | `fd7a50e8` | 該 commit 的 test file 變更 | post-commit review |
-| **Daily Scan** | `--daily` | 全部 test files | 每晚排程（nightly-sequence op3）→ append `## audit-test` section 進 daily-report |
+| **Daily Scan** | `--daily` | 全部 test files | 每週六排程（ZCode 23:20 定時任務週六條件段，2026-08 起）→ append `### 🔍 audit-test` section 進 daily-report |
 
 ### 掃描範圍判定
 
@@ -342,7 +342,7 @@ fd -e py . tests/
 
 ### 步驟 10：產出報告
 
-按輸出格式模板產出報告。Daily Scan 時，報告寫入 `/Users/ctai/logs/claude-sync-{YYYYMMDD}.log`（由夜間排程腳本管理）；nightly-sequence op3 直接 append `## audit-test` section 進 daily-report（不經 standup——test-quality 在報告裡有自己的 section）。
+按輸出格式模板產出報告。Daily Scan 時由排程載體（ZCode 23:20 定時任務週六條件段，2026-08 起）直接 append `### 🔍 audit-test` section 進 daily-report（不經 standup——test-quality 在報告裡有自己的 section）；手動跑的 claude-sync log 落點慣例隨 claude -p 載體退役一併停用。
 
 ---
 
@@ -351,7 +351,7 @@ fd -e py . tests/
 | 命令 | 與 /audit-test 的關係 |
 |------|---------------------|
 | `/fix-test` | 互補：fix-test 修**失敗**的測試，audit-test 偵測**通過但品質差**的測試 |
-| nightly-sequence op3 | Daily Scan 結果直接 append `## audit-test` section 進 daily-report（standup skill 不再消費——已退役整合） |
+| ZCode 23:20 定時任務（週六條件段） | Daily Scan 結果直接 append `### 🔍 audit-test` section 進 daily-report（standup skill 不再消費——已退役整合） |
 | `/code-review` | Correctness 軸可引用 audit-test 發現 |
 | `/implement` | 段落完成後跑 audit-test 確認測試品質 |
 | `/commit` | pre-commit gate：audit-test 無 Critical 才建議 commit |
