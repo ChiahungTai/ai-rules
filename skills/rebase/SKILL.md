@@ -244,12 +244,20 @@ Rebase 成功後（無衝突或衝突已解決），檢查**非衝突區域**的
 
 > **all 與 Phase 3 的關係**：all 同步語義已把所有 feature rebase onto trunk，落後狀態當場消除——不另跑 Phase 3 落後報告（無落後可報）。all 的產出是 Step A4 三類報告（✅/⚠️/❌），不是 Phase 3 的「誰落後多少」。
 
-### Step A0：決定語義 + 列舉 feature
+### Step A0：決定語義 + 動態列舉 feature（禁寫死）
 
 ```bash
-git branch --show-current          # 當前 = trunk → 吸收；當前 = feature → 同步
-git worktree list                  # 取得 feature wt（排除 trunk wt）
+git branch --show-current                    # 當前 = trunk → 吸收；當前 = feature → 同步
+git branch --format='%(refname:short)'       # 所有本地 branch —— all 目標集合的唯一來源
+git worktree list                            # branch → worktree 對應（同步語義 git -C 用）
 ```
+
+**目標集合 = 當次 `git branch` 輸出 − trunk**。列舉必須來自本次執行的 git 即時輸出——禁止寫死：不用本文件示例名（`replay`/`backbone` 等是格式示意）、不用記憶或上次執行的清單；不同 repo、不同時刻 branch 集合都不同。
+
+- **trunk 解析**：慣例 `main`。同步語義下 `main` 不在 `git branch` 輸出 → 停下問用戶 trunk 是哪條，不猜測。
+- **branch 無 worktree**：
+  - 吸收語義：`merge --ff-only <feature>` 不需要 feature wt —— 無 wt 的 branch 照樣是吸收對象。
+  - 同步語義：rebase 須在該 branch 自己的 wt 內跑（`git -C <wt>`）—— 無 wt 的 branch 列入 A4 報告 ⚠️（無 worktree，未同步），不在當前 wt checkout 它 rebase（會切走當前 wt 的 branch）。
 
 ### Step A1：對每個 feature 算分叉分類（Phase 1 既有，批次套用）
 
@@ -313,8 +321,8 @@ git worktree list                  # 取得 feature wt（排除 trunk wt）
 - 在 `main`（trunk）上 `/rebase replay` → `<branch>` = `replay`（feature）→ `git merge --ff-only replay`（吸收步）
 - 在 `replay`（feature）上 `/rebase main` → `<branch>` = `main`（trunk）→ `git rebase main`
 - 在 `replay`（feature）上 `/rebase backbone` → `<branch>` = `backbone`（另個 feature）→ `git rebase backbone`（feature 互 rebase，依賴鏈由呼叫者自負）
-- 在 `replay`（feature）上 `/rebase all` → 批次同步：當前 `rebase main` + `git -C <backbone-wt> rebase main`（見 all 批次模式）
-- 在 `main`（trunk）上 `/rebase all` → 批次吸收：連續 `git merge --ff-only <feature>`（見 all 批次模式）
+- 在 `replay`（feature）上 `/rebase all` → 批次同步：當前 `rebase main` + 對每個其他 feature（`git branch` 動態列舉，見 Step A0）`git -C <wt> rebase main`
+- 在 `main`（trunk）上 `/rebase all` → 批次吸收：對每個 feature（`git branch` 動態列舉，見 Step A0）逐一 `merge --ff-only`（只 ff-able）
 
 ---
 
@@ -339,6 +347,7 @@ git worktree list                  # 取得 feature wt（排除 trunk wt）
 - ❌ **當前 = trunk 卻跑 `git rebase`**（鐵律 2；trunk 用 `merge --ff-only` 吸收）
 - ❌ **一般 `/rebase <branch>` 的 Phase 3 自動 rebase 其他 feature worktree**（方向由呼叫者決定；Phase 3 只報告 + 提示）。批次同步/吸收改用 `/rebase all`（顯式 opt-in，帶停止點菜單）
 - ❌ **all 模式自動跳過卡住的 feature**（停止點必須停下給菜單；跳過是用戶選的，非預設）
+- ❌ **all 模式把目標 branch 寫死**（目標集合 = 當次 `git branch` 即時輸出 − trunk；本文件示例中的 `replay`/`backbone` 是格式示意，不是列舉來源）
 
 ---
 
