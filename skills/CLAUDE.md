@@ -124,7 +124,7 @@
 - `maintain` — `/daily-maintain`（自動）與 `/project-review`（互動）共用的 4-phase 維護核心（勿直接呼叫）
 - `scan-project` — 統一專案知識掃描（imports + Capabilities + kanban → dep_graph / findings）
 - `standup` — 每日晨間簡報昨日活動 digest（跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition；nightly-sequence op4 整合）
-- `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）
+- `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / spawn 預設背景 / 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
 - `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離）

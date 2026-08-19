@@ -49,6 +49,15 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 
 **spawn Agent 前必須印出確認**：`[Agent] model=<依 model-routing 任務類型>, max=N, current=M`
 
+### Spawn 預設背景（ZCode spawn 原生預設前台——規則補上）
+
+ZCode 的 Agent tool **預設前台**（阻塞主對話）——前台 spawn 期間使用者無法插話，steering 訊息只能中斷、連帶殺掉 agent。因此：
+
+- **spawn 帶 `run_in_background: true`**（Claude 2.1.198+ 已預設背景免動作）；spawn 後主對話回報「進行中」即結束 turn，agent 完成的通知會自動接手
+- 例外（前台）：結果是當前步驟立即依賴且預期 <30s 的短 probe
+- 為什麼（兩面）：前台 = 對話卡死 + 使用者 steer 即殺 agent；背景 = 使用者可繼續對話、steer 不影響 agent、通知後無縫接手——token 帳等價（接手時 context 重送都一次、cache TTL 看壁鐘與 turn 結構無關）
+- 詳細規範（pytest 背景跑等）單一源在 [tool-discipline](../../rules/tool-discipline.md)「背景執行」
+
 ### Subagent 產出格式：schema 嚴格度（raw material vs deliverable）
 
 spawn agent 時，依「agent 產出是**原料**還是**直接交付**」選 schema 嚴格度：
@@ -105,7 +114,7 @@ Pre-flight 檢查：
 **安全不變量**（path-in-root / symlink-escape 偵測 / 優先 EnterWorktree）定義見 [autonomous-execution](../autonomous-execution/SKILL.md)「機械空間不變量」段；此處僅為 worktree 用法，不重述安全不變量定義（single-source）。
 
 何時用 `isolation: "worktree"`：PoC 驗證、平行實作、風險操作。
-何時不用：純研究（foreground Agent 即可）、單檔案修改、改動少時不用 isolation 更簡單。
+何時不用：純研究（background Agent 即可）、單檔案修改、改動少時不用 isolation 更簡單。
 
 ### PoC → Implement 流程
 
@@ -204,6 +213,7 @@ Rules 檔在 session 啟動時載入，但**更新不會傳播到已 spawn 的 a
 - [ ] 已偵測自身模型，查「並發上限」表確認（Claude: `rules/model-routing.md`）；Agent **model 依任務類型**
 - [ ] 已印出 `[Agent] model=X, max=N, current=M`
 - [ ] 當前 Agent 數量未超過上限
+- [ ] spawn 帶 `run_in_background: true`（前台僅限 <30s 短 probe——見上「Spawn 預設背景」）
 - [ ] Prompt 包含足夠 context + 相對路徑 + rules-reminder 規則摘要（Agent 看不到 auto-loaded rules，必須在 prompt 開頭明確寫入：多行 `python -c` 禁 `#` 註解、`rg`/`fd` 取代 `grep`/`find`、`uv run` 前綴 Python、禁止 `sed` 修改 `.py/.md`、禁止 `$` shell 展開、輸出繁體中文、獨立工具呼叫同 block 批次發、改檔前先 Read）
 - [ ] **若任務涉及 mock / PropertyMock / fixture**：prompt 主動注入專案 `tests/AGENTS.md`（legacy `tests/CLAUDE.md`）的 mock 規範段落摘要（agent 不會自己讀專案 instruction 檔，必須主動注入；見上方「Rule Freshness」）
 - [ ] Uncommitted changes：需要 → 先 commit；Branch：不正確 → 先 checkout
