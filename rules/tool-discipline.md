@@ -45,11 +45,11 @@ harness-scope: neutral
 
 - **同 session 已完整讀過的檔案，重查細節禁再無參數全讀**——每次全讀 = 同內容全量重複注入 context（實測：86KB 架構檔單一 session 重讀 19 次，每次 25-30K tokens 佔死後續所有 request）。重查改用：`rg -n -C 10 "關鍵詞" <file>`（回片段）或片段 Read（`offset`/`limit`——已實測滿足 Edit 的 read-state 前置，可同 block，順序依賴見下「獨立呼叫批次化」）
 - 為回答**具體問題**而讀未讀過的大檔 → 先 `rg -n` 定位再讀片段；首次為**整體理解**全讀可接受（浪費在重讀，不在首讀）
-- 小檔（數 KB 內）全讀無妨；call 帳 neutral——重查本來就是 1 call，換成輸出小兩個數量級的那種
+- 小檔（數 KB 內）全讀無妨；重查本來就是 1 request，換成輸出小兩個數量級的形態——request 數不變、context 大減
 
 ## 獨立呼叫批次化
 
-> **核心原則**：獨立無依賴的工具呼叫在**同一個 block 一次發出**——每個獨立 call 各耗一個 model request，逐一發純浪費。
+> **核心原則**：獨立無依賴的工具呼叫在**同一個 block 一次發出**——每個獨立 call 各耗一個 model request（各帶全 context 重送），逐一發是 token/延遲/退化的三重浪費，與計費模型無關。
 
 - **依賴判準**：下一步需要本步**結果**才是依賴；「同類操作」不是依賴。多個 Read、rg/fd、git 查詢、LSP 查不同 anchor、跨檔 Edit、同檔不同位置（old_string 不重疊）的 Edit——皆獨立，同 block 發。**順序依賴**（Edit 前的 Read——需要的是 read-state 註冊非輸出值）可同 block：block 內按序執行（實測），Read 放批內 Edit 前
 - **機械驗證序列**（lint/type/test）組成單一命令一次 call：輸出重導檔案再 Read + 失敗段標記（`uv run cmd1 > out 2>&1 || echo "cmd1:FAIL"; uv run cmd2 > out2 2>&1 || echo "cmd2:FAIL"`——無 FAIL 行 = 全綠；遵守上方 no-pipe-tail、避開 `$?` 展開）

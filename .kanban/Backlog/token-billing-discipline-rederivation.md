@@ -1,6 +1,6 @@
-# deferred：計費翻轉 token——call 紀律重推導（F1-F10 審查 findings）
+# deferred：token 計費紀律重推導（F1-F10 審查 findings）
 
-現役 GLM 仍為 **per-call 計量**（視窗 99%+ requests 為 GLM）——審查報告的 token-only 槓桿**現在不翻規則**（現在翻對現役計費次優）。本卡釘在**新 token 計量 model 落地時**一次重推導。
+**2026-08-18 計費定案（用戶裁決 + 證據三角）**：現行 Legacy V1 的計量本質 ≈ **token-value**（dashboard 顯示 Token usage；Claude Max 同構先例——長對話每則訊息全 context 重處理；「prompts」是 UI 話術，1 prompt ≈ 15-20 invocations 估算）+ **premium model 倍率**，細節**不可精算**。策略 = 雙軸省 token：**省 requests**（批次化/組合命令/git 錨定——已落地）+ **省 context**（Read 紀律——已落地）。本卡剩餘項目釘在**計費明朗化或 token-billed model 成為主力時**重推導；F4 已拆出獨立卡（bundle-layered-diet）。
 
 **審查來源**：2026-08-18 跨 session 審查報告（成本模型假設 c=0.1 cache-read / k=4 output，c∈[0.05,0.2] 結論穩健）；五天基線 + db.sqlite 查詢方法見 memory `reference_zcode-telemetry-db`。
 

@@ -143,4 +143,5 @@ Resume 觸發時，LLM 應：
 - **清理**：Resume 完成後必須刪除 context 檔案，避免殘留
 - **多個排程**：若 `.at-contexts/` 已有 `at-context-*` 檔案，提示用戶確認是否有衝突
 - **版控排除（一次性設定，與 auto-mode 放行無關）**：`.at-contexts/` 含任務目標描述，建議加入該專案 `.gitignore` 或全域 `core.excludesFile`，避免誤 commit
+- **排程經濟**：每次觸發即消耗 quota（≈1 prompt + 全 context 重送）——排**資訊密集**的任務（一次量多指標，如同批多項驗證）、polling 型（usage-ping 類）保持最低頻率
 - **語音通知**：遵循 `voice-notification` skill 規範

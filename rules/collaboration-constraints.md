@@ -15,6 +15,8 @@ harness-scope: neutral
 - **確認理解**：複述用戶需求，確保理解一致
 - **提供選項**：給出多種可能的理解，讓用戶選擇
 - **主動詢問**：有疑問時主動澄清，不猜測用戶意圖
+- **澄清一次問完**：需要用戶輸入時彙整成清單一次問（多問題條列；Claude: AskUserQuestion 多問題），禁逐輪追問——每次往返 = 全 context 重送。該問的仍要問，只是湊一次；不是「不問自行猜」
+- **確認彙整到末端**：任務中的確認點收集到完成報告一次處理，不中途暫停逐項確認。硬 gate 例外不在此限：commit consent、destructive、真單向門（見 [outward-action-consent](outward-action-consent.md)）
 
 ---
 
@@ -141,6 +143,7 @@ LLM 的討好傾向在 review 場景最危險 —— 要嘛無腦同意壞建議
 - **不 cd 到其他 repo**：工作目錄是 harness 啟動時的 Primary working directory（Claude: Claude Code 啟動時目錄），不要 cd 到其他 repo 或 worktree 去做 git 操作
 - **需要讀取其他 repo**：用 `Read` 工具或 `git -C <path>` 讀取，不需要 cd
 - **需要執行其他 repo 的命令**：用 `git -C <path>` 或完整路徑，不 cd && command
+- **同 working tree 並行原則**：並行 session 是**使用者管理的例外**——working tree 出現非本 session 的未 commit 改動時，預設視為「使用者已判斷與目前任務不相關」，**不納入本 session 流程**（不審、不改、不順手修），commit 只 add 指名檔案帶走自己的。**停下向使用者確認的觸發 = 機械衝突信號**（非意圖判斷——意圖是使用者的）：本任務需修改的檔案已有非本 session 改動（寫寫重疊，含 Edit「modified since read」持續失敗）、或同一區域出現兩種改法。有信號 → 暫停確認歸屬，不自行裁決；無信號 → 各自進行
 
 ### 為什麼
 
