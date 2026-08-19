@@ -81,6 +81,19 @@ rg -o -r '$1' "(\w+)\.py" # 捕獲群組替換輸出（$1 是 rg 語法，非 sh
 
 **真實案例**（features codebase-sweep 時期——該命令現為 smell-detector baseline）：`rg -l "from mosaic_alpha.features" | head -20` 截斷 → consumers **41 誤寫 20**（head-20 截斷:排序在前的子目錄先列完才輪到其餘 → 某子目錄實際 32 檔只顯示 11）；多處文檔一致寫錯，**自審抓不到**（claim 與截斷證據共享盲點，需獨立第三方 rg 才揭露）。同類陷阱不同載體:符號查詢的 truncation/stale 見 [lsp-navigation.md](lsp-navigation.md)（**rg** 符號查詢會 truncation/masking,**LSP findReferences** 是解方 100% 涵蓋;LSP workspace stale 時亦回傳少）。
 
+## 盤點執行點：間接層與直呼層雙掃
+
+> **核心原則**：盤點「誰執行/呼叫 X」（CI 跑哪些測試、哪些入口呼叫某工具、cutover 影響域掃描）時，間接層（make target/wrapper 引用）與直呼層（raw command 直接出現，**含 Makefile recipe 內**）**兩層都要掃**——只掃一層系統性漏，且自審抓不到（掃了什麼就被當成完整）。路徑集按 repo 調整——CI workflow（如 `.github/workflows/`）、launchd plist、cron 排程必含。
+
+| 層 | 掃什麼 | 範例命令 |
+|----|--------|---------|
+| 間接層 | 誰引用 wrapper/target | `rg -e "make " scripts/ deploy/ .github/workflows/` |
+| 直呼層 | X 本體直呼 | `rg -e pytest -e "uv run" Makefile scripts/ deploy/ .github/workflows/` |
+
+範例統一用 `-e` 多 pattern，不用 `a\|b`——表格 cell 內 `\|` 是 markdown 轉義與 regex literal pipe 的歧義點（見「rg 常用語法」alternation 陷阱）。
+
+**反例（真實案例）**：NautilusTrader v2 gates 考古 session 分層判定「哪些 gate 擋 merge/release」只掃 CI workflow 的 make 引用——漏掉 build.yml **直呼**的 `uv run pytest`（CI 中 Python 測試唯一落點，根本不是 make target）；rg 間接層有 hits ≠ 執行點清單完整。同 family：head 截斷（上節）、toplevel-only import 漏 local import（[lsp-navigation.md](lsp-navigation.md)）——pattern coverage blind spot 的不同載體。高風險場景（一次性儀式/稽核）把兩層掃法命令寫死在執行清單，不依賴 session 記得。
+
 ## 搜尋策略
 
 - **找檔案**：`fd` 或 `rg -l "pattern"` — 只需檔名
