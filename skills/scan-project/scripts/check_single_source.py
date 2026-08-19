@@ -257,7 +257,8 @@ def check_deploy_freshness(inv: dict) -> list[tuple[str, str, str]]:
         spec.loader.exec_module(mod)
         bundle = mod.build_bundle(
             # "neutral" 綁定 deploy_agents main() 的 --scope default；default 改變時此處需同步
-            mod.discover_rules(mod.RULES_DIR, {"neutral"}), "neutral"
+            mod.discover_rules(mod.RULES_DIR, {"neutral"}),
+            "neutral",
         ).encode("utf-8")
     except Exception as exc:  # load/build 失敗（如 deploy_agents 編輯後 SyntaxError）
         return [(inv["id"], "important", f"無法以 source 重建 bundle: {exc!r}")]

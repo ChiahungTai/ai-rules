@@ -198,7 +198,9 @@ def zcode_sessions(worktrees: list[Path], target_date) -> list[dict]:
     if not worktrees or not ZCODE_DB.exists():
         return []
     day_start = datetime.combine(target_date, time.min, tzinfo=LOCAL_TZ)
-    day_end = datetime.combine(target_date + timedelta(days=1), time.min, tzinfo=LOCAL_TZ)
+    day_end = datetime.combine(
+        target_date + timedelta(days=1), time.min, tzinfo=LOCAL_TZ
+    )
     wt_by_dir = {str(p.resolve()): p for p in worktrees}
     try:
         con = sqlite3.connect(f"file:{ZCODE_DB}?mode=ro", uri=True)
