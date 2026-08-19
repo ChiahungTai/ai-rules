@@ -103,3 +103,4 @@
 2. **選對載體**：Hook？Rule？Skill？按上面的分界判斷
 3. **驗證附著**：rule/command 是否包含可驗證的標準？沒有驗證的規則是噪音
 4. **長度預算**：CLAUDE.md 越長，AI 越容易忽略重要規則。一條規則一行能說完最好
+5. **部署同步**：編輯 `rules/` 後的部署與驗證紀律見 [rules/AGENTS.md](rules/AGENTS.md)「部署紀律」（含 `/sync-sources` 機械新鮮度檢查）

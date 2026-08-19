@@ -2,7 +2,7 @@
 name: sync-sources
 
 description: "Single-source invariant 檢查 — 機械驗證 ai-rules 的『唯一/單一源』宣稱沒被 drift。/sync-sources"
-when_to_use: "After editing ai-rules rules/skills/commands, before /commit, or when auditing single-source health. Mechanically checks declared single-source invariants (severity/confidence enums, audience classification) are reflected in their enforcing schemas/files. Catches the 'definition exists but schema dropped it' drift that AI-discipline-only maintenance misses."
+when_to_use: "After editing ai-rules rules/skills/commands, before /commit, or when auditing single-source health. Mechanically checks declared single-source invariants (severity/confidence enums, audience classification, allow-list coverage, source-contains, and deployed-bundle freshness — the three non-Claude AGENTS.md deployments must byte-match a rebuild from current rules/ + guide). Catches the 'definition exists but schema dropped it' drift that AI-discipline-only maintenance misses."
 argument-hint: ""
 allowed-tools: Bash(uv run python *)
 ---
@@ -29,6 +29,9 @@ uv run python skills/scan-project/scripts/check_single_source.py
 |------|--------|---------------|
 | **enforced_by 同步** | 定義在 source、強制 schema 在另一檔 → schema 必須真的含該欄位 | 抓「定義源/schema 源分離 drift」（如信心水準被 DimensionVerdict 丟棄）——這是純文字比對，無語義判斷 |
 | **classification 自標** | CLAUDE.md 分類的命令本體必須含受眾字樣 | 抓「外部分類、命令不自知」——純字串包含檢查 |
+| **coverage（allow-list 覆蓋）** | source_glob 下每個定義（如 skill name）必須被 enforced_by 提取的集合覆蓋 | 抓「定義源目錄 ↔ 執行源 allow-list」drift（rename 後未同步）——純集合比對 |
+| **source_contains** | 定義源自身必須含關鍵值 | 防 drift 回非預期值——純字串包含檢查 |
+| **部署 bundle 新鮮度** | 非 Claude 三端部署 AGENTS.md 必須 == source 重建 bundle | 抓「編輯 rules/ 後沒跑 deploy」（stale 部署 = 非 Claude session 讀舊規則）——rebuild + byte 比對，無語義判斷 |
 
 ## Finding 嚴重度
 
@@ -47,9 +50,9 @@ uv run python skills/scan-project/scripts/check_single_source.py
 | `/consistency` | 單一文檔自洽；`/sync-sources` 跨檔 single-source invariant |
 | `/commit` | 未來可在此跑 `/sync-sources` 當 commit gate（目前手動） |
 
-## 範圍（v1）
+## 範圍
 
-v1 機械檢查 **enforced_by + classification** 兩類（可靠、零誤判）。以下為設計層 drift，靠 `/code-review` + 手動修，未機械化（未來可擴充）：
+機械檢查五類：**enum（enforced_by 同步）/ classification / coverage / source_contains / deploy_freshness**（可靠、零誤判）。以下為設計層 drift，靠 `/code-review` + 手動修，未機械化（未來可擴充）：
 - 「唯一/單一源」強字眼過度承諾（如「唯一判定規則」卻有 carve-out）
 - canonical flow 多處重畫
 - 持久化 optional/預設語義漂移

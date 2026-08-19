@@ -12,6 +12,7 @@ Run: uv run python skills/scan-project/scripts/check_single_source.py
 Exit: non-zero if any critical/important finding（未來可掛 commit gate）。
 """
 
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -84,6 +85,17 @@ INVARIANTS = [
         "note": "review-engine base 點 4 定義 3-perspective（clean/UC/Correctness）為單一源 —— "
         "防未來 drift 回 2-perspective。消費者反向（活躍文檔 rg 2-perspective 應 0 hits）"
         "靠 rg + EP Review 兜底（消費者引用形態不一，機械反向 check 留未來）",
+    },
+    {
+        "id": "deploy_bundle_freshness",
+        "type": "deploy_freshness",
+        "note": "部署 bundle 是 rules/ + guide（單一源）的衍生 snapshot；非 Claude 三端"
+        "（~/.zcode、~/.config/opencode、~/.codex 的 AGENTS.md）只讀 bundle，stale = "
+        "session 讀舊規則。Claude 端 ~/.claude/rules/ 目錄 symlink 即時，不在檢查範圍。"
+        "真實案例：2026-08-18 發現部署版落後 source 六條 rules（tool-discipline 新紀律"
+        "缺席）——編輯 rules 的 ZCode session 讀不到部署紀律（紀律在 meta rule，不進 "
+        "bundle），drift 靠外部 session 偶然發現。此檢查把「編輯後須 deploy」從散文"
+        "紀律變機械閘門",
     },
 ]
 
@@ -227,6 +239,47 @@ def check_source_contains(inv: dict) -> list[tuple[str, str, str]]:
     return []
 
 
+def check_deploy_freshness(inv: dict) -> list[tuple[str, str, str]]:
+    """非 Claude 三端的部署 AGENTS.md 必須 == 當前 source 重建的 bundle（byte 比對）。
+
+    單一源是 repo 內 rules/ + guide；部署檔是衍生 snapshot。skip 條件（不 false
+    positive）：目標不存在（該機器未用該 harness）、無 generator header marker
+    （非 deploy_agents.py 產出，用戶自管檔）。
+    """
+    if inv.get("type") != "deploy_freshness":
+        return []
+    deploy_py = REPO_ROOT / "scripts" / "deploy_agents.py"
+    if not deploy_py.exists():
+        return [(inv["id"], "important", f"deploy script 不存在: {deploy_py}")]
+    try:
+        spec = importlib.util.spec_from_file_location("deploy_agents", deploy_py)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        bundle = mod.build_bundle(
+            # "neutral" 綁定 deploy_agents main() 的 --scope default；default 改變時此處需同步
+            mod.discover_rules(mod.RULES_DIR, {"neutral"}), "neutral"
+        ).encode("utf-8")
+    except Exception as exc:  # load/build 失敗（如 deploy_agents 編輯後 SyntaxError）
+        return [(inv["id"], "important", f"無法以 source 重建 bundle: {exc!r}")]
+    # marker 取自 HEADER 首行（單一源）——不硬編碼字串複製品，HEADER 改版自動跟隨
+    marker = mod.HEADER.splitlines()[0].encode("utf-8")
+    out = []
+    for target in mod.TARGETS:
+        data = target.read_bytes() if target.exists() else None
+        if data is None or marker not in data:
+            continue
+        if data != bundle:
+            out.append(
+                (
+                    inv["id"],
+                    "critical",
+                    f"{target} 與 source 重建 bundle 不一致（stale 部署）——非 Claude "
+                    f"session 正在讀舊規則；跑 `uv run python scripts/deploy_agents.py` 同步",
+                )
+            )
+    return out
+
+
 def main() -> int:
     findings: list[tuple[str, str, str]] = []
     for inv in INVARIANTS:
@@ -234,6 +287,7 @@ def main() -> int:
         findings += check_classification(inv)
         findings += check_coverage(inv)
         findings += check_source_contains(inv)
+        findings += check_deploy_freshness(inv)
 
     crit = [f for f in findings if f[1] == "critical"]
     imp = [f for f in findings if f[1] == "important"]
