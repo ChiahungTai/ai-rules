@@ -15,7 +15,7 @@ allowed-tools: ["Read", "Write", "Bash", "Glob", "CronCreate", "CronDelete", "Cr
 
 > **與 `/handoff` 分工**：本命令是「時間接續」（usage 用盡，**自己 resume**）；要把工作交給**另一個** session/provider 並行或接手，用 [`/handoff`](../handoff/SKILL.md)。
 
-> **與 `/usage-ping` 分工**：本命令時間後面要接**任務**（reset 後自動接續工作）；只寫時間、只叫醒 LLM 確認配額回來（單 call 紀律、不接任務），用 [`/usage-ping`](../usage-ping/SKILL.md)。
+> **與 `/usage-ping` 分工**：本命令時間後面要接**任務**（reset 後自動接續工作）；只寫時間、只叫醒 LLM 確認配額回來（最小 call 成本、不接任務），用 [`/usage-ping`](../usage-ping/SKILL.md)。
 
 ---
 

@@ -30,7 +30,7 @@ allowed-tools: [Bash]
 - **審查**：`/code-review`、`/ep-review`、`/ep-validate`、`/judge-review`、`/followup-review`
 - **分析 / 維護 / 文檔產生**：`/execution-plan`、`/daily-maintain`、`/project-review`、`/instruction-init`
 - **升級**：`/upgrade-nt`、`/upgrade-sj`
-- **排程接續**：`/at`（排程確認 + resume 完成）、`/usage-ping`（排程確認 say；落地召回走 Stop hook ping sentinel，非 LLM say）
+- **排程接續**：`/at`（排程確認 + resume 完成）、`/usage-ping`（排程確認 say；落地召回走 Stop hook ping sentinel，非 LLM say——週期模式例外：landing 直接 say）
 
 快速查詢、建議、`/illustrate`、`/commit`、`/help` 等**不 say**。
 

@@ -44,6 +44,7 @@ LLM 需要細節時，直接 Read instruction 檔（AGENTS.md 為主，legacy �
 |------|------|------|------|
 | 1 | 消費 Scan Findings | 預設 | 讀 `.project-snapshot.json` 的 `findings`，按嚴重度呈現 |
 | 2 | 清單一致性 | 預設 | Capabilities 表格/入口有效性 + Skill 索引↔`skills/` 目錄比對 |
+| 2.5 | 知識庫真相源偵測 | 預設（慣例命中時） | 知識庫 instruction 檔帶「真相源映射」宣告 → 對可機械驗證宣稱跑 drift 偵測（report-only） |
 | 3 | instruction 檔品質 | --quality | LLM 評估 signal/noise + 導航有效性 |
 | 4 | 過時卡片 | --all | 讀 .kanban/ 檔案 mtime，標記長期未動卡片 |
 | 5 | SYSTEM-MAP 同步 | --all / --sync-system-map | LLM 讀 SYSTEM-MAP.md + Capabilities，比對狀態 |
@@ -81,6 +82,21 @@ LLM 直接讀取索引/清單類段落，驗證與實際檔案一致：
 - **機械比對**：`fd -t d . skills/ --max-depth 1` 列實際 skill 目錄，`rg` 抓索引列出的 skill name，比對差集
 - **標記**：索引有但目錄無 = 幽靈（important）；目錄有但索引無 = 遺漏（important）
 - **容錯**：無 `skills/CLAUDE.md` 或無 Skill 索引段 → 跳過（非所有專案有 skill 索引）
+
+### 步驟 2.5：知識庫真相源偵測（opt-in by 慣例）
+
+**慣例偵測**：`rg -l "^#+ .*真相源映射" -g "AGENTS.md"` ——知識庫目錄的 instruction 檔以「真相源映射」**section**（表：每份文檔 ↔ 權威真相源）宣告派生視圖契約時，本步對該知識庫跑 drift 偵測。錨定 heading（非內文散句）避免導航文字誤命中。無命中 → 跳過（非所有專案有知識庫慣例）。
+
+**偵測範圍**——只查可機械驗證的宣稱；語義 drift（敘事是否仍連貫、結論是否仍成立）屬知識庫重編流程（該 instruction 檔內的對齊流程）的工作，本步不硬偵測：
+
+| 宣稱類型 | 機械驗證 |
+|---------|---------|
+| 引用存在性 | 知識庫文檔內的檔案連結/路徑 → `fd` / 存在性檢查 |
+| 入口宣稱 | 文檔提到的 CLI command / script / 函式符號 → `rg` 於 repo；0 hits 只標「未驗證（rg 無命中）」供判讀，不斷言不存在（動態引用不可見） |
+| 狀態宣稱 | 知識庫的 UC/功能狀態 ↔ Capabilities / SYSTEM-MAP cross-read，有出入列兩邊現值 |
+| 排程宣稱 | 文檔提到的排程（launchd plist / cron / 排程腳本時刻）↔ 專案排程配置目錄現況 |
+
+**嚴重度與處置**：全部 🟡 important **只報告不修正**——知識庫是敘事文檔，修正 = 消化重編（狀態語義），機械 patch 會侵蝕敘事連貫。findings 前綴 `[KB-drift]`（便於晨報 rg 聚合）。偵測輸出同時是知識庫對齊流程的輸入（[maintain](../maintain/SKILL.md) 晨報 🔥 累積 → 重編 session 認領）。
 
 ### 步驟 3：instruction 檔品質（--quality）
 
@@ -168,6 +184,7 @@ LLM 直接讀取索引/清單類段落，驗證與實際檔案一致：
 - **release-gate（drop-module 後必跑）**：刪除整檔/整模組的 refactor 後，跑本命令 + `rg -F "<deleted-symbol>"` 掃導航文檔（root AGENTS.md / architecture.md / dependency-graph.md / SYSTEM-MAP.md + 各模組 AGENTS.md）當 release-gate。真實案例：清理日刪 facade 後 ≥6 個導航檔仍引用它，靠事後審計才抓——drop-module 不跑此 gate = 文檔 drift 漏到下個 session。
 - **前瞻 vs 回溯分工**：本命令的 X-cap-path 是**回溯查**（既有 Capabilities 路徑還在嗎）；**前瞻查**（這次 doc 編輯有沒有新增指向虛無的引用）屬 `/code-review` docs mode 的「前瞻 phantom 偵測」——兩者互補，不重疊。
 - **容錯**：無 `.project-snapshot.json` 時降級為純 LLM 檢查，不報錯
+- **容錯**：無「真相源映射」慣例命中時跳過步驟 2.5，不報錯
 - **容錯**：無 .kanban/ 目錄時只檢查 Capabilities，不報錯
 - **容錯**：無 SYSTEM-MAP.md 時跳過步驟 5，不報錯
 - **容錯**：無 `## Capabilities` 的 instruction 檔跳過，不報錯
