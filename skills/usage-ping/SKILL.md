@@ -1,14 +1,14 @@
 ---
 name: usage-ping
-description: "usage reset 探測叫醒 — 在估計的重置時間排 ping（one-shot 階梯：Claude Code 3 發；ZCode 單發——session 綁定限制），落地即確認配額回來；固定週期配額用週期模式——固定時刻制 every Nh from HH:MM（recurring cron 網格）、滾動窗口制 every 5h rolling（+5h01m 自排程鏈：landing 即新窗口錨點、每輪重錨零漂移）。每個 trigger 最小 call 成本；只寫時間不帶任務（要接續工作用 /at）。觸發詞：叫醒、ping、配額重置、reset 探測、usage reset、5 小時窗口、滾動窗口"
-when_to_use: "LLM provider usage reset 時間是估計值（一次性時刻、固定時刻週期、或滾動窗口）、只需要叫醒 LLM 確認配額（不接任務、最小 call 成本）時"
-argument-hint: "HH:MM | every 5h from HH:MM | every 5h rolling"
+description: "usage reset 探測叫醒 — 在估計的重置時間排 ping（one-shot 階梯：Claude Code 3 發；ZCode 單發——session 綁定限制），落地即確認配額回來；固定時刻制配額用網格模式 every Nh from HH:MM（recurring cron）。滾動窗口制（GLM 5 小時窗口類）無法自動輪詢——讀 provider UI 邊界重跑一次性，或無參數保底 now+301min（落地後重跑＝手動接力）。每個 trigger 最小 call 成本；只寫時間不帶任務（要接續工作用 /at）。觸發詞：叫醒、ping、配額重置、reset 探測、usage reset、5 小時窗口、滾動窗口"
+when_to_use: "LLM provider usage reset 時間是估計值（一次性時刻或固定時刻週期）、只需要叫醒 LLM 確認配額（不接任務、最小 call 成本）時"
+argument-hint: "HH:MM | every 5h from HH:MM"
 allowed-tools: ["Bash", "CronCreate", "CronDelete", "CronList"]
 ---
 
 # /usage-ping — usage reset 探測叫醒
 
-在估計的 usage reset 時間排 **ping**，時間到叫醒 LLM——model call 能發生 = 配額已重置（落地即確認）。**只叫醒不接任務**。三種模式：**一次性**（單一估計時刻 → 階梯 rungs，見「執行流程」）；**週期-網格**（固定時刻 reset → 單條 recurring cron）；**週期-鏈**（滾動窗口 reset 如 GLM 5 小時窗口 → landing 自排下一發 +5h01m、零漂移，見「週期模式」段）。
+在估計的 usage reset 時間排 **ping**，時間到叫醒 LLM——model call 能發生 = 配額已重置（落地即確認）。**只叫醒不接任務**。兩種模式：**一次性**（單一估計時刻 → 階梯 rungs，見「執行流程」）；**週期-網格**（固定時刻 reset → 單條 recurring cron）。滾動窗口制（如 GLM 5 小時窗口）無法自動輪詢（鏈模式已棄用，見該段）——實務為每次讀 provider UI 邊界重跑一次性。
 
 > **與 `/at` 分工**：本命令只寫時間（叫醒＋確認配額）；時間後面要接「做什麼」（reset 後自動接續工作）用 [`/at`](../at/SKILL.md)；要把工作交給另一個 session/provider 用 [`/handoff`](../handoff/SKILL.md)。
 
@@ -16,7 +16,7 @@ allowed-tools: ["Bash", "CronCreate", "CronDelete", "CronList"]
 
 - reset 時間是**估計值**——估早的 ping 撞死配額 → turn 不發生（0 call）→ 下一 rung 15 分鐘後再試（有界重試）
 - ping 觸發時 model turn 能發生 = 配額已重置：call 本身觸發/證明配額回來，**不需查詢 usage 狀態的機制**
-- **單 call 紀律**（per-call 計費；一次性模式）：落地 rung 回一行文字、**零工具呼叫**——任何工具 round-trip 都是多一個 request，不划算；週期模式放寬（網格 2 calls；鏈 3 calls——landing 直接 say＋自排下一發，理由見「週期模式」）
+- **單 call 紀律**（per-call 計費；一次性模式）：落地 rung 回一行文字、**零工具呼叫**——任何工具 round-trip 都是多一個 request，不划算；網格模式放寬（2 calls——landing 直接 say，理由見「週期模式」）
 - 語音召回由 Stop hook 機械執行（ping sentinel，0 LLM call；見 [voice-notification](../voice-notification/SKILL.md)）
 - **落地不做清理**：清理成本（CronList + CronDelete ≈ 2-3 calls）與讓後續 rung 空落地（各 1 call）相當，且零失敗模式。殘留有兩種、都由下次 `/usage-ping` 排程時 supersede（Phase 2 刪舊覆蓋）清掉：① 未 fire 的後續 rung（by design 空落地耗盡）；② ZCode one-shot 跑完的 completed/failed 記錄——**不自動刪且佔 20 條名額**（Claude Code one-shot 跑完自刪，無此殘留）。階梯成本上界 = rung 數（3 calls）
 
@@ -27,11 +27,12 @@ allowed-tools: ["Bash", "CronCreate", "CronDelete", "CronList"]
 | 輸入格式 | 解析方式 | 範例 |
 |---------|---------|------|
 | `HH:MM` | 今天指定時間；已過 → 明天 | `14:30` → 今天 14:30 |
-| `every Nh from HH:MM`／`every Nh rolling` | 週期模式（網格／鏈）——跳到下方「週期模式」段處理，不走本階梯流程 | `every 5h from 17:41`；`every 5h rolling` |
+| （無參數） | 滾動窗口保底：T = 現在 + 301 分鐘（用 `date` 換算絕對時刻後照 Phase 3；ZCode 可直接 `delayMinutes=301`）——本次對話本身即配額使用，證明錨點 ≤ 現在 → 邊界 ≤ 現在+5h < T，**任何時刻排都保證 ≥ 邊界+1min**；不加 +1、不走 jitter（301 已含 margin）。landing 即新窗口首用、錨定下輪邊界 = landing+5h → **落地後立即重跑本命令＝手動接力**（取代已棄用自排鏈；中途重跑會晚於邊界但仍正確） | 無 UI 邊界時的保底 / 語音後接力 |
+| `every Nh from HH:MM` | 週期-網格模式——跳到下方「週期模式」段處理，不走本階梯流程 | `every 5h from 17:41` |
 
 - **絕對時間 only**（同 /at 治理）：用戶給相對時間時，用 `date` 查當前時間換算成絕對時刻（跨日明確向用戶確認目標日期）
-- **一律 +1 分鐘**：T = 輸入時間 + 1 分鐘（秒數誤差防護——輸入的 HH:MM 無秒數，實際 reset 若在 HH:MM:00 邊界，不延後會在重置完成前偷跑，浪費 rung）
-- **jitter 規則**：T（+1 後）落在 `:00`/`:30` → 再 +1 分鐘——Claude Code one-shot 在整點/半點最多**提前 90 秒** fire，reset 前偷跑 = 偽陰性
+- **一律 +1 分鐘（僅 `HH:MM` 輸入）**：T = 輸入時間 + 1 分鐘（秒數誤差防護——輸入的 HH:MM 無秒數，實際 reset 若在 HH:MM:00 邊界，不延後會在重置完成前偷跑，浪費 rung；無參數保底不適用——301 已含 margin）
+- **jitter 規則（僅 `HH:MM` 輸入）**：T（+1 後）落在 `:00`/`:30` → 再 +1 分鐘——Claude Code one-shot 在整點/半點最多**提前 90 秒** fire，reset 前偷跑 = 偽陰性
 - 計算 3 個 rung 時刻：T、T+15m、T+30m，用 `date` 換算（macOS `-v` 可疊加：`date -v+1M -v+15M`），跨日跨月交給 date 處理，**不手算**
 - 用戶在時間後面寫了任務 → 提示「usage-ping 不帶任務；要 reset 後接續工作改用 /at」
 
@@ -73,7 +74,7 @@ allowed-tools: ["Bash", "CronCreate", "CronDelete", "CronList"]
 
 ## 週期模式（固定週期配額輪詢）
 
-> 按 reset 語義選：**固定時刻制**（每天同樣牆上時刻 reset、秒級抖動）→ 網格模式 `every 5h from HH:MM`；**滾動窗口制**（窗口從首用起算 N 小時、邊界隨使用漂移，如 GLM 5 小時窗口）→ 鏈模式 `every 5h rolling`。一次性階梯不適用此場景——每週期重排 rungs 成本高且 ZCode session 綁定（pending 期間鎖定，見 Phase 3）擋住後續建立。
+> 適用**固定時刻制**（每天同樣牆上時刻 reset、秒級抖動）：網格模式 `every 5h from HH:MM`。**滾動窗口制**（窗口從首用起算、邊界漂移，如 GLM 5 小時窗口）不適用任何自動排程——見下方「鏈模式已棄用」段，實務為讀 UI 邊界重跑一次性。
 
 ### 網格模式（固定時刻 reset）
 
@@ -99,32 +100,22 @@ allowed-tools: ["Bash", "CronCreate", "CronDelete", "CronList"]
 
 title `usage-ping every {N}h 週期叫醒`（保留 marker 供 supersede 匹配）。
 
-### 鏈模式（滾動窗口 reset）
+### 鏈模式（滾動窗口）——已棄用（2026-08-20 實測災難，真實案例）
 
-> 用法：`/usage-ping every 5h rolling`。**核心洞察：landing call 即新窗口首用**——roll 後第一個 request 是 ping 自己，邊界被錨定在 landing 時刻、下輪邊界 = landing + 5h → 下一發排 **landing + 5h01m（delayMinutes=301）精確無漂移**（每輪重新錨定、誤差不累積——API 做不到的 301 分鐘累加節奏因此不必要）。
+曾設計：landing turn 自排下一發（delayMinutes=301，landing call 即新窗口錨點、每輪重錨零漂移）。實測**首發落地即退化迴圈**：冷 context 下 landing LLM 重複呼叫第一個工具（CronList）約 50 次、從未進入下一步——每輪 context 累積放大、快速燒盡 usage，鏈斷（成功率 0/1）。
 
-- **建立**：先 Phase 2 supersede（網格與鏈互斥——網格排程多餘且其 fire 也會錨定窗口）；`CronCreate(delayMinutes=301, recurring=false, title="usage-ping 鏈 ping", prompt=下方鏈模板)`。首發 +301min 對任何當前窗口錨點都 ≥ 邊界+1min（錨點 ≤ 現在 → 邊界 ≤ 現在+5h），保證落地後自校正；**用戶已知精確邊界**（provider UI 直示 reset 時刻）→ **僅首發**改釘 邊界+1min 的 pinned cron 貼邊宣告（如邊界 22:43 → cron `44 22 ...`）——後續每發恆為前一落地 +301min 自錨定，不再用 cron
-- **landing 協議（3 calls）**：① `CronList` → 刪 title 含 usage-ping 之**非 active** 殘留（防 20 名額塞滿；刪除失敗不重試）② 同批並行 `say`「配額回來了」＋ `CronCreate` 下一發（delayMinutes=301、prompt=鏈模板原文照抄）③ 一行回覆
-- **失效模式**：host 關閉錯過 fire → skipped 消耗 one-shot → **鏈死、無自動復活**（有別於網格 recurring 恆存續）→ 重跑本命令重建——**任意時刻重建皆安全**（配額休眠語義：關機期間無請求＝無 roll，開機後首命令才是新窗口錨點 R ≤ 現在 → 新首發 now+301min ≥ R+5h+1min；歸納上鏈只死於 fire 未發生或抄寫變異，不死於邊界估錯）；Mac 睡眠 miss 可用自動化頁「保持喚醒」全局開關緩解；模板照抄變異（quine 風險）→ 落地走樣肉眼可見、重跑修復；provider 實為固定時刻制 → 改用網格模式
-- **session 綁定**：鏈落地 session 的前一發已 fire（completed）→ 額度已釋放 → landing 內 CronCreate 可成功（pending-lock 模型，見 Phase 3）。**鏈綁定 session 勿另建 pending 排程**（鎖定會拒 landing 的 CronCreate → 鏈死）——`/at` 用別的 chat；`/usage-ping` rerun 例外（supersede 先刪 active link 釋放額度再建）
-- **語音**：landing 直接 say（同網格理由——sentinel 時窗無法跨週期 re-arm）
+**教訓（設計約束）**：
+- **冷 context trigger 禁多步工具工作流**——cron dispatch 無對話歷史錨定，LLM 對「下一步」確定性下降，陷入「重複首工具」退化吸引子；一次性 landing「零工具、一行回覆」實測可靠（02:41、17:43 兩次 ✓）
+- 退化模式是**重複首工具**——若協議首工具是 CronCreate，迴圈會指數級複製排程（每個複製品再自排），災害遠大於重複讀取。**不可用「重排步驟順序」修**
+- prompt 內呼叫上限指令（「3 個 request call 內完成」）擋不住退化——退化時指令被忽略
+- 機械斷路器（hook 擋重複呼叫）理論可行但只能限損不能救鏈——landing 沒建出下一發，鏈照樣死
 
-**鏈模板**（建立與每發照抄用）：
-
-```
-🔴 usage-ping 鏈落地 — 滾動 5h 配額窗口輪詢 ping 觸發。
-本 turn 能發生 = 配額已重置（落地即確認；本 call 是 roll 後首用，錨定下輪邊界 = 現在 + 5h）。
-執行協議（嚴格——per-call 計費，3 個 request call 內完成）：
-1. CronList：找出 title 含「usage-ping」且非 active 的殘留排程，逐一 CronDelete（防 20 名額塞滿；刪除失敗不重試）
-2. 同批並行兩個工具：say -v Meijia -r 180 "配額回來了"；CronCreate（delayMinutes=301、recurring=false、title「usage-ping 鏈 ping」、prompt=本訊息「🔴 usage-ping 鏈落地」起全文原文照抄、一字不改）
-3. 回一行：「🔴 usage-ping 鏈落地 — 配額已重置，下一發 +5h01m」
-禁止其他工具與其他操作；不查狀態、不接任務。
-```
+**滾動窗口實務**：讀 provider UI 的下次 reset 時刻 → `/usage-ping HH:MM`（一次性、零工具 landing）；每次邊界重跑一次。僅單一 trivial 工具的 landing（如網格的固定 say 指令）屬可接受邊界，未實測。
 
 ## 執行約束
 
 - **host 開啟前提**（同 /at）：排程由 host 在觸發時刻 dispatch——Claude Code 是 terminal session、ZCode 是 app；關閉期間到點不觸發（ZCode 記「跳過」不補跑），需要就把 host 開到觸發時刻
-- **失敗消耗假設**（一次性）：fire 失敗（配額仍死）也消耗該 one-shot（兩端文檔皆未記載 retry，保守假設）→ 靠多 rungs 有界取樣，不依賴單發重試（ZCode 僅 1 rung，miss 即無重試——見 Phase 3 session 綁定限制）；網格 recurring 恆存續（miss 週期 = 0 call）；鏈模式 one-shot miss = 鏈死（見鏈模式「失效模式」）
+- **失敗消耗假設**（一次性）：fire 失敗（配額仍死）也消耗該 one-shot（兩端文檔皆未記載 retry，保守假設）→ 靠多 rungs 有界取樣，不依賴單發重試（ZCode 僅 1 rung，miss 即無重試——見 Phase 3 session 綁定限制）；網格 recurring 恆存續（miss 週期 = 0 call）
 - **sentinel 時窗語義**：Stop hook 只在 [T, T+90min)（上界排除——恰 T+90min 走逾時自清）內有 turn 結束才 say——配額死 = 無 turn = 無誤報；逾時靜默自清（階梯早已耗盡，估計過期）。時窗 90min = hook `PING_STALE=5400`（sync 副本：hooks/stop-notification.sh、本檔、voice-notification——改階梯幾何三處同改）
 - **生命週期**（同 /at）：Claude Code 綁 session，session 結束排程消失；ZCode workspace 持久——殘留 completed 記錄佔 20 條名額，下次 supersede 清
 - **語音**：遵循 [voice-notification](../voice-notification/SKILL.md) 規範（排程確認即時 say；落地召回走 Stop hook sentinel 機制，非 LLM say——**週期模式例外**：landing 直接 say，理由見該段「成本」）
@@ -138,6 +129,9 @@ title `usage-ping every {N}h 週期叫醒`（保留 marker 供 supersede 匹配�
 # 固定時刻制（每天 02/07/12/17/22 的 ~:41 reset）→ recurring cron 42 2-23/5 * * *（每天五發，各 +1 分 margin）
 /usage-ping every 5h from 17:41
 
-# 滾動窗口制（GLM 5h 從首用起算、邊界漂移）→ 自排程鏈，每輪 landing+5h01m、零漂移
-/usage-ping every 5h rolling
+# 滾動窗口制（GLM 5h）→ 無法自動輪詢（鏈已棄用）——讀 UI 下次 reset 時刻，每次邊界重跑一次性
+/usage-ping 01:02
+
+# 無參數保底（滾動窗口、無 UI 數字）→ T = now+301min；聽到語音後再跑一次＝手動接力下一輪
+/usage-ping
 ```

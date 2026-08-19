@@ -59,7 +59,7 @@
 
 - `/deep-work` — 用戶離開時的自主實作引擎（收尾寫 STATE.md Last session 觀察）
 - `/at` — 排程工作接續（對應 Unix `at`，LLM provider reset usage 後自動 resume；resume 讀 STATE.md 補 observation）
-- `/usage-ping` — usage reset 探測叫醒（一次性 one-shot 階梯：Claude Code 3 發有界重試 / ZCode 單發 pending 鎖定，每 trigger 1 call 零工具、召回走 Stop hook sentinel；週期-網格：固定時刻 reset 單條 recurring cron，每 trigger 2 calls；週期-鏈：滾動窗口（GLM 5h 類）landing 自排下一發 +5h01m 零漂移，每 trigger 3 calls、landing 直接 say；落地即確認配額回來；只寫時間不接任務，接任務用 /at）
+- `/usage-ping` — usage reset 探測叫醒（一次性 one-shot 階梯：Claude Code 3 發有界重試 / ZCode 單發 pending 鎖定，每 trigger 1 call 零工具、召回走 Stop hook sentinel；週期-網格：固定時刻 reset 單條 recurring cron，每 trigger 2 calls；滾動窗口（GLM 5h 類）無法自動輪詢——讀 UI 邊界重跑一次性，或無參數保底 now+301min、落地後重跑＝手動接力（鏈模式已棄用：冷 context landing 退化迴圈）；落地即確認配額回來；只排時間不接任務，接任務用 /at）
 - `/handoff` — 產出 self-contained 交接 prompt（進度+決策脈絡+下一步），交另一個 session/repo/provider；與 /at 分工（handoff 交別人 / /at 自己續）；STATE.md 非交接選項（Last session 觀察 / 每 session 覆寫，/at resume 讀）
 - `/mosaic-idle-tasks` — mosaic_alpha 閒時任務範本產生器（ZCode 免費 idle 通道、UI copy-paste 建立；四張：weekly-standup / test-findings / doc-sync / research-scan；範本自足——唯讀、禁背景子智能體、分段續跑鐵律逐張內嵌；例行工作走 CronCreate 定時非閒時）
 
