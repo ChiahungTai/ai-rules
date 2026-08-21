@@ -61,7 +61,7 @@
 | 2 | 跨 session LLM 第二意見（開新 session 跑 `/code-review`/`/ep-review`，findings 貼回實作 LLM → `/judge-review`） | 中 | A |
 | 3 | `/debrief`（改動理解+驗證證據）+ `/illustrate`（結構 viewport）+ `/smell-detector`（壞味道：zoom 放大鏡/baseline 盤點）：人類 viewport 判讀 | 高（不同智能） | B |
 
-理論底層（A/B 軸、L1-L6 證據階層、證據獨立性、Runtime Invariant Assurance、Claim→Evidence→Trust、Intent Drift Type A/B）見 `rules/acceptance-evidence.md`。本節是入口摘要，acceptance-evidence 是完整理論。
+理論底層（A/B 軸、L1-L6 證據階層、證據獨立性、Claim→Evidence→Trust）見 `rules/acceptance-evidence.md`（always-on 核心）；深層理論（Runtime Invariant Assurance、Intent Drift Type A/B、filter trap、B 軸演進）見 acceptance-evidence skill（on-demand）。本節是入口摘要。
 
 ### 核心流程命令分類
 
@@ -88,8 +88,8 @@
 
 ## 專案結構
 
-- `rules/` — 行為規範（載入機制因 harness 而異；部署紀律 + scope 分類見 `rules/AGENTS.md`）
-- `skills/` — 領域知識和工作流 skills（on-demand；SKILL.md 開放標準，跨 harness 可攜；Claude 端 `/name` slash 與 Skill tool 皆可觸發，工作流 skills 索引見 `skills/CLAUDE.md`）
+- `rules/` — 行為規範的 **always-on 核心**（載入機制因 harness 而異；部署紀律 + scope 分類 + 截斷線/尺寸 gate 見 `rules/AGENTS.md`——非 Claude 端是單檔 bundle，受 harness 截斷線約束（ZCode 實測 100KiB 硬編碼），rule 只放每次 session 都需要的內容）
+- `skills/` — 領域知識和工作流 skills（on-demand；SKILL.md 開放標準，跨 harness 可攜；Claude 端 `/name` slash 與 Skill tool 皆可觸發，工作流 skills 索引見 `skills/CLAUDE.md`）。**reference skill 分層**：on-demand 級 rule 內容下沉至此——rule 留 always-on 核心＋pointer，深層住 `skills/<同名>/SKILL.md` 經全域 symlink 四 harness 按需可讀；這是控制 bundle 尺寸的既定模式（先例：acceptance-evidence / lsp-navigation / instruction-writing）
 - `skills/_common/` — 共用子範本（跨 skill 引用單元，非 skill；`instruction-*` 等使用）
 - `hooks/` — Hook 實作腳本（跨 Claude/ZCode 單一來源。hooks 無目錄載入點，**不能 symlink**——兩家 config 以絕對路徑引用本目錄腳本：Claude `~/.claude/settings.json`；ZCode 3.7.7+ user-level hooks，註冊範本 `hooks/zcode-registration.json`——**範本內容是 `~/.zcode/cli/config.json` `hooks:` 鍵下的子樹值，merge 進去而非整檔覆蓋**（整檔覆蓋會毀掉 config 的 mcp/plugins 區塊）、`notification.sh` 不移植。詳細實測與 ZCode 限制（事件子集、專案層忽略、per-session 快照）見 [04 報告 §7 修訂](ai-analysis/reports/superpowers/04-multi-harness機制對照.md)）
 - `agents/` — 跨 harness subagent 定義（`~/.claude/agents`、`~/.zcode/agents` symlink → 本目錄；欄位相容策略、tools 清單陷阱與 ZCode Beta 限制見 [agents/AGENTS.md](agents/AGENTS.md)）
@@ -100,7 +100,7 @@
 新增 rule/skill/command 時遵守：
 
 1. **先修剪測試**：這行知識從程式碼推導得出嗎？是 → 不寫
-2. **選對載體**：Hook？Rule？Skill？按上面的分界判斷
+2. **選對載體**：Hook？Rule？Skill？按上面的分界判斷——且 always-on 預算是稀缺資源：rule 只放每次 session 都需要的硬紀律，on-demand 級內容（理論深掘、失敗案例群、撰寫規範細則）住 skill（reference 分層）；`deploy_agents.py` 的 90KiB gate 撞線時以此為處方
 3. **驗證附著**：rule/command 是否包含可驗證的標準？沒有驗證的規則是噪音
 4. **長度預算**：CLAUDE.md 越長，AI 越容易忽略重要規則。一條規則一行能說完最好
 5. **部署同步**：編輯 `rules/` 後的部署與驗證紀律見 [rules/AGENTS.md](rules/AGENTS.md)「部署紀律」（含 `/sync-sources` 機械新鮮度檢查）

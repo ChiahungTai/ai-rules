@@ -61,7 +61,7 @@ description: 台股券商分點進出(BSR / broker flow / 主力進出 / 分點�
 
 ## 個案指標(完整敘事在 project doc)
 
-源案例:一檔股票盤前利空殺到日低,用戶錨定「後手發動點」這個關鍵價位,萃取其下買盤 → **分散式中實戰合力吃掉少數大戶的集中賣壓(割肉 + 放空 + 追殺)穩住底部 → 後手在更高帶進場拉抬**;另有一分點長期零庫存但含方向性大單,最終判讀為「非純造市、有方向判斷」。完整方法 + 陷阱 + 全敘事見 mosaic 專案 `ai-analysis/analysis/daytrade-bsr-analysis.md`(該處的「6 方法」是廣度分析,本 skill 的「6 步 playbook」是 focal-point 紀律精煉,兩者不同)。**程式 verdict**(anchor / dispersion / absorption / band_net,Code-computes)見 mosaic `mosaic_alpha/broker_flow_analysis/` 模組 + CLI `scripts/research/analyze_focal_point.py`;本 skill 補 LLM 判讀層(step 5 因果 / 角色邊界 / 敘事)。
+源案例:一檔股票盤前利空殺到日低,用戶錨定「後手發動點」這個關鍵價位,萃取其下買盤 → **分散式中實戰合力吃掉少數大戶的集中賣壓(割肉 + 放空 + 追殺)穩住底部 → 後手在更高帶進場拉抬**;另有一分點長期零庫存但含方向性大單,最終判讀為「非純造市、有方向判斷」。完整方法 + 陷阱 + 全敘事見 mosaic 專案 `ai-analysis/blueprint/strategy/daytrade-bsr-analysis.md`(該處的「6 方法」是廣度分析,本 skill 的「6 步 playbook」是 focal-point 紀律精煉,兩者不同)。**程式 verdict**(anchor / dispersion / absorption / band_net,Code-computes)見 mosaic `mosaic_alpha/broker_flow_analysis/` 模組 + CLI `scripts/research/analyze_focal_point.py`;本 skill 補 LLM 判讀層(step 5 因果 / 角色邊界 / 敘事)。
 
 ## 工具慣例
 

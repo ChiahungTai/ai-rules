@@ -32,6 +32,15 @@ Bundle slimming: rule bodies may mark sections to drop from the bundle with
 Claude reads the full file via ~/.claude/rules/ symlink; non-Claude bundles
 get the slimmed version. No-op for rules without markers.
 
+Size gate: non-Claude harnesses truncate the single AGENTS.md silently.
+ZCode truncates at 102,400 bytes (100KiB, hardcoded in zcode.cjs -- no
+config). The bundle carries a hard-fail limit of 90KiB (92,160 bytes),
+leaving headroom below the truncation line. Over the limit -> abort with
+guidance: slim rules/ (encoder-philosophy) or demote on-demand-grade
+content to a reference skill (rule keeps an always-on core + pointer).
+Precedents: acceptance-evidence / lsp-navigation / instruction-writing
+rule+skill pairs.
+
 Run after editing rules/ (deploy discipline in rules/AGENTS.md). Idempotent.
 """
 
@@ -49,6 +58,15 @@ TARGETS = [
     pathlib.Path.home() / ".config" / "opencode" / "AGENTS.md",
     pathlib.Path.home() / ".codex" / "AGENTS.md",
 ]
+
+# ZCode truncates a single instruction file at 100KiB (102,400 bytes,
+# hardcoded; OpenCode/Codex limits unverified). Keep the bundle under 90KiB
+# so tail rules never land in the silent-truncation zone.
+BUNDLE_MAX_BYTES = 90 * 1024
+
+# Appended as the bundle's last line; a deployed file whose tail lacks it was
+# cut short (or hand-edited) -- load-time truncation is proven by size gate.
+BUNDLE_END_SENTINEL = "<!-- bundle-end -->"
 
 # Matches <!-- bundle: skip-start --> ... <!-- bundle: skip-end --> (incl. the
 # trailing newline) so adjacent sections join cleanly. Non-greedy + DOTALL.
@@ -178,6 +196,7 @@ def build_bundle(rule_paths: list[pathlib.Path], scopes_label: str) -> str:
             ).strip()
         )
         parts.append("")
+    parts.append(BUNDLE_END_SENTINEL)
     return "\n".join(parts)
 
 
@@ -234,6 +253,9 @@ def main() -> int:
         return 1
 
     bundle = build_bundle(rule_paths, scopes_label)
+    # Sentinel integrity is the load-time truncation proof; guard it every run.
+    assert bundle.count(BUNDLE_END_SENTINEL) == 1
+    assert bundle.rstrip().endswith(BUNDLE_END_SENTINEL)
     bundle_lines = bundle.count("\n") + 1
     bundle_bytes = len(bundle.encode("utf-8"))
     tok_est = bundle_bytes // 3200
@@ -242,8 +264,25 @@ def main() -> int:
     print(f"[OK] bundle: {len(rule_paths)} rules (scope={scopes_label}) + guide")
     print(f"     rules: {', '.join(rule_names)}")
     print(
-        f"     size: {bundle_lines} lines, {bundle_bytes:,} bytes (~{tok_est}K tokens est)"
+        f"     size: {bundle_lines} lines, {bundle_bytes:,} bytes "
+        f"(~{tok_est}K tokens est, {bundle_bytes * 100 // BUNDLE_MAX_BYTES}% of "
+        f"{BUNDLE_MAX_BYTES // 1024}KiB gate)"
     )
+
+    if bundle_bytes > BUNDLE_MAX_BYTES:
+        print(
+            f"[FAIL] bundle {bundle_bytes:,} bytes exceeds size gate "
+            f"{BUNDLE_MAX_BYTES:,} bytes ({BUNDLE_MAX_BYTES // 1024}KiB)",
+            file=sys.stderr,
+        )
+        print(
+            "     Non-Claude harnesses truncate silently (ZCode: 102,400B hard "
+            "line). Slim rules/ per encoder-philosophy, or demote on-demand "
+            "content to a reference skill (rule keeps always-on core + "
+            "pointer; see rules/AGENTS.md size-gate note).",
+            file=sys.stderr,
+        )
+        return 1
 
     if args.dry_run:
         print("[DRY-RUN] skipping deploy")
@@ -257,11 +296,17 @@ def main() -> int:
             deployed += 1
         except Exception as exc:
             print(f"  [FAIL] {target}: {exc}", file=sys.stderr)
-    print(f"[OK] deployed to {deployed}/{len(TARGETS)} non-Claude harnesses")
+    if deployed == len(TARGETS):
+        print(f"[OK] deployed to {deployed}/{len(TARGETS)} non-Claude harnesses")
+    else:
+        print(
+            f"[FAIL] deployed to {deployed}/{len(TARGETS)} non-Claude harnesses",
+            file=sys.stderr,
+        )
     print(
         "     Claude (~/.claude/CLAUDE.md) untouched -- rules via ~/.claude/rules/ auto-load"
     )
-    return 0
+    return 0 if deployed == len(TARGETS) else 1
 
 
 if __name__ == "__main__":

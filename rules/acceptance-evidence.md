@@ -4,59 +4,24 @@ harness-scope: neutral
 
 # 驗收證據階層
 
-> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）。**深層理論**（認知誤差與 EP 預見極限、Intent Drift 兩型、filter trap 重構查證、L3 整合實例、Runtime Invariant Assurance、B 軸演進）見 **acceptance-evidence skill**（on-demand）
 
 ## 核心原則:證據獨立性
 
-傳統 TDD 的權威性建立在一個從未被明說的前提:測試的「意圖」與實作的「理解」分屬不同認知主體。人類寫測試表達需求(程式碼之外),實作面對機械世界,兩者的張力就是驗收的來源。
-
-**AI 同時寫實作與測試時,這個獨立性塌縮。** 測試從「人類意圖的權威表達」降級為「AI 對自己理解的描述」,測試通過從「人類意圖被滿足」降級為「AI 內部自洽」。最危險的不是測試太弱,而是測試與實作共享同一個錯誤前提 — AI 若誤解問題,它寫的測試忠實反映誤解,實作忠實滿足誤解,綠燈只在證明「AI 自洽地重複了自己的錯」。
+傳統 TDD 的權威性建立在一個從未被明說的前提:測試的「意圖」與實作的「理解」分屬不同認知主體。**AI 同時寫實作與測試時,這個獨立性塌縮。** 測試從「人類意圖的權威表達」降級為「AI 對自己理解的描述」,測試通過從「人類意圖被滿足」降級為「AI 內部自洽」。最危險的不是測試太弱,而是測試與實作共享同一個錯誤前提 — AI 若誤解問題,它寫的測試忠實反映誤解,實作忠實滿足誤解,綠燈只在證明「AI 自洽地重複了自己的錯」。
 
 **判斷準則**:驗收證據的強度,取決於「證據來源是否獨立於被驗證物」。AI 同寫 test + impl = 零獨立性 = 證據強度低。
 
 ### Claim→Evidence→Trust(no-impact claim 校驗)
 
-證據獨立性的直接 operationalization:當 AI/producer 宣稱「不影響 X」(accounting/risk/invariant)時,這個 claim 須有**獨立機械證據**反證(git diff / rg 殘留 / LSP findReferences),否則 claim 退化為 self-report — AI 同時產 code 與 claim,claim 是非獨立自述,受同一 mental model drift 污染(呼應上方證據獨立性)。**AI 誠實說「沒影響」時最危險** — 獨立性塌縮點。
+當 AI/producer 宣稱「不影響 X」(accounting/risk/invariant)時,這個 claim 須有**獨立機械證據**反證(git diff / rg 殘留 / LSP findReferences),否則 claim 退化為 self-report — AI 同時產 code 與 claim,受同一 mental model drift 污染。**AI 誠實說「沒影響」時最危險** — 獨立性塌縮點。任何「沒影響 X」的 claim 都須獨立證據,不接受自述。
 
-**數字/清單類 claim 同理**(計數、規模、盤點清單):寫進文檔前用獨立計數命令(`rg | wc -l` / `rg -c`)核對原命令完整輸出,不靠印象或截斷結果人工數 — AI 寫盤點清單時易憑印象混入/漏掉成員(真實案例:features leaf 清單把 VolumeFeature 寫成 KeyCandleFeature,與 `list_feature_classes` 實際輸出不符,自審抓不到;consumers 數 41 誤寫 20 因 `rg | head -20` 截斷)。
+同型 claim 群（均須獨立機械證據，詳案例見 acceptance-evidence skill）：
 
-**刪除/死碼自述同理**(zero caller / dead code /「沒人用」):刪除前宣稱「零 caller」是 no-impact self-claim,須**獨立機械證據**反證,且證據須涵蓋**全消費端**——靜態 import(LSP `findReferences`)+ 字串引用(rg 跨 .py/.yaml/.json)+ **非函式庫消費者**(scripts/、lab/、demo、saved config)+ 動態派發(getattr/importlib/registry auto-discovery/StrEnum 字串值)。只跑 LSP `findReferences` 宣稱「zero hits = 確認」**不足**——LSP 漏動態派發,且 review 的「消費端」列舉若只含 demo/poc 會漏 scripts/lab。
-
-**最低門檻（actionable）**：刪整檔/整 class 前，rg 符號名跨全專案 + 實際執行 import 測試(L4)受影響消費者——靜態 zero-hit ≠ runtime 無消費者。
-
-真實案例:清理日刪一個被歸類為「死 demo」的檔案,commit 自述「雙工具驗證零 caller」,實際 scripts/ 有 hard-import caller → runtime `ModuleNotFoundError`;自述反映「這是死碼」的意圖非事實(呼應本節頂層:AI 誠實說沒影響時最危險)。教訓通用(刪除自述須獨立全消費端驗證),不依賴該符號現狀。
-
-**silent-failure claim 同理**(silent drift / silent corruption / 靜默失效):宣稱「行為 silent」須附**執行證據**(跑了該輸入、觀察到靜默通過,非靜態推論)。**silent vs loud 不對稱風險** — 誤判 loud(實為 silent)以為會炸卻靜默腐敗(危險);誤判 silent(實為 loud)虛驚、跑測試推翻(安全)。故 silent-claim 舉證責任更高:無執行證據時**預設標 'inferred loud',禁標 'silent'**。真實案例:codebase-sweep（原時期命令，現 smell-detector baseline）state.yaml 把 Interval 自創名稱(如 `"1M"`)標「silent drift」— 靜態推論「1M 撞 1m」沒跑 `Interval("1M")`;實證 StrEnum 精確比對 + raise → loud crash 非 silent。同類:tilde bug 靜態推論「消費端 inline 沒問題」沒執行 → 實證推翻。教訓通用(silent-claim 須執行),不依賴特定符號現狀。
-
-**Review 雙向應用**:上述 silent vs loud 不對稱風險不只用於「驗證 silent-claim」,也用於**審查 loud→silent 的 diff**——看到 `raise`→`return None`、新增/拓寬 `try/except`、crash→filter、validation 緩步化的改動時,視為潛在 silent-corruption **引入**(危險方向,不限交易 critical path,任何 error-path 改動把大聲錯誤靜默化都套用)。review 的 operational lens 見 code-review-and-quality skill ###1 Correctness「Loud→silent regression」（Claude: `skills/code-review-and-quality/SKILL.md`；非 Claude harness 靠自家 review profile 套用同一 loud→silent lens）。
-
-此為跨 harness 通用原則:具體機制(Agent 產出 vs git diff 校驗)見 build.md Agent 產出機械驗證(Claude command);非 Claude harness 靠自家 review 機制套用同一原則 — 任何「沒影響 X」的 claim 都須獨立證據,不接受自述。
-
-## 核心原則(續):認知誤差與 EP 的預見極限
-
-證據獨立性解決「驗證者的偏誤」(AI 不能自己驗自己),但解決不了「驗證基準本身可能是錯的」。**規劃層(EP)是人類 + AI 對需求理解的最佳猜測,不是真理**。兩種認知誤差只能在實作呈現時被發現:
-
-- **實作落差**:實作層發現規劃層沒預見的 — EP 的 pseudo code 看起來對,接起來才發現邊界、副作用、組件互動。
-- **設計本身錯**:使用者一開始的設計就錯,看到實作呈現才理解 — 「我以為我要的是這個,看到成品才知道不是」。
-
-**Agent Review 解決「球員兼裁判」(同 LLM 審自己),但對認知誤差無效** — review agent 再獨立,審的基準仍是 EP,而 EP 可能從根上錯。問題不在「實作對不對 EP」,而在「EP 和它背後的預期對不對」。
-
-### 對 build 的啟示:EP 是收斂方向,不是合約
-
-- **前線實作 LLM 有裁量權**:實作時發現 EP 的問題(規劃層預見極限外的真相),可調整。這不是「偷懶不照 EP」,而是「實作層有發現真相的責任」 — 死守 EP 會實作一個「忠實但錯誤」的東西,反而妨礙人類在呈現時發現認知誤差。
-- **仍要架構化**:實作接近 EP(避免失控)+ 記錄偏差(可追溯)。
-- **呈現是唯一觸發器**:認知誤差只能靠「實作呈現給人類判讀」(L6)揭露。沒有可觀察的呈現,認知誤差永遠潛伏 — 這是 B 軸人類驗收層不可省略的根本理由。
-
-## Intent Drift 的兩型(Type A/B)+ 3-signal correlation
-
-認知誤差(上方)是「EP/設計本身可能錯」;intent drift 是另一軸 — **AI 的產出偏離了人類意圖**,即使 code 正確、test 通過(passing test ≠ business intent)。分兩型,偵測法不同:
-
-- **Type A(Specification Drift,靜態)**:AI 誤解 prompt → code 完全正確但不是要的。偵測:意圖先於 code 寫下並保留(story / plan);completion analysis 把生成碼 + transcript 對照原 plan。
-- **Type B(Context/Goal Drift,動態)**:AI 不知 project convention / hidden invariant / 歷史 bug,或隨段落推進 / 跨 session 目標悄然偏移。偵測:invariant check + pattern divergence 偵測 + 跨 session 目標描述 drift。
-
-**3-signal correlation**:判讀 passing test 是真通過還是 silent drift,須關聯三訊號 — ① 原始 test intent(story 建立時擷取)② 當前 test result ③ 引入的 code changes。任一單獨不足以判斷。coverage 增加 ≠ 能指出「code 仍做意圖中的事」。
-
-**別混淆三組二分法**:本處的 Type A/B(intent drift 動靜態)≠ fix-test 的 Type A/B(test-failure 分類:實作缺陷 vs 契約變更,Claude command)≠ 既有 impl-discovery / design-error(認知誤差兩型,非 Type A/B 標籤)— 三者語義正交,勿混為一談。
+- **數字/清單類 claim**（計數、規模、盤點）:寫進文檔前用獨立計數命令（`rg | wc -l` / `rg -c`）核對完整輸出，不靠印象或截斷結果人工數——AI 寫盤點清單易憑印象混入/漏掉成員（真實案例：consumers 數 41 誤寫 20，因 `rg | head -20` 截斷）。
+- **刪除/死碼自述**（zero caller /「沒人用」）:證據須涵蓋**全消費端**——靜態 import（LSP `findReferences`）+ 字串引用（rg 跨 .py/.yaml/.json）+ **非函式庫消費者**（scripts/、lab/、demo、saved config）+ 動態派發（getattr/importlib/registry auto-discovery/StrEnum 字串值）。只跑 LSP 宣稱「zero hits = 確認」**不足**。最低門檻：刪整檔/整 class 前，rg 符號名跨全專案 + 實際執行 import 測試（L4）受影響消費者——靜態 zero-hit ≠ runtime 無消費者（真實案例：自述「雙工具驗證零 caller」，實際 scripts/ 有 hard-import caller → runtime `ModuleNotFoundError`）。
+- **silent-failure claim**（silent drift / 靜默失效）:宣稱「行為 silent」須附**執行證據**（跑了該輸入、觀察到靜默通過），非靜態推論。**silent vs loud 不對稱風險**——誤判 loud（實為 silent）以為會炸卻靜默腐敗（危險）；誤判 silent（實為 loud）虛驚、跑測試推翻（安全）。無執行證據時**預設標 'inferred loud'，禁標 'silent'**。
+- **Review 雙向應用**：審查 diff 時看到 `raise`→`return None`、新增/拓寬 `try/except`、crash→filter、validation 緩步化 → 視為潛在 silent-corruption **引入**（loud→silent regression 檢查見 code-review-and-quality skill）。
 
 ## 證據階層
 
@@ -80,102 +45,24 @@ harness-scope: neutral
 | test-driven-development skill 警告過度 mock | L2 的獨立性被掏空 |
 | 消費端驗證模式(見 quality-constraints) | L3 的具體化 |
 
-### L3 整合層的正向價值實例(為什麼整合測試值得)
-
-**理論呼應**:"mock 循環論證讓 mock 假設成為 bug 來源"(見 quality-constraints 整合器型變更)。以下實例顯示補整合測試如何**立刻**抓到 mock 抓不到的 source bug。
-
-**實例(真實案例 — DB 序列重置函式)**:
-
-- **audit 發現**:restore flow 新增的 DB 序列重置函式(`pg_get_serial_sequence` + `setval` 動態 SQL),屬整合器型變更(DB catalog + serial sequence + restore flow),但整合測試零覆蓋。
-- **補整合測試**(真實 PostgreSQL,跑 restore → reset → INSERT):**立刻崩潰**。
-- **source bug**:空 table 時 `setval(seq, COALESCE(MAX(id), 0))` → `setval(seq, 0)`,但 SERIAL 的 `MINVALUE=1`,`setval(seq, 0)` 違反約束 → fresh DB restore 後第一次 INSERT 崩潰。
-- **為什麼 mock 抓不到**:mock 假設「table 有資料,MAX 有值」,整個邊界(空 table)不在 mock 的假設世界裡。mock 循環論證讓這個假設成為 bug 來源。
-
-**啟示**:整合器型變更(接 ≥2 真實外部組件)補整合測試不是「儀式」,是**唯一能抓跨組件邊界 bug 的手段**。理論見品質約束「整合器型變更判定」;判定流程見 audit-test 角度 4(Claude command,跨 harness 路徑從略)。
-
-### 重構查證義務:上抬抽象層的 filter trap(通用重構紀律)
-
-> **適用範圍超出整合器型變更** — 任何「移除補丁 / 上抬抽象層」重構都適用。此段放在 L3 整合層下,是因為 filter trap 的測試角度(mock 偽造 real code 不會算的值)接 L3 證據理論,但**重構查證義務本身是行動紀律,不限整合測試場景**。
-
-**機制(為什麼這類重構會回歸)**:「上抬抽象層」重構 = 把 logic 從 consumer 移到 producer(移除 consumer 補丁,改由 producer 統一處理)。直覺假設「producer 能處理 case X → 移除補丁後 case X 仍被處理」。**這個假設漏了一層**:producer 能處理 **≠** producer 會收到 — caller chain 中間的 filter 會阻斷 case 到達 producer。
-
-```
-consumer 補丁處理 case_X（原狀）
-  ↑ 重構：移除補丁，producer 已加 case_X 處理
-  ↓ 假設：producer 會接到 case_X
-producer 的 case_X 處理（從沒被觸發 — 死碼）
-  ← caller filter 全擋掉 case_X（重構者沒查）
-  → 移除補丁後 case_X 完全消失
-```
-
-**查證義務(移除補丁前必須執行)**:對 producer(被上抬的抽象層)做 LSP `findReferences` 找所有 caller,逐個讀其 filter 邏輯(條件分支、guard、type narrowing),確認 case 真流入 producer。**禁假設「producer 能處理 = producer 會收到」** — 這個等式只在「無 filter」的直連 caller 成立,真實 codebase 的 caller 幾乎都有 filter。
-
-**與 YAGNI check([collaboration-constraints](./collaboration-constraints.md))的差異**:YAGNI 是「搜用量 → 沒用 → 移除」;filter trap 是「**code 有用、但 caller chain 中間的 filter 阻斷 case 到達 producer**」。YAGNI 往「刪」走,filter trap 往「驗證不能刪」走 — 方向相反。YAGNI 的 `findReferences` 查「誰引用」;filter trap 的 `findReferences` 查「誰引用 + 其 filter 是否阻斷 case」— 多一層 filter 邏輯查證。
-
-**測試假信心(為什麼測試會給綠燈)**:移除補丁後,測試可能 mock 掉 producer 的真實 caller chain,直接偽造 case_X 傳入 producer → producer 處理成功 → 綠燈。但真實 runtime 的 caller filter 把 case_X 擋掉了,producer 從沒收到 → 死碼 → 補丁移除等於功能消失。**對「移除補丁」類重構,測試不能 mock 掉被重構的 producer caller 路徑**,須用真實 caller chain 驅動(L3 整合路徑,非 L2 隔離 unit test)。
+L3 整合層正向實例（mock 抓不到的 source bug）、filter trap 重構查證義務：見 acceptance-evidence skill。
 
 ### 證據時效性
 
-證據階層談「強度」,但證據還有「時效」— 測試通過的證據會隨系統演化而**腐化**。重構改變行為後,測試可能:
-
-- **過時但仍通過**(死測試):測試被改成迎合新實作,從「驗證意圖」降級為「反映實作」 — 這是同義反覆的動態版本(靜態同義反覆偵測抓不到)。
-- **驗證的行為已無關**:測試的消費端 / 情境已不存在。
-
-過時測試比沒測試更危險 — 它給虛假信心。**重構後必須重新確認證據有效**,否則 L2 證據 silently 貶值。偵測見 audit-test 角度 6,修正見 fix-test 必要性審查(Claude commands,跨 harness 路徑從略)。
-
-## Runtime Invariant Assurance(設計方向)
-
-證據階層的 test 是**時間點證據**(build-time 通過);runtime monitor 是**持續保證**。silent-corruption path(bug 不 crash 但污染下游資料)的 invariant,須有 **runtime 機械檢查**作為 test 之後的持續守衛 — 區分「test-passed-at-build-time」vs「holds-at-runtime」。source review 看得到語法 / 邏輯,看不到 runtime silent corruption。
-
-**獨立性**:runtime check 機械執行,**獨立於 AI mental model**(呼應證據獨立性)。AI 可幫寫 check code,但「該驗什麼 invariant」必須人定 — AI 可能正確實作錯誤模型,讓 AI 列 invariant 會把同一 drift 帶進 spec。
-
-**spec 是上限**:runtime monitor 的上限 = 寫進 spec 的 invariant 完整度。沒寫進 spec 的 invariant = 永遠測不到。
-
-**multi-point placement**(範例 placement,領域特定非規則本體):runtime check 放多個 defense-in-depth 點,依專案生命週期選。範例(量化領域):test-time assert / 對帳外部 truth(broker / account,獨立於內部 state)/ 生產 monitor / 本地 pre-commit(solo 無 CI 時取代 CI gate)。
-
-**降級路徑**(專案無 runtime monitor infra 時):原則不退化為空話 — 至少 ① source-time 強制列舉 invariant(人列,不讓 AI 列)+ ② test-time assert 作 monitor 替代。標「不足但有」。
-
-**asymmetric drift 警覺**(原則層,禁寫死研究數字):AI 在 complex / competing-demand 壓力下傾向破壞 constraint(risk limit 首要受害)→ constraint invariant 的 check 必須**機械、不可被 AI lobby**(AI 產 claim「沒影響 risk」時,assertion 照跑、違規照崩)。
-
-> cross-ref:silent-corruption path 的識別見 execution-plan §1b Invariant Impact(producer 端規劃時識別,Claude command);本段承接其 runtime 保證層(建議 §1b 加 forward-ref 指本段)。本原則(機械檢查 > AI 自述 / 人審)是 mechanical-gate-philosophy 的具體應用(該 general framework 待建成獨立 skill)。
+證據階層談「強度」,但證據還有「時效」— 測試通過的證據會隨系統演化而**腐化**。重構改變行為後,測試可能:過時但仍通過（死測試:測試被改成迎合新實作,從「驗證意圖」降級為「反映實作」）、或驗證的行為已無關。過時測試比沒測試更危險 — 它給虛假信心。**重構後必須重新確認證據有效**,否則 L2 證據 silently 貶值。
 
 ## A / B 雙軸分工
 
 | 軸 | 職責 | 證據層 | 天花板 |
 |--|--|--|--|
 | **A 機器自驗** | 內部實作細節的正確性 | L1-L3 | **AI 內部自洽** — 機器斷言跳不出 AI 信念體系 |
-| **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:debrief(理解+驗證證據) + illustrate(結構 viewport) + smell-detector(壞味道) = 人類 viewport(三層介入);完整 L4-L6 執行驗收仍為設計方向(見下) |
+| **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:debrief + illustrate + smell-detector = 人類 viewport(三層介入);完整 L4-L6 執行驗收仍為設計方向(見 skill) |
 
-**鐵律**:A 是必要不充分,B 是充分性的來源。A 軸深化有邊際效益遞減 — 天花板是 AI 自洽,真正的驗收鴻溝在 B 軸。Agent Review 的「獨立 context」≠「獨立智能」:同家族 LLM 共享系統性偏誤,quorum 對共同盲點無效,A 軸的深層防線最終仍由 B 軸兜底。
-
-**人審結構上限**(reviewer 認知上限):人審(B 軸 L6 / reviewer)亦有**結構上限** — 疲勞、注意力瓶頸、確認偏差是認知結構限制,**經驗無關**(資深 reviewer 同樣漏看)。故 P0 invariant 不能只靠人審(B 軸),需 Runtime Invariant Assurance(見上段)補人審結構上限 — A 軸機械、B 軸人審、runtime assurance 三層共同守 silent-corruption invariant。
-
-## B 軸人類驗收層
-
-**已落地**:debrief(理解簡報:demo-checklist 驗證證據 + 認知誤差點，承接原 deliverable-review 交付軸) + illustrate(結構 viewport:whole-picture + 重用枚舉) + smell-detector(壞味道:存在質疑/baseline 盤點) 是人類 viewport(三層介入,見 AGENTS.md「命令的受眾視角」)(Claude commands 與路徑,跨 harness 從略)—— 讓人用大原則判讀 EP 或 code,補 LLM 兩個結構性 blind spot(重造既有 / 偏方向)。
-
-**仍為設計方向**(viewport 之外,更深的 B 軸演進):
-
-`must-execute-before-complete.md` 把 `.py / demo / poc/ / example` 全歸為「可執行 → 必須 uv run」是**生產側視角**(確保 AI 跑過),完全缺**消費側視角**(給誰看、怎麼看)。B 軸的演進方向:
-
-1. **UC 場景執行驗收(B 軸核心)**:驗收單位是 UC 場景(execution-plan,Claude command)(EP Scenario Matrix,下稱 SM),不是泛泛 demo。SM 欄位「觸發 / 預期行為」是現成的可執行輸入 + 人類可判讀預期,且必須涵蓋 happy / 錯誤 / 邊界 / 效能。**人的角色**:debrief 第 6 段(驗證證據+清單完整性)審「該驗哪些」(範圍,不親跑);LLM 跑場景、人觀察產出 = L6。素材 EP 已產出,不需另發明。
-2. **可觀察性合約**:SM 的「預期行為」欄位 = 人類可判讀的結論。執行 SM 場景的 stdout 必須對應預期行為,且至少跑一個錯誤/邊界場景(避免只演 happy path 的 AI 公關稿)。
-3. **自動化對照(A/B diff)**:跑新舊版 / 兩 branch / 兩參數比對,人類只判讀 diff 合理性。把「讀」外包給機器,這是長期最該投資的模式。
-4. **流程末端驗收步驟**:build / deep-work(Claude commands)在 commit 前缺「執行 SM 代表性場景讓人判讀」的步驟;現有 demo/POC 驗證只驗 exit code 0,不驗輸出內容(silent failure / 語義錯誤偵測不到)。
-5. **人類介入點前移到 RED(operational)**:GREEN 後人類讀不完;RED 時刻判讀「失敗是否符合預期」更便宜,是意圖偏移的最早訊號。**operational step**:build 在每段 RED 時刻印出「失敗訊號 + EP 該段預期行為」對照,標「人類 RED checkpoint」(prospective 可選暫停點)。明文 prospective vs retrospective:此 checkpoint 前瞻判意圖,有別於 fix-test(Claude command)retrospective 判舊測試意圖。
-6. **session-boundary review**:跨 session 接續時,判讀累積目標是否漂移。**部分落地**:跨 session resume 觸發的 **substrate + 觸發器已落地** —— autonomous-execution「Session 級 Recovery」crash-only reconciliation(resume 時 re-derive「git diff vs EP scope」差異報告);at / handoff / standup 命令(Claude commands)仍非 intent-drift review。本原則效果:單 session batch-ceiling 軟觸發(見 build.md batch ceiling,Claude command)+ 跨 session resume 機械 re-derive(autonomous-execution)。**仍 deferred**:完整 intent-drift review **command**(判讀層:差異報告 → intent 是否漂移,Type B 動態漂移偵測見本檔「Intent Drift 的兩型」)——見 `.kanban/Backlog/` deferred card。
-
-### 內部跨層接線的真實邊界歸屬(A 軸天花板,B 軸補強)
-
-整合器型「真實邊界」的觸發準則鎖定「≥2 真實**外部**組件」。**內部跨層接線 + 真實資料依賴**(例:auto-discovery registry 成員 consume Feature 的真實 dtype、跨層欄位 auto-prefix 展開)不觸發整合器 flag — 這是 by design 而非 gap:
-
-- 這類 bug(接線 guard 通過但真實資料 dtype/契約落差)是 **A 軸 L3 天花板**:跑真實 pipeline 仍可能因 mock/合成資料不反映真實 dtype 而自洽通過。強迫真實邊界收不掉這個天花板。
-- 真正能抓此落差的是 **B 軸**(執行 UC/SM 場景,人類觀察真實資料產出,L4-L6)。
-- 實務:內部跨層段落,接線 guard(registry membership / 路徑覆蓋)靠 A 軸機械閘門擋高頻 regression;真實 dtype/契約落差靠 B 軸 UC 場景驗收。兩軸分工,不靠收緊整合器 flag 把真實邊界塞回 A 軸(over-classify,違反「避免過度工程」)。
+**鐵律**:A 是必要不充分,B 是充分性的來源。A 軸深化有邊際效益遞減 — 天花板是 AI 自洽,真正的驗收鴻溝在 B 軸。Agent Review 的「獨立 context」≠「獨立智能」:同家族 LLM 共享系統性偏誤,quorum 對共同盲點無效,A 軸的深層防線最終仍由 B 軸兜底。人審亦有結構上限（疲勞/注意力/確認偏差，經驗無關）→ P0 invariant 需 Runtime Invariant Assurance 補（A 機械、B 人審、runtime assurance 三層守衛,詳見 skill）。
 
 ## 與既有規則的關係
 
-- **風險分級**(ai-development-guide「驗證約束」段;source 在 ai-rules repo)決定「爬到第幾層」— 🟢 低風險不需六層,🔴 高風險才強制爬到對應層。避免過度工程是本階層的內建約束。
+- **風險分級**(ai-development-guide「驗證約束」段)決定「爬到第幾層」— 🟢 低風險不需六層,🔴 高風險才強制爬到對應層。避免過度工程是本階層的內建約束。
 - **漸進驗證**([progressive-validation](./progressive-validation.md))是 L1 → L2 → L3 的爬坡順序(DEPTH-MIN → SAMPLE → FULL)。
 - **消費端驗證模式**([quality-constraints](./quality-constraints.md))是 L3 整合層的具體化,本階層為它提供「為什麼」的理論基礎。
-- 階層降低風險,**不消除風險** — 每一層都值得懷疑,包括最頂層(L6 人類觀察會疲勞漏見 — 結構上限見上方「人審結構上限」,需 runtime assurance 補;L5 POC 可能打自己畫的靶)。
+- 階層降低風險,**不消除風險** — 每一層都值得懷疑,包括最頂層(L6 人類觀察會疲勞漏見;L5 POC 可能打自己畫的靶)。

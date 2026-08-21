@@ -21,6 +21,14 @@ uv run python scripts/deploy_agents.py
 → Claude 端不需 deploy（`~/.claude/rules/` 目錄 symlink 即時同步）。
 → 注意：deploy 會將非 Claude 端的 AGENTS.md 從 symlink（live-sync）轉為 generated snapshot — 改 rule 後需重跑 generator 才同步。
 
+### 尺寸 gate 與截斷線（bundle 上限）
+
+非 Claude 端單檔 AGENTS.md 受 harness **截斷線**約束——超線內容**靜默失效**（不報錯，直接截掉）：
+
+- **ZCode 實測**：截斷線 **102,400 bytes（100KiB）**，硬編碼於 `zcode.cjs`（`hIn=100*1024`，讀前 100KiB bytes 再 UTF-8 decode），**無任何 config 可調**（官方文檔亦未記載）。載入模型：只讀 user 全域（`~/.zcode/AGENTS.md`）+ workspace（cwd 往上至 project root 第一個 `AGENTS.md`）**兩檔**，各檔獨立 100KiB 預算；**不展開 `@import/@include`、不掃子目錄、不依任務類型選規則檔**。
+- `deploy_agents.py` 內建 **90KiB 硬 fail gate**（常數 `BUNDLE_MAX_BYTES`，此處為描述非真相源）：bundle 超過即拒絕部署。撞線時先精簡 rules/（encoder-philosophy：砍可推導與敘事），或把 on-demand 級內容**下沉 skills/**（reference skill 分層模式：rule 留 always-on 核心＋pointer，深層內容住 `skills/<name>/SKILL.md`——skills/ 經全域 symlink 四 harness 按需可讀。先例：acceptance-evidence / lsp-navigation / instruction-writing 三組 rule+skill 分層）。
+- 歷史教訓：部署版 141KB 時代，尾部 8 條 rules（含 tool-discipline、quality-constraints）落在截斷區靜默失效（2026-08-20 實證事故：spawn 背景規範沒載入 → 前景 spawn 被 user 插話殺掉）。**規範存在 ≠ 規範載入**。
+
 ### 部署驗證義務（deploy 跑通 ≠ 部署完成）
 
 deploy exit 0 只證明「bundle 生成成功 + 0 斷 ref」，**不證明「各端讀到正確內容」**。改動 rule（尤其 reclassify scope / 拆雙檔 / 新增 rule）後必須獨立驗證**每一端**（架構不同 → 驗證方式不同）：
@@ -41,17 +49,17 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `deep-thinking` | 🟢 neutral | 決策框架（第一性原理＋第二層）|
 | `progressive-validation` | 🟢 neutral | DEPTH-MIN/SAMPLE/FULL 驗證 |
 | `quality-constraints` | 🟢 neutral | crash-only / fail-loud / 消費端驗證 |
-| `acceptance-evidence` | 🟢 neutral | L1-L6 證據階層 / A/B 軸 / Runtime Invariant Assurance / Claim→Evidence→Trust / Intent Drift Type A/B |
+| `acceptance-evidence` | 🟢 neutral | L1-L6 證據階層 / A/B 軸 / Claim→Evidence→Trust（深層理論：Runtime Invariant、Intent Drift、filter trap 在 acceptance-evidence skill）|
 | `must-execute-before-complete` | 🟢 neutral | 改了要跑、非靜態檢查 |
 | `collaboration-constraints` | 🟢 neutral | anti-sycophancy / 事實查證 |
 | `self-consistency` | 🟢 neutral | 文檔自洽檢查 |
 | `_ai-behavior-constraints` | 🟢 neutral | instruction file 禁元資訊 |
-| `instruction-writing` | 🟢 neutral | 雙檔模型 meta-rule（large 但仍打包）|
+| `instruction-writing` | 🟢 neutral | instruction file 撰寫核心（完整規範在 instruction-writing skill）|
 | `python-standards` | 🟢 neutral | Python 標準（language；Python 專案適用）|
 | `context-management` | 🟢 neutral | context 重置原則（Claude 機制用括號註）|
 | `outward-action-consent` | 🟢 neutral | outward action 需用戶授權（commit / deploy / push / send / live order；reversibility test + AUTH line）|
 | `llm-output-convention` | 🟢 neutral | print/Logger 雙通道（Python 段標註）|
-| `lsp-navigation` | 🟢 neutral | 符號導航決策樹 + 跨 harness LSP 載體對照 |
+| `lsp-navigation` | 🟢 neutral | 符號導航決策樹 + Tool Discovery gate（反例群、載體對照、staleness 處置在 lsp-navigation skill）|
 | `modern-cli-preference` | 🟢 neutral | fd/rg CLI 速查（Claude 權限段括號註隔離）|
 | `tool-discipline` | 🟢 neutral | 通用工具紀律（uv run / pipe-exit / 禁 sed / pytest 背景跑）|
 | `edit-discipline` | 🟢 neutral | 通用編輯紀律（SRP/DIP/變更紀律/禁混合寫法）|
@@ -109,7 +117,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 
 ### 通用模式：跨 harness 載體對照（當工具呼叫方式跨 harness 不同時）
 
-當一個概念跨 harness 通用、但呼叫載體不同時（典型：LSP），用**對照表**表達，而非把某家 harness 的呼叫語法寫成主體。範例見 `lsp-navigation.md`「跨 harness LSP 載體對照」段。模式：
+當一個概念跨 harness 通用、但呼叫載體不同時（典型：LSP），用**對照表**表達，而非把某家 harness 的呼叫語法寫成主體。範例見 lsp-navigation skill「跨 harness LSP 載體對照」段。模式：
 
 ```markdown
 ### 跨 harness X 載體對照

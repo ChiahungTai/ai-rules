@@ -37,7 +37,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 **前置流程確認**（僅記錄，不因此停下）：`/spec（純輔助·需求釐清，可選）→ /execution-plan（自足，含 EP Review）→ [/ep-validate] → /implement`
 
-**docs mode 偵測**：掃描 EP 檔頭是否有 docs mode 聲明（變更全為 `.md` 且無新增/修改 `.py` callable 符號）→ 標記本 EP 為 docs mode，後續階段 2/3 依 docs mode 分支跳過 TDD/mypy/pytest，改 rg 殘留 + 一致性（完整對照見 [execution-plan.md](../execution-plan/SKILL.md) docs mode）。
+**docs mode 偵測**：掃描 EP 檔頭是否有 docs mode 聲明（變更全為 `.md` 且無新增/修改 `.py` callable 符號）→ 標記本 EP 為 docs mode，後續階段 2/3 依 docs mode 分支跳過 TDD/mypy/pytest，改 rg 殘留 + 一致性（完整對照見 [execution-plan](../execution-plan/SKILL.md) docs mode）。
 
 **EP 品質快掃**：
 
@@ -66,7 +66,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 整合器型段落標記後，在階段 2/3 對應加嚴（路徑覆蓋硬閘門 + 真實邊界整合測試）。
 
-**complex-change constraint tightening**（與整合器加嚴並列的第二 escalation trigger）：當變更觸及「會被未來目標 rationalize 放寬的約束」（風控 limit / 會計守恆 / single-writer）且 complex / competing-demand 升高時，constraint invariant 審查自動加嚴（不只 IO 邊界觸發加嚴，複雜度-約束也觸發）。asymmetric drift 原則（AI 壓力下傾向破壞 constraint，check 須機械、不可被 lobby）見 [acceptance-evidence](../../rules/acceptance-evidence.md)「Runtime Invariant Assurance」段 —— 本處只加 trigger 機制（IO 邊界 + 複雜度-約束雙 escalation），不重述原則。
+**complex-change constraint tightening**（與整合器加嚴並列的第二 escalation trigger）：當變更觸及「會被未來目標 rationalize 放寬的約束」（風控 limit / 會計守恆 / single-writer）且 complex / competing-demand 升高時，constraint invariant 審查自動加嚴（不只 IO 邊界觸發加嚴，複雜度-約束也觸發）。asymmetric drift 原則（AI 壓力下傾向破壞 constraint，check 須機械、不可被 lobby）見 [acceptance-evidence skill](../acceptance-evidence/SKILL.md)「Runtime Invariant Assurance」段 —— 本處只加 trigger 機制（IO 邊界 + 複雜度-約束雙 escalation），不重述原則。
 
 ### 階段 1：準備
 
@@ -122,7 +122,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 #### EP 專屬約束
 
-> **EP 是收斂方向，不是合約**。EP 是規劃層對需求理解的最佳猜測，有預見極限（見 [acceptance-evidence](../../rules/acceptance-evidence.md)「認知誤差與 EP 的預見極限」）— 實作落差、設計本身錯，都只能在實作呈現時發現。前線實作 LLM 有裁量權根據實作發現調整；死守 EP 會實作「忠實但錯誤」的東西，反而妨礙人類在呈現時發現認知誤差。
+> **EP 是收斂方向，不是合約**。EP 是規劃層對需求理解的最佳猜測，有預見極限（見 [acceptance-evidence skill](../acceptance-evidence/SKILL.md)「認知誤差與 EP 的預見極限」）— 實作落差、設計本身錯，都只能在實作呈現時發現。前線實作 LLM 有裁量權根據實作發現調整；死守 EP 會實作「忠實但錯誤」的東西，反而妨礙人類在呈現時發現認知誤差。
 
 - **EP 為收斂方向，實作層有裁量權**：照 EP 為主軸，但實作時發現 EP 預見極限外的真相（邊界、副作用、組件互動、需求落差）可調整 — 這是「發現真相的責任」而非「偷懶不照 EP」
 - 記錄偏差：與 Pseudo Code 有出入時記錄原因（偏差是發現認知誤差的線索，不是違規）
@@ -282,7 +282,7 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 > ⚠️ 本 build 僅 layer 1（AI 自洽天花板）。此變更觸及 [跨模組/公開簽名/外部整合]，**建議跑跨 session `/code-review`（layer 2）** 抓全貌漣漪 / 同 session 盲點（段落自檢 + Agent Review 都是 layer 1，看不全跨模組 ripple）。
 
-此旗標是**新增**硬性 code-review 導向提示；檔尾「與其他命令的協作」段的既有軟提醒（涵蓋 debrief/illustrate/code-review）**保留不動**。
+layer 旗標（本段）與檔尾「與其他命令的協作」段的軟提醒（涵蓋 debrief/illustrate/code-review）並存——前者是觸發條件命中時的硬性提示，後者是常規協作導覽。
 
 > **終點聲明**：implement 止於本完成報告——commit 屬 `/commit`（人類確認硬規則，見 [post-build](../post-build/SKILL.md)），不由本 skill 觸發。
 
@@ -313,7 +313,7 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 ## 與其他命令的協作
 
 ```
-/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review）→ [/ep-validate] → post-EP: /illustrate --ep（layer 3 結構；方向確認 = 人讀 EP SM 情境 + /ep-review）→ /implement（含 Agent Review + /audit-test, LLM 鏈）→ post-build（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport）/ /debrief（layer 3 改動理解簡報：改了啥/證據/認知誤差點）→ /post-build（收尾鏈編排：code-review [dual-context] → judge-review → 修正迴圈 → consistency → metadata-sync；可拆開單跑）→ /commit
+/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review）→ [/ep-validate] → post-EP: /illustrate @<ep-*.md>（layer 3 結構；方向確認 = 人讀 EP SM 情境 + /ep-review）→ /implement（含 Agent Review + /audit-test, LLM 鏈）→ post-build（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport）/ /debrief（layer 3 改動理解簡報：改了啥/證據/認知誤差點）→ /post-build（收尾鏈編排：code-review [dual-context] → judge-review → 修正迴圈 → consistency → metadata-sync；可拆開單跑）→ /commit
 ```
 
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。

@@ -29,7 +29,7 @@
 ```
 〔pre-EP 軟 gate〕對話討論新功能 →〔提醒〕/illustrate 結構化提案（city map/重用，軟 gate 不硬擋）→ 人判讀 → 確認
 /spec（純輔助·需求釐清，可選）→ /execution-plan（自足：段落0全域研究 + UC盤點 + EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
-          ↓ post-EP checkpoint: /illustrate --ep（layer 3 結構：撐得起嗎；方向確認 = 人讀 EP SM 情境 + /ep-review）
+          ↓ post-EP checkpoint: /illustrate @<ep-*.md>（layer 3 結構：撐得起嗎；方向確認 = 人讀 EP SM 情境 + /ep-review）
   → /implement（含 Agent Review + /audit-test + 階段 5a metadata-sync 結算 [UC 狀態+SYSTEM-MAP+EP 歸檔]，LLM 鏈）
           ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport，漂移/重造檢查）/ /debrief（layer 3 改動理解簡報：改了啥/證據/認知誤差點）→ /post-build（收尾鏈編排：/code-review [dual-context] → /judge-review → 修正迴圈 → /consistency → /metadata-sync）→ /commit（純 git 提交；post-build 可拆開手動單跑各命令）
 ```
@@ -78,6 +78,7 @@
 - `/instruction-init` — 為任意專案自動產生 instruction file 體系（root + 模組都雙檔：AGENTS.md source + CLAUDE.md @AGENTS.md wrapper，bottom-up）
 - `/instruction-clean` — 清理 Markdown 元資訊；`--distill` 蒸餾低 signal 內容（保守防護欄：預設 conservative、NEVER 清單禁觸失敗教訓/設計理由/約束、換形為主僅元資訊直刪、縮減 >30% 逐條列出）
 - `/instruction-sync` — 檢查文檔與程式碼同步性
+- `instruction-writing` — instruction file 撰寫完整規範（reference skill：rule 留 always-on 核心，此處承載完整規範＋元資訊禁止第一性原理論證；rule+skill 分層控制 bundle 尺寸）
 - `/daily-maintain` — 每日自動維護（排程用），自動修正低風險問題 + commit
 - `/project-review` — 互動式專案審查（人類用），findings + kanban + doc health
 
@@ -115,6 +116,7 @@
 - `code-review-and-quality` — code 六軸審查 profile（what to check，含 Security/Performance 軸 checklist 與 Capability Coverage 單源）；通用邏輯見 review-engine
 - `python-type-gap` — 第三方套件型別缺口的四層策略
 - `validation-strategy` — 驗證策略紀律（e2e 優先/交易 replay>live/放 scripts//不重驗 package；與 TDD 流程分工）
+- `acceptance-evidence` — 驗收證據深層理論（reference skill：認知誤差與 EP 預見極限、Intent Drift 兩型、filter trap、L3 整合實例、Runtime Invariant Assurance、B 軸演進；rule 留 L1-L6/A-B 軸 always-on 核心——rule+skill 分層控制 bundle 尺寸）
 
 ### 架構與演進
 - `api-and-interface-design` — 穩定 API / 模組邊界 / 公開介面設計（Hyrum's Law、邊界驗證、agent-friendly interface）
@@ -137,6 +139,7 @@
 - `crg-query` — code-review-graph 知識圖譜查詢紀律（LSP-vs-CRG 分工：symbol→LSP / impact·callers·flows·community→CRG；assume-present + warn-if-absent；anti-over-reliance：graph=structure 非 behavior；CRG 裝了才 fire，平行 nt-query）
 - `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀）
 - `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
+- `lsp-navigation` — LSP 深層參考（reference skill：rg 陷阱案例群、方法論限制 loopback、跨 harness 載體對照、workspace staleness/reindex 處置、驗證輸出格式；rule 留決策樹/Tool Discovery gate 核心——rule+skill 分層控制 bundle 尺寸）
 - `voice-notification` — 三通道語音通知（系統召回 / 進度提醒 / 完成通知）
 
 ### UI / 協作

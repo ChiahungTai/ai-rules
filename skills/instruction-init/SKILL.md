@@ -30,7 +30,7 @@ allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash", "Agent"]
 
 ### Phase 1.5：Dependency Snapshot（如果 scan-project 可用）
 
-執行 [/scan-project](../../skills/scan-project/SKILL.md) skill 產出統一知識快照。**腳本在 scan-project skill 的 `scripts/` 下——本 skill 目錄沒有 scripts/，別在自己的 skill dir 找**。依 harness 解析 scan-project skill 根目錄後執行（例：Claude 的 `${CLAUDE_SKILL_DIR}` 相對路徑是 `../scan-project/`）：
+執行 [/scan-project](../scan-project/SKILL.md) skill 產出統一知識快照。**腳本在 scan-project skill 的 `scripts/` 下——本 skill 目錄沒有 scripts/，別在自己的 skill dir 找**。依 harness 解析 scan-project skill 根目錄後執行（例：Claude 的 `${CLAUDE_SKILL_DIR}` 相對路徑是 `../scan-project/`）：
 
 ```bash
 uv run python <scan-project-skill-dir>/scripts/scan_project.py --project-root . --output .project-snapshot.json --init
@@ -44,7 +44,7 @@ uv run python <scan-project-skill-dir>/scripts/scan_project.py --project-root . 
 
 - `dep_graph.modules` / `dep_graph.edges` — 模組依賴結構（內建掃描即有；`dep_graph.source` 標示來源）
 - `rust_workspace.crates` — Cargo workspace 成員、crate 內部依賴、`has_python_bindings`——truth/shell 分離 repo 的分層與綁定標記，直接餵 Truth-Anchored 策略
-- `dir_inventory.dirs` — **機械目錄盤點**（深度 ≤3，含檔名）——寫任何「目錄內含什麼」段落的列舉依據
+- `dir_inventory.dirs` — **機械目錄盤點**（深度 ≤3；檔名僅在目錄 ≤60 項時列出）——寫任何「目錄內含什麼」段落的列舉依據
 - `instruction_files` — 哪些目錄已有 AGENTS.md/CLAUDE.md（取代人工掃描）
 - `findings` — 預計算的機械性問題（X6 模組缺 instruction 檔、X-cap-path 路徑失效等）
 - `fingerprint` — 變化偵測用 counts + hashes
@@ -83,7 +83,7 @@ uv run python <scan-project-skill-dir>/scripts/scan_project.py --project-root . 
 - **架構定位**：在整體系統中的角色
 - **Module Boundaries**：Depends on / Consumed by / Does NOT depend on
 - **關鍵設計決策**：從程式碼推導不出來的「為什麼」
-- **導航索引**：如果模組很大，用 `### 類別小標題` 分組導航種子（非集中符號對照表，見 [instruction-writing.md](../../rules/instruction-writing.md)「大模組 selectivity」段；檔案路徑選用，LSP 可從符號解析）
+- **導航索引**：如果模組很大，用 `### 類別小標題` 分組導航種子（非集中符號對照表，見 [instruction-writing skill](../instruction-writing/SKILL.md)「大模組 selectivity」段；檔案路徑選用，LSP 可從符號解析）
 
 **Module Boundaries 精確度**（有 Phase 1.5 時加成）：
 - `Depends on` 從 `edges[]` 精確推導（而非猜測）
@@ -148,7 +148,7 @@ Signal/noise framework: [encoder-philosophy.md](../_common/encoder-philosophy.md
 
 ## 語音通知
 
-遵循 [voice-notification skill](../../skills/voice-notification/SKILL.md)（隨機稱謂、sentinel 進度提醒、say 樣板見 skill）：
+遵循 [voice-notification skill](../voice-notification/SKILL.md)（隨機稱謂、sentinel 進度提醒、say 樣板見 skill）：
 
 - **開始**（第一個動作前）：建進度提醒 sentinel + say 開始
   ```bash

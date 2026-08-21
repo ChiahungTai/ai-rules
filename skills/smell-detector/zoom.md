@@ -53,8 +53,8 @@ scope 極大（50+ 檔）才用 Agent（free-text 產出，主 session 組報告
 
 | # | 判準（用戶 viewport） | 機械查證 | 既有引用（不重寫） |
 |---|---|---|---|
-| 1 | **YAGNI 嚴格**（沒用就刪） | LSP `findReferences` + rg 確認零消費者；filter trap 區分（YAGNI 往刪 / 驗證不能刪）；**arch-thinking 觀：是否 connected dead cluster / 重用缺口**（不只零 caller） | [collaboration-constraints](../../rules/collaboration-constraints.md) YAGNI check + [acceptance-evidence](../../rules/acceptance-evidence.md) filter trap |
-| 2 | **測試要有實際價值** | 隱含覆蓋查證（行為別處已測 = 冗餘）；不為覆蓋率寫 | 委外 [audit-test](../audit-test/SKILL.md) 角度 6 + **補靜態隱含覆蓋**（下方編排段） |
+| 1 | **YAGNI 嚴格**（沒用就刪） | LSP `findReferences` + rg 確認零消費者；filter trap 區分（YAGNI 往刪 / 驗證不能刪）；**arch-thinking 觀：是否 connected dead cluster / 重用缺口**（不只零 caller） | [collaboration-constraints](../../rules/collaboration-constraints.md) YAGNI check + [acceptance-evidence skill](../acceptance-evidence/SKILL.md) filter trap |
+| 2 | **測試要有實際價值** | 隱含覆蓋查證（收窄：production wrapper 重複測試，見下方編排段）；不為覆蓋率寫 | 委外 [audit-test](../audit-test/SKILL.md)（角度 1/6：反模式、過時與其餘冗餘） |
 | 3 | **嚴格不放水** | 機械查證不靠善意；對抗性自查（挑戰自己判斷） | [collaboration-constraints](../../rules/collaboration-constraints.md) 反 Sycophancy + [review-engine](../review-engine/SKILL.md) 審查者自證 |
 | 4 | **質疑命名/設計** | 命名碰撞（LSP）/ domain 一致 / phantom API（rg + LSP 確認符號存在）；**arch-thinking 觀：bounded context 邊界 / dep weight / 設計 pattern** | **本 mode 自帶**（分散承載 → 封裝即價值；詳見 Domain 層） |
 | 5 | **scope 釐清** | mixed-tree 分組（`git status`）+ 結論 framing 對應 scope | **本 mode 自帶**（完全無既有承載；詳見 Domain 層） |
@@ -94,7 +94,7 @@ scope 極大（50+ 檔）才用 Agent（free-text 產出，主 session 組報告
 - **查證誠信段必含**：記錄翻案（撤銷）/ 深化 / 確認，展示「批判性追查」——對 audit-test 的差異化
 - **撤銷的 finding 保留**（標 ❌）：查證推翻不刪除，示範自我否證建立信任
 - **微觀 ASCII 圖**（problem → fix 對照）：**僅當釐清該 finding 的 problem→fix 時才畫**（非每個 finding 必畫，避免噪音）；**結構巨觀圖（call graph / city map / 重用 / 邊界）不自畫——交 `/illustrate @<scope>`**
-- **LSP stale 警告**：判死碼前 LSP `findReferences` 回可疑少（只 intra-file）必須 rg 補（[lsp-navigation](../../rules/lsp-navigation.md) 條件式 fallback）——dogfood 實證：`throttle()` LSP 只回定義點，rg 才發現 production 在用
+- **LSP stale 警告**：判死碼前 LSP `findReferences` 回可疑少（只 intra-file）必須 rg 補（[lsp-navigation skill](../lsp-navigation/SKILL.md) 條件式 fallback）——dogfood 實證：`throttle()` LSP 只回定義點，rg 才發現 production 在用
 
 ## 執行流程
 
@@ -127,7 +127,7 @@ zoom 是 read-only（產 finding + 建議，不改 code）。後續修正 + 驗�
 - **推薦先行**：不給選項清單，給明確推薦 + 理由
 - **查證必須**：inferred finding 必查證（LSP / rg）才報；未查標 `inferred ⚠️`（防 false positive——dogfood T1 教訓：未查就報「符號不存在」，rg 推翻）
 - **撤銷透明**：查證推翻的 finding 標 ❌ 保留，不刪（示範誠信）
-- **LSP stale 警告**：判死碼 LSP 回可疑少 → rg 補（[lsp-navigation](../../rules/lsp-navigation.md)）
+- **LSP stale 警告**：判死碼 LSP 回可疑少 → rg 補（[lsp-navigation skill](../lsp-navigation/SKILL.md)）
 - **不重造機械**：死碼 → arch-thinking / LSP；測試反模式 → audit-test；severity / confidence → review-engine
 - **預設 source + test 同審**；user 可明確排除——不強制，避免稀釋放大鏡焦點
 
@@ -141,15 +141,15 @@ zoom 是 read-only（產 finding + 建議，不改 code）。後續修正 + 驗�
 
 ---
 
-## Domain 層（判準 4/5 詳定義 + 誠信 stance）
+## Domain 層（判準 4/5 詳定義）
 
 通用審查邏輯（severity / confidence / 審查者自證）在 [review-engine](../review-engine/SKILL.md)；測試反模式偵測在 [audit-test](../audit-test/SKILL.md)；本檔不重造，只補 zoom 獨有部分。
 
-## 判準 4：質疑命名/設計（AI 產出的命名/設計盲點）
+### 判準 4：質疑命名/設計（AI 產出的命名/設計盲點）
 
 AI 寫 code 時犯三類命名/設計錯誤，zoom **預設質疑**（不假設 AI 命名正確）：
 
-### 4a 命名碰撞
+#### 4a 命名碰撞
 
 符號名與既有概念碰撞，造成語義混淆。
 
@@ -157,7 +157,7 @@ AI 寫 code 時犯三類命名/設計錯誤，zoom **預設質疑**（不假設 
 - 範例：domain class `CashAccount`（現金累算器）與 NT `AccountType.CASH`（帳戶類型）—— 同名不同概念，讀者混淆
 - 判定：同名但語義不同 → finding（建議改名或文件標明區隔）
 
-### 4b domain 一致性（名稱反映涵蓋）
+#### 4b domain 一致性（名稱反映涵蓋）
 
 命名/設計與 domain 模型不一致——名稱宣稱的涵蓋範圍 ≠ 實際定義。
 
@@ -165,7 +165,7 @@ AI 寫 code 時犯三類命名/設計錯誤，zoom **預設質疑**（不假設 
 - 範例：`RateLimiter` Protocol 只定義 sync CM，名稱卻宣稱通用 → 涵蓋缺口（消費者標註的 instance 可能是 AsyncRateLimiter，不符 Protocol）
 - 判定：名稱過廣 / 過窄 → finding（建議改名 / 補定義 / 拆分）
 
-### 4c phantom API（AI 幻覺造的符號）— **限 source 側**
+#### 4c phantom API（AI 幻覺造的符號）— **限 source 側**
 
 docstring / 註解 / 範例引用不存在的 method / class（AI 文檔幻覺）。
 
@@ -176,28 +176,28 @@ docstring / 註解 / 範例引用不存在的 method / class（AI 文檔幻覺�
 
 > ⚠️ **查證陷阱（dogfood 教訓）**：查 phantom API **不能只查「符號在不在」**，要查「引用語意對不對」——符號存在但 docstring 放錯 class / 宣稱錯使用場景，仍是 finding（語意誤導，見 dogfood T4：符號 `_get_historical_bars_sync` 存在，但 docstring 放 `TestAsyncThrottle` 下暗示它是 throttle 使用，實際走 acquire）。
 
-## 判準 5：mixed-tree scope framing（完全無既有承載）
+### 判準 5：mixed-tree scope framing（完全無既有承載）
 
 > 既有 [git-workflow-and-versioning](../git-workflow-and-versioning/SKILL.md) 講「commit 前分組」（commit 視角），但 **review 面對 mixed working tree 怎麼 framing 結論**完全無承載。本 mode 補此缺口（最大省 prompt 價值之一）。
 
 mixed working tree = 多 session / 來源的變更混在同一 working tree。zoom 審某 scope 時，working tree 常有無關變更（其他 session、pre-existing、unstaged）。
 
-### 5a 分組（git status）
+#### 5a 分組（git status）
 
 `git status` 看所有變更，按邏輯單元分組。
 
-### 5b 標明誰的變更
+#### 5b 標明誰的變更
 
 每組標「**本次審查標的**」vs「**混入的其他來源**」。
 
-### 5c 結論 framing 對應 scope
+#### 5c 結論 framing 對應 scope
 
 **結論只涵蓋審查範圍**，禁下全域結論。若 working tree 有未審變更，明確標「本次結論僅覆蓋 \<X\>，\<Y\> 未審」。
 
 - 🔴 反例：`/code-review` 審 rate_limiter 子集，下「無 Critical」全域結論，但 working tree 有 `client.py`（production concurrency）未審 → `/judge-review` 才揭露
 - ✅ 正解：標「無 Critical（**僅 rate_limiter 子集**）；`client.py` 未審，需另跑」
 
-### 5d scope 判定 checklist（操作準則）
+#### 5d scope 判定 checklist（操作準則）
 
 1. **本次標的** = user 明確指定的 dir/files（參數）
 2. **其他來源** = working tree 中不在本次標的的變更，進一步判定：
@@ -215,7 +215,7 @@ zoom 的 test 段聚焦**判準 2（收窄：production wrapper 重複測試）*
 |---|---|
 | **production wrapper 重複測試**（測 thin wrapper，但 wrapper 本體已被別處測；**且 wrapper 無獨立 production 入口**）| 反模式（幽靈斷言 / 同義反覆 / 空殼）— 角度 1 |
 | test 與 production 脫節（docstring 語意誤導）| 過時 / 死測試 — 角度 6 |
-| —（其餘隱含覆蓋場景） | mock 健康度 / 覆蓋對稱 / 漸進驗證 |
+| —（其餘隱含覆蓋場景：同行為不同入口重複測等） | 反模式 / 過時死測試 / 測試必要性 — 角度 1 / 角度 6 |
 
 **判準 2 收窄理由**：audit-test 角度 1 + 角度 6 已覆蓋多數隱含覆蓋場景。zoom 判準 2 **真正獨有**的是「**production wrapper 重複測試**」判斷——測 wrapper 時要查 wrapper 是否有**獨立 production 入口**：
 
@@ -230,5 +230,5 @@ zoom 不是機械列 finding（那是 audit-test），是**批判性追查**。�
 
 - **對抗性自查**：每個 finding 挑戰自己判斷（不放水，判準 3）
 - **兩個查證陷阱（dogfood 實證，必記）**：
-  1. **LSP-stale**：判死碼時 LSP `findReferences` 回可疑少（只 intra-file / 跨檔消失）→ 必須 rg 補（[lsp-navigation](../../rules/lsp-navigation.md) 條件式 fallback）。dogfood 實證：`throttle()` LSP 只回定義點，rg 才見 production 消費者
+  1. **LSP-stale**：判死碼時 LSP `findReferences` 回可疑少（只 intra-file / 跨檔消失）→ 必須 rg 補（[lsp-navigation skill](../lsp-navigation/SKILL.md) 條件式 fallback）。dogfood 實證：`throttle()` LSP 只回定義點，rg 才見 production 消費者
   2. **符號路徑**：**符號存在 ≠ 走你想當然的路徑**。看到符號被引用，別假設它走你預期的路徑——**讀 body 確認**。dogfood 實證：`_get_historical_bars_sync` 符號存在且被 docstring 引用，初版假設它是 throttle 消費者；fresh-eyes 讀 body 才發現走 `async with`（acquire），不是 throttle

@@ -39,7 +39,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 | 6 | **驗證證據** | demo-checklist：feature → 可跑 target → 覆蓋。**NONE 不掩蓋——「沒 demo = 沒證明完成」** |
 | 7 | **認知誤差點** | 主動揭露「我可能哪裡會錯意」：詮釋假設（「你說 X 我理解成 Y」）/ 歧義選擇（「兩種解讀我選 A 因為…」）/ 推斷行為（「spec 沒寫死，我推斷的」）/ 動態漂移（Type B：跨段落目標悄然偏移）。每點附確認問題，人一句「對/不對」校正 |
 
-小改動不硬撐七段全滿——行為段可一句話；大改動每段完整。Console 紀律：精簡章節、禁 Mermaid 語法（md 模式才可用）。第 7 段前三類（詮釋假設/歧義選擇/推斷行為）是靜態詮釋偏差（Type A，單時點）；動態漂移是累積偏移（Type B）——兩型見 [acceptance-evidence](../../rules/acceptance-evidence.md)「Intent Drift 的兩型」。
+小改動不硬撐七段全滿——行為段可一句話；大改動每段完整。Console 紀律：精簡章節、禁 Mermaid 語法（md 模式才可用）。第 7 段前三類（詮釋假設/歧義選擇/推斷行為）是靜態詮釋偏差（Type A，單時點）；動態漂移是累積偏移（Type B）——兩型見 [acceptance-evidence skill](../acceptance-evidence/SKILL.md)「Intent Drift 的兩型」。
 
 ### 第 6 段 demo target 挑選規則（優先序）
 

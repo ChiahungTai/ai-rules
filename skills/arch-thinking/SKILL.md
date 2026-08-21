@@ -225,7 +225,7 @@ CRG-sourced edges 附 anti-over-reliance label（graph=structure≠behavior；dy
 |---------|------|
 | 用了哪些工具 | LSP operation（hover/findReferences/...）/ rg / fd — 每類結論標明主工具 |
 | 哪些無法驗證 | 未跑動態依賴分析、未跑 pytest --cov、workspace 在 worktree 非 production 等 |
-| LSP workspace 狀態 | LSP 結果是 workspace 狀態相依（見 [lsp-navigation](../../rules/lsp-navigation.md)「Workspace 狀態相依性」）；私有 symbol findReferences 矛盾時先懷疑 reindex 時機，再懷疑工具能力 |
+| LSP workspace 狀態 | LSP 結果是 workspace 狀態相依（見 [lsp-navigation skill](../lsp-navigation/SKILL.md)「Workspace 狀態相依性」）；私有 symbol findReferences 矛盾時先懷疑 reindex 時機，再懷疑工具能力 |
 | 主觀研判標記 | 「刻意設計 vs 債」「可辯護 vs 該修」基於 DDD/Clean Architecture 原則推論，非機械結論 |
 
 **反例（真實案例，cross-harness 驗證）**：同一 `_PREV_COUNT` 符號，Claude session `findReferences` 只回 intra-file（誤推論為「LSP 對私有 symbol 固有 false-negative」），ZCode session 卻成功回傳跨檔引用 — 根因是 pyright workspace reindex 時機。**方法論限制段誠實記錄此差異，比「LSP 不可靠」的錯誤結論更有價值** — 它讓下個 session 知道要 reindex 而非換工具。

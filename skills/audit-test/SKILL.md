@@ -11,9 +11,9 @@ allowed-tools: ["Read", "Bash"]
 
 偵測**通過但品質差**的測試。`ruff` 抓語法問題，`/fix-test` 修失敗測試，本命令抓**隱性品質問題**。
 
-方法論定義見 [test-driven-development](../test-driven-development/SKILL.md)（反模式定義）、[must-execute-before-complete](../../rules/must-execute-before-complete.md)（覆蓋對稱性）。通用審查邏輯（嚴重度/信心水準/審查者自證/LSP 查證/多層驗證）見 [review-engine](../review-engine/SKILL.md)。
+方法論定義見 [test-driven-development](../test-driven-development/SKILL.md)（反模式定義）；覆蓋對稱性（source↔test 對應）的判定流程定義在本檔角度 2。通用審查邏輯（嚴重度/信心水準/審查者自證/LSP 查證/多層驗證）見 [review-engine](../review-engine/SKILL.md)。
 
-> **audit-test 是 review 執行預設的例外**：review 執行預設（force 獨立 / max-agents / 3-perspective / mode 判定，見 [review-engine](../review-engine/SKILL.md)「review 執行預設」）適用 ep-review/code-review/execution-plan/implement；**audit-test 是 read-only 單一 agent 偵測器**（不平行、不 3-perspective、不 mode 判定），僅共用通用審查邏輯（spawn 失敗處理仍走 [agent-workflow](../agent-workflow/SKILL.md) general 階梯）。
+> **audit-test 是 review 執行預設的例外**：review 執行預設（force 獨立 / max-agents / 3-perspective / mode 判定，見 [review-engine](../review-engine/SKILL.md)「review 執行預設」）適用 ep-review/code-review/execution-plan/implement；**audit-test 是 read-only 偵測器**（不做平行 3-perspective、不 mode 判定；Daily Scan 分段落盤的 `{agent}` 命名見「長任務 findings 落盤策略」段），僅共用通用審查邏輯（spawn 失敗處理仍走 [agent-workflow](../agent-workflow/SKILL.md) general 階梯）。
 
 ---
 
@@ -35,7 +35,7 @@ allowed-tools: ["Read", "Bash"]
 |------|------|---------|------|
 | **Diff Audit** | 無參數 | uncommitted test files | pre-commit gate |
 | **Commit Audit** | `fd7a50e8` | 該 commit 的 test file 變更 | post-commit review |
-| **Daily Scan** | `--daily` | 全部 test files | 每週六排程（ZCode 23:20 定時任務週六條件段，2026-08 起）→ append `### 🔍 audit-test` section 進 daily-report |
+| **Daily Scan** | `--daily` | 全部 test files | 每週六排程（ZCode 23:20 定時任務週六條件段）→ append `### 🔍 audit-test` section 進 daily-report |
 
 ### 掃描範圍判定
 
@@ -61,7 +61,7 @@ allowed-tools: ["Read", "Bash"]
 | # | 角度 | 對應標準 | 嚴重程度 |
 |---|------|---------|---------|
 | 1 | 反模式掃描 | test-driven-development SKILL.md（5 項） | Critical / Important |
-| 2 | 覆蓋對稱性 | must-execute-before-complete | Important |
+| 2 | 覆蓋對稱性 | 本檔角度 2 判定流程（+ quality-constraints 符號 vs 路徑覆蓋） | Important |
 | 3 | Mock 健康度 | test-driven-development SKILL.md（Mock 階層） | Important |
 | 4 | 消費端驗證覆蓋 | acceptance-evidence L3 + quality-constraints 符號 vs 路徑覆蓋 | Important / Suggestion |
 | 5 | 漸進驗證合規 | progressive-validation DEPTH-MIN 集合 | Suggestion |
@@ -210,9 +210,9 @@ allowed-tools: ["Read", "Bash"]
 
 **與角度 1 的區別**：角度 1「同義反覆」是靜態（test/source 同值）；角度 6「過時」是動態（重構後 test 被改迎合）。角度 1 抓不到動態漂移。
 
-**與靜態隱含覆蓋的區別（/smell-detector zoom 判準 2 補充）**：本角度（動態過時）與「靜態他處已測 = 冗餘」語義不同 — 後者指測試的行為已被**另一個測試**隱含驅動（如測 thin wrapper，但 wrapper 本體已被別處測；或同行為不同入口重複測）。靜態隱含覆蓋的查證與判斷見 [smell-detector zoom mode](../smell-detector/zoom.md) 判準 2；本命令聚焦動態過時 + 反模式，不重疊。
+**與靜態隱含覆蓋的區別（/smell-detector zoom 判準 2 收窄後的分界）**：本角度（動態過時）與「靜態他處已測 = 冗餘」語義不同 — 後者指測試的行為已被**另一個測試**隱含驅動。分界：**production wrapper 重複測試**（測 thin wrapper 且 wrapper 無獨立 production 入口）的判斷見 [smell-detector zoom mode](../smell-detector/zoom.md) 判準 2；**其餘靜態冗餘**（同行為不同入口重複測等）屬本命令（角度 1 反模式 / 角度 6 測試必要性）；本段角度 6 聚焦動態過時。
 
-**3-signal correlation（升級 2-signal → 3-signal，捕 intent drift）**：判讀 passing test 是真通過還是 silent drift，單看「過時」（動態）不夠 —— 須關聯三訊號：① 原始 test intent（story / 建立時擷取）② 當前 test result ③ 引入的 code changes。三者不一致 = intent drift 訊號（test 還過但已不驗原意圖）。coverage 增加也不保證 test 仍驗意圖。3-signal taxonomy 見 [acceptance-evidence](../../rules/acceptance-evidence.md)「Intent Drift 的兩型 + 3-signal correlation」。
+**3-signal correlation（升級 2-signal → 3-signal，捕 intent drift）**：判讀 passing test 是真通過還是 silent drift，單看「過時」（動態）不夠 —— 須關聯三訊號：① 原始 test intent（story / 建立時擷取）② 當前 test result ③ 引入的 code changes。三者不一致 = intent drift 訊號（test 還過但已不驗原意圖）。coverage 增加也不保證 test 仍驗意圖。3-signal taxonomy 見 [acceptance-evidence skill](../acceptance-evidence/SKILL.md)「Intent Drift 的兩型 + 3-signal correlation」（rule 端 always-on 核心見 [acceptance-evidence](../../rules/acceptance-evidence.md)）。
 
 ---
 
@@ -342,7 +342,7 @@ fd -e py . tests/
 
 ### 步驟 10：產出報告
 
-按輸出格式模板產出報告。Daily Scan 時由排程載體（ZCode 23:20 定時任務週六條件段，2026-08 起）直接 append `### 🔍 audit-test` section 進 daily-report（不經 standup——test-quality 在報告裡有自己的 section）；手動跑的 claude-sync log 落點慣例隨 claude -p 載體退役一併停用。
+按輸出格式模板產出報告。Daily Scan 時由排程載體（ZCode 23:20 定時任務週六條件段）直接 append `### 🔍 audit-test` section 進 daily-report（不經 standup——test-quality 在報告裡有自己的 section）；手動跑的 claude-sync log 落點慣例隨 claude -p 載體退役一併停用。
 
 ---
 
