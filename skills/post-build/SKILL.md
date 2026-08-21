@@ -34,7 +34,7 @@ description: build 後收尾鏈編排 — code-review → judge-review → 修�
 
 ## 階段 1 — Code Review（僅 code 鏈）
 
-執行 `code-review`（[skills/code-review/SKILL.md](../code-review/SKILL.md)；無參 = uncommitted diff，弧模式（階段 0 判定）= EP baseline..HEAD——見該命令「任務弧模式」；dual-context 雙審查者規則見該命令模式 B）。本 skill 是**跨命令自動化場景**，code-review 產出寫 `.review/<branch>.md`（Finding Record 表格）供後續 judge/followup 讀。primed 側 context 依 code-review 模式 B 餵料清單（EP 路徑由 build 上下文帶入；無 EP 時依模式 B 降級規則處理）。
+執行 `code-review`（[skills/code-review/SKILL.md](../code-review/SKILL.md)；無參 = uncommitted diff，弧模式（階段 0 判定）= EP baseline..HEAD——見該命令「任務弧模式」；dual-context 雙審查者規則見該命令模式 B）。本 skill 是**跨命令自動化場景**，code-review 產出寫 `.review/<branch>.md`（Finding Record 表格）供後續 judge/followup 讀。primed 側 context 依 code-review 模式 B 餵料清單（EP 路徑由 build 上下文帶入；含 transition 報告——code_reality baseline snapshot 在場時機械產「EP 宣稱模組 vs 實際變動」對照，機制見模式 B；無 EP 時依模式 B 降級規則處理）。
 
 findings 全空 → 報告並直接進 docs 鏈。
 

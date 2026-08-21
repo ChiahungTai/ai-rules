@@ -33,13 +33,15 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 |---|-----|------|
 | 1 | **意圖一句話** | 這次改動解決什麼問題、為什麼改 |
 | 2 | **行為黑盒子** | 改動觸及的核心模組/函式：input/output + 演算法；**明確判定「對外行為變了 vs 純結構重構」**（input/output 合約不變時，這句判定本身就是最高價值訊息）。改動以 `.md` 規則/命令為主時，本段渲染 **behavior delta**：AI 讀了改的 rule 後會做什麼不同 + 影響 UC |
-| 3 | **前後差異** | 語義 diff——能力/行為的 delta，非行數增減 |
+| 3 | **前後差異** | 語義 diff——能力/行為的 delta，非行數增減；機械底稿：transition 報告（若專案有 code_reality，見下方） |
 | 4 | **檔案地圖** | per-file 1-2 行，**按角色分組**（核心邏輯/配套/測試/文檔）——分組顯現改動形狀（「核心其實只有 2 檔，其餘配套」） |
-| 5 | **波及與缺口** | 受影響消費者 + 該同步未同步（下游/索引/文件/測試） |
+| 5 | **波及與缺口** | 受影響消費者 + 該同步未同步（下游/索引/文件/測試）；hub symbol 波及用 `hub_refs` 聚合（若專案有 code_reality，見下方） |
 | 6 | **驗證證據** | demo-checklist：feature → 可跑 target → 覆蓋。**NONE 不掩蓋——「沒 demo = 沒證明完成」** |
 | 7 | **認知誤差點** | 主動揭露「我可能哪裡會錯意」：詮釋假設（「你說 X 我理解成 Y」）/ 歧義選擇（「兩種解讀我選 A 因為…」）/ 推斷行為（「spec 沒寫死，我推斷的」）/ 動態漂移（Type B：跨段落目標悄然偏移）。每點附確認問題，人一句「對/不對」校正 |
 
 小改動不硬撐七段全滿——行為段可一句話；大改動每段完整。Console 紀律：精簡章節、禁 Mermaid 語法（md 模式才可用）。第 7 段前三類（詮釋假設/歧義選擇/推斷行為）是靜態詮釋偏差（Type A，單時點）；動態漂移是累積偏移（Type B）——兩型見 [acceptance-evidence skill](../acceptance-evidence/SKILL.md)「Intent Drift 的兩型」。
+
+**code_reality 機械底稿（若專案有 `tools/code_reality/`）**：第 3 段底稿＝transition 報告（邊集差異＋「EP 宣稱模組 vs 實際變動」三欄對照），由本命令自產——與 post-build 先後不固定，不假設上游已產；產出機制與時點條件（HEAD == baseline 不產出、stale 跳過）見 [code-review](../code-review/SKILL.md) 模式 B transition 段。宣稱抽取只認特定模組路徑前綴——不符前綴的變更宣稱欄恆 NONE，視為「未提供對照」（單欄邊集差異仍可用），不當「EP 無宣稱」解讀。第 5 段 hub symbol 波及吃 `hub_refs` 聚合（callers/callees 按目錄、test/prod 切分）。機械產物取代 LLM 逐檔推導，渲染成人類 viewport 仍是本命令職責。未裝、缺 baseline snapshot 或時點不符 → LLM 推導（既有行為不變）。工具用法真相源：消費專案 `tools/AGENTS.md` Capabilities（code_reality 條目）。
 
 ### 第 6 段 demo target 挑選規則（優先序）
 
