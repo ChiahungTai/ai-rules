@@ -27,10 +27,10 @@ pytestmark = [
 def test_real_graph_csv_invariants(tmp_path: Path) -> None:
     db = graph_db_path(REPO_ROOT)
     g = load(db, REPO_ROOT)
-    # 量級錨（POC 期 1,218/2,815；UI 退役弧刪檔後實測 1,143/2,787——
-    # 下界取刪檔後值，反映「真 graph 非空殼」語義而非單調成長）
-    assert len(g.nodes) >= 1143
-    assert len(g.links) >= 2787
+    # 量級錨＝最新刪檔後 graph 重建實測（抽離弧 1,112/2,732；POC 期 1,218/2,815）——
+    # 下界反映「真 graph 非空殼」語義而非單調成長（mosaic 刪檔弧後錨隨之更新）
+    assert len(g.nodes) >= 1112
+    assert len(g.links) >= 2732
     # community 欄：多數決結果必屬 communities 表（或無成員投票為空）
     comm_ids = set(g.communities)
     assert comm_ids, "真 graph 應有 communities"
