@@ -24,7 +24,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 1. **盤點**：`.tours/` 現況、文檔源（root／模組 AGENTS.md 群、架構文檔、SYSTEM-MAP）、`.gitignore` 對 `.tours` 的契約。⚠ **arch 進版控是契約變更**（預設 `.tours/` 常被整目錄排除）——改 `.tours/` → `.tours/delta/`（delta 7 天窗不版控不變）＋前例補追蹤，`git check-ignore` 雙向驗證，需用戶知情。
 2. **場景層**（有 callstack 文檔才做）：`uv run --project ~/Github/ai-rules python -m code_reality.chain_tour <md> --repo <repo> --out-dir <repo>/.tours/arch/<stem>/`（**不傳 `--primary`**——primary 專屬 overview）。驗收：產出檔數＝文檔場景數（場景＝含樹狀幀的 code block）；重錨分佈統計記錄；每條抽樣 ≤5 步 `line`+`pattern` 與源碼 def 對齊。0-step tour（描述殼）保留但勿連入。
-3. **地圖層**：overview 短版（10–14 步、`isPrimary: true`、檔名 `00 - <repo> 總覽.tour`）骨架＝開場（contents 步無檔）＋分層地圖 4–6 步（**錨模組 AGENTS.md h1**，description=職責一句抄自該檔＋file link）＋資料入口 1–2 步（代表檔 `line`+`pattern` 雙錨）＋場景目錄步（tour link）＋開發工作流步＋收尾。長版可選（30–40 步、`00b - `）。**資料源紀律：只引用既有文檔宣稱，不自行發明敘事**——內容錯誤可追溯到文檔源。
+3. **地圖層（先判受眾，再選步錨）**：受眾＝**冷啟動新手**（clone 即讀）→ 分層步**錨模組 AGENTS.md h1**、description＝職責一句＋file link（文檔是新手的自然入口）；受眾＝**理解程式碼**（含 repo 主人走讀）→ 分層步**錨真實源碼**（入口函式／註冊點／核心機制，`line`+`pattern` 雙錨，講這段程式碼做什麼、上下游是誰），文檔退 file link——**文檔索引對 repo 主人是零價值**。骨架＝開場（contents 步無檔）＋分層 4–6 步＋資料入口 1–2 步（代表檔雙錨）＋場景目錄步（tour link）＋開發工作流步＋收尾；長版可選（30–40 步、`00b - `）。**宣稱紀律：description 每個實質宣稱可追溯到文檔或源碼**（防 AI 造假敘事），不自行發明。
 4. **`.tour` 語言契約**（消費端 CodeTour 的正則決定，寫錯＝死鏈）：
    - `line` = **1-based**（player 內部 −1）
    - `pattern` = literal-ish regex（`^…$` 行錨定；行漂移時 pattern 最近命中校正，零命中顯性標未驗證）
@@ -37,6 +37,18 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 ## 停點設計
 
 初稿產出即**停**——AI 不代終審（敘事品質是使用者策展職責）；使用者裝 vsix 邊走邊改；策展定稿後重跑機械驗證（編輯會引入壞 link／壞 JSON，走查只暴露走到的步）。收尾產 `.tours/README.md`（三層說明＋慣例＋再產 CLI 一行）。
+
+## 重跑語義（三模式——repo 已有 corpus 時）
+
+| 模式 | 觸發 | 行為 |
+|---|---|---|
+| **fresh** | 無 corpus／用戶明示重建 | 走五步程序 |
+| **audit** | 有 corpus（**預設**） | 跑 `tour_validate --manifest` 產報告，**不改任何檔** |
+| **migrate** | 格式舊（line-only 錨／純文字 cross-ref） | `tour_upgrade --dry-run` 先看報告，用戶點頭才 `--apply` |
+
+判定：`.tours/` 無 tour→fresh；有 corpus 無 manifest→audit（提示 migrate 若格式舊）；有 manifest→audit 為預設。
+
+**兩條鐵律**：① **corpus 變更一律經工具**（generator／tour_upgrade／tour_manifest CLI）——LLM 不直接手改 `.tour`（bootstrap 期 overview 手工初稿與人類策展編輯除外）；② **curated 不可盲目覆蓋**——derived tour 重產 diff 非空＝已被人改過，升級為 curated（manifest generator 改 `manual`）只報 diff 不覆蓋。
 
 ## 斷點③（未解）
 

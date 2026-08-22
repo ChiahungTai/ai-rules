@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from code_reality import tour_manifest
 from code_reality.common import (
     anchor_pattern,
     assert_db_unchanged,
@@ -483,6 +484,28 @@ def main() -> None:
     paths = write_tours(st, out_dir, primary=primary)
     for p in paths:
         print(f"[OK] chain tour -> {p}")
+    # corpus provenance：generator 原生寫 manifest（derived/curated 二分的機械載體）
+    out_abs = out_dir.resolve()
+    mroot = tour_manifest.tours_root_of(out_abs)
+    mpath = mroot / "manifest.toml"
+    mdata = tour_manifest.load(mpath)
+    mdata.setdefault("version", 1)
+    mdata.setdefault("tour", {})
+    try:
+        src_rel = str(args.chain_md.resolve().relative_to(args.repo.resolve()))
+    except ValueError:
+        src_rel = str(args.chain_md.resolve())
+    commit = tour_manifest.git_head(args.repo)
+    for p in paths:
+        tour_manifest.upsert(
+            mdata,
+            p.resolve().relative_to(mroot).as_posix(),
+            generator="chain_tour",
+            sources=[src_rel],
+            commit=commit,
+        )
+    tour_manifest.dump(mpath, mdata)
+    print(f"[OK] manifest upsert: {mpath}（{len(paths)} rows, generator=chain_tour）")
     print(
         f"[OK] chain tours: {len(st.tours)} 場景 / {st.frames} 幀 / "
         f"{st.frames - st.skipped} 步 / skipped {st.skipped}"

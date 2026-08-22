@@ -56,6 +56,7 @@ findings 全空 → 報告並直接進 docs 鏈。
 
 1. 對每個變更的 `.md` 執行 `consistency`（[skills/consistency/SKILL.md](../consistency/SKILL.md)）；fail 項當場修再驗（**重驗範圍 = 修正觸及的檔**，非整個 docs 鏈重跑；上限同階段 3 的 3 輪）
 2. diff 觸及 Capabilities / `SYSTEM-MAP.md` / `dependency-graph.md` / `.kanban/` → 執行 `metadata-sync`（[skills/metadata-sync](../metadata-sync/SKILL.md)）
+3. repo 有 `.tours/manifest.toml` → 跑 `uv run --project ~/Github/ai-rules python -m code_reality.tour_validate --manifest --repo .`，FAIL 列入收尾報告（tour corpus audit 接線——工具語義見 [code-reality](../code-reality/SKILL.md)）
 
 ## 階段 5 — 收尾報告（終點，不 commit）
 
