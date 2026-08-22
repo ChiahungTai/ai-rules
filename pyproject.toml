@@ -4,9 +4,22 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = []
 
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["code_reality"]
+
 [dependency-groups]
 dev = [
     "ruff>=0.16.3",
+    "pytest>=8.4",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: 真實邊界（boundary sidecar / graph.db / tour 產物）",
 ]
 
 [tool.ruff]

@@ -137,6 +137,7 @@
 - `nt-query` — NautilusTrader **v2**（Rust+PyO3）能力 / 實作 / 用法合約 / v1→v2 移植查詢（docs-first + LSP-on-in-package-stubs + MIGRATION_V2 契約 + v2 名稱紀律）
 - `nt-v1-query` — NautilusTrader **v1**（legacy Cython runtime — 消費端現行 runtime）查詢（docs-first + LSP-on-Cython-stubs + designer intent；消費端遷移 v2 後退休）
 - `crg-query` — code-review-graph 知識圖譜查詢紀律（LSP-vs-CRG 分工：symbol→LSP / impact·callers·flows·community→CRG；assume-present + warn-if-absent；anti-over-reliance：graph=structure 非 behavior；CRG 裝了才 fire，平行 nt-query）
+- `code-reality` — code_reality 工具鏈程序層（meta 層工具住 ai-rules，九工具：snapshot／transition／hub_refs／runtime_edges／boundary／boundary_build／delta_tour／chain_tour／graph_csv；repo profile `.code-reality.toml` schema、存在性偵測單一真相源、claims 口徑限制；與 crg-query 分工：CRG 查圖譜結構、code_reality 做邊集導出與 EP 對照）
 - `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀）
 - `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
 - `lsp-navigation` — LSP 深層參考（reference skill：rg 陷阱案例群、方法論限制 loopback、跨 harness 載體對照、workspace staleness/reindex 處置、驗證輸出格式；rule 留決策樹/Tool Discovery gate 核心——rule+skill 分層控制 bundle 尺寸）
