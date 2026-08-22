@@ -851,7 +851,9 @@ def _assert_repo(repo: Path, roots: tuple[ScanRoot, ...]) -> None:
     """crash-only 驗證掃描前提：repo 存在＋各 scan_root 的 base 目錄存在。
 
     掃描根由 profile ``[[scan_root]]`` 擁有（NT 深層形狀——pyo3 宣告＋
-    .pyi 合約樹——是 NT 專案假設，記錄於 code-reality skill）。"""
+    .pyi 合約樹——是 NT 專案假設，記錄於 code-reality skill）。已知邊界：
+    多個 scan_root 的 glob 重疊時不去重（重掃＋重複邊）——profile 應
+    保持 scan_root 互斥（自曝慣例，對齊 claims_re 的重疊 prefix 警示）。"""
     assert repo.is_dir(), f"repo 不存在：{repo}"
     for sr in roots:
         for glob in (sr.path, sr.pyi):
@@ -937,7 +939,8 @@ def main() -> None:
         f"（空白 stub 估）、variant {gaps['rs_only_method_variant_residual']}（轉換殘餘）"
     )
     print(
-        f"[LOG] 查詢：uv run python -m code_reality.boundary <symbol>"
+        f"[LOG] 查詢：uv run --project ~/Github/ai-rules "
+        f"python -m code_reality.boundary <symbol> --repo <repo>"
         f"｜裸 sqlite：sqlite3 {db} 'SELECT * FROM boundary_edges WHERE py_symbol LIKE \"%LiveNode%\"'"
     )
 

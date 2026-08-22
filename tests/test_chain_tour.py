@@ -119,6 +119,29 @@ class TestResolve:
         assert kind == "suffix"
         assert got is not None and got.parent.name == "apps"
 
+    def test_no_profile_fallback_root_direct(self, tmp_path: Path) -> None:
+        """無 profile repo：generic fallback pkg_roots=[repo_root]——根檔 direct 命中。"""
+        repo = tmp_path / "bare"
+        (repo / "src").mkdir(parents=True)
+        (repo / "src" / "app.py").write_text("x\n")
+        r = PathResolver(repo)
+        got, kind = r.resolve("src/app.py")
+        assert kind == "direct"
+        assert got is not None and got.name == "app.py"
+
+    def test_venv_same_name_excluded_from_pool(self, tmp_path: Path) -> None:
+        """.venv/ 同名檔不得進 pool——排除前綴讓真 package 檔從 ambiguous 變唯一。"""
+        repo = tmp_path / "repo"
+        for rel in ("mosaic_alpha/apps/x.py", ".venv/lib/x.py"):
+            p = repo / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("x\n")
+        write_mosaic_profile(repo)
+        r = PathResolver(repo)
+        got, kind = r.resolve("x.py")
+        assert kind == "suffix"
+        assert got is not None and got.parent.name == "apps"
+
 
 class TestCheckAnchor:
     def test_statuses(self, tmp_path: Path) -> None:

@@ -1,7 +1,8 @@
-"""S3 graph_csv 整合測試——真 CRG graph.db（SM-7 數字量級錨）。
+"""S3 graph_csv 整合測試——真 CRG graph.db（量級錨＝當前 graph 重建快照）。
 
-對照組＝POC 產出（1,218 nodes/2,815 links）；boundary EP 後 tools 節點再增，
-故量級錨用 ≥（POC 值為下界）。缺 graph.db 的環境 skip。
+錨 1,112/2,732 是 graph.db 重建後的實測快照（graph 隨 CRG 增量演進，
+斷言語義＝「真 graph 非空殼」的量級下界——重建縮小時隨實況更新錨）。
+缺 graph.db 的環境 skip。
 """
 
 import csv

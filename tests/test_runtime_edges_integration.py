@@ -32,6 +32,11 @@ pytestmark = pytest.mark.integration
 
 pytest.importorskip("viztracer")
 
+# 依賴鏈：viztracer 之外還需 mosaic checkout（driver 經 `uv pip install -e`
+# 裝的 mosaic-alpha 進 ai-rules venv）——bare `uv sync` 會 prune 掉它，
+# driver subprocess 會 loud 失敗（附 stdout）；先 `uv pip install -e
+# <mosaic-repo>` 再跑本測試。
+
 DRIVER = Path(__file__).parent / "fixtures" / "delegation_driver.py"
 REPO_ROOT = (
     Path.home() / "Github" / "mosaic_alpha_offline_backtesting"

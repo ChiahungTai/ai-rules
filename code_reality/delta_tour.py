@@ -14,7 +14,8 @@
 kebab 化、無 --ep 時 ``review``）；生成時清理 out-dir 內 >7 天舊檔
 （delta tour 不 commit 的本地 7 天生命週期義務）。
 已知口徑：claims 只認 profile ``[[module]]`` prefixes 衍生路徑（code-reality
-skill「口徑限制」段）——不符前綴的弧宣稱恆 NONE 屬預期，如實顯示（SM-2）。
+skill「口徑限制」段）——不符前綴的弧宣稱恆 NONE 屬預期，如實顯示
+（SM-2，ep-code-reality-ui）。
 """
 
 import argparse
