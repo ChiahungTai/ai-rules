@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """graph CSV export——CRG graph.db → nodes/links CSV（Cosmograph 餵料）。
 
 純資料資產無 UI（退役裁決：圖是資料不是介面——想看圖就把 CSV 拖進

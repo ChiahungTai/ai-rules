@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S1 整合測試——viztracer 真跑 EP-F1 driver → 抽取 → golden edge（SM-1）。
 
 golden oracle 是評估弧 R6b 實證的委派邊

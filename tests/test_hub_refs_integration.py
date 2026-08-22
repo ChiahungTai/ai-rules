@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S4 整合測試——真 CRG CLI 查詢＋聚合（SM-9/10）。
 
 斷言以 known-CRG 行為寫（EP S4）：CRG 漏 instance-attr 邊是 R2 已知結果

@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S2 snapshot/exclusions 單元測試——fixture sqlite 覆蓋 SM-5/6/11 的函數層。
 
 驗證意圖提煉自評估弧 POC（git 歷史 poc/poc_crg_module_edges.py；schema 直讀已全量

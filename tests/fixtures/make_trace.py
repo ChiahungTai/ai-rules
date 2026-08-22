@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """合成 viztracer trace 產生器——單元測試用，不依賴 viztracer 本體。
 
 事件格式對齊 viztracer JSON：fee/X complete events，name 格式

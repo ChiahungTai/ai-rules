@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S4 hub_refs 單元測試——fixture JSON 聚合邏輯＋名稱解析（SM-9/10/13）。
 
 CRG CLI JSON 形態（ok/ambiguous/not_found）基於 2026-08-21 實測；名稱解析

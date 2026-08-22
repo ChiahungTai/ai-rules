@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """PyO3 boundary extractor——NT pyo3 宣告 ↔ Python .pyi 合約對照 sidecar。
 
 跨語言縫是 evidence fusion 的最後盲區（pyright 看不進 Rust、rust-analyzer

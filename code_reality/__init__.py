@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """code_reality — code reality 薄層工具鏈（dev-only）。
 
 三源證據（LSP／CRG graph／VizTracer runtime）的可消費機械產物：

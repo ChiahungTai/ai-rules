@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """boundary 查詢 CLI——python 符號 → Rust 真身（path:line＋match_kind）。
 
 v2 遷移期消費場景：「這個 python 符號的實作在哪個 Rust 檔哪一行」——

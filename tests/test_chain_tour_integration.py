@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S2 chain_tour 整合測試——真 callchain 文檔 × 真 graph.db（SM-4/5 數字錨）。
 
 對照組＝POC chain_viewer.py（5 場景/187 幀；重錨分佈 same 65/moved 12/

@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S3 graph_csv 整合測試——真 CRG graph.db（SM-7 數字量級錨）。
 
 對照組＝POC 產出（1,218 nodes/2,815 links）；boundary EP 後 tools 節點再增，

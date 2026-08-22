@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """profile 引擎測試——loader crash-only、module_of 規則表（含 F6 根檔案）、
 claims 衍生等價（POC-3 提煉）、scan_roots fallback。
 

@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """boundary 查詢 CLI 單元測試——fixture 小 sidecar（LiveNode 家族縮影）。
 
 涵蓋：查詢 happy／裸名／多命中（雙宣告列全部）／not-found 候選消歧／

@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """code_reality 工具鏈共用慣例——_meta 區塊、repo 相對化、CRG db 連線。
 
 全工具輸出 JSON 共用 `_meta` 區塊（commit/timestamp/tool 錨定），定義

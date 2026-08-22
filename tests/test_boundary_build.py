@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """boundary_build 單元測試——合成 mini-case（NT 實形狀的縮影）。
 
 素材：poc/test_pyo3_boundary_poc.py 提煉擴充（EP Dogfood——POC→RED 銜接）

@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S1 delta_tour 單元測試——transition＋git hunk 錨 → CodeTour .tour（SM-1/2/3）。
 
 POC 對照組＝.agent-tmp/ui/build_delta_tour.py（22 步實證，搬運忠實度由

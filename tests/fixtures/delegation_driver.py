@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """EP-F1 委派 runtime 證據 driver——viztracer 追蹤目標。
 
 真走 ConditionService.calculate → FeatureService.calculate 委派（評估弧

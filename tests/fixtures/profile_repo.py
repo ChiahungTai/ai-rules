@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """測試 helper——合成 repo 的 .code-reality.toml 寫入（profile 引擎化隨遷）。
 
 mosaic/NT 兩形狀與真 repo profile 檔同值——測試合成 repo 行為與真 repo

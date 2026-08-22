@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """共用 exclusion 層——profile ``exclude`` 單一源（報告 §8 薄層清單 #4）。
 
 排除對象＝repo 擁有的噪音實證（mosaic：R1 stubs 假邊、R3b ai-analysis/

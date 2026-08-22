@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S1 runtime_edges 單元測試——合成 trace 覆蓋 SM-1/3/4（巢套/兄弟/遞迴/crash-only）。
 
 驗證意圖提煉自評估弧 POC（git 歷史 poc/poc_runtime_edges.py；掃描線巢套演算法已全量

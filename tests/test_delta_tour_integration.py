@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S1 delta_tour 整合測試——真 snapshot sidecar × 真 repo 歷史（SM-1 數字錨）。
 
 對照組＝POC ``.agent-tmp/ui/build_delta_tour.py`` 產出（22 步實證）：

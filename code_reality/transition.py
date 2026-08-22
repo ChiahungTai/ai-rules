@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """transition diff——兩 snapshot module-edge 集差異＋「EP 宣稱 vs 實際」對照。
 
 UC5 最後一哩＋intent drift 機械化第一步（報告 §6 裁決）：Depwire diff 的

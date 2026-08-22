@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """boundary 整合測試——真 NT repo 掃描＋查詢（SM-1/2/3/6/7）。
 
 NT checkout 缺席即 skip。錨點驗證採自洽式（sidecar 指到的 rs 行內容確實

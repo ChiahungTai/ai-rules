@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S2 整合測試——對本 repo 真 CRG graph.db 跑 snapshot（SM-5/6）。
 
 graph.db 缺席（fresh clone）即 skip。graph stale 時 skip 方向抽查（過時

@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """common.py 共用 helper 測試——anchor_pattern／repo_relative／connect_ro。
 
 module_of 已隨 profile 引擎化遷至 code_reality.profile（測試見

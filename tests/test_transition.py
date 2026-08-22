@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S3 transition 單元測試——邊集差異＋EP 宣稱對照（SM-7/8/12）。
 
 S3 帶已知 bug 開工（EP Dogfood 規格）：評估弧 POC（git 歷史）的

@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """臨時 CRG graph.db 產生器——S2/S4 單元測試用，不依賴真 CRG 安裝。
 
 schema 對齊 code-review-graph sqlite（nodes/edges/metadata 表），最小欄位

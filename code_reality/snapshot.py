@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """弧 snapshot——CRG module-edge 集導出為 commit 錨定 sidecar。
 
 UC5 Transition 的原料（報告 §8 #2）：Depwire 有此能力但共享 worktree 危害

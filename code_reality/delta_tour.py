@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """delta-review tour——transition diff＋git hunk 錨 → CodeTour `.tour`。
 
 「review commit」從看圖改成走讀：step 1 弧總覽（宣稱對照），之後每步一個

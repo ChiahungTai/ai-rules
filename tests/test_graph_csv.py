@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S3 graph_csv 單元測試——graph.db → nodes/links CSV（SM-7 語義）。
 
 POC 對照組＝.agent-tmp/ui/graph_csv.py（1,218 nodes/2,815 links 已抽乾淨可跑；

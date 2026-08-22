@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """repo profile——``.code-reality.toml`` 單一源。
 
 repo 事實歸 repo：module 規則（``module_of``）、claims 前綴衍生、

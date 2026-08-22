@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """conftest for tests/ — fixtures/ helper import 路徑。
 
 fixtures/make_trace.py（合成 trace 產生器）非 test 模組，加入 sys.path

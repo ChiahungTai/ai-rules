@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """runtime edge 抽取器——viztracer trace JSON → runtime 呼叫邊表。
 
 評估弧 R6b 實證 viztracer runtime 事件可還原呼叫邊（EP-F1 委派邊 442ms

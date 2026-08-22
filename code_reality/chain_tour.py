@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """chain tour——callchain 文檔 → 每場景一條 CodeTour `.tour`。
 
 文檔保鮮的機械基礎：文檔錨在一個 commit 後漂移，graph.db 重錨自動給新行號

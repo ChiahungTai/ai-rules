@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """S2 chain_tour 單元測試——callchain 文檔 → 每場景一條 CodeTour（SM-4/5/6）。
 
 解析機械搬運自 .agent-tmp/ui/chain_viewer.py（187 幀/L6 驗證源；html viewer

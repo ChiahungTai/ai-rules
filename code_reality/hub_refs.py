@@ -1,5 +1,3 @@
-# Copyright: (c) 2026 mosaic_alpha contributors
-# Licensed under GNU Affero General Public License v3.0+
 """hub-refs 聚合器——CRG callers_of/callees_of 按檔聚合＋test/prod 切分。
 
 解 hub symbol 洪流（R4 實證：Interval 的 LSP findReferences 195KB 被
