@@ -1,6 +1,6 @@
 ---
 name: tour-bootstrap
-description: "Repo Tour Bootstrap——把任意 repo 變成可走讀狀態（場景層 Chain Tour／時間層 Delta Tour；地圖層 Overview Tour 視重複度盤點）的程序 skill，建在 code-reality 工具鏈之上。何時跑：使用者說「bootstrap 這個 repo 的 tour」／新 repo 冷啟動要導覽／要產 overview tour。含 .tour link 語言契約、機械驗證清單、優先序裁定、唯一斷點（AI 輔助生成 callchain 文檔）。"
+description: "Repo Tour Bootstrap——把任意 repo 變成可走讀狀態（場景層 Chain Tour／時間層 Delta Tour；地圖層 Overview Tour 視重複度盤點）的程序 skill，建在 code-reality 工具鏈之上。何時跑：使用者說「bootstrap 這個 repo 的 tour」／新 repo 冷啟動要導覽／要產 overview tour。含 .tour link 語言契約、機械驗證清單、優先序裁定；斷點③已解——callstack 生成走 blueprint-bootstrap。"
 when_to_use: "Bootstrapping tour corpus for any repo (user says \"幫我 bootstrap 這個 repo 的 tour\"), authoring an Overview Tour (short isPrimary version), converting callstack docs to chain tours, or validating .tour links/anchors. Prerequisite detection: repo 有無 callstack 文檔決定 chain＋delta（地圖層視重複度盤點）或 overview-only 最小形態。"
 argument-hint: "<repo-root>（要 bootstrap 的 repo；省略即 cwd repo）"
 allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
