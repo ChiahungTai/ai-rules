@@ -29,7 +29,7 @@ uv run --project ~/Github/ai-rules python -m code_reality.<tool> --repo <repo-ro
 
 **時點條件（transition 消費 gate——細節真相源 code-review 模式 B transition 段）**：HEAD == EP baseline（uncommitted）→ **不跑**（同 sha 零差異假陰性＋baseline sidecar 覆寫風險），退 LLM 對照＋`[WARN]`；snapshot 報 stale → 視同缺報告。
 
-## 工具表（十二工具＋共用）
+## 工具表（十一工具＋共用）
 
 | 工具 | 職責 |
 |------|------|
@@ -39,7 +39,7 @@ uv run --project ~/Github/ai-rules python -m code_reality.<tool> --repo <repo-ro
 | `runtime_edges` | viztracer trace → 逐函式 runtime 邊 |
 | `boundary_build`／`boundary` | pyo3 宣告↔`.pyi` 合約 sidecar build／查詢 |
 | `delta_tour`／`chain_tour`／`graph_csv` | 敘事/關聯載體（`.tour` 契約——渲染消費者 CodeTour）；chain_tour 產出同步 upsert `.tours/manifest.toml` |
-| `tour_validate`／`tour_upgrade`／`test_tour`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／tests→tour 骨架（AST 枚舉＋`>>` 可執行步）／manifest 讀寫 |
+| `tour_validate`／`tour_upgrade`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／manifest 讀寫 |
 | `common`／`exclusions`／`profile` | 共用設施：`_meta`/`connect_ro`（WAL fallback）／排除前綴／profile 引擎 |
 
 ## repo profile（`.code-reality.toml`——repo 擁有）
