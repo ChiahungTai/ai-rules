@@ -31,7 +31,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
    - **tour link**＝`[顯示名][匹配鍵#N]`（顯示名可省——單方括號也是合法形式，正是下條誤判的源頭）；markdown `( )` 形式被排除＝死鏈；**匹配鍵**＝title 剝 `^#?\d+\s-` 前綴**且在第一個 ASCII `-` 截斷**（`getTourTitle` 的 `split("-")[1]` quirk——title body 避 ASCII 連字號，撞鍵時 link 落第一條）
    - **file link**＝`[文字](./相對路徑)`——路徑以 `.` 開頭才觸發走讀欄 pinned tab（`./` 為慣例形態）
    - description 內**禁其他裸方括號**（會被誤判為 tour link）
-   - `NN - ` 前綴限系列 tour 且**必須補零**（`01 - `）——非補零 `1 - ` 會被 player 誤判 primary；`isPrimary`＝corpus 前門（冷啟動直達＋panel star 置頂）——有地圖層時＝overview 短版，無地圖層時＝chain_tour `--primary N` 標教育鏈（見「優先序裁定」）
+   - `NN - ` 前綴限系列 tour 且**必須補零**（`01 - `）——非補零 `1 - ` 會被 player 誤判 primary；`isPrimary`＝corpus 前門（冷啟動直達＋panel star 置頂）——有地圖層時＝overview 短版，無地圖層時＝chain_tour `--primary N` 標主題鏈（edu）（見「優先序裁定」）
 5. **機械驗證**（初稿產出時＋策展定稿後各一次）：全檔 JSON parse／tour link 匹配鍵逐字對齊＋步號存在（用上述剝前綴演算法算鍵，非肉眼）／file link 路徑存在／自有步 line+pattern 與源碼行對齊。
 
 ## 優先序裁定（條件式——多族 corpus）
@@ -41,10 +41,10 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 三輸入（盤點而來，AI 不發明）：
 
 - **機械統計**——chain_tour 輸出（每條步數、0-step 殼、族幀數）
-- **族角色**——SYSTEM-MAP 狀態標記（🏃＝生產運行）＋callstack 文檔自述目的（理解骨架／生產／戰略／專題）
+- **族角色**——SYSTEM-MAP 狀態標記（🏃＝生產運行）＋plan 軌別（入口 ops／機制 mech／主題 edu——blueprint 三軌）
 - **覆蓋廣度**——鏈橫跨的架構層數（callstack 幀目錄可判）
 
-裁決規則：① 前門＝教育鏈中「橫跨層最多 × 步數中等」者（殼與 1-step 不入動線——步驟 2「勿連入」擴為「不入動線」）；② 動線＝教育→生產→專題按任務；③ 殼族標「深讀走 callstack md 本身，不走 tour」。落地＝`chain_tour --primary N`（唯一有效前門機制——player fallback 只認未補零 `1 - `，補零 corpus 永不命中；**重產帶前門的族必須再帶 `--primary`，漏帶則旗標靜默掉落**）＋目錄數字前綴（panel 群組 alphabetical 排序，前綴讓群序＝優先序——**panel 即動線**，不另立文檔；前綴可承載軌別如 `ops-`/`mech-`/`edu-`（blueprint 三軌配套，不綁死））＋repo 入口文檔一行（AGENTS.md 觸發器表自述前門與群序語義）。停點：初稿產出即停，用戶策展。
+裁決規則：① 前門＝主題鏈（edu）中「橫跨層最多 × 步數中等」者（殼與 1-step 不入動線——步驟 2「勿連入」擴為「不入動線」）；② 動線＝主題（edu）→入口（ops）→機制（mech）按任務；③ 殼族標「深讀走 callstack md 本身，不走 tour」。落地＝`chain_tour --primary N`（唯一有效前門機制——player fallback 只認未補零 `1 - `，補零 corpus 永不命中；**重產帶前門的族必須再帶 `--primary`，漏帶則旗標靜默掉落**）＋目錄數字前綴（panel 群組 alphabetical 排序，前綴讓群序＝優先序——**panel 即動線**，不另立文檔；前綴可承載軌別如 `ops-`/`mech-`/`edu-`（blueprint 三軌配套，不綁死））＋repo 入口文檔一行（AGENTS.md 觸發器表自述前門與群序語義）。停點：初稿產出即停，用戶策展。
 
 ## 停點設計
 
