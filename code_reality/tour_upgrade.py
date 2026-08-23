@@ -160,7 +160,6 @@ def run(repo: Path, tours_dir: Path, apply: bool) -> int:
     mpath = root / "manifest.toml"
     data = tour_manifest.load(mpath)
     data.setdefault("version", 1)
-    data["audience"] = "newcomer"
     for rel, _ in tours:
         rel_from_root = str(Path(rel).relative_to(tours_dir)) if str(tours_dir) != "." else rel
         tour_manifest.upsert(

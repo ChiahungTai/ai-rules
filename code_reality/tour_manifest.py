@@ -1,6 +1,6 @@
 """corpus provenance manifest——.tours/manifest.toml 讀寫。
 
-derived/curated 二分的機械載體：source×generator×anchored_commit＋corpus 級 audience。
+derived/curated 二分的機械載體：source×generator×anchored_commit。
 curated＝generator "manual"；重產 diff 非空的 derived 由 audit 建議升 manual（不覆蓋）。
 """
 
@@ -58,8 +58,6 @@ def _kv(key: str, val: str) -> str:
 
 def dump(path: Path, data: dict) -> None:
     lines = [f"version = {data.get('version', 1)}"]
-    if data.get("audience"):
-        lines.append(f'audience = "{data["audience"]}"')
     for rel in sorted(data.get("tour", {})):
         row = data["tour"][rel]
         lines.append(f'\n[tour."{rel}"]')
@@ -82,14 +80,12 @@ def init_scan(
     repo: Path,
     tours_dir: Path,
     *,
-    audience: str,
     generator_rule: str = "chain",
 ) -> dict:
     """掃 corpus 補 manifest——只補缺行（既有行不覆蓋：generator 原生寫入的 sources 保留）；generator 以檔名慣例猜（chain-*→chain_tour、其餘 manual）、sources 留空。"""
     path = repo / tours_dir / "manifest.toml"
     data = load(path) if path.exists() else {}
     data.setdefault("version", 1)
-    data["audience"] = audience
     data.setdefault("tour", {})
     commit = git_head(repo)
     for f in sorted((repo / tours_dir).rglob("*.tour")):
@@ -109,13 +105,12 @@ def main() -> None:
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--tours-dir", type=Path, default=Path(".tours"))
     parser.add_argument("--init-scan", action="store_true", help="掃 corpus 生成 manifest 骨架")
-    parser.add_argument("--audience", default="newcomer", choices=["newcomer", "owner"])
     args = parser.parse_args()
     path = args.repo / args.tours_dir / "manifest.toml"
     if not args.init_scan:
         print(f"[OK] manifest path: {path}（exists={path.exists()}）")
         return
-    data = init_scan(args.repo, args.tours_dir, audience=args.audience)
+    data = init_scan(args.repo, args.tours_dir)
     dump(path, data)
     print(f"[OK] manifest init: {len(data['tour'])} rows -> {path}")
 
