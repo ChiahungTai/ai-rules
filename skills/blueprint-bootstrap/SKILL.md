@@ -10,7 +10,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 一句話：使用者說「**幫這個 repo 立 blueprint 骨架**」→ 產出半滿 blueprint 知識庫（骨架＋狀態標記＋誘導問題）＋（指定時）callstack 場景敘事系列 → 使用者策展演化；callstack 產出＝[tour-bootstrap](../tour-bootstrap/SKILL.md) 場景層的輸入。
 
-**定位**：軌道②人類 viewport 的 **scaffold**（工作區非成品）——骨架不偽裝完成。與機器導航分工：[instruction-init](../instruction-init/SKILL.md) 產 AGENTS.md 群（blueprint 的真相源輸入之一）；與 tour 分工：blueprint 先成熟 → tour 後消費（callstack 文檔餵 chain_tour，每份 md → `.tours/arch/<stem>/` 一族）。**不併 tour-bootstrap**——載體契約（治理文檔 vs `.tour` corpus）、生命週期（消化重編人類策展 vs 工具重產禁手改）、工具層三切面異質。
+**定位**：軌道②人類 viewport 的 **scaffold**（工作區非成品）——骨架不偽裝完成。與機器導航分工：[instruction-init](../instruction-init/SKILL.md) 產 AGENTS.md 群（blueprint 的真相源輸入之一）；與 tour 分工：blueprint 先成熟 → tour 後消費（callstack 文檔餵 chain_tour，每份 md → `.tours/arch/<族名>/` 一族）。**不併 tour-bootstrap**——載體契約（治理文檔 vs `.tour` corpus）、生命週期（消化重編人類策展 vs 工具重產禁手改）、工具層三切面異質。
 
 ## 前置偵測（決定模式）
 
@@ -38,6 +38,8 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 - 無 `.py` 錨幀（launchd/shell／外部路徑／撞名）會被跳過並記原因分佈——屬設計非錯誤
 
 **每份文檔模板**（callstack-v1 實證七段完整形態——按鏈型態裁剪，如純資料鏈無入口總表；audit 盤點不以七段齊全為 drift 基準）：①檔頭 blockquote（讀者／定位／行號快照宣告／交叉引用）②入口總表（launchd／CLI／test 誰觸發）③主 call stack 樹（**場景分棵**）④分層敘事（關鍵函式／錯誤路徑／IO·state 副作用）⑤資料轉換邊界表（時區／單位／編碼在鏈上哪點變換）⑥不變量與陷阱（docstring 教訓）⑦符號速查表（symbol→連結按層分組）。
+
+**檔名**：每篇＝英文 kebab slug（grep/CLI 友善）；corpus 族名與檔名**解耦**（族名＝人類標題，規範在 [tour-bootstrap](../tour-bootstrap/SKILL.md) 步驟 2）——兩者僅經 manifest sources 連結。
 
 **生成程序**（callstack-v1 反推——16 篇／24 模組實證）：
 1. **鏈枚舉（問題錨定三軌——獨立可跑，成本 ~2% 於生成）**：準則＝「這條鏈回答什麼**使用者問題**」（非程式從哪進來/長在哪層）——①**入口鏈**（ops「這入口失敗去哪查」）：機械掃入口（launchd／CLI／UI app）＋常青篩選（會再跑才成鏈；同體多入口併一鏈），本軌機械收斂可驗；②**機制鏈**（debug／重構「為什麼擋單／改這模組誰受影響」）：錨共用模組影響域／critical path（候選＝CRG 熱點、hub 影響域），過濾＝cross-cutting 且活著（dormant 不成鏈）；③**流程主題鏈**（onboarding／研究「這流程端到端」）：一篇一縱貫流程，教育裁定（人決動線）；④scripts／probe／一次性——**plan 索引一行，不成鏈**（無對應使用者場景）。產出 `ai-analysis/blueprint/callstack-plan.md`（每行＝**軌**×鏈名×錨點×一句職責×優先序）——分批菜單按軌分批；驗收分軌（入口軌機械收斂／機制軌數據支持／主題軌人裁定）。README 地圖按三軌分組、目錄維持平面；入口鏈↔機制鏈交叉引用開放（「本鏈止於 X、深潛見 Y」邊界宣告）
