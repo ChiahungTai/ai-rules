@@ -82,7 +82,7 @@ def init_scan(
     *,
     generator_rule: str = "chain",
 ) -> dict:
-    """掃 corpus 補 manifest——只補缺行（既有行不覆蓋：generator 原生寫入的 sources 保留）；generator 以檔名慣例猜（chain-*→chain_tour、其餘 manual）、sources 留空。"""
+    """掃 corpus 補 manifest——只補缺行（既有行不覆蓋：generator 原生寫入的 sources 保留）；generator 以檔名慣例猜（`chain-*` 或純序號 `NN.tour`→chain_tour、其餘 manual）、sources 留空。"""
     path = repo / tours_dir / "manifest.toml"
     data = load(path) if path.exists() else {}
     data.setdefault("version", 1)
@@ -95,7 +95,12 @@ def init_scan(
         rel = rel_path.as_posix()
         if rel in data["tour"]:
             continue
-        gen = "chain_tour" if generator_rule == "chain" and f.name.startswith("chain-") else "manual"
+        gen = (
+            "chain_tour"
+            if generator_rule == "chain"
+            and (f.name.startswith("chain-") or (f.stem.isascii() and f.stem.isdigit()))
+            else "manual"
+        )
         upsert(data, rel, generator=gen, sources=[], commit=commit)
     return data
 

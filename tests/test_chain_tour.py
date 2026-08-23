@@ -301,17 +301,30 @@ class TestBuildTours:
         assert st.tours[0]["steps"][0]["line"] == 10  # 文檔錨原值
 
     def test_write_tours_filenames(self, tmp_path: Path) -> None:
-        """寫檔段：chain-<idx>-<slug>.tour 命名（zero-pad 防字典序亂調）。"""
+        """寫檔段：{NN}.tour 純序號（user 裁定——族名承載語義、檔名穩定鍵；zero-pad 防字典序亂調）。"""
         md, repo, db = self._setup(tmp_path)
         st = build_tours(md, repo, db)
         paths = write_tours(st, tmp_path / "out")
         assert len(paths) == 1
-        assert paths[0].name == "chain-01-場景-X.tour"
+        assert paths[0].name == "01.tour"
         assert paths[0].exists()
+
+    def test_write_tours_warns_legacy_filenames(
+        self, tmp_path: Path, capsys: pytest.CaptureFixture
+    ) -> None:
+        """D-f 過渡：out_dir 殘留舊格式 chain-*.tour → [WARN] 提示清理
+        （防新舊同 title 並存、player 撞鍵靜默雙份）。"""
+        md, repo, db = self._setup(tmp_path)
+        st = build_tours(md, repo, db)
+        out = tmp_path / "out"
+        out.mkdir()
+        (out / "chain-01-舊格式.tour").write_text("{}", encoding="utf-8")
+        write_tours(st, out)
+        assert "舊檔名格式殘留" in capsys.readouterr().out
 
     def test_written_title_nn_prefix_upstream_parseable(self, tmp_path: Path) -> None:
         """tour-contract EP S2（SM-4）——寫檔後 title 帶 ``NN - `` 前綴（記憶體
-        raw heading 不變、slug 取 raw——防 chain-01-01 雙重編號）；上游連鎖
+        raw heading 不變——防 01-01 雙重編號）；上游連鎖
         regex ``^#?(\\d+)\\s+-`` 逐條可解析。"""
         md, repo, db = self._setup(tmp_path)
         st = build_tours(md, repo, db)
@@ -474,7 +487,7 @@ class TestCli:
         monkeypatch.setattr(sys, "argv", ["chain_tour", str(md), "--primary", "2"])
         main()
         base = tmp_path / ".tours" / "arch" / "paper-chain-鏈"
-        p1, p2 = sorted(base.glob("chain-*.tour"))
+        p1, p2 = sorted(base.glob("*.tour"))
         t1, t2 = json.loads(p1.read_text()), json.loads(p2.read_text())
         assert t1["title"] == "01 - 場景 一"
         assert t2["title"] == "02 - 場景 二"
@@ -511,7 +524,7 @@ def test_main_outdir_outside_tours_skips_manifest(
         ["chain_tour", str(md), "--repo", str(tmp_path), "--out-dir", str(dry)],
     )
     main()
-    assert list(dry.glob("chain-*.tour")), "tour 檔照寫"
+    assert list(dry.glob("*.tour")), "tour 檔照寫"
     assert not list(tmp_path.rglob("manifest.toml")), "dry 目錄不得產生 manifest 副作用"
     out_text = capsys.readouterr().out
     assert "manifest skip" in out_text

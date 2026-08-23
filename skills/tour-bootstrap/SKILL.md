@@ -31,7 +31,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
    - **tour link**＝`[顯示名][匹配鍵#N]`（顯示名可省——單方括號也是合法形式，正是下條誤判的源頭）；markdown `( )` 形式被排除＝死鏈；**匹配鍵**＝title 剝 `^#?\d+\s-` 前綴**且在第一個 ASCII `-` 截斷**（`getTourTitle` 的 `split("-")[1]` quirk——title body 避 ASCII 連字號，撞鍵時 link 落第一條）
    - **file link**＝`[文字](./相對路徑)`——路徑以 `.` 開頭才觸發走讀欄 pinned tab（`./` 為慣例形態）
    - description 內**禁其他裸方括號**（會被誤判為 tour link）
-   - `NN - ` 前綴限系列 tour 且**必須補零**（`01 - `）——非補零 `1 - ` 會被 player 誤判 primary；`isPrimary`＝corpus 前門（冷啟動直達＋panel star 置頂）——有地圖層時＝overview 短版，無地圖層時＝chain_tour `--primary N` 標主題鏈（edu）（見「優先序裁定」）
+   - **tour 檔名＝`{NN}.tour` 純序號**（user 裁定——族名承載語義、檔名僅穩定鍵，無截斷）；`NN - ` 前綴限系列 tour 且**必須補零**（`01 - `）——非補零 `1 - ` 會被 player 誤判 primary；`isPrimary`＝corpus 前門（冷啟動直達＋panel star 置頂）——有地圖層時＝overview 短版，無地圖層時＝chain_tour `--primary N` 標主題鏈（edu）（見「優先序裁定」）
 5. **機械驗證**（初稿產出時＋策展定稿後各一次）：全檔 JSON parse／tour link 匹配鍵逐字對齊＋步號存在（用上述剝前綴演算法算鍵，非肉眼）／file link 路徑存在／自有步 line+pattern 與源碼行對齊。
 
 ## 優先序裁定（條件式——多族 corpus）
@@ -61,6 +61,8 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 判定：`.tours/` 無 tour→fresh；有 corpus 無 manifest→audit（提示 migrate 若格式舊）；有 manifest→audit 為預設。
 
 **兩條鐵律**：① **corpus 變更一律經工具**（generator／tour_upgrade／tour_manifest CLI）——LLM 不直接手改 `.tour`（bootstrap 期 overview 手工初稿與人類策展編輯除外）；② **curated 不可盲目覆蓋**——derived tour 重產 diff 非空＝已被人改過，升級為 curated（manifest generator 改 `manual`）只報 diff 不覆蓋。
+
+**檔名格式過渡（D-f 後）**：out_dir 殘留舊格式 `chain-*.tour` 時 chain_tour 印 `[WARN]`——新舊同 title 並存會使 player 撞鍵靜默落第一條（corpus 靜默雙份）；全 corpus 改名重錨＝雙步清理：`rm <族目錄>/chain-*.tour` ＋ 刪 manifest.toml 讓重產重建。
 
 ## 斷點③（已解——上游為獨立服務）
 

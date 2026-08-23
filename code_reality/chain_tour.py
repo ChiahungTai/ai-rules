@@ -404,20 +404,17 @@ def build_tours(
     )
 
 
-def scenario_slug(heading: str) -> str:
-    return re.sub(r"[^\w\u4e00-\u9fff]+", "-", heading).strip("-")[:40] or "scenario"
-
-
 def write_tours(
     st: ScenarioTours, out_dir: Path, *, primary: AbstractSet[int] = frozenset()
 ) -> list[Path]:
-    """寫檔：``chain-NN-<slug>.tour``，JSON title 帶 ``NN - `` 前綴——上游
+    """寫檔：``{NN}.tour`` 純序號（user 裁定 2026-08-23——族目錄名承載語義、
+    檔名僅穩定鍵，無截斷），JSON title 帶 ``NN - `` 前綴——上游
     連鎖 parse 側 regex ``^#?(\\d+)\\s+-`` 可解析（Number("01")=1）。fork
     連鎖**尋找側**模板已補零（``^#?0*N\\s+[-:]``，codetour
     src/player/index.ts）——補零 title 的 Next/Previous 連鎖生效。
 
-    前綴在 emission 層加——記憶體 title 保持 raw heading、slug 取 raw，
-    防 ``chain-01-01-…`` 雙重編號。primary（1-based 場景號集合）成員帶
+    前綴在 emission 層加——記憶體 title 保持 raw heading，防雙重編號。
+    primary（1-based 場景號集合）成員帶
     ``"isPrimary": true``：補零編號 corpus 的唯一有效 primary 機制（上游
     ``1 - `` 偵測只認未補零），預設不標（user 08-22 裁決——primary 是
     corpus 級編輯決策，非單次生成能知）。
@@ -425,7 +422,7 @@ def write_tours(
     out_dir.mkdir(parents=True, exist_ok=True)
     paths = []
     for i, tour in enumerate(st.tours, 1):
-        p = out_dir / f"chain-{i:02d}-{scenario_slug(tour['title'])}.tour"
+        p = out_dir / f"{i:02d}.tour"
         emitted = dict(tour)
         emitted["title"] = f"{i:02d} - {tour['title']}"
         if i in primary:
@@ -434,6 +431,13 @@ def write_tours(
             json.dumps(emitted, ensure_ascii=False, indent=1), encoding="utf-8"
         )
         paths.append(p)
+    legacy = sorted(out_dir.glob("chain-*.tour"))
+    if legacy:
+        print(
+            f"[WARN] 舊檔名格式殘留 {len(legacy)} 檔（chain-*.tour）——新舊同 title "
+            "會使 player 撞鍵靜默落第一條（corpus 靜默雙份）；重錨過渡＝刪舊檔"
+            f"＋manifest 重建（rm {out_dir}/chain-*.tour 後重產或 init-scan）"
+        )
     return paths
 
 

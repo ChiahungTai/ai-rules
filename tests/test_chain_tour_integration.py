@@ -63,11 +63,9 @@ def test_real_chain_tours(tmp_path: Path) -> None:
         m = re.match(r"^#?(\d+)\s+-", written["title"])
         assert m and m.group(1) == f"{i:02d}"
 
-    # SM-5：跨檔重錨由 g_counts「moved-file」承載（本錨點文檔唯一實例的
-    # ident 語義不真——單空格 # 致 ident 污染＋陳舊 graph 座標的複合效應，
-    # 見 docstring；不對單幀寫死斷言）
+    # SM-5：跨檔重錨由 g_counts 承載——本錨點文檔雙空格修正後 moved-file=0
+    # （原唯一實例是 ident 污染＋陳舊 graph 的複合意外，note 分離後消失）
 
-    # 重錨分佈（2026-08-23 快照：same 46/moved 8/moved-file 1/noref 6）
-    assert st.g_counts.get("same", 0) >= 40
+    # 重錨分佈（2026-08-23 雙空格修正後快照：same 58/moved 9/moved-file 0/noref 6）
+    assert st.g_counts.get("same", 0) >= 50
     assert st.g_counts.get("moved", 0) >= 5
-    assert st.g_counts.get("moved-file", 0) >= 1
