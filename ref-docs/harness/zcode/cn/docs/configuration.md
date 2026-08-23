@@ -97,7 +97,7 @@ GLM-5-Turbo200 万 token / 日
 体验期内额度每天刷新，具体可用模型、剩余额度与消耗情况以 BigModel 供应商页面实时展示为准。
 在 ZCode 内订购编程套餐
 体验额度不够用？不用离开 ZCode：在 BigModel 供应商页面即可浏览 GLM Coding 编程套餐（Lite / Pro / Max），支持包月、包季、包年三种订购方式，登录后直接在应用内完成购买；已订阅用户也能在这里管理当前套餐、查看额度状态。
-新版套餐的用量按积分计算，除 5 小时额度外还设有每周额度；各档位的具体权益、积分额度与折算规则以 套餐改版说明 为准。
+新版套餐的用量按积分计算，除 5 小时额度外还设有每周额度；各档位的具体权益、积分额度与折算规则以 套餐改版说明 为准。额度用完时可以留意端内的重置机会，见 额度重置卡。
 使用团队套餐
 如果你所在的团队买了 GLM Coding Plan 团队版，登录后不需要额外配置：在 BigModel 供应商页面的 连接方式 菜单里，你有权限的每个团队会各自显示成一个 团队套餐 条目（按组织名称命名），选中即用该团队的额度跑任务。同一个菜单里也能切回 个人套餐 或 API Key。
 切换连接方式后，侧边栏和用量统计展示的额度会跟着切到对应来源，额度卡片上会标明是个人还是团队。
@@ -147,8 +147,8 @@ Anthropic（Claude API）
 名称填写「Anthropic」
 Anthropic 接口地址填写 https://api.anthropic.com
 在「API Key」输入框中填入从 Anthropic 平台 获取的 API Key（可在平台内查看用量与套餐）
-保存后，ZCode 会按供应商返回的可用模型列表展示模型
-如未自动加载，可通过「添加模型」手动补充 Anthropic 支持的模型
+保存后，点击「添加模型」手动填写 Anthropic 支持的模型 ID
+开启启用开关即可使用
 OpenRouter 平台
 1. 创建 API Key
 前往 OpenRouter 平台，注册账号并创建 API Key。
@@ -165,45 +165,45 @@ Moonshot
 名称填写「Moonshot」
 Anthropic 接口地址填写 https://api.moonshot.cn/anthropic
 前往 KIMI 开放平台 获取 API Key（可在平台内查看资源包与用量），并填入「API Key」输入框
-保存后，ZCode 会按供应商返回的可用模型列表展示模型；如未自动加载，可通过「添加模型」手动补充 Moonshot 支持的模型
+保存后，点击「添加模型」手动填写 Moonshot 支持的模型 ID，开启启用开关即可使用
 OpenAI
 进入 模型设置 面板
 在左侧供应商列表底部点击「添加供应商」
 名称填写「OpenAI」
 API 基础 URL 填写 https://api.openai.com
 在「API Key」输入框中填入从 OpenAI 平台 获取的 API Key
-保存后，ZCode 会按供应商返回的可用模型列表展示模型；如未自动加载，可通过「添加模型」手动补充 OpenAI 支持的模型
+保存后，点击「添加模型」手动填写 OpenAI 支持的模型 ID，开启启用开关即可使用
 MiniMax
 进入 模型设置 面板
 在左侧供应商列表底部点击「添加供应商」
 名称填写「MiniMax」
 Anthropic 接口地址填写 https://api.minimaxi.com/anthropic
 前往 MiniMax 开放平台 获取 API Key（可在平台内查看套餐与计费），并填入「API Key」输入框
-保存后，ZCode 会按供应商返回的可用模型列表展示模型；如未自动加载，可通过「添加模型」手动补充 MiniMax 支持的模型
+保存后，点击「添加模型」手动填写 MiniMax 支持的模型 ID，开启启用开关即可使用
 小米 MiMo
 进入 模型设置 面板
 在左侧供应商列表底部点击「添加供应商」
 名称填写「Xiaomi MiMo」
 API 基础 URL 填写 https://api.xiaomimimo.com/v1
 前往 小米 MiMo 开放平台 获取 API Key（平台提供 Token Plan 套餐，可按需开通），并填入「API Key」输入框
-保存后，ZCode 会按供应商返回的可用模型列表展示模型；如未自动加载，可通过「添加模型」手动补充 Xiaomi MiMo 支持的模型
+保存后，点击「添加模型」手动填写 Xiaomi MiMo 支持的模型 ID，开启启用开关即可使用
 自定义供应商（兼容 Anthropic / OpenAI 协议）
 ZCode 支持添加任何兼容 Anthropic / OpenAI 协议 的模型服务作为自定义供应商——既可以是公网模型服务，也可以是团队统一维护的企业模型通道或内网自托管服务。
-当你选择对应厂商的 Base URL，或填入兼容的接口地址后，系统会自动识别并加载可用模型列表，无需手动逐个补充模型名称。
+填写接口地址和 API Key 后，通过「添加模型」手动填写该服务支持的模型 ID 即可使用。
 配置步骤
 进入 模型设置 面板
 在左侧供应商列表底部点击「添加供应商」
 自定义填写名称：为供应商命名（如 claude、deepseek 等）
 选择对应厂商 Base URL：从下拉列表中选择或手动输入 API 基础 URL
 填写 API Key：输入对应服务的 API 密钥
-自动加载模型列表：接口地址确认后，系统会自动拉取并填充可用模型列表
+添加模型：点击「添加模型」，手动填写该服务支持的模型 ID
 开启启用开关后即可开始使用
 以 DeepSeek 兼容接口为例：
 名称填写「DeepSeek」
 Anthropic 接口地址填写 https://api.deepseek.com/anthropic
 OpenAI 接口地址填写 https://api.deepseek.com/v1
 填入从 DeepSeek 开放平台 获取的 API Key
-可用模型以供应商实际返回的模型列表为准；必要时手动添加团队约定的模型 ID
+点击「添加模型」填写 DeepSeek 支持的模型 ID（如 deepseek-chat、deepseek-reasoner），或团队约定的模型 ID
 点击保存即可
 团队使用建议：企业模型通道建议由团队统一管理 Base URL、API Key、模型列表与访问权限，保证长任务执行过程中的连接稳定性和可追踪性。如需团队级的席位、用量与权限管理，可了解 GLM Coding Plan 团队版。
 单个模型的高级参数
@@ -228,7 +228,7 @@ DeepSeek V4 系列high / maxmax
 其他自定义模型「开启 / 关闭」两档，或不提供档位由模型配置决定
 界面会按思考强度从低到高排列这些选项。选择档位后，ZCode 再根据接口类型转换请求参数：OpenAI 兼容接口使用顶层 reasoning_effort，Anthropic 兼容接口使用 thinking / effort。如果某个第三方模型没有显示细分档位，通常表示 ZCode 还没有该模型的档位映射，并不是配置丢失。
 需要注意：同名模型的第三方部署，接受的档位可能与官方端点不一致。例如 DeepSeek V4 系列在 ZCode 中的最高档按官方端点约定发送 max，而部分第三方部署只接受 xhigh 及以下——此时选最高档会返回 400 参数错误，改选 high 档即可正常使用。非 V4 的 DeepSeek 模型默认使用「开启 / 关闭」两档，不适用上表中的 high / max。
-供应商私有思考参数的支持情况：Qwen 系列的 enable_thinking、thinking.type=enabled/disabled 形式的开关已适配；GLM 的 clear_thinking、MiniMax 的 adaptive 思考模式当前不支持在 ZCode 内配置。有额外参数需求时，可在自定义供应商配置中通过 provider options 透传字段。
+供应商私有思考参数的支持情况：Qwen 系列的 enable_thinking、thinking.type=enabled/disabled 形式的开关已适配；GLM 的 clear_thinking、MiniMax 的 adaptive 思考模式当前不支持在 ZCode 内配置。目前也不支持为第三方模型追加自定义请求参数：~/.zcode/v2/config.json 中供应商的 options 只识别 apiKey、baseURL、apiKeyRequired、headers 等连接参数，手动加入的其他字段（如 reasoning_effort、vl_high_resolution_images）不会写入请求体，也不会有报错提示。
 图片输入的支持判定
 ZCode 会综合供应商与模型配置、模型目录中的能力信息、内置模型规则，以及当前接口协议，判断所选模型能否接收图片。判断结果分为三种：
 支持：保留图片，并随请求发送给模型服务。

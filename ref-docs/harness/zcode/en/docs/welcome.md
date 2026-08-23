@@ -34,6 +34,7 @@ Get StartedCopy page
 Welcome to ZCode for GLM-5.3
 ZCode is an Agentic Development Environment (ADE) built to bring GLM-5.3 into real coding workflows. It helps turn GLM-5.3's long-context, long-horizon, and agentic coding capabilities into a stable desktop experience for planning, coding, reviewing, and iterating across complex development tasks.
 With GLM-5.3's stable 1M context and long-horizon task capability, ZCode Agent can keep goals, files, terminal results, browser context, execution modes, and Git state in the same task. This allows complex development work to move from planning to implementation and verification without losing continuity.
+ZCode has been deeply tuned and specifically optimized around GLM-5.3, with a focus on the first-party ZCode Agent. Model, tools, and execution workflow are more tightly integrated, so complex development tasks can move from planning all the way to verification within a single context.
 With natural-language instructions, you can ask ZCode Agent to handle coding, debugging, testing, project preview, and change review. Through the desktop workspace, Remote, and Bot Channel, you can keep checking progress and adding instructions while long-running work continues.
 Core Capabilities
 ZCode organizes the development experience around the ZCode Agent, deeply tuned for GLM-5.3, with emphasis on:
@@ -44,7 +45,7 @@ Self-developed Agent workflow: tasks, permissions, context, tool calls, and revi
 Continuous follow-up across devices: desktop, mobile Remote, and Feishu / WeChat Bot can all keep the same workspace task moving.
 Safe and controllable execution: sensitive commands, file changes, and high-permission actions go through confirmation before execution.
 GLM-5.3 and Exclusive Benefits
-GLM-5.3 is now fully available in ZCode, with genuinely usable long-context capability suited to development tasks with longer scope, more files, and sustained reasoning. ZCode Agent continuously combines workspace state, tool results, and Git changes throughout task execution, turning model capability into stable code changes.
+With GLM-5.3's long context, ZCode can keep track of more files and longer stretches of development within a single task. It keeps moving forward by combining the current workspace, tool results, and Git changes, so even multi-step tasks don't need their background re-explained.
 Subscriber benefit
 Idle-time tasks run for free
 Subscribers can create idle-time tasks: queue up non-urgent work and ZCode completes it for free during periods of spare capacity, without consuming your plan quota. Rolling out gradually to subscribers.
@@ -77,8 +78,14 @@ Connect Models
 Connect GLM models and Coding Plans for your Agents.
 Feedback & Support
 Learn how to report issues and provide useful logs.
+Join the Community
+Discord
+Scan or click to join the ZCode Discord community
+X
+Follow @zcode_ai for product news and updates
 On this page
 Core Capabilities
 GLM-5.3 and Exclusive Benefits
 Release Highlights
 Quick Start
+Join the Community

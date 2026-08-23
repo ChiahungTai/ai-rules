@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-14T14:16:28+00:00",
+  "generated_at": "2026-08-23T13:11:34+00:00",
   "sources": {
     "claude-code": {
       "base": "https://code.claude.com",
@@ -6621,8 +6621,8 @@
           "url": "https://zcode.z.ai/cn/docs/configuration",
           "path": "cn/docs/configuration.md",
           "status": "extracted-html",
-          "sha256": "2b84d1cc53c152e40826b89243aa76306193f2cfca836dfcea8bce8b15edd8cf",
-          "bytes": 19865
+          "sha256": "7cd14aa0f06c3d1817ea4abc50392338d2d44f04e3860e90bad6f5ab8ae2af2c",
+          "bytes": 19860
         },
         {
           "url": "https://zcode.z.ai/cn/docs/edit-history",
@@ -6656,14 +6656,14 @@
           "url": "https://zcode.z.ai/cn/docs/idle-time-tasks",
           "path": "cn/docs/idle-time-tasks.md",
           "status": "extracted-html",
-          "sha256": "9bcdb1b02598ef32093a7588296940056f1e5f14b5b1b32fbe2226259f8995d4",
-          "bytes": 7182
+          "sha256": "a707be4c20ff1f8e7134465a574d796ef50b5214e4ed29855eebb9be40c5702e",
+          "bytes": 8408
         },
         {
           "url": "https://zcode.z.ai/cn/docs/install",
           "path": "cn/docs/install.md",
           "status": "extracted-html",
-          "sha256": "78f833f20f932957564d6826ccfc729932f950136065e68a20c617287ccac6f0",
+          "sha256": "3a7cebf5fba2d1b1f5a78387fe1639f1043eac779fd284b0015067ed9a3de7fc",
           "bytes": 5251
         },
         {
@@ -6754,8 +6754,8 @@
           "url": "https://zcode.z.ai/cn/docs/usage-stats",
           "path": "cn/docs/usage-stats.md",
           "status": "extracted-html",
-          "sha256": "3da4516be79a9d3568db4e3468dd99b3a0cb3a8de5717495df8aa99b41499a50",
-          "bytes": 2185
+          "sha256": "4368812c78381a9ebbebf9cd99e513830422b5c48eb968a4e7b77b0b2d0693fc",
+          "bytes": 3683
         },
         {
           "url": "https://zcode.z.ai/cn/docs/welcome",
@@ -6768,8 +6768,8 @@
           "url": "https://zcode.z.ai/en/docs/welcome",
           "path": "en/docs/welcome.md",
           "status": "extracted-html",
-          "sha256": "2a241df26b08e4b43b905bb6702229fe096aa45b174179c94010e798e6a9e884",
-          "bytes": 4530
+          "sha256": "cfb1cd7b692d3f71f6a0b99c424d0edd017db5afeb45e351d9354e7fef485151",
+          "bytes": 4911
         }
       ]
     }
