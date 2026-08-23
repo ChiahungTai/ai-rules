@@ -412,9 +412,9 @@ def write_tours(
     st: ScenarioTours, out_dir: Path, *, primary: AbstractSet[int] = frozenset()
 ) -> list[Path]:
     """寫檔：``chain-NN-<slug>.tour``，JSON title 帶 ``NN - `` 前綴——上游
-    連鎖 parse 側 regex ``^#?(\\d+)\\s+-`` 可解析（Number("01")=1）。注意：
-    fork 連鎖**尋找側**模板未補零（``^#?N\\s+[-:]``），補零 title 不被其
-    匹配——Next/Previous 連鎖需 fork 修 template（已列入收尾通知）。
+    連鎖 parse 側 regex ``^#?(\\d+)\\s+-`` 可解析（Number("01")=1）。fork
+    連鎖**尋找側**模板已補零（``^#?0*N\\s+[-:]``，codetour
+    src/player/index.ts）——補零 title 的 Next/Previous 連鎖生效。
 
     前綴在 emission 層加——記憶體 title 保持 raw heading、slug 取 raw，
     防 ``chain-01-01-…`` 雙重編號。primary（1-based 場景號集合）成員帶
