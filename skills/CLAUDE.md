@@ -139,6 +139,7 @@
 - `crg-query` — code-review-graph 知識圖譜查詢紀律（LSP-vs-CRG 分工：symbol→LSP / impact·callers·flows·community→CRG；assume-present + warn-if-absent；anti-over-reliance：graph=structure 非 behavior；CRG 裝了才 fire，平行 nt-query）
 - `code-reality` — code_reality 工具鏈程序層（meta 層工具住 ai-rules，九工具：snapshot／transition／hub_refs／runtime_edges／boundary／boundary_build／delta_tour／chain_tour／graph_csv；repo profile `.code-reality.toml` schema、存在性偵測單一真相源、claims 口徑限制；與 crg-query 分工：CRG 查圖譜結構、code_reality 做邊集導出與 EP 對照）
 - `tour-bootstrap` — repo 導覽建置程序（Chain 場景／Delta 時間層，地圖層 Overview 視重複度盤點退役；優先序裁定＝corpus 前門與動線；`.tour` 語言契約——CodeTour 消費端正則決定的 line/pattern/tour link/file link 規則；機械驗證清單＋AI 不代終審停點；建在 code-reality 工具層之上，斷點③＝AI 輔助 callchain 生成待沉澱）
+- `blueprint-bootstrap` — blueprint 知識庫建置程序（人讀合成視角 scaffold：骨架＋半滿＋🤖/👤 狀態標記＋誘導問題＋治理模板；**callstack 場景敘事生成＝斷點③解法**——鏈枚舉→逐幀實證→coverage 稽核→findings，產出餵 tour-bootstrap 場景層；既有 blueprint 走 audit 模式不重建；位置＝instruction-init 之上、tour-bootstrap 之下）
 - `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀）
 - `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
 - `lsp-navigation` — LSP 深層參考（reference skill：rg 陷阱案例群、方法論限制 loopback、跨 harness 載體對照、workspace staleness/reindex 處置、驗證輸出格式；rule 留決策樹/Tool Discovery gate 核心——rule+skill 分層控制 bundle 尺寸）

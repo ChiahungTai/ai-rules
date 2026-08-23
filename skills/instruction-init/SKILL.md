@@ -142,7 +142,7 @@ Signal/noise framework: [encoder-philosophy.md](../_common/encoder-philosophy.md
 3. `.project-snapshot.json`（如果 Phase 1.5 有執行）
 4. 最後列出所有新增的 instruction file 路徑
 
-> **下一步**：產出後建議執行 `/instruction-sync` 驗證同步性與品質。
+> **下一步**：產出後建議執行 `/instruction-sync` 驗證同步性與品質；人類 viewport（結構全貌＋onboarding scaffold＋callstack 生成）→ [blueprint-bootstrap](../blueprint-bootstrap/SKILL.md)。
 
 ---
 

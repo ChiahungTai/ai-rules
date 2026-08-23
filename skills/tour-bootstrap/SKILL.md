@@ -16,7 +16,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 | 偵測 | 有 | 無 |
 |---|---|---|
-| callstack 文檔（人寫場景敘事，如 `ai-analysis/blueprint/callstack-v1/`） | **chain＋delta**（地圖層視步驟 3 重複度盤點） | **overview-only 最小形態**（斷點③） |
+| callstack 文檔（場景敘事，如 `ai-analysis/blueprint/callstack-v1/`——由 [blueprint-bootstrap](../blueprint-bootstrap/SKILL.md) 生成） | **chain＋delta**（地圖層視步驟 3 重複度盤點） | **overview-only 最小形態**（斷點③——blueprint-bootstrap 補上游後再來） |
 | `.code-review-graph/graph.db`（chain_tour 重錨的實際開關） | chain_tour 帶 graph 重錨統計 | 純文檔錨退化（不擋） |
 | `.tours/` 既有內容 | 盤點前例（產出形態對照、版控契約現況） | 全新 |
 
@@ -62,9 +62,9 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 **兩條鐵律**：① **corpus 變更一律經工具**（generator／tour_upgrade／tour_manifest CLI）——LLM 不直接手改 `.tour`（bootstrap 期 overview 手工初稿與人類策展編輯除外）；② **curated 不可盲目覆蓋**——derived tour 重產 diff 非空＝已被人改過，升級為 curated（manifest generator 改 `manual`）只報 diff 不覆蓋。
 
-## 斷點③（未解）
+## 斷點③（已解——上游落地）
 
-**AI 輔助生成 callchain 文檔**——場景層輸入是人寫場景敘事，新 repo 沒有 → overview-only。生成程序（graph／code 結構 → AI 草擬 → 人審）待更多案例沉澱後設計；現階段誠實標記而非跳過。
+**AI 輔助生成 callchain 文檔**——生成程序已固化於 [blueprint-bootstrap](../blueprint-bootstrap/SKILL.md)「callstack 場景敘事生成」章節（graph／code 結構→AI 草擬→人審；程序由 mosaic callstack-v1 反推）。新 repo 無場景敘事 → 先跑 blueprint-bootstrap 產 callstack，再回本程序場景層；不跑則 overview-only 最小形態。
 
 ## 已驗證案例
 
