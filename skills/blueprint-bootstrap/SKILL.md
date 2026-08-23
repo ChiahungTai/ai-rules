@@ -30,7 +30,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 ## callstack 場景敘事生成（斷點③解法——tour-bootstrap 場景層上游）
 
-**何時**：骨架完成後（或獨立指定）。輸出目錄 `ai-analysis/blueprint/callstack-v<N>/`（版號=整份重生成的世代）。
+**何時**：骨架完成後（或獨立指定）。輸出目錄 `ai-analysis/blueprint/callstack/`（預設無版號——版號後綴如 `callstack-v2/` 僅當 repo 有平行版本需求，如 mosaic v1→v2 cutover 特例）。
 
 **格式契約（chain_tour 機械解析——寫錯＝場景落空）**：
 - 場景＝**含樹狀幀行（`├`/`└`）的 code block＋最近前置標題**（標題即場景名/tour title）
@@ -47,7 +47,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 5. **findings 彙整**：跨系列 🔴／🟡／🟢 優先序（深挖副產品＝code review 輸入）
 6. **UC 映射表**：任務／UC × 鏈（「查某 UC 的 how 從這進」）
 
-**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（版號遞增）或退役 `_done/`。**效率錨**：callstack-v1 實證＝16 篇／24 模組／一個完整 session 額度（含稽核補強）——本程序固化後應顯著低於此。
+**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（原地）或退役 `_done/`——平行版本需求才開版號目錄。**效率錨**：callstack-v1 實證＝16 篇／24 模組／一個完整 session 額度（含稽核補強）——本程序固化後應顯著低於此。
 
 ## audit 模式（既有 blueprint——預設防護）
 
