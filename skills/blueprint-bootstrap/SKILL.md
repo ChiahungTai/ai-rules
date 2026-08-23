@@ -40,7 +40,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 **每份文檔模板**（callstack-v1 實證七段完整形態——按鏈型態裁剪，如純資料鏈無入口總表；audit 盤點不以七段齊全為 drift 基準）：①檔頭 blockquote（讀者／定位／行號快照宣告／交叉引用）②入口總表（launchd／CLI／test 誰觸發）③主 call stack 樹（**場景分棵**）④分層敘事（關鍵函式／錯誤路徑／IO·state 副作用）⑤資料轉換邊界表（時區／單位／編碼在鏈上哪點變換）⑥不變量與陷阱（docstring 教訓）⑦符號速查表（symbol→連結按層分組）。
 
 **生成程序**（callstack-v1 反推——16 篇／24 模組實證）：
-1. **鏈枚舉（入口錨定——獨立可跑，成本 ~2% 於生成）**：機械掃入口清單（launchd plist／CLI entry／script／UI app）→ **一獨立入口一鏈**；無獨立入口的計算域併入觸發鏈經過段（任務域切綱不固化進 corpus）；膠水模組（config/services/cli）不獨立成篇。產出 `ai-analysis/blueprint/callstack-plan.md`（每行＝入口×鏈名×一句職責×優先序）——plan 三職：生成 spec（枚舉收斂驗證對象）＋**分批菜單**（挑鏈生成、逐批驗收）＋corpus roadmap。面分組進 README 地圖，目錄維持平面
+1. **鏈枚舉（問題錨定三軌——獨立可跑，成本 ~2% 於生成）**：準則＝「這條鏈回答什麼**使用者問題**」（非程式從哪進來/長在哪層）——①**入口鏈**（ops「這入口失敗去哪查」）：機械掃入口（launchd／CLI／UI app）＋常青篩選（會再跑才成鏈；同體多入口併一鏈），本軌機械收斂可驗；②**機制鏈**（debug／重構「為什麼擋單／改這模組誰受影響」）：錨共用模組影響域／critical path（候選＝CRG 熱點、hub 影響域），過濾＝cross-cutting 且活著（dormant 不成鏈）；③**流程主題鏈**（onboarding／研究「這流程端到端」）：一篇一縱貫流程，教育裁定（人決動線）；④scripts／probe／一次性——**plan 索引一行，不成鏈**（無對應使用者場景）。產出 `ai-analysis/blueprint/callstack-plan.md`（每行＝**軌**×鏈名×錨點×一句職責×優先序）——分批菜單按軌分批；驗收分軌（入口軌機械收斂／機制軌數據支持／主題軌人裁定）。README 地圖按三軌分組、目錄維持平面；入口鏈↔機制鏈交叉引用開放（「本鏈止於 X、深潛見 Y」邊界宣告）
 2. **每鏈深挖**：入口→逐幀抽取，**每一幀 Read／rg／LSP 實證、禁止臆測**；行號用 def 實讀非估算
 3. **coverage 稽核**：檔案級覆蓋率＋省略原則（registry 同構 leaf 群由引擎篇涵蓋、thin wrapper＝CLI 等價入口不另錨、UI 呈現內容切綱外但資料餵入子鏈屬執行面、dev tools 不入盤點）
 4. **補強輪**：真缺口清零（省略原則豁免項外逐檔對賬）
