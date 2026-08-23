@@ -5,6 +5,8 @@ curated＝generator "manual"；重產 diff 非空的 derived 由 audit 建議升
 """
 
 import argparse
+import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -56,8 +58,36 @@ def _kv(key: str, val: str) -> str:
         return f'{key} = "{val}"'
 
 
+def _toml_key(key: str) -> str:
+    """bare key（[A-Za-z0-9_-]+）直出；其餘 quote——鍵名裸輸出非 bare 形態會寫出不可解析 TOML。"""
+    if re.fullmatch(r"[A-Za-z0-9_-]+", key):
+        return key
+    return json.dumps(key, ensure_ascii=False)
+
+
+def _toml_value(v: object) -> str:
+    """頂層未知鍵的 TOML 序列化（scalar／scalar list）；非支援型別 loud——silent 掉資料更糟。"""
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, (int, float)):
+        return str(v)
+    if isinstance(v, str):
+        # json 跳脫是 TOML basic string 子集；U+007F 兩家語義不同——補跳脫
+        # （否則寫出非法 TOML、延遲到下游 load 才炸）
+        return json.dumps(v, ensure_ascii=False).replace("\x7f", "\\u007f")
+    if isinstance(v, list) and all(isinstance(x, (bool, int, float, str)) for x in v):
+        return "[" + ", ".join(_toml_value(x) for x in v) + "]"
+    raise ValueError(
+        f"manifest 頂層鍵型別不支援保存（{type(v).__name__}）——只支援 scalar／scalar list"
+    )
+
+
 def dump(path: Path, data: dict) -> None:
-    lines = [f"version = {data.get('version', 1)}"]
+    lines = [f"version = {_toml_value(data.get('version', 1))}"]
+    # 未知頂層鍵 roundtrip 保存——dump 只重建已知欄位會 silent 刪除人工鍵
+    # （F7：NT 的 audience = "newcomer" 兩次被 upsert 刪掉）
+    for key in sorted(k for k in data if k not in ("version", "tour")):
+        lines.append(f"{_toml_key(key)} = {_toml_value(data[key])}")
     for rel in sorted(data.get("tour", {})):
         row = data["tour"][rel]
         lines.append(f'\n[tour."{rel}"]')
@@ -65,6 +95,12 @@ def dump(path: Path, data: dict) -> None:
         srcs = ", ".join(f'"{s}"' for s in row.get("sources", []))
         lines.append(f"sources = [{srcs}]")
         lines.append(_kv("anchored_commit", row["anchored_commit"]))
+        # row 未知鍵同原則保存（J1）——upsert 全列替換＝重產列歸工具權威；
+        # 未動列 roundtrip 不得掉資料
+        for key in sorted(
+            k for k in row if k not in ("generator", "sources", "anchored_commit")
+        ):
+            lines.append(f"{_toml_key(key)} = {_toml_value(row[key])}")
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

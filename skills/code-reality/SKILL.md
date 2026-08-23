@@ -48,7 +48,7 @@ mosaic 形態（module 規則＋exclusions）：
 
 ```toml
 exclude = ["stubs/", "ai-analysis/", ".venv/", "snapshot/"]  # 通用 default 僅 .venv/
-[[module]]        # module_of 規則（有序首中）＋claims 前綴來源
+[[module]]        # module_of 規則（有序首中）＋claims 前綴來源＋chain_tour PathResolver pkg_roots——prefix 覆蓋度＝幀存活度（路徑不在任何 prefix 下 resolve 失敗落 external skip；NT 實證 .py 幀全滅，補 python/+examples/ 前綴救回）
 prefix = "mosaic_alpha/"
 depth = 1         # module＝prefix 下第 depth 層目錄；根檔案歸 prefix 本身
 ```
@@ -68,10 +68,10 @@ pyi = "python/nautilus_trader/**/*.pyi"
 
 **authoring 程序**（新 repo 寫 profile——固定四步，勿即興）：
 
-1. **判斷 module 規則**：找 code 主目錄（有實現邏輯的層，非 docs/tests/生成物）→ `prefix`＝主目錄（須尾斜線——profile 載入 assert，同 exclude）、`depth`＝「module 應是第幾層目錄」（`depth 1`＝prefix 直接子目錄；根檔案歸 prefix 本身）。多主目錄 repo 寫多條 `[[module]]`（有序首中）。判斷法：你希望 transition 對照表以什麼粒度列模組——那就是 module 層
+1. **判斷 module 規則**：找 code 主目錄（有實現邏輯的層，非 docs/tests/生成物）→ `prefix`＝主目錄（須尾斜線——profile 載入 assert，同 exclude）、`depth`＝「module 應是第幾層目錄」（`depth 1`＝prefix 直接子目錄；根檔案歸 prefix 本身）。多主目錄 repo 寫多條 `[[module]]`（有序首中）。判斷法：你希望 transition 對照表以什麼粒度列模組——那就是 module 層。**prefix 涵蓋度同時決定 chain_tour 幀存活**（幀路徑不在任何 prefix 下＝resolve 失敗落 external skip）——callstack 幀會經過的層都要涵蓋，含非「實現邏輯」的 stub 宣告層（如 `python/` .pyi）與 examples（NT 實證：缺 `python/`＋`examples/` 前綴致 .py 幀全滅）
 2. **判斷 exclude**：非 code 目錄全列（文檔/研究產物/fixture/stubs/生成物 `dist`·`node_modules`）。**一律目錄粒度帶斜線**（`"docs/"` 非 `"docs"`——profile 載入 assert 強制；理由：startswith 匹配下無斜線會誤傷同名開頭檔，如 `.venv-setup.py`）
 3. **scan_root 僅 pyo3 對帳 repo 需要**（rust 源 × `.pyi` stub 的 boundary 掃描）——一般 repo 不寫；非 NT 佈局的 `boundary_build` 會 crash-only（loud），屬設計
-4. **smoke 驗證**：`code_reality.snapshot --repo <repo> --label smoke` 跑一發，判讀 module 切分是否符合直覺（切錯→回步驟 1 改 prefix/depth）；之後 chain_tour 的 `not-in-graph` 統計是 graph 新鮮度信號。profile 檔歸 repo root，commit 與否該 repo 自決
+4. **smoke 驗證**：`code_reality.snapshot --repo <repo> --label smoke` 跑一發，判讀 module 切分是否符合直覺（切錯→回步驟 1 改 prefix/depth）；之後 chain_tour 的 `not-in-graph` 統計是 graph 新鮮度信號、`external`/skip 統計是 prefix 覆蓋度信號（幀整批落 external＝prefix 缺層，回步驟 1 補）。profile 檔歸 repo root，commit 與否該 repo 自決
 
 ## 口徑限制（宣稱抽取——transition `--ep`）
 

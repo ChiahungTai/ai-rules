@@ -95,6 +95,10 @@ class TestParse:
             best_ident("TradingHost.should_skip_for_holiday()")
             == "should_skip_for_holiday"
         )
+        # F8（NT dogfood）：`::` 裸寫分裂多 candidates 走 longest-wins——
+        # struct 名（通常更長）搶走 ident＝錨到 struct 定義行的根因；`()` 呼叫狀優先導正
+        assert best_ident("EventStoreLifecycle::open") == "EventStoreLifecycle"
+        assert best_ident("EventStoreLifecycle::open()") == "open"
 
 
 class TestResolve:

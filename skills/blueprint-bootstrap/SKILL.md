@@ -34,7 +34,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 **格式契約（chain_tour 機械解析——寫錯＝場景落空）**：
 - 場景＝**含樹狀幀行（`├`/`└`）的 code block＋最近前置標題**（標題即場景名/tour title）
-- 幀行＝函式名＋`path:line` 錨＋`  # ` 職責附註——**`#` 前須雙空格**（parse_frames 的 partition 條件 `"  # "`；單空格或無 `#` 會讓職責併入 ident 判定、污染 graph 重錨——M2 實證：單空格形態致 not-in-graph 偏高）；depth 由樹狀縮排推導；幀 DFS 序＝步序
+- 幀行＝函式名＋`path:line` 錨＋`  # ` 職責附註——**`#` 前須雙空格**（parse_frames 的 partition 條件 `"  # "`；單空格或無 `#` 會讓職責併入 ident 判定、污染 graph 重錨——M2 實證：單空格形態致 not-in-graph 偏高）；幀 ident 一律 call-shaped `fn()`——ident 擇取偏呼叫狀、其次 longest-wins，裸 `Type::method` 會被更長的 struct 名搶走、錨到 struct 定義行（NT 實證 moved 1→19，補 `()` 歸零）；depth 由樹狀縮排推導；幀 DFS 序＝步序
 - 錨副檔＝`.py`／`.rs`（`.pyi` stub 是宣告層不入錨——跨縫幀走 boundary 第二錨，見生成程序步驟 2）；無錨幀（launchd/shell／外部路徑／撞名）會被跳過並記原因分佈——屬設計非錯誤
 
 **每份文檔模板**（callstack-v1 實證七段完整形態——按鏈型態裁剪，如純資料鏈無入口總表；audit 盤點不以七段齊全為 drift 基準）：①檔頭 blockquote（讀者／定位／行號快照宣告／交叉引用）②入口總表（launchd／CLI／test 誰觸發）③主 call stack 樹（**場景分棵**）④分層敘事（關鍵函式／錯誤路徑／IO·state 副作用）⑤資料轉換邊界表（時區／單位／編碼在鏈上哪點變換）⑥不變量與陷阱（docstring 教訓）⑦符號速查表（symbol→連結按層分組）。
