@@ -12,17 +12,18 @@ harness-scope: neutral
 
 **語義查詢用 LSP，文字搜尋用 rg，檔案搜尋用 fd。** `fd`/`rg` 預設遵守 `.gitignore`（減少噪音）。詳細 LSP 決策樹見 [lsp-navigation.md](lsp-navigation.md)。
 
-(Claude: `find -exec`、`grep -r` 是 Claude Code 系統層級硬限制，無法被 allow 規則覆蓋；`fd`/`rg` 預設可被 auto-allow。其他 harness 無此限制，但 fd/rg 語法優勢通用)
+(Claude: `find -exec`、`grep -r` 是 Claude Code 系統層級硬限制；`fd`/`rg` 預設可 auto-allow。其他 harness 無此限制，fd/rg 語法優勢通用)
 
 ---
 
 ## fd/rg 陷阱（基礎語法是原生知識，此處只列會誤導的）
 
 - **fd pattern 匹配檔名不是路徑**：搜尋特定目錄用 `fd . <dir>`；`fd src/` 是搜尋檔名含 `src/` 的檔案，不是搜尋 src/ 目錄
-- **隱藏檔/gitignored 檔陷阱**：fd/rg 預設跳過 dotfiles 與 `.gitignore` 內檔案。查 `.env`、`.gitignore`、settings.json 等必須 `fd -H` / `rg --hidden` 或 `-uu` / `--no-ignore`，否則 false negative 誤判「不存在／全綠」（真實案例：settings.json 殘留被 rg 跳過，殘留檢查誤判全綠）
+- **隱藏檔/gitignored 檔陷阱**：fd/rg 預設跳過 dotfiles 與 `.gitignore` 內檔案。查 `.env`、`.gitignore`、settings.json 等必須 `fd -H` / `rg --hidden` 或 `-uu` / `--no-ignore`，否則 false negative 誤判「不存在／全綠」（案例：settings.json 殘留被跳過、殘留檢查誤判全綠）
 - **rg alternation 陷阱**：`rg "a\|b"` 搜尋 literal `a|b`，**不是**「a 或 b」。多選一用 `rg "a|b"`（雙引號內 `|` 直傳 rg）或 `rg -e a -e b`（markdown 表格 cell 內一律用 `-e` 多 pattern，避開 `\|` 轉義歧義）
 - **固定字串用 `-F`**（預設走正則）；**glob `-g` 比 `--type` 靈活**（`--type py` 不含 `.pyx`/`.rs`）
 - **多檔搜尋加 `--heading`**：檔名只印一次（預設每行重複完整路徑，浪費 token）；路徑已知時直接指定檔案不遞迴
+- **grep 旗標不可遷移到 rg**：grep `-h`（抑制檔名）rg 是 help——免檔名用 `-I`；`-r` grep=遞迴、rg=--replace（複合旗標 `-rn` 拆開讀，`-r` 會替換 match 污染輸出）。真實案例：`rg -h pattern` 印整份 help、`rg -rn pattern` match 全成 "n"（兩連發，grep 慣性遷移）
 
 ---
 
@@ -36,7 +37,7 @@ harness-scope: neutral
 | **統計:檔案數**（寫進文檔/claim） | `rg -l "pattern" \| wc -l`（**禁 head 截斷**） |
 | 統計:per-file match 數 | `rg -c "pattern"`（輸出 `file:count` 多行，語境不同於檔案數） |
 
-**真實案例**：`rg -l "from <pkg>" | head -20` 截斷 → consumers **41 誤寫 20**（head-20 截斷：排序在前的子目錄先列完才輪到其餘），多處文檔一致寫錯，**自審抓不到**（claim 與截斷證據共享盲點，需獨立第三方 rg 才揭露）。同類陷阱不同載體：符號查詢的 truncation/masking 見 [lsp-navigation.md](lsp-navigation.md)。
+**真實案例**：`rg -l "from <pkg>" | head -20` 截斷 → consumers **41 誤寫 20**（head 只列前段），多處文檔寫錯，**自審抓不到**（claim 與截斷證據共享盲點，需獨立第三方 rg 才揭露）。同類陷阱不同載體：符號查詢的 truncation/masking 見 [lsp-navigation.md](lsp-navigation.md)。
 
 ---
 
@@ -49,4 +50,4 @@ harness-scope: neutral
 | 間接層 | 誰引用 wrapper/target | `rg -e "make " scripts/ deploy/ .github/workflows/` |
 | 直呼層 | X 本體直呼 | `rg -e pytest -e "uv run" Makefile scripts/ deploy/ .github/workflows/` |
 
-**反例（真實案例）**：判定「哪些 gate 擋 merge/release」只掃 CI workflow 的 make 引用——漏掉 build.yml **直呼**的 `uv run pytest`（CI 中 Python 測試唯一落點，根本不是 make target）；rg 間接層有 hits ≠ 執行點清單完整。同 family：head 截斷（上節）、toplevel-only import 漏 local import（[lsp-navigation.md](lsp-navigation.md)）——pattern coverage blind spot 的不同載體。高風險場景（一次性儀式/稽核）把兩層掃法命令寫死在執行清單，不依賴 session 記得。
+**反例（真實案例）**：判定「哪些 gate 擋 merge/release」只掃 CI workflow 的 make 引用——漏掉 build.yml **直呼**的 `uv run pytest`（Python 測試唯一落點、非 make target）；rg 間接層有 hits ≠ 執行點清單完整。同 family：head 截斷（上節）、toplevel-only import 漏 local import（[lsp-navigation.md](lsp-navigation.md)）——pattern coverage blind spot 的不同載體。高風險場景（一次性儀式/稽核）把兩層掃法命令寫死在執行清單，不依賴 session 記得。
