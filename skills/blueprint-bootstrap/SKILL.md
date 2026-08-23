@@ -47,7 +47,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 5. **findings 彙整**：跨系列 🔴／🟡／🟢 優先序（深挖副產品＝code review 輸入）
 6. **UC 映射表**：任務／UC × 鏈（「查某 UC 的 how 從這進」）
 
-**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（原地）或退役 `_done/`——平行版本需求才開版號目錄。**效率錨**：callstack-v1 實證＝16 篇／24 模組／一個完整 session 額度（含稽核補強）——本程序固化後應顯著低於此。
+**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（原地）或退役 `_done/`——平行版本需求才開版號目錄。**執行模式與效率**：①單 session 逐鏈（原版實證：16 篇／24 模組／一個完整 session 額度）②agent 群並行（跑批實證：29 篇／~2.5k 幀／牆鐘 ~2h／token ~150M——高於單 session 額度，但每篇自帶錨定機械驗證、可並行；token 量級是模式抉擇的輸入）。agent 群模式**共用 context 打包**：枚舉產物（鏈清單＋每鏈入口細節＋相關 AGENTS.md 段）直接嵌入每篇 agent prompt——冷啟重讀是重複成本主因，打包入口細節實證有效。品質基準：工具實測錨定率（>90%）＋` # ` 附註率（~100%）。
 
 ## audit 模式（既有 blueprint——預設防護）
 
@@ -59,4 +59,4 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 ## 機械驗證（產出時）
 
-README／治理檔交叉引用路徑存在；callstack 文檔跑 `uv run --project ~/Github/ai-rules python -m code_reality.chain_tour <md> --repo <repo> --out-dir <repo>/.agent-tmp/chain-dry/` 暫存自測——**場景數＝文檔場景數、重錨統計合理、無錨幀分佈記錄**，生成端當場驗，不等到 tour-bootstrap 才發現格式落空（暫存產物驗完即棄）。
+README／治理檔交叉引用路徑存在；callstack 文檔跑 `uv run --project ~/Github/ai-rules python -m code_reality.chain_tour <md> --repo <repo> --out-dir <repo>/.agent-tmp/chain-dry/` 暫存自測——**場景數＝文檔場景數、重錨統計合理、無錨幀分佈記錄**，生成端當場驗，不等到 tour-bootstrap 才發現格式落空（out-dir 在 `.tours/` 外＝工具自動跳 manifest，暫存零副作用；驗完即棄）。
