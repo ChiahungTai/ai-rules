@@ -12,3 +12,5 @@ SM-1~9 全過；三工具測試綠；NT corpus apply 後 validate 綠＋用戶�
 
 ## 備註
 T6 mosaic nightly-sequence 行為可選、commit 前用戶 gate。
+
+2026-08-23 結算：T5 test_tour 已除役（M1 D2 user 裁定——承接＝coverage 三軸，見 Backlog/coverage-triaxis-spec.md）；audience 欄廢除（D3）。卡內「三工具」為目標時點歷史描述。

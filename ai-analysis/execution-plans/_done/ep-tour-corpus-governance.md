@@ -279,3 +279,10 @@ audit 沒有觸發時機＝機制空轉。三個消費點：post-build（任務�
 - T1~T6 全段完成；SM-1~9 對應驗證：SM-1 codetour 0 fails／SM-2/3 fixture+實例／SM-5 NT dry-run 報告（pattern +241/358、crossref 165）／SM-6 NT apply 後 validate 0 fails（165 live links；L6 用戶走讀待驗）／SM-7 mosaic case_studies 6 tests 骨架綠／SM-8 dry-run 預設＋curated 鐵律入 skill／SM-9 post-build 接線完成（nightly-sequence 行 pending 用戶 gate）
 - 建置中發現並修：NT 舊描述的 rust 屬性方括號（`[pyclass(...)]` 等 62 處）會被 player TOUR_REF 誤判壞 link——upgrade 加全形括號 sanitize；驗證器「單方括號未解析」降 WARN（prose 誤判）、「雙方括號未解析」維持 FAIL
 - mosaic corpus 重跑 chain×3 與 staged 零差異（generator 冪等實證）＋manifest 原生寫入（23 chain rows 帶 callstack sources＋2 manual＋4 test_tour rows）
+
+## 結算（2026-08-23——M1 dogfood 後）
+
+- **T5 test_tour 除役**（user 裁定 M1 D2：方向錯誤——本意是「每個 call path 應該都有 test cover」，tests 是驗證資產非敘事素材；工具＋測試已刪、skill 工具表同步）。本文檔 T5 段與 schema 範例的 test_tour／audience 內容為歷史記錄，隨歸檔凍結。
+- **manifest audience 欄廢除**（M1 D3：全工具鏈零讀取點＋newcomer 寫死與地圖層退役後語義矛盾）——load 容忍舊檔、dump 自然淘汰（codetour／NT manifest 既有鍵 lazy migration）。
+- **承接方向（user 裁決語義）**：coverage 三軸對帳（test→source 既有／tour→source 雛形／test→tour 缺）——產出＝**缺口報告生成器**（backlog 生成），非 tour 生成器、**永遠不是 gate**（Goodhart 防護）。規格另立 session 對齊，載體＝`.kanban/Backlog/coverage-triaxis-spec.md`。
+- 收尾步驟 2 補執行：三卡搬 Done；本文檔歸檔 `_done/`。
