@@ -66,6 +66,8 @@ def test_real_chain_tours(tmp_path: Path) -> None:
     # SM-5：跨檔重錨由 g_counts 承載——本錨點文檔雙空格修正後 moved-file=0
     # （原唯一實例是 ident 污染＋陳舊 graph 的複合意外，note 分離後消失）
 
-    # 重錨分佈（2026-08-23 雙空格修正後快照：same 58/moved 9/moved-file 0/noref 6）
-    assert st.g_counts.get("same", 0) >= 50
-    assert st.g_counts.get("moved", 0) >= 5
+    # 重錨分佈（2026-08-23 新 graph 快照——mosaic e3e0b781 full rebuild 後：
+    # same 101/moved 12/moved-file 0/noref 6/not-in-graph 12。因果鏈：
+    # 70（單空格污染＋陳舊 graph）→58（雙空格修正）→12（graph 重建）
+    assert st.g_counts.get("same", 0) >= 90
+    assert st.g_counts.get("moved", 0) >= 8
