@@ -18,12 +18,12 @@ harness-scope: neutral
 
 ## fd/rg 陷阱（基礎語法是原生知識，此處只列會誤導的）
 
-- **fd pattern 匹配檔名不是路徑**：搜尋特定目錄用 `fd . <dir>`；`fd src/` 是搜尋檔名含 `src/` 的檔案，不是搜尋 src/ 目錄
-- **隱藏檔/gitignored 檔陷阱**：fd/rg 預設跳過 dotfiles 與 `.gitignore` 內檔案。查 `.env`、`.gitignore`、settings.json 等必須 `fd -H` / `rg --hidden` 或 `-uu` / `--no-ignore`，否則 false negative 誤判「不存在／全綠」（案例：settings.json 殘留被跳過、殘留檢查誤判全綠）
+- **fd pattern 匹配檔名不是路徑**：搜尋特定目錄用 `fd . <dir>`；`fd src/` 是搜尋檔名含 `src/` 的檔案非搜尋 src/ 目錄
+- **隱藏檔/gitignored 檔陷阱**：fd/rg 預設跳過 dotfiles 與 ignore 檔，**旗標跨工具不同義**——fd：`-H` hidden、`-u` 全解；rg：`--hidden`/`--no-ignore`（`-H` 是 with-filename 非 hidden）；dot+ignore 疊加態（如 `.code-review-graph/` 自帶 `*` ignore）兩旗標併用（NT graph.db 1.4G 誤判不存在實案）
 - **rg alternation 陷阱**：`rg "a\|b"` 搜尋 literal `a|b`，**不是**「a 或 b」。多選一用 `rg "a|b"`（雙引號內 `|` 直傳 rg）或 `rg -e a -e b`（markdown 表格 cell 內一律用 `-e` 多 pattern，避開 `\|` 轉義歧義）
 - **固定字串用 `-F`**（預設走正則）；**glob `-g` 比 `--type` 靈活**（`--type py` 不含 `.pyx`/`.rs`）
-- **多檔搜尋加 `--heading`**：檔名只印一次（預設每行重複完整路徑，浪費 token）；路徑已知時直接指定檔案不遞迴
-- **grep 旗標不可遷移到 rg**：grep `-h`（抑制檔名）rg 是 help——免檔名用 `-I`；`-r` grep=遞迴、rg=--replace（複合旗標 `-rn` 拆開讀，`-r` 會替換 match 污染輸出）。真實案例：`rg -h pattern` 印整份 help、`rg -rn pattern` match 全成 "n"（兩連發，grep 慣性遷移）
+- **多檔搜尋加 `--heading`**：檔名只印一次（預設每行重複完整路徑）；路徑已知時直接指定檔案不遞迴
+- **grep 旗標不可遷移到 rg**：grep `-h`（抑制檔名）rg 是 help——免檔名用 `-I`；`-r` grep=遞迴、rg=--replace（複合旗標 `-rn` 拆開讀，`-r` 會替換 match 污染輸出）。真實案例：`rg -h pattern` 印整份 help、`rg -rn pattern` match 全成 "n"（grep 慣性遷移）
 
 ---
 

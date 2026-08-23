@@ -35,15 +35,16 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 **格式契約（chain_tour 機械解析——寫錯＝場景落空）**：
 - 場景＝**含樹狀幀行（`├`/`└`）的 code block＋最近前置標題**（標題即場景名/tour title）
 - 幀行＝函式名＋`path:line` 錨＋`  # ` 職責附註——**`#` 前須雙空格**（parse_frames 的 partition 條件 `"  # "`；單空格或無 `#` 會讓職責併入 ident 判定、污染 graph 重錨——M2 實證：單空格形態致 not-in-graph 偏高）；depth 由樹狀縮排推導；幀 DFS 序＝步序
-- 無 `.py` 錨幀（launchd/shell／外部路徑／撞名）會被跳過並記原因分佈——屬設計非錯誤
+- 錨副檔＝`.py`／`.rs`（`.pyi` stub 是宣告層不入錨——跨縫幀走 boundary 第二錨，見生成程序步驟 2）；無錨幀（launchd/shell／外部路徑／撞名）會被跳過並記原因分佈——屬設計非錯誤
 
 **每份文檔模板**（callstack-v1 實證七段完整形態——按鏈型態裁剪，如純資料鏈無入口總表；audit 盤點不以七段齊全為 drift 基準）：①檔頭 blockquote（讀者／定位／行號快照宣告／交叉引用）②入口總表（launchd／CLI／test 誰觸發）③主 call stack 樹（**場景分棵**）④分層敘事（關鍵函式／錯誤路徑／IO·state 副作用）⑤資料轉換邊界表（時區／單位／編碼在鏈上哪點變換）⑥不變量與陷阱（docstring 教訓）⑦符號速查表（symbol→連結按層分組）。
 
 **檔名**：每篇＝英文 kebab slug（grep/CLI 友善）；corpus 族名與檔名**解耦**（族名＝人類標題，規範在 [tour-bootstrap](../tour-bootstrap/SKILL.md) 步驟 2）——兩者僅經 manifest sources 連結。
 
 **生成程序**（callstack-v1 反推——16 篇／24 模組實證）：
+0. **重複度盤點（前置裁決——燒錢的是生成非枚舉）**：比對 repo 既有文檔群（docs／concepts／how_to）×既有 corpus 與將生成鏈——**edu 軸須證明邊際值**（文檔極完善 repo 直接生成流程鏈＝同源重複——NT dogfood：docs 極完善＋corpus 又是 docs 鏡像 → edu 全降 P3 邊際值≈0），結論反映進 callstack-plan 優先序。原則同 [tour-bootstrap](../tour-bootstrap/SKILL.md) 步驟 3 重複度盤點（overview 前置的同型裁決）
 1. **鏈枚舉（問題錨定三軌——獨立可跑，成本 ~2% 於生成）**：準則＝「這條鏈回答什麼**使用者問題**」（非程式從哪進來/長在哪層）——①**入口鏈**（ops「這入口失敗去哪查」）：機械掃入口（launchd／CLI／UI app）＋常青篩選（會再跑才成鏈；同體多入口併一鏈），本軌機械收斂可驗；②**機制鏈**（debug／重構「為什麼擋單／改這模組誰受影響」）：錨共用模組影響域／critical path（候選＝CRG 熱點、hub 影響域），過濾＝cross-cutting 且活著（dormant 不成鏈）；③**流程主題鏈**（onboarding／研究「這流程端到端」）：一篇一縱貫流程，教育裁定（人決動線）；④scripts／probe／一次性——**plan 索引一行，不成鏈**（無對應使用者場景）。產出 `ai-analysis/blueprint/callstack-plan.md`（每行＝**軌**×鏈名×錨點×一句職責×優先序）——分批菜單按軌分批；驗收分軌（入口軌機械收斂／機制軌數據支持／主題軌人裁定）。README 地圖按三軌分組、目錄維持平面；入口鏈↔機制鏈交叉引用開放（「本鏈止於 X、深潛見 Y」邊界宣告）
-2. **每鏈深挖**：入口→逐幀抽取，**每一幀 Read／rg／LSP 實證、禁止臆測**；行號用 def 實讀非估算
+2. **每鏈深挖**：入口→逐幀抽取，**每一幀 Read／rg／LSP 實證、禁止臆測**；行號用 def 實讀非估算；跨縫幀（python 面↔Rust 真身，pyo3 形態 repo）以 `boundary` 查詢補第二錨（`uv run --project ~/Github/ai-rules python -m code_reality.boundary <symbol>`、`--rs` 反向；sidecar 無則先 `boundary_build` 產）——graph 對縫兩側無邊（NT 實證：Python↔Rust 邊＝0、.pyi 節點＝0）
 3. **coverage 稽核**：檔案級覆蓋率＋省略原則（registry 同構 leaf 群由引擎篇涵蓋、thin wrapper＝CLI 等價入口不另錨、UI 呈現內容切綱外但資料餵入子鏈屬執行面、dev tools 不入盤點）
 4. **補強輪**：真缺口清零（省略原則豁免項外逐檔對賬）
 5. **findings 彙整**：跨系列 🔴／🟡／🟢 優先序（深挖副產品＝code review 輸入）

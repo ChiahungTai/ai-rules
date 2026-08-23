@@ -13,7 +13,7 @@ html viewer 已退役，`.agent-tmp/ui/chain_viewer.py` 留 scratch 當解析機
 
 映射規則（EP ep-code-reality-ui S2）：幀 DFS 序＝步序；步 title 保樹狀前綴；
 步 line 用 graph 重錨優先（moved→新行號、moved-file→新檔行）；無錨幀
-（無錨／外部／撞名——launchd/shell 類無 ``.py`` 錨、外部路徑無法解析、
+（無錨／外部／撞名——launchd/shell 類無 ``.py``/``.rs`` 錨、外部路徑無法解析、
 同名撞名無法唯一定位）跳過、tour 描述記實際原因分佈。depth 用 stack 推導（修正 POC
 ``pl//3`` 對「│+4 空格」縮排的跳層失真）。
 """
@@ -38,7 +38,7 @@ from code_reality.common import (
 from code_reality.exclusions import is_excluded
 from code_reality.profile import load_profile
 
-REF_RE = re.compile(r"([\w./\-]+\.py):(\d+)")
+REF_RE = re.compile(r"([\w./\-]+\.(?:py|rs)):(\d+)")
 TREE_PREFIX_CHARS = set("│├└─ ")
 
 

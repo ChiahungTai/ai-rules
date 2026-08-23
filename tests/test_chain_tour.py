@@ -71,6 +71,24 @@ class TestParse:
         assert "休市" in f["note"]
         assert f["symbol"].startswith("MarketService")
 
+    def test_frames_rs_ref_pyi_excluded(self) -> None:
+        """F1（NT dogfood）：.rs 幀錨與 .py 同構；.pyi stub 不入錨（宣告層）。"""
+        block = {
+            "heading": "t",
+            "lines": [
+                "root  crates/engine/src/kernel.rs:42",
+                "└─ Engine::run()  crates/engine/src/engine.rs:120  # 主循環",
+                "└─ LiveNode  live/node.pyi:30",
+            ],
+        }
+        frames = parse_frames(block)
+        assert frames[0]["path"] == "crates/engine/src/kernel.rs"
+        assert frames[0]["line"] == 42
+        assert frames[1]["path"] == "crates/engine/src/engine.rs"
+        assert frames[1]["line"] == 120
+        assert "主循環" in frames[1]["note"]
+        assert frames[2]["path"] is None  # .pyi 無錨 → noref skip 分類
+
     def test_best_ident(self) -> None:
         assert best_ident("main()") == "main"
         assert (
@@ -299,6 +317,31 @@ class TestBuildTours:
         md, repo, _ = self._setup(tmp_path)
         st = build_tours(md, repo, None)
         assert st.tours[0]["steps"][0]["line"] == 10  # 文檔錨原值
+
+    def test_rs_frame_pipeline_anchored(self, tmp_path: Path) -> None:
+        """F1 整合：.rs 幀 resolve＋check_anchor＋graph 重錨全管線（Rust repo 形態）；
+        無錨 root 幀仍走 noref skip——分類不因副檔擴充改變。"""
+        repo = (tmp_path / "repo").resolve()
+        src = repo / "crates/engine/src"
+        src.mkdir(parents=True)
+        (src / "engine.rs").write_text("pub fn run() {\n}\n")
+        db = tmp_path / "graph.db"
+        q = qualified(repo, "crates/engine/src/engine.rs", "run")
+        make_crg_db(
+            db,
+            nodes=[("run", None, q, str(src / "engine.rs"))],
+            node_lines={q: 2},
+        )
+        md = tmp_path / "chain.md"
+        md.write_text(
+            f"# Chain\n## 場景 R\n{FENCE}\nroot\n└─ run()  crates/engine/src/engine.rs:1\n{FENCE}"
+        )
+        st = build_tours(md, repo, db)
+        assert st.frames == 2 and st.skipped == 1  # root 無錨跳過、.rs 幀不跳
+        assert st.g_counts == {"noref": 1, "moved": 1}
+        step = st.tours[0]["steps"][0]
+        assert step["file"] == "crates/engine/src/engine.rs"
+        assert step["line"] == 2  # graph 重錨優先（文檔錨 :1、g moved +1）
 
     def test_write_tours_filenames(self, tmp_path: Path) -> None:
         """寫檔段：{NN}.tour 純序號（user 裁定——族名承載語義、檔名穩定鍵；zero-pad 防字典序亂調）。"""
