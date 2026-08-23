@@ -44,7 +44,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 - **族角色**——SYSTEM-MAP 狀態標記（🏃＝生產運行）＋callstack 文檔自述目的（理解骨架／生產／戰略／專題）
 - **覆蓋廣度**——鏈橫跨的架構層數（callstack 幀目錄可判）
 
-裁決規則：① 前門＝教育鏈中「橫跨層最多 × 步數中等」者（殼與 1-step 不入動線——步驟 2「勿連入」擴為「不入動線」）；② 動線＝教育→生產→專題按任務；③ 殼族標「深讀走 callstack md 本身，不走 tour」。落地＝`chain_tour --primary N`（唯一有效前門機制——player fallback 只認未補零 `1 - `，補零 corpus 永不命中）＋目錄數字前綴（panel 群組 alphabetical 排序，前綴讓群序＝優先序——**panel 即動線**，不另立文檔）＋repo 入口文檔一行（AGENTS.md 觸發器表自述前門與群序語義）。停點：初稿產出即停，用戶策展。
+裁決規則：① 前門＝教育鏈中「橫跨層最多 × 步數中等」者（殼與 1-step 不入動線——步驟 2「勿連入」擴為「不入動線」）；② 動線＝教育→生產→專題按任務；③ 殼族標「深讀走 callstack md 本身，不走 tour」。落地＝`chain_tour --primary N`（唯一有效前門機制——player fallback 只認未補零 `1 - `，補零 corpus 永不命中；**重產帶前門的族必須再帶 `--primary`，漏帶則旗標靜默掉落**）＋目錄數字前綴（panel 群組 alphabetical 排序，前綴讓群序＝優先序——**panel 即動線**，不另立文檔）＋repo 入口文檔一行（AGENTS.md 觸發器表自述前門與群序語義）。停點：初稿產出即停，用戶策展。
 
 ## 停點設計
 
