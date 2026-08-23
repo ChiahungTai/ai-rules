@@ -1,7 +1,7 @@
 ---
 name: tour-bootstrap
 description: "Repo Tour Bootstrap——把任意 repo 變成可走讀狀態（場景層 Chain Tour／時間層 Delta Tour；地圖層 Overview Tour 視重複度盤點）的程序 skill，建在 code-reality 工具鏈之上。何時跑：使用者說「bootstrap 這個 repo 的 tour」／新 repo 冷啟動要導覽／要產 overview tour。含 .tour link 語言契約、機械驗證清單、優先序裁定；斷點③已解——callstack 生成走 blueprint-bootstrap。"
-when_to_use: "Bootstrapping tour corpus for any repo (user says \"幫我 bootstrap 這個 repo 的 tour\"), authoring an Overview Tour (short isPrimary version), converting callstack docs to chain tours, or validating .tour links/anchors. Prerequisite detection: repo 有無 callstack 文檔決定 chain＋delta（地圖層視重複度盤點）或 overview-only 最小形態。"
+when_to_use: "Bootstrapping tour corpus for any repo (user says \"幫我 bootstrap 這個 repo 的 tour\"), authoring an Overview Tour (short isPrimary version), converting callstack docs to chain tours, or validating .tour links/anchors. Prerequisite detection: 有 callstack 文檔→chain＋delta（地圖層視重複度盤點）；無→不產 tour，出 callstack-plan 枚舉清單＋詢問三選（生成 callstack／手作 overview／跳過）。"
 argument-hint: "<repo-root>（要 bootstrap 的 repo；省略即 cwd repo）"
 allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 ---
@@ -10,13 +10,13 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 一句話：使用者說「**幫我 bootstrap 這個 repo 的 tour**」→ 產出走讀 corpus（地圖層視重複度盤點；場景＋時間層）→ 使用者「**走讀**」它（裝 CodeTour vsix，panel 點開即走）。
 
-**分層**：工具層＝[code-reality](../code-reality/SKILL.md)（chain_tour／delta_tour CLI、repo profile）；本 skill＝程序層（工具的編排、`.tour` 語言契約、驗證、停點設計）。能力命名體系：Repo Tour Bootstrap（能力）／Overview·Chain·Delta Tour（三層產物）／Walkthrough 走讀（消費）。**delta 層不在本程序產出**——由 `delta_tour` CLI 在 commit 走讀時按需重產（7 天窗），bootstrap 只負責其目錄版控契約（步驟 1）。
+**分層**：工具層＝[code-reality](../code-reality/SKILL.md)（chain_tour／delta_tour CLI、repo profile）；本 skill＝程序層（工具的編排、`.tour` 語言契約、驗證、停點設計）。能力命名體系：Repo Tour Bootstrap（能力）／Overview·Chain·Delta Tour（三層產物）／Walkthrough 走讀（消費）。**基數鏈**：一份 callstack md → N 場景 → N 條 tour → 一族（同目錄）——md 與 tour 非一對一，呈現各自獨立（md 給人讀、corpus 受 player 正則約束），唯一耦合是資料流邊（chain_tour 以檔名為錨）。**delta 層不在本程序產出**——由 `delta_tour` CLI 在 commit 走讀時按需重產（7 天窗），bootstrap 只負責其目錄版控契約（步驟 1）。
 
 ## 前置偵測（決定 corpus 形態）
 
 | 偵測 | 有 | 無 |
 |---|---|---|
-| callstack 文檔（場景敘事，`ai-analysis/blueprint/callstack/`——由 [blueprint-bootstrap](../blueprint-bootstrap/SKILL.md) 生成；偵測含歷史版號目錄如 mosaic `callstack-v1/`，其輸出一律無版號） | **chain＋delta**（地圖層視步驟 3 重複度盤點） | **overview-only 最小形態**（斷點③——blueprint-bootstrap 補上游後再來） |
+| callstack 文檔（場景敘事，`ai-analysis/blueprint/callstack/`——由 [blueprint-bootstrap](../blueprint-bootstrap/SKILL.md) 生成；偵測含歷史版號目錄如 mosaic `callstack-v1/`，其輸出一律無版號） | **chain＋delta**（地圖層視步驟 3 重複度盤點） | **不產 tour**——跑入口枚舉出 callstack-plan 清單（~2% 成本）＋**詢問 user** 三選（生成 callstack：報價＋分批／手作 overview／跳過）；無互動＝無產出（tour 是素材→corpus 轉換器，非內容生成器） |
 | `.code-review-graph/graph.db`（chain_tour 重錨的實際開關） | chain_tour 帶 graph 重錨統計 | 純文檔錨退化（不擋） |
 | `.tours/` 既有內容 | 盤點前例（產出形態對照、版控契約現況） | 全新 |
 
@@ -62,9 +62,9 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 **兩條鐵律**：① **corpus 變更一律經工具**（generator／tour_upgrade／tour_manifest CLI）——LLM 不直接手改 `.tour`（bootstrap 期 overview 手工初稿與人類策展編輯除外）；② **curated 不可盲目覆蓋**——derived tour 重產 diff 非空＝已被人改過，升級為 curated（manifest generator 改 `manual`）只報 diff 不覆蓋。
 
-## 斷點③（已解——上游落地）
+## 斷點③（已解——上游為獨立服務）
 
-**AI 輔助生成 callchain 文檔**——生成程序已固化於 [blueprint-bootstrap](../blueprint-bootstrap/SKILL.md)「callstack 場景敘事生成」章節（graph／code 結構→AI 草擬→人審；程序由 mosaic callstack-v1 反推）。新 repo 無場景敘事 → 先跑 blueprint-bootstrap 產 callstack，再回本程序場景層；不跑則 overview-only 最小形態。
+**AI 輔助生成 callchain 文檔**——生成程序固化於 [blueprint-bootstrap](../blueprint-bootstrap/SKILL.md)「callstack 場景敘事生成」章節（高成本＝獨立觸發＋報價＋按 callstack-plan 分批挑鏈）。本程序偵測無場景敘事 → **不代跑、不自動退化**：先跑入口枚舉出 plan 清單，**詢問 user** 三選——高成本操作是決策停點，不是流程步驟。
 
 ## 已驗證案例
 

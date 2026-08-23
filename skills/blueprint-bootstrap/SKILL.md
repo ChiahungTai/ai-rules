@@ -30,7 +30,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 ## callstack 場景敘事生成（斷點③解法——tour-bootstrap 場景層上游）
 
-**何時**：骨架完成後（或獨立指定）。輸出目錄 `ai-analysis/blueprint/callstack/`——**一律無版號**：世代交替＝舊版退役 `_done/`（標籤帶世代）、新版原地寫回 `callstack/`；版號並行目錄僅當新舊 code 並存跑且兩份地圖同時活消費（罕見）。mosaic 既有 `callstack-v1/` 屬歷史遺留——其 v2 cutover 也是退役路線，**不是** `callstack-v2/`。
+**何時**：**獨立觸發**（「幫這個 repo 生成 callstack」）——本章高成本（單 session 一天額度／agent 群 ~150M token、牆鐘 ~2h），骨架流程走到此處＝**停點報價**（兩模式並列），不自動跑。輸出目錄 `ai-analysis/blueprint/callstack/`——**一律無版號**：世代交替＝舊版退役 `_done/`（標籤帶世代）、新版原地寫回 `callstack/`；版號並行目錄僅當新舊 code 並存跑且兩份地圖同時活消費（罕見）。mosaic 既有 `callstack-v1/` 屬歷史遺留——其 v2 cutover 也是退役路線，**不是** `callstack-v2/`。骨架的 callstack 區塊狀態四態：📋 未枚舉→📋 已枚舉（plan 在）→🤖 逐鏈生成中（分批）→✅。
 
 **格式契約（chain_tour 機械解析——寫錯＝場景落空）**：
 - 場景＝**含樹狀幀行（`├`/`└`）的 code block＋最近前置標題**（標題即場景名/tour title）
@@ -40,7 +40,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 **每份文檔模板**（callstack-v1 實證七段完整形態——按鏈型態裁剪，如純資料鏈無入口總表；audit 盤點不以七段齊全為 drift 基準）：①檔頭 blockquote（讀者／定位／行號快照宣告／交叉引用）②入口總表（launchd／CLI／test 誰觸發）③主 call stack 樹（**場景分棵**）④分層敘事（關鍵函式／錯誤路徑／IO·state 副作用）⑤資料轉換邊界表（時區／單位／編碼在鏈上哪點變換）⑥不變量與陷阱（docstring 教訓）⑦符號速查表（symbol→連結按層分組）。
 
 **生成程序**（callstack-v1 反推——16 篇／24 模組實證）：
-1. **鏈枚舉**：from AGENTS.md Data Flow／SYSTEM-MAP／模組地圖 → 鏈清單按面分組（資料／計算／執行／外圍消費端）；膠水模組（config/services/cli）不獨立成篇——各鏈內含經過段落
+1. **鏈枚舉（入口錨定——獨立可跑，成本 ~2% 於生成）**：機械掃入口清單（launchd plist／CLI entry／script／UI app）→ **一獨立入口一鏈**；無獨立入口的計算域併入觸發鏈經過段（任務域切綱不固化進 corpus）；膠水模組（config/services/cli）不獨立成篇。產出 `ai-analysis/blueprint/callstack-plan.md`（每行＝入口×鏈名×一句職責×優先序）——plan 三職：生成 spec（枚舉收斂驗證對象）＋**分批菜單**（挑鏈生成、逐批驗收）＋corpus roadmap。面分組進 README 地圖，目錄維持平面
 2. **每鏈深挖**：入口→逐幀抽取，**每一幀 Read／rg／LSP 實證、禁止臆測**；行號用 def 實讀非估算
 3. **coverage 稽核**：檔案級覆蓋率＋省略原則（registry 同構 leaf 群由引擎篇涵蓋、thin wrapper＝CLI 等價入口不另錨、UI 呈現內容切綱外但資料餵入子鏈屬執行面、dev tools 不入盤點）
 4. **補強輪**：真缺口清零（省略原則豁免項外逐檔對賬）
