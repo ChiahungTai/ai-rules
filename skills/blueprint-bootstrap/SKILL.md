@@ -30,7 +30,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 ## callstack 場景敘事生成（斷點③解法——tour-bootstrap 場景層上游）
 
-**何時**：骨架完成後（或獨立指定）。輸出目錄 `ai-analysis/blueprint/callstack/`（預設無版號——版號後綴如 `callstack-v2/` 僅當 repo 有平行版本需求，如 mosaic v1→v2 cutover 特例）。
+**何時**：骨架完成後（或獨立指定）。輸出目錄 `ai-analysis/blueprint/callstack/`——**一律無版號**：世代交替＝舊版退役 `_done/`（標籤帶世代）、新版原地寫回 `callstack/`；版號並行目錄僅當新舊 code 並存跑且兩份地圖同時活消費（罕見）。mosaic 既有 `callstack-v1/` 屬歷史遺留——其 v2 cutover 也是退役路線，**不是** `callstack-v2/`。
 
 **格式契約（chain_tour 機械解析——寫錯＝場景落空）**：
 - 場景＝**含樹狀幀行（`├`/`└`）的 code block＋最近前置標題**（標題即場景名/tour title）

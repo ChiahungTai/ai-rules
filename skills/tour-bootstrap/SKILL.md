@@ -16,7 +16,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 | 偵測 | 有 | 無 |
 |---|---|---|
-| callstack 文檔（場景敘事，`ai-analysis/blueprint/callstack/`——由 [blueprint-bootstrap](../blueprint-bootstrap/SKILL.md) 生成；版號目錄如 mosaic `callstack-v1/` 屬 repo 特例） | **chain＋delta**（地圖層視步驟 3 重複度盤點） | **overview-only 最小形態**（斷點③——blueprint-bootstrap 補上游後再來） |
+| callstack 文檔（場景敘事，`ai-analysis/blueprint/callstack/`——由 [blueprint-bootstrap](../blueprint-bootstrap/SKILL.md) 生成；偵測含歷史版號目錄如 mosaic `callstack-v1/`，其輸出一律無版號） | **chain＋delta**（地圖層視步驟 3 重複度盤點） | **overview-only 最小形態**（斷點③——blueprint-bootstrap 補上游後再來） |
 | `.code-review-graph/graph.db`（chain_tour 重錨的實際開關） | chain_tour 帶 graph 重錨統計 | 純文檔錨退化（不擋） |
 | `.tours/` 既有內容 | 盤點前例（產出形態對照、版控契約現況） | 全新 |
 
