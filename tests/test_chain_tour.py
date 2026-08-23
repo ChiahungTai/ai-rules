@@ -493,3 +493,66 @@ class TestCli:
         monkeypatch.setattr(sys, "argv", ["chain_tour", str(md), "--primary", "9"])
         with pytest.raises(AssertionError, match="越界"):
             main()
+
+
+def test_main_outdir_outside_tours_skips_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+    """M2 D-b：out-dir 不在 .tours/ 樹內（dry-run 暫存）→ tour 照寫、manifest 零副作用。"""
+    md = tmp_path / "chain.md"
+    md.write_text(
+        f"# Chain\n\n## 場景 一\n\n{FENCE}\nroot\n└─ main()  app.py:1\n{FENCE}\n"
+    )
+    dry = tmp_path / "agent-tmp" / "chain-dry"
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["chain_tour", str(md), "--repo", str(tmp_path), "--out-dir", str(dry)],
+    )
+    main()
+    assert list(dry.glob("chain-*.tour")), "tour 檔照寫"
+    assert not list(tmp_path.rglob("manifest.toml")), "dry 目錄不得產生 manifest 副作用"
+    out_text = capsys.readouterr().out
+    assert "manifest skip" in out_text
+    assert "manifest upsert" not in out_text, "guard 誤判走 else 的 regression"
+
+
+def test_main_outdir_is_tours_root_itself(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+    """guard 最小正邊界：out-dir＝.tours 本身（tours_root_of 零步迴圈）→ upsert 照常。"""
+    md = tmp_path / "chain.md"
+    md.write_text(
+        f"# Chain\n\n## 場景 一\n\n{FENCE}\nroot\n└─ main()  app.py:1\n{FENCE}\n"
+    )
+    out = tmp_path / ".tours"
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["chain_tour", str(md), "--repo", str(tmp_path), "--out-dir", str(out)],
+    )
+    main()
+    assert (out / "manifest.toml").exists()
+    assert "manifest upsert" in capsys.readouterr().out
+
+
+def test_main_outdir_inside_tours_upserts_manifest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture
+) -> None:
+    """M1 行為回歸守衛：out-dir 在 .tours/ 樹內 → manifest upsert 照常。"""
+    md = tmp_path / "chain.md"
+    md.write_text(
+        f"# Chain\n\n## 場景 一\n\n{FENCE}\nroot\n└─ main()  app.py:1\n{FENCE}\n"
+    )
+    out = tmp_path / ".tours" / "arch" / "x"
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["chain_tour", str(md), "--repo", str(tmp_path), "--out-dir", str(out)],
+    )
+    main()
+    assert (tmp_path / ".tours" / "manifest.toml").exists()
+    assert "manifest upsert" in capsys.readouterr().out

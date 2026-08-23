@@ -487,25 +487,31 @@ def main() -> None:
     # corpus provenance：generator 原生寫 manifest（derived/curated 二分的機械載體）
     out_abs = out_dir.resolve()
     mroot = tour_manifest.tours_root_of(out_abs)
-    mpath = mroot / "manifest.toml"
-    mdata = tour_manifest.load(mpath)
-    mdata.setdefault("version", 1)
-    mdata.setdefault("tour", {})
-    try:
-        src_rel = str(args.chain_md.resolve().relative_to(args.repo.resolve()))
-    except ValueError:
-        src_rel = str(args.chain_md.resolve())
-    commit = tour_manifest.git_head(args.repo)
-    for p in paths:
-        tour_manifest.upsert(
-            mdata,
-            p.resolve().relative_to(mroot).as_posix(),
-            generator="chain_tour",
-            sources=[src_rel],
-            commit=commit,
+    if mroot.name != ".tours":
+        print(
+            f"[WARN] manifest skip: out-dir 不在 .tours/ 樹內（resolved root={mroot}）"
+            "——tour 檔照寫，provenance 不記（暫存/dry-run 目錄零 manifest 副作用）"
         )
-    tour_manifest.dump(mpath, mdata)
-    print(f"[OK] manifest upsert: {mpath}（{len(paths)} rows, generator=chain_tour）")
+    else:
+        mpath = mroot / "manifest.toml"
+        mdata = tour_manifest.load(mpath)
+        mdata.setdefault("version", 1)
+        mdata.setdefault("tour", {})
+        try:
+            src_rel = str(args.chain_md.resolve().relative_to(args.repo.resolve()))
+        except ValueError:
+            src_rel = str(args.chain_md.resolve())
+        commit = tour_manifest.git_head(args.repo)
+        for p in paths:
+            tour_manifest.upsert(
+                mdata,
+                p.resolve().relative_to(mroot).as_posix(),
+                generator="chain_tour",
+                sources=[src_rel],
+                commit=commit,
+            )
+        tour_manifest.dump(mpath, mdata)
+        print(f"[OK] manifest upsert: {mpath}（{len(paths)} rows, generator=chain_tour）")
     print(
         f"[OK] chain tours: {len(st.tours)} 場景 / {st.frames} 幀 / "
         f"{st.frames - st.skipped} 步 / skipped {st.skipped}"

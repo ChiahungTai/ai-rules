@@ -69,7 +69,7 @@ def dump(path: Path, data: dict) -> None:
 
 
 def tours_root_of(out_dir: Path) -> Path:
-    """out_dir（如 .tours/arch/<stem>）往上找名為 .tours 的根；找不到退 out_dir 本身。"""
+    """out_dir（如 .tours/arch/<stem>）往上找名為 .tours 的根；找不到一路上至 filesystem root——呼叫端以 ``name != ".tours"`` 判定非 corpus 樹。"""
     p = out_dir.resolve()
     while p.name and p.name != ".tours" and p.parent != p:
         p = p.parent
