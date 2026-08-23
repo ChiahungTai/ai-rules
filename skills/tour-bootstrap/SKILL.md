@@ -23,7 +23,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 ## 程序（五步）
 
 1. **盤點**：`.tours/` 現況、文檔源（root／模組 AGENTS.md 群、架構文檔、SYSTEM-MAP）、`.gitignore` 對 `.tours` 的契約；manifest `generator` 非 `chain_tour`（現值域＝`manual`）rows＝**curated 資產**——重產前逐列提示保留／重寫決策（勿盲目覆蓋；M1 實證）。⚠ **arch 進版控是契約變更**（預設 `.tours/` 常被整目錄排除）——改 `.tours/` → `.tours/delta/`（delta 7 天窗不版控不變）＋前例補追蹤，`git check-ignore` 雙向驗證，需用戶知情。
-2. **場景層**（有 callstack 文檔才做）：`uv run --project ~/Github/ai-rules python -m code_reality.chain_tour <md> --repo <repo> --out-dir <repo>/.tours/arch/<stem>/`（`--primary` 見「優先序裁定」）。**收錄語義**：每份 callstack md 落地一族，收錄子集屬策展決策（初稿停點裁定）——M1 實證：全量 16 族 97 條落地、策展核心族 byte-identical 重現。zsh 變數不 word-split——CLI 參數勿經變數間接組合展開（整串成單一 arg 報 unrecognized），寫明參數。驗收：產出檔數＝文檔場景數（場景＝含樹狀幀的 code block）；重錨分佈統計記錄；每條抽樣 ≤5 步 `line`+`pattern` 與源碼 def 對齊。0-step tour（描述殼）保留但勿連入。
+2. **場景層**（有 callstack 文檔才做）：`uv run --project ~/Github/ai-rules python -m code_reality.chain_tour <md> --repo <repo> --out-dir <repo>/.tours/arch/<stem>/`（`--primary` 見「優先序裁定」；族目錄名＝stem 人類可讀主題名——**panel 是走讀介面非分類介面：族名不帶軌別前綴**（軌分類住 README 地圖/plan）、推薦動線族加數字前綴亦見「優先序裁定」）。**收錄語義**：每份 callstack md 落地一族，收錄子集屬策展決策（初稿停點裁定）——M1 實證：全量 16 族 97 條落地、策展核心族 byte-identical 重現。zsh 變數不 word-split——CLI 參數勿經變數間接組合展開（整串成單一 arg 報 unrecognized），寫明參數。驗收：產出檔數＝文檔場景數（場景＝含樹狀幀的 code block）；重錨分佈統計記錄；每條抽樣 ≤5 步 `line`+`pattern` 與源碼 def 對齊。0-step tour（描述殼）保留但勿連入。
 3. **地圖層（先做重複度盤點，再判受眾，再選步錨）**：**重複度盤點＝是否做 overview 的前置裁決**——比對潛在 overview 與既有文檔源：模組步是否＝文檔模組導航表的逐步慢讀、文檔錨步邊際值（落地所見 − description 所述）是否≈0、（若已有雙版——audit 時點才可盤）版間錨點重複度；**事後退役同等有效**（mosaic 即先產後盤退役）。高重複（repo 已有強導航文檔群）→ **地圖層退役**：前門改 chain `--primary`＋目錄前綴群序（見「優先序裁定」），省 curated 維護稅；低重複 → 續做，判受眾：受眾＝**冷啟動新手**（clone 即讀）→ 分層步**錨模組 AGENTS.md h1**、description＝職責一句＋file link（文檔是新手的自然入口）；受眾＝**理解程式碼**（含 repo 主人走讀）→ 分層步**錨真實源碼**（入口函式／註冊點／核心機制，`line`+`pattern` 雙錨，講這段程式碼做什麼、上下游是誰），文檔退 file link——**文檔索引對 repo 主人是零價值**。骨架＝開場（contents 步無檔）＋分層 4–6 步＋資料入口 1–2 步（代表檔雙錨）＋場景目錄步（tour link）＋開發工作流步＋收尾；長版可選（30–40 步、`00b - `）。**宣稱紀律：description 每個實質宣稱可追溯到文檔或源碼**（防 AI 造假敘事），不自行發明。
 4. **`.tour` 語言契約**（消費端 CodeTour 的正則決定，寫錯＝死鏈）：
    - `line` = **1-based**（player 內部 −1）
@@ -44,7 +44,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 - **族角色**——SYSTEM-MAP 狀態標記（🏃＝生產運行）＋plan 軌別（入口 ops／機制 mech／主題 edu——blueprint 三軌）
 - **覆蓋廣度**——鏈橫跨的架構層數（callstack 幀目錄可判）
 
-裁決規則：① 前門＝主題鏈（edu）中「橫跨層最多 × 步數中等」者（殼與 1-step 不入動線——步驟 2「勿連入」擴為「不入動線」）；② 動線＝主題（edu）→入口（ops）→機制（mech）按任務；③ 殼族標「深讀走 callstack md 本身，不走 tour」。落地＝`chain_tour --primary N`（唯一有效前門機制——player fallback 只認未補零 `1 - `，補零 corpus 永不命中；**重產帶前門的族必須再帶 `--primary`，漏帶則旗標靜默掉落**）＋目錄數字前綴（panel 群組 alphabetical 排序，前綴讓群序＝優先序——**panel 即動線**，不另立文檔；前綴可承載軌別如 `ops-`/`mech-`/`edu-`（blueprint 三軌配套，不綁死））＋repo 入口文檔一行（AGENTS.md 觸發器表自述前門與群序語義）。停點：初稿產出即停，用戶策展。
+裁決規則：① 前門＝主題鏈（edu）中「橫跨層最多 × 步數中等」者（殼與 1-step 不入動線——步驟 2「勿連入」擴為「不入動線」）；② 動線＝主題（edu）→入口（ops）→機制（mech）按任務；③ 殼族標「深讀走 callstack md 本身，不走 tour」。落地＝`chain_tour --primary N`（唯一有效前門機制——player fallback 只認未補零 `1 - `，補零 corpus 永不命中；**重產帶前門的族必須再帶 `--primary`，漏帶則旗標靜默掉落**）＋目錄數字前綴（panel 群組 alphabetical 排序，前綴讓群序＝優先序——**panel 即動線**；族名＝主題人類名（md stem）**不含軌別**——生產者分類（edu/mech/ops）洩入走讀介面是呈現錯置，軌分類住 README 地圖與 plan）＋repo 入口文檔一行（AGENTS.md 觸發器表自述前門與群序語義）。停點：初稿產出即停，用戶策展。
 
 ## 停點設計
 
