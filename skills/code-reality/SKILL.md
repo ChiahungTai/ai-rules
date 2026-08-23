@@ -66,6 +66,13 @@ pyi = "python/nautilus_trader/**/*.pyi"
 
 無 profile：module fallback 頂層目錄、exclude 僅 `.venv/`、claims 恆 NONE、boundary crash-only。
 
+**authoring 程序**（新 repo 寫 profile——固定四步，勿即興）：
+
+1. **判斷 module 規則**：找 code 主目錄（有實現邏輯的層，非 docs/tests/生成物）→ `prefix`＝主目錄（須尾斜線——profile 載入 assert，同 exclude）、`depth`＝「module 應是第幾層目錄」（`depth 1`＝prefix 直接子目錄；根檔案歸 prefix 本身）。多主目錄 repo 寫多條 `[[module]]`（有序首中）。判斷法：你希望 transition 對照表以什麼粒度列模組——那就是 module 層
+2. **判斷 exclude**：非 code 目錄全列（文檔/研究產物/fixture/stubs/生成物 `dist`·`node_modules`）。**一律目錄粒度帶斜線**（`"docs/"` 非 `"docs"`——profile 載入 assert 強制；理由：startswith 匹配下無斜線會誤傷同名開頭檔，如 `.venv-setup.py`）
+3. **scan_root 僅 pyo3 對帳 repo 需要**（rust 源 × `.pyi` stub 的 boundary 掃描）——一般 repo 不寫；非 NT 佈局的 `boundary_build` 會 crash-only（loud），屬設計
+4. **smoke 驗證**：`code_reality.snapshot --repo <repo> --label smoke` 跑一發，判讀 module 切分是否符合直覺（切錯→回步驟 1 改 prefix/depth）；之後 chain_tour 的 `not-in-graph` 統計是 graph 新鮮度信號。profile 檔歸 repo root，commit 與否該 repo 自決
+
 ## 口徑限制（宣稱抽取——transition `--ep`）
 
 claims regex 由 `[[module]]` prefixes 衍生（如 `mosaic_alpha/[a-z_0-9]+`）——**只認這些前綴的路徑 mention**。不符前綴的變更宣稱欄恆 NONE＝「未提供對照」（單欄邊集差異仍可用），**不當「EP 無宣稱」解讀**。
