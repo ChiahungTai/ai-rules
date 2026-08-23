@@ -132,6 +132,7 @@
 - `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
 - `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離）
 - `dependency-upgrade-watch` — 偵測 nautilus_trader / shioaji 版本漂移，主動建議 /upgrade-nt|/upgrade-sj（碰 pyproject.toml 時 auto-load）
+- `zcode-session-query` —（ZCode 專用）跨 session 查詢與參考：查 session id / 讀指定 session 尾部真人互動（scripts/zcode_tail_chat.py）/ ReadSessionContext（handoff 策略；relevant 大 session 逾時）；handoff / relay 的「讀進來」側；id 禁手打、sqlite3 CLI 無聲空輸出改 python ro uri
 
 ### 工具與查詢
 - `nt-query` — NautilusTrader **v2**（Rust+PyO3）能力 / 實作 / 用法合約 / v1→v2 移植查詢（docs-first + LSP-on-in-package-stubs + MIGRATION_V2 契約 + v2 名稱紀律）
