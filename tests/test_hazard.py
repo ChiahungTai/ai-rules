@@ -42,7 +42,7 @@ CONDITION_REG = HazardRegistry(
     suffix="Condition",
     register_fn="auto_register_conditions",
     registry="CONDITION_REGISTRY",
-    evidence="mosaic_alpha/conditions/discovery.py:186",
+    evidence="mosaic_alpha/conditions/discovery.py:149",
 )
 
 FEATURE_REG = HazardRegistry(
@@ -224,7 +224,7 @@ class TestDetectGetattrDispatch:
     def test_getattr_hits_reported(self) -> None:
         facts = parse_symbol_facts(FAKE_CONDITION, "ConsolidationCondition")
         lines = [
-            "mosaic_alpha/conditions/discovery.py:186:cls = getattr(module, attr_name)",
+            "mosaic_alpha/conditions/discovery.py:149:cls = getattr(module, attr_name)",
             "tests/foo.py:1:getattr(m, 'ConsolidationCondition')",
         ]
         f = detect_getattr_dispatch(facts, fake_rg(lines))
@@ -400,7 +400,7 @@ class TestResidentFindings:
         fs = resident_findings(facts, (CONDITION_REG,))
         reg = next(f for f in fs if f.kind == "registry-auto-discovery")
         assert reg.count == 1
-        assert reg.evidence == ["mosaic_alpha/conditions/discovery.py:186"]
+        assert reg.evidence == ["mosaic_alpha/conditions/discovery.py:149"]
 
     def test_protocol_presence(self) -> None:
         facts = parse_symbol_facts(FAKE_PROTOCOL, "FactorCache")

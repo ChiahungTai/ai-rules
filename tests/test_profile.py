@@ -173,7 +173,7 @@ package_prefix = "mosaic_alpha/conditions/"
 suffix = "Condition"
 register_fn = "auto_register_conditions"
 registry = "CONDITION_REGISTRY"
-evidence = "mosaic_alpha/conditions/discovery.py:186"
+evidence = "mosaic_alpha/conditions/discovery.py:149"
 """
 
     def test_parse_full_entry(self, tmp_path: Path) -> None:
@@ -186,7 +186,7 @@ evidence = "mosaic_alpha/conditions/discovery.py:186"
                 suffix="Condition",
                 register_fn="auto_register_conditions",
                 registry="CONDITION_REGISTRY",
-                evidence="mosaic_alpha/conditions/discovery.py:186",
+                evidence="mosaic_alpha/conditions/discovery.py:149",
             ),
         )
 

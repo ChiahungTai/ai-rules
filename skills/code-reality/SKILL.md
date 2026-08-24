@@ -75,7 +75,7 @@ package_prefix = "mosaic_alpha/conditions/"
 suffix = "Condition"
 register_fn = "auto_register_conditions"
 registry = "CONDITION_REGISTRY"
-evidence = "mosaic_alpha/conditions/discovery.py:186"   # 可選——註冊鏈證據顯示用
+evidence = "mosaic_alpha/conditions/discovery.py:149"   # 可選——註冊鏈證據顯示用
 ```
 
 無 profile：module fallback 頂層目錄、exclude 僅 `.venv/`、claims 恆 NONE、boundary crash-only、hazard registry 規則不命中（其餘 hazard 規則不依賴 profile）。
