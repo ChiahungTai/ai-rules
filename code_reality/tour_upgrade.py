@@ -48,7 +48,10 @@ def build_step_pattern(step: dict, repo: Path) -> str | None:
     for m in BACKTICK_DECL.finditer(step.get("description", "") or ""):
         cand = re.compile(
             r"^[ \t]*(?:pub\s+)?(?:async\s+)?(?:unsafe\s+)?"
-            + m.group(1) + r"\s+" + re.escape(m.group(2)) + r"\b"
+            + m.group(1)
+            + r"\s+"
+            + re.escape(m.group(2))
+            + r"\b"
         )
         hits = [i for i, x in enumerate(lines) if cand.search(x)]
         near = [i for i in hits if abs(i - (ln - 1)) <= 1]
@@ -78,9 +81,7 @@ def sanitize_brackets(desc: str) -> tuple[str, int]:
     return BRACKET.sub(repl, desc), n
 
 
-def revive_crossrefs(
-    desc: str, key_by_num: dict[int, str]
-) -> tuple[str, int]:
+def revive_crossrefs(desc: str, key_by_num: dict[int, str]) -> tuple[str, int]:
     n = 0
 
     def repl(m: re.Match) -> str:
@@ -143,7 +144,9 @@ def run(repo: Path, tours_dir: Path, apply: bool) -> int:
             f"  {rel}: pattern +{r['pattern_added']} skip {r['pattern_skip']} crossref {r['crossrefs']}"
         )
     mode = "APPLY" if apply else "DRY-RUN"
-    print(f"[OK] tour_upgrade {mode}: {len(tours)} tours | pattern +{total_add} skip {total_skip} | crossref {total_refs}")
+    print(
+        f"[OK] tour_upgrade {mode}: {len(tours)} tours | pattern +{total_add} skip {total_skip} | crossref {total_refs}"
+    )
     for line in report:
         print(line)
     for k, v in dup.items():
@@ -151,7 +154,7 @@ def run(repo: Path, tours_dir: Path, apply: bool) -> int:
     if not apply:
         return 0
     root = repo / tours_dir
-    for (rel, tour) in tours:
+    for rel, tour in tours:
         path = repo / rel
         path.write_text(
             json.dumps(tour, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
@@ -161,7 +164,9 @@ def run(repo: Path, tours_dir: Path, apply: bool) -> int:
     data = tour_manifest.load(mpath)
     data.setdefault("version", 1)
     for rel, _ in tours:
-        rel_from_root = str(Path(rel).relative_to(tours_dir)) if str(tours_dir) != "." else rel
+        rel_from_root = (
+            str(Path(rel).relative_to(tours_dir)) if str(tours_dir) != "." else rel
+        )
         tour_manifest.upsert(
             data, rel_from_root, generator="manual", sources=[], commit=commit
         )
@@ -172,7 +177,9 @@ def run(repo: Path, tours_dir: Path, apply: bool) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="tour corpus 舊格式遷移（預設 dry-run）")
+    parser = argparse.ArgumentParser(
+        description="tour corpus 舊格式遷移（預設 dry-run）"
+    )
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--tours-dir", type=Path, default=Path(".tours"))
     parser.add_argument("--apply", action="store_true", help="實際寫檔（預設 dry-run）")

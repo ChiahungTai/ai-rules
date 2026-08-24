@@ -515,7 +515,9 @@ def main() -> None:
                 commit=commit,
             )
         tour_manifest.dump(mpath, mdata)
-        print(f"[OK] manifest upsert: {mpath}（{len(paths)} rows, generator=chain_tour）")
+        print(
+            f"[OK] manifest upsert: {mpath}（{len(paths)} rows, generator=chain_tour）"
+        )
     print(
         f"[OK] chain tours: {len(st.tours)} 場景 / {st.frames} 幀 / "
         f"{st.frames - st.skipped} 步 / skipped {st.skipped}"

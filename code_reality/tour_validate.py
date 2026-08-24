@@ -24,7 +24,10 @@ def ts_key(title: str) -> str:
     return title
 
 
-EXCLUDED_DIRS = ("delta", "dev-fixture")  # 時間層（可再生）／開發驗收假資料（非 corpus）
+EXCLUDED_DIRS = (
+    "delta",
+    "dev-fixture",
+)  # 時間層（可再生）／開發驗收假資料（非 corpus）
 
 
 def iter_tours(
@@ -38,7 +41,9 @@ def iter_tours(
         parts = f.relative_to(root).parts[:-1]
         if not include_excluded and any(d in parts for d in EXCLUDED_DIRS):
             continue
-        out.append((f.relative_to(repo).as_posix(), json.loads(f.read_text(encoding="utf-8"))))
+        out.append(
+            (f.relative_to(repo).as_posix(), json.loads(f.read_text(encoding="utf-8")))
+        )
     return out
 
 
@@ -97,7 +102,9 @@ def check_anchors(rel: str, tour: dict, repo: Path) -> tuple[list[str], int, int
         if not (0 <= ln - 1 < len(lines)) or not re.search(pat, lines[ln - 1]):
             hits = _hits(lines, pat)
             if not hits:
-                fails.append(f"[FAIL] {rel} 步{i} pattern 未命中（unverified）: {f}:{ln}")
+                fails.append(
+                    f"[FAIL] {rel} 步{i} pattern 未命中（unverified）: {f}:{ln}"
+                )
             else:
                 best = min(hits, key=lambda h: abs(h - (ln - 1)))
                 corrected += 1
@@ -117,7 +124,9 @@ def check_files(rel: str, tour: dict, repo: Path) -> list[str]:
     return fails
 
 
-def check_manifest(repo: Path, tours_dir: Path, tours: list[tuple[str, dict]]) -> list[str]:
+def check_manifest(
+    repo: Path, tours_dir: Path, tours: list[tuple[str, dict]]
+) -> list[str]:
 
     from . import tour_manifest
 
@@ -129,7 +138,11 @@ def check_manifest(repo: Path, tours_dir: Path, tours: list[tuple[str, dict]]) -
     rows = data.get("tour", {})
 
     def _root_rel(rel: str) -> str:
-        return rel if str(tours_dir) == "." else Path(rel).relative_to(tours_dir).as_posix()
+        return (
+            rel
+            if str(tours_dir) == "."
+            else Path(rel).relative_to(tours_dir).as_posix()
+        )
 
     fails = []
     for rel in rows:
@@ -157,7 +170,9 @@ def validate(repo: Path, tours_dir: Path, with_manifest: bool) -> tuple[int, lis
     if not tours:
         print(f"[WARN] {repo / tours_dir} 無 .tour")
         return 0, []
-    idx = key_index(iter_tours(repo, tours_dir, include_excluded=True))  # link 目標含被排除目錄
+    idx = key_index(
+        iter_tours(repo, tours_dir, include_excluded=True)
+    )  # link 目標含被排除目錄
     by_rel = dict(tours)
     for rel, tour in tours:
         lf, nl = check_links(rel, tour, idx, by_rel)
@@ -166,8 +181,7 @@ def validate(repo: Path, tours_dir: Path, with_manifest: bool) -> tuple[int, lis
         n_files += sum(1 for _ in FILE_REF.finditer(tour.get("description") or ""))
         for step in tour.get("steps", []):
             n_files += sum(
-                1
-                for _ in FILE_REF.finditer(step.get("description", "") or "")
+                1 for _ in FILE_REF.finditer(step.get("description", "") or "")
             )
         fails += check_files(rel, tour, repo)
         af, _ex, _co = check_anchors(rel, tour, repo)
@@ -183,10 +197,16 @@ def validate(repo: Path, tours_dir: Path, with_manifest: bool) -> tuple[int, lis
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="tour corpus 機械驗證（.tour 語言契約）")
+    parser = argparse.ArgumentParser(
+        description="tour corpus 機械驗證（.tour 語言契約）"
+    )
     parser.add_argument("--repo", type=Path, default=Path.cwd(), help="repo 根")
-    parser.add_argument("--tours-dir", type=Path, default=Path(".tours"), help="corpus 根（遞迴）")
-    parser.add_argument("--manifest", action="store_true", help="驗 manifest source 存在性")
+    parser.add_argument(
+        "--tours-dir", type=Path, default=Path(".tours"), help="corpus 根（遞迴）"
+    )
+    parser.add_argument(
+        "--manifest", action="store_true", help="驗 manifest source 存在性"
+    )
     args = parser.parse_args()
     code, _ = validate(args.repo, args.tours_dir, args.manifest)
     sys.exit(code)

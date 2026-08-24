@@ -60,11 +60,15 @@ def test_dry_run_does_not_touch_files(tmp_path, capsys):
     repo = tmp_path
     p = repo / ".tours" / "t.tour"
     p.parent.mkdir(parents=True)
-    orig = {"title": "01 - A", "steps": [{"file": "m.py", "line": 1, "description": "見[2 - B]"}]}
+    orig = {
+        "title": "01 - A",
+        "steps": [{"file": "m.py", "line": 1, "description": "見[2 - B]"}],
+    }
     p.write_text(json.dumps(orig, ensure_ascii=False), encoding="utf-8")
     (repo / "m.py").write_text("class A:\n", encoding="utf-8")
     (repo / ".tours" / "b.tour").write_text(
-        json.dumps({"title": "02 - B", "steps": []}, ensure_ascii=False), encoding="utf-8"
+        json.dumps({"title": "02 - B", "steps": []}, ensure_ascii=False),
+        encoding="utf-8",
     )
     before = p.read_text(encoding="utf-8")
     code = tour_upgrade.run(repo, Path(".tours"), apply=False)

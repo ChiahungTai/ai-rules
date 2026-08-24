@@ -11,7 +11,9 @@ def test_ts_key_strips_zero_padded_prefix():
 
 
 def test_ts_key_non_numeric_prefix_untouched():
-    assert tour_validate.ts_key("00b - mosaic 總覽（完整）") == "00b - mosaic 總覽（完整）"
+    assert (
+        tour_validate.ts_key("00b - mosaic 總覽（完整）") == "00b - mosaic 總覽（完整）"
+    )
 
 
 def test_ts_key_hyphen_truncation_quirk():
@@ -27,7 +29,9 @@ def _write(repo: Path, rel: str, tour: dict) -> None:
 
 def test_links_good_and_broken(tmp_path):
     repo = tmp_path
-    _write(repo, ".tours/a.tour", {"title": "01 - 目標", "steps": [{"description": "x"}]})
+    _write(
+        repo, ".tours/a.tour", {"title": "01 - 目標", "steps": [{"description": "x"}]}
+    )
     tours = tour_validate.iter_tours(repo, Path(".tours"))
     idx = tour_validate.key_index(tours)
     by_rel = dict(tours)
@@ -45,7 +49,9 @@ def test_links_good_and_broken(tmp_path):
 def test_anchor_three_states(tmp_path, capsys):
     repo = tmp_path
     src = repo / "mod.py"
-    src.write_text("class Foo:\n    pass\n\ndef bar() -> int:\n    return 1\n", encoding="utf-8")
+    src.write_text(
+        "class Foo:\n    pass\n\ndef bar() -> int:\n    return 1\n", encoding="utf-8"
+    )
     exact = {"file": "mod.py", "line": 1, "pattern": r"^class Foo:"}
     corrected = {"file": "mod.py", "line": 3, "pattern": r"^def bar"}
     unverified = {"file": "mod.py", "line": 1, "pattern": r"^def gone"}
@@ -72,7 +78,9 @@ def test_manifest_missing_source(tmp_path, capsys):
     repo = tmp_path
     _write(repo, ".tours/a.tour", {"title": "t", "steps": []})
     mpath = repo / ".tours" / "manifest.toml"
-    data = tour_manifest.upsert({}, "a.tour", generator="manual", sources=["gone.md"], commit="c0ffee")
+    data = tour_manifest.upsert(
+        {}, "a.tour", generator="manual", sources=["gone.md"], commit="c0ffee"
+    )
     tour_manifest.dump(mpath, data)
     tours = tour_validate.iter_tours(repo, Path(".tours"))
     fails = tour_validate.check_manifest(repo, Path(".tours"), tours)
