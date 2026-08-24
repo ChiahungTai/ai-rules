@@ -12,6 +12,7 @@ import pytest
 from profile_repo import NT_PROFILE, write_mosaic_profile
 
 from code_reality.profile import (
+    HazardRegistry,
     ModuleRule,
     Profile,
     claims_re,
@@ -161,3 +162,61 @@ class TestScanRoots:
         write_mosaic_profile(tmp_path)
         profile = load_profile(tmp_path)
         assert scan_roots(profile) == ()
+
+
+class TestHazardRegistry:
+    """[[hazard_registry]]——registry auto-discovery 偵測的 repo 事實單一源。"""
+
+    REGISTRY_TOML = """\
+[[hazard_registry]]
+package_prefix = "mosaic_alpha/conditions/"
+suffix = "Condition"
+register_fn = "auto_register_conditions"
+registry = "CONDITION_REGISTRY"
+evidence = "mosaic_alpha/conditions/discovery.py:186"
+"""
+
+    def test_parse_full_entry(self, tmp_path: Path) -> None:
+        (tmp_path / ".code-reality.toml").write_text(self.REGISTRY_TOML)
+        profile = load_profile(tmp_path)
+        assert profile is not None
+        assert profile.hazard_registries == (
+            HazardRegistry(
+                package_prefix="mosaic_alpha/conditions/",
+                suffix="Condition",
+                register_fn="auto_register_conditions",
+                registry="CONDITION_REGISTRY",
+                evidence="mosaic_alpha/conditions/discovery.py:186",
+            ),
+        )
+
+    def test_evidence_optional(self, tmp_path: Path) -> None:
+        (tmp_path / ".code-reality.toml").write_text(
+            self.REGISTRY_TOML.split("evidence")[0]
+        )
+        profile = load_profile(tmp_path)
+        assert profile is not None
+        assert profile.hazard_registries[0].evidence == ""
+
+    def test_prefix_without_slash_crash(self, tmp_path: Path) -> None:
+        (tmp_path / ".code-reality.toml").write_text(
+            self.REGISTRY_TOML.replace(
+                'package_prefix = "mosaic_alpha/conditions/"',
+                'package_prefix = "mosaic_alpha/conditions"',
+            )
+        )
+        with pytest.raises(AssertionError, match="目錄粒度"):
+            load_profile(tmp_path)
+
+    def test_missing_required_key_crash(self, tmp_path: Path) -> None:
+        (tmp_path / ".code-reality.toml").write_text(
+            self.REGISTRY_TOML.replace('suffix = "Condition"\n', "")
+        )
+        with pytest.raises(AssertionError, match="hazard_registry"):
+            load_profile(tmp_path)
+
+    def test_default_empty_tuple(self, tmp_path: Path) -> None:
+        write_mosaic_profile(tmp_path)
+        profile = load_profile(tmp_path)
+        assert profile is not None
+        assert profile.hazard_registries == ()

@@ -1,7 +1,7 @@
 ---
 name: code-reality
-description: "code_reality 工具鏈——repos 之上的 meta 層工具（住 ~/Github/ai-rules），跨 repo 消費單一入口。何時跑：implement 階段 1 baseline snapshot／post-build·code-review 弧模式 transition／debrief 機械底稿／cold-start boundary 掃描。含 repo profile（.code-reality.toml）schema 與 claims 口徑限制真相源。"
-when_to_use: "Running code_reality tools (snapshot/transition/hub_refs/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_csv/graph_audit), authoring .code-reality.toml, or interpreting transition claims output. Tool availability check: .code-reality.toml in repo root OR uv run --project ~/Github/ai-rules python -m code_reality.snapshot --help exits 0."
+description: "code_reality 工具鏈——repos 之上的 meta 層工具（住 ~/Github/ai-rules），跨 repo 消費單一入口。何時跑：implement 階段 1 baseline snapshot／post-build·code-review 弧模式 transition／debrief 機械底稿／cold-start boundary 掃描／「0 callers 可刪」判斷前 hub_refs hazard。含 repo profile（.code-reality.toml）schema 與 claims 口徑限制真相源。"
+when_to_use: "Running code_reality tools (snapshot/transition/hub_refs+hazard/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_csv/graph_audit/scip_refs), authoring .code-reality.toml, or interpreting transition claims output. Tool availability check: .code-reality.toml in repo root OR uv run --project ~/Github/ai-rules python -m code_reality.snapshot --help exits 0."
 argument-hint: "（程序 skill——不直接觸發；查閱用）"
 allowed-tools: ["Read", "Bash"]
 ---
@@ -22,7 +22,8 @@ uv run --project ~/Github/ai-rules python -m code_reality.<tool> --repo <repo-ro
 |------|------|--------|
 | implement 階段 1（build 起點） | `snapshot --label <ep>` | transition 的 before 基準 |
 | 弧模式（code 已 commit、HEAD 越過 EP baseline） | `transition <a> <b> --ep <ep.md> --repo <repo>` | code-review 模式 B primed／post-build／implement 階段 6／debrief |
-| hub symbol 波及盤點 | `hub_refs <symbol>` | debrief 第 5 段 |
+| hub symbol 波及盤點 | `hub_refs <symbol>`（內建 hazard 安全網；「可刪」判斷前必跑） | debrief 第 5 段 |
+| CRG 同鍵去重受害符號 refs（Rust） | `scip_refs <Type.method> --index <scip>`；`--audit --repo <nt>` 對帳 graph_audit 缺差 | graph_audit 發現缺差後的 callers 真相源 |
 | runtime 逐函式耗時 | `runtime_edges`（viztracer trace） | 效能分析 |
 | NT python↔Rust 邊 | `boundary_build --repo <nt>`（掃描建 sidecar）＋`boundary <symbol> --repo <nt>`（查詢） | v2 遷移地圖／縫分析 |
 | 弧敘事載體 | `delta_tour`（snapshot 對 diff→tour）／`chain_tour`（callstack md→tours）／`graph_csv`（graph.db→CSV） | 人類 viewport |
@@ -35,13 +36,14 @@ uv run --project ~/Github/ai-rules python -m code_reality.<tool> --repo <repo-ro
 |------|------|
 | `snapshot` | CRG module-edge 導出＋commit 錨定 sidecar（冪等；`_meta` 慣例） |
 | `transition` | 兩 snapshot 邊集差異＋「EP 宣稱 vs 實際變動」對照 |
-| `hub_refs` | hub symbol 廣度（callers/callees 按目錄、test/prod 切分） |
+| `hub_refs` | hub symbol 廣度（callers/callees 按目錄、test/prod 切分）＋hazard 分層安全網（常駐 AST 級＋static_prod ≤ 2 觸發 rg 級 dynamic dispatch 偵測，規則在 `hazard` 模組——防「0 refs 可刪」誤判；`--hazard` 強制全掃、`--json` 含 `hazard_findings` 欄） |
 | `runtime_edges` | viztracer trace → 逐函式 runtime 邊 |
 | `boundary_build`／`boundary` | pyo3 宣告↔`.pyi` 合約 sidecar build／查詢 |
 | `delta_tour`／`chain_tour`／`graph_csv` | 敘事/關聯載體（`.tour` 契約——渲染消費者 CodeTour）；chain_tour 產出同步 upsert `.tours/manifest.toml` |
 | `tour_validate`／`tour_upgrade`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／manifest 讀寫 |
 | `graph_audit` | CRG graph.db **Rust 完整度稽核**——D1 同型別多 impl 風險掃描（per-block ≥2，非交集）＋D2 rust-analyzer symbols 對帳（kind 含 Test）；`--json` 鍵為治理鉤子契約；graph rebuild／rebase 大跳後跑（收編自 NT N1，2026-08-24 實測 219 缺差） |
-| `common`／`exclusions`／`profile` | 共用設施：`_meta`/`connect_ro`（WAL fallback）／排除前綴／profile 引擎 |
+| `scip_refs` | rust-analyzer SCIP 索引查詢——CRG 同鍵去重受害符號（見 graph_audit）的 def/refs 真相源 sidecar；`--audit` 與 graph_audit 缺差對帳（(定義檔, 方法名) 雙鍵歸屬）；索引生成 ~8 分鐘、rebase 後重生（rust-analyzer scip，輸出寫 cwd）；protobuf 為 ai-rules dev 依賴 |
+| `common`／`exclusions`／`profile`／`hazard` | 共用設施：`_meta`/`connect_ro`（WAL fallback）／排除前綴／profile 引擎／hub_refs hazard 判定層（六規則純函數——registry 表由 profile `[[hazard_registry]]` 注入） |
 
 ## repo profile（`.code-reality.toml`——repo 擁有）
 
@@ -65,7 +67,18 @@ path = "crates/**/*.rs"
 pyi = "python/nautilus_trader/**/*.pyi"
 ```
 
-無 profile：module fallback 頂層目錄、exclude 僅 `.venv/`、claims 恆 NONE、boundary crash-only。
+registry auto-discovery repo（hazard 偵測的 `registry-auto-discovery` 規則——有 registry 掃描註冊機制的 repo 才寫，如 mosaic conditions/features）：
+
+```toml
+[[hazard_registry]]   # 定義檔在 package_prefix 下＋名稱尾 suffix → 註冊推定（callers 邊不涵蓋）
+package_prefix = "mosaic_alpha/conditions/"
+suffix = "Condition"
+register_fn = "auto_register_conditions"
+registry = "CONDITION_REGISTRY"
+evidence = "mosaic_alpha/conditions/discovery.py:186"   # 可選——註冊鏈證據顯示用
+```
+
+無 profile：module fallback 頂層目錄、exclude 僅 `.venv/`、claims 恆 NONE、boundary crash-only、hazard registry 規則不命中（其餘 hazard 規則不依賴 profile）。
 
 **authoring 程序**（新 repo 寫 profile——固定四步，勿即興）：
 

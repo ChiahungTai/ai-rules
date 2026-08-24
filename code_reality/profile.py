@@ -32,10 +32,22 @@ class ScanRoot:
 
 
 @dataclass(frozen=True)
+class HazardRegistry:
+    """registry auto-discovery 事實（hazard 規則用）——repo 事實歸 repo。"""
+
+    package_prefix: str  # registry 掃描的 package 路徑前綴（目錄粒度）
+    suffix: str  # class 名慣例後綴（如 "Condition"）
+    register_fn: str  # auto-discovery 註冊函數名
+    registry: str  # registry 容器名
+    evidence: str = ""  # 註冊鏈證據（path:line，顯示用）
+
+
+@dataclass(frozen=True)
 class Profile:
     modules: tuple[ModuleRule, ...] = ()
     exclude: tuple[str, ...] = DEFAULT_EXCLUDE
     scan_roots: tuple[ScanRoot, ...] = ()
+    hazard_registries: tuple[HazardRegistry, ...] = ()
 
 
 def load_profile(repo_root: Path) -> Profile | None:
@@ -52,7 +64,7 @@ def load_profile(repo_root: Path) -> Profile | None:
         data = tomllib.loads(path.read_text())
     except tomllib.TOMLDecodeError as e:
         raise AssertionError(f"{path} TOML 解析失敗：{e}") from e
-    unknown = set(data) - {"module", "exclude", "scan_root"}
+    unknown = set(data) - {"module", "exclude", "scan_root", "hazard_registry"}
     assert not unknown, (
         f"{path} 含未知鍵 {sorted(unknown)}——拼錯 section 名會靜默退化 generic "
         "fallback（合法鍵：module／exclude／scan_root）"
@@ -66,10 +78,21 @@ def load_profile(repo_root: Path) -> Profile | None:
         roots = tuple(
             ScanRoot(path=s["path"], pyi=s["pyi"]) for s in data.get("scan_root", [])
         )
+        registries = tuple(
+            HazardRegistry(
+                package_prefix=r["package_prefix"],
+                suffix=r["suffix"],
+                register_fn=r["register_fn"],
+                registry=r["registry"],
+                evidence=r.get("evidence", ""),
+            )
+            for r in data.get("hazard_registry", [])
+        )
     except KeyError as e:
         raise AssertionError(
             f"{path} schema 不合（缺 {e}）——[[module]] 需 prefix（depth 可選）、"
-            "[[scan_root]] 需 path＋pyi"
+            "[[scan_root]] 需 path＋pyi、[[hazard_registry]] 需 package_prefix＋"
+            "suffix＋register_fn＋registry（evidence 可選）"
         ) from e
     for rule in modules:
         assert rule.prefix.endswith("/"), (
@@ -84,7 +107,14 @@ def load_profile(repo_root: Path) -> Profile | None:
         assert prefix.endswith("/"), (
             f"{path} exclude={prefix!r} 須以 / 結尾（目錄粒度）"
         )
-    return Profile(modules=modules, exclude=exclude, scan_roots=roots)
+    for reg in registries:
+        assert reg.package_prefix.endswith("/"), (
+            f"{path} [[hazard_registry]] package_prefix={reg.package_prefix!r} "
+            "須以 / 結尾（目錄粒度）"
+        )
+    return Profile(
+        modules=modules, exclude=exclude, scan_roots=roots, hazard_registries=registries
+    )
 
 
 def module_of(rel_path: str, profile: Profile | None) -> str:

@@ -14,9 +14,13 @@ import pytest
 from crg_db import make_crg_db
 from profile_repo import write_mosaic_profile
 
+from code_reality.hazard import HazardFinding, SymbolFacts
 from code_reality.hub_refs import (
+    AggResult,
     aggregate,
     crg_query,
+    hazard_stage,
+    json_payload,
     resolve_qualified,
     resolve_symbol,
 )
@@ -292,3 +296,143 @@ class TestResolveSymbol:
         monkeypatch.setattr("code_reality.hub_refs.crg_query", fake_query)
         with pytest.raises(SystemExit, match="ambiguous"):
             resolve_symbol("/abs/repo/a.py::Dup", Path("/abs/repo"))
+
+
+class TestHazardStage:
+    """§5.4 分層觸發——常駐 AST 級 vs static_prod ≤ 2 觸發 rg 級。"""
+
+    def _patch(
+        self, monkeypatch: pytest.MonkeyPatch, facts: SymbolFacts, rg_lines: list[str]
+    ) -> list:
+        monkeypatch.setattr("code_reality.hub_refs.symbol_facts", lambda s, r, p: facts)
+        rg_calls: list[list[str]] = []
+
+        def fake_runner(repo_root: Path):
+            def run(args: list[str]) -> list[str]:
+                rg_calls.append(args)
+                return list(rg_lines)
+
+            return run
+
+        monkeypatch.setattr("code_reality.hub_refs.make_rg_runner", fake_runner)
+        return rg_calls
+
+    def test_low_prod_triggers_full_scan(self, tmp_path, monkeypatch) -> None:
+        """static_prod=0（ConsolidationCondition 形態）→ rg 級全掃＋gate 警告。"""
+        facts = SymbolFacts(name="X", is_class=True, is_protocol=True)
+        rg_calls = self._patch(monkeypatch, facts, ["src/a.py:5:x: X"])
+        findings, warn, level = hazard_stage(
+            "X",
+            tmp_path,
+            direction="callers",
+            total_prod=0,
+            total_test=0,
+            results=[],
+        )
+        assert rg_calls  # rg 級啟動
+        assert any(f.kind == "protocol-duck-typing" for f in findings)
+        assert warn is not None
+        assert "protocol-duck-typing" in warn
+        assert level == "full"
+
+    def test_high_prod_resident_only(self, tmp_path, monkeypatch) -> None:
+        """static_prod=4（Interval 形態）→ 不跑 rg，常駐存在性訊號＋無警告。"""
+        facts = SymbolFacts(
+            name="Interval", is_class=True, is_strentenum=True, enum_values=["1d"]
+        )
+        rg_calls = self._patch(monkeypatch, facts, [])
+        findings, warn, level = hazard_stage(
+            "Interval",
+            tmp_path,
+            direction="callers",
+            total_prod=4,
+            total_test=1,
+            results=[],
+        )
+        assert not rg_calls  # 未觸發——rg 成本放在危險路徑
+        assert [f.kind for f in findings] == ["strentenum-string-dispatch"]
+        assert findings[0].count == 0
+        assert warn is None
+        assert level == "resident"
+
+    def test_trigger_boundary_inclusive_at_two(self, tmp_path, monkeypatch) -> None:
+        """觸發條件是 ≤（含 2 非 <）——off-by-one regression 釘住（審查 F6）。"""
+        facts = SymbolFacts(name="X", is_class=True)
+        rg_calls = self._patch(monkeypatch, facts, [])
+        _, _, level = hazard_stage(
+            "X", tmp_path, direction="callers", total_prod=2, total_test=0, results=[]
+        )
+        assert rg_calls
+        assert level == "full"
+
+    def test_no_trigger_at_three(self, tmp_path, monkeypatch) -> None:
+        facts = SymbolFacts(name="X", is_class=True)
+        rg_calls = self._patch(monkeypatch, facts, [])
+        _, _, level = hazard_stage(
+            "X", tmp_path, direction="callers", total_prod=3, total_test=0, results=[]
+        )
+        assert not rg_calls
+        assert level == "resident"
+
+    def test_force_flag_full_scan_despite_high_prod(
+        self, tmp_path, monkeypatch
+    ) -> None:
+        """--hazard（force）→ 高 callers 也全掃（研究/審計用）。"""
+        facts = SymbolFacts(name="X", is_class=True)
+        rg_calls = self._patch(monkeypatch, facts, [])
+        hazard_stage(
+            "X",
+            tmp_path,
+            direction="callers",
+            total_prod=20,
+            total_test=5,
+            results=[],
+            force=True,
+        )
+        assert rg_calls
+
+    def test_callees_force_skips_gate(self, tmp_path, monkeypatch) -> None:
+        """callees 方向無 callers baseline 語意——force 進場但不 gate 警告。"""
+        facts = SymbolFacts(name="X", is_class=True)
+        self._patch(monkeypatch, facts, [])
+        _, warn, _ = hazard_stage(
+            "X",
+            tmp_path,
+            direction="callees",
+            total_prod=0,
+            total_test=0,
+            results=[],
+            force=True,
+        )
+        assert warn is None
+
+
+class TestJsonPayload:
+    def test_shape_and_serializable(self) -> None:
+        agg = AggResult(
+            prod=[("a", 2)],
+            test=[],
+            total_prod=2,
+            total_test=0,
+            excluded=0,
+            outside=0,
+        )
+        f = HazardFinding(kind="k", count=1, summary="s")
+        payload = json_payload(
+            "X", "q::X", "callers", agg, [f], "w", 3, hazard_level="full"
+        )
+        assert payload["symbol"] == "X"
+        assert payload["aggregate"]["total_prod"] == 2
+        assert payload["aggregate"]["prod"] == [["a", 2]]
+        assert payload["hazard_findings"][0]["kind"] == "k"
+        assert payload["hazard_level"] == "full"
+        assert payload["hazard_gate"] == "w"
+        assert payload["results_omitted"] == 3
+        json.dumps(payload, ensure_ascii=False)  # 可序列化
+
+    def test_empty_hazard_shape(self) -> None:
+        agg = AggResult(prod=[], test=[], total_prod=0, total_test=0, excluded=0)
+        payload = json_payload("X", "q::X", "callers", agg, [], None, 0)
+        assert payload["hazard_findings"] == []
+        assert payload["hazard_level"] == "resident"  # 預設值
+        assert payload["hazard_gate"] is None

@@ -4,10 +4,17 @@
 resultBudget 截斷；CRG JSON 含 is_test＋file_path——聚合後即為可消費答案）。
 精度分工（報告 §4 定版）：LSP 管「邊真相」、本工具管「hub 廣度概覽」。
 
+內建 dynamic dispatch hazard 安全網（§5.4 語意——CRG/Tree-sitter 看不到
+dynamic dispatch，防止「0 refs 可刪」誤判）：callers 查詢常駐 AST 級
+偵測（零 rg 成本）；static_prod ≤ 2 或 ``--hazard`` 才觸發 rg 級全規則
+（每條 rg 全 repo 掃 ~1-3s）。規則與分層見 hazard 模組；``--json``
+輸出含 ``hazard_findings`` 欄（程式消費）。
+
 用法::
 
     uv run python -m code_reality.hub_refs <symbol> \
-        [--repo PATH] [--direction callers|callees] [--top N]
+        [--repo PATH] [--direction callers|callees] [--top N] \
+        [--hazard] [--json]
 
 symbol 形態：完整 qualified name（``<abs-path>::Class.method``）直接查；
 裸名經 **nodes 表 sqlite 精確匹配**解析（2026-08-21 實測：CRG CLI 的
@@ -23,7 +30,7 @@ import json
 import sqlite3
 import subprocess
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
@@ -35,9 +42,19 @@ from code_reality.common import (
     repo_relative,
 )
 from code_reality.exclusions import is_excluded
-from code_reality.profile import load_profile
+from code_reality.hazard import (
+    HazardFinding,
+    full_findings,
+    hazard_gate_warning,
+    make_rg_runner,
+    method_name,
+    resident_findings,
+    symbol_facts,
+)
+from code_reality.profile import Profile, load_profile
 
 CRG_TIMEOUT_S = 120
+RG_TRIGGER_PROD = 2  # static prod callers ≤ 此值才觸發 rg 級 hazard 掃描
 
 
 @dataclass
@@ -202,6 +219,106 @@ def aggregate(
     )
 
 
+def caller_files_of(
+    results: list[dict[str, Any]], repo_root: Path, profile: Profile | None
+) -> set[str]:
+    """CRG refs → repo 相對呼叫檔集合（static-edge-gap 的對帳基準）。"""
+    repo_root = repo_root.resolve()
+    files: set[str] = set()
+    for r in results:
+        fp = r.get("file_path")
+        if not fp:
+            continue
+        try:
+            rel = str(Path(fp).relative_to(repo_root))
+        except ValueError:
+            continue
+        if is_excluded(rel, profile):
+            continue
+        files.add(rel)
+    return files
+
+
+def hazard_stage(
+    symbol: str,
+    repo_root: Path,
+    *,
+    direction: str,
+    total_prod: int,
+    total_test: int,
+    results: list[dict[str, Any]],
+    force: bool = False,
+) -> tuple[list[HazardFinding], str | None, str]:
+    """§5.4 hazard 安全網——常駐 AST 級＋觸發式 rg 級。
+
+    觸發條件：``--hazard``（force）或 callers 方向 static_prod ≤
+    ``RG_TRIGGER_PROD``（§5.4 語意本來就是「callers 少才需要」）。callees
+    方向無 callers baseline 語意——僅 force 進場且 static-edge-gap 跳過
+    （對帳基準不存在）。回 (findings, gate 警告行|None, level)——level
+    "resident"|"full" 供 ``--json`` 消費者區分存在性訊號與計數訊號。
+    """
+    profile = load_profile(repo_root)
+    registries = profile.hazard_registries if profile is not None else ()
+    facts = symbol_facts(symbol, repo_root, profile)
+    triggered = force or (direction == "callers" and total_prod <= RG_TRIGGER_PROD)
+    if triggered:
+        rg = make_rg_runner(repo_root)
+        baseline_files = (
+            caller_files_of(results, repo_root, profile)
+            if direction == "callers"
+            else None
+        )
+        findings = full_findings(
+            facts,
+            registries,
+            rg,
+            baseline_files,
+            profile,
+            method=method_name(symbol),
+        )
+        level = "full"
+    else:
+        findings = resident_findings(facts, registries)
+        level = "resident"
+    warn = (
+        hazard_gate_warning(total_prod, total_test, findings, RG_TRIGGER_PROD)
+        if direction == "callers"
+        else None
+    )
+    return findings, warn, level
+
+
+def json_payload(
+    args_symbol: str,
+    target: str,
+    direction: str,
+    agg: AggResult,
+    findings: list[HazardFinding],
+    warn: str | None,
+    results_omitted: int,
+    hazard_level: str = "resident",
+) -> dict[str, Any]:
+    """``--json`` 輸出組裝——``hazard_findings``＋``hazard_level``
+    （resident=存在性訊號／full=rg 計數）供程式消費。"""
+    return {
+        "symbol": args_symbol,
+        "target": target,
+        "direction": direction,
+        "results_omitted": results_omitted,
+        "aggregate": {
+            "prod": [[d, n] for d, n in agg.prod],
+            "test": [[d, n] for d, n in agg.test],
+            "total_prod": agg.total_prod,
+            "total_test": agg.total_test,
+            "excluded": agg.excluded,
+            "outside": agg.outside,
+        },
+        "hazard_findings": [asdict(f) for f in findings],
+        "hazard_level": hazard_level,
+        "hazard_gate": warn,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("symbol", help="qualified name 或裸名（自動解析）")
@@ -215,11 +332,51 @@ def main() -> None:
         help="refs 方向",
     )
     parser.add_argument("--top", type=int, default=20, help="每欄最多列 N 目錄")
+    parser.add_argument(
+        "--hazard",
+        action="store_true",
+        help="強制全規則 hazard 掃描（常規為觸發式：static_prod ≤ RG_TRIGGER_PROD=2 才掃）",
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="機器可讀輸出（hazard_findings 欄）"
+    )
     args = parser.parse_args()
 
     resp = resolve_symbol(args.symbol, args.repo, args.direction)
     results = resp.get("results", [])
     agg = aggregate(results, args.repo, top=args.top)
+
+    findings: list[HazardFinding] = []
+    warn: str | None = None
+    level = "resident"
+    if args.direction == "callers" or args.hazard:
+        findings, warn, level = hazard_stage(
+            args.symbol,
+            args.repo,
+            direction=args.direction,
+            total_prod=agg.total_prod,
+            total_test=agg.total_test,
+            results=results,
+            force=args.hazard,
+        )
+
+    if args.json:
+        print(
+            json.dumps(
+                json_payload(
+                    args.symbol,
+                    resp.get("target", args.symbol),
+                    args.direction,
+                    agg,
+                    findings,
+                    warn,
+                    resp.get("results_omitted", 0),
+                    hazard_level=level,
+                ),
+                ensure_ascii=False,
+            )
+        )
+        return
 
     print(
         f"[OK] {args.direction} of {resp.get('target', args.symbol)}: "
@@ -233,6 +390,14 @@ def main() -> None:
     print("test:")
     for d, n in agg.test:
         print(f"  {d} ({n})")
+    if findings:
+        print(f"⚠ {len(findings)} dynamic hazards:")
+        for f in findings:
+            print(f"  [{f.kind}] {f.summary}")
+            for ev in f.evidence[:3]:
+                print(f"      {ev}")
+    if warn:
+        print(warn)
     print(
         "[WARN] 註腳：CRG（Tree-sitter）缺 instance-attr 邊（R2）——跨檔 self._x.method() "
         "呼叫不在本清單；邊真相用 LSP findReferences"
