@@ -7,7 +7,9 @@ commit 錨定 sidecar）、transition（兩 snapshot 邊集差異＋EP 宣稱對
 hub_refs（CRG callers 按檔聚合）、boundary_build＋boundary（NT pyo3
 宣告 ↔ .pyi 合約對照 sidecar——python 符號 → Rust 真身查詢）、
 delta_tour／chain_tour（transition/callchain → CodeTour `.tour`）、
-graph_csv（graph.db → nodes/links CSV）。repo 結構事實歸各 repo 的
+graph_csv（graph.db → nodes/links CSV）、graph_audit（CRG graph.db Rust
+完整度稽核——D1 風險掃描＋D2 rust-analyzer 對帳）、tour_validate／
+tour_upgrade／tour_manifest（`.tours` corpus 治理三件）。repo 結構事實歸各 repo 的
 ``.code-reality.toml``（profile 單一源）。
 
 加 __init__.py 是為了 `python -m code_reality.<mod>` 顯式子套件

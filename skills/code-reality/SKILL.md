@@ -1,7 +1,7 @@
 ---
 name: code-reality
 description: "code_reality 工具鏈——repos 之上的 meta 層工具（住 ~/Github/ai-rules），跨 repo 消費單一入口。何時跑：implement 階段 1 baseline snapshot／post-build·code-review 弧模式 transition／debrief 機械底稿／cold-start boundary 掃描。含 repo profile（.code-reality.toml）schema 與 claims 口徑限制真相源。"
-when_to_use: "Running code_reality tools (snapshot/transition/hub_refs/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_csv), authoring .code-reality.toml, or interpreting transition claims output. Tool availability check: .code-reality.toml in repo root OR uv run --project ~/Github/ai-rules python -m code_reality.snapshot --help exits 0."
+when_to_use: "Running code_reality tools (snapshot/transition/hub_refs/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_csv/graph_audit), authoring .code-reality.toml, or interpreting transition claims output. Tool availability check: .code-reality.toml in repo root OR uv run --project ~/Github/ai-rules python -m code_reality.snapshot --help exits 0."
 argument-hint: "（程序 skill——不直接觸發；查閱用）"
 allowed-tools: ["Read", "Bash"]
 ---
@@ -29,7 +29,7 @@ uv run --project ~/Github/ai-rules python -m code_reality.<tool> --repo <repo-ro
 
 **時點條件（transition 消費 gate——細節真相源 code-review 模式 B transition 段）**：HEAD == EP baseline（uncommitted）→ **不跑**（同 sha 零差異假陰性＋baseline sidecar 覆寫風險），退 LLM 對照＋`[WARN]`；snapshot 報 stale → 視同缺報告。
 
-## 工具表（十一工具＋共用）
+## 工具表（＋共用設施）
 
 | 工具 | 職責 |
 |------|------|
@@ -40,6 +40,7 @@ uv run --project ~/Github/ai-rules python -m code_reality.<tool> --repo <repo-ro
 | `boundary_build`／`boundary` | pyo3 宣告↔`.pyi` 合約 sidecar build／查詢 |
 | `delta_tour`／`chain_tour`／`graph_csv` | 敘事/關聯載體（`.tour` 契約——渲染消費者 CodeTour）；chain_tour 產出同步 upsert `.tours/manifest.toml` |
 | `tour_validate`／`tour_upgrade`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／manifest 讀寫 |
+| `graph_audit` | CRG graph.db **Rust 完整度稽核**——D1 同型別多 impl 風險掃描（per-block ≥2，非交集）＋D2 rust-analyzer symbols 對帳（kind 含 Test）；`--json` 鍵為治理鉤子契約；graph rebuild／rebase 大跳後跑（收編自 NT N1，2026-08-24 實測 219 缺差） |
 | `common`／`exclusions`／`profile` | 共用設施：`_meta`/`connect_ro`（WAL fallback）／排除前綴／profile 引擎 |
 
 ## repo profile（`.code-reality.toml`——repo 擁有）
