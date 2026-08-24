@@ -10,9 +10,13 @@
         [-o out.json] [--top N] [--include/--exclude substr] \
         [--repo-only/--no-repo-only] [--repo-root PATH]
 
-viztracer 錄製配方（五坑解，見 ai-analysis/reports/code-reality-tools-evaluation.md
-R6b）：``--ignore_c_function --min_duration 0.002 --tracer_entries 2000000``；
-事件抽取 ``cat=='fee' && ph=='X'``；nesting＝同 (pid,tid) 且 ts 區間包含。
+viztracer 錄製配方（五坑見 code-reality-tools-evaluation.md R6b；第六坑與
+量產配方見 mosaic gap-prototypes P3 定案）：``--ignore_c_function``＋
+``--tracer_entries`` 依負載放大（2M 約 ~390 rows 即飽和——circular buffer
+靜默丟頭部 phase，邊集可失真 −88.9%）＋``--min_duration 1~2``（**單位 µs**——
+原 ``0.002``＝2ns＝no-op）；事件抽取 ``cat=='fee' && ph=='X'``；nesting＝同
+(pid,tid) 且 ts 區間包含。Known gap：repo-only 過濾未接 exclusions.py
+（.venv import 噪音邊會進 top 榜——P3 §3.4，正式化時接）。
 """
 
 import argparse
