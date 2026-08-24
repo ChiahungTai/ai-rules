@@ -46,6 +46,7 @@ Logger name 是 log → 源碼的反查鍵，**必須是 module-path**（`Logger
 | `[ACTION]` | UI 操作事件（由 ui 元件層 log，app 層不重複——元件擁有互動，元件 log；只有 app 直接操作 UI 框架時才由 app log） |
 | `[progress]` | 週期性心跳（長任務定期進度，非 state transition） |
 
+- **不使用 `[INFO]`**（與 Logger level 混淆；`[progress]` 是心跳的明示例外、非 state transition）
 - **`[LOG]` 路徑只印一次**：同一 session 內 log 路徑不變，每次都印是浪費 token（class variable 追蹤已印過）
 - **何時不該 print**：中間步驟細節（Loading column X / Processing row i/N）→ Logger；重複 Logger 已有摘要；超過一行內容（DataFrame/dict/list）
 
@@ -64,15 +65,11 @@ Logger name 是 log → 源碼的反查鍵，**必須是 module-path**（`Logger
 stdlib logger 無 handler 時走 `lastResort`（INFO/DEBUG 靜默丟棄），框架 log 檔找不到其輸出。
 
 - **同進程只用一套 Logger 系統**：框架有內建 Logger → 全用框架 Logger，禁混 stdlib `logging.getLogger`
-- 必須用 stdlib（框架無 Logger）→ 顯式 `addHandler`，不依賴 lastResort
+- 必須用 stdlib（框架無 Logger）→ 顯式 `addHandler`，不依賴 lastResort；依專案 init_logging 配置 file level ≥ DEBUG（供 rg 查），stdout 交 print 控制
 - **遷移非純機械替換**：`%s` lazy formatting 在部分框架 Logger 不展開 → 改 f-string；`extra=` kwargs 可能拋 TypeError → 欄位併入 message
 
 ---
 
 ## 執行自檢清單
 
-- [ ] print 只用於 state transition，使用 `[OK]`/`[WARN]`/`[FAIL]`/`[LOG]`/`[ACTION]`/`[progress]` tag（`[progress]` 為心跳的明示例外；不用 `[INFO]`）
-- [ ] `[LOG]` 路徑同 session 只印一次；`[ACTION]` 由 ui 元件層 log
-- [ ] Logger message 以 `action_name: ` prefix 開頭；name 是 module-path（`Logger(__name__)`）
-- [ ] print 的 rg tag 在 Logger 中存在（閉環）；Logger 不重複 print 摘要
-- [ ] 同進程只用一套 Logger 系統（框架優先，禁 stdlib 無 handler）；依專案 init_logging 配置 file level ≥ DEBUG（供 rg 查），stdout 交 print 控制
+輸出前對照上方慣例段逐項自檢：print 限 state transition＋tag 正確、`[LOG]` 路徑只印一次、Logger `action_name: ` prefix＋module-path name、print↔Logger 閉環、同進程單一 Logger 系統。

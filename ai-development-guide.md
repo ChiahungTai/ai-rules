@@ -2,7 +2,7 @@
 
 > **🔗 部署說明**: 本檔是 harness-neutral source，部署到各 harness 全域位置（Claude `~/.claude/CLAUDE.md` symbolic link → 本檔；ZCode `~/.zcode/AGENTS.md`；OpenCode `~/.config/opencode/AGENTS.md`；Codex `~/.codex/AGENTS.md`）。專案層雙檔模式（AGENTS.md source；Claude 端另有 CLAUDE.md wrapper）見 [instruction-writing.md](rules/instruction-writing.md)。
 
-> **🔴 強烈警告**: AI 撰寫或修改 instruction 檔（AGENTS.md source；Claude 端另有 CLAUDE.md wrapper）時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。詳細約束請參考 [_ai-behavior-constraints.md](rules/_ai-behavior-constraints.md)
+> **🔴 強烈警告**: AI 撰寫或修改 instruction 檔（AGENTS.md source；Claude 端另有 CLAUDE.md wrapper）時**絕對禁止**加入統計資訊（行數、字數）、版本號、更新日期。詳細約束（❌ 行為表、自檢清單）見 instruction-writing skill「元資訊禁止行為」章
 
 **適用範圍**: 所有軟體開發專案（量化交易專案優先）
 **AI 系統**: Claude Code、KiloCode、Gemini 等

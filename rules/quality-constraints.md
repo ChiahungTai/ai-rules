@@ -31,15 +31,9 @@ harness-scope: neutral
 
 ### 誤用警告：crash-only 不是「graceful 不修」的藉口
 
-> **核心原則**：crash-only 是 defense-in-depth 的**後備保證**，不是「graceful shutdown 故意不修」的合理化。
+> **核心原則**：crash-only 是 defense-in-depth 的**後備保證**（graceful shutdown 意外失敗時系統仍正確），**不是**「graceful 可預期地壞掉也不修」的合理化——整合 bug、配置錯誤、合約違反是可修 bug，該修，不可用 crash-only 跳過。披著「設計哲學」外衣的跳過比一般 bug 更危險，code review 難抓。
 
-**正確理解**：crash-only 處理「**不可預期的崩潰**」— 系統設計成即使意外崩潰，狀態外部化也能恢復。graceful shutdown 是理想，crash-only 確保它失敗時系統仍正確。
-
-**危險誤用**：把 crash-only 扭曲成「graceful 壞掉沒關係，反正能恢復」— 用設計哲學合理化跳過一個**真實可修的 bug**。這比一般 bug 更危險：披著「設計哲學」外衣，code review 難抓。
-
-**判準**：graceful **意外**失敗（不可預期崩潰、極端情境）→ crash-only 後備保證職責 ✓；graceful **可預期地壞掉且可修**（整合 bug、配置錯誤、合約違反）→ 該修，**不可**用 crash-only 跳過 ✗。
-
-**實例**：mosaic ReplayHost SIGTERM 在 daemon-thread 下 graceful shutdown 失敗（NT loop signal handler 衝突）。曾錯誤主張「crash-only 接受 graceful 不 work」— 用 crash-only 跳過可修 bug。正解是 TDD red（xfail strict 釘住 graceful 目標，見 test-driven-development skill）+ 另開 EP 修復。
+**實例**：mosaic ReplayHost SIGTERM 在 daemon-thread 下 graceful shutdown 失敗（NT loop signal handler 衝突），曾錯誤主張「crash-only 接受不 work」跳過可修 bug——正解是 TDD red（xfail strict 釘住 graceful 目標，見 test-driven-development skill）+ 另開 EP 修復。
 
 ---
 
@@ -74,22 +68,7 @@ harness-scope: neutral
 
 ### 整合器型變更判定
 
-整合器型變更的完成定義必須含**真實邊界整合測試**（L3+），不能只靠 mock。EP 段落同時滿足以下 → 整合器型：
-
-- 主要價值是把 ≥2 個真實外部組件接起來（DB、catalog、第三方 SDK、跨進程、跨框架）
-- 邊界正確性無法從任一單方文件推導（必須實際接起來跑）
-- 錯了不是「調參數」而是「整天行為全錯」（時區偏移整天、序列化整批毀損）
-
-**mock 循環論證陷阱**：當 EP 主要價值是「把外部組件接對」，mock 測試的假設本身可能是 bug 來源 — mock 驗證「假設成立的話行為正確」，無法驗證「假設本身是否成立」。例：catalog 存 naive Taiwan-local 時間，`tz_localize("UTC")` 只貼標不轉換，mock 假設「catalog 回傳正確 UTC」就是 bug 來源，mock unit test 結構上抓不到 +8h 時區偏移。
-
-**兩層整合測試**（缺任一即缺口）：
-
-| 測試類型 | 性質 | 目錄 | marker |
-|--|--|--|--|
-| 接線 guard | 純邏輯、無 IO（registry lookup、membership 斷言） | `tests/unit_tests/` | `quick` |
-| 真實邊界 | 真實 DB / Catalog / 資料，跑完整消費端 pipeline | `tests/integration_tests/` | `integration` |
-
-**不可互代**：接線 guard 廉價擋高頻接線 regression；真實邊界昂貴擋跨層 schema / 展開失敗。命名含 `_integration` 但純邏輯仍留 unit_tests（依依賴判斷，不看名稱）。
+整合器型變更判定（三條件）、mock 循環論證陷阱與兩層整合測試（接線 guard＋真實邊界，缺任一即缺口）見 validation-strategy skill「整合器型變更判定」章。
 
 ---
 

@@ -76,7 +76,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 5 個 Dimensio
 
 ### F2: Rules 合規檢查
 
-命名是否符合 `python-standards`？是否遵守 `code-edit-constraints`？是否有違反 `_ai-behavior-constraints` 的內容？是否需要更新 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）？
+命名是否符合 `python-standards`？是否遵守 `code-edit-constraints`？是否有違反元資訊禁止（[instruction-writing](../instruction-writing/SKILL.md)）的內容？是否需要更新 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）？
 
 ### F3: 一致性 + 架構視角檢查（承接 execution-plan 維度①②④）
 

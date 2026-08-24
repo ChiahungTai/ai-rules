@@ -333,7 +333,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
   1. **分層依賴**：domain←use case←adapter←infra 依賴向內？有循環？Call Stack 可行？
   2. **bounded context**：不跨域存取 `_private`？邊界清楚？職責單一？
   3. **use case 覆蓋**：消費者要什麼行為？EP 撐得起？UC 完整覆蓋？每段有驗收標準？檔案完整？依賴遺漏？
-  4. **兜底路徑驗證**：EP 預見極限（實作落差）+ 語義約束 drift + Rules 合規（命名、code-edit-constraints、_ai-behavior-constraints、instruction 檔更新）+ 遺漏風險（Demo、測試、`__init__.py`、配置、受影響模組）+ 內部一致性 + **兜底假設路徑驗證**（EP 若宣稱「X 段暴露/處理 Y 問題」→ 必須驗證 X 的 code path 真經過 Y，追 call chain 附 path:line；不經過 → 標「未驗證」而非「handled」，Y 須獨立調查）+ **「可觀測 ≠ 已修復」用語**（visible / overlap-fixed / root-cause-fixed 三區分；`handled/exposed` 不得模糊涵蓋 visible 與 fixed — S0=visible、S6=overlap-fixed，root-cause-fixed 是另一件事）
+  4. **兜底路徑驗證**：EP 預見極限（實作落差）+ 語義約束 drift + Rules 合規（命名、code-edit-constraints、元資訊禁止（instruction-writing skill）、instruction 檔更新）+ 遺漏風險（Demo、測試、`__init__.py`、配置、受影響模組）+ 內部一致性 + **兜底假設路徑驗證**（EP 若宣稱「X 段暴露/處理 Y 問題」→ 必須驗證 X 的 code path 真經過 Y，追 call chain 附 path:line；不經過 → 標「未驗證」而非「handled」，Y 須獨立調查）+ **「可觀測 ≠ 已修復」用語**（visible / overlap-fixed / root-cause-fixed 三區分；`handled/exposed` 不得模糊涵蓋 visible 與 fixed — S0=visible、S6=overlap-fixed，root-cause-fixed 是另一件事）
 - 相關檔案路徑（必讀）
 
 ### 主 LLM — /judge-review

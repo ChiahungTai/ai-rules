@@ -79,7 +79,7 @@
 - `/instruction-init` — 為任意專案自動產生 instruction file 體系（root + 模組都雙檔：AGENTS.md source + CLAUDE.md @AGENTS.md wrapper，bottom-up）
 - `/instruction-clean` — 清理 Markdown 元資訊；`--distill` 蒸餾低 signal 內容（保守防護欄：預設 conservative、NEVER 清單禁觸失敗教訓/設計理由/約束、換形為主僅元資訊直刪、縮減 >30% 逐條列出）
 - `/instruction-sync` — 檢查文檔與程式碼同步性
-- `instruction-writing` — instruction file 撰寫完整規範（reference skill：rule 留 always-on 核心，此處承載完整規範＋元資訊禁止第一性原理論證；rule+skill 分層控制 bundle 尺寸）
+- `instruction-writing` — instruction file 撰寫完整規範（reference skill：rule 留 always-on 核心，此處承載完整規範＋元資訊禁止行為表與論證＋文檔自洽五維檢查；rule+skill 分層控制 bundle 尺寸）
 - `/daily-maintain` — 每日自動維護（排程用），自動修正低風險問題 + commit
 - `/project-review` — 互動式專案審查（人類用），findings + kanban + doc health
 
@@ -117,7 +117,7 @@
 - `code-review-and-quality` — code 六軸審查 profile（what to check，含 Security/Performance 軸 checklist 與 Capability Coverage 單源）；通用邏輯見 review-engine
 - `python-type-gap` — 第三方套件型別缺口的四層策略
 - `validation-strategy` — 驗證策略紀律（e2e 優先/交易 replay>live/放 scripts//不重驗 package；與 TDD 流程分工）
-- `acceptance-evidence` — 驗收證據深層理論（reference skill：認知誤差與 EP 預見極限、Intent Drift 兩型、filter trap、L3 整合實例、Runtime Invariant Assurance、B 軸演進；rule 留 L1-L6/A-B 軸 always-on 核心——rule+skill 分層控制 bundle 尺寸）
+- `acceptance-evidence` — 驗收證據深層理論（reference skill：認知誤差與 EP 預見極限、Intent Drift 兩型、filter trap、L3 整合實例、Runtime Invariant Assurance、B 軸演進、盤點執行點雙掃；rule 留 L1-L6/A-B 軸 always-on 核心——rule+skill 分層控制 bundle 尺寸）
 
 ### 架構與演進
 - `api-and-interface-design` — 穩定 API / 模組邊界 / 公開介面設計（Hyrum's Law、邊界驗證、agent-friendly interface）
@@ -144,7 +144,8 @@
 - `blueprint-bootstrap` — blueprint 知識庫建置程序（人讀合成視角 scaffold：骨架＋半滿＋🤖/👤 狀態標記＋誘導問題＋治理模板；**callstack 場景敘事生成＝斷點③解法**——重複度盤點前置→鏈枚舉→逐幀實證→coverage 稽核→findings，產出餵 tour-bootstrap 場景層；既有 blueprint 走 audit 模式不重建；位置＝instruction-init 之上、tour-bootstrap 之下）
 - `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀）
 - `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
-- `lsp-navigation` — LSP 深層參考（reference skill：rg 陷阱案例群、方法論限制 loopback、跨 harness 載體對照、workspace staleness/reindex 處置、驗證輸出格式；rule 留決策樹/Tool Discovery gate 核心——rule+skill 分層控制 bundle 尺寸）
+- `lsp-navigation` — LSP 深層參考（reference skill：rg 陷阱案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness/reindex 處置、驗證輸出格式；rule 留統一速查/Tool Discovery gate 核心——rule+skill 分層控制 bundle 尺寸）
+- `context7` — Context7 MCP 文檔查詢（library/framework/SDK/API 用法先查最新文檔再回答，優先於 web search；跨 harness MCP 支援）
 - `voice-notification` — 三通道語音通知（系統召回 / 進度提醒 / 完成通知）
 
 ### UI / 協作

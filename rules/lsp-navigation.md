@@ -4,7 +4,7 @@ harness-scope: neutral
 
 # LSP 語義導航優先
 
-> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）。**深層參考**（反例案例群、方法論限制 loopback、跨 harness 載體對照、workspace staleness 處置、驗證輸出格式）見 **lsp-navigation skill**（on-demand）
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）。**深層參考**（反例案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness 處置、驗證輸出格式）見 **lsp-navigation skill**（on-demand）
 
 ---
 
@@ -51,77 +51,26 @@ LSP 提供語義級程式碼導航（~50ms，workspace 索引最新時 100% 準�
 
 ---
 
-## 決策樹
-
-```
-你要找什麼？
-│
-├─ 符號的定義（class、function、variable、type）
-│  → LSP goToDefinition
-│
-├─ 符號的所有引用（誰在用它）
-│  → LSP findReferences
-│
-├─ 符號的型別資訊
-│  → LSP hover
-│
-├─ 專案中的 class/function（按名稱）
-│  → LSP workspaceSymbol
-│
-├─ 單一檔案的所有符號大綱
-│  → LSP documentSymbol
-│
-├─ 介面的具體實作
-│  → LSP goToImplementation（ZCode pyright 不支援，載體差異見 skill）
-│
-├─ 呼叫鏈（誰呼叫它 / 它呼叫誰）
-│  → LSP incomingCalls / outgoingCalls
-│
-├─ 編輯後的型別檢查
-│  → LSP diagnostics（即時）→ mypy（完整驗證）
-│
-├─ 註解、字串、config 值、日誌、TODO、FIXME
-│  → rg（LSP 不索引非程式碼內容）
-│
-├─ 檔案搜尋（按名稱模式）
-│  → fd（LSP 不處理檔案系統）
-│
-└─ Markdown、YAML、TOML、JSON 等非程式碼
-   → rg（LSP 只涵蓋已配置的語言伺服器）
-```
-
----
-
-## LSP 工具速查
+## 查什麼 → 用什麼工具（LSP×rg/fd 統一速查）
 
 LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `hover` 等），呼叫載體因 harness 而異（對照表見 lsp-navigation skill）。
 
-| Operation | 用途 | 典型場景 |
-|-----------|------|---------|
-| `goToDefinition` | 跳到定義 | 從 import 跳到源碼、從 class 使用跳到 class 定義 |
-| `findReferences` | 找所有引用 | 確認 API 變更影響範圍、找 dead code（zero hits） |
-| `hover` | 型別資訊 | 不讀檔案就知道變數型別、函式簽名 |
-| `workspaceSymbol` | 全域搜尋 | 找特定名稱的 class/function |
-| `documentSymbol` | 檔案大綱 | 快速了解檔案結構 |
-| `goToImplementation` | 介面實作 | 「誰實作了 Actor？」 |
-| `incomingCalls` | 呼叫者 | 「誰呼叫了 submit_order？」 |
-| `outgoingCalls` | 被呼叫者 | 「handle_order 呼叫了誰？」 |
+| 查什麼 | 首選（LSP operation） | 降級 | 說明 |
+|--------|----------------------|------|------|
+| 符號的定義（class/function/variable/type） | `goToDefinition`（跳到定義） | `rg "class\|def"` | LSP 100% 精準（索引最新時），rg 有 false positive |
+| 符號的所有引用（誰在用它） | `findReferences`（找所有引用） | `rg "symbol"` | LSP 區分 scope，rg 匹配所有文字；找 dead code（zero hits）、確認 API 變更影響範圍 |
+| 符號的型別資訊 | `hover` | Read 檔案 | hover 不消耗 context（不讀檔案知道變數型別、函式簽名） |
+| 專案中的 class/function（按名稱） | `workspaceSymbol`（全域搜尋） | — | 找特定名稱的 class/function |
+| 單一檔案的所有符號大綱 | `documentSymbol`（檔案大綱） | — | 快速了解檔案結構 |
+| 介面的具體實作 | `goToImplementation` | — | 「誰實作了 Actor？」（ZCode pyright 不支援，載體差異見 skill） |
+| 呼叫鏈（誰呼叫它） | `incomingCalls` | 手動 rg 追蹤 | LSP 結構化，rg 需逐檔追蹤 |
+| 呼叫鏈（它呼叫誰） | `outgoingCalls` | 手動 rg 追蹤 | 「handle_order 呼叫了誰？」 |
+| 編輯後的型別檢查 | `diagnostics`（即時） | — | 即時快速反饋；mypy 是權威驗證（見「Diagnostics 定位」） |
+| 註解、字串、config 值、日誌、TODO、FIXME | rg | — | LSP 不索引非程式碼內容 |
+| 檔案搜尋（按名稱模式） | fd | — | LSP 不處理檔案系統 |
+| Markdown、YAML、TOML、JSON 等非程式碼 | rg | — | LSP 只涵蓋已配置的語言伺服器 |
 
 **被動能力**（Claude: 每次檔案編輯後 LSP 自動推送 diagnostics — 型別錯誤、missing import，在同一 turn 修正）。其他 harness 需主動觸發 diagnostics operation。
-
----
-
-## 與 rg/fd 的分工
-
-| 查詢類型 | 首選 | 降級 | 說明 |
-|---------|------|------|------|
-| 定義位置 | LSP goToDefinition | `rg "class\|def"` | LSP 100% 精準（索引最新時），rg 有 false positive |
-| 所有引用 | LSP findReferences | `rg "symbol"` | LSP 區分 scope，rg 匹配所有文字 |
-| 型別資訊 | LSP hover | Read 檔案 | hover 不消耗 context |
-| 呼叫鏈 | LSP incomingCalls | 手動 rg 追蹤 | LSP 結構化，rg 需逐檔追蹤 |
-| 註解/字串/config | rg | — | LSP 不索引非程式碼 |
-| 檔案搜尋 | fd | — | LSP 不處理檔案系統 |
-| Markdown/YAML | rg | — | LSP 不涵蓋非程式碼格式 |
 
 ---
 
@@ -169,19 +118,4 @@ diagnostics 不能取代 mypy 在品質閘門中的角色。
 
 ## Agent Prompt 工具選擇
 
-> **核心原則**：spawn agent 時，prompt 必須根據任務性質明確指定使用 LSP 或 rg。禁止只寫「驗證/讀取/確認」不指定工具。
-
-**Agent prompt 工具指定模板**：
-
-```
-# 工具選擇（必填）
-- 簽名/型別/定義位置 → 用 LSP hover / goToDefinition
-- 呼叫鏈/引用 → 用 LSP outgoingCalls / incomingCalls / findReferences
-- 文字搜尋（字串、註解、config）→ 用 rg
-- 檔案搜尋 → 用 fd
-- Cython 模組（.pyx/.so）→ 用 rg + Read（LSP 不索引 Cython）
-- audit-test 角度 2 覆蓋判斷 → 禁用單一 rg pattern；registry membership / class 引用 / method call 必須 LSP findReferences 為主、rg 為輔
-- judge-review 符號查證 → 「X 是否存在 / 在哪引用」必須 LSP findReferences / workspaceSymbol；rg 0 hits 不可直接下「不存在」結論
-```
-
-**判斷方式**：任務描述含「簽名」「型別」「定義」「呼叫」「繼承」「Protocol」→ 主工具 LSP，輔以 rg；含「字串」「註解」「config」「檔案路徑」→ 主工具 rg/fd。
+spawn agent 時的 prompt 工具指定模板與判斷方式見 lsp-navigation skill「Agent Prompt 工具選擇」章；rule 端 always-on 摘要見 [tool-discipline.md](tool-discipline.md)「工具選擇原則」。

@@ -6,9 +6,9 @@ paths:
 
 # Instruction File 撰寫規範
 
-> **🔴 強烈警告**: AI 寫作 instruction file 時**絕對禁止**加入統計資訊、版本號、更新日期等元資訊。詳細說明請參考 [AI 行為約束細節](_ai-behavior-constraints.md)
+> **🔴 強烈警告**: AI 寫作 instruction file 時**絕對禁止**加入統計資訊、版本號、更新日期等元資訊（❌ 行為表與自檢清單見下方 skill「元資訊禁止行為」章）
 
-> **完整規範**（frontmatter 欄位、章節組織、引用語法選擇、導航細則與段落標題標準、映射表 drift 查證、Decoder Test、元資訊禁止的第一性原理論證）見 **instruction-writing skill**（on-demand）——撰寫或修改任何 instruction 檔時載入
+> **完整規範**（frontmatter 欄位、章節組織、引用語法選擇、導航細則與段落標題標準、映射表 drift 查證、Decoder Test、元資訊禁止行為表與第一性原理論證、文檔自洽五維檢查）見 **instruction-writing skill**（on-demand）——撰寫或修改任何 instruction 檔時載入
 
 ## 基本原則
 

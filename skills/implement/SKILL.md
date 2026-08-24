@@ -56,7 +56,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 2. 套用 max-agents 限制（預設 3，可透過 `--max-agents N` 或 `-a N` 覆蓋）
 3. **有語義約束的段落強制序列**
 
-**整合器段落識別**（驅動階段 2 硬閘門、階段 3 真實邊界的觸發）：掃描 EP 段落，標記同時滿足以下者為整合器型（見 [quality-constraints](../../rules/quality-constraints.md)「整合器型變更判定」）：
+**整合器段落識別**（驅動階段 2 硬閘門、階段 3 真實邊界的觸發）：掃描 EP 段落，標記同時滿足以下者為整合器型（見 [validation-strategy](../validation-strategy/SKILL.md)「整合器型變更判定」）：
 
 - 主要價值是把 ≥2 個真實外部組件接起來（DB、catalog、SDK、跨進程、跨框架）
 - 邊界正確性無法從任一單方文件推導
@@ -156,7 +156,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 > **docs mode**：跳過全量 mypy/pytest，改全量 rg 殘留 + `/consistency`。
 
-**整合器型段落必須有真實邊界整合測試**（見 [quality-constraints](../../rules/quality-constraints.md)「整合器型變更判定」+「兩層整合測試」）：主要價值是接 ≥2 個真實外部組件的段落，完成定義必須含接線 guard（`unit_tests/`）+ 真實邊界（`integration_tests/`），不能只靠 mock — mock 循環論證會讓 mock 假設即 bug 來源。
+**整合器型段落必須有真實邊界整合測試**（見 [validation-strategy](../validation-strategy/SKILL.md)「整合器型變更判定」＋「兩層整合測試」）：主要價值是接 ≥2 個真實外部組件的段落，完成定義必須含接線 guard（`unit_tests/`）+ 真實邊界（`integration_tests/`），不能只靠 mock — mock 循環論證會讓 mock 假設即 bug 來源。
 
 ### 階段 4：Agent Review Cycle
 

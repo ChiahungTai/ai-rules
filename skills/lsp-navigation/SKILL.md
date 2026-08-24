@@ -1,11 +1,11 @@
 ---
 name: lsp-navigation
-description: LSP 語義導航深層參考 — rg 陷阱真實案例群（truncation/masking/local import/覆蓋判斷 false negative）、方法論限制 loopback、跨 harness LSP 載體對照（Claude native vs ZCode lsp-python MCP）、workspace staleness/reindex 與條件式 fallback、LSP 驗證輸出格式。always-on 核心（決策樹、Tool Discovery gate、工具速查）在 rules/lsp-navigation.md；做依賴審計/符號查證/review 需要反例論證或跨 harness 呼叫細節時載入。觸發詞：LSP、findReferences、reindex、workspace stale、rg 陷阱、載體對照、lsp-python。
+description: LSP 語義導航深層參考 — rg 陷阱真實案例群（truncation/masking/local import/覆蓋判斷 false negative）、方法論限制 loopback、Agent prompt 工具指定模板（spawn agent 必填工具選擇）、跨 harness LSP 載體對照（Claude native vs ZCode lsp-python MCP）、workspace staleness/reindex 與條件式 fallback、LSP 驗證輸出格式。always-on 核心（核心原則、Tool Discovery gate、統一速查表）在 rules/lsp-navigation.md；做依賴審計/符號查證/review 需要反例論證、spawn agent 工具指定或跨 harness 呼叫細節時載入。觸發詞：LSP、findReferences、reindex、workspace stale、rg 陷阱、載體對照、lsp-python、agent prompt 工具指定。
 ---
 
 # LSP Navigation — 深層參考
 
-> 本 skill 是 `rules/lsp-navigation.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（核心原則、Tool Discovery gate、決策樹、工具速查、分工表、Agent prompt 模板）；本檔承載反例論證、跨 harness 載體細節、stalence 處置與驗證輸出格式。
+> 本 skill 是 `rules/lsp-navigation.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（核心原則、Tool Discovery gate、統一速查表）；本檔承載反例論證、Agent prompt 工具指定模板、跨 harness 載體細節、staleness 處置與驗證輸出格式。
 
 ## 反例群：rg 的陷阱（符號查詢 + 依賴枚舉）
 
@@ -38,6 +38,25 @@ description: LSP 語義導航深層參考 — rg 陷阱真實案例群（truncat
 task prompt 寫「若有 LSP 工具可用...無 LSP 則用 rg」是**提醒確認可用性**，**不是授權默認假設無 LSP**。衝突時優先級：`skill / 全域 rules > task prompt 條件句`。即：task prompt 的條件句要求你「確認可用性」（調用 LSP 測試），全域規則要求你「符號查詢用 LSP」。兩者一致 — 條件句不構成「跳過 LSP」的授權。
 
 > **真實失誤案例（本規則的觸發源）**：分析任務全程用 rg，理由是「task prompt 寫若有 LSP 則用」。實際上 LSP 工具可用，但 LLM (a) 誤讀條件句為「預設 rg」、(b) 全程未調用 LSP、(c) 被提醒後用 `timeout` 命令（shell 工具）測試並下結論「LSP 不可用」 — 三重失誤全因缺強制啟動 step。
+
+## Agent Prompt 工具選擇
+
+> **核心原則**：spawn agent 時，prompt 必須根據任務性質明確指定使用 LSP 或 rg。禁止只寫「驗證/讀取/確認」不指定工具（always-on 摘要見 rules 端 tool-discipline「工具選擇原則」）。
+
+**Agent prompt 工具指定模板**：
+
+```
+# 工具選擇（必填）
+- 簽名/型別/定義位置 → 用 LSP hover / goToDefinition
+- 呼叫鏈/引用 → 用 LSP outgoingCalls / incomingCalls / findReferences
+- 文字搜尋（字串、註解、config）→ 用 rg
+- 檔案搜尋 → 用 fd
+- Cython 模組（.pyx/.so）→ 用 rg + Read（LSP 不索引 Cython）
+- audit-test 角度 2 覆蓋判斷 → 禁用單一 rg pattern；registry membership / class 引用 / method call 必須 LSP findReferences 為主、rg 為輔
+- judge-review 符號查證 → 「X 是否存在 / 在哪引用」必須 LSP findReferences / workspaceSymbol；rg 0 hits 不可直接下「不存在」結論
+```
+
+**判斷方式**：任務描述含「簽名」「型別」「定義」「呼叫」「繼承」「Protocol」→ 主工具 LSP，輔以 rg；含「字串」「註解」「config」「檔案路徑」→ 主工具 rg/fd。
 
 ## 跨 harness LSP 載體對照
 

@@ -1,11 +1,11 @@
 ---
 name: instruction-writing
-description: Instruction file（AGENTS.md / CLAUDE.md / rules / SKILL.md）撰寫與編輯規範 — 雙檔模式命名、YAML frontmatter、章節組織、High Signal / Low Noise 內容分類、導航優先（概念→符號種子）、標準段落標題、Class→檔案映射表禁令、引用語法選擇、導航 Decoder Test、元資訊禁止的第一性原理論證。撰寫或修改任何 instruction 檔時載入。觸發詞：AGENTS.md、CLAUDE.md、instruction、雙檔模式、wrapper、High Signal、導航種子、模組導航、Capabilities 段、instruction-clean。
+description: Instruction file（AGENTS.md / CLAUDE.md / rules / SKILL.md）撰寫與編輯規範 — 雙檔模式命名、YAML frontmatter、章節組織、High Signal / Low Noise 內容分類、導航優先（概念→符號種子）、標準段落標題、Class→檔案映射表禁令、引用語法選擇、導航 Decoder Test、元資訊禁止（行為表＋自檢清單＋第一性原理論證）、文檔自洽五維檢查、single-source drift 防護。撰寫或修改任何 instruction 檔時載入。觸發詞：AGENTS.md、CLAUDE.md、instruction、雙檔模式、wrapper、High Signal、導航種子、模組導航、Capabilities 段、instruction-clean、元資訊清理、版本號／統計／更新日期禁止、文檔自洽、single-source drift。
 ---
 
 # Instruction Writing — 撰寫規範
 
-> 本 skill 是 `rules/instruction-writing.md` 與 `rules/_ai-behavior-constraints.md` 的 on-demand 完整載體：rules 端保留 always-on 核心（禁止元資訊警告、雙檔模式命名、High/Low Signal 分類精簡版）；本檔承載完整撰寫規範、段落標題標準、導航細則與元資訊禁止的第一性原理論證。
+> 本 skill 是 `rules/instruction-writing.md` 與 `rules/_ai-behavior-constraints.md` 的 on-demand 完整載體：rules 端保留 always-on 核心（禁止元資訊警告、雙檔模式命名、High/Low Signal 分類精簡版、single-source drift 核心句）；本檔承載完整撰寫規範、段落標題標準、導航細則、元資訊禁止行為表與第一性原理論證、文檔自洽五維檢查。
 
 ## 基本原則
 
@@ -124,7 +124,7 @@ allowed-tools: ["Read", "Write", "Edit"]
 @~/Github/ai-rules/rules/_ai-behavior-constraints.md
 
 # 相對路徑（深層 instruction 檔向上回指，例為兩層深）
-@../../rules/self-consistency.md
+@../../rules/tool-discipline.md
 ```
 
 #### Skill / Command — markdown link 按需讀取
@@ -272,6 +272,78 @@ Signal/noise framework: [encoder-philosophy.md](../_common/encoder-philosophy.md
 **機械驗證**：文檔提到的 symbol，用 `workspaceSymbol "<name>"` 確認可解析 —— 比 `test -f file.py` 更準（直接驗證符號存在且 LSP 找得到）。
 
 任一問題無法回答 → 補充導航指引。
+
+## 文檔自洽五維檢查
+
+在撰寫或修改 instruction 檔（AGENTS.md source；Claude 端另有 CLAUDE.md wrapper）時，必須確保文檔的自洽性。
+
+### 1. 術語一致性
+- **術語定義統一**: 相同概念使用相同術語
+- **大小寫一致**: 專業術語（如 API、CLI、HTTP）大小寫統一
+- **編碼格式一致**: 檔案路徑、變數名稱使用一致格式
+
+### 2. 章節結構
+- **章節編號連續**: 標題層級正確（`#` → `##` → `###`）
+- **目錄對應**: 目錄中的章節標題實際存在
+- **層級合理**: 不跳級（如 `#` 之後直接 `###`）
+
+### 3. 引用完整性
+- **內部引用**: 引用目標存在（Claude 端 `@path` transclusion、各家 markdown link）
+- **外部引用**: 連結檢查可訪問
+- **交叉引用**: 章節間引用相互對應
+- **single-source drift 防護（修改紀律）**: 改「定義源」（review-engine 共通邏輯 / 跨命令引用的 rule / 模式判定表）時，**強制 rg 掃所有引用該定義的命令/skill**，逐檔同步 — 否則「定義改了，引用沒跟」（drift regression）。實證：改 review-engine mode 表（移除 Main LLM）漏 build.md/ep-review.md 引用；改 human-review 命令（現 smell-detector zoom）漏 AGENTS 表/路徑 — 兩次 code-review 都抓到 drift。**機械步驟**：改定義後 `rg "<單一關鍵詞>" skills/ rules/`（如 `rg "Main LLM"`,或 alternation `rg "Workflow|Agent Tool"` — **禁用 `/` 當 alternation**,rg 的 `/` 是字面字元,會 false negative）→ 逐檔確認引用一致（rg 只 surface 候選,需人工 triage 合法引用 vs 過時引用）。code-review agent 跨檔查 drift 是兜底（事後），此紀律是事前防。已註冊的 single-source invariant 另有 `/sync-sources` 機械閘門長期保護（recurring invariant 應登記 `check_single_source.py` REGISTRY）；本紀律補未註冊的 ad-hoc case。
+
+### 4. 前後邏輯
+- **無矛盾陳述**: 前文說明與後文不衝突
+- **範例與說明一致**: 程式碼範例符合文字描述
+- **約束無衝突**: 不同約束條款可以同時滿足
+
+### 5. 格式規範
+- **程式碼區塊**: 語言標籤正確（```bash、```python）
+- **表格格式**: Markdown 表格語法正確
+- **列表格式**: 項目符號/縮排一致
+
+### 快速自檢清單
+
+完成 instruction 檔修改後，檢查：
+- [ ] 所有引用（Claude `@path` / markdown link）目標存在
+- [ ] 改定義源（review-engine/共通 rule/模式表）後，rg 掃所有引用該定義的命令，逐檔同步（single-source drift 防護）
+- [ ] 章節編號連續無跳級
+- [ ] 術語使用統一（無同義多詞）
+- [ ] 程式碼範例可執行
+- [ ] 無矛盾說明或規則
+
+## 元資訊禁止行為
+
+> **這些行為會破壞 instruction 檔（AGENTS.md source；Claude 端另有 CLAUDE.md wrapper）的實用價值，絕對禁止。論證（為什麼統計/版號對 AI 無價值）見下方「元資訊禁止的第一性原理分析」。**
+
+### ❌ 絕對禁止的行為
+
+| 行為 | 原因 | 後果 |
+|------|------|------|
+| **加入統計資訊** | 行數/字數是快照，每次修改都過時 | AI 被誤導，以為程式碼很小 |
+| **加入版本號** | AI 不關心 v1.0 → v2.0 | 浪費 token，無實質資訊 |
+| **模組描述標版號** | 如 `ClassName（v3: ...）`必然過時 | 功能性描述始終準確 |
+| **加入更新日期** | AI 只需要「當前」規則 | 干擾核心內容 |
+| **加入 Changelog** | 歷史變更應放 CHANGELOG.md | 文檔膨脹 |
+| **作者資訊** | 除非有特殊意義 | 無聊且干擾 |
+| **寫入可推導內容** | API 簽名、參數表、欄位列表可從程式碼直接推導 | 浪費 token，降低 signal/noise ratio |
+| **完整程式碼範例 (>5 行)** | 應精簡為一句話描述 + 源碼引用 | 文檔膨脹，維護成本高 |
+
+### ✅ 正確的 AI 行為
+
+專注核心原則（why）、暴露結構關係（檔案依賴）、說明當前狀態（現有規則與約束）。
+
+### 執行約束
+
+- **撰寫** instruction 檔（AGENTS.md source；Claude 端另有 CLAUDE.md wrapper）：不加入任何元資訊區塊、不統計行數字數、不標版本日期、專注「當前有效」的規則
+- **修改** instruction 檔：移除發現的元資訊（不保留）、不添加新元資訊（即使其他檔案有）、用 instruction-clean 驗證（Claude: `/instruction-clean`；跨 harness 用各家清理工具或人工檢查）
+
+### 自檢清單
+
+在輸出或修改 instruction 檔前確認：沒加 `版本`/`更新日期`/`行數`/`字數` 區塊、沒在模組描述標版號、沒加 `變更歷史` 區塊或統計表格、沒寫可推導內容（API 簽名、參數表、欄位列表）、程式碼範例 <= 5 行、內容專注「當前有效」規則。
+
+> 💡 **核心原則**: instruction 檔是給 AI 的實用指南，不是專案履歷表。任何對 AI 無意義的資訊都是噪音。
 
 ## 元資訊禁止的第一性原理分析（疫苗論證）
 

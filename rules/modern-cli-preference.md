@@ -10,7 +10,7 @@ harness-scope: neutral
 
 ## 核心原則
 
-**語義查詢用 LSP，文字搜尋用 rg，檔案搜尋用 fd。** `fd`/`rg` 預設遵守 `.gitignore`（減少噪音）。詳細 LSP 決策樹見 [lsp-navigation.md](lsp-navigation.md)。
+**語義查詢用 LSP，文字搜尋用 rg，檔案搜尋用 fd。** `fd`/`rg` 預設遵守 `.gitignore`（減少噪音）。詳細 LSP×rg/fd 工具對照速查見 [lsp-navigation.md](lsp-navigation.md)。
 
 (Claude: `find -exec`、`grep -r` 是 Claude Code 系統層級硬限制；`fd`/`rg` 預設可 auto-allow。其他 harness 無此限制，fd/rg 語法優勢通用)
 
@@ -24,6 +24,7 @@ harness-scope: neutral
 - **固定字串用 `-F`**（預設走正則）；**glob `-g` 比 `--type` 靈活**（`--type py` 不含 `.pyx`/`.rs`）
 - **多檔搜尋加 `--heading`**：檔名只印一次（預設每行重複完整路徑）；路徑已知時直接指定檔案不遞迴
 - **grep 旗標不可遷移到 rg**：grep `-h`（抑制檔名）rg 是 help——免檔名用 `-I`；`-r` grep=遞迴、rg=--replace（複合旗標 `-rn` 拆開讀，`-r` 會替換 match 污染輸出）。真實案例：`rg -h pattern` 印整份 help、`rg -rn pattern` match 全成 "n"（grep 慣性遷移）
+- **rg `-g` glob 錨定路徑 arg 形態**：`-g '!dir/**'` 對絕對路徑 root arg 靜默失效——要生效用 cwd＋arg `.` 或 `!**/dir/**`（hazard runner 實案：mock 全繞過、真 rg 測試才抓到）
 
 ---
 
@@ -43,11 +44,4 @@ harness-scope: neutral
 
 ## 盤點執行點：間接層與直呼層雙掃
 
-> **核心原則**：盤點「誰執行/呼叫 X」（CI 跑哪些測試、哪些入口呼叫某工具、cutover 影響域）時，間接層（make target/wrapper 引用）與直呼層（raw command 直接出現，**含 Makefile recipe 內**）**兩層都要掃**——只掃一層系統性漏，且自審抓不到（掃了什麼就被當成完整）。路徑集按 repo 調整——CI workflow、launchd plist、cron 排程必含。
-
-| 層 | 掃什麼 | 範例命令 |
-|----|--------|---------|
-| 間接層 | 誰引用 wrapper/target | `rg -e "make " scripts/ deploy/ .github/workflows/` |
-| 直呼層 | X 本體直呼 | `rg -e pytest -e "uv run" Makefile scripts/ deploy/ .github/workflows/` |
-
-**反例（真實案例）**：判定「哪些 gate 擋 merge/release」只掃 CI workflow 的 make 引用——漏掉 build.yml **直呼**的 `uv run pytest`（Python 測試唯一落點、非 make target）；rg 間接層有 hits ≠ 執行點清單完整。同 family：head 截斷（上節）、toplevel-only import 漏 local import（[lsp-navigation.md](lsp-navigation.md)）——pattern coverage blind spot 的不同載體。高風險場景（一次性儀式/稽核）把兩層掃法命令寫死在執行清單，不依賴 session 記得。
+盤點執行點雙掃（間接層 make target/wrapper 引用＋直呼層 raw command——CI 跑哪些測試、哪些入口呼叫某工具、cutover 影響域的完整性盤點）見 acceptance-evidence skill「盤點執行點雙掃」章。

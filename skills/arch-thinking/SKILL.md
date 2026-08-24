@@ -254,7 +254,7 @@ CRG-sourced edges 附 anti-over-reliance label（graph=structure≠behavior；dy
 
 **不適用**（場景排除）：
 - 除錯 → `debugging-and-error-recovery`
-- 查 API 用法 / 文檔 → Context7 MCP（`rules/context7.md`）
+- 查 API 用法 / 文檔 → Context7 MCP（[context7](../context7/SKILL.md)）
 - 測試策略 → `test-driven-development` / `validation-strategy`
 - 強制套四層模板（本 skill 是視角，非模板）
 

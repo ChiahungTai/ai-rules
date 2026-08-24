@@ -10,13 +10,17 @@ harness-scope: neutral
 
 ## 工具選擇原則
 
-- 語義查詢用 LSP（goToDefinition / findReferences / hover），文字搜尋用 `rg`，檔案搜尋用 `fd`（決策樹見 [lsp-navigation.md](lsp-navigation.md)）
+- 語義查詢用 LSP（goToDefinition / findReferences / hover），文字搜尋用 `rg`，檔案搜尋用 `fd`（工具對照速查見 [lsp-navigation.md](lsp-navigation.md)）
 - **Agent prompt 必須指定工具**：spawn agent 時，根據任務性質在 prompt 中明確寫「用 LSP hover/ goToDefinition 查簽名」或「用 rg 搜文字」。禁止 agent prompt 只寫「讀取/驗證」不指定工具
 
 ## Python 命令執行
 
 - 所有 Python 命令用 `uv run` 前綴（`uv run python script.py`、`uv run pytest`）
 - 禁止：`python`、`python3`、`PYTHONPATH=$PWD`
+
+## Bash `python -c` 禁止寫註解
+
+> **`python -c` 是 AI 自用驗證，不需人類可讀註解。** 多行 `python -c` 中換行後接 `#` 註解會觸發部分 harness 的權限確認（Claude: Claude CLI 無法判斷跨行 `#` 是否被注入惡意內容，故每次需人工確認）。要驗證想法就寫乾淨單行，或落成 `.py` 檔。Claude 端 `python -c` / `$` 展開限制（Claude: `bash-hard-rules.md`）。
 
 ## 檔案修改禁令
 

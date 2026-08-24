@@ -1,6 +1,6 @@
 ---
 name: acceptance-evidence
-description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限、Intent Drift Type A/B、filter trap 重構查證義務、L3 整合測試實例、Runtime Invariant Assurance、B 軸人類驗收層演進。always-on 核心（L1-L6 階層表、證據獨立性、Claim→Evidence）在 rules/acceptance-evidence.md；審查/規劃/測試策略需要深層論證或失敗案例時載入。觸發詞：證據階層、L3、整合測試、filter trap、runtime invariant、intent drift、B 軸、人類驗收、認知誤差、EP 預見極限。
+description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限、Intent Drift Type A/B、filter trap 重構查證義務、L3 整合測試實例、Runtime Invariant Assurance、B 軸人類驗收層演進、盤點執行點雙掃（間接層＋直呼層）。always-on 核心（L1-L6 階層表、證據獨立性、Claim→Evidence）在 rules/acceptance-evidence.md；審查/規劃/測試策略需要深層論證或失敗案例時載入。觸發詞：證據階層、L3、整合測試、filter trap、runtime invariant、intent drift、B 軸、人類驗收、認知誤差、EP 預見極限、盤點執行點、誰呼叫、影響域、CI 執行點、雙掃。
 ---
 
 # Acceptance Evidence — 驗收證據深層理論
@@ -13,6 +13,17 @@ description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限�
 
 - **數字/清單類 claim**（真實案例）：features leaf 清單把 VolumeFeature 寫成 KeyCandleFeature，與 `list_feature_classes` 實際輸出不符，自審抓不到——AI 寫盤點清單易憑印象混入/漏掉成員（同型：consumers 數 41 誤寫 20，`rg | head -20` 截斷；此簡版 rule 端保留）。
 - **silent-failure claim**（真實案例）：smell-detector baseline（原 codebase-sweep）state.yaml 把 Interval 自創名稱（如 `"1M"`）標「silent drift」——靜態推論「1M 撞 1m」沒跑 `Interval("1M")`，實證 StrEnum 精確比對 + raise → loud crash 非 silent。同類：tilde bug 靜態推論「消費端 inline 沒問題」沒執行 → 實證推翻。教訓通用（silent-claim 須執行證據），不依賴特定符號現狀。
+
+## 盤點執行點雙掃（間接層＋直呼層）
+
+> **核心原則**：盤點「誰執行/呼叫 X」（CI 跑哪些測試、哪些入口呼叫某工具、cutover 影響域）時，間接層（make target/wrapper 引用）與直呼層（raw command 直接出現，**含 Makefile recipe 內**）**兩層都要掃**——只掃一層系統性漏，且自審抓不到（掃了什麼就被當成完整）。路徑集按 repo 調整——CI workflow、launchd plist、cron 排程必含。
+
+| 層 | 掃什麼 | 範例命令 |
+|----|--------|---------|
+| 間接層 | 誰引用 wrapper/target | `rg -e "make " scripts/ deploy/ .github/workflows/` |
+| 直呼層 | X 本體直呼 | `rg -e pytest -e "uv run" Makefile scripts/ deploy/ .github/workflows/` |
+
+**反例（真實案例）**：判定「哪些 gate 擋 merge/release」只掃 CI workflow 的 make 引用——漏掉 build.yml **直呼**的 `uv run pytest`（Python 測試唯一落點、非 make target）；rg 間接層有 hits ≠ 執行點清單完整。同 family：head 截斷（modern-cli-preference 統計禁 head 段）、toplevel-only import 漏 local import（lsp-navigation rule）——pattern coverage blind spot 的不同載體。高風險場景（一次性儀式/稽核）把兩層掃法命令寫死在執行清單，不依賴 session 記得。
 
 ## 認知誤差與 EP 的預見極限
 
@@ -42,7 +53,7 @@ description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限�
 
 ## L3 整合層的正向價值實例(為什麼整合測試值得)
 
-**理論呼應**:"mock 循環論證讓 mock 假設成為 bug 來源"(見 quality-constraints 整合器型變更)。以下實例顯示補整合測試如何**立刻**抓到 mock 抓不到的 source bug。
+**理論呼應**:"mock 循環論證讓 mock 假設成為 bug 來源"(見 [validation-strategy](../validation-strategy/SKILL.md) 整合器型變更判定)。以下實例顯示補整合測試如何**立刻**抓到 mock 抓不到的 source bug。
 
 **實例(真實案例 — DB 序列重置函式)**:
 
@@ -51,7 +62,7 @@ description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限�
 - **source bug**:空 table 時 `setval(seq, COALESCE(MAX(id), 0))` → `setval(seq, 0)`,但 SERIAL 的 `MINVALUE=1`,`setval(seq, 0)` 違反約束 → fresh DB restore 後第一次 INSERT 崩潰。
 - **為什麼 mock 抓不到**:mock 假設「table 有資料,MAX 有值」,整個邊界(空 table)不在 mock 的假設世界裡。mock 循環論證讓這個假設成為 bug 來源。
 
-**啟示**:整合器型變更(接 ≥2 真實外部組件)補整合測試不是「儀式」,是**唯一能抓跨組件邊界 bug 的手段**。理論見品質約束「整合器型變更判定」;判定流程見 audit-test 角度 4(Claude command,跨 harness 路徑從略)。
+**啟示**:整合器型變更(接 ≥2 真實外部組件)補整合測試不是「儀式」,是**唯一能抓跨組件邊界 bug 的手段**。理論見 [validation-strategy](../validation-strategy/SKILL.md)「整合器型變更判定」;判定流程見 audit-test 角度 4(Claude command,跨 harness 路徑從略)。
 
 ## 重構查證義務:上抬抽象層的 filter trap(通用重構紀律)
 

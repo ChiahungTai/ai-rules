@@ -21,7 +21,7 @@ paths:
 
 > 回應 Python 社群「公開 API 統一由 `__init__.py` 導出（Facade）」的主張——禁令若不先承認並反駁 Facade 價值，會被社群論述動搖。
 
-Facade 的價值在**解耦內部實作與外部介面**，在「發佈給外部消費者的套件」為真。但內部專案的消費者是同專案 modules/scripts/tests/AI，本來就靠 instruction 檔導航定位，Facade 的「重構解耦」收益不存在，代價突出（import 開銷、循環依賴風險、IDE 混淆）。**判準**：Facade 的價值取決於「消費者是否外部」。**若未來發佈外部套件**：用 `_internal` 模式（PyTorch/Open edX 風格）——實作放私有子模組，`__init__.py` 只 re-export 穩定 API。
+Facade 的解耦價值只在「發佈給**外部**消費者的套件」為真；內部專案消費者是同專案 modules/scripts/tests/AI（靠 instruction 檔導航定位），重構解耦收益不存在而代價突出（import 開銷、循環依賴風險、IDE 混淆）。**判準：Facade 價值取決於消費者是否外部**；未來發佈外部套件改用 `_internal` 模式（PyTorch/Open edX 風格：實作放私有子模組，`__init__.py` 只 re-export 穩定 API）。
 
 **審查原則**：每個 `__init__.py` 的內容都必須能回答「為什麼放在這裡而非子模組？」行數不是判準，內容是否合理才是（re-export 原則禁止；handy functions、註冊初始化個案衡量收益 vs 全消費者 import 代價；`__version__`、docstring 無代價合理）。
 

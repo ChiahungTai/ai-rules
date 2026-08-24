@@ -1,6 +1,6 @@
 ---
 name: validation-strategy
-description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 replay >>> live、驗證放 scripts/、不重驗 package 已驗證的部分。用於 build/commit 驗證段決定測試類型與方式。觸發詞：e2e、replay、驗證策略、測試類型、live、不重驗 package、驗證放哪、交易驗證、回放。
+description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 replay >>> live、驗證放 scripts/、不重驗 package 已驗證的部分、整合器型變更判定（三條件＋mock 循環論證＋兩層整合測試：接線 guard＋真實邊界）。用於 build/commit 驗證段決定測試類型與方式。觸發詞：e2e、replay、驗證策略、測試類型、live、不重驗 package、驗證放哪、交易驗證、回放、整合器型、真實邊界、整合測試、mock。
 ---
 
 # Validation Strategy — 驗證策略紀律
@@ -40,6 +40,25 @@ description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 rep
 判準：
 - 驗「NT 的 submit_order 在你的 context 怎麼行為」（你的整合）→ 驗
 - 驗「NT submit_order 內部是否正確」（package 內部）→ 不驗（package 自己驗）
+
+## 整合器型變更判定（真實邊界整合測試）
+
+整合器型變更的完成定義必須含**真實邊界整合測試**（L3+，證據階層見 [acceptance-evidence](../../rules/acceptance-evidence.md)），不能只靠 mock。EP 段落同時滿足以下 → 整合器型：
+
+- 主要價值是把 ≥2 個真實外部組件接起來（DB、catalog、第三方 SDK、跨進程、跨框架）
+- 邊界正確性無法從任一單方文件推導（必須實際接起來跑）
+- 錯了不是「調參數」而是「整天行為全錯」（時區偏移整天、序列化整批毀損）
+
+**mock 循環論證陷阱**：當 EP 主要價值是「把外部組件接對」，mock 測試的假設本身可能是 bug 來源 — mock 驗證「假設成立的話行為正確」，無法驗證「假設本身是否成立」。例：catalog 存 naive Taiwan-local 時間，`tz_localize("UTC")` 只貼標不轉換，mock 假設「catalog 回傳正確 UTC」就是 bug 來源，mock unit test 結構上抓不到 +8h 時區偏移。
+
+**兩層整合測試**（缺任一即缺口）：
+
+| 測試類型 | 性質 | 目錄 | marker |
+|--|--|--|--|
+| 接線 guard | 純邏輯、無 IO（registry lookup、membership 斷言） | `tests/unit_tests/` | `quick` |
+| 真實邊界 | 真實 DB / Catalog / 資料，跑完整消費端 pipeline | `tests/integration_tests/` | `integration` |
+
+**不可互代**：接線 guard 廉價擋高頻接線 regression；真實邊界昂貴擋跨層 schema / 展開失敗。命名含 `_integration` 但純邏輯仍留 unit_tests（依依賴判斷，不看名稱）。
 
 ## 與 test-driven-development 邊界
 
