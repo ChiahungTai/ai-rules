@@ -6,6 +6,7 @@ curated＝generator "manual"；重產 diff 非空的 derived 由 audit 建議升
 
 import argparse
 import json
+import math
 import re
 import subprocess
 from pathlib import Path
@@ -24,7 +25,9 @@ def git_head(repo: Path) -> str:
         check=False,
     )
     if out.returncode != 0:
-        print(f"[WARN] git HEAD 取不到（{repo} 非 git repo？）——anchored_commit 記 unknown")
+        print(
+            f"[WARN] git HEAD 取不到（{repo} 非 git repo？）——anchored_commit 記 unknown"
+        )
         return "unknown"
     return out.stdout.strip()
 
@@ -55,7 +58,7 @@ def upsert(
 
 
 def _kv(key: str, val: str) -> str:
-        return f'{key} = "{val}"'
+    return f'{key} = "{val}"'
 
 
 def _toml_key(key: str) -> str:
@@ -69,6 +72,10 @@ def _toml_value(v: object) -> str:
     """頂層未知鍵的 TOML 序列化（scalar／scalar list）；非支援型別 loud——silent 掉資料更糟。"""
     if isinstance(v, bool):
         return "true" if v else "false"
+    if isinstance(v, float) and not math.isfinite(v):
+        raise ValueError(
+            "manifest 頂層鍵含非有限 float（inf/nan）——TOML 無此字面，寫出即非法"
+        )
     if isinstance(v, (int, float)):
         return str(v)
     if isinstance(v, str):
@@ -145,7 +152,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="manifest 讀寫／--init-scan 骨架生成")
     parser.add_argument("--repo", type=Path, default=Path.cwd())
     parser.add_argument("--tours-dir", type=Path, default=Path(".tours"))
-    parser.add_argument("--init-scan", action="store_true", help="掃 corpus 生成 manifest 骨架")
+    parser.add_argument(
+        "--init-scan", action="store_true", help="掃 corpus 生成 manifest 骨架"
+    )
     args = parser.parse_args()
     path = args.repo / args.tours_dir / "manifest.toml"
     if not args.init_scan:

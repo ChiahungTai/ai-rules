@@ -32,7 +32,8 @@ def fetch_tail(session_id: str) -> str:
             "JOIN message m ON p.message_id = m.id "
             "WHERE p.session_id = ? AND json_extract(p.data, '$.type') = 'text' "
             "AND json_extract(m.data, '$.role') IN ('user', 'assistant') "
-            "ORDER BY p.time_created DESC LIMIT ?",
+            "AND NOT json_extract(p.data, '$.synthetic') "
+            "ORDER BY p.time_created DESC, p.id DESC LIMIT ?",
             (session_id, CANDIDATE_PARTS),
         ).fetchall()
     finally:
@@ -59,8 +60,10 @@ def fetch_tail(session_id: str) -> str:
 def read_state(cwd: str) -> str:
     state = Path(cwd) / "STATE.md" if cwd else None
     if state and state.is_file():
-        return state.read_text(encoding="utf-8").encode("utf-8")[:STATE_BUDGET_BYTES].decode(
-            "utf-8", errors="ignore"
+        return (
+            state.read_text(encoding="utf-8")
+            .encode("utf-8")[:STATE_BUDGET_BYTES]
+            .decode("utf-8", errors="ignore")
         )
     return ""
 
@@ -73,13 +76,19 @@ def main() -> None:
         return
     # 只在 compact 後注入；startup/clear 時完整 context 已在，注入 tail 是重複
     if data.get("source") != "compact":
-        print(f"compact-tail-inject: source={data.get('source')} 非 compact，跳過", file=sys.stderr)
+        print(
+            f"compact-tail-inject: source={data.get('source')} 非 compact，跳過",
+            file=sys.stderr,
+        )
         return
     session_id = data.get("session_id") or ""
     if not session_id:
         # 不 fallback「db 最新 session」——同 worktree 並行 session 下會撈到別的
         # session 的 tail（靜默污染）。無 session_id 寧可不注入（fail-open no-op）。
-        print("compact-tail-inject: stdin 無 session_id，跳過（防同 wt 並行 session 污染）", file=sys.stderr)
+        print(
+            "compact-tail-inject: stdin 無 session_id，跳過（防同 wt 並行 session 污染）",
+            file=sys.stderr,
+        )
         return
     try:
         tail = fetch_tail(session_id)
@@ -112,7 +121,10 @@ def main() -> None:
         ensure_ascii=False,
     )
     if len(out.encode("utf-8")) > OUTPUT_GUARD_BYTES:  # 組裝後最終 guard
-        print(f"compact-tail-inject: 輸出 {len(out.encode('utf-8'))} bytes 超_guard，跳過", file=sys.stderr)
+        print(
+            f"compact-tail-inject: 輸出 {len(out.encode('utf-8'))} bytes 超_guard，跳過",
+            file=sys.stderr,
+        )
         return
     sys.stdout.write(out)
 

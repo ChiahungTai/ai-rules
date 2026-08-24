@@ -93,3 +93,11 @@ def test_dump_loud_on_unsupported_top_level_type(tmp_path: Path) -> None:
     """非 scalar／scalar list 的頂層鍵 loud 拒寫——不 silent 掉資料。"""
     with pytest.raises(ValueError, match="型別不支援"):
         tour_manifest.dump(tmp_path / "m.toml", {"weird": {"nested": 1}})
+
+
+def test_dump_loud_on_nonfinite_float(tmp_path: Path) -> None:
+    """inf/nan float 走 str(v) 會寫出非法 TOML（下游 load 才炸）——源頭 loud 拒寫。"""
+    with pytest.raises(ValueError, match="非有限"):
+        tour_manifest.dump(tmp_path / "m.toml", {"ratio": float("inf")})
+    with pytest.raises(ValueError, match="非有限"):
+        tour_manifest.dump(tmp_path / "m.toml", {"list_val": [1.0, float("nan")]})

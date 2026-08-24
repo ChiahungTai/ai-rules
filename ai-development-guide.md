@@ -155,10 +155,12 @@ SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介�
 
 ## Summary Instructions（壓縮策略）
 
-> **觸發時機**：對話壓縮（Claude: `/compact`）手動或自動觸發時，此區塊引導 compactor 保留關鍵資訊。
+> 對話壓縮（`/compact`）觸發時引導 compactor 保留關鍵資訊。
 
 When summarizing this conversation, always preserve:
 - File paths that have been read or modified
 - Test results and error messages
 - Decisions made and the reasoning behind them
 - Current task objective and pending items
+- Suspended actions: commands/skill invocations submitted but unexecuted, proposals awaiting user confirmation, running background tasks (interrupted executions — unlike pending plans, they vanish with the raw history)
+- Counts/ratios: derive from your own enumeration or copy verbatim; never rewrite numbers from memory
