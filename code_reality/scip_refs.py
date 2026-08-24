@@ -42,6 +42,8 @@ scip_pb2.py 重生（schema 變更時；grpcio-tools 內含 protoc；scip.proto
         EventStoreLifecycle.open --repo <repo-root>     # 預設 slot
     uv run --project ~/Github/ai-rules python -m code_reality.scip_refs \\
         --audit --repo <repo-root>                       # 預設 slot
+    uv run --project ~/Github/ai-rules python -m code_reality.scip_refs \\
+        --build-cache --repo <repo-root>    # 衍生 sqlite 查詢面（一次構建）
 
 source 標註（facade 契約「每回應附 source 與 commit 版本」）：stamp 過
 sidecar 或給 ``--repo`` 的回應，輸出首行帶 ``[SRC] scip index @ <sha>``
@@ -49,14 +51,24 @@ sidecar 或給 ``--repo`` 的回應，輸出首行帶 ``[SRC] scip index @ <sha>
 A3 graph.db 過時事件同型防線）。顯式 ``--index`` 無 sidecar 無 ``--repo``
 → 無 [SRC] 行，legacy 輸出位元組不變（NT 查詢契約）。
 
+衍生 sqlite 查詢面（``--build-cache`` 落 ``<index>.scip.db``；建議時序
+＝生成索引 → ``--stamp-meta`` → ``--build-cache``）：occurrences 表只收
+函數形態符號（``FN_TAIL_RE`` 命中者——查詢/audit 的消費集恆為該子集，
+非函數符號的 occurrences 不入庫）。查詢優先走 db；匹配語義單一真相源
+仍在本模組（``_matcher``/``FN_TAIL_RE``）——SQL 只做 ``method=?`` 候選
+縮小、Python 複檢。無 db → protobuf 全量解析（~40s/次）路徑不變；過期
+（db 比索引檔舊、或 sidecar head 變動）→ WARN＋自動重建——管理訊息走
+stderr，查詢 stdout 兩路徑**位元組相同**（衍生面不該改變答案）。
+
 退出碼：0=有結果｜1=查無｜2=環境錯誤（索引不在/損壞/protobuf 未裝/
-graph_audit 子進程失敗/stamp 取不到 HEAD）。原型取舍：每次查詢重新解析
-索引（~40s）——常駐/衍生 sqlite 快取為後續優化點。
+graph_audit 子進程失敗/stamp 取不到 HEAD/衍生 db 構建失敗）。
 """
 
 import argparse
 import json
+import os
 import re
+import sqlite3
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -73,6 +85,8 @@ FN_TAIL_RE = re.compile(r"(?<!\w)(\w+)\(\)\.$")
 # index.scip 會互蓋——basename 為鍵（同名異路徑 repo 需顯式 --index）。
 DEFAULT_INDEX_ROOT = Path.home() / ".mosaic" / "code-reality" / "scip"
 META_SUFFIX = ".meta.json"
+DB_SUFFIX = ".db"
+SCHEMA_VERSION = "1"  # 结构變更時遞增——舊 schema db 視同過期重建
 
 
 def load_index(path: Path):
@@ -104,9 +118,12 @@ def ln(occ) -> int:
     return r[0] + 1 if len(r) >= 2 else -1
 
 
+def loc_line(rel_path: str, line: int) -> str:
+    return f"{rel_path}:?" if line <= 0 else f"{rel_path}:{line}"
+
+
 def loc(doc_path: str, occ) -> str:
-    line = ln(occ)
-    return f"{doc_path}:?" if line <= 0 else f"{doc_path}:{line}"
+    return loc_line(doc_path, ln(occ))
 
 
 def tail(symbol: str) -> str:
@@ -162,14 +179,14 @@ def find_refs(index, symbols: set[str]) -> dict[str, list[str]]:
     return refs
 
 
-def report(index, query: str, src_line: str | None = None) -> int:
+def report(face, query: str, src_line: str | None = None) -> int:
     if src_line:
         print(src_line)
-    defs = find_defs(index, query)
+    defs = face.defs(query)
     if not defs:
         print(f"[WARN] 查無 DEF：{query}")
         return 1
-    refs = find_refs(index, set(defs))
+    refs = face.refs(set(defs))
     for symbol in sorted(defs):
         d_list, r_list = defs[symbol], refs[symbol]
         print(f"[OK] {tail(symbol)}")
@@ -276,15 +293,15 @@ def audit_mode(index_path: Path, repo: Path, src_line: str | None = None) -> int
     if src_line:
         print(src_line)
     print(f"[OK] graph_audit 缺差 {len(missing)} 項 → 逐項 SCIP refs 對照：")
-    index = load_index(index_path)
+    face = open_face(index_path)
 
     files_by_name: dict[str, set[str]] = {}  # name → {rel path}
     for m in missing:
         m["_rel"] = _repo_rel(str(m["file"]), repo)
         files_by_name.setdefault(m["symbol"], set()).add(m["_rel"])
 
-    target_symbols = audit_targets(index.documents, files_by_name)
-    refs_count = find_refs(index, set(target_symbols))
+    target_symbols = face.audit_targets(files_by_name)
+    refs_count = face.refs(set(target_symbols))
 
     with_refs = 0
     for m in missing:
@@ -297,6 +314,262 @@ def audit_mode(index_path: Path, repo: Path, src_line: str | None = None) -> int
         )
     print(f"[OK] {with_refs}/{len(missing)} 項在 SCIP 有 refs（非零 callers）")
     return 0
+
+
+SCHEMA_SQL = """
+CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE occurrences (
+    -- seq 顯式 PK：VACUUM 不重編（隱式 rowid 會）——插入序＝掃描序，
+    -- 兩路徑輸出位元組等價的次序基礎；人工 VACUUM 壓縮後仍成立
+    seq      INTEGER PRIMARY KEY,
+    symbol   TEXT    NOT NULL,
+    rel_path TEXT    NOT NULL,
+    line     INTEGER NOT NULL,
+    is_def   INTEGER NOT NULL
+);
+CREATE TABLE symbol_tails (
+    -- tail＝預計算 descriptor（供人工 sqlite 探查；程式端由 tail() 現算）
+    symbol TEXT PRIMARY KEY,
+    tail   TEXT NOT NULL,
+    method TEXT NOT NULL
+);
+CREATE INDEX idx_symbol_tails_method ON symbol_tails(method);
+CREATE INDEX idx_occurrences_symbol ON occurrences(symbol, is_def);
+"""
+
+
+def sqlite_path(index_path: Path) -> Path:
+    return index_path.parent / (index_path.name + DB_SUFFIX)
+
+
+def _sidecar_head(index_path: Path) -> str:
+    meta = load_meta(index_path)
+    return str(meta.get("head") or "") if meta else ""
+
+
+def _build_db(index, db_path: Path, sidecar_head: str) -> dict[str, int]:
+    """核心構建——單一交易寫入後原子換入（暫存檔＋``os.replace``）。
+
+    occurrences 只收 ``FN_TAIL_RE`` 符號：查詢/audit 消費集（defs 匹配、
+    refs 收集、雙鍵歸屬）恆為函數形態符號，非函數符號入庫只膨脹不會被
+    讀。meta 記構建時 sidecar head——過期判定的第二訊號（重 stamp＝索引
+    重生蹤跡）。訊息路由在呼叫端：CLI 模式走 stdout、查詢內自動重建走
+    stderr（查詢 stdout 位元組不變的硬約束）。
+    """
+    tails: dict[str, tuple[str, str]] = {}
+    for d in index.documents:
+        for occ in d.occurrences:
+            m = FN_TAIL_RE.search(occ.symbol)
+            if m:
+                tails[occ.symbol] = (tail(occ.symbol), m.group(1))
+    stats = {"symbols": len(tails), "occurrences": 0}
+
+    def occ_rows():
+        for d in index.documents:
+            for occ in d.occurrences:
+                if occ.symbol in tails:
+                    stats["occurrences"] += 1
+                    yield (
+                        occ.symbol,
+                        d.relative_path,
+                        ln(occ),
+                        1 if occ.symbol_roles & 1 else 0,
+                    )
+
+    tmp = db_path.with_name(db_path.name + ".tmp")
+    tmp.unlink(missing_ok=True)  # 前次崩潰殘檔會讓 CREATE TABLE 失敗
+    conn = sqlite3.connect(tmp)
+    try:
+        conn.executescript(SCHEMA_SQL)
+        conn.executemany(
+            "INSERT INTO symbol_tails (symbol, tail, method) VALUES (?, ?, ?)",
+            ((s, t, m) for s, (t, m) in tails.items()),
+        )
+        conn.executemany(
+            "INSERT INTO occurrences (symbol, rel_path, line, is_def)"
+            " VALUES (?, ?, ?, ?)",
+            occ_rows(),
+        )
+        conn.executemany(
+            "INSERT INTO meta (key, value) VALUES (?, ?)",
+            (
+                ("head", sidecar_head),
+                ("schema", SCHEMA_VERSION),
+                ("tool", "code_reality.scip_refs"),
+            ),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+    os.replace(tmp, db_path)
+    return stats
+
+
+def build_cache_mode(index_path: Path) -> int:
+    db_path = sqlite_path(index_path)
+    try:
+        stats = _build_db(load_index(index_path), db_path, _sidecar_head(index_path))
+    except (OSError, sqlite3.Error) as e:
+        print(f"[FAIL] 衍生 db 構建失敗：{db_path}：{e}", file=sys.stderr)
+        return 2
+    print(
+        f"[OK] cache built：{db_path}"
+        f"（{stats['symbols']} symbols/{stats['occurrences']} occurrences）"
+    )
+    return 0
+
+
+def _stale_reason(index_path: Path, db_path: Path) -> str | None:
+    """過期雙訊號＋schema 守衛——db mtime＜index mtime、sidecar head 與
+    構建時不同、或 meta 的 schema 版本不符。
+
+    db 損壞（非 sqlite 檔/meta 表缺/舊 schema）視同過期：重建即治，不必
+    讓查詢端處理半殘 db——「valid sqlite 但形狀不對」若放行會到查詢時才
+    crash。
+    """
+    try:
+        if db_path.stat().st_mtime < index_path.stat().st_mtime:
+            return "db 比索引檔舊"
+    except OSError as e:
+        return f"stat 失敗：{e}"
+    try:
+        conn = sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
+        try:
+            meta_rows = dict(conn.execute("SELECT key, value FROM meta").fetchall())
+        finally:
+            conn.close()
+    except sqlite3.Error as e:
+        return f"db 損壞：{e}"
+    if meta_rows.get("schema") != SCHEMA_VERSION:
+        got = meta_rows.get("schema", "無")
+        return f"schema 版本不符（{got} ≠ {SCHEMA_VERSION}）"
+    db_head = meta_rows.get("head", "")
+    if db_head != _sidecar_head(index_path):
+        return "sidecar head 變動（索引重生後重 stamp？）"
+    return None
+
+
+def _open_ro(db_path: Path) -> sqlite3.Connection:
+    return sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
+
+
+def open_face(index_path: Path):
+    """查詢面解析——fresh db → SqliteFace；無/過期 db → 重建或 protobuf。
+
+    自動重建失敗（磁碟等 OSError/sqlite 錯誤）回 protobuf 全量解析：
+    衍生面是加速器不是依賴，壞了不該擋服務。索引本身損壞時
+    ``load_index`` 的 exit 2 照常傳播（protobuf 路徑也會走到同一結局）。
+    """
+    db_path = sqlite_path(index_path)
+    if not db_path.exists():
+        return ProtobufFace(load_index(index_path))
+    reason = _stale_reason(index_path, db_path)
+    if reason is None:
+        return SqliteFace(_open_ro(db_path))
+    print(f"[WARN] 衍生 db 過期（{reason}）——自動重建", file=sys.stderr)
+    try:
+        index = load_index(index_path)  # 解析一次留存——build 失敗直接餵 protobuf
+        _build_db(index, db_path, _sidecar_head(index_path))
+    except (OSError, sqlite3.Error) as e:
+        print(
+            f"[WARN] 衍生 db 重建失敗——本次查詢改走 protobuf 全量解析：{e}",
+            file=sys.stderr,
+        )
+        return ProtobufFace(index)
+    print("[OK] 衍生 db 重建完成", file=sys.stderr)
+    return SqliteFace(_open_ro(db_path))
+
+
+class ProtobufFace:
+    """protobuf 索引查詢面——無 db 時的原路徑（委託既有掃描函數）。"""
+
+    def __init__(self, index):
+        self.index = index
+
+    def defs(self, query: str) -> dict[str, list[str]]:
+        return find_defs(self.index, query)
+
+    def refs(self, symbols: set[str]) -> dict[str, list[str]]:
+        return find_refs(self.index, symbols)
+
+    def audit_targets(
+        self, files_by_name: dict[str, set[str]]
+    ) -> dict[str, tuple[str, str]]:
+        return audit_targets(self.index.documents, files_by_name)
+
+
+class SqliteFace:
+    """衍生 sqlite 查詢面——SQL 只做 ``method=?`` 候選縮小。
+
+    語義複檢全在本模組既有原語（``_matcher``/``FN_TAIL_RE``＋歸屬過濾）
+    ——SQL 若長出自己的匹配語義就是第二真相源，drift 即靜默錯答。
+    ``ORDER BY seq`` 釘住插入序＝protobuf 文檔/occurrence 序（顯式 PK
+    ——VACUUM 不重編；輸出位元組等價的次序保證）。
+    """
+
+    def __init__(self, conn: sqlite3.Connection):
+        self.conn = conn
+
+    def defs(self, query: str) -> dict[str, list[str]]:
+        match = _matcher(query)
+        method = query.rsplit(".", 1)[1] if "." in query else query
+        if re.fullmatch(r"\w+", method):
+            candidates = self.conn.execute(
+                "SELECT symbol FROM symbol_tails WHERE method = ?", (method,)
+            ).fetchall()
+        else:
+            # 非 identifier 查詢（含 '-' 等）：method=? 鍵對不上 FN_TAIL_RE
+            # 的 \w+ 捕獲，縮小不再保證超集——退全候選，Python 複檢把關
+            candidates = self.conn.execute("SELECT symbol FROM symbol_tails").fetchall()
+        defs: dict[str, list[str]] = {}
+        for (symbol,) in candidates:
+            if not match(symbol):
+                continue
+            rows = self.conn.execute(
+                "SELECT rel_path, line FROM occurrences"
+                " WHERE symbol = ? AND is_def = 1 ORDER BY seq",
+                (symbol,),
+            ).fetchall()
+            if rows:  # 無 DEF 的 ref-only 符號不入 defs（protobuf 同律）
+                defs[symbol] = [loc_line(rel_path, line) for rel_path, line in rows]
+        return defs
+
+    def refs(self, symbols: set[str]) -> dict[str, list[str]]:
+        out: dict[str, list[str]] = {s: [] for s in symbols}
+        for symbol in symbols:
+            out[symbol] = [
+                loc_line(rel_path, line)
+                for rel_path, line in self.conn.execute(
+                    "SELECT rel_path, line FROM occurrences"
+                    " WHERE symbol = ? AND is_def = 0 ORDER BY seq",
+                    (symbol,),
+                )
+            ]
+        return out
+
+    def audit_targets(
+        self, files_by_name: dict[str, set[str]]
+    ) -> dict[str, tuple[str, str]]:
+        names = list(files_by_name)
+        if not names:
+            return {}
+        ph = ",".join("?" * len(names))
+        rows = self.conn.execute(
+            "SELECT symbol, rel_path FROM occurrences"
+            f" WHERE is_def = 1 AND symbol IN"
+            f" (SELECT symbol FROM symbol_tails WHERE method IN ({ph}))"
+            " ORDER BY seq",
+            names,
+        ).fetchall()
+        target_symbols: dict[str, tuple[str, str]] = {}
+        for symbol, rel_path in rows:
+            m = FN_TAIL_RE.search(symbol)  # 複檢——meta 表資料不替代語義源
+            if not m:
+                continue
+            name = m.group(1)
+            if name in files_by_name and rel_path in files_by_name[name]:
+                target_symbols[symbol] = (rel_path, name)
+        return target_symbols
 
 
 def default_index_path(repo: Path) -> Path:
@@ -478,9 +751,23 @@ def main() -> int:
         action="store_true",
         help="索引生成後落版本 sidecar（配 --repo；[SRC] 標註的資料面）",
     )
+    parser.add_argument(
+        "--build-cache",
+        action="store_true",
+        help=(
+            "構建衍生 sqlite 查詢面 <index>.scip.db（一次構建；"
+            "查詢/audit 自動優先使用，過期自動重建）"
+        ),
+    )
     args = parser.parse_args()
 
-    if args.stamp_meta and (args.audit or args.query):
+    if args.build_cache and (args.stamp_meta or args.audit or args.query is not None):
+        print(
+            "[FAIL] --build-cache 與 --stamp-meta/--audit/查詢互斥",
+            file=sys.stderr,
+        )
+        return 2
+    if args.stamp_meta and (args.audit or args.query is not None):
         print("[FAIL] --stamp-meta 與 --audit/查詢互斥", file=sys.stderr)
         return 2
     if args.stamp_meta:
@@ -495,7 +782,7 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
-    if args.audit and args.query:
+    if args.audit and args.query is not None:
         print("[FAIL] --audit 與查詢字串互斥", file=sys.stderr)
         return 2
     if args.audit and args.repo is None:
@@ -533,13 +820,15 @@ def main() -> int:
 
     if args.stamp_meta:
         return stamp_meta(args.index, args.repo)
+    if args.build_cache:
+        return build_cache_mode(args.index)
     if not args.audit and not args.query:
         print("[FAIL] 需提供查詢或 --audit", file=sys.stderr)
         return 2
     src_line = source_line(args.index, args.repo)
     if args.audit:
         return audit_mode(args.index, args.repo, src_line)
-    return report(load_index(args.index), args.query, src_line)
+    return report(open_face(args.index), args.query, src_line)
 
 
 if __name__ == "__main__":

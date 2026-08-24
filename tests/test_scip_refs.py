@@ -5,12 +5,15 @@
 會把同檔鄰居 refs 聯集，原型審查 216→138 實證）、main() 退出碼契約
 （0/1/2）與 load_index 截斷 sanity；repo-keyed 預設 slot（--repo 時
 --index 可省略）與 [SRC] source 標註（stamp sidecar＋live HEAD＋漂移
-守衛；顯式 --index 無證據時輸出位元組不變——NT 契約）。真索引 L4 基準：
+守衛；顯式 --index 無證據時輸出位元組不變——NT 契約）；衍生 sqlite
+查詢面（--build-cache 三表、SqliteFace 與 protobuf 掃描等價、open_face
+路由與過期雙訊號、**兩路徑 stdout 位元組相同**）。真索引 L4 基準：
 NT 實測 --audit 138/861（.agent-tmp/research/scip/ 原型輪）。
 """
 
 import json
 import os
+import sqlite3
 import subprocess
 import sys
 from pathlib import Path
@@ -672,14 +675,22 @@ class TestReportSourceLine:
 
     def test_src_printed_first(self, capsys) -> None:
         idx = FakeIndex([FakeDoc("crates/x.rs", [FakeOcc(IMPL, 1, [1, 0, 1, 5])])])
-        assert scip_refs.report(idx, "EventStoreLifecycle.open", "[SRC] x @ y") == 0
+        assert (
+            scip_refs.report(
+                scip_refs.ProtobufFace(idx), "EventStoreLifecycle.open", "[SRC] x @ y"
+            )
+            == 0
+        )
         out = capsys.readouterr().out.splitlines()
         assert out[0] == "[SRC] x @ y"
         assert out[1].startswith("[OK]")
 
     def test_no_src_keeps_legacy_first_line(self, capsys) -> None:
         idx = FakeIndex([FakeDoc("crates/x.rs", [FakeOcc(IMPL, 1, [1, 0, 1, 5])])])
-        assert scip_refs.report(idx, "EventStoreLifecycle.open") == 0
+        assert (
+            scip_refs.report(scip_refs.ProtobufFace(idx), "EventStoreLifecycle.open")
+            == 0
+        )
         out = capsys.readouterr().out.splitlines()
         assert out[0].startswith("[OK]")  # legacy 位元組不變——NT 契約釘住
 
@@ -725,3 +736,474 @@ class TestReportSourceLine:
         out = capsys.readouterr().out.splitlines()
         assert out[0] == "[SRC] audit @ z"
         assert out[1].startswith("[OK] graph_audit 缺差")
+
+
+MY_OPEN = "… impl#[X]my_open()."
+MY_OPEN_DASH = "… impl#[T]my-open()."  # FN_TAIL_RE 捕獲 open——method=? 縮小的超集邊界
+REF_ONLY = (
+    "rust-analyzer cargo nautilus 1.0.0 crates/common/src/dep.rs impl#[RefOnly]run()."
+)
+NON_FN = "rust-analyzer cargo nautilus 1.0.0 crates/common/src/types.rs SomeStruct"
+
+
+def rich_index() -> FakeIndex:
+    """等價/byte-identity 共用底稿——覆蓋三符號形態、邊界拒絕、ref-only、
+    非函數形態、空 range、>6 refs（...共 N 處 行）、跨檔排序、dash 邊界。"""
+    return FakeIndex(
+        [
+            FakeDoc(
+                "crates/a.rs",
+                [
+                    FakeOcc(IMPL, 1, [10, 0, 10, 5]),
+                    FakeOcc(OTHER_TYPE, 1, [1, 0, 1, 5]),
+                    FakeOcc(MY_OPEN, 1, [2, 0, 2, 5]),
+                    FakeOcc(MY_OPEN_DASH, 1, [3, 0, 3, 5]),
+                    FakeOcc(NON_FN, 0, [4, 0, 4, 2]),
+                ],
+            ),
+            FakeDoc(
+                "crates/b.rs",
+                [
+                    FakeOcc(IMPL, 0, [7, 0, 7, 9]),
+                    FakeOcc(IMPL, 0, [8, 0, 8, 9]),
+                    FakeOcc(IMPL, 0, [9, 0, 9, 9]),
+                    FakeOcc(IMPL, 0, [11, 0, 11, 9]),
+                    FakeOcc(IMPL, 0, [12, 0, 12, 9]),
+                    FakeOcc(IMPL, 0, [13, 0, 13, 9]),
+                    FakeOcc(IMPL, 0, [14, 0, 14, 9]),
+                    FakeOcc(IMPL, 0, [15, 0, 15, 9]),
+                    FakeOcc(IMPL, 0, []),  # 空 range → "?"
+                    FakeOcc(TRAIT_IMPL, 1, [5, 0, 5, 5]),
+                    FakeOcc(TRAIT_DECL, 1, [6, 0, 6, 5]),
+                    FakeOcc(TRAIT_DECL, 0, [9, 0, 9, 9]),
+                    FakeOcc(REF_ONLY, 0, [3, 0, 3, 3]),
+                ],
+            ),
+        ]
+    )
+
+
+def write_index_file(tmp_path: Path) -> Path:
+    p = tmp_path / "index.scip"
+    p.write_bytes(b"junk")
+    return p
+
+
+class TestBuildCache:
+    """②資料面——--build-cache 落 <index>.scip.db 三表；occurrences 只收
+    FN_TAIL_RE 符號（查詢消費集）；meta 記構建時 sidecar head。"""
+
+    def _run(self, monkeypatch, argv: list[str]) -> int:
+        monkeypatch.setattr(sys, "argv", ["scip_refs", *argv])
+        return main()
+
+    def test_build_via_cli_creates_db(self, tmp_path, monkeypatch, capsys) -> None:
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        assert self._run(monkeypatch, ["--build-cache", "--index", str(idx_file)]) == 0
+        db = tmp_path / "index.scip.db"
+        assert db.exists()
+        assert "cache built" in capsys.readouterr().out
+        conn = sqlite3.connect(db)
+        try:
+            tails = dict(conn.execute("SELECT symbol, method FROM symbol_tails"))
+            assert set(tails) == {
+                IMPL,
+                TRAIT_IMPL,
+                TRAIT_DECL,
+                OTHER_TYPE,
+                MY_OPEN,
+                MY_OPEN_DASH,
+                REF_ONLY,
+            }
+            assert tails[IMPL] == "open"
+            assert tails[MY_OPEN] == "my_open"
+            assert tails[MY_OPEN_DASH] == "open"  # \w+ 捕獲停在 '-' 前
+            # 非函數形態不入 occurrences；IMPL＝1 DEF＋9 refs（含空 range）
+            assert (
+                conn.execute(
+                    "SELECT COUNT(*) FROM occurrences WHERE symbol = ?", (NON_FN,)
+                ).fetchone()[0]
+                == 0
+            )
+            assert (
+                conn.execute(
+                    "SELECT COUNT(*) FROM occurrences WHERE symbol = ?", (IMPL,)
+                ).fetchone()[0]
+                == 10
+            )
+            assert (
+                conn.execute("SELECT value FROM meta WHERE key = 'head'").fetchone()[0]
+                == ""
+            )
+        finally:
+            conn.close()
+
+    def test_build_stores_sidecar_head(self, tmp_path, monkeypatch) -> None:
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        (tmp_path / "index.scip.meta.json").write_text(
+            json.dumps({"repo": "r", "head": "abcdef1234"}), encoding="utf-8"
+        )
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        assert self._run(monkeypatch, ["--build-cache", "--index", str(idx_file)]) == 0
+        conn = sqlite3.connect(tmp_path / "index.scip.db")
+        try:
+            assert (
+                conn.execute("SELECT value FROM meta WHERE key = 'head'").fetchone()[0]
+                == "abcdef1234"
+            )
+        finally:
+            conn.close()
+
+    def test_build_mutex_with_query(self, tmp_path, monkeypatch) -> None:
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        assert (
+            self._run(monkeypatch, ["q", "--build-cache", "--index", str(idx_file)])
+            == 2
+        )
+
+    def test_build_mutex_with_audit_and_stamp(self, tmp_path, monkeypatch) -> None:
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        rc1 = self._run(
+            monkeypatch,
+            [
+                "--build-cache",
+                "--audit",
+                "--repo",
+                str(tmp_path),
+                "--index",
+                str(idx_file),
+            ],
+        )
+        rc2 = self._run(
+            monkeypatch,
+            [
+                "--build-cache",
+                "--stamp-meta",
+                "--repo",
+                str(tmp_path),
+                "--index",
+                str(idx_file),
+            ],
+        )
+        assert rc1 == 2
+        assert rc2 == 2
+
+    def test_build_via_default_slot(self, tmp_path, monkeypatch) -> None:
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        monkeypatch.setattr(scip_refs, "DEFAULT_INDEX_ROOT", tmp_path / "scip")
+        idx_file = tmp_path / "scip" / "myrepo" / "index.scip"
+        idx_file.parent.mkdir(parents=True)
+        idx_file.write_bytes(b"junk")
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: FakeIndex([]))
+        assert (
+            self._run(
+                monkeypatch, ["--build-cache", "--repo", str(tmp_path / "myrepo")]
+            )
+            == 0
+        )
+        assert (tmp_path / "scip" / "myrepo" / "index.scip.db").exists()
+
+    def test_build_sqlite_error_returns_2(self, tmp_path, monkeypatch, capsys) -> None:
+        """審查 F1：sqlite3.Error 非 OSError 子類——CLI 失敗路須 exit 2 不裸
+        traceback（docstring 明列「衍生 db 構建失敗」＝2）。"""
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+
+        def boom(index, db_path, head):
+            raise sqlite3.OperationalError("database is locked")
+
+        monkeypatch.setattr(scip_refs, "_build_db", boom)
+        assert self._run(monkeypatch, ["--build-cache", "--index", str(idx_file)]) == 2
+        assert "衍生 db 構建失敗" in capsys.readouterr().err
+
+    def test_empty_query_with_build_cache_returns_2(
+        self, tmp_path, monkeypatch
+    ) -> None:
+        """審查 F7：空字串查詢 falsy——互斥判斷用 is not None，不得靜默吞
+        掉查詢意圖。"""
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        assert (
+            self._run(monkeypatch, ["", "--build-cache", "--index", str(idx_file)]) == 2
+        )
+
+
+class TestSqliteFaceEquivalence:
+    """②等價層——SqliteFace 與 protobuf 掃描同底稿同輸出（byte-identical
+    的單元釘住；SQL 候選縮小不得改變任何語義）。"""
+
+    def _faces(self, tmp_path) -> tuple:
+        idx = rich_index()
+        idx_file = write_index_file(tmp_path)
+        scip_refs._build_db(idx, scip_refs.sqlite_path(idx_file), "")
+        db = scip_refs._open_ro(scip_refs.sqlite_path(idx_file))
+        return scip_refs.ProtobufFace(idx), scip_refs.SqliteFace(db)
+
+    def test_defs_type_method_equal(self, tmp_path) -> None:
+        pb, sq = self._faces(tmp_path)
+        assert sq.defs("EventStoreLifecycle.open") == pb.defs(
+            "EventStoreLifecycle.open"
+        )
+
+    def test_defs_bare_name_equal(self, tmp_path) -> None:
+        pb, sq = self._faces(tmp_path)
+        assert sq.defs("open") == pb.defs("open")
+
+    def test_defs_word_boundary_candidate_excluded(self, tmp_path) -> None:
+        r"""my_open 在 tails 的 method 是 my_open——open 查詢的候選集就不含
+        它（SQL 縮小與 (?<!\w) 邊界同律）。"""
+        pb, sq = self._faces(tmp_path)
+        assert sq.defs("X.my_open") == pb.defs("X.my_open")
+        assert MY_OPEN not in sq.defs("open")
+
+    def test_defs_non_word_method_query_equal(self, tmp_path) -> None:
+        r"""審查 F2：query method 含非 \w 字元時 method=? 鍵對不上 FN_TAIL_RE
+        捕獲（my-open 的 method 欄是 open）——縮小必須退全候選保超集。"""
+        pb, sq = self._faces(tmp_path)
+        got_pb, got_sq = pb.defs("T.my-open"), sq.defs("T.my-open")
+        assert got_pb == got_sq
+        assert list(got_sq) == [MY_OPEN_DASH]
+
+    def test_defs_ref_only_symbol_absent(self, tmp_path) -> None:
+        pb, sq = self._faces(tmp_path)
+        assert sq.defs("RefOnly.run") == pb.defs("RefOnly.run") == {}
+
+    def test_refs_equal_including_empty_and_cross_file(self, tmp_path) -> None:
+        pb, sq = self._faces(tmp_path)
+        symbols = {IMPL, TRAIT_DECL, OTHER_TYPE, REF_ONLY}
+        assert sq.refs(symbols) == pb.refs(symbols)
+        # IMPL refs 含空 range 的 "?" 行——兩路徑同型
+        assert "crates/b.rs:?" in sq.refs(symbols)[IMPL]
+
+    def test_audit_targets_equal(self, tmp_path) -> None:
+        pb, sq = self._faces(tmp_path)
+        files_by_name = {"open": {"crates/a.rs"}, "run": {"crates/b.rs"}}
+        assert sq.audit_targets(files_by_name) == pb.audit_targets(files_by_name)
+
+
+class TestOpenFaceRouting:
+    """②路由——fresh db 走 sqlite（不觸 protobuf 解析）；無 db 走 protobuf
+    原路徑；過期雙訊號（mtime＋sidecar head）WARN＋自動重建；重建失敗回
+    protobuf 不擋服務。"""
+
+    def test_no_db_uses_protobuf(self, tmp_path, monkeypatch) -> None:
+        idx_file = write_index_file(tmp_path)
+        seen: list[Path] = []
+        monkeypatch.setattr(
+            scip_refs, "load_index", lambda p: (seen.append(p), FakeIndex([]))[1]
+        )
+        assert isinstance(scip_refs.open_face(idx_file), scip_refs.ProtobufFace)
+        assert seen == [idx_file]
+
+    def test_fresh_db_skips_protobuf_parse(self, tmp_path, monkeypatch) -> None:
+        idx_file = write_index_file(tmp_path)
+        scip_refs._build_db(FakeIndex([]), scip_refs.sqlite_path(idx_file), "")
+
+        def boom(p):
+            raise AssertionError("fresh db 不應觸 protobuf 全量解析")
+
+        monkeypatch.setattr(scip_refs, "load_index", boom)
+        assert isinstance(scip_refs.open_face(idx_file), scip_refs.SqliteFace)
+
+    def test_stale_mtime_warns_and_rebuilds(
+        self, tmp_path, monkeypatch, capsys
+    ) -> None:
+        idx_file = write_index_file(tmp_path)
+        db = scip_refs.sqlite_path(idx_file)
+        scip_refs._build_db(FakeIndex([]), db, "")
+        older = idx_file.stat().st_mtime - 100
+        os.utime(db, (older, older))
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: FakeIndex([]))
+        assert isinstance(scip_refs.open_face(idx_file), scip_refs.SqliteFace)
+        err = capsys.readouterr().err
+        assert "比索引檔舊" in err and "自動重建" in err
+        # 重建已翻新 mtime——再開一次不再 WARN
+        assert isinstance(scip_refs.open_face(idx_file), scip_refs.SqliteFace)
+        assert "自動重建" not in capsys.readouterr().err
+
+    def test_sidecar_head_change_triggers_rebuild(
+        self, tmp_path, monkeypatch, capsys
+    ) -> None:
+        idx_file = write_index_file(tmp_path)
+        scip_refs._build_db(FakeIndex([]), scip_refs.sqlite_path(idx_file), "")
+        (tmp_path / "index.scip.meta.json").write_text(
+            json.dumps({"repo": "r", "head": "abcdef1234"}), encoding="utf-8"
+        )
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: FakeIndex([]))
+        assert isinstance(scip_refs.open_face(idx_file), scip_refs.SqliteFace)
+        assert "sidecar head 變動" in capsys.readouterr().err
+        # 重建吃進新 head——第二次 fresh
+        assert isinstance(scip_refs.open_face(idx_file), scip_refs.SqliteFace)
+        assert "自動重建" not in capsys.readouterr().err
+
+    def test_corrupt_db_rebuilt(self, tmp_path, monkeypatch, capsys) -> None:
+        idx_file = write_index_file(tmp_path)
+        db = scip_refs.sqlite_path(idx_file)
+        db.write_bytes(b"definitely not sqlite")
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        assert isinstance(scip_refs.open_face(idx_file), scip_refs.SqliteFace)
+        assert "db 損壞" in capsys.readouterr().err
+        conn = sqlite3.connect(db)
+        try:
+            # rich_index 的 FN 符號 occurrences 全量（IMPL 10＋其餘 7）
+            assert conn.execute("SELECT COUNT(*) FROM occurrences").fetchone()[0] == 17
+        finally:
+            conn.close()
+
+    def test_schema_mismatch_triggers_rebuild(
+        self, tmp_path, monkeypatch, capsys
+    ) -> None:
+        """schema 守衛：valid sqlite 但舊 schema——放行會到查詢時才 crash
+        （no such column），視同過期重建即治。"""
+        idx_file = write_index_file(tmp_path)
+        db = scip_refs.sqlite_path(idx_file)
+        scip_refs._build_db(FakeIndex([]), db, "")
+        conn = sqlite3.connect(db)
+        conn.execute("UPDATE meta SET value = '0' WHERE key = 'schema'")
+        conn.commit()
+        conn.close()
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        assert isinstance(scip_refs.open_face(idx_file), scip_refs.SqliteFace)
+        assert "schema 版本不符" in capsys.readouterr().err
+
+    def test_rebuild_failure_falls_back_protobuf(
+        self, tmp_path, monkeypatch, capsys
+    ) -> None:
+        idx_file = write_index_file(tmp_path)
+        db = scip_refs.sqlite_path(idx_file)
+        scip_refs._build_db(FakeIndex([]), db, "")
+        older = idx_file.stat().st_mtime - 100
+        os.utime(db, (older, older))
+
+        def boom(index, db_path, head):
+            raise OSError("disk full")
+
+        monkeypatch.setattr(scip_refs, "_build_db", boom)
+        parses: list[Path] = []
+        monkeypatch.setattr(
+            scip_refs,
+            "load_index",
+            lambda p: (parses.append(p), FakeIndex([]))[1],
+        )
+        assert isinstance(scip_refs.open_face(idx_file), scip_refs.ProtobufFace)
+        assert "重建失敗" in capsys.readouterr().err
+        # 審查 F4：解析一次留存——失敗 fallback 不得二次解析
+        assert parses == [idx_file]
+
+
+class TestByteIdentity:
+    """②驗收級——同底稿 protobuf 路徑與 sqlite 路徑的 main() stdout
+    **逐位相同**（含 [SRC] 缺席、...共 N 處 行、? 行）。"""
+
+    def _run(self, monkeypatch, argv: list[str]) -> int:
+        monkeypatch.setattr(sys, "argv", ["scip_refs", *argv])
+        return main()
+
+    def test_query_stdout_identical(self, tmp_path, monkeypatch, capsys) -> None:
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        argv = ["EventStoreLifecycle.open", "--index", str(idx_file)]
+        rc1 = self._run(monkeypatch, argv)
+        out1 = capsys.readouterr().out
+        assert rc1 == 0
+        assert self._run(monkeypatch, ["--build-cache", "--index", str(idx_file)]) == 0
+        capsys.readouterr()
+        # db 在——protobuf 解析不該被觸（路由釘住）
+        monkeypatch.setattr(
+            scip_refs,
+            "load_index",
+            lambda p: (_ for _ in ()).throw(AssertionError("應走 sqlite")),
+        )
+        rc2 = self._run(monkeypatch, argv)
+        assert rc2 == 0
+        assert capsys.readouterr().out == out1
+
+    def test_bare_query_stdout_identical(self, tmp_path, monkeypatch, capsys) -> None:
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        argv = ["open", "--index", str(idx_file)]
+        rc1 = self._run(monkeypatch, argv)
+        out1 = capsys.readouterr().out
+        assert rc1 == 0
+        assert self._run(monkeypatch, ["--build-cache", "--index", str(idx_file)]) == 0
+        capsys.readouterr()
+        rc2 = self._run(monkeypatch, argv)
+        assert rc2 == 0
+        assert capsys.readouterr().out == out1
+
+    def test_no_match_stdout_identical(self, tmp_path, monkeypatch, capsys) -> None:
+        """審查 F6a：exit 1（查無 DEF）路徑的 stdout 位元組相同。"""
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        argv = ["RefOnly.run", "--index", str(idx_file)]  # ref-only——無 DEF
+        rc1 = self._run(monkeypatch, argv)
+        out1 = capsys.readouterr().out
+        assert rc1 == 1
+        assert self._run(monkeypatch, ["--build-cache", "--index", str(idx_file)]) == 0
+        capsys.readouterr()
+        rc2 = self._run(monkeypatch, argv)
+        assert rc2 == 1
+        assert capsys.readouterr().out == out1
+
+    def test_stale_db_rebuild_in_main_keeps_stdout(
+        self, tmp_path, monkeypatch, capsys
+    ) -> None:
+        """審查 F6b：main() 查詢內自動重建——WARN 走 stderr，stdout 不變。"""
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        idx_file = write_index_file(tmp_path)
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        argv = ["EventStoreLifecycle.open", "--index", str(idx_file)]
+        rc1 = self._run(monkeypatch, argv)
+        out1 = capsys.readouterr().out
+        assert rc1 == 0
+        assert self._run(monkeypatch, ["--build-cache", "--index", str(idx_file)]) == 0
+        capsys.readouterr()
+        db = scip_refs.sqlite_path(idx_file)
+        older = idx_file.stat().st_mtime - 100
+        os.utime(db, (older, older))
+        rc2 = self._run(monkeypatch, argv)
+        captured = capsys.readouterr()
+        assert rc2 == 0
+        assert captured.out == out1
+        assert "自動重建" in captured.err
+
+    def test_audit_stdout_identical(self, tmp_path, monkeypatch, capsys) -> None:
+        monkeypatch.setattr(scip_refs, "scip_pb2", object())
+        monkeypatch.setattr(scip_refs, "_git_head", lambda repo: None)
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        idx_file = write_index_file(tmp_path)
+        missing_json = json.dumps(
+            {
+                "missing": [
+                    {
+                        "file": str(repo / "crates/a.rs"),
+                        "symbol": "open",
+                        "db_count": 0,
+                        "ra_count": 1,
+                    }
+                ]
+            }
+        )
+        proc = SimpleNamespace(returncode=0, stdout=missing_json, stderr="")
+        monkeypatch.setattr(scip_refs.subprocess, "run", lambda *a, **kw: proc)
+        monkeypatch.setattr(scip_refs, "load_index", lambda p: rich_index())
+        argv = ["--audit", "--repo", str(repo), "--index", str(idx_file)]
+        rc1 = self._run(monkeypatch, argv)
+        out1 = capsys.readouterr().out
+        assert rc1 == 0
+        assert self._run(monkeypatch, ["--build-cache", "--index", str(idx_file)]) == 0
+        capsys.readouterr()
+        rc2 = self._run(monkeypatch, argv)
+        assert rc2 == 0
+        assert capsys.readouterr().out == out1
