@@ -10,9 +10,10 @@
         [-o out.json] [--top N] [--include/--exclude substr] \
         [--repo-only/--no-repo-only] [--repo-root PATH]
 
-viztracer 錄製配方（五坑見 code-reality-tools-evaluation.md R6b；第六坑與
+viztracer 錄製配方（五坑見 mosaic code-reality-tools-evaluation.md R6b；第六坑與
 量產配方見 mosaic gap-prototypes P3 定案）：``--ignore_c_function``＋
-``--tracer_entries`` 依負載放大（2M 約 ~390 rows 即飽和——circular buffer
+``--tracer_entries`` 依負載放大（2M 觸頂線 ≈390 rows——**本負載**實測，
+circular buffer
 靜默丟頭部 phase，邊集可失真 −88.9%）＋``--min_duration 1~2``（**單位 µs**——
 原 ``0.002``＝2ns＝no-op）；事件抽取 ``cat=='fee' && ph=='X'``；nesting＝同
 (pid,tid) 且 ts 區間包含。Known gap：repo-only 過濾未接 exclusions.py
@@ -73,7 +74,9 @@ def extract_edges(events: list[dict[str, Any]]) -> list[tuple[str, str, float]]:
 
     已知假設與降級（post-build F9）：事件流 well-nested（viztracer fee/X
     complete events 保證配對）；``tracer_entries`` 是 circular buffer——
-    溢出丟最舊事件時 caller 會跳級到最近存活祖先（邊仍真實、粒度降級）。
+    溢出丟最舊事件時 caller 會跳級到最近存活祖先（邊仍真實、粒度降級）；
+    頭部 phase 整段被丟時邊集大比例缺損（「完全錯誤的圖像」——P3 §3.3，
+    見 module docstring 量產配方）。
     1.8M events 已達配方 2M entries 的 90%，錄更大負載時提高 entries。
     """
     by_tid: dict[Any, list[dict[str, Any]]] = defaultdict(list)

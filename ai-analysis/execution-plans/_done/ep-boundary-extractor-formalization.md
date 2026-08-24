@@ -20,7 +20,10 @@
   `1e872d9e`；位元級差異＝meta.created_at 時間戳——provenance 本性，起草端措辭過嚴已更正）
 - **原型對照自洽**：+499 邊＝method matched 增量（8,944→9,443），denominator +261
   ＝正式版規則更全——無未解釋殘差
-- 七規則逐行命中（boundary_build.py :279/:227/:229/:613/:201/:385/:352）；
+- 七規則全在碼內（symbol 錨，行號隨 docstring 增刪浮動）：`_exposed_method_name`
+  ＝rename／`get_`·`set_`·`py_` 剝前綴／`#[new]` 對應、`_screaming_snake`＝variant
+  命名轉換、`scan_rust_file`＝enum variant 邊＋from_py_object/get_all→field_property
+  合成、last-wins rename 保護見 pymethods／pyfunction 兩分支註解；
   match_kind 六分類齊；13 tests 含四事故 regression（SM-8，對照 gap-prototypes §1.6）
 
 ## 設計定案（NT＋ai-rules 雙方一致，2026-08-24）

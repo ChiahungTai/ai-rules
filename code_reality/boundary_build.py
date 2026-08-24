@@ -11,8 +11,8 @@ pyclass 兩種落點（native struct ``cfg_attr`` 巢狀／binding 檔 wrapper�
 module 路徑真相源＝pyclass / gen_stub_pyclass 的 ``module=`` derive
 （.pyi 產生源，語義權威）。
 
-Known Gaps（文檔化不擋——gap-prototypes 報告 §1.4；收案記錄見 EP
-_boundary-extractor-formalization）：
+Known Gaps（文檔化不擋——gap-prototypes 報告 §1.4；收案記錄見
+ai-analysis/execution-plans/_done/ep-boundary-extractor-formalization.md）：
 - ``custom_data!`` 巨集內宣告掃不到（掃描器看不進巨集）→ pyi-only class
   殘差（原型期 16 class）
 - credential 欄位選擇性省略機制未釘死 → field_property rs-only 殘差大宗
@@ -28,8 +28,8 @@ _boundary-extractor-formalization）：
 - method→class join 假設 impl 與 pyclass 宣告同 crate（binding 檔慣例，
   build review R3）；跨 crate 同名時 bare-name 歧義的方法跳過（計入
   ``methods.unresolved_class``）
-- Known Concern：sidecar commit-keyed 檔案會累積（``<out-dir>/<sha>.db``）——
-  遲需清理策略（如保留最新 N 個；2026-08-24 A2 收案記錄，不擋）
+- sidecar commit-keyed 檔案累積（``<out-dir>/<sha>.db`` 每 commit 一顆）——
+  遲需清理策略（保留最新 N 個候選）
 
 用法::
 
