@@ -14,19 +14,6 @@
         ]
       }
     ],
-    "SessionStart": [
-      {
-        "matcher": "compact",
-        "hooks": [
-          {
-            "type": "process",
-            "command": "python3",
-            "args": ["/Users/ctai/Github/ai-rules/hooks/compact-tail-inject.py"],
-            "timeoutMs": 10000
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "hooks": [
