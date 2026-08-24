@@ -12,6 +12,17 @@
             "timeoutMs": 10000
           }
         ]
+      },
+      {
+        "matcher": "mcp__code-review-graph__",
+        "hooks": [
+          {
+            "type": "process",
+            "command": "python3",
+            "args": ["/Users/ctai/Github/ai-rules/hooks/require-crg-repo-root.py"],
+            "timeoutMs": 10000
+          }
+        ]
       }
     ],
     "Stop": [

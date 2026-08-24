@@ -20,11 +20,17 @@ A graph edge (A calls B / A imports B) is a *static, parse-time fact*. It says a
 
 This skill assumes the project has CRG. Detect once per task:
 
-1. **MCP tools present** — `mcp__code-review-graph__*` callable → CRG live, use it.
+1. **MCP tools present** — `mcp__code-review-graph__*` callable → CRG live, use it. 兩種部署形態共用這組工具名：Claude 端 stdio（per-project `cwd` 展開，repo 預設正確）與共享 HTTP server（launchd `com.user.crg-mcp` 常駐 `127.0.0.1:5555`；ZCode/Codex 已掛接，OpenCode 待接）。
 2. **Graph DB exists** — `.code-review-graph/graph.db` in repo root → CRG installed; if MCP tools absent, the server isn't running (see Fallback).
 3. **Neither** — CRG not installed in this project.
 
 🔴 **GATE — assume + warn, do not silently degrade.** A review/planning command that expects CRG (impact/callers/scoping) and finds it absent must emit a one-line `[WARN] CRG graph not available — structural context (impact/callers/flows) degraded; install: uvx code-review-graph install && build`, then fall back. **Silent fallback = the user gets a worse review without knowing why.** Do not block — proceed with the fallback below.
+
+## 🔴 Shared-server rule — every call carries repo_root
+
+共享 HTTP server 沒有 per-session cwd：`repo_root` 是唯一的 repo 路由鍵。**每個 `mcp__code-review-graph__*` 呼叫都必須帶 `repo_root=<當前 repo root 絕對路徑>`**（`list_repos_tool` / `cross_repo_search_tool` 除外——registry 級）。
+
+省略的失敗形態是**自信假陰性**而非報錯：server 落到自身 cwd 的空 graph，回 `"graph is empty"` + not_found（2026-08-24 spike 實證：NT graph 近 8 萬節點下查 `InstrumentId` 回空）。查詢結果出現 "graph is empty" 指紋＝漏了 repo_root，補上重試。ZCode 端由 PreToolUse hook（`hooks/require-crg-repo-root.py`）機械阻擋缺參數呼叫；Claude stdio 端 repo 預設正確，統一帶上無害。
 
 ## LSP vs CRG — the division (core)
 
@@ -84,12 +90,14 @@ They compose: a CRG workflow gives the steps; `crg-query` governs *how each quer
 ## Fallback — CRG absent or stale
 
 - **Not installed** → `[WARN]` (above) + LSP `findReferences`/`incomingCalls` (single-symbol, no transitive) + scan-project dep_graph (folder/module-level ripple) + rg. Accept degraded: no transitive impact, no flows, no communities.
-- **MCP tools absent but graph.db exists** → server not running. Use CLI directly: `uvx code-review-graph <subcommand>` (same GraphStore). Or restart the AI tool to load the MCP server.
+- **MCP tools absent but graph.db exists** → server not running. 共享 server 健康檢查：`launchctl list | rg crg`（`com.user.crg-mcp` 應在列）。CLI 直用不受影響：`uvx code-review-graph <subcommand> --repo <repo-root>`（same GraphStore）。
 - **Graph stale** (`head_matches_build: false`) → `uvx code-review-graph update`; or note "graph pre-dates recent changes" and verify critical edges with LSP.
 
 ## Reference
 
 - **CRG CLI commands:** `code-review-graph --help` (build / update / status / query / impact / detect-changes / dead-code / communities / architecture / search / refactor / serve …)
+- **共享 HTTP server（非 Claude 端的接線）:** launchd `com.user.crg-mcp` → `uvx code-review-graph@2.3.8 serve --http --host 127.0.0.1 --port 5555`（plist：`~/Library/LaunchAgents/com.user.crg-mcp.plist`；無 default repo，一律 repo_root 路由）
+- 註：本檔表格內的工具名（`query_graph`、`get_impact_radius`…）省略 server 實際暴露名的 `_tool` 後綴（`query_graph_tool` 等）
 - **CRG architecture / tool map:** `<CRG_REPO>/code_review_graph/AGENTS.md` (resolve `<CRG_REPO>` — default `~/Github/code-review-graph`)
 - **Sibling facts discipline:** [lsp-navigation](../../rules/lsp-navigation.md) (symbol queries) — this skill is its graph counterpart
 - **Consumers:** [review-engine](../review-engine/SKILL.md) (change-impact lens), [arch-thinking](../arch-thinking/SKILL.md) §二 結構機械 (structure-facts lens)
