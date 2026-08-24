@@ -13,6 +13,8 @@ from pathlib import Path
 from crg_db import make_crg_db, qualified
 
 from code_reality.graph_audit import (
+    FN_RE,
+    IMPL_RE,
     audit,
     db_functions,
     parse_ra_symbols,
@@ -62,6 +64,32 @@ def test_risk_scan_terminator_ends_block(tmp_path: Path) -> None:
     assert risk_scan([f]) == []
 
 
+def test_risk_scan_sees_indented_impls(tmp_path: Path) -> None:
+    """NT 最終版：縮排 impl（inline mod 內）可見——收編首版的 col-0 blind
+    spot（審查 F4）由此關閉。"""
+    f = tmp_path / "t.rs"
+    f.write_text(
+        "#[cfg(test)]\nmod tests {\n    use super::*;\n"
+        "    impl Foo {\n        fn open(&self) {}\n    }\n}\n"
+        "impl Foo {\n    fn open(&self) {}\n}\n",
+        encoding="utf-8",
+    )
+    assert risk_scan([f]) == [(f, "Foo", ["open"])]
+
+
+def test_impl_fn_re_variants() -> None:
+    """NT 三輪審查迭代形態：unsafe／泛型巢狀／路徑限定 trait／dyn／縮排；
+    fn 前綴 const/async/unsafe/extern。"""
+    assert IMPL_RE.match("impl Foo").group(1) == "Foo"
+    assert IMPL_RE.match("unsafe impl Foo").group(1) == "Foo"
+    assert IMPL_RE.match("impl<T: Clone> Foo<T>").group(1) == "Foo"
+    assert IMPL_RE.match("impl fmt::Display for Foo").group(1) == "Foo"
+    assert IMPL_RE.match("impl SomeTrait for dyn Foo").group(1) == "dyn Foo"
+    assert IMPL_RE.match("    impl Foo {").group(1) == "Foo"
+    assert FN_RE.match('pub const unsafe extern "C" fn foo()').group(1) == "foo"
+    assert FN_RE.match("    async fn bar()").group(1) == "bar"
+
+
 def test_audit_missing_via_injected_lookup(tmp_path: Path) -> None:
     """audit() 組合邏輯（審查 F2）：D1 風險檔進 scope＋db<ra → missing
     組裝——``ra_lookup`` 替身免 rust-analyzer。"""
@@ -80,11 +108,13 @@ def test_audit_missing_via_injected_lookup(tmp_path: Path) -> None:
     def fake_lookup(p: Path) -> Counter:
         return Counter({"open": 2})  # RA 見 inherent＋trait 兩個 open；DB 僅 1
 
-    _, audited, missing = audit(repo, db, ra_lookup=fake_lookup)
+    _, audited, missing, errors, total_ra = audit(repo, db, ra_lookup=fake_lookup)
     assert audited == 1  # 僅 D1 風險檔進預設 scope
     assert missing == [
         {"file": str(rs), "symbol": "open", "ra_count": 2, "db_count": 1}
     ]
+    assert errors == []
+    assert total_ra == 2
 
 
 def test_parse_ra_symbols_fn_kinds_only() -> None:
