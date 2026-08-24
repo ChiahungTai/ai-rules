@@ -23,7 +23,7 @@ uv run --project ~/Github/ai-rules python -m code_reality.<tool> --repo <repo-ro
 | implement 階段 1（build 起點） | `snapshot --label <ep>` | transition 的 before 基準 |
 | 弧模式（code 已 commit、HEAD 越過 EP baseline） | `transition <a> <b> --ep <ep.md> --repo <repo>` | code-review 模式 B primed／post-build／implement 階段 6／debrief |
 | hub symbol 波及盤點 | `hub_refs <symbol>`（內建 hazard 安全網；「可刪」判斷前必跑） | debrief 第 5 段 |
-| CRG 同鍵去重受害符號 refs（Rust） | `scip_refs <Type.method> --index <scip>`；`--audit --repo <nt>` 對帳 graph_audit 缺差 | graph_audit 發現缺差後的 callers 真相源 |
+| CRG 同鍵去重受害符號 refs（Rust） | `scip_refs <Type.method> --repo <repo>`（repo-keyed slot，`--index` 顯式覆蓋）；`--audit --repo <repo>` 對帳 graph_audit 缺差 | graph_audit 發現缺差後的 callers 真相源 |
 | runtime 逐函式耗時 | `runtime_edges`（viztracer trace） | 效能分析 |
 | NT python↔Rust 邊 | `boundary_build --repo <nt>`（掃描建 sidecar）＋`boundary <symbol> --repo <nt>`（查詢） | v2 遷移地圖／縫分析 |
 | 弧敘事載體 | `delta_tour`（snapshot 對 diff→tour）／`chain_tour`（callstack md→tours）／`graph_csv`（graph.db→CSV） | 人類 viewport |
@@ -42,7 +42,7 @@ uv run --project ~/Github/ai-rules python -m code_reality.<tool> --repo <repo-ro
 | `delta_tour`／`chain_tour`／`graph_csv` | 敘事/關聯載體（`.tour` 契約——渲染消費者 CodeTour）；chain_tour 產出同步 upsert `.tours/manifest.toml` |
 | `tour_validate`／`tour_upgrade`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／manifest 讀寫 |
 | `graph_audit` | CRG graph.db **Rust 完整度稽核**——D1 同型別多 impl 風險掃描（per-block ≥2，非交集）＋D2 rust-analyzer symbols 對帳（kind 含 Test）；`--json` 鍵為治理鉤子契約；graph rebuild／rebase 大跳後跑（收編自 NT N1，2026-08-24 實測 219 缺差） |
-| `scip_refs` | rust-analyzer SCIP 索引查詢——CRG 同鍵去重受害符號（見 graph_audit）的 def/refs 真相源 sidecar；`--audit` 與 graph_audit 缺差對帳（(定義檔, 方法名) 雙鍵歸屬）；索引生成 ~8 分鐘、rebase 後重生（rust-analyzer scip，輸出寫 cwd）；protobuf 為 ai-rules dev 依賴 |
+| `scip_refs` | rust-analyzer SCIP 索引查詢——CRG 同鍵去重受害符號（見 graph_audit）的 def/refs 真相源 sidecar；`--audit` 與 graph_audit 缺差對帳（(定義檔, 方法名) 雙鍵歸屬）；索引 repo-keyed slot（`~/.mosaic/code-reality/scip/<repo-basename>/`——`--repo` 時 `--index` 可省略，多 repo 互蓋防護）＋生成後 `--stamp-meta --repo` 落版本 sidecar → 查詢首行 `[SRC] scip index @ <sha>`（與 repo HEAD 不一致 WARN＝漂移守衛；顯式 `--index` 無 sidecar 無 `--repo` 輸出不變）；索引生成 ~8 分鐘、rebase 後重生（rust-analyzer scip，輸出寫 cwd）；protobuf 為 ai-rules dev 依賴 |
 | `common`／`exclusions`／`profile`／`hazard` | 共用設施：`_meta`/`connect_ro`（WAL fallback）／排除前綴／profile 引擎／hub_refs hazard 判定層（六規則純函數——registry 表由 profile `[[hazard_registry]]` 注入） |
 
 ## repo profile（`.code-reality.toml`——repo 擁有）
