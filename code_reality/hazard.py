@@ -342,7 +342,7 @@ def detect_static_edge_gap(
         kind="static-edge-gap",
         count=len(missing),
         summary=(
-            f"{'.' + method if method else facts.name + '('} 呼叫檔 "
+            f"{'.' + method if method else facts.name} 呼叫檔 "
             f"{len(missing)} 個不在 CRG callers（prod {len(prod_missing)} / "
             f"test {len(test_missing)}）——rg 可見但靜態圖漏邊"
         ),
