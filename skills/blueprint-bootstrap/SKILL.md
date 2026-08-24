@@ -37,7 +37,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 - 幀行＝函式名＋`path:line` 錨＋`  # ` 職責附註——**`#` 前須雙空格**（parse_frames 的 partition 條件 `"  # "`；單空格或無 `#` 會讓職責併入 ident 判定、污染 graph 重錨——M2 實證：單空格形態致 not-in-graph 偏高）；幀 ident 一律 call-shaped `fn()`——ident 擇取偏呼叫狀、其次 longest-wins，裸 `Type::method` 會被更長的 struct 名搶走、錨到 struct 定義行（NT 實證 moved 1→19，補 `()` 歸零）；depth 由樹狀縮排推導；幀 DFS 序＝步序
 - 錨副檔＝`.py`／`.rs`（`.pyi` stub 是宣告層不入錨——跨縫幀走 boundary 第二錨，見生成程序步驟 2）；無錨幀（launchd/shell／外部路徑／撞名）會被跳過並記原因分佈——屬設計非錯誤
 
-**每份文檔模板**（callstack-v1 實證七段完整形態——按鏈型態裁剪，如純資料鏈無入口總表；audit 盤點不以七段齊全為 drift 基準）：①檔頭 blockquote（讀者／定位／行號快照宣告／交叉引用）②入口總表（launchd／CLI／test 誰觸發）③主 call stack 樹（**場景分棵**）④分層敘事（關鍵函式／錯誤路徑／IO·state 副作用）⑤資料轉換邊界表（時區／單位／編碼在鏈上哪點變換）⑥不變量與陷阱（docstring 教訓）⑦符號速查表（symbol→連結按層分組）。
+**每份文檔模板**（callstack-v1 實證七段完整形態——按鏈型態裁剪，如純資料鏈無入口總表；audit 盤點不以七段齊全為 drift 基準）：①檔頭 blockquote（讀者／定位／行號快照宣告／交叉引用）②入口總表（launchd／CLI／test 誰觸發＋**環境前提與警語**——本機前置／feature gate／fallback 鏈；NT 實證：madsim 開關、雙 venv、feature 靜默縮減、RPC fallback panic 為 ops 鏈最有價值段落）③主 call stack 樹（**場景分棵**）④分層敘事（關鍵函式／錯誤路徑／IO·state 副作用）⑤資料轉換邊界表（時區／單位／編碼在鏈上哪點變換）⑥不變量與陷阱（docstring 教訓）⑦符號速查表（symbol→連結按層分組）。
 
 **檔名**：每篇＝英文 kebab slug（grep/CLI 友善）；corpus 族名與檔名**解耦**（族名＝人類標題，規範在 [tour-bootstrap](../tour-bootstrap/SKILL.md) 步驟 2）——兩者僅經 manifest sources 連結。
 
@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 5. **findings 彙整**：跨系列 🔴／🟡／🟢 優先序（深挖副產品＝code review 輸入）
 6. **UC 映射表**：任務／UC × 鏈（「查某 UC 的 how 從這進」）
 
-**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（原地）或退役 `_done/`——平行版本需求才開版號目錄。**執行模式與效率**：①單 session 逐鏈（原版實證：16 篇／24 模組／一個完整 session 額度）②agent 群並行（跑批實證：29 篇／~2.5k 幀／牆鐘 ~2h／token ~150M——高於單 session 額度，但每篇自帶錨定機械驗證、可並行；token 量級是模式抉擇的輸入）。agent 群模式**共用 context 打包**：枚舉產物（鏈清單＋每鏈入口細節＋相關 AGENTS.md 段）直接嵌入每篇 agent prompt——冷啟重讀是重複成本主因，打包入口細節實證有效。品質基準：工具實測錨定率（>90%）＋` # ` 附註率（~100%）。
+**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（原地）或退役 `_done/`——平行版本需求才開版號目錄。**執行模式與效率**：①單 session 逐鏈（原版實證：16 篇／24 模組／一個完整 session 額度）②agent 群並行（跑批實證：29 篇／~2.5k 幀／牆鐘 ~2h／token ~150M——高於單 session 額度，但每篇自帶錨定機械驗證、可並行；token 量級是模式抉擇的輸入）——**並行上限 ≤3**（rate limit 實證：mosaic 六並行掛 2；NT 13 agents 併 ≤3 零失敗）＋失敗者**序列重試一次一個**，勿立即重 spawn。agent 群模式**共用 context 打包**：枚舉產物（鏈清單＋每鏈入口細節＋相關 AGENTS.md 段）直接嵌入每篇 agent prompt——冷啟重讀是重複成本主因，打包入口細節實證有效。品質基準：工具實測錨定率（>90%）＋` # ` 附註率（~100%）。
 
 ## audit 模式（既有 blueprint——預設防護）
 
