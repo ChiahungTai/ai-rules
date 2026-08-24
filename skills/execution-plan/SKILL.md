@@ -168,6 +168,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 - 依賴關係和關鍵約束
 - 類似功能的既有實作位置
 - 風險假設清單（標注等級；致命等級附先驗結果，對應段落驗證策略）
+- callstack 菜單積壓（repo 有 `ai-analysis/blueprint/callstack-plan.md` 時）：待生成鏈行——新 EP 常踩在未文檔化功能上；僅列清單，生成＝獨立觸發（blueprint-bootstrap）
 
 > **深度上限**：研究摘要層級（可複用元件清單 + 風險假設），**非 codebase 全景報告**——避免 EP 膨脹。後續段落的「基礎設施盤點」在此基礎上補段落特定細節。
 

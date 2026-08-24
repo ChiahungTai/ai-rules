@@ -65,6 +65,7 @@ findings 全空 → 報告並直接進 docs 鏈。
 - code 鏈：findings N（✅N/❌N/⚠️N）、修正 N 項、followup <通過|未收斂(殘留清單)>
 - EP 對照：transition=<機械底稿|LLM 對照|無（原因：uncommitted 模式/小變更）>——宣稱觸及 vs 實際變動模組、unexplained 差異項
 - docs 鏈：consistency N 檔（pass N / fail-fixed N）、metadata-sync <跑/跳過>
+- callstack 菜單（repo 有 `ai-analysis/blueprint/callstack-plan.md` 時）：積壓 N 條待生成（機械＝plan 行數 − `callstack/` 既有 md 數）——報庫存不催行動，生成＝獨立觸發＋報價（blueprint-bootstrap）
 - ⚠️ 待用戶確認：<決策清單>
 - 下一步：`/commit`（commit 需人類確認，本 skill 止步於此）
 ```
