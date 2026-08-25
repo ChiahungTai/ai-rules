@@ -16,6 +16,7 @@ working tree）。
 import argparse
 import json
 import re
+import sys
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -108,7 +109,9 @@ def _path_token_claims(text: str, profile: Profile, repo_root: Path) -> set[str]
     (mosaic dogfood 2026-08-25: relative-only EPs scored 0 hits → mass false
     "changed but not claimed"). Relative tokens are resolved against each
     module prefix and verified as real directories under repo_root — a
-    grounded mapping, no guessing.
+    grounded mapping, no guessing. Known edge: with multiple module rules,
+    a same-named first segment under two prefixes resolves to the first
+    rule in declaration order (same first-hit convention as module_of).
     """
     claims: set[str] = set()
     for tok in _FILE_TOKEN_RE.findall(text):
@@ -252,7 +255,10 @@ def render_report(
     if claims is None:
         lines.append("未提供 `--ep`（EP 宣稱模組路徑對照省略）。")
     elif not claims:
-        lines.append("claims: **NONE**——EP 內無 profile prefix 路徑 mention。")
+        lines.append(
+            "claims: **NONE**——EP 內無可解析之路徑 mention"
+            "（prefix 形式或可驗證之相對路徑）。"
+        )
         lines.append(
             f"- 實際變動模組（供判讀，無宣稱可比對）：{sorted(_changed_modules(diff, new_files, gone_files, profile))}"
         )
@@ -340,7 +346,8 @@ def main() -> None:
     if args.ep and profile is None:
         print(
             "[WARN] claims 恆 NONE——--repo 未指到含 .code-reality.toml 的 repo，"
-            "宣稱對照不生效（--repo 預設 cwd）"
+            "宣稱對照不生效（--repo 預設 cwd）",
+            file=sys.stderr,
         )
     claims = (
         extract_ep_claims(args.ep, profile, repo_root=args.repo) if args.ep else None

@@ -89,7 +89,7 @@ evidence = "mosaic_alpha/conditions/discovery.py:149"   # 可選——註冊鏈�
 
 ## 口徑限制（宣稱抽取——transition `--ep`／delta_tour）
 
-claims regex 由 `[[module]]` prefixes 衍生（如 `mosaic_alpha/[a-z_0-9]+`）——**只認這些前綴的路徑 mention**。不符前綴的變更宣稱欄恆 NONE＝「未提供對照」（單欄邊集差異仍可用），**不當「EP 無宣稱」解讀**。相對路徑 mention（`adapters/sj/x.py` 形式）經 prefix 下目錄**存在性驗證**可正規化命中（`extract_ep_claims` 帶 repo_root 時；2026-08-25 dogfood 修）。delta_tour 宣稱**三態**：⚠ 只在可比較態；claims 空（profile 未載入/無 mention）或 **0 命中防呆**（有 claims 但零交集＋多變更模組＝matcher 異常訊號）→ 整塊「未比對」零 ⚠＋stderr WARN；步驟集由宣稱的 git range 嚴格推導（刪檔收斂單步、改名可走讀、範圍外結構上不可能）。
+claims regex 由 `[[module]]` prefixes 衍生（如 `mosaic_alpha/[a-z_0-9]+`）——**只認這些前綴的路徑 mention**。不符前綴的變更宣稱欄恆 NONE＝「未提供對照」（單欄邊集差異仍可用），**不當「EP 無宣稱」解讀**。相對路徑 mention（`adapters/sj/x.py` 形式）經 prefix 下目錄**存在性驗證**可正規化命中（`extract_ep_claims` 帶 repo_root 時；2026-08-25 dogfood 修）。delta_tour 宣稱**三態**：⚠ 只在可比較態；claims 空（profile 未載入/無可解析 mention）→ 整塊「未比對」零 ⚠＋stderr WARN；**claims 非空恆比對**——零命中＝如實呈現真漂移（⚠/✗）＋stderr 觀測 WARN（可能是真漂移或粒度問題）；步驟集由宣稱的 git range 嚴格推導（刪檔收斂單步、改名可走讀、範圍外結構上不可能）。
 
 ## 已知形狀假設（boundary——NT 專案）
 

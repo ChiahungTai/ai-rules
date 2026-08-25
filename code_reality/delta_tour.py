@@ -13,9 +13,9 @@
 輸出 ``<out-dir>/YYYY-MM-DD-<task>.tour``（task 預設＝--ep 檔名 stem
 kebab 化、無 --ep 時 ``review``）；生成時清理 out-dir 內 >7 天舊檔
 （delta tour 不 commit 的本地 7 天生命週期義務）。
-已知口徑：claims 只認 profile ``[[module]]`` prefixes 衍生路徑（code-reality
-skill「口徑限制」段）——不符前綴的弧宣稱恆 NONE 屬預期，如實顯示
-（SM-2，ep-code-reality-ui）。
+已知口徑：claims 三態（compared／未比對〔claims 空＝無 profile 或無可解析
+mention〕／無 --ep）——⚠ 只在 compared 態；相對路徑 mention 經 prefix 下目錄
+存在性驗證可正規化命中（code-reality skill「口徑限制」段）。
 """
 
 import argparse
@@ -54,7 +54,8 @@ def first_change_lines(
 ) -> tuple[dict[str, int], set[str]]:
     """git diff（unified=0）每檔第一個正錨 hunk 的新行號＋git-A 檔集——跳轉錨。
 
-    ``--diff-filter=AM`` 排除純刪檔與 rename；錨取第一個起始行 >0 的 hunk
+    ``--diff-filter=AMT`` 排除純刪檔與 rename（T 補入——typechange 走 M
+    分類但 hunk 錨不再退 line 1）；錨取第一個起始行 >0 的 hunk
     （檔首刪除 hunk 是 ``+0,0`` 被跳過——首 hunk 刪除＋後續修改的檔仍錨到
     後續 hunk，不整檔消失；非檔首的純刪除 hunk（``+N,0``）錨到刪除點
     前一行）；有 diff 輸出但無正錨（binary/清空）退 line 1（漏檔比弱錨糟）。
@@ -67,7 +68,7 @@ def first_change_lines(
             "diff",
             "--name-status",
             "-z",
-            "--diff-filter=AM",
+            "--diff-filter=AMT",
             before,
             after,
         ],
@@ -81,7 +82,7 @@ def first_change_lines(
         errors="replace",
     )
     parts = iter(p for p in out.split("\0") if p)
-    # 兩兩配對依賴 AM filter：A/M 條目恰兩欄位（status\0path\0）；R/C 是
+    # 兩兩配對依賴 filter：A/M/T 條目恰兩欄位（status\0path\0）；R/C 是
     # 三欄位（R100\0old\0new\0）會錯位——放寬 filter 前須改解析
     added: set[str] = set()
     files: list[str] = []
@@ -112,9 +113,14 @@ def first_change_lines(
 
 # First-declaration anchor for freshly added/renamed code files (mosaic
 # dogfood bug 3: landing on a copyright header is not what a reader wants).
+# Optional visibility modifiers cover the common Rust/Java/TS openers
+# (pub fn / public class / export function — review F2); no string
+# awareness — a declaration-looking line inside a docstring may match
+# (anchors near-content, acceptable).
 _DECL_RE = re.compile(
-    r"^\s*(?:async\s+def\b|def\b|class\b|fn\b|struct\b|enum\b|impl\b|"
-    r"trait\b|mod\b|func\b|type\b|interface\b)"
+    r"^\s*(?:(?:pub|public|private|protected|internal|static|export|"
+    r"async)\s+)*(?:async\s+def\b|def\b|class\b|fn\b|struct\b|enum\b|"
+    r"impl\b|trait\b|mod\b|func\b|function\b|type\b|interface\b)"
 )
 _CODE_SUFFIXES = {
     ".py",
@@ -144,7 +150,7 @@ def range_status(
     typechanges (T) count as M, copies (C) as A.
     """
     out = subprocess.run(
-        ["git", "diff", "--name-status", "-z", before, after],
+        ["git", "diff", "--name-status", "-z", "--find-renames", before, after],
         cwd=repo_root,
         capture_output=True,
         check=True,
@@ -174,24 +180,21 @@ def range_status(
     return by_status, renames
 
 
-def new_file_anchor(repo_root: Path, after: str, path: str) -> int:
+def new_file_anchor(
+    repo_root: Path,
+    after: str,
+    path: str,
+    lines_cache: dict[str, list[str] | None],
+) -> int:
     """Anchor line for added/renamed files: first declaration line for code
-    files; line 1 otherwise (and as fallback when unreadable)."""
+    files; line 1 otherwise (and as fallback when unreadable). Shares the
+    step-pattern line cache — one ``git show`` per file (review F3)."""
     if Path(path).suffix.lower() not in _CODE_SUFFIXES:
         return 1
-    r = subprocess.run(
-        ["git", "show", f"{after}:{path}"],
-        cwd=repo_root,
-        capture_output=True,
-        check=False,
-    )
-    if r.returncode != 0:
+    lines = _after_lines(repo_root, after, path, lines_cache)
+    if lines is None:
         return 1
-    try:
-        text = r.stdout.decode("utf-8")
-    except UnicodeDecodeError:
-        return 1
-    for idx, line in enumerate(text.split("\n"), start=1):
+    for idx, line in enumerate(lines, start=1):
         if _DECL_RE.match(line):
             return idx
     return 1
@@ -199,9 +202,21 @@ def new_file_anchor(repo_root: Path, after: str, path: str) -> int:
 
 def file_subjects(repo_root: Path, before: str, after: str, path: str) -> list[str]:
     """Commit subjects touching ``path`` within the range — the cheapest
-    mechanical "why" for step descriptions (mosaic dogfood bug 3)."""
+    mechanical "why" for step descriptions (mosaic dogfood bug 3).
+
+    Newest first (git log order); git's default history simplification
+    applies, so merge-heavy ranges may undercount. ``:(literal)`` guards
+    filenames containing glob characters (review F12).
+    """
     out = subprocess.run(
-        ["git", "log", "--format=%s", f"{before}..{after}", "--", path],
+        [
+            "git",
+            "log",
+            "--format=%s",
+            f"{before}..{after}",
+            "--",
+            f":(literal){path}",
+        ],
         cwd=repo_root,
         capture_output=True,
         check=True,
@@ -261,9 +276,11 @@ def build_tour(
     c_miss = claims.get("claimed_not_changed", [])
 
     # claims three-state (bug 1): ⚠ "EP didn't mention this" is a serious
-    # accusation — emit it only when the comparison actually ran. Extraction
-    # failure (no profile / no mention / zero-hit guard) degrades to
-    # not-compared instead of mass false warnings.
+    # accusation — emit it only when the comparison actually ran. Empty
+    # claims (no profile / no resolvable mention) degrade to not-compared;
+    # non-empty claims always compare (zero hits = genuine drift or a
+    # granularity mismatch — honest display + stderr observability WARN,
+    # review F1: degrading here would swallow the true-drift signal).
     if "ep_claims" not in data:
         claims_state, nc_reason = "no_ep", None
     elif claims.get("claims_none"):
@@ -271,18 +288,17 @@ def build_tour(
         nc_reason = (
             "profile 未載入——--repo 未指到含 .code-reality.toml 的 checkout"
             if profile is None
-            else "EP 內無 profile 前綴路徑 mention（相對路徑需可解析至前綴下）"
-        )
-    elif not c_hit and c_sur:
-        claims_state = "not_compared"
-        nc_reason = "宣稱對照 0 命中且有多個變更模組——matcher 異常訊號，整塊降級未比對"
-        print(
-            f"[WARN] {nc_reason}（步驟不標 ✓/⚠——避免把抽取失效誤呈為"
-            "「EP 沒提卻變了」）",
-            file=sys.stderr,
+            else "EP 內無可解析之路徑 mention（prefix 形式或可驗證之相對路徑）"
         )
     else:
         claims_state, nc_reason = "compared", None
+        if not c_hit and c_sur:
+            print(
+                "[WARN] 宣稱對照零命中（宣稱全數未動＋"
+                f"{len(c_sur)} 個未宣稱變更模組）——若非真實漂移，檢查 --repo "
+                "profile 粒度與 EP 路徑形式",
+                file=sys.stderr,
+            )
 
     def claim_tag(module: str) -> str:
         if claims_state != "compared":
@@ -320,7 +336,7 @@ def build_tour(
 
     a_files = sorted(f for f in statuses["A"] if not _noise(f))
     r_files = sorted(f for f in renames if not _noise(f))
-    m_files = sorted(f for f in statuses["M"] if not _noise(f) and f not in renames)
+    m_files = sorted(f for f in statuses["M"] if not _noise(f))
     d_files = sorted(f for f in statuses["D"] if not _noise(f))
 
     # Overview counts derive from the same sets as the steps — consistent by
@@ -366,10 +382,12 @@ def build_tour(
             overview["pattern"] = overview_pattern
 
     entries: list[tuple[str, str, int]] = [
-        (f, "＋新檔", new_file_anchor(repo_root, meta["after"], f)) for f in a_files
+        (f, "＋新檔", new_file_anchor(repo_root, meta["after"], f, lines_cache))
+        for f in a_files
     ]
     entries += [
-        (f, "→改名", new_file_anchor(repo_root, meta["after"], f)) for f in r_files
+        (f, "→改名", new_file_anchor(repo_root, meta["after"], f, lines_cache))
+        for f in r_files
     ]
     entries += [(f, "M修改", jump.get(f, 1)) for f in m_files]
     for f, tag, ln in entries:
@@ -399,8 +417,13 @@ def build_tour(
         steps.append(step)
 
     # Deletions collapse into one unjumpable summary step (bug 2: dead steps
-    # were 24% of the mosaic walk-through).
+    # were 24% of the mosaic walk-through); each line keeps the range commit
+    # subject so cleanup arcs keep their "why" (review F5).
     if d_files:
+        d_lines = []
+        for f in d_files:
+            subs = file_subjects(repo_root, meta["before"], meta["after"], f)
+            d_lines.append(f"- {f}" + (f" — {subs[0]}" if subs else ""))
         steps.append(
             {
                 "file": d_files[0],
@@ -408,7 +431,7 @@ def build_tour(
                 "title": f"−刪檔 ×{len(d_files)}（range 內彙總）",
                 "description": (
                     f"本弧刪除 {len(d_files)} 檔——無法跳轉，僅清單：\n"
-                    + "\n".join(f"- {f}" for f in d_files)
+                    + "\n".join(d_lines)
                 ),
             }
         )
@@ -503,13 +526,14 @@ def main() -> None:
     if args.ep and profile is None:
         print(
             "[WARN] claims 恆 NONE——--repo 未指到含 .code-reality.toml 的 repo，"
-            "宣稱對照不生效（--repo 預設 cwd）"
+            "宣稱對照不生效（--repo 預設 cwd）",
+            file=sys.stderr,
         )
     claims = (
         extract_ep_claims(args.ep, profile, repo_root=args.repo) if args.ep else None
     )
     diff, new_files, gone_files = summarize(sa, sb)
-    data = render_json(sa, sb, claims, diff, new_files, gone_files)
+    data = render_json(sa, sb, claims, diff, new_files, gone_files, profile)
     tour = build_tour(data, args.repo, ep_path=args.ep, task=task)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)

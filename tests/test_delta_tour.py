@@ -20,6 +20,7 @@ from profile_repo import write_mosaic_profile
 
 from code_reality.common import anchor_pattern
 from code_reality.delta_tour import (
+    _DECL_RE,
     build_tour,
     cleanup_expired,
     first_change_lines,
@@ -466,15 +467,18 @@ class TestClaimsThreeState:
         assert not any("✓宣稱命中" in s["title"] for s in tour["steps"])
         assert "未比對" in tour["steps"][0]["description"]
 
-    def test_zero_hit_degrades_to_not_compared(
+    def test_zero_hit_still_compares_with_observation_warn(
         self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
     ) -> None:
+        """review F1：claims 非空＝抽取成功——零命中恆比對（真漂移如實呈現
+        ⚠），只加 stderr 觀測 WARN，不降級吞訊號。"""
         repo, data = self._claims_data(
             tmp_path, claims_none=False, claims=["mosaic_alpha/ghost"]
         )
         tour = build_tour(data, repo)
-        assert not any("⚠" in s["title"] for s in tour["steps"])
-        assert "未比對" in tour["steps"][0]["description"]
+        assert any("⚠EP沒提卻變了" in s["title"] for s in tour["steps"])
+        assert "宣稱對照" in tour["steps"][0]["description"]
+        assert "未比對" not in tour["steps"][0]["description"]
         assert "WARN" in capsys.readouterr().err
 
     def test_partial_hit_still_compares(self, tmp_path: Path) -> None:
@@ -616,3 +620,100 @@ class TestCli:
         assert tour["title"] == "my-fancy-ep 變更導覽"
         assert not expired.exists()  # main() 生成後清理接線（build review F-D）
         assert "cleaned 1 expired" in capsys.readouterr().out
+
+
+class TestClaimsThreeStateNoProfile:
+    """claims_none＋profile 未載入分支（review primed-F8）——nc_reason 指向
+    profile 未載入，而非無 mention。"""
+
+    def test_claims_none_without_profile_names_reason(self, tmp_path: Path) -> None:
+        repo, a, b = make_repo(tmp_path)
+        (repo / ".code-reality.toml").unlink()  # make_repo writes one — remove
+        data = trans_data(
+            a,
+            b,
+            ep_claims={
+                "claims": [],
+                "claims_none": True,
+                "claimed_and_changed": [],
+                "changed_not_claimed": ["mosaic_alpha"],
+                "claimed_not_changed": [],
+            },
+        )
+        tour = build_tour(data, repo)
+        desc = tour["steps"][0]["description"]
+        assert "未比對" in desc and "profile 未載入" in desc
+        assert not any("⚠" in s["title"] for s in tour["steps"])
+
+
+class TestDeclReForms:
+    """review F2 — declaration regex covers common modifier openers
+    (Rust pub / Java public / TS export)."""
+
+    @pytest.mark.parametrize(
+        ("line", "hits"),
+        [
+            ("def main():", True),
+            ("pub fn main() {", True),
+            ("pub struct Foo {", True),
+            ("export function foo(", True),
+            ("public class Foo {", True),
+            ("async fn poll(", True),
+            ("# Copyright (c) 2026", False),
+            ("import os", False),
+        ],
+    )
+    def test_forms(self, line: str, hits: bool) -> None:
+        assert bool(_DECL_RE.match(line)) is hits
+
+
+class TestCliPartialHit:
+    """review primed-F1 — render_json must carry the profile: a CLI-level EP
+    claim on a prefix module that genuinely changed must surface ✓ (the
+    granularity mismatch used to swallow true hits into the zero-hit guard)."""
+
+    def test_ep_claim_hits_at_cli_level(self, tmp_path: Path) -> None:
+        repo, a, b = make_repo(tmp_path)
+        snap: dict[str, Any] = {
+            "_meta": {"repo": "repo", "commit": "", "created_at": "t", "tool": "t"},
+            "files": ["mosaic_alpha/domain/mod_a.py", "mosaic_alpha/old/gone.py"],
+            "module_edges": [],
+        }
+        sa, sb = tmp_path / "a.json", tmp_path / "b.json"
+        snap["_meta"]["commit"] = a
+        sa.write_text(json.dumps(snap))
+        snap["files"] = [
+            "mosaic_alpha/domain/mod_a.py",
+            "mosaic_alpha/newpkg/new_mod.py",
+        ]
+        snap["_meta"]["commit"] = b
+        sb.write_text(json.dumps(snap))
+        ep = tmp_path / "ep.md"
+        ep.write_text("新增 `mosaic_alpha/newpkg/new_mod.py`（註冊新模組）。\n")
+        out = tmp_path / "out"
+        r = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "code_reality.delta_tour",
+                str(sa),
+                str(sb),
+                "--repo",
+                str(repo),
+                "--ep",
+                str(ep),
+                "--out-dir",
+                str(out),
+                "--task",
+                "partial",
+            ],
+            cwd=tmp_path,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert r.returncode == 0, r.stderr
+        tour = json.loads((out / f"{local_today():%Y-%m-%d}-partial.tour").read_text())
+        titles = [s["title"] for s in tour["steps"]]
+        assert any("✓宣稱命中" in t for t in titles)
+        assert "✓ 命中 (1)" in tour["steps"][0]["description"]
