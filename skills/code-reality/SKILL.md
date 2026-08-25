@@ -87,9 +87,9 @@ evidence = "mosaic_alpha/conditions/discovery.py:149"   # 可選——註冊鏈�
 3. **scan_root 僅 pyo3 對帳 repo 需要**（rust 源 × `.pyi` stub 的 boundary 掃描）——一般 repo 不寫；非 NT 佈局的 `boundary_build` 會 crash-only（loud），屬設計
 4. **smoke 驗證**：`code_reality.snapshot --repo <repo> --label smoke` 跑一發，判讀 module 切分是否符合直覺（切錯→回步驟 1 改 prefix/depth）；之後 chain_tour 的 `not-in-graph` 統計是 graph 新鮮度信號、`external`/skip 統計是 prefix 覆蓋度信號（幀整批落 external＝prefix 缺層，回步驟 1 補）。profile 檔歸 repo root，commit 與否該 repo 自決
 
-## 口徑限制（宣稱抽取——transition `--ep`）
+## 口徑限制（宣稱抽取——transition `--ep`／delta_tour）
 
-claims regex 由 `[[module]]` prefixes 衍生（如 `mosaic_alpha/[a-z_0-9]+`）——**只認這些前綴的路徑 mention**。不符前綴的變更宣稱欄恆 NONE＝「未提供對照」（單欄邊集差異仍可用），**不當「EP 無宣稱」解讀**。
+claims regex 由 `[[module]]` prefixes 衍生（如 `mosaic_alpha/[a-z_0-9]+`）——**只認這些前綴的路徑 mention**。不符前綴的變更宣稱欄恆 NONE＝「未提供對照」（單欄邊集差異仍可用），**不當「EP 無宣稱」解讀**。相對路徑 mention（`adapters/sj/x.py` 形式）經 prefix 下目錄**存在性驗證**可正規化命中（`extract_ep_claims` 帶 repo_root 時；2026-08-25 dogfood 修）。delta_tour 宣稱**三態**：⚠ 只在可比較態；claims 空（profile 未載入/無 mention）或 **0 命中防呆**（有 claims 但零交集＋多變更模組＝matcher 異常訊號）→ 整塊「未比對」零 ⚠＋stderr WARN；步驟集由宣稱的 git range 嚴格推導（刪檔收斂單步、改名可走讀、範圍外結構上不可能）。
 
 ## 已知形狀假設（boundary——NT 專案）
 

@@ -69,5 +69,7 @@ def test_real_chain_tours(tmp_path: Path) -> None:
     # 重錨分佈（2026-08-23 新 graph 快照——mosaic e3e0b781 full rebuild 後：
     # same 101/moved 12/moved-file 0/noref 6/not-in-graph 12。因果鏈：
     # 70（單空格污染＋陳舊 graph）→58（雙空格修正）→12（graph 重建）
-    assert st.g_counts.get("same", 0) >= 90
+    # →2026-08-25 mosaic 側 graph 再重建（636e7d9d 弧）：same 87/moved 26
+    # （live-state 漂移帳本——本測試消費真 mosaic graph.db，重建即位移）
+    assert st.g_counts.get("same", 0) >= 80
     assert st.g_counts.get("moved", 0) >= 8

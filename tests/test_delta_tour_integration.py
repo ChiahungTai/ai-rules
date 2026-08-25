@@ -59,7 +59,13 @@ def _run(*extra: str, out: Path) -> subprocess.CompletedProcess[str]:
 )
 class TestDeltaTourIntegration:
     def test_poc_parity_22_steps(self, tmp_path: Path) -> None:
-        """SM-1：--ep 跑 thin-layer 弧 → 與 POC 22 步一致（含錨點級對照）。"""
+        """SM-1：--ep 跑 thin-layer 弧 → 22 步（range 推導：1 總覽＋19 新＋2 修改）。
+
+        2026-08-25 dogfood 三 bug 修後：本 EP 的 tools/tests 相對路徑在
+        mosaic_alpha/ prefix **之外**（不可正規化命中）→ 宣稱對照**未比對**、
+        步驟零 ⚠（舊行為全量 ⚠＝「EP 沒提卻變了」錯誤指控，mosaic dogfood
+        bug 1）。計數由 range 同源導出（19 新檔＝步驟數，根治 3-vs-5 不一致）。
+        """
         r = _run("--ep", str(EP), out=tmp_path)
         assert r.returncode == 0, r.stderr
         tour = json.loads(
@@ -74,8 +80,12 @@ class TestDeltaTourIntegration:
         s0 = tour["steps"][0]
         assert s0["title"] == "弧總覽：87173a8a → 9f58f78c"
         assert s0["file"] == str(EP)
-        # thin-layer EP 無 mosaic_alpha/ mention → tools/tests 全落「沒提卻變了」
-        assert any("⚠EP沒提卻變了" in s["title"] for s in tour["steps"])
+        # thin-layer EP 無 mosaic_alpha/ mention 且相對路徑在 prefix 外 →
+        # 未比對（三態），非全量 ⚠
+        assert "未比對" in s0["description"]
+        assert not any("⚠" in s["title"] for s in tour["steps"])
+        assert not any("✓宣稱命中" in s["title"] for s in tour["steps"])
+        assert "19 新檔" in s0["description"] and "2 修改" in s0["description"]
 
         # hunk 錨級對照（POC 實證值）：modified 檔跳第一個 hunk
         anchors = {s["file"]: s["line"] for s in tour["steps"]}
