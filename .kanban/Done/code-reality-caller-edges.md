@@ -18,3 +18,6 @@ DEF-enc containment 推導 caller 邊（96.9% 歸屬已證）：ref occ 行→�
 
 ## 備註
 refs＝所有 non-DEF occ、不可當呼叫數解讀；callers＝歸屬子集（item-level remainder 分離標注）
+
+## 收案（2026-08-26）
+能力已交付——載體＝code-reality repo R3（`8cacbce` feat(rust): caller edges + closure，DEF-enc attribution＋fn_defs sidecar；NT 基準經 46a9c23 EP 裁定為 16 callers）。本卡以能力交付論結；Python 版 S2 形態（17 callers 三源）由 Rust parity 測試承接。

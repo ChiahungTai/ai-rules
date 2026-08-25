@@ -18,3 +18,6 @@ code_reality 九工具＋tests big-bang 搬進新 repo（D1），加 caller 邊�
 ## 備註
 - 硬約束：NT CLI 契約（--json/exit codes/stdout bytes）永不破壞
 - Ask First gate：repo 命名已定案 `code-reality`（2026-08-25）、刪碼（S4 gate）、每筆 commit
+
+## 收案（2026-08-26）
+S1 完整閉環（`2eafd8a`＋dogfood）；**S2/S3 scope 移交 code-reality repo Rust 軌**（R3 已交付 caller edges）；S4（消費端切換＋ai-rules 舊碼刪除）另立卡追蹤。本卡追蹤目的完成。

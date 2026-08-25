@@ -18,3 +18,5 @@ FastMCP HTTP 薄殼（:8200）＋launchd 常駐＋ZCode user-level 掛接——L
 
 ## 備註
 v0 工具面＝SCIP 家族四工具；snapshot/transition/hub_refs/tour 維持 CLI（YAGNI）。Claude 端掛接 optional。不做 repo-root hook（server 端自己 loud）
+
+> 2026-08-26 註記：ownership＝code-reality repo Rust 軌（ai-rules 側無動作）；R4 graph family EP 之後評估 MCP 形態。卡留作跨 repo 可見度——屆時若由 Rust 統一介面交付，收案比照 caller-edges 卡。
