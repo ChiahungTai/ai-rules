@@ -22,6 +22,15 @@ harness-scope: neutral
 
 > **`python -c` 是 AI 自用驗證，不需人類可讀註解。** 多行 `python -c` 中換行後接 `#` 註解會觸發部分 harness 的權限確認（Claude: Claude CLI 無法判斷跨行 `#` 是否被注入惡意內容，故每次需人工確認）。要驗證想法就寫乾淨單行，或落成 `.py` 檔。Claude 端 `python -c` / `$` 展開限制（Claude: `bash-hard-rules.md`）。
 
+## zsh 動態 flag 組合（陣列、禁純量）
+
+> **harness shell 是 zsh——未引號變數不做 word-split（與 bash 慣性相反）**：bash 慣性的 `cmd $extra` 在 zsh 把 `--flag 1` 整串當單一參數，argparse 報 `unrecognized arguments`。
+
+- 迴圈/條件組動態 CLI flags：❌ `extra="--flag 1"; cmd $extra`；✅ `args=(--flag 1); cmd "${args[@]}"`（bash/zsh 同語義）
+- 組合 ≤2 直接寫死分支命令；單一 flag 用 `--flag=1` 單 word 形式
+- 禁 `setopt shwordsplit`（全局語義突變）與 `${=var}`（zsh 專屬不可攜）
+- 真實案例：2026-08-26 NT chain_tour 批次重產 `--primary 1` 純量整串傳入 → `unrecognized arguments`
+
 ## 檔案修改禁令
 
 - 禁止 `sed` 修改 `.py`/`.md`/`.yaml`/`.json`/`.toml`（sed 不理解程式碼或 Markdown 語法，批次替換常破壞縮排、誤改字串/註解、毀損多行結構）
