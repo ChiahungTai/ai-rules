@@ -76,7 +76,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 **前置：EP baseline 記錄**：EP 整合策略缺 `baseline: <hash>` 時補記當下 `git rev-parse HEAD`（= build 首個 code commit 的 parent）——`/post-build`/`/code-review` 任務弧審查的範圍邊界由 EP 攜帶，跨 session 不重新推導（見 [code-review](../code-review/SKILL.md)「任務弧模式」）。
 
-**code_reality baseline snapshot（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：一律跑（不綁「補記 baseline」條件）：`uv run --project ~/Github/ai-rules python -m code_reality.snapshot --repo <repo> --label <ep>`——錨定 build 起點 code 結構（HEAD 通常 = EP baseline；resume 或 EP 後另有 commits 時錨 build 起點現狀，git 弧邊界仍由 EP baseline hash 管轄），是 transition（EP 宣稱模組 vs 實際變動對照）的 before 基準，階段 6 EP 對照歸納、`/code-review` 模式 B primed（含 `/post-build` 編排；弧模式才產出 transition——時點條件見模式 B）與 `/debrief` 前後差異段消費。docs mode EP 跳過（code edges 不變）；未裝跳過，不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
+**code_reality baseline snapshot（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：一律跑（不綁「補記 baseline」條件）：`code-reality snapshot --repo <repo> --label <ep>`——錨定 build 起點 code 結構（HEAD 通常 = EP baseline；resume 或 EP 後另有 commits 時錨 build 起點現狀，git 弧邊界仍由 EP baseline hash 管轄），是 transition（EP 宣稱模組 vs 實際變動對照）的 before 基準，階段 6 EP 對照歸納、`/code-review` 模式 B primed（含 `/post-build` 編排；弧模式才產出 transition——時點條件見模式 B）與 `/debrief` 前後差異段消費。docs mode EP 跳過（code edges 不變）；未裝跳過，不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
 
 1. 讀取 Execution Plan，識別段落結構、依賴關係
 2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在階段 5a 結算時執行）

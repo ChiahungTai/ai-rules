@@ -1,7 +1,7 @@
 ---
 name: code-reality
 description: "code_reality 工具鏈——repos 之上的 meta 層工具（住 ~/Github/ai-rules），跨 repo 消費單一入口。何時跑：implement 階段 1 baseline snapshot／post-build·code-review 弧模式 transition／debrief 機械底稿／cold-start boundary 掃描／「0 callers 可刪」判斷前 hub_refs hazard。含 repo profile（.code-reality.toml）schema 與 claims 口徑限制真相源。"
-when_to_use: "Running code_reality tools (snapshot/transition/hub_refs+hazard/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_csv/graph_audit/scip_refs), authoring .code-reality.toml, or interpreting transition claims output. Tool availability check: .code-reality.toml in repo root OR uv run --project ~/Github/ai-rules python -m code_reality.snapshot --help exits 0."
+when_to_use: "Running code_reality tools (snapshot/transition/hub_refs+hazard/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_csv/graph_audit/scip_refs), authoring .code-reality.toml, or interpreting transition claims output. Tool availability check: .code-reality.toml in repo root OR code-reality snapshot --help exits 0."
 argument-hint: "（程序 skill——不直接觸發；查閱用）"
 allowed-tools: ["Read", "Bash"]
 ---
@@ -11,10 +11,10 @@ allowed-tools: ["Read", "Bash"]
 工具在 `~/Github/ai-rules`（repos 之上——**repo 事實歸 repo**，工具層不內建任何 repo 特例）。**呼叫形態**（從任意 repo cwd）：
 
 ```
-uv run --project ~/Github/ai-rules python -m code_reality.<tool> --repo <repo-root> [args]
+code-reality <tool> --repo <repo-root> [args]
 ```
 
-**存在性偵測（單一真相源——implement／code-review／debrief 三檔存在性述語直接引用；post-build 經 code-review 模式 B 間接）**：repo root 有 `.code-reality.toml`，或 `uv run --project ~/Github/ai-rules python -m code_reality.snapshot --help` exit 0。未裝 → 消費端跳過不阻擋（既有降級語義）。
+**存在性偵測（單一真相源——implement／code-review／debrief 三檔存在性述語直接引用；post-build 經 code-review 模式 B 間接）**：repo root 有 `.code-reality.toml`，或 `code-reality snapshot --help` exit 0（Rust 載體 `~/.cargo/bin/code-reality`——`cargo install --path ~/Github/code-reality/crates/code-reality` 安裝）。未裝 → 消費端跳過不阻擋（既有降級語義）。
 
 ## 何時跑（程序接線）
 
