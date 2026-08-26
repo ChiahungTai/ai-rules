@@ -8,14 +8,9 @@ dependencies = []
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["code_reality"]
-
 [dependency-groups]
 dev = [
     "ruff>=0.16.3",
-    "pytest>=8.4",
-    "protobuf>=7.35.1",  # scip_refs vendored scip_pb2 gencode 的 runtime（僅此模組需要）
 ]
 
 [tool.pytest.ini_options]
@@ -27,7 +22,6 @@ markers = [
 target-version = "py312"
 extend-exclude = [
     "*.md",  # md code block 不做格式化（文檔 churn 非 lint 標的）
-    "code_reality/scip_pb2.py",  # protobuf 生成碼——不 lint 不 format
 ]
 
 [tool.ruff.lint]
