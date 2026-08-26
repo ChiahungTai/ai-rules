@@ -13,7 +13,8 @@ UI 必須在背景執行，讓 LLM 能同時啟動 Monitor 監控。
 
 - **`python -u`**：背景執行時 Python stdout 會 buffer，不加 `-u` 則 `[ACTION]` 不會即時 flush，Monitor 完全捕捉不到事件
 - **`run_in_background: true`**：讓 Bash 在背景執行，立即取得 output file path
-- **就緒等待**：`until grep -q "就緒信號" <output_path> 2>/dev/null; do sleep 1; done && echo "UI Ready"`
+- **就緒等待**：`until grep -q "就緒信號" <output_path> 2>/dev/null; do sleep 1; done && echo "UI Ready"`——grep 目標須為 **process 級就緒行**（main 層 serve 前即印，如 `[OK] ... serve: port=N`）
+- **就緒信號生命週期（隱性 stdout 契約）**：啟動即印的 stdout line 是 Monitor／ops 腳本消費的**隱性 API**——serve 形態重構（singleton `pn.serve(app.render())` → factory session callback）會把 session 級 readiness **靜默 deferred 到第一個瀏覽器連線**：不開瀏覽器永不印，Monitor until-grep 無限卡等且無錯誤訊號（像 hang、不像 fail）。對策：app 端 main 層 serve 前印 process 級 readiness（per-session 詳情留在 session callback）；啟動路徑重構時盤點就緒行消費端；serve 形態以 AST 釘測固定。真實案例：mosaic viewer／annotate／backtest_dashboard singleton→factory（`8e92d957`／`69257c01`，Monitor 卡等到補償行落地）
 - **重啟流程**：先用 `TaskStop` 停掉舊的背景任務和 Monitor，再重新啟動
 
 ## Monitor 監控模式
