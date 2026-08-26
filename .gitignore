@@ -41,3 +41,4 @@ ref-docs/*.pdf
 # Python packaging artifacts（code_reality packaged form——uv sync 副產物）
 *.egg-info/
 .pytest_cache/
+.code-review-graph/

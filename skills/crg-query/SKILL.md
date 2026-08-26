@@ -1,12 +1,12 @@
 ---
 name: crg-query
-description: Query code-review-graph (CRG) — the code knowledge graph — correctly. Use when you need structural facts file-scanning cannot give efficiently — blast radius / impact radius of a change, who calls whom (callers/callees), affected execution flows, hub/bridge nodes, module communities, dead code, architecture overview, or token-efficient review context scoping — in a project where CRG is installed (MCP `mcp__code-review-graph__*` tools, `.code-review-graph/graph.db`, or `code-review-graph` CLI). Provides the LSP-vs-CRG division (symbol→LSP, impact/callers/flows→CRG), the assume-present + warn-if-absent rule, and anti-over-reliance (graph = structure, not runtime behavior). Prevents manually re-tracing dependencies with LSP/rg when the graph has them, and inferring behavior/correctness from graph edges.
-when_to_use: Fires in a CRG-equipped project (MCP `mcp__code-review-graph__*` tools available, `.code-review-graph/graph.db` exists, or `code-review-graph` CLI detected) when the task needs structural/impact facts — "who calls X", "blast radius of this change", "is X dead code", "hubs/communities", "scope my review to impacted nodes only". Load BEFORE manually tracing imports/callers with LSP findReferences or rg. Does NOT fire in projects without CRG (no warn noise). Parallels nt-query (discipline for a tool).
+description: Query the code knowledge graph — now the code-reality engine face (CRG MCP retired 2026-08-26) — correctly. Use when you need structural facts file-scanning cannot give efficiently — blast radius / impact radius of a change, who calls whom (callers/callees), affected execution flows, hub/bridge nodes, module communities, dead code, architecture overview, or token-efficient review context scoping — in a project with a graph (`.code-review-graph/graph.db`; MCP `code-reality` engine tools, or CLI `code-reality graph_query <op> --repo <root>`). Provides the LSP-vs-CRG division (symbol→LSP, impact/callers/flows→CRG), the assume-present + warn-if-absent rule, and anti-over-reliance (graph = structure, not runtime behavior). Prevents manually re-tracing dependencies with LSP/rg when the graph has them, and inferring behavior/correctness from graph edges.
+when_to_use: Fires in a graph-equipped project (`code-reality` MCP engine tools available or `.code-review-graph/graph.db` exists) when the task needs structural/impact facts — "who calls X", "blast radius of this change", "is X dead code", "hubs/communities", "scope my review to impacted nodes only". Load BEFORE manually tracing imports/callers with LSP findReferences or rg. Does NOT fire in projects without CRG (no warn noise). Parallels nt-query (discipline for a tool).
 ---
 
 # crg-query — Query the code knowledge graph correctly
 
-You're in a project with **code-review-graph (CRG)** — a Tree-sitter → SQLite structural graph exposed via MCP / CLI. The graph already holds who-imports-whom, call edges, communities, flows. Confusing what the graph gives you vs what LSP / reading code gives you causes two expensive mistakes.
+You're in a project with a **code knowledge graph** — the code-reality engine face over `.code-review-graph/graph.db` (graph CRG retired 2026-08-26; the db format stays). The graph already holds who-imports-whom, call edges, communities, flows. Confusing what the graph gives you vs what LSP / reading code gives you causes two expensive mistakes.
 
 ## The one rule
 
@@ -20,15 +20,15 @@ A graph edge (A calls B / A imports B) is a *static, parse-time fact*. It says a
 
 This skill assumes the project has CRG. Detect once per task:
 
-1. **MCP tools present** — `mcp__code-review-graph__*` callable → CRG live, use it. 兩種部署形態共用這組工具名：Claude 端 stdio（per-project `cwd` 展開，repo 預設正確）與共享 HTTP server（launchd `com.user.crg-mcp` 常駐 `127.0.0.1:5555`；ZCode/Codex 已掛接，OpenCode 待接）。
-2. **Graph DB exists** — `.code-review-graph/graph.db` in repo root → CRG installed; if MCP tools absent, the server isn't running (see Fallback).
+1. **MCP tools present** — code-reality engine tools callable (impact_radius / detect_changes / hub_nodes / bridge_nodes / list_communities / architecture_overview / list_flows / affected_flows / semantic_search / get_review_context / get_minimal_context / refs / callers / closure / audit) → engine live, use it. 兩種部署形態共用這組工具名：Claude 端 stdio（per-project `cwd` 展開，repo 預設正確）與共享 HTTP server（launchd `com.user.crg-mcp` 常駐 `127.0.0.1:5555`；ZCode/Codex 已掛接，OpenCode 待接）。
+2. **Graph DB exists** — `.code-review-graph/graph.db` in repo root → graph present; if MCP tools absent, use CLI `code-reality graph_query <op> --repo <root>` (see Fallback).
 3. **Neither** — CRG not installed in this project.
 
-🔴 **GATE — assume + warn, do not silently degrade.** A review/planning command that expects CRG (impact/callers/scoping) and finds it absent must emit a one-line `[WARN] CRG graph not available — structural context (impact/callers/flows) degraded; install: uvx code-review-graph install && build`, then fall back. **Silent fallback = the user gets a worse review without knowing why.** Do not block — proceed with the fallback below.
+🔴 **GATE — assume + warn, do not silently degrade.** A review/planning command that expects CRG (impact/callers/scoping) and finds it absent must emit a one-line `[WARN] graph not available — structural context (impact/callers/flows) degraded; build: code-reality scip_nodes --bootstrap --repo <root>`, then fall back. **Silent fallback = the user gets a worse review without knowing why.** Do not block — proceed with the fallback below.
 
 ## 🔴 Shared-server rule — every call carries repo_root
 
-共享 HTTP server 沒有 per-session cwd：`repo_root` 是唯一的 repo 路由鍵。**每個 `mcp__code-review-graph__*` 呼叫都必須帶 `repo_root=<當前 repo root 絕對路徑>`**（`list_repos_tool` / `cross_repo_search_tool` 除外——registry 級）。
+共享 HTTP server 沒有 per-session cwd：`repo_root` 是唯一的 repo 路由鍵。**每個 `code-reality:*` 呼叫都必須帶 `repo_root=<當前 repo root 絕對路徑>`**（`list_repos_tool` / `cross_repo_search_tool` 除外——registry 級）。
 
 省略的失敗形態是**自信假陰性**而非報錯：server 落到自身 cwd 的空 graph，回 `"graph is empty"` + not_found（2026-08-24 spike 實證：NT graph 近 8 萬節點下查 `InstrumentId` 回空）。查詢結果出現 "graph is empty" 指紋＝漏了 repo_root，補上重試。ZCode 端由 PreToolUse hook（`hooks/require-crg-repo-root.py`）機械阻擋缺參數呼叫；Claude stdio 端 repo 預設正確，統一帶上無害。
 
@@ -43,13 +43,13 @@ Three facts backends, complementary not competing:
 | Symbol **callers/callees** (direct) | **LSP** `incomingCalls`/`outgoingCalls` OR **CRG** `query_graph` callers_of/callees_of | Either; CRG if traversing further |
 | **Rust repo** symbol refs/defs（trait 消歧） | **code-reality** MCP `refs`／CLI `scip_refs`（SCIP；`[SRC]` provenance＋stale 守衛、跨 session 一致） | **只蓋 Rust**（rust-analyzer SCIP）——Python repo 維持 LSP；LSP 亦可但 workspace 狀態相依 |
 | **Rust repo** callers／transitive callers | **code-reality** MCP `callers`（sites 級）／`closure`（BFS）；CLI `scip_refs --callers`／`--closure` | CRG `query_graph` 跨語言但無 site 細節；LSP `incomingCalls` 單層 |
-| **Transitive blast radius** (A changed → all downstream N hops) | **CRG** `get_impact_radius` | LSP can't do transitive efficiently |
-| **Change → risk score + affected nodes** (from a diff) | **CRG** `detect_changes`（MCP tool；`analyze_changes` 是 `changes.py` 內部函式，非 MCP tool） | LSP has no diff/risk model |
+| **Transitive blast radius** (A changed → all downstream N hops) | **code-reality** `impact_radius` | LSP can't do transitive efficiently |
+| **Change → risk score + affected nodes** (from a diff) | **code-reality** `detect_changes`（MCP tool；`analyze_changes` 是 `changes.py` 內部函式，非 MCP tool） | LSP has no diff/risk model |
 | **Affected execution flows** (which call chains hit) | **CRG** `get_affected_flows` | LSP has no flow concept |
 | **Token-efficient review scoping** (read only impacted) | **CRG** `get_minimal_context` / `get_review_context` | LSP has no context-budgeting |
-| **Hub / bridge / community / architecture overview** | **CRG** `get_hub_nodes` / `get_bridge_nodes` / `list_communities` / `get_architecture_overview` | No LSP equivalent |
+| **Hub / bridge / community / architecture overview** | **code-reality** `hub_nodes` / `bridge_nodes` / `list_communities` (directory or `--leiden`) / `architecture_overview` | No LSP equivalent |
 | **Dead code** (no callers + no tests) | **CRG** `refactor_tool` mode=dead_code | Stronger than LSP zero-hits (cross-checks tests) |
-| **Semantic search** ("where do we handle X concept") | **CRG** `semantic_search_nodes` (needs `embed`) OR rg | LSP is name-based |
+| **Semantic search** ("where do we handle X concept") | **code-reality** `semantic_search` (keyword face; embeddings not adopted) OR rg | LSP is name-based |
 | **Comments / strings / config / TODO** | **rg** | Neither LSP nor CRG index non-code |
 
 **Rule of thumb:** *symbol* → LSP; *graph* (impact/callers/flows/community/scope) → CRG; *text* → rg. **Rust repo＋SCIP index 在場**：symbol refs/callers/closure 優先 code-reality（只蓋 Rust；Python repo 不變）。For "what does this change affect," start at CRG `get_impact_radius`/`detect_changes`, then LSP/Read for the specific symbols.
@@ -68,7 +68,7 @@ Three facts backends, complementary not competing:
 | "is X dead code" | `refactor_tool` mode=dead_code (CLI: `dead-code`) |
 | "find symbol by concept/keyword" | `semantic_search_nodes` (CLI: `search`) — needs embeddings; else rg |
 
-> **Stale graph check:** CRG tool responses carry `_graph.head_matches_build`. If `false` (code changed since last build) → run `update` (`uvx code-review-graph update`) before trusting impact/caller results. Graph facts are build-time; stale graph = stale facts (parallel: LSP workspace state-dependence — re-verify before concluding).
+> **Stale graph check:** Rust repos — `code-reality scip_refs <sym> --repo` prints `[SRC] scip index @ <sha> · repo HEAD @ <sha>`; mismatch → regenerate the index before trusting results. Graph freshness — rebuild with `scip_nodes --bootstrap` (Python: rerun `scripts/lsp_harvest.py` in the code-reality repo first). Graph facts are build-time; stale graph = stale facts (parallel: LSP workspace state-dependence — re-verify before concluding).
 
 ## 🔴 Anti-over-reliance (the failure this skill prevents)
 
@@ -92,14 +92,14 @@ They compose: a CRG workflow gives the steps; `crg-query` governs *how each quer
 ## Fallback — CRG absent or stale
 
 - **Not installed** → `[WARN]` (above) + LSP `findReferences`/`incomingCalls` (single-symbol, no transitive) + scan-project dep_graph (folder/module-level ripple) + rg. Accept degraded: no transitive impact, no flows, no communities.
-- **MCP tools absent but graph.db exists** → server not running. 共享 server 健康檢查：`launchctl list | rg crg`（`com.user.crg-mcp` 應在列）。CLI 直用不受影響：`uvx code-review-graph <subcommand> --repo <repo-root>`（same GraphStore）。
-- **Graph stale** (`head_matches_build: false`) → `uvx code-review-graph update`; or note "graph pre-dates recent changes" and verify critical edges with LSP.
+- **MCP tools absent but graph.db exists** → CLI 直用：`code-reality graph_query <op> --repo <repo-root>`（ops: impact_radius detect_changes hub bridge communities arch_overview flows affected_flows review_context minimal_context search symbols；`--union` 接 SCIP 邊、`--leiden` 社區分層）。
+- **Graph stale** → Rust: regen index + `scip_nodes --bootstrap`; Python: rerun the LSP-harvest adapter. Or verify critical edges with LSP and note the staleness.
 
 ## Reference
 
-- **CRG CLI commands:** `code-review-graph --help` (build / update / status / query / impact / detect-changes / dead-code / communities / architecture / search / refactor / serve …)
-- **共享 HTTP server（非 Claude 端的接線）:** launchd `com.user.crg-mcp` → `uvx code-review-graph@2.3.8 serve --http --host 127.0.0.1 --port 5555`（plist：`~/Library/LaunchAgents/com.user.crg-mcp.plist`；無 default repo，一律 repo_root 路由）
+- **CLI commands:** `code-reality --help`（graph_query 家族＋scip_refs/scip_edges/scip_nodes 等）
+- **code-reality MCP 接線：** stdio `code-reality-mcp --stdio`（plugin 形態）或 streamable-http `127.0.0.1:8200/mcp`（launchd `com.code-reality.mcp`）；工具呼叫一律帶 `repo_root`（不自動偵測）。舊 CRG server（com.user.crg-mcp @5555）已於 2026-08-26 cutover 時 bootout——plist 留檔可回滾。
 - 註：本檔表格內的工具名（`query_graph`、`get_impact_radius`…）省略 server 實際暴露名的 `_tool` 後綴（`query_graph_tool` 等）
-- **CRG architecture / tool map:** `<CRG_REPO>/code_review_graph/AGENTS.md` (resolve `<CRG_REPO>` — default `~/Github/code-review-graph`)
+- **engine semantics 真相源:** ai-rules `skills/code-reality/SKILL.md`（跨 repo 單一源）＋code-reality repo `crates/AGENTS.md`
 - **Sibling facts discipline:** [lsp-navigation](../../rules/lsp-navigation.md) (symbol queries) — this skill is its graph counterpart
 - **Consumers:** [review-engine](../review-engine/SKILL.md) (change-impact lens), [arch-thinking](../arch-thinking/SKILL.md) §二 結構機械 (structure-facts lens)

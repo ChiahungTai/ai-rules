@@ -3,7 +3,7 @@ name: smell-detector
 description: "壞味道偵測 / code smell / 架構審查 / 重構前研究 / 測試優化盤點 / 質疑 code 存在價值 / 懷疑 AI 亂加 code 或測試 / baseline 盤點 / codebase 穩固度 / 架構 onboarding——兩 mode：`<dir|files>` zoom 變焦批判（6 判準+查證誠信）、`--baseline <dir>` 廣角盤點（4 檔+invariants+drift 追蹤）。read-only 偵測器，修復走 /implement、/fix-test。"
 when_to_use: "Code smells, architecture review, pre-refactor research, test-suite cost/structure inventory, or questioning whether existing code/tests deserve to exist. Zoom <dir|files> for targeted critique (typical trigger: suspect AI added junk code/tests, no suspicion required); --baseline <dir> for per-directory baseline or onboarding. NOT for: change-diff review (/code-review), test-content anti-patterns (/audit-test), post-change comprehension (/debrief)."
 argument-hint: "<dir|files>（zoom 預設） | --baseline <dir> | --status | --stale [dir] | --architecture (--arch) | --invariants"
-allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mcp__code-review-graph__*"]
+allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mcp__code-reality__*"]
 ---
 
 # /smell-detector — 壞味道偵測：架構審查＋重構前期研究＋測試優化盤點

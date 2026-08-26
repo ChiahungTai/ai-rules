@@ -33,8 +33,8 @@
 
 > graph 是結構事實來源，但會 drift。**不 assume doc-only drift**（實證：doc/test/chore 混合 commit 也改結構）。
 
-1. `mcp__code-review-graph__list_graph_stats_tool` 看 `head_matches_build`。
-2. 若 `false` → `mcp__code-review-graph__build_or_update_graph_tool`（incremental refresh）→ 確保含當前 test 檔（如 `<guard test>`）。
+1. `code-reality scip_refs --audit --repo <root>` 看 index/HEAD 對齊（[SRC] 行）。
+2. 若不同步 → Python 語料：`python ~/Github/code-reality/scripts/lsp_harvest.py`（LSP-harvest adapter）→ `code-reality scip_nodes --bootstrap --repo <root>`（graph.db 不存在時）／`--inject`（存在時）；Rust 語料：重生 SCIP index 後 `--inject`。
 3. refresh 後才信任 impact/caller/community 結果。CRG 未裝 → `[WARN]` + fallback [scan-project](../scan-project/SKILL.md)/LSP（crg-query assume-present + warn-if-absent，**不靜默降級**）。
 
 ## 執行模式（直接執行優先，勿過度 workflow）
