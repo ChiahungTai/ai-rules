@@ -32,8 +32,9 @@ call 可由路徑前綴推斷 repo。
 時，`hooks/require-crg-repo-root.py` 的 `EXEMPT` 集需同步——漏同步會
 誤擋＋補 repo_root 後 server schema 又拒絕（兩頭卡死，loud）。
 
-**stderr 回饋實證（審查 A-F1，待驗）**：hook 的 exit 2 阻擋已實證生效，
-但「stderr 修正指引會回饋給 LLM」在 ZCode 文檔未載明——下次 session
-驗證清單觀察：被擋後 AI 是否能看到指引（若盲重試，改用文檔明載的
-JSON 路徑 `hookSpecificOutput.permissionDecision: "deny"` +
-`permissionDecisionReason`）。
+**stderr 回饋實證（審查 A-F1，✅ 2026-08-25 已驗）**：新 session 實測
+（handoff V2）——缺 repo_root 的呼叫被 hook 擋下後，指引文字以
+`[Hook Blocked] ...` 前綴完整回饋給 LLM（含「用相同參數重試，並加上
+repo_root=」修正指令），據以補參數一次重試成功。exit 2 + stderr 路徑
+成立，**無需**改 `hookSpecificOutput.permissionDecision` JSON 路徑；
+hook matcher `mcp__code-review-graph__`（含 `-`）實測正常命中。

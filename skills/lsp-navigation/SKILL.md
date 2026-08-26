@@ -82,6 +82,8 @@ LSP 結果是 workspace 狀態相依的 — 若 `findReferences` 回傳意外少
 
 **真實案例（cross-harness 驗證）**：同一 `_PREV_COUNT` 符號（mosaic_alpha `structure/wave_scalars.py:50`），Claude session `findReferences` 只回傳 intra-file ref（誤判為工具對私有 symbol 的 false-negative），ZCode session 卻成功回傳跨檔引用 — 差異根因是 pyright workspace reindex 時機，非 LSP 對私有 symbol 的固有限制。**兩 session 結果矛盾時，先懷疑 workspace 狀態，再懷疑工具能力。**
 
+> **Rust repo 的繞道**：SCIP index 在場（`~/.mosaic/code-reality/scip/<repo>/` 或 code-reality MCP 工具可用）時，符號查詢可改 code-reality（MCP `refs`/`callers`／CLI `scip_refs`＋`--callers`/`--closure` 旗標；`[SRC]` provenance＋stale WARN）——免 workspace stale、跨 session 一致；**code-reality 符號面只蓋 Rust**（rust-analyzer SCIP），Python repo 無此路，維持 LSP＋reindex。
+
 ### 條件式 fallback（無原生 reloadWorkspace 的 harness）
 
 CC 原生 LSP plugin **無 `reloadWorkspace`** —— workspace stale（冷啟動 index 未完成、git 大幅變動）時，原生 `findReferences` 回可疑少（典型症狀：只回 intra-file refs、跨檔全消失），無法主動 reindex 只能乾等。解法：連接 `lsp-python` MCP（http 模式，ZCode 已在用的同一 server）作**條件式 fallback**（非常駐取代原生）：

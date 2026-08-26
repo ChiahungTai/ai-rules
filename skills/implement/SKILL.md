@@ -280,7 +280,7 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + **EP 對照（宣稱 vs 實際差異歸納，見下段）** + 能力狀態變更摘要 + SYSTEM-MAP 功能狀態變更 + architecture.md 設計變更（若有）+ /consistency 導航文檔結果 + /audit-test 稽核結果 + **全量測試結果（命令 + exit code + 通過計數；階段 3 完成閘門，必填）**
 
-**EP 對照（宣稱 vs 實際差異歸納——主歸納點在此，post-build 只再提醒）**：build 現場是差異最清楚的時點（post-build/debrief 只能事後推導），兩個來源缺一不可——① **偏差記錄歸納（why）**：階段 2「EP 專屬約束」逐段累積的偏差（與 Pseudo Code 出入、疑慮、自癒 ⚠️）統一歸納，差異原因只在 build session 記得；② **機械對照（what）**：弧條件成立（HEAD 越過 EP baseline）時跑 `code_reality.transition`（呼叫形態與時點條件真相源見 [code-review](../code-review/SKILL.md) 模式 B；未裝/條件不符 → 標明降級）——session 歸納是 self-report，機械對照反證之（Claim→Evidence→Trust，見 [acceptance-evidence](../../rules/acceptance-evidence.md)）。歸納供 `/post-build` 收尾報告帶入與人類直接判讀；深度渲染（邊集差異+行為 delta）屬 `/debrief`。
+**EP 對照（宣稱 vs 實際差異歸納——主歸納點在此，post-build 只再提醒）**：build 現場是差異最清楚的時點（post-build/debrief 只能事後推導），兩個來源缺一不可——① **偏差記錄歸納（why）**：階段 2「EP 專屬約束」逐段累積的偏差（與 Pseudo Code 出入、疑慮、自癒 ⚠️）統一歸納，差異原因只在 build session 記得；② **機械對照（what）**：弧條件成立（HEAD 越過 EP baseline）時跑 `code-reality transition`（呼叫形態與時點條件真相源見 [code-review](../code-review/SKILL.md) 模式 B；未裝/條件不符 → 標明降級）——session 歸納是 self-report，機械對照反證之（Claim→Evidence→Trust，見 [acceptance-evidence](../../rules/acceptance-evidence.md)）。歸納供 `/post-build` 收尾報告帶入與人類直接判讀；深度渲染（邊集差異+行為 delta）屬 `/debrief`。
 
 **layer 旗標（硬性 — commit 前方向提示）**：偵測本 EP 變更是否觸及**跨模組**（`git diff --name-only` top-level 模組目錄計數 ≥2；模組目錄 = 專案 bounded context 根目錄，各專案自訂）、**公開簽名變更**（階段 2 路徑覆蓋觸發）、**整合器段落**（階段 0 標記）、或 **build loop 未收斂**（階段 4 達 3 輪上限）。命中 → 完成報告必含：
 

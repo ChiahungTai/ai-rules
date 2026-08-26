@@ -23,7 +23,7 @@ LSP 提供語義級程式碼導航（~50ms，workspace 索引最新時 100% 準�
 - **依賴枚舉**錨 `^` toplevel 會系統性漏 local import（`# noqa: PLC0415` 是「刻意就地掩蓋」的指紋，恰恰是最該抓的結構債）
 - workspace stale 時 LSP `findReferences` 回可疑少（只 intra-file）—— 先 reindex 再下結論，非工具 false-negative（處置見 skill）
 
-**結論**：符號查詢一律 LSP 起手；rg 只做文字/註解/config；依賴分析搭配 LSP `findReferences`（涵蓋 import 行 + call site）。
+**結論**：符號查詢預設 LSP 起手（Rust repo＋SCIP 在場例外——見下方「code-reality 分工」段）；rg 只做文字/註解/config；依賴分析搭配 LSP `findReferences`（涵蓋 import 行 + call site）。
 
 ---
 
@@ -71,6 +71,8 @@ LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `
 | Markdown、YAML、TOML、JSON 等非程式碼 | rg | — | LSP 只涵蓋已配置的語言伺服器 |
 
 **被動能力**（Claude: 每次檔案編輯後 LSP 自動推送 diagnostics — 型別錯誤、missing import，在同一 turn 修正）。其他 harness 需主動觸發 diagnostics operation。
+
+**code-reality 分工（Rust repo 限定）**：code-reality 符號面（MCP 工具 `refs`／`callers`／`closure`；CLI 形態 `scip_refs`＋`--callers`/`--closure` 旗標，rust-analyzer SCIP index）**只蓋 Rust**——Rust repo 且 SCIP index 在場時，符號 refs／callers 優先 code-reality（`[SRC]` provenance＋stale 守衛、免 workspace stale、跨 session 一致）；**Python repo 符號真相仍走 LSP**（pyright），hover／簽名／documentSymbol／diagnostics 即時性全程 LSP。工具用法見 code-reality skill。
 
 ---
 

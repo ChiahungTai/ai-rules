@@ -32,15 +32,17 @@ This skill assumes the project has CRG. Detect once per task:
 
 省略的失敗形態是**自信假陰性**而非報錯：server 落到自身 cwd 的空 graph，回 `"graph is empty"` + not_found（2026-08-24 spike 實證：NT graph 近 8 萬節點下查 `InstrumentId` 回空）。查詢結果出現 "graph is empty" 指紋＝漏了 repo_root，補上重試。ZCode 端由 PreToolUse hook（`hooks/require-crg-repo-root.py`）機械阻擋缺參數呼叫；Claude stdio 端 repo 預設正確，統一帶上無害。
 
-## LSP vs CRG — the division (core)
+## LSP vs CRG vs code-reality — the division (core)
 
-Two facts backends, complementary not competing:
+Three facts backends, complementary not competing:
 
 | You need | Tool | Why |
 |---|---|---|
 | Symbol **definition / signature / type** | **LSP** `hover` / `goToDefinition` | Live, precise, ~50ms |
 | **Single-symbol** references (who uses X) | **LSP** `findReferences` | Precise for one symbol |
 | Symbol **callers/callees** (direct) | **LSP** `incomingCalls`/`outgoingCalls` OR **CRG** `query_graph` callers_of/callees_of | Either; CRG if traversing further |
+| **Rust repo** symbol refs/defs（trait 消歧） | **code-reality** MCP `refs`／CLI `scip_refs`（SCIP；`[SRC]` provenance＋stale 守衛、跨 session 一致） | **只蓋 Rust**（rust-analyzer SCIP）——Python repo 維持 LSP；LSP 亦可但 workspace 狀態相依 |
+| **Rust repo** callers／transitive callers | **code-reality** MCP `callers`（sites 級）／`closure`（BFS）；CLI `scip_refs --callers`／`--closure` | CRG `query_graph` 跨語言但無 site 細節；LSP `incomingCalls` 單層 |
 | **Transitive blast radius** (A changed → all downstream N hops) | **CRG** `get_impact_radius` | LSP can't do transitive efficiently |
 | **Change → risk score + affected nodes** (from a diff) | **CRG** `detect_changes`（MCP tool；`analyze_changes` 是 `changes.py` 內部函式，非 MCP tool） | LSP has no diff/risk model |
 | **Affected execution flows** (which call chains hit) | **CRG** `get_affected_flows` | LSP has no flow concept |
@@ -50,7 +52,7 @@ Two facts backends, complementary not competing:
 | **Semantic search** ("where do we handle X concept") | **CRG** `semantic_search_nodes` (needs `embed`) OR rg | LSP is name-based |
 | **Comments / strings / config / TODO** | **rg** | Neither LSP nor CRG index non-code |
 
-**Rule of thumb:** *symbol* → LSP; *graph* (impact/callers/flows/community/scope) → CRG; *text* → rg. For "what does this change affect," start at CRG `get_impact_radius`/`detect_changes`, then LSP/Read for the specific symbols.
+**Rule of thumb:** *symbol* → LSP; *graph* (impact/callers/flows/community/scope) → CRG; *text* → rg. **Rust repo＋SCIP index 在場**：symbol refs/callers/closure 優先 code-reality（只蓋 Rust；Python repo 不變）。For "what does this change affect," start at CRG `get_impact_radius`/`detect_changes`, then LSP/Read for the specific symbols.
 
 ## Standard CRG query map
 
