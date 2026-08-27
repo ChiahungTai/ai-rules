@@ -1,7 +1,7 @@
 ---
 name: code-reality
 description: "code_reality 工具鏈——repos 之上的 meta 層工具（Rust carrier，住 ~/Github/code-reality），跨 repo 消費單一入口。何時跑：implement 階段 1 baseline snapshot／post-build·code-review 弧模式 transition／debrief 機械底稿／cold-start boundary 掃描／「0 callers 可刪」判斷前 hub_refs hazard。含 repo profile（.code-reality.toml）schema 與 claims 口徑限制真相源。"
-when_to_use: "Running code_reality tools (snapshot/transition/hub_refs+hazard/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_csv/graph_audit/scip_refs), authoring .code-reality.toml, or interpreting transition claims output. Tool availability check: .code-reality.toml in repo root OR code-reality snapshot --help exits 0."
+when_to_use: "Running code_reality tools (snapshot/transition/hub_refs+hazard/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_audit/scip_refs), authoring .code-reality.toml, or interpreting transition claims output. Tool availability check: .code-reality.toml in repo root OR code-reality snapshot --help exits 0."
 argument-hint: "（程序 skill——不直接觸發；查閱用）"
 allowed-tools: ["Read", "Bash"]
 ---
@@ -28,7 +28,7 @@ code-reality <tool> --repo <repo-root> [args]
 | CRG 同鍵去重受害符號 refs（Rust） | `scip_refs <Type.method> --repo <repo>`（repo-keyed slot，`--index` 顯式覆蓋）；`--audit --repo <repo>` 對帳 graph_audit 缺差 | graph_audit 發現缺差後的 callers 真相源 |
 | runtime 逐函式耗時 | `runtime_edges`（viztracer trace） | 效能分析 |
 | NT python↔Rust 邊 | `boundary_build --repo <nt>`（掃描建 sidecar）＋`boundary <symbol> --repo <nt>`（查詢） | v2 遷移地圖／縫分析 |
-| 弧敘事載體 | `delta_tour`（snapshot 對 diff→tour）／`chain_tour`（callstack md→tours）／`graph_csv`（graph.db→CSV） | 人類 viewport |
+| 弧敘事載體 | `delta_tour`（snapshot 對 diff→tour）／`chain_tour`（callstack md→tours） | 人類 viewport |
 
 **時點條件（transition 消費 gate——細節真相源 code-review 模式 B transition 段）**：HEAD == EP baseline（uncommitted）→ **不跑**（同 sha 零差異假陰性＋baseline sidecar 覆寫風險），退 LLM 對照＋`[WARN]`；snapshot 報 stale → 視同缺報告。
 
@@ -36,14 +36,14 @@ code-reality <tool> --repo <repo-root> [args]
 
 | 工具 | 職責 |
 |------|------|
-| `snapshot` | CRG module-edge 導出＋commit 錨定 sidecar（冪等；`_meta` 慣例） |
+| `snapshot` | graph module-edge 導出（讀自有 `.code-reality/graph.db`）＋commit 錨定 sidecar（冪等；`_meta` 慣例） |
 | `transition` | 兩 snapshot 邊集差異＋「EP 宣稱 vs 實際變動」對照 |
 | `hub_refs` | hub symbol 廣度（callers/callees 按目錄、test/prod 切分）＋hazard 分層安全網（常駐 AST 級＋static_prod ≤ 2 觸發 rg 級 dynamic dispatch 偵測，規則在 `hazard` 模組——防「0 refs 可刪」誤判；`--hazard` 強制全掃、`--json` 含 `hazard_findings` 欄） |
 | `runtime_edges` | viztracer trace → 逐函式 runtime 邊 |
 | `boundary_build`／`boundary` | pyo3 宣告↔`.pyi` 合約 sidecar build／查詢 |
-| `delta_tour`／`chain_tour`／`graph_csv` | 敘事/關聯載體（`.tour` 契約——渲染消費者 CodeTour）；chain_tour 產出同步 upsert `.tours/manifest.toml` |
+| `delta_tour`／`chain_tour` | 敘事/關聯載體（`.tour` 契約——渲染消費者 CodeTour）；chain_tour 產出同步 upsert `.tours/manifest.toml` |
 | `tour_validate`／`tour_upgrade`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／manifest 讀寫 |
-| `graph_audit` | CRG graph.db **Rust 完整度稽核**——D1 同型別多 impl 風險掃描（per-block ≥2，非交集）＋D2 rust-analyzer symbols 對帳（kind 含 Test）；`--json` 鍵為治理鉤子契約；graph rebuild／rebase 大跳後跑（收編自 NT N1，2026-08-24 實測 219 缺差） |
+| `graph_audit` | 自有 graph.db **Rust 完整度稽核**——D1 同型別多 impl 風險掃描（per-block ≥2，非交集）＋D2 rust-analyzer symbols 對帳（kind 含 Test）；`--json` 鍵為治理鉤子契約；graph rebuild／rebase 大跳後跑（收編自 NT N1，2026-08-24 實測 219 缺差） |
 | `scip_refs` | rust-analyzer SCIP 索引查詢——CRG 同鍵去重受害符號（見 graph_audit）的 def/refs 真相源 sidecar；`--audit` 與 graph_audit 缺差對帳（(定義檔, 方法名) 雙鍵歸屬）；索引 repo-keyed slot（`~/.mosaic/code-reality/scip/<repo-basename>/`——`--repo` 時 `--index` 可省略，多 repo 互蓋防護）＋生成後 `--stamp-meta --repo` 落版本 sidecar → 查詢首行 `[SRC] scip index @ <sha>`（與 repo HEAD 不一致 WARN＝漂移守衛；顯式 `--index` 無 sidecar 無 `--repo` 輸出不變）；衍生 sqlite 查詢面 `--build-cache`（落 `<index>.scip.db`，時序＝生成→stamp→build-cache；查詢自動優先，過期雙訊號〔mtime＋sidecar head〕自動重建，與 protobuf 路徑 stdout 位元組相同）；索引生成 ~8 分鐘、rebase 後重生（rust-analyzer scip，輸出寫 cwd） |
 | `common`／`exclusions`／`profile`／`hazard` | 共用設施：`_meta`/`connect_ro`（WAL fallback）／排除前綴／profile 引擎／hub_refs hazard 判定層（六規則純函數——registry 表由 profile `[[hazard_registry]]` 注入） |
 
