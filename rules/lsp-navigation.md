@@ -74,9 +74,8 @@ LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `
 
 **code-reality 分工（符號與圖譜的預設主查詢面，2026-08-27 起）**：code-reality 符號面
 （MCP 工具 `refs`／`callers`／`closure`；CLI 形態 `scip_refs`＋`--callers`/`--closure`
-旗標）**雙語料**——Rust 走 rust-analyzer SCIP index；**Python 走 LSP-harvest index**
-（`scripts/lsp_harvest.py` 於 code-reality repo，驅動 pyright-langserver 產三表 cache，
-pass-bar 20/20 對拍 LSP）。index 在場時符號 refs／callers／closure／圖譜
+旗標）**雙語料**——Rust 走 rust-analyzer SCIP index；**Python 走 `pyrefly-index`**
+（code-reality producer；refs 密度語義、fallback 與 golden 對帳見 code-reality skill）。index 在場時符號 refs／callers／closure／圖譜
 （graph_query 家族）優先 code-reality（`[SRC]` provenance＋stale 守衛、免 workspace
 stale、跨 session 一致）。**LSP 保留三個獨有面**：hover／型別簽名（SCIP/index 無
 此資料）、documentSymbol 即時形、**working-tree 即時性**（index 是 build-time 產物

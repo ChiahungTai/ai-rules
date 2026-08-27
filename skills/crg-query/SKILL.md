@@ -68,7 +68,7 @@ Three facts backends, complementary not competing:
 | "is X dead code" | `refactor_tool` mode=dead_code (CLI: `dead-code`) |
 | "find symbol by concept/keyword" | `semantic_search_nodes` (CLI: `search`) — needs embeddings; else rg |
 
-> **Stale graph check:** Rust repos — `code-reality scip_refs <sym> --repo` prints `[SRC] scip index @ <sha> · repo HEAD @ <sha>`; mismatch → regenerate the index before trusting results. Graph freshness — rebuild with `graph_db build --repo <root>` (Python cache first: rerun `scripts/lsp_harvest.py` in the code-reality repo). Graph facts are build-time; stale graph = stale facts (parallel: LSP workspace state-dependence — re-verify before concluding).
+> **Stale graph check:** Rust repos — `code-reality scip_refs <sym> --repo` prints `[SRC] scip index @ <sha> · repo HEAD @ <sha>`; mismatch → regenerate the index before trusting results. Graph freshness — rebuild with `graph_db build --repo <root>` (Python cache first: `pyrefly-index --repo <root>`). Graph facts are build-time; stale graph = stale facts (parallel: LSP workspace state-dependence — re-verify before concluding).
 
 ## 🔴 Anti-over-reliance (the failure this skill prevents)
 
@@ -93,7 +93,7 @@ They compose: a CRG workflow gives the steps; `crg-query` governs *how each quer
 
 - **Not installed** → `[WARN]` (above) + LSP `findReferences`/`incomingCalls` (single-symbol, no transitive) + scan-project dep_graph (folder/module-level ripple) + rg. Accept degraded: no transitive impact, no flows, no communities.
 - **MCP tools absent but graph.db exists** → CLI 直用：`code-reality graph_query <op> --repo <repo-root>`（ops: impact_radius detect_changes hub bridge communities arch_overview flows affected_flows review_context minimal_context search symbols；`--leiden` 社區分層——`--union` 已退休：聯集邊於 build 時物化，查詢預設全量）。新庫缺場 → `code-reality graph_db build --repo`；舊 `.code-review-graph/` 在場 → `graph_db import_legacy`。
-- **Graph stale** → regen the producer cache (Rust: SCIP index; Python: LSP-harvest adapter) + `graph_db build --repo <root>`. Or verify critical edges with LSP and note the staleness.
+- **Graph stale** → regen the producer cache (Rust: SCIP index; Python: `pyrefly-index`) + `graph_db build --repo <root>`. Or verify critical edges with LSP and note the staleness.
 
 ## Reference
 
