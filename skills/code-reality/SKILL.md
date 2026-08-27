@@ -47,6 +47,19 @@ code-reality <tool> --repo <repo-root> [args]
 | `scip_refs` | rust-analyzer SCIP 索引查詢——CRG 同鍵去重受害符號（見 graph_audit）的 def/refs 真相源 sidecar；`--audit` 與 graph_audit 缺差對帳（(定義檔, 方法名) 雙鍵歸屬）；索引 repo-keyed slot（`~/.mosaic/code-reality/scip/<repo-basename>/`——`--repo` 時 `--index` 可省略，多 repo 互蓋防護）＋生成後 `--stamp-meta --repo` 落版本 sidecar → 查詢首行 `[SRC] scip index @ <sha>`（與 repo HEAD 不一致 WARN＝漂移守衛；顯式 `--index` 無 sidecar 無 `--repo` 輸出不變）；衍生 sqlite 查詢面 `--build-cache`（落 `<index>.scip.db`，時序＝生成→stamp→build-cache；查詢自動優先，過期雙訊號〔mtime＋sidecar head〕自動重建，與 protobuf 路徑 stdout 位元組相同）；索引生成 ~8 分鐘、rebase 後重生（rust-analyzer scip，輸出寫 cwd） |
 | `common`／`exclusions`／`profile`／`hazard` | 共用設施：`_meta`/`connect_ro`（WAL fallback）／排除前綴／profile 引擎／hub_refs hazard 判定層（六規則純函數——registry 表由 profile `[[hazard_registry]]` 注入） |
 
+## Python occurrence producer（scip-python＋patch）
+
+Python repo 的 occurrence 面生產者（與既有 `scripts/lsp_harvest.py` LSP-harvest 並存）：npm `@sourcegraph/scip-python@0.6.6`（scoped 名——bare `scip-python` 404）＋code-reality repo `scripts/scip-python-mosaic.patch`（depth guard——深遞迴 protocol 型別推導耗盡 native stack 的修補＋emit-skip）→ SCIP index → sidecar slot → `graph_db build` SCIP face（spans 歸屬，與 Rust SCIP 同一 build 面）。
+
+**Operational 約束（實測坑）**：
+
+- **workspace 以 cwd 解析**：傳入 arg 目錄不作 workspace root——必須以目標 repo 為 cwd 執行；誤用會**靜默 index 錯 repo 且 exit 0**
+- **fatal 時 partial index 照樣寫出**：檔案在場 ≠ 成功——exit code 才是失敗訊號，消費前 assert 產出者 exit 0
+- **跳檔清單 loud 輸出須對帳**：doc 數 vs repo 檔數；缺口歸因與 scope 差異（project-only vs tests/scripts）分開
+- **slot 競爭**：sidecar slot 已有 lsp-harvest cache 時 SCIP index 被優先短路靜默忽略——不同 producer 不混用同槽
+
+**對帳 harness**：code-reality repo `scripts/golden_corpus.py`——workspace-filtered per-symbol ref counts（stdlib/builtins 先濾除再比）；mosaic baseline 存 sidecar `~/.mosaic/code-reality/golden/`（不入 repo——sites 體積）。
+
 ## repo profile（`.code-reality.toml`——repo 擁有）
 
 mosaic 形態（module 規則＋exclusions）：
