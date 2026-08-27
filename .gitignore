@@ -42,3 +42,4 @@ ref-docs/*.pdf
 *.egg-info/
 .pytest_cache/
 .code-review-graph/
+.code-reality/
