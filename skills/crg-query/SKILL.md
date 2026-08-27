@@ -41,7 +41,7 @@ Three facts backends, complementary not competing:
 | Symbol **definition / signature / type** | **LSP** `hover` / `goToDefinition` | Live, precise, ~50ms |
 | **Single-symbol** references (who uses X) | **LSP** `findReferences` | Precise for one symbol |
 | Symbol **callers/callees** (direct) | **LSP** `incomingCalls`/`outgoingCalls` OR **CRG** `query_graph` callers_of/callees_of | Either; CRG if traversing further |
-| **Rust repo** symbol refs/defs（trait 消歧） | **code-reality** MCP `refs`／CLI `scip_refs`（SCIP；`[SRC]` provenance＋stale 守衛、跨 session 一致） | **只蓋 Rust**（rust-analyzer SCIP）——Python repo 維持 LSP；LSP 亦可但 workspace 狀態相依 |
+| Symbol refs/defs（trait 消歧；Rust＋Python） | **code-reality** MCP `refs`／CLI `scip_refs`（Rust＝SCIP、Python＝LSP-harvest index；`[SRC]` provenance＋stale 守衛、跨 session 一致） | 雙語料皆有此路；index 缺場重建或退 LSP（workspace 狀態相依） |
 | **Rust repo** callers／transitive callers | **code-reality** MCP `callers`（sites 級）／`closure`（BFS）；CLI `scip_refs --callers`／`--closure` | CRG `query_graph` 跨語言但無 site 細節；LSP `incomingCalls` 單層 |
 | **Transitive blast radius** (A changed → all downstream N hops) | **code-reality** `impact_radius` | LSP can't do transitive efficiently |
 | **Change → risk score + affected nodes** (from a diff) | **code-reality** `detect_changes`（MCP tool；`analyze_changes` 是 `changes.py` 內部函式，非 MCP tool） | LSP has no diff/risk model |
@@ -52,7 +52,7 @@ Three facts backends, complementary not competing:
 | **Semantic search** ("where do we handle X concept") | **code-reality** `semantic_search` (keyword face; embeddings not adopted) OR rg | LSP is name-based |
 | **Comments / strings / config / TODO** | **rg** | Neither LSP nor CRG index non-code |
 
-**Rule of thumb:** *symbol* → LSP; *graph* (impact/callers/flows/community/scope) → CRG; *text* → rg. **Rust repo＋SCIP index 在場**：symbol refs/callers/closure 優先 code-reality（只蓋 Rust；Python repo 不變）。For "what does this change affect," start at CRG `get_impact_radius`/`detect_changes`, then LSP/Read for the specific symbols.
+**Rule of thumb:** *symbol* → code-reality（index 在場；Rust＝SCIP、Python＝LSP-harvest）; *graph* (impact/callers/flows/community/scope) → code-reality `graph_query` 家族; *type 與當下*（hover/簽名/即時） → LSP; *text* → rg. index 缺場/過期 → 重建或退 LSP＋標「未 index 驗證」。For "what does this change affect," start at CRG `get_impact_radius`/`detect_changes`, then LSP/Read for the specific symbols.
 
 ## Standard CRG query map
 

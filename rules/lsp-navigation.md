@@ -10,7 +10,7 @@ harness-scope: neutral
 
 ## 核心原則
 
-**語義查詢用 LSP，文字搜尋用 rg/fd。兩者互補，非競爭。**
+**符號/圖譜查詢用 code-reality（index 在場），型別與當下用 LSP，文字搜尋用 rg/fd。三者互補，非競爭。**
 
 LSP 提供語義級程式碼導航（~50ms，workspace 索引最新時 100% 準確），rg/fd 提供文字級搜尋。LSP 理解程式碼結構（區分定義、引用、型別、scope）；rg 只匹配字串。
 
@@ -23,7 +23,7 @@ LSP 提供語義級程式碼導航（~50ms，workspace 索引最新時 100% 準�
 - **依賴枚舉**錨 `^` toplevel 會系統性漏 local import（`# noqa: PLC0415` 是「刻意就地掩蓋」的指紋，恰恰是最該抓的結構債）
 - workspace stale 時 LSP `findReferences` 回可疑少（只 intra-file）—— 先 reindex 再下結論，非工具 false-negative（處置見 skill）
 
-**結論**：符號查詢預設 LSP 起手（Rust repo＋SCIP 在場例外——見下方「code-reality 分工」段）；rg 只做文字/註解/config；依賴分析搭配 LSP `findReferences`（涵蓋 import 行 + call site）。
+**結論**：符號查詢預設 code-reality 起手（index 在場時——Rust＝SCIP、Python＝LSP-harvest；見下方「code-reality 分工」段），LSP 留給 hover／簽名／即時性；兩者皆缺時 rg＋標「未 LSP/index 驗證」；rg 只做文字/註解/config。
 
 ---
 
@@ -72,7 +72,17 @@ LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `
 
 **被動能力**（Claude: 每次檔案編輯後 LSP 自動推送 diagnostics — 型別錯誤、missing import，在同一 turn 修正）。其他 harness 需主動觸發 diagnostics operation。
 
-**code-reality 分工（Rust repo 限定）**：code-reality 符號面（MCP 工具 `refs`／`callers`／`closure`；CLI 形態 `scip_refs`＋`--callers`/`--closure` 旗標，rust-analyzer SCIP index）**只蓋 Rust**——Rust repo 且 SCIP index 在場時，符號 refs／callers 優先 code-reality（`[SRC]` provenance＋stale 守衛、免 workspace stale、跨 session 一致）；**Python repo 符號真相仍走 LSP**（pyright），hover／簽名／documentSymbol／diagnostics 即時性全程 LSP。工具用法見 code-reality skill。
+**code-reality 分工（符號與圖譜的預設主查詢面，2026-08-27 起）**：code-reality 符號面
+（MCP 工具 `refs`／`callers`／`closure`；CLI 形態 `scip_refs`＋`--callers`/`--closure`
+旗標）**雙語料**——Rust 走 rust-analyzer SCIP index；**Python 走 LSP-harvest index**
+（`scripts/lsp_harvest.py` 於 code-reality repo，驅動 pyright-langserver 產三表 cache，
+pass-bar 20/20 對拍 LSP）。index 在場時符號 refs／callers／closure／圖譜
+（graph_query 家族）優先 code-reality（`[SRC]` provenance＋stale 守衛、免 workspace
+stale、跨 session 一致）。**LSP 保留三個獨有面**：hover／型別簽名（SCIP/index 無
+此資料）、documentSymbol 即時形、**working-tree 即時性**（index 是 build-time 產物
+——編輯後未重 harvest 前反映的是舊態；要查「當下」用 LSP 或先重建 index）。
+index 缺場/過期且不可重建 → LSP fallback（標「未 index 驗證」）。pyright-langserver
+同時是 harvest 的 producer 引擎——不可解除安裝。工具用法見 code-reality skill。
 
 ---
 
