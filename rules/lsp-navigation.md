@@ -23,7 +23,7 @@ LSP 提供語義級程式碼導航（~50ms，workspace 索引最新時 100% 準�
 - **依賴枚舉**錨 `^` toplevel 會系統性漏 local import（`# noqa: PLC0415` 是「刻意就地掩蓋」的指紋，恰恰是最該抓的結構債）
 - workspace stale 時 LSP `findReferences` 回可疑少（只 intra-file）—— 先 reindex 再下結論，非工具 false-negative（處置見 skill）
 
-**結論**：符號查詢預設 code-reality 起手（index 在場時——Rust＝SCIP、Python＝LSP-harvest；見下方「code-reality 分工」段），LSP 留給 hover／簽名／即時性；兩者皆缺時 rg＋標「未 LSP/index 驗證」；rg 只做文字/註解/config。
+**結論**：符號查詢預設 code-reality 起手（index 在場時——Rust＝SCIP、Python＝pyrefly-index；見下方「code-reality 分工」段），LSP 留給 hover／簽名／即時性；兩者皆缺時 rg＋標「未 LSP/index 驗證」；rg 只做文字/註解/config。
 
 ---
 

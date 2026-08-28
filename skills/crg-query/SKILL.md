@@ -1,6 +1,6 @@
 ---
 name: crg-query
-description: Query the code knowledge graph — now the code-reality engine face (CRG MCP retired 2026-08-26) — correctly. Use when you need structural facts file-scanning cannot give efficiently — blast radius / impact radius of a change, who calls whom (callers/callees), affected execution flows, hub/bridge nodes, module communities, dead code, architecture overview, or token-efficient review context scoping — in a project with a graph (`.code-reality/graph.db`; MCP `code-reality` engine tools, or CLI `code-reality graph_query <op> --repo <root>`). Provides the LSP-vs-code-reality division (symbol truth→code-reality index: Rust=SCIP, Python=LSP-harvest; type/live faces→LSP; graph ops→code-reality graph_query), the assume-present + warn-if-absent rule, and anti-over-reliance (graph = structure, not runtime behavior). Prevents manually re-tracing dependencies with LSP/rg when the graph has them, and inferring behavior/correctness from graph edges.
+description: Query the code knowledge graph — now the code-reality engine face (CRG MCP retired 2026-08-26) — correctly. Use when you need structural facts file-scanning cannot give efficiently — blast radius / impact radius of a change, who calls whom (callers/callees), affected execution flows, hub/bridge nodes, module communities, dead code, architecture overview, or token-efficient review context scoping — in a project with a graph (`.code-reality/graph.db`; MCP `code-reality` engine tools, or CLI `code-reality graph_query <op> --repo <root>`). Provides the LSP-vs-code-reality division (symbol truth→code-reality index: Rust=SCIP, Python=pyrefly-index; type/live faces→LSP; graph ops→code-reality graph_query), the assume-present + warn-if-absent rule, and anti-over-reliance (graph = structure, not runtime behavior). Prevents manually re-tracing dependencies with LSP/rg when the graph has them, and inferring behavior/correctness from graph edges.
 when_to_use: Fires in a graph-equipped project (`code-reality` MCP engine tools available or `.code-reality/graph.db` exists) when the task needs structural/impact facts — "who calls X", "blast radius of this change", "is X dead code", "hubs/communities", "scope my review to impacted nodes only". Load BEFORE manually tracing imports/callers with LSP findReferences or rg. Does NOT fire in projects without CRG (no warn noise). Parallels nt-query (discipline for a tool).
 ---
 
@@ -41,7 +41,7 @@ Three facts backends, complementary not competing:
 | Symbol **definition / signature / type** | **LSP** `hover` / `goToDefinition` | Live, precise, ~50ms |
 | **Single-symbol** references (who uses X) | **LSP** `findReferences` | Precise for one symbol |
 | Symbol **callers/callees** (direct) | **LSP** `incomingCalls`/`outgoingCalls` OR **CRG** `query_graph` callers_of/callees_of | Either; CRG if traversing further |
-| Symbol refs/defs（trait 消歧；Rust＋Python） | **code-reality** MCP `refs`／CLI `scip_refs`（Rust＝SCIP、Python＝LSP-harvest index；`[SRC]` provenance＋stale 守衛、跨 session 一致） | 雙語料皆有此路；index 缺場重建或退 LSP（workspace 狀態相依） |
+| Symbol refs/defs（trait 消歧；Rust＋Python） | **code-reality** MCP `refs`／CLI `scip_refs`（Rust＝SCIP、Python＝pyrefly index；`[SRC]` provenance＋stale 守衛、跨 session 一致） | 雙語料皆有此路；index 缺場重建或退 LSP（workspace 狀態相依） |
 | **Rust repo** callers／transitive callers | **code-reality** MCP `callers`（sites 級）／`closure`（BFS）；CLI `scip_refs --callers`／`--closure` | CRG `query_graph` 跨語言但無 site 細節；LSP `incomingCalls` 單層 |
 | **Transitive blast radius** (A changed → all downstream N hops) | **code-reality** `impact_radius` | LSP can't do transitive efficiently |
 | **Change → risk score + affected nodes** (from a diff) | **code-reality** `detect_changes`（MCP tool；`analyze_changes` 是 `changes.py` 內部函式，非 MCP tool） | LSP has no diff/risk model |
@@ -52,7 +52,7 @@ Three facts backends, complementary not competing:
 | **Semantic search** ("where do we handle X concept") | **code-reality** `semantic_search` (keyword face; embeddings not adopted) OR rg | LSP is name-based |
 | **Comments / strings / config / TODO** | **rg** | Neither LSP nor CRG index non-code |
 
-**Rule of thumb:** *symbol* → code-reality（index 在場；Rust＝SCIP、Python＝LSP-harvest）; *graph* (impact/callers/flows/community/scope) → code-reality `graph_query` 家族; *type 與當下*（hover/簽名/即時） → LSP; *text* → rg. index 缺場/過期 → 重建或退 LSP＋標「未 index 驗證」。For "what does this change affect," start at the engine's `impact_radius`/`detect_changes`, then LSP/Read for the specific symbols.
+**Rule of thumb:** *symbol* → code-reality（index 在場；Rust＝SCIP、Python＝pyrefly-index）; *graph* (impact/callers/flows/community/scope) → code-reality `graph_query` 家族; *type 與當下*（hover/簽名/即時） → LSP; *text* → rg. index 缺場/過期 → 重建或退 LSP＋標「未 index 驗證」。For "what does this change affect," start at the engine's `impact_radius`/`detect_changes`, then LSP/Read for the specific symbols.
 
 ## Standard CRG query map
 
