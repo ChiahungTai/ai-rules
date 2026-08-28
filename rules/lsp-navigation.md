@@ -10,7 +10,7 @@ harness-scope: neutral
 
 ## 核心原則
 
-**符號/圖譜查詢用 code-reality（index 在場），型別與當下用 LSP，文字搜尋用 rg/fd。三者互補，非競爭。**
+**符號/圖譜查詢用 code-reality（index 在場），Python 型別面（hover/diagnostics）用 code-reality-lsp-bridge，Rust 型別面與當下編輯回饋用 LSP，文字搜尋用 rg/fd。三者互補，非競爭。**
 
 LSP 提供語義級程式碼導航（~50ms，workspace 索引最新時 100% 準確），rg/fd 提供文字級搜尋。LSP 理解程式碼結構（區分定義、引用、型別、scope）；rg 只匹配字串。
 
@@ -23,7 +23,7 @@ LSP 提供語義級程式碼導航（~50ms，workspace 索引最新時 100% 準�
 - **依賴枚舉**錨 `^` toplevel 會系統性漏 local import（`# noqa: PLC0415` 是「刻意就地掩蓋」的指紋，恰恰是最該抓的結構債）
 - workspace stale 時 LSP `findReferences` 回可疑少（只 intra-file）—— 先 reindex 再下結論，非工具 false-negative（處置見 skill）
 
-**結論**：符號查詢預設 code-reality 起手（index 在場時——Rust＝SCIP、Python＝pyrefly-index；見下方「code-reality 分工」段），LSP 留給 hover／簽名／即時性；兩者皆缺時 rg＋標「未 LSP/index 驗證」；rg 只做文字/註解/config。
+**結論**：符號查詢預設 code-reality 起手（index 在場時——Rust＝SCIP、Python＝pyrefly-index；見下方「code-reality 分工」段），Python hover／簽名→code-reality-lsp-bridge（bridge 缺場退 LSP），Rust hover 與即時性→LSP；兩者皆缺時 rg＋標「未 LSP/index 驗證」；rg 只做文字/註解/config。
 
 ---
 
@@ -77,11 +77,14 @@ LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `
 旗標）**雙語料**——Rust 走 rust-analyzer SCIP index；**Python 走 `pyrefly-index`**
 （code-reality producer；refs 密度語義、fallback 與 golden 對帳見 code-reality skill）。index 在場時符號 refs／callers／closure／圖譜
 （graph_query 家族）優先 code-reality（`[SRC]` provenance＋stale 守衛、免 workspace
-stale、跨 session 一致）。**LSP 保留三個獨有面**：hover／型別簽名（SCIP/index 無
-此資料）、documentSymbol 即時形、**working-tree 即時性**（index 是 build-time 產物
+stale、跨 session 一致）。**Python 型別面已由 bridge 承接（2026-08-28 P1）**：hover／diagnostics／
+記憶體 edit-recheck 走 `code-reality-lsp-bridge` MCP（tools `hover`/
+`check_file`/`edit_file`；ZCode plugin entry，發版前 inert——缺場退 LSP）。
+**LSP 保留面**：Rust hover／型別簽名（P2 橋接前）、documentSymbol 即時形、
+**working-tree 即時性**（index 是 build-time 產物
 ——編輯後未重 harvest 前反映的是舊態；要查「當下」用 LSP 或先重建 index）。
 index 缺場/過期且不可重建 → LSP fallback（標「未 index 驗證」）。pyright-langserver
-同時是 harvest 的 producer 引擎——不可解除安裝。工具用法見 code-reality skill。
+同時是 harvest 的 golden oracle 引擎——不可解除安裝。工具用法見 code-reality skill。
 
 ---
 

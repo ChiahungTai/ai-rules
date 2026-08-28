@@ -82,7 +82,7 @@ LSP 結果是 workspace 狀態相依的 — 若 `findReferences` 回傳意外少
 
 **真實案例（cross-harness 驗證）**：同一 `_PREV_COUNT` 符號（mosaic_alpha `structure/wave_scalars.py:50`），Claude session `findReferences` 只回傳 intra-file ref（誤判為工具對私有 symbol 的 false-negative），ZCode session 卻成功回傳跨檔引用 — 差異根因是 pyright workspace reindex 時機，非 LSP 對私有 symbol 的固有限制。**兩 session 結果矛盾時，先懷疑 workspace 狀態，再懷疑工具能力。**
 
-> **符號查詢的預設繞道（2026-08-27 起，不再 Rust 限定）**：code-reality index 在場（`~/.mosaic/code-reality/scip/<repo>/` 或 code-reality MCP 工具可用）時，符號查詢**優先** code-reality（MCP `refs`/`callers`／CLI `scip_refs`＋`--callers`/`--closure` 旗標；`[SRC]` provenance＋stale WARN）——免 workspace stale、跨 session 一致。**雙語料**：Rust＝rust-analyzer SCIP；**Python＝`pyrefly-index`**（code-reality producer；refs 密度低於 LSP 面是已知語義，詳 code-reality skill）。index 缺場/過期 → 重建（Python 跑 `pyrefly-index --repo <repo>`）或退 LSP＋標「未 index 驗證」。**LSP 保留面不變**：hover／型別簽名／diagnostics／working-tree 即時性（index 是 build-time 產物）。
+> **符號查詢的預設繞道（2026-08-27 起，不再 Rust 限定）**：code-reality index 在場（`~/.mosaic/code-reality/scip/<repo>/` 或 code-reality MCP 工具可用）時，符號查詢**優先** code-reality（MCP `refs`/`callers`／CLI `scip_refs`＋`--callers`/`--closure` 旗標；`[SRC]` provenance＋stale WARN）——免 workspace stale、跨 session 一致。**雙語料**：Rust＝rust-analyzer SCIP；**Python＝`pyrefly-index`**（code-reality producer；refs 密度低於 LSP 面是已知語義，詳 code-reality skill）。index 缺場/過期 → 重建（Python 跑 `pyrefly-index --repo <repo>`）或退 LSP＋標「未 index 驗證」。**LSP 保留面**：Rust hover／型別簽名（P2 橋接前）、documentSymbol 即時形、working-tree 即時性（index 是 build-time 產物）——Python hover／diagnostics 已由 `code-reality-lsp-bridge` 承接（2026-08-28 P1；bridge 缺場退 LSP，詳 rule「code-reality 分工」段）。
 
 ### 條件式 fallback（無原生 reloadWorkspace 的 harness）
 

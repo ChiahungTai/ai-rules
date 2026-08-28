@@ -10,7 +10,7 @@ harness-scope: neutral
 
 ## 核心原則
 
-**符號/圖譜查詢用 code-reality（index 在場；型別與即時用 LSP），文字搜尋用 rg，檔案搜尋用 fd。** `fd`/`rg` 預設遵守 `.gitignore`（減少噪音）。詳細 LSP×rg/fd 工具對照速查見 [lsp-navigation.md](lsp-navigation.md)。
+**符號/圖譜查詢用 code-reality（index 在場；Python 型別面〔hover/diagnostics〕用 code-reality-lsp-bridge，Rust 型別面與即時用 LSP），文字搜尋用 rg，檔案搜尋用 fd。** `fd`/`rg` 預設遵守 `.gitignore`（減少噪音）。詳細 LSP×rg/fd 工具對照速查見 [lsp-navigation.md](lsp-navigation.md)。
 
 (Claude: `find -exec`、`grep -r` 是 Claude Code 系統層級硬限制；`fd`/`rg` 預設可 auto-allow。其他 harness 無此限制，fd/rg 語法優勢通用)
 

@@ -10,7 +10,7 @@ harness-scope: neutral
 
 ## 工具選擇原則
 
-- 符號/圖譜查詢用 code-reality（index 在場時；refs/callers/closure＋graph_query 家族），hover／型別簽名用 LSP，文字搜尋用 `rg`，檔案搜尋用 `fd`（工具對照速查見 [lsp-navigation.md](lsp-navigation.md)）
+- 符號/圖譜查詢用 code-reality（index 在場時；refs/callers/closure＋graph_query 家族），hover／型別簽名：Python 用 code-reality-lsp-bridge（`hover`/`check_file`）、Rust 用 LSP，文字搜尋用 `rg`，檔案搜尋用 `fd`（工具對照速查見 [lsp-navigation.md](lsp-navigation.md)）
 - **Agent prompt 必須指定工具**：spawn agent 時，根據任務性質在 prompt 中明確寫「用 LSP hover/ goToDefinition 查簽名」或「用 rg 搜文字」。禁止 agent prompt 只寫「讀取/驗證」不指定工具
 
 ## Python 命令執行
