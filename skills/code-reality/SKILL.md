@@ -14,7 +14,7 @@ allowed-tools: ["Read", "Bash"]
 code-reality <tool> --repo <repo-root> [args]
 ```
 
-**存在性偵測（單一真相源——implement／code-review／debrief 三檔存在性述語直接引用；post-build 經 code-review 模式 B 間接）**：repo root 有 `.code-reality.toml`，或 `code-reality snapshot --help` exit 0（Rust 載體 `~/.cargo/bin/code-reality`——`cargo install --path ~/Github/code-reality/crates/code-reality` 安裝）。未裝 → 消費端跳過不阻擋（既有降級語義）。
+**存在性偵測（單一真相源——implement／code-review／debrief 三檔存在性述語直接引用；post-build 經 code-review 模式 B 間接）**：repo root 有 `.code-reality.toml`，或 `code-reality snapshot --help` exit 0（Rust 載體 `~/.cargo/bin/code-reality`——`cargo install --path ~/Github/code-reality/crates/code-reality` 安裝）。**新舊自報**：`--version` 帶嵌入 rev（`<pkg>+<rev>`）；CR checkout HEAD 前移過嵌入 rev 或帶 uncommitted `crates/` edits 時，WARN-wired bins 每進程一行 stderr stale WARN（`929420f`——防「cargo install 早於 source edits→對舊 binary 驗證」silent 類；CR repo 端 post-commit hook 自動重裝已啟用）。未裝 → 消費端跳過不阻擋（既有降級語義）。
 
 **MCP 面（ZCode plugin）**：`refs`／`callers`／`closure`／`audit` 四工具對應 CLI `scip_refs` 家族——**CLI 無 `refs`/`callers` 子命令**，符號查詢 CLI 形態＝`code-reality scip_refs <symbol> --repo <repo>`（`--callers`／`--closure [--depth N]` 旗標）。instruction 引用工具名時標注面別（MCP `refs` vs CLI `scip_refs`）。
 
@@ -44,7 +44,7 @@ code-reality <tool> --repo <repo-root> [args]
 | `delta_tour`／`chain_tour` | 敘事/關聯載體（`.tour` 契約——渲染消費者 CodeTour）；chain_tour 產出同步 upsert `.tours/manifest.toml` |
 | `tour_validate`／`tour_upgrade`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／manifest 讀寫 |
 | `graph_audit` | 自有 graph.db **Rust 完整度稽核**——D1 同型別多 impl 風險掃描（per-block ≥2，非交集）＋D2 rust-analyzer symbols 對帳（kind 含 Test）；`--json` 鍵為治理鉤子契約；graph rebuild／rebase 大跳後跑（收編自 NT N1，2026-08-24 實測 219 缺差） |
-| `scip_refs` | rust-analyzer SCIP 索引查詢——CRG 同鍵去重受害符號（見 graph_audit）的 def/refs 真相源 sidecar；`--audit` 與 graph_audit 缺差對帳（(定義檔, 方法名) 雙鍵歸屬）；索引 repo-keyed slot（`~/.mosaic/code-reality/scip/<repo-basename>/`——`--repo` 時 `--index` 可省略，多 repo 互蓋防護）＋生成後 `--stamp-meta --repo` 落版本 sidecar → 查詢首行 `[SRC] scip index @ <sha>`（與 repo HEAD 不一致 WARN＝漂移守衛；顯式 `--index` 無 sidecar 無 `--repo` 輸出不變）；衍生 sqlite 查詢面 `--build-cache`（落 `<index>.scip.db`，時序＝生成→stamp→build-cache；查詢自動優先，過期雙訊號〔mtime＋sidecar head〕自動重建，與 protobuf 路徑 stdout 位元組相同）；索引生成 ~8 分鐘、rebase 後重生（rust-analyzer scip，輸出寫 cwd） |
+| `scip_refs` | rust-analyzer SCIP 索引查詢——CRG 同鍵去重受害符號（見 graph_audit）的 def/refs 真相源 sidecar；`--audit` 與 graph_audit 缺差對帳（(定義檔, 方法名) 雙鍵歸屬）；索引 repo-keyed slot（`~/.mosaic/code-reality/scip/<repo-basename>/`——`--repo` 時 `--index` 可省略，多 repo 互蓋防護）＋生成後 `--stamp-meta --repo` 落版本 sidecar → 查詢首行 `[SRC] scip index @ <sha>`（與 repo HEAD 不一致 WARN＝漂移守衛；顯式 `--index` 無 sidecar 無 `--repo` 輸出不變）；衍生 sqlite 查詢面 `--build-cache`（落 `<index>.scip.db`，時序＝生成→stamp→build-cache；查詢自動優先，過期雙訊號〔mtime＋sidecar head〕自動重建，與 protobuf 路徑 stdout 位元組相同）；索引生成 ~8 分鐘、rebase 後重生（rust-analyzer scip，輸出寫 cwd）；**重生直呼 repo-pin binary**——`rust-analyzer` 是 rustup proxy、依 cwd 解析 toolchain，非 repo cwd 呼叫（如從 slot 目錄）會**靜默**換 toolchain 產泛型渲染/覆蓋面漂移（NT 實案 2026-08-28：slot cwd 降到 default 1.96.0、NT pin 1.97.1，+322/−5 假差） |
 | `common`／`exclusions`／`profile`／`hazard` | 共用設施：`_meta`/`connect_ro`（WAL fallback）／排除前綴／profile 引擎／hub_refs hazard 判定層（六規則純函數——registry 表由 profile `[[hazard_registry]]` 注入） |
 
 ## Python occurrence producer（pyrefly 預設面）
@@ -56,7 +56,7 @@ pyrefly-index --repo <repo>    # cargo install --path ~/Github/code-reality/crat
                                # 或 cargo run --release -p pyrefly-producer --bin pyrefly-index -- --repo <repo>
 ```
 
-→ 寫 repo-keyed slot `index.scip` → `--stamp-meta` → `--build-cache` 時序與 rust-analyzer 面相同，`graph_db build` 零改動消費。**無 Node.js／venv 依賴**（Pyrefly 內建 typeshed）；fail-loud——無 `.py` 檔即 Err、無 AST 檔 loud 清單＋WARN；輸出 byte-deterministic（mosaic 全量分鐘級、defs 覆蓋 ~99.6% name-normalized vs lsp golden）。
+→ 寫 repo-keyed slot `index.scip` → `--stamp-meta` → `--build-cache` 時序與 rust-analyzer 面相同，`graph_db build` 零改動消費；**單跑 pyrefly-index 後直接 build 亦安全**（寫入自動失效舊 sidecar＋build 對 lsp cache 舊於 index.scip 有 mtime 閘門 fail-loud——CR `2442692`）。**無 Node.js／venv 依賴**（Pyrefly 內建 typeshed）；fail-loud——無 `.py` 檔即 Err、無 AST 檔 loud 清單＋WARN；輸出 byte-deterministic（mosaic 全量分鐘級、defs 覆蓋~99.6% name-normalized vs lsp golden）。
 
 **refs 密度語義（預期管理，非 bug）**：refs 密度遠低於 lsp golden（~12.7×）——pyright LSP 計所有 attribute 成員存取、且 cache ingest 濾非 fn 形態 refs；constructor call 經 dunder 崩縮落 `__init__`。跨 producer 對帳用 `golden_corpus.py --normalize`（fn_tail 比較鍵；預設 off＝凍結輸出位元組不變）；baseline 於 sidecar `~/.mosaic/code-reality/golden/`。
 

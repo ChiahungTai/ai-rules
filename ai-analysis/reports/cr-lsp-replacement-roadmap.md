@@ -48,7 +48,7 @@
 | **P1 ✅** | **DONE 2026-08-28**（CR commit `e524866`）：bridge crate `code-reality-lsp-bridge`（stdio MCP，tools `lsp_status`/`hover`/`check_file`/`edit_file`）＋backend bin `pyrefly-lsp`（producer crate 同 pinned rev）＋plugin entry（inert until bump）。等值電池：hover parity 三型逐字（variable/function/attribute，共用五步正規化）＋class 單側斷言（兩家顯示深度本質不同，記錄排除）；diagnostics .py 過濾＋串流（edit→recheck version 雙條件）；18/18 tests＋dual-context review 25 findings 全修。取捨理由（橋 pyrefly vs pyright）已回填 EP。**分工條文已翻**：型別面 Python→CR bridge（lsp-navigation 3 位點＋crg-query 3 位點＋modern-cli-preference＋tool-discipline，2026-08-28 同批） | CR＋ai-rules | 電池過＋條文翻轉完成＋**MCP 面實證**（2026-08-28 mosaic session 四項：lsp_status alive（lazy spawn）、hover 完整簽名＋docstring＋go-to、check_file `.py` 過濾、edit_file 否證探針——注入型別錯誤 recheck 抓到、還原歸零、磁碟未動） |
 | **P2 ✅** | **DONE 2026-08-28**（CR commit `decdb75`）：同 bridge crate 副檔路由（.py→pyrefly、.rs→rust-analyzer 無參數 spawn）——per-language LangSpec＋雙獨立 lazy session；probe 實證 backend 現實（range 省略形被 ra 無視→range 形舊內容 span；didChange 靜默丟棄→停滯重發恢復；-32801 暫態重試）。**Gate 過**：ra_equivalence_battery 內外往返逐字一致（版本釘＋BRIDGE_STRICT_BATTERY strict mode）＋延遲預算（init 0.02s／冷 hover 749ms-9.5s／熱 25ms）＋SM-7 並發獨立性釘；23/23 tests＋post-build review 9 findings 處置（8 採納 1 回滾取捨記錄）。**NT 消費端實證 ✅**（2026-08-28 NT session：路由正確〔status 雙 backend〕、熱 hover 完整簽名（kernel.rs `EventStoreLifecycleOptions` 含 private fields＋doc）、check_file 穩定 count=0；**已知行為**：大 repo 首次冷 hover 可能吃掉內部 timeout 逾時一次——逾時後 status 確認 spawn、重試即熱，非故障——冷 spawn 費用在 NT 量級超過 CR 實測上界〔9.5s〕，改善候選＝首單 pre-warm/retry，隨下次 CR relay）。**mosaic Python 回歸 ✅**（2026-08-28 mosaic session 四項：路由正確落 pyrefly 未誤路由、hover 同 P1 基準品質（簽名＋docstring＋go-to bundled typeshed）、check_file 乾淨、edit 注入→recheck 抓 4 診斷→還原歸零、git status 驗磁碟不動——**P2 重構無回歸**）。**分工條文全面翻轉完成**（型別面雙語言→bridge，8 位點，2026-08-28 同批） | CR＋ai-rules | 條文翻轉完成——U1-U10 全綠＋雙語言型別面，完全取代路線收斂（餘 P3 退役與發版） |
 | **P3** | lsp-python :8000 退役：mosaic 三 worktree `.mcp.json` 條目移除＋ZCode user-level config entry＋server 本體歸屬裁定（**offline_backtesting 已退役 in-repo lsp_mcp**——2026-08-28 30 檔批次、gates 全綠、已 commit `d0345603`＋`0914dedd`；main `mosaic_alpha` 仍持 8 檔本體＋Makefile targets；:8000 現況無 listener——findings #2）；CC 內建 LSP 自然共存不強制；執行前先落盤 `.mcp.json` 既有未提交修改（findings #10） | mosaic sessions＋user（STATE.md 矛盾經 relay 交 CR session 修正） | **可逆但收緊**（回滾＝git revert 成本已知；收緊＝U1-U10 電池＋鮮度 gate 齊才走——findings #9 已裁） |
-| **分發軸（貫穿）** | plugin＝純 MCP carrier：`.claude-plugin` manifest 補（CC 端一條安裝）＋**Codex 納入**（plugin 承載——機制存在性由 CR 發版時驗證）＋**OpenCode 明示排除**（暫不建，未來需要再議 :8200 共享面）；version bump 紀律、skill 不入 bundle（findings #4 已裁） | CR | 發版後機械比對 marketplace.json vs ZCode user-level cache 版本（`~/.zcode/cli/plugins/cache/code-reality-market/`），不一致即 finding——「免手動同步」現況未實證（repo 0.1.1 vs cache 0.1.0；findings #6／Validate #3） |
+| **分發軸（貫穿）** | plugin＝純 MCP carrier：`.claude-plugin` manifest 補（CC 端一條安裝）＋**Codex 納入**（plugin 承載——機制存在性由 CR 發版時驗證）＋**OpenCode 明示排除**（暫不建，未來需要再議 :8200 共享面）；version bump 紀律、skill 不入 bundle（findings #4 已裁）。**binary 新舊治理 ✅ `929420f`**（rev 嵌入＋--version 帶 rev＋雙信號 stale WARN＋CR repo post-commit 自動重裝 hook 已啟用——殺 silent install-lag 類，2026-08-28 三中） | CR | 發版後機械比對 marketplace.json vs ZCode user-level cache 版本（`~/.zcode/cli/plugins/cache/code-reality-market/`），不一致即 finding——「免手動同步」現況未實證（repo 0.1.1 vs cache 0.1.0；findings #6／Validate #3） |
 
 ## 資料面自理軸（與型別面並行——import_legacy 退場鏈）
 
@@ -60,8 +60,8 @@
 | W1 | S5 結算修訂：套用 R2-3 凍結條款（constructor 剔分母——94.7% 達標記錄）＋B7a 度量收割（2,642 grain 錯位邊收割）——**併入 W2 EP 開段**（同一度量面，不單開 session） | CR | 結算數字更新＋度量測試 |
 | W2 ✅ | **DONE 2026-08-28**（CR `ef58b61`）：B7b 偽建構子 mint 完整落地（pseudo refs/defs 3,033/377；class-callee missing 4,957→~110、轉換率 ~97.8%）；B8 **非 bug 結案**（130 檔＝97 語義空 document＋33 個 class/variable-only 檔被 R2-3 fn-tail gate 設計性濾除——probe 推翻「get_ast None」歸因）；W1 度量腳本 `scripts/s5_coverage.py`（gate 層＝全分母＋B7a 正規化；腳本自身 keying bug 被審出修正）。**gate 實測 95.42%**（凍結語料 `24ced017`，預測 95.7% 的 Δ0.28pp 全歸因：derived-base ~110＋B5 fixture/builtin ~236＋B4/B6/B1b 固有類；HEAD 語料 93.86%／剔 345 條 stale 端點後 95.43%——兩語料收斂）。EP 雙軸審查 12＋post-build 8 findings 全採納 | CR | B7b 落地＋B8 列冊＋凍結第二條成立——**user 已裁（2026-08-28）：接受 95.42% 全歸因真匹配版為 W3 gate 達成**（嚴格 95.7% 為預測值；實測全歸因，精神滿足） |
 | W3 ✅ | **DONE 2026-08-28**（CR `3980fe1`）：import_legacy 退役為恢復面（CLI 保留帶 WARN＋`"retired": true`；刷鏈引導全移除——純 producer graph＝常態）；**mosaic 驗收 PASS**——producer 面退場前後逐位相同、chain_tour 重錨逐位相同（same 42/moved 6/not-in-graph 2）；差異全歸因 legacy universe 退役（hub 重整化、impact_radius 7,905→275〔TESTED_BY 33,117 測試衝擊邊隨 legacy 退場〕、communities 排除 legacy-only 成員）；恢復路徑實測可用。結算＝CR `ep-w3-import-legacy-retirement.md` | CR＋mosaic | gate 已裁定達成（user：95.42% 全歸因版——W2 `ef58b61`）；ai-rules 刷鏈文檔已翻轉（同批） |
-| W4 | 退場後 mosaic 清 `.code-review-graph/`（oracle／回滾角色卸除） | mosaic（relay 屆時發） | W3 驗收過 |
-| W5 | `import_legacy` 完全拔除（subcommand＋importer code＋tests＋雙端文檔殘句；user 2026-08-28 裁定方向） | CR 小弧 | W4 全清＋批次二（NT/code-reality repo/ai-rules 舊庫）完成——gate 表在 CR W3 EP |
+| W4 ✅ | **DONE 2026-08-28**（mosaic session）：三 worktree 清除——main 直接刪（~221MB，db 已驗收）；offline_backtesting／trading_lab 走 W3 門型（pyrefly-index→build→spot-check→刪，~245MB 各）；三處 graph_query 煙霧 PASS、讀鏈零依賴舊庫；僅刪 gitignored 生成物無需 commit。**附帶發現 pipeline 缺口**：pyrefly-index 不失效舊 sidecar——offline 首次 build 讀到 8/27 殘留 lsp-harvest sidecar，**靜默**產出 CALLS 0/REFERENCES 610554 壞庫（無 WARN）；正確時序＝pyrefly-index→stamp-meta→build-cache→graph_db build。**修復 ✅ CR `2442692`**（雙修：pyrefly-index 寫入自動失效三個舊 sidecar＋build mtime 閘門 fail-loud；L4 原場景三步重現＋回歸釘；殘留＝document_symbols_at 過渡邊界＋mtime 相等 tick 理論邊）——W4b/NT 前置已滿足 | mosaic | 三處煙霧綠；後續批次（ai-rules／code-reality／NT）另排 |
+| W5 ✅ | **DONE 2026-08-28**（CR 變更集 20 檔 −1,567/+216——commit 待 user 原話於 CR 端）：`import_legacy` 零殘留（活面 rg 全零、`-h` 只剩 `build\|ensure_indexes`、op→exit 2 loud 拒絕）；CR 自身舊庫**先重建後刪**（rust 鏈 899 nodes/2,277 edges→spot-check→刪 7.9M——never-delete-first 遵守）；**撈到兩個真 bug**：F-A `scip_refs --audit` wrapper 殘留舊 CRG 路徑（cutover 漏網回歸，修後 exit 0 缺差 0）＋F-B freshness WARN 不標主體（unscoped diagnostic——我報的「chain_tour 誤報」實為 WARN 對 CR checkout 準確但被 NT session 誤讀，修為自指訊息）；雙軸審查零 🔴🟡；遞延＝fixture 命名 rename＋bridge flake 調優（EP 記錄） | CR 小弧 | **資料面自理軸 W1-W5 全終結** |
 | W6 | **tree-sitter 互補面（19.8%＝Rust macro／多行／動態派發——POC 聯集互補實證）**。**前置＝RA 榨乾 spike**（升級 rust-analyzer＋查 SCIP emitter 對 macro expansion call sites 覆蓋——殘餘缺口先量化，可能蒸發大半）；有殘餘才建 producer，**首選 syn-based**（與 Python 側 ruff-parse／py_calls 對稱模式，非 tree-sitter grammar）；cargo expand 路線否決（行號契議全毀）、pyrefly 不適用（Python semantic；Python 語法層已由 ruff-parse 承接）。設計約束：provenance 標記＋查詢面分離、producer-native 鍵避 double-key collision；TESTED_BY 為獨立衍生功能項 | CR（新弧） | 觸發：RA spike 殘餘量化後 user 決定建不建；序位建議 P3/分發軸之後 |
 
 ## 決策記錄（2026-08-28 arch-thinking 定案，防再議）
@@ -78,23 +78,16 @@
 
 每 Phase 完成 → CR 回執（commit＋等值電池證據）→ 貼 ai-rules session → ai-rules 做：①分工條文翻轉（docs mode 小改＋deploy）②下游 handoff 產生（mosaic/NT 消費步驟）③本檔 milestone 打勾。跨 session 不代授權——各 repo commit gate 留在各 session。
 
-## 下一步（immediate，2026-08-28 P2 完成後更新）
+## 下一步（2026-08-28 W5 後更新——取代路線收尾倒數）
 
-1. ~~deploy~~ ✅；**bridge 驗證 ✅**（mosaic offline_backtesting 四項全過）
-   ；該 worktree **收案**（`d0345603` lsp_mcp 退役批次＋`0914dedd`
-   `.code-reality/` ignore——.gitignore 拆獨立 commit 倖存；`.mcp.json`
-   依 user 裁決丟棄，CC 端形態分發軸定案後再設定）。mosaic_alpha／
-   trading_lab 隨相互 rebase 收斂（繼承兩個 commit；各自未 commit 的
-   `.mcp.json` 修改同批丟棄）
-2. **P2 ✅**（CR `decdb75`；副檔路由＋probe 實證 backend 現實＋往返
-   一致性 gate 過——見 P2 行）；條文已翻（8 位點）；**deploy 待跑**
-   （P2 批次）。NT 掛接實證屬消費端（hover `kernel.rs` 回填 EP）
-3. **W2/資料面自理軸**（下一弧；kickoff prompt user 已持有）：規格真相源
-   code-reality `ai-analysis/reports/s5-ceiling-analysis.md`（W1 結算
-   修訂併入 W2 EP 開段）；CR 新 session 起手
-4. **P3**（lsp-python 退役）：W3 退場鏈 gate＝B7b 落地（95.7% 真匹配）
-   ＋P2 補齊 Rust 型別面（:8000 曾雙語言服務）；offline_backtesting 的
-   lsp_mcp 退役已預先落地（見 P3 行）
-5. **分發軸**：下次發版 bump 讓 bridge plugin entry 生效（ZCode cache
-   版本鎖；bump 後移除 user-level 手動 entry 避免雙掛）；候選議題——CRG 式 `install` 子命令 vs plugin entry
-   （user 標記之後研究，CR STATE.md item 4）
+1. ~~P0-P2／W2-W5~~ ✅（型別面雙語言＋資料面自理軸全終結；W5 CR 端
+   commit 待 user 原話）
+2. **P3**（lsp-python :8000 退役）：前置全齊（W3✓＋P2✓）——relay 隨時
+   可發；內容＝mosaic 三 worktree `lsp-python` 條目移除＋ZCode
+   user-level entry＋server 本體歸屬裁定（main worktree 仍持 8 檔＋
+   Makefile targets；offline_backtesting 已預先退役）
+3. **分發軸**：發版 bump（bridge plugin entry 生效——ZCode cache 版本
+   鎖；bump 後 ai-rules 端移除 user-level 手動 entry 避免雙掛）；
+   binary 面 ✅ `929420f`（rev 嵌入＋stale WARN＋post-commit 自動重裝）
+4. **W6**（tree-sitter/syn 互補面）：觸發式——RA 榨乾 spike 先行
+   （殘餘量化後 user 決定建不建）

@@ -92,7 +92,7 @@ They compose: a CRG workflow gives the steps; `crg-query` governs *how each quer
 ## Fallback — CRG absent or stale
 
 - **Not installed** → `[WARN]` (above) + LSP `findReferences`/`incomingCalls` (single-symbol, no transitive) + scan-project dep_graph (folder/module-level ripple) + rg. Accept degraded: no transitive impact, no flows, no communities.
-- **MCP tools absent but graph.db exists** → CLI 直用：`code-reality graph_query <op> --repo <repo-root>`（ops: impact_radius detect_changes hub bridge communities arch_overview flows affected_flows review_context minimal_context search symbols；`--leiden` 社區分層——`--union` 已退休：聯集邊於 build 時物化，查詢預設全量）。新庫缺場 → `code-reality graph_db build --repo`（純 producer graph 為常態——`import_legacy` 已退役〔W3 2026-08-28〕，CLI 僅留恢復面帶 WARN）。
+- **MCP tools absent but graph.db exists** → CLI 直用：`code-reality graph_query <op> --repo <repo-root>`（ops: impact_radius detect_changes hub bridge communities arch_overview flows affected_flows review_context minimal_context search symbols；`--leiden` 社區分層——`--union` 已退休：聯集邊於 build 時物化，查詢預設全量）。新庫缺場 → `code-reality graph_db build --repo`（純 producer graph 為常態——`import_legacy` 已完全移除〔W5 2026-08-28〕）。
 - **Graph stale** → regen the producer cache (Rust: SCIP index; Python: `pyrefly-index`) + `graph_db build --repo <root>`. Or verify critical edges with LSP and note the staleness.
 
 ## Reference
