@@ -24,7 +24,7 @@ This skill assumes the project has CRG. Detect once per task:
 2. **Graph DB exists** — `.code-reality/graph.db` in repo root → graph present; if MCP tools absent, use CLI `code-reality graph_query <op> --repo <root>` (see Fallback).
 3. **Neither** — CRG not installed in this project.
 
-🔴 **GATE — assume + warn, do not silently degrade.** A review/planning command that expects CRG (impact/callers/scoping) and finds it absent must emit a one-line `[WARN] graph not available — structural context (impact/callers/flows) degraded; build: code-reality graph_db build --repo <root>`, then fall back. **Silent fallback = the user gets a worse review without knowing why.** Do not block — proceed with the fallback below.
+🔴 **GATE — assume + warn, do not silently degrade.** A review/planning command that expects CRG (impact/callers/scoping) and finds it absent must emit a one-line `[WARN] graph not available — structural context (impact/callers/flows) degraded; build: code-reality graph_db build --repo <root>`, then fall back. **Silent fallback = the user gets a worse review without knowing why.** Do not block — proceed with the fallback below. **查詢面缺口**（該有的邊/符號不在 graph——如 macro 鏈、動態派發）：在**自己 repo** 的 `.kanban/Backlog/` 開 `[cr-demand]` 卡（觸發場景＋實證缺口＋期望能力）——demand-pull 觸發工具弧（ai-rules roadmap relay 段），不靠工具方猜測。
 
 ## 🔴 Shared-server rule — every call carries repo_root
 
