@@ -1,4 +1,4 @@
-安装 | ZCODE Docs
+安装 | ZCode Docs
 开始使用
 ZCode for GLM-5.3
 安装
@@ -40,10 +40,10 @@ Hooks
 下载
 立即下载 ZCode
 适用于 macOS (Apple Silicon)
-v3.8.1·最新版本
+v3.10.1·最新版本
 其他平台
 macOSIntelWindowsx64WindowsARM64Linuxx64
-支持 macOS（Apple Silicon / Intel）、Windows（x64 / ARM64）、Linux（x64，AppImage）。
+支持 macOS（Apple Silicon / Intel）、Windows（x64 / ARM64）、Linux（x64 / ARM64，AppImage、DEB、RPM）。
 安装步骤
 当前系统
 macOSApple Silicon / Intel
@@ -56,9 +56,9 @@ WindowsWindows x64
 2双击运行，按照安装向导完成安装。
 3从开始菜单或桌面快捷方式启动 ZCode。
 当前系统
-LinuxLinux x64
-1在下载区选择 Linux，下载 .AppImage 安装文件。
-2为文件添加可执行权限：chmod +x ZCode-*.AppImage。
+LinuxLinux x64 / ARM64
+1在下载区选择 Linux，下载 .AppImage、.deb 或 .rpm 安装文件。
+2使用 AppImage 时，为文件添加可执行权限：chmod +x ZCode-*.AppImage；使用 .deb 或 .rpm 时，通过发行版的软件包管理器安装。
 3双击文件或在终端中运行它启动 ZCode。
 首次启动
 首次启动会进入「首次启动设置」页面，完成后在左下角点击 连接使用 进入登录页面：

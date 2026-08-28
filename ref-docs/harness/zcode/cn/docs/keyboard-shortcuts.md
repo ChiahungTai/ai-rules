@@ -1,4 +1,4 @@
-快捷键表 | ZCODE Docs
+快捷键表 | ZCode Docs
 开始使用
 ZCode for GLM-5.3
 安装

@@ -64,26 +64,26 @@ Developer docs
 Developer docsDeveloper docs
 Related posts
 Explore more product news and best practices for teams building with Claude.
-Aug 13, 2026
-Claude Tag now reads even more of the room
+Aug 26, 2026
+Claude gets its own browser in Cowork
 Product announcements
-Claude Tag now reads even more of the roomClaude Tag now reads even more of the room
-Claude Tag now reads even more of the roomClaude Tag now reads even more of the room
-Nov 20, 2025
-What’s new in Claude: Turning Claude into your thinking partner
+Claude gets its own browser in CoworkClaude gets its own browser in Cowork
+Claude gets its own browser in CoworkClaude gets its own browser in Cowork
+Aug 26, 2026
+Claude in Chrome is generally available
 Product announcements
-What’s new in Claude: Turning Claude into your thinking partnerWhat’s new in Claude: Turning Claude into your thinking partner
-What’s new in Claude: Turning Claude into your thinking partnerWhat’s new in Claude: Turning Claude into your thinking partner
-Aug 12, 2026
-The Claude in Chrome side panel is now Claude Cowork
-Product announcements
-The Claude in Chrome side panel is now Claude CoworkThe Claude in Chrome side panel is now Claude Cowork
-The Claude in Chrome side panel is now Claude CoworkThe Claude in Chrome side panel is now Claude Cowork
+Claude in Chrome is generally available Claude in Chrome is generally available
+Claude in Chrome is generally available Claude in Chrome is generally available
 Aug 11, 2026
 Compliance API coverage extends to Claude Cowork and Claude Code
 Enterprise AI
 Compliance API coverage extends to Claude Cowork and Claude CodeCompliance API coverage extends to Claude Cowork and Claude Code
 Compliance API coverage extends to Claude Cowork and Claude CodeCompliance API coverage extends to Claude Cowork and Claude Code
+Aug 25, 2026
+Claude's memory works everywhere, and you decide what's in it
+Product announcements
+Claude's memory works everywhere, and you decide what's in itClaude's memory works everywhere, and you decide what's in it
+Claude's memory works everywhere, and you decide what's in itClaude's memory works everywhere, and you decide what's in it
 Transform how your organization operates with Claude
 See pricing
 See pricingSee pricing

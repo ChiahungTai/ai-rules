@@ -1,4 +1,4 @@
-MCP | ZCODE Docs
+MCP | ZCode Docs
 开始使用
 ZCode for GLM-5.3
 安装

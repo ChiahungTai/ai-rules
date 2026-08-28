@@ -59,7 +59,7 @@ GLM-5.3300 万 Token / 天
 GLM-5-turbo200 万 Token / 天
 每日合计（仅限 5 天）500 万 Token
 连接 GLM Coding Plan
-绑定 BigModel 或 Z.ai 账号，使用 GLM-5.3 等内置模型。
+绑定 BigModel 或 Z.ai 账号，使用 GLM-5.3、GLM-5.3-Flash 等内置模型。
 查看编程套餐用量
 在使用统计中查看 Coding Plan 额度、模型消耗和工具调用。
 本次版本亮点

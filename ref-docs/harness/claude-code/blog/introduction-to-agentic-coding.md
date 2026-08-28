@@ -106,26 +106,26 @@ How does agentic coding handle project-specific requirements?
 Claude Code uses CLAUDE.md configuration files that document your coding standards, architectural decisions, and project-specific requirements. These files persist across your sessions, ensuring consistent implementations that follow your established practices.
 Related posts
 Explore more product news and best practices for teams building with Claude.
-Aug 14, 2026
-Maximizing the value of your Claude Code sessions
+Aug 21, 2026
+The AI-Native SDLC playbook
+Enterprise AI
+The AI-Native SDLC playbookThe AI-Native SDLC playbook
+The AI-Native SDLC playbookThe AI-Native SDLC playbook
+Aug 24, 2026
+How an Anthropic field marketer uses Claude Code to send weekly personalized updates to every sales rep
 Claude Code
-Maximizing the value of your Claude Code sessionsMaximizing the value of your Claude Code sessions
-Maximizing the value of your Claude Code sessionsMaximizing the value of your Claude Code sessions
-Mar 19, 2026
-Product management on the AI exponential
+How an Anthropic field marketer uses Claude Code to send weekly personalized updates to every sales repHow an Anthropic field marketer uses Claude Code to send weekly personalized updates to every sales rep
+How an Anthropic field marketer uses Claude Code to send weekly personalized updates to every sales repHow an Anthropic field marketer uses Claude Code to send weekly personalized updates to every sales rep
+Aug 13, 2026
+Self-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-hoc questions
+Agents
+Self-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-hoc questionsSelf-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-hoc questions
+Self-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-hoc questionsSelf-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-hoc questions
+Jul 24, 2026
+The new rules of context engineering for Claude 5 generation models
 Claude Code
-Product management on the AI exponential Product management on the AI exponential
-Product management on the AI exponential Product management on the AI exponential
-May 20, 2026
-Using Claude Code: The unreasonable effectiveness of HTML
-Claude Code
-Using Claude Code: The unreasonable effectiveness of HTMLUsing Claude Code: The unreasonable effectiveness of HTML
-Using Claude Code: The unreasonable effectiveness of HTMLUsing Claude Code: The unreasonable effectiveness of HTML
-May 12, 2026
-How Anthropic's cybersecurity team built a threat detection platform with Claude Code
-Claude Code
-How Anthropic's cybersecurity team built a threat detection platform with Claude CodeHow Anthropic's cybersecurity team built a threat detection platform with Claude Code
-How Anthropic's cybersecurity team built a threat detection platform with Claude CodeHow Anthropic's cybersecurity team built a threat detection platform with Claude Code
+The new rules of context engineering for Claude 5 generation models The new rules of context engineering for Claude 5 generation models
+The new rules of context engineering for Claude 5 generation models The new rules of context engineering for Claude 5 generation models
 Transform how your organization operates with Claude
 See pricing
 See pricingSee pricing

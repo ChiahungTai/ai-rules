@@ -1,4 +1,4 @@
-使用统计 | ZCODE Docs
+使用统计 | ZCode Docs
 开始使用
 ZCode for GLM-5.3
 安装
@@ -45,7 +45,7 @@ Token 用量、会话数、消息数和活跃天数。
 编程套餐 读取 Z.ai / BigModel Coding Plan 的远端统计，适合查看套餐额度、模型消耗和工具调用情况。下图以 Z.ai - Coding Plan 为例；如果你使用的是 BigModel - Coding Plan，同样可以在这里查看对应的额度和消耗。
 这里会展示：
 5 小时 prompt 池、每周额度、MCP 每月额度等套餐状态。
-GLM-5.3、GLM-5-Turbo 等模型的 Token 消耗。
+GLM-5.3、GLM-5.3-Flash 等模型的 Token 消耗。
 联网搜索 MCP、网页读取 MCP 等工具调用次数。
 点击或展开额度信息时，还可以查看当前上下文窗口的组成、消息和工具调用占比，以及 5 小时、每周、工具调用等剩余额度。
 额度重置卡

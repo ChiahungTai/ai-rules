@@ -1,4 +1,4 @@
-编辑历史对话 | ZCODE Docs
+编辑历史对话 | ZCode Docs
 开始使用
 ZCode for GLM-5.3
 安装

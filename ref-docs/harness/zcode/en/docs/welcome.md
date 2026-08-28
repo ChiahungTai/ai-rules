@@ -59,7 +59,7 @@ GLM-5.33M tokens / day
 GLM-5-turbo2M tokens / day
 Daily total (5 days only)5M tokens
 Connect GLM Coding Plan
-Bind your BigModel or Z.ai account to use GLM-5.3 and other built-in models.
+Bind your BigModel or Z.ai account to use GLM-5.3, GLM-5.3-Flash, and other built-in models.
 View Coding Plan usage
 Check Coding Plan quota, model consumption, and tool calls in usage stats.
 Release Highlights

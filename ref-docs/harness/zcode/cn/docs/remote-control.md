@@ -1,4 +1,4 @@
-Remote Control | ZCODE Docs
+Remote Control | ZCode Docs
 开始使用
 ZCode for GLM-5.3
 安装
