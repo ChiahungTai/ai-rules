@@ -6,7 +6,7 @@ when_to_use: Fires in a graph-equipped project (`code-reality` MCP engine tools 
 
 # crg-query — Query the code knowledge graph correctly
 
-You're in a project with a **code knowledge graph** — the code-reality engine face over `.code-reality/graph.db` (self-owned schema since 2026-08-27; CRG retired, legacy `.code-review-graph/` kept as oracle/rollback). The graph already holds who-imports-whom, call edges, communities, flows. Confusing what the graph gives you vs what LSP / reading code gives you causes two expensive mistakes.
+You're in a project with a **code knowledge graph** — the code-reality engine face over `.code-reality/graph.db` (self-owned schema since 2026-08-27; pure producer graph is the norm — legacy `.code-review-graph/` deleted across all consumer repos in W4/W5, only the retired CRG museum repo keeps a copy by user adjudication). The graph already holds who-imports-whom, call edges, communities, flows. Confusing what the graph gives you vs what LSP / reading code gives you causes two expensive mistakes.
 
 ## The one rule
 
