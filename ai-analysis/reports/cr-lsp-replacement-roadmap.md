@@ -58,9 +58,11 @@
 | # | 內容 | Owner | Gate |
 |---|---|---|---|
 | W1 | S5 結算修訂：套用 R2-3 凍結條款（constructor 剔分母——94.7% 達標記錄）＋B7a 度量收割（2,642 grain 錯位邊收割）——**併入 W2 EP 開段**（同一度量面，不單開 session） | CR | 結算數字更新＋度量測試 |
-| W2 | producer 補完 EP：B7b 偽建構子 mint（2,254 pairs 轉真匹配）＋B8 未 walk 檔調查（130 個真模組零 occurrences＝def 宇宙缺口 bug）——kickoff prompt CR 已備（P2 後取用） | CR（P2 之後的新 session） | B7b 落地→95.7% 真匹配；B8 修復或列冊歸因 |
-| W3 | import_legacy 退場鏈：刷鏈去步驟→純 producer graph→消費端驗收 | CR＋mosaic | **user 已裁（2026-08-28）：B7b 落地後**——95.7% 真匹配退場，非 94.7% 剔分母版；凍結雙條款的第二條（missing 全歸因語義固有類）需 B8 修復或列冊後才成立 |
+| W2 ✅ | **DONE 2026-08-28**（CR `ef58b61`）：B7b 偽建構子 mint 完整落地（pseudo refs/defs 3,033/377；class-callee missing 4,957→~110、轉換率 ~97.8%）；B8 **非 bug 結案**（130 檔＝97 語義空 document＋33 個 class/variable-only 檔被 R2-3 fn-tail gate 設計性濾除——probe 推翻「get_ast None」歸因）；W1 度量腳本 `scripts/s5_coverage.py`（gate 層＝全分母＋B7a 正規化；腳本自身 keying bug 被審出修正）。**gate 實測 95.42%**（凍結語料 `24ced017`，預測 95.7% 的 Δ0.28pp 全歸因：derived-base ~110＋B5 fixture/builtin ~236＋B4/B6/B1b 固有類；HEAD 語料 93.86%／剔 345 條 stale 端點後 95.43%——兩語料收斂）。EP 雙軸審查 12＋post-build 8 findings 全採納 | CR | B7b 落地＋B8 列冊＋凍結第二條成立——**user 已裁（2026-08-28）：接受 95.42% 全歸因真匹配版為 W3 gate 達成**（嚴格 95.7% 為預測值；實測全歸因，精神滿足） |
+| W3 ✅ | **DONE 2026-08-28**（CR `3980fe1`）：import_legacy 退役為恢復面（CLI 保留帶 WARN＋`"retired": true`；刷鏈引導全移除——純 producer graph＝常態）；**mosaic 驗收 PASS**——producer 面退場前後逐位相同、chain_tour 重錨逐位相同（same 42/moved 6/not-in-graph 2）；差異全歸因 legacy universe 退役（hub 重整化、impact_radius 7,905→275〔TESTED_BY 33,117 測試衝擊邊隨 legacy 退場〕、communities 排除 legacy-only 成員）；恢復路徑實測可用。結算＝CR `ep-w3-import-legacy-retirement.md` | CR＋mosaic | gate 已裁定達成（user：95.42% 全歸因版——W2 `ef58b61`）；ai-rules 刷鏈文檔已翻轉（同批） |
 | W4 | 退場後 mosaic 清 `.code-review-graph/`（oracle／回滾角色卸除） | mosaic（relay 屆時發） | W3 驗收過 |
+| W5 | `import_legacy` 完全拔除（subcommand＋importer code＋tests＋雙端文檔殘句；user 2026-08-28 裁定方向） | CR 小弧 | W4 全清＋批次二（NT/code-reality repo/ai-rules 舊庫）完成——gate 表在 CR W3 EP |
+| W6 | **tree-sitter 互補面（19.8%＝Rust macro／多行／動態派發——POC 聯集互補實證）**。**前置＝RA 榨乾 spike**（升級 rust-analyzer＋查 SCIP emitter 對 macro expansion call sites 覆蓋——殘餘缺口先量化，可能蒸發大半）；有殘餘才建 producer，**首選 syn-based**（與 Python 側 ruff-parse／py_calls 對稱模式，非 tree-sitter grammar）；cargo expand 路線否決（行號契議全毀）、pyrefly 不適用（Python semantic；Python 語法層已由 ruff-parse 承接）。設計約束：provenance 標記＋查詢面分離、producer-native 鍵避 double-key collision；TESTED_BY 為獨立衍生功能項 | CR（新弧） | 觸發：RA spike 殘餘量化後 user 決定建不建；序位建議 P3/分發軸之後 |
 
 ## 決策記錄（2026-08-28 arch-thinking 定案，防再議）
 

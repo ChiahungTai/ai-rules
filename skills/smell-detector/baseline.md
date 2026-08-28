@@ -34,7 +34,7 @@
 > graph 是結構事實來源，但會 drift。**不 assume doc-only drift**（實證：doc/test/chore 混合 commit 也改結構）。
 
 1. `code-reality scip_refs --audit --repo <root>` 看 index/HEAD 對齊（[SRC] 行）。
-2. 若不同步 → 語料重生（Python：`pyrefly-index --repo <root>`；Rust：重生 SCIP index）→ `code-reality graph_db build --repo <root>`（單一 build 面、冪等）；舊 `.code-review-graph/` 在場 → 接 `graph_db import_legacy`。
+2. 若不同步 → 語料重生（Python：`pyrefly-index --repo <root>`；Rust：重生 SCIP index）→ `code-reality graph_db build --repo <root>`（單一 build 面、冪等、純 producer——`import_legacy` 已退役〔W3〕）。
 3. refresh 後才信任 impact/caller/community 結果。CRG 未裝 → `[WARN]` + fallback [scan-project](../scan-project/SKILL.md)/LSP（crg-query assume-present + warn-if-absent，**不靜默降級**）。
 
 ## 執行模式（直接執行優先，勿過度 workflow）
