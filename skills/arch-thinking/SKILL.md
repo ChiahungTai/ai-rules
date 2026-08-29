@@ -203,14 +203,14 @@ code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠beha
 **消費前述機械產出做「審查優先序」判定** — 把 dep weight / 消費者數 / hotspot / ripple 框成 core vs leaf 判定 + 審查深度建議，供 `/illustrate`（人 viewport，B 軸）渲染 selective review matrix 讓人判讀「先審哪、審多深」。**受眾中性**（見本文 §受眾中性）：產判定 + 建議，**不產**機器 finding、不釘嚴重度、不給 file:line 處方（那交 `/code-review`）。
 
 **定義**（新詞錨定）：
-- **core**（heavy human review）：高 `消費者數`（`imported_by`）+ lean/廣用 + 高 ripple（在 `dependency-graph.md` Ripple Impact Rules）的模組；**或**位於 domain critical path（bug 會 silent-corrupt 全下游）。
+- **core**（heavy human review）：高 `消費者數`（`imported_by`）+ lean/廣用 + 高 ripple（在 per-repo ripple 語義表——`dependency-graph.md`（若有）或 `architecture.md`）的模組；**或**位於 domain critical path（bug 會 silent-corrupt 全下游）。
 - **leaf**（放過 / behavior-only）：terminal consumer（library 內少被依賴）+ 低 ripple + 非 critical path。
 - **審查深度 tier**：deep human review（core，逐行讀）/ structure viewport + spot-read（中）/ behavior-only（leaf）。
 - **change-type triage**（「需不需要審」入口 gate，**非深度加權軸**）：變更類型先 triage —— generated / reproducible（protobuf stub、build artifact）→ 放行（可證偽判準：一旦 hand-modified 即升 source 必審）;rename / comment / logging → 放行;money-path / tribal-knowledge → 必審（已被 core / silent-corruption path 涵蓋，此處明示）;其餘隨 core / leaf 深度。**不另立深度軸** —— 修缺陷的高價值審查由補償邏輯盤點承接;本 triage 僅補「需不需要審」的入口判斷。change-type triage（此處，入口 gate）≠ risk-tier（acceptance-evidence，證據深度）≠ scope（execution-plan，planning gate）—— 語義不同，**勿機械套用為第四深度軸**（過度工程：第四軸強迫 LLM 自覺加權，是最弱形式）。
 
 **資料來源（reference，不重造）**：
 - [`scan-project`](../scan-project/SKILL.md) `dep_graph.modules.imported_by[]`（消費者數）+ `hotspots[]`（hotspot tier）。
-- `dependency-graph.md`（[`maintain`](../maintain/SKILL.md) 步驟 1.3 持續維護的 Hotspots + Ripple Impact Rules — 持續真相源，非 snapshot；循環依賴集群若存在，其 ripple 會落在 Ripple Impact Rules 內）。
+- per-repo ripple 語義表——`dependency-graph.md`（若有；人工策展）或 `architecture.md`（若該 repo 以此慣例存放 ripple 語義表）的 Hotspots + Ripple Impact Rules（循環依賴集群若存在，其 ripple 會落在 Ripple Impact Rules 內）；機械 transitive ripple 另可由 code-reality `impact_radius` 產。
 - 本 skill City Map 資料生成既有 dep weight / 反向耦合 flag。
 
 **domain overlay**（不硬編特定領域）：project 可定義 domain-specific core overlay（bug 會污染全下游的 path）。**範例**（quant）：除權息調整 / volume 張↔股 / 風控 sizing / 會計總量。

@@ -17,49 +17,32 @@ when_to_use: >
 ## 四階段流程
 
 ```
-Phase 1: Snapshot               Phase 2: Instruction Sync     Phase 3: Doc Health           Phase 4: Report
-─────────────────               ──────────────────────      ──────────────────────        ──────────────
-scan_project.py                 /instruction-sync                 /doc-health                    彙總報告
-→ dep_graph / findings / fp     LLM 直接讀 instruction 檔        呈現 findings                  跨 phase 關聯
-diff fingerprint                用 dep_graph 驗證 imports   LLM 直接讀 .kanban/            趨勢追蹤
-更新 dependency-graph.md          品質檢查                    品質檢查 + kanban hygiene
+Phase 1: Graph Freshness        Phase 2: Instruction Sync     Phase 3: Doc Health           Phase 4: Report
+──────────────────              ──────────────────────      ──────────────────────        ──────────────
+code-reality build（opt-in）    /instruction-sync                 /doc-health                    彙總報告
+無 index 的 repo skip           LLM 直接讀 instruction 檔        呈現 findings                  跨 phase 關聯
+                                品質檢查                    品質檢查 + kanban hygiene       趨勢追蹤
 ```
 
-### Phase 1: 統一知識快照
+### Phase 1: 結構圖新鮮度（code-reality，opt-in）
 
-**步驟 1.1：執行統一掃描**
+**步驟 1.1：判斷 opt-in**
+
+project root 有 `.code-reality.toml`（profile）或 `.code-reality/`（sidecar）任一 → opt-in；兩者皆無 → Phase 1 skip（一行帶過，不報錯）。此處偵測的是 **repo 數據面 opt-in**（toml／sidecar 在場）；binary 存在性偵測是另一件事（單一真相源見 [code-reality](../code-reality/SKILL.md) 存在性偵測）。
+
+**步驟 1.2：重建 graph**
 
 ```bash
-cd <project-root>
-uv run python ${CLAUDE_SKILL_DIR}/../scan-project/scripts/scan_project.py --project-root . --output .project-snapshot.json
+code-reality build --repo <project-root>
 ```
 
-產出 JSON v5（dep_graph / findings / fingerprint），不含 registry。
+binary 不存在或 build 失敗 → 記 `[WARN]` 後續行 Phase 2——graph 新鮮度是 nightly prefetch，查詢時 stale WARN 驅動的 lazy rebuild 是兜底（見 [cr-query](../cr-query/SKILL.md)）。
 
-**步驟 1.2：偵測變化**
-
-- `--init` 模式：跳過 diff
-- 維護模式：比較新舊 JSON 的 fingerprint、findings、dep_graph
-- 沒變 → 跳過。有變 → 列出具體變更
-
-**步驟 1.3：更新 dependency-graph.md**
-
-根據 dep_graph 資料更新 Mermaid graph、Direct Dependencies、Hotspots、Ripple Impact Rules。
-Mermaid 樣式遵循 [mermaid](../mermaid/SKILL.md)：禁 `%%{init}%%`、fill+color 成對（跨 Dark/Light 主題可讀）。
-
-**步驟 1.4：Commit snapshot**
-
-`.project-snapshot.json` 隨程式碼一起 commit，作為下次 diff 基準。
+> snapshot 快照鏈（scan_project.py 產出 `.project-snapshot.json` + diff fingerprint + 自動更新 `dependency-graph.md` + commit snapshot）已退役：機械依賴/ripple 查詢由 code-reality graph 承擔（`callers`／`hub_nodes`／`impact_radius`，見 [cr-query](../cr-query/SKILL.md)）；人工策展（Ripple 語義表、分層敘事）由 per-repo 文檔承擔（`dependency-graph.md` opt-in 人工維護，或 `architecture.md`——若該 repo 以此慣例存放 ripple 語義表）。[scan-project](../scan-project/SKILL.md) 保留為 on-demand 機械盤點／findings 工具。
 
 ### Phase 2: Instruction 同步
 
-執行 `/instruction-sync --changed-since yesterday --recursive`。
-
-Snapshot 輔助：
-- `dep_graph` → 精確 import 依賴鏈
-- `findings` → 預計算 X6 等問題
-
-無 snapshot 時降級為獨立模式。
+執行 `/instruction-sync --changed-since yesterday --recursive`。（snapshot 的條件式輔助——退役過渡期 `.project-snapshot.json` 仍存在時——由該 skill 自述，此處不重複。）
 
 ### Phase 3: 文件健康 + Kanban 維護
 
@@ -72,15 +55,15 @@ Snapshot 輔助：
 彙總三個 phase 結果：
 
 1. **各 Phase 摘要**：通過/警告/失敗統計
-2. **跨 Phase 關聯**：
-   - Phase 1 import 變化 ↔ Phase 2 Instruction 問題
-   - Phase 1 findings ↔ Phase 3 doc-health 問題
-3. **趨勢追蹤**：fingerprint 數量變化、findings 增減
+2. **跨 Phase 關聯**：Phase 2 Instruction 問題 ↔ Phase 3 doc-health findings 同根因關聯
+3. **趨勢追蹤**：doc-health findings 增減、kanban 卡片流動
 4. **寫晨報檔**：若 `<project-root>/ai-analysis/daily-report/` 目錄存在，把報告寫入 `ai-analysis/daily-report/YYYY-MM-DD.md`（**同日 merge 非覆蓋**——重寫 top title + intro + 🔥/✅/📈 owned section，保留其他 op append 的外來 section；格式 + merge 規則見下方「晨報檔格式」）。目錄不存在則 skip——這是跨專案 opt-in guard，避免影響沒有晨報慣例的專案。**無待決項時仍寫檔**（內容標「✅ 無待決項」），以證明排程有跑。
 
 ---
 
 ## Findings 風險分級矩陣
+
+> X-\* 機械 findings 由 `/scan-project`（on-demand）產出的 `.project-snapshot.json` 供應——夜間鏈已不產 snapshot（Phase 1 退役），無 snapshot 時 doc-health 降級純 LLM、X-\* 缺席屬預期；需要機械 findings 時手動補跑 `/scan-project`。
 
 | check_id | 風險 | 自動模式 | 互動模式 | 修正程序 |
 |----------|------|---------|---------|---------|
@@ -187,9 +170,8 @@ Done/ 是歷史檔案庫（全域開發指南 `ai-development-guide.md` 明文 `
 ```
 ## Daily Maintenance Report
 
-### Phase 1: Snapshot
-✅ 無變化（fingerprint 與上次一致）
-   - dep_graph: N modules, findings: N, capabilities: N, kanban: N
+### Phase 1: Graph Freshness
+✅ code-reality graph 重建完成（opt-in repo）／ skip（無 index 的 repo）
 
 ### Phase 2: Instruction Sync
 ✅ 無問題（檢查 N 個檔案）
@@ -206,12 +188,8 @@ Done/ 是歷史檔案庫（全域開發指南 `ai-development-guide.md` 明文 `
 ```
 ## Daily Maintenance Report
 
-### Phase 1: Snapshot
-⚠️ 偵測到變更
-- fingerprint: capabilities X→Y, kanban X→Y
-- findings: X-cap-path 新增 N 筆, X-tag-module 解決 N 筆
-- dep_graph: 新增 deps features → data
-- 已更新: Mermaid graph, Direct Dependencies 表
+### Phase 1: Graph Freshness
+⚠️ graph 重建完成（失敗時：`[WARN]` + 原因，續行）
 
 ### Phase 2: Instruction Sync
 ⚠️ 發現 N 個問題
@@ -226,9 +204,9 @@ Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
   - Stale: Next-Up 'xxx' 已 8 天未更新
 
 ### Phase 4: Health Report
-- 跨 phase 關聯：Phase 1 新增依賴 ↔ Phase 2 Instruction 問題
+- 跨 phase 關聯：Phase 2 Instruction 問題 ↔ Phase 3 findings 同根因
 - 未解決 🟡: N 筆（需人工確認）
-- 趨勢: capabilities +N（健康），findings +N
+- 趨勢: findings +N、kanban 卡片流動
 
 ### 下一步
 - 🟡 待確認項目：列出
@@ -252,7 +230,7 @@ Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
 - Kanban: 無 tag 卡片補 tag(N)
 
 ## 📈 趨勢
-- fingerprint: capabilities X→Y, findings X→Y
+- findings: X→Y、kanban 卡片流動
 - 與昨日 diff 要點
 ```
 
@@ -273,7 +251,7 @@ Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
 
 ### 自動模式（/daily-maintain）
 
-**自動 commit 範圍**：🟢 自動修正的變更 + `.project-snapshot.json` 更新 + 晨報檔（`ai-analysis/daily-report/YYYY-MM-DD.md`，若產出）。
+**自動 commit 範圍**：🟢 自動修正的變更 + 晨報檔（`ai-analysis/daily-report/YYYY-MM-DD.md`，若產出）。
 
 Commit message 格式：
 ```
@@ -281,7 +259,6 @@ chore(maintain): daily auto-maintain — X findings fixed, Y reported
 
 Auto-fixed: X-cap-path(N), X-tag-module(N)
 Reported: X6(N)
-Snapshot: capabilities N, kanban N, findings N
 Morning report: ai-analysis/daily-report/YYYY-MM-DD.md
 ```
 
@@ -298,7 +275,6 @@ Morning report: ai-analysis/daily-report/YYYY-MM-DD.md
 | 參數 | 說明 |
 |------|------|
 | 無參數 | 依序執行 Phase 1 → 2 → 3 → 4 |
-| `--init` | Phase 1 用初始生成模式（從零產出 dep-graph） |
-| `--only dep-graph` | 只跑 Phase 1 |
+| `--only graph` | 只跑 Phase 1（graph 新鮮度） |
 | `--only sync` | 只跑 Phase 2 |
 | `--only doc-health` | 只跑 Phase 3 |

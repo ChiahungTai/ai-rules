@@ -100,7 +100,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 | Agent | 定義 | context（spawn prompt 餵） | 抓什麼 |
 |-------|------|---------------------------|--------|
 | fresh-eyes | `agents/shared/code-reviewer.md` | **只餵 diff**，不給任何意圖文件 | 實作層真相：邏輯錯、邊界、silent regression、幻覺 API（不被作者意圖合理化） |
-| primed | `agents/shared/code-reviewer-primed.md` | diff + EP + delta_tour 對照（若有，見下）+ 模組 AGENTS.md Capabilities + `dependency-graph.md` | Type A intent drift：意圖對齊、架構契合、測試精簡且完整、YAGNI↔過度工程光譜 |
+| primed | `agents/shared/code-reviewer-primed.md` | diff + EP + delta_tour 對照（若有，見下）+ 模組 AGENTS.md Capabilities + `dependency-graph.md`（若有） | Type A intent drift：意圖對齊、架構契合、測試精簡且完整、YAGNI↔過度工程光譜 |
 
 - **context 差異在 spawn prompt，非 agent 定義**（ZCode subagent 自動注入 AGENTS.md，「空 context」不可能全空；可控制的是不餵 EP/架構文檔）
 - **delta_tour 對照（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：**僅弧模式（code 已 commit、HEAD 越過 EP baseline）產出**——spawn primed 前對當下 HEAD 跑 `code-reality snapshot --repo <repo>`（呼叫形態：`code-reality <tool> --repo <repo>`），與 EP baseline snapshot（implement 階段 1 落下；定位＝EP baseline hash8 → `<repo>-<sha8>.json`，`--label` 僅入 `_meta`）對跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo>`，其 `.tour` description（宣稱對照三態＋實際變動模組＋退化/跨面 pair 自動警示；json 中間產物不落盤）併入 primed 餵料——intent drift（Type A）從 LLM 推導升級為機械底稿（宣稱抽取只認特定模組路徑前綴，宣稱欄 NONE ≠ EP 無宣稱——範圍見真相源）。**HEAD == baseline（uncommitted 審查）→ 不跑**：同 sha 對跑＝零差異假陰性，且此時對 baseline sha 跑 graph 刷新＋snapshot 會以 working-tree 修改覆寫 baseline sidecar；印 `[WARN]` 退回純 LLM 對照。snapshot 報 stale WARN → 視同缺報告跳過（stale snapshot 照寫、基於舊原料）。缺 baseline snapshot 或未裝 → 跳過不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill
@@ -155,9 +155,9 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 > 補盲區：消費端影響檢查看 **code consumer**（API/刪除 → scripts/lab/config）；本節看 **arch doc consumer**（結構變更 → 架構文檔）。code-review 只 **flag 提醒**，不做 sync。
 
-偵測 structural signal（新/移/改名 module、跨模組 import edge 變、觸及 hub/ripple component、新抽象層；非 file-count）→ 產 finding 提醒檢查架構文檔（`dependency-graph.md` / 模組 AGENTS.md 架構段 / `SYSTEM-MAP.md`），**每個 finding 指向其 owner tool**（what-to-check 真相源在 [code-review-and-quality](../code-review-and-quality/SKILL.md)「Architecture Doc Drift Reminder」，不重抄——single-source drift 防護）。
+偵測 structural signal（新/移/改名 module、跨模組 import edge 變、觸及 hub/ripple component、新抽象層；非 file-count）→ 產 finding 提醒檢查架構文檔（`dependency-graph.md`（若有） / 模組 AGENTS.md 架構段 / `SYSTEM-MAP.md`），**每個 finding 指向其 owner tool**（what-to-check 真相源在 [code-review-and-quality](../code-review-and-quality/SKILL.md)「Architecture Doc Drift Reminder」，不重抄——single-source drift 防護）。
 
-**為什麼獨立成節**：`dependency-graph.md` 無 build-time owner（只有 `/daily-maintain`、`/scan-project`），是架構文檔最易 silent drift 的；axis 3 被「≥3 files」gate 擋住，會漏 1-file 高 ripple 改動（如改 hub module 的單檔），故獨立、signal-triggered 接住。
+**為什麼獨立成節**：`dependency-graph.md`（per-repo opt-in）無 build-time owner（人工策展，同 `architecture.md`），是架構文檔最易 silent drift 的；axis 3 被「≥3 files」gate 擋住，會漏 1-file 高 ripple 改動（如改 hub module 的單檔），故獨立、signal-triggered 接住。
 
 ---
 

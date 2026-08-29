@@ -33,7 +33,7 @@ allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Bash", "Agent"]
 執行 [/scan-project](../scan-project/SKILL.md) skill 產出統一知識快照。**腳本在 scan-project skill 的 `scripts/` 下——本 skill 目錄沒有 scripts/，別在自己的 skill dir 找**。依 harness 解析 scan-project skill 根目錄後執行（例：Claude 的 `${CLAUDE_SKILL_DIR}` 相對路徑是 `../scan-project/`）：
 
 ```bash
-uv run python <scan-project-skill-dir>/scripts/scan_project.py --project-root . --output .project-snapshot.json --init
+uv run python <scan-project-skill-dir>/scripts/scan_project.py --project-root . --output .project-snapshot.json
 ```
 
 多語言 repo：Rust 側依賴由 snapshot 的 `rust_workspace` 涵蓋；其他語言用 Phase 1 分析補。

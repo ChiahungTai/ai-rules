@@ -1,22 +1,23 @@
 ---
 name: scan-project
 description: >
-  Unified project knowledge scanner. Scans Python imports (built-in AST scan; auto-upgrades via the
-  target project's tools/scan_imports.py), Rust Cargo workspaces (members + internal crate deps +
-  PyO3 binding marker), mechanical directory inventory, instruction files (AGENTS.md preferred,
-  CLAUDE.md legacy), and .kanban/ cards. Produces dep_graph + rust_workspace + dir_inventory +
-  instruction_files + findings + fingerprint. Use before /daily-maintain or /project-review, or
-  when setting up a new project.
+  Unified project knowledge scanner (on-demand). Scans Python imports (built-in AST), Rust Cargo
+  workspaces (members + internal crate deps + PyO3 binding marker), mechanical directory inventory,
+  instruction files (AGENTS.md preferred, CLAUDE.md legacy), and .kanban/ cards. Produces dep_graph +
+  rust_workspace + dir_inventory + instruction_files + findings + fingerprint. Nightly maintain no
+  longer generates snapshots (structural graph freshness is code-reality's domain); run on demand
+  for mechanical inventory / cross-validation findings.
 when_to_use: >
-  Run before daily-maintain, during init, or when you need mechanical
-  cross-validation findings. Also use when dependency graph may be stale.
-argument-hint: "[--project-root PATH] [--output PATH] [--init]"
+  Run on demand — during init, when you need mechanical cross-validation
+  findings, or when the dependency inventory may be stale. Nightly maintain
+  no longer runs this.
+argument-hint: "[--project-root PATH] [--output PATH]"
 allowed-tools: Bash(uv run python *)
 ---
 
 # /scan-project — 統一專案知識掃描器
 
-掃描 Python import 依賴（內建；目標專案有 `tools/scan_imports.py` 時自動升級）、Rust Cargo workspace、機械目錄盤點、模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities 表格、.kanban/ 卡片，產出 **dep_graph + rust_workspace + dir_inventory + instruction_files + findings + fingerprint**。
+掃描 Python import 依賴（內建 AST）、Rust Cargo workspace、機械目錄盤點、模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities 表格、.kanban/ 卡片，產出 **dep_graph + rust_workspace + dir_inventory + instruction_files + findings + fingerprint**。
 
 Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.md)
 
@@ -27,7 +28,7 @@ Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.m
 **scan_project.py 做機械性檢查，不產出完整 registry。LLM 需要細節時直接讀取檔案。**
 
 產出：
-1. **dep_graph** — Python import 關係（LLM 無法自行可靠計算）。`source` 標示來源：`scan_imports`（目標專案 `tools/scan_imports.py`，較豐富）/ `builtin`（內建 AST fallback，模組 = package root 第一層目錄）/ `none`
+1. **dep_graph** — Python import 關係（LLM 無法自行可靠計算）。`source` 標示來源：`builtin`（內建 AST 掃描，模組 = package root 第一層目錄）/ `none`（無 package root）
 2. **rust_workspace** — Cargo workspace members、crate 間內部依賴、`has_python_bindings`（PyO3 綁定層標記——truth/shell 分離 repo 的關鍵訊號）；無 Rust workspace 時為 `null`
 3. **dir_inventory** — 機械目錄盤點（深度 ≤3；檔名僅在 ≤60 時列出）——**結構性列舉的 ground truth**，LLM prose 摘要不可取代
 4. **instruction_files** — 各目錄 instruction 檔位置 + 邊界/能力表有無
@@ -55,17 +56,13 @@ Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.m
 # 掃描當前專案
 uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root . --output .project-snapshot.json
 
-# 首次建立（從零產出）
-uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --init --output .project-snapshot.json
-
 # 輸出到 stdout（pipe 用）
 uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/to/project
 ```
 
 ## Graceful Degradation
 
-- 如果目標專案有 `tools/scan_imports.py`：自動 import 並採用（`source: scan_imports`，dep-graph 較豐富）
-- 如果沒有：**內建 AST 掃描 fallback**（模組 = package root 下第一層目錄；`source: builtin`）；連 package root 都沒有才為空（`source: none`）
+- **內建 AST 掃描**（模組 = package root 下第一層目錄；`source: builtin`）；連 package root 都沒有才為空（`source: none`）
 - 沒有 Cargo workspace：`rust_workspace` 為 `null`
 - 如果沒有 `.kanban/` 目錄：kanban 相關 findings 不產出
 - 輸出格式 schema_version: 6
@@ -76,10 +73,10 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 
 | Section | 來源 | 說明 |
 |---------|------|------|
-| `dep_graph.source` | — | `scan_imports` / `builtin` / `none` |
-| `dep_graph.modules` | scan_imports.py 或內建掃描 | 模組依賴結構（file_count, internal_deps, fan_out 等） |
-| `dep_graph.edges` | scan_imports.py 或內建掃描 | 模組間 import edges |
-| `dep_graph.hotspots` | scan_imports.py 或內建掃描 | 高 fan-out imports |
+| `dep_graph.source` | — | `builtin` / `none` |
+| `dep_graph.modules` | 內建掃描 | 模組依賴結構（file_count, internal_deps, fan_out 等） |
+| `dep_graph.edges` | 內建掃描 | 模組間 import edges |
+| `dep_graph.hotspots` | 內建掃描 | 高 fan-out imports |
 | `rust_workspace` | Cargo.toml 解析 | workspace 成員 + crate 內部依賴 + `has_python_bindings` |
 | `dir_inventory` | 檔案系統盤點 | 深度 ≤3 目錄清單（subdirs、檔名/副檔統計）——列舉 ground truth |
 | `instruction_files` | instruction 檔掃描 | 各目錄 AGENTS.md/CLAUDE.md 位置 + 邊界/能力表有無 |
@@ -90,10 +87,10 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 
 ## 與其他命令整合
 
+維護流程（`/daily-maintain` 自動、`/project-review` 互動）已不產出 snapshot（快照鏈退役，結構新鮮度歸 code-reality——見 [maintain](../maintain/SKILL.md) Phase 1）；本 skill 為 on-demand 工具。
+
 | 命令 | 如何使用本 skill |
 |------|-----------------|
-| `/daily-maintain` | Phase 1 執行本 skill 產出 snapshot（自動模式） |
-| `/project-review` | Phase 1 執行本 skill 產出 snapshot（互動模式） |
 | `/instruction-sync` | 可選：載入 dep_graph 用於 import 驗證 |
 | `/instruction-init` | 可選：執行本 skill，用 findings 報告缺口 |
 | `/doc-health` | 步驟 1 消費 findings，LLM 直接讀 instruction 檔（AGENTS.md/CLAUDE.md）+ .kanban/ 做品質檢查 |

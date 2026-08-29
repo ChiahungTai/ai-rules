@@ -142,12 +142,12 @@
 
 | 欄位 | 型別 | 說明 |
 |------|------|------|
-| `source` | string | `scan_imports`（目標專案 tools/scan_imports.py，較豐富）/ `builtin`（內建 AST fallback）/ `none` |
+| `source` | string | `builtin`（內建 AST 掃描）/ `none` |
 | `modules` | dict | 模組依賴結構（key = module name；builtin 模組 = package root 第一層目錄，另含 `(root)`） |
 | `edges` | array | 模組間 import edges |
 | `hotspots` | array | 高 fan-out imports |
 
-dep_graph 不需要目標專案自帶工具：無 `tools/scan_imports.py` 時自動降級為內建掃描；連 package root 都沒有時三個欄位為空（`{}`、`[]`、`[]`）。
+dep_graph 由內建 AST 掃描產出（外部 scan_imports rich face 已退役）；連 package root 都沒有時三個欄位為空（`{}`、`[]`、`[]`）。
 
 ### rust_workspace
 

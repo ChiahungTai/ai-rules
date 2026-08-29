@@ -10,17 +10,15 @@ Produces three things (no full registries — LLM reads files directly):
 Internal parsing of instruction files (AGENTS.md preferred, CLAUDE.md legacy) and .kanban/ is kept for computing findings,
 but registries are NOT included in output.
 
-Designed for the /scan-project skill + /daily-maintain or /project-review workflow.
+Designed for the /scan-project skill (on-demand mechanical inventory + findings).
 
 Usage:
     uv run python scan_project.py --project-root . --output .project-snapshot.json
-    uv run python scan_project.py --init --project-root /path/to/project
 """
 
 import argparse
 import ast
 import hashlib
-import importlib.util
 import json
 import os
 import re
@@ -77,30 +75,8 @@ TABLE_ROW_START = re.compile(r"^\|.*\|\s*$")
 
 
 # ---------------------------------------------------------------------------
-# Import scan_imports if available (graceful degradation)
+# Package root detection (shared by scans + findings)
 # ---------------------------------------------------------------------------
-
-
-def _load_scan_imports(project_root: Path) -> dict | None:
-    """Try to import and run scan_imports.scan_project from the target project."""
-    candidates = [
-        project_root / "tools" / "scan_imports.py",
-        project_root.parent / "tools" / "scan_imports.py",
-    ]
-    for path in candidates:
-        if path.exists():
-            try:
-                spec = importlib.util.spec_from_file_location("scan_imports", path)
-                if spec is None or spec.loader is None:
-                    continue
-                mod = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(mod)
-                package_root = _find_package_root(project_root)
-                if package_root:
-                    return mod.scan_project(package_root, package_root.name)
-            except Exception:
-                pass
-    return None
 
 
 def _find_package_root(project_root: Path) -> Path | None:
@@ -669,7 +645,7 @@ def run_cross_validation(
 
 
 def _builtin_import_scan(project_root: Path) -> dict | None:
-    """Fallback import scan when the project has no tools/scan_imports.py.
+    """Built-in AST import scan over the project's package root.
 
     AST-parses all .py files under the package root and reduces imports to
     module-level edges (module = first directory under the package root).
@@ -948,12 +924,9 @@ def scan_project(project_root: Path) -> dict:
     """
     project_root = project_root.resolve()
 
-    # Phase 1: Import scan — target tools/scan_imports.py (rich) > built-in fallback
-    import_data = _load_scan_imports(project_root)
-    import_source = "scan_imports"
-    if not import_data:
-        import_data = _builtin_import_scan(project_root)
-        import_source = "builtin" if import_data else "none"
+    # Phase 1: Import scan — built-in AST scan of the package root
+    import_data = _builtin_import_scan(project_root)
+    import_source = "builtin" if import_data else "none"
     if import_data:
         modules = import_data.get("modules", {})
         edges = import_data.get("edges", [])
@@ -1034,11 +1007,6 @@ def main():
         default=None,
         help="Output JSON file path (default: stdout)",
     )
-    parser.add_argument(
-        "--init",
-        action="store_true",
-        help="Initial generation mode (no diff, just produce full snapshot)",
-    )
     args = parser.parse_args()
 
     project_root = args.project_root.resolve()
@@ -1056,7 +1024,7 @@ def main():
         inv_dirs = len(result.get("dir_inventory", {}).get("dirs", []))
         print(
             f"[OK] Written to {args.output} "
-            f"(dep_graph[{dep.get('source', 'scan_imports')}]: {dep_modules} modules, "
+            f"(dep_graph[{dep.get('source', 'builtin')}]: {dep_modules} modules, "
             f"rust: {rust_crates} crates, "
             f"inventory: {inv_dirs} dirs, "
             f"instruction_files: {fp['instruction_file_total']}, "

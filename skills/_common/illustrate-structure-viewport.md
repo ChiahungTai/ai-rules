@@ -67,7 +67,7 @@ drift detection 細節（5 signal class / baseline degradation ladder / no-sever
 
 ## Selective Review Matrix（既有 core 審查 artifact）
 
-**既有 core 骨幹審查（無 change，純審穩固度）的 P1 產物** —— core vs leaf 判定 + 審查深度建議，讓人決定「先審哪、審多深」（Anthropic selective-review：core heavy human review、leaf 放過）。**判定 / 資料來自 [arch-thinking](../arch-thinking/SKILL.md)「core identification」lens**（消費 `dep_graph.modules.imported_by` / `hotspots` + `dependency-graph.md` ripple）—— 本檔只 spec **渲染格式**，不做判定（分層）。
+**既有 core 骨幹審查（無 change，純審穩固度）的 P1 產物** —— core vs leaf 判定 + 審查深度建議，讓人決定「先審哪、審多深」（Anthropic selective-review：core heavy human review、leaf 放過）。**判定 / 資料來自 [arch-thinking](../arch-thinking/SKILL.md)「core identification」lens**（消費 `dep_graph.modules.imported_by` / `hotspots` + per-repo ripple 語義表（`dependency-graph.md`（若有）））—— 本檔只 spec **渲染格式**，不做判定（分層）。
 
 **欄位**：`| 模組 | dep weight | 消費者數 | ripple/hotspot tier | domain core overlay? | core/leaf | 建議審查深度 | 位置 |`
 

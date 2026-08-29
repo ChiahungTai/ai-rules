@@ -24,7 +24,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 1. **盤點（機械）**：AGENTS.md 群／SYSTEM-MAP／dependency-graph／架構文檔／既有 ai-analysis 產物。結構性列舉以 `ls`/fd 對齊，subagent 報告只是理解素材非列舉來源。
 2. **骨架生成**：目錄結構＋`README.md`（區塊導航＝**問題→入口**＋讀者路徑：onboarding 5 分鐘／開新設計先盤 UC／排研究工作）＋治理 `AGENTS.md`——**真相源映射表**（檔案×真相源×drift 速度×更新時機）、更新紀律（消化重編非機械 patch、單一真相不重複、退役制 `_done/`、狀態宣稱帶出處）、對齊覆核流程（arc 收尾錨定 git log 觸發，**含 callstack-plan 差異盤點**——UC-B→UC-A 回填鉤子，細則見生成章「新功能回填」）。區塊分類參考：架構／UC 矩陣／營運地圖／研究循環／策略方法論／領域哲學（哲學類用 symlink 指向單一真相，不複製）。模板從 mosaic `ai-analysis/blueprint/` 抽象。
-3. **半滿草擬（🤖 標記）**：AI 立即填可推導部分——架構結構段（from dependency-graph／snapshot）、營運 UC 骨架（from Capabilities 掃描）。**空清單誘導力弱、半滿文檔誘導力強**（人傾向補完非開頭）。
+3. **半滿草擬（🤖 標記）**：AI 立即填可推導部分——架構結構段（from code-reality graph（index 在場時）／既有 dependency-graph／snapshot（若有））、營運 UC 骨架（from Capabilities 掃描）。**空清單誘導力弱、半滿文檔誘導力強**（人傾向補完非開頭）。
 4. **👤 標記＋誘導問題預埋**：需人類意圖的 section（核心假說、需求全集缺口、策略方法論、領域哲學）標 👤＋預埋具體誘導問題（例：「核心假說是什麼？沒有它會怎樣？」「需求全集的分層與缺口？」）。**成功判據＝正確留白，不是重現內容**——fresh run 若「補出」洞察層內容即失敗（編造非意圖）。
 5. **更新鉤子接線＋停點**：鉤子掛既有流程（build 5a 結算→營運地圖、arc 收尾→對齊覆核＋callstack-plan 差異盤點（見生成章「新功能回填」）、開新設計→UC 盤點）——誘導靠流程被動觸發不靠人想起，此為防骨架淪為永久空清單的唯一可靠機制。初稿即**停**：blueprint 是人類 viewport，AI 不代終審。
 

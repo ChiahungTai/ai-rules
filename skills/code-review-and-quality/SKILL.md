@@ -116,11 +116,11 @@ DEAD CODE IDENTIFIED:
 
 | 架構文檔 | owner | 何時該更新 |
 |---|---|---|
-| `dependency-graph.md` | `/scan-project`（重生成）/ `/daily-maintain` | 新/移/改名 module、import edge 變、hub component 改 — **無 build-time owner，最易 silent drift** |
+| `dependency-graph.md`（per-repo opt-in） | 無自動 owner（人工策展） | 新/移/改名 module、import edge 變、hub component 改 — **無 build-time owner，最易 silent drift** |
 | 模組 AGENTS.md 架構段 / `architecture.md` | build 5b（未跑 /implement 則手動） | 設計決策 / 新抽象 / 模組結構 / 依賴方向 變更 |
 | `SYSTEM-MAP.md`（lifecycle） | metadata-sync / build 5a | 功能生命週期變化（新功能完成、狀態升級） |
 
-**嚴重度**：Suggestion（mild signal）→ Important（強信號：新/移除 module 必更 `dependency-graph.md`）。
+**嚴重度**：Suggestion（mild signal）→ Important（強信號：新/移除 module 必更 `dependency-graph.md`——在持有此檔的 repo）。
 
 **不適用**：docs mode（純文檔審查本身就是改文檔；本提醒是「code 變更 → 架構文檔忘了跟」）。
 
