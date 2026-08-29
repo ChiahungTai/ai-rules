@@ -1,10 +1,10 @@
 ---
-name: crg-query
+name: cr-query
 description: Query the code knowledge graph — now the code-reality engine face (CRG MCP retired 2026-08-26) — correctly. Use when you need structural facts file-scanning cannot give efficiently — blast radius / impact radius of a change, who calls whom (callers/callees), affected execution flows, hub/bridge nodes, module communities, dead code, architecture overview, or token-efficient review context scoping — in a project with a graph (`.code-reality/graph.db`; MCP `code-reality` engine tools, or CLI `code-reality graph_query <op> --repo <root>`). Provides the LSP-vs-code-reality division (symbol truth→code-reality index: Rust=SCIP, Python=pyrefly-index; type face both languages→code-reality-lsp-bridge hover/check_file, .py/.rs extension-routed; graph ops→code-reality graph_query), the assume-present + warn-if-absent rule, and anti-over-reliance (graph = structure, not runtime behavior). Prevents manually re-tracing dependencies with LSP/rg when the graph has them, and inferring behavior/correctness from graph edges.
 when_to_use: Fires in a graph-equipped project (`code-reality` MCP engine tools available or `.code-reality/graph.db` exists) when the task needs structural/impact facts — "who calls X", "blast radius of this change", "is X dead code", "hubs/communities", "scope my review to impacted nodes only". Load BEFORE manually tracing imports/callers with LSP findReferences or rg. Does NOT fire in projects without the engine (no warn noise). Parallels nt-query (discipline for a tool).
 ---
 
-# crg-query — Query the code knowledge graph correctly
+# cr-query — Query the code knowledge graph correctly
 
 You're in a project with a **code knowledge graph** — the code-reality engine face over `.code-reality/graph.db` (self-owned schema since 2026-08-27; pure producer graph is the norm — legacy `.code-review-graph/` deleted across all consumer repos in W4/W5, only the retired CRG museum repo keeps a copy by user adjudication). The graph already holds who-imports-whom, call edges, communities, flows. Confusing what the graph gives you vs what LSP / reading code gives you causes two expensive mistakes.
 
@@ -50,7 +50,7 @@ Two facts backends, complementary not competing:
 | **Token-efficient review scoping** (read only impacted) | **code-reality** `get_minimal_context` / `get_review_context` | LSP has no context-budgeting |
 | **Hub / bridge / community / architecture overview** | **code-reality** `hub_nodes` / `bridge_nodes` / `list_communities` (directory or `--leiden`) / `architecture_overview` | No LSP equivalent |
 | **Dead code** (no callers + no tests) | `callers` 歸零＋CLI `hub_refs` hazard 分層安全網（「0 refs 可刪」前必跑） | LSP zero-hits 無 hazard 分層（動態派發盲區） |
-| **Semantic search** ("where do we handle X concept") | **code-reality** `semantic_search` (keyword face; embeddings not adopted) OR rg | LSP is name-based |
+| **Semantic search** ("where do we handle X concept") | **code-reality** `semantic_search` (keyword face; embeddings not adopted) OR rg | LSP is name-based；**有效形態＝單關鍵詞**（多詞落 LIKE 全短語比對 0 筆） |
 | **Comments / strings / config / TODO** | **rg** | Neither LSP nor code-reality index non-code |
 
 **Rule of thumb:** *symbol* → code-reality（index 在場；Rust＝SCIP、Python＝pyrefly-index）; *graph* (impact/callers/flows/community/scope) → code-reality `graph_query` 家族; *type*（hover/diagnostics，.py 與 .rs） → code-reality-lsp-bridge（`hover`/`check_file`）; *text* → rg. index 缺場/過期 → 重建或退 LSP＋標「未 index 驗證」。For "what does this change affect," start at the engine's `impact_radius`/`detect_changes`, then LSP/Read for the specific symbols.
@@ -88,9 +88,9 @@ Graph edges are **static parse-time** facts. They miss:
 
 CRG's `install` generates **four workflow skills** (`debug-issue`, `explore-codebase`, `refactor-safely`, `review-changes`) — *step-by-step procedures* for a task with the graph, project-local (`.claude/skills/`).
 
-**`crg-query` is the discipline** — *how to query the graph correctly* (LSP-vs-CR 分工、GATE、anti-over-reliance), global (ai-rules).
+**`cr-query` is the discipline** — *how to query the graph correctly* (LSP-vs-CR 分工、GATE、anti-over-reliance), global (ai-rules).
 
-They compose: a CRG workflow gives the steps; `crg-query` governs *how each query in those steps is interpreted* (don't over-infer, fall back to LSP/code when behavior matters). On conflict, this skill's discipline wins — workflows don't suspend verification.
+They compose: a CRG workflow gives the steps; `cr-query` governs *how each query in those steps is interpreted* (don't over-infer, fall back to LSP/code when behavior matters). On conflict, this skill's discipline wins — workflows don't suspend verification.
 
 ## Fallback — engine absent or stale
 

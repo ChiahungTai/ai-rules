@@ -35,7 +35,7 @@
 
 1. `code-reality scip_refs --audit --repo <root>` 看 index/HEAD 對齊（[SRC] 行）。
 2. 若不同步 → 語料重生（Python：`pyrefly-index --repo <root>`；Rust：重生 SCIP index——**直呼 repo-pin binary**，rustup proxy 從 any cwd outside the repo 呼叫會靜默降 toolchain；事故實案＝CR plugin skill）→ `code-reality graph_db build --repo <root>`（單一 build 面、冪等、純 producer）。
-3. refresh 後才信任 impact/caller/community 結果。engine 缺場 → `[WARN]` + fallback [scan-project](../scan-project/SKILL.md)/LSP（crg-query GATE，**不靜默降級**）。
+3. refresh 後才信任 impact/caller/community 結果。engine 缺場 → `[WARN]` + fallback [scan-project](../scan-project/SKILL.md)/LSP（cr-query GATE，**不靜默降級**）。
 
 ## 執行模式（直接執行優先，勿過度 workflow）
 
@@ -47,7 +47,7 @@
 
 ## Flow（5 步，per directory）
 
-> 廣到精細 + 受眾分離。委託：[arch-thinking](../arch-thinking/SKILL.md)（core/leaf tiering + City Map）+ [crg-query](../crg-query/SKILL.md)（graph facts）+ [illustrate](../illustrate/SKILL.md)（渲染）+ [review-engine](../review-engine/SKILL.md)（severity/confidence only）。
+> 廣到精細 + 受眾分離。委託：[arch-thinking](../arch-thinking/SKILL.md)（core/leaf tiering + City Map）+ [cr-query](../cr-query/SKILL.md)（graph facts）+ [illustrate](../illustrate/SKILL.md)（渲染）+ [review-engine](../review-engine/SKILL.md)（severity/confidence only）。
 
 ### 1. Profile
 - 讀 `<dir>/AGENTS.md`（職責 + 关鍵設計決策 + 可複用基礎設施）。**fallback**：無 AGENTS.md → 目錄名 + top-level README 推導職責 + `[WARN] 無 instruction 檔`。
@@ -84,7 +84,7 @@ illustrate 渲染 5 張圖：**emoji-first，color 僅 accent 每圖 1-3 節點*
 - **state.yaml**（機器，**開頭標「⚠️ 非人類閱讀」**）：verdict / last-reviewed-sha / guarded / gaps / drift_basis / crg_facts。
 - 更新 `ai-analysis/codebase-review/README.md` 狀態表。
 
-## graph 整合（conditional — crg-query GATE）
+## graph 整合（conditional — cr-query GATE）
 - ripple：`hub_nodes` / `bridge_nodes`（node 級；排除 mega-cluster）
 - 優先化：coverage × hub 熱點交叉（untested hotspot）
 - invariant 消費者：MCP `callers`（浮現 folder 外）
@@ -124,7 +124,7 @@ ai-analysis/codebase-review/
 
 ## Reference
 - [arch-thinking](../arch-thinking/SKILL.md) — core/leaf tiering + City Map + domain overlay
-- [crg-query](../crg-query/SKILL.md) — graph facts 紀律（LSP-vs-CR 分工、GATE、anti-over-reliance、mega-cluster caveat）
+- [cr-query](../cr-query/SKILL.md) — graph facts 紀律（LSP-vs-CR 分工、GATE、anti-over-reliance、mega-cluster caveat）
 - [illustrate](../illustrate/SKILL.md) — B 軸人類 viewport 渲染
 - [review-engine](../review-engine/SKILL.md) — severity/confidence（severity/confidence only；baseline 非 review 命令家族，自有 baseline 預設）
 - [mermaid](../mermaid/SKILL.md) — 跨主題安全色（產圖前必讀）

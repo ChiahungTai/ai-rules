@@ -1,7 +1,7 @@
 ---
 name: corpus-recall
 description: "開新功能/修 bug 前找前因後果 / 這功能之前怎麼做的 / 相關 tours / prior art / corpus 檢索——topic（symbol｜模組路徑｜關鍵詞）→ 前因後果卡片：相關鏈文檔＋tour 走讀入口（職責一句＋為何相關＋confidence）。與 smell-detector 對仗＝行動前偵察雙軸（code 壞味道／敘事脈絡）。"
-when_to_use: "Before starting a feature/bugfix/refactor: recall prior narrative context (callstack chains, tours, delta tours) —「之前怎麼做的、有沒有既有鏈」. Also AI self-use at execution-plan 階段 0 全域研究. NOT for: code structure viewport (/illustrate), symbol navigation (LSP/crg-query/hub_refs), post-action understanding (/debrief)."
+when_to_use: "Before starting a feature/bugfix/refactor: recall prior narrative context (callstack chains, tours, delta tours) —「之前怎麼做的、有沒有既有鏈」. Also AI self-use at execution-plan 階段 0 全域研究. NOT for: code structure viewport (/illustrate), symbol navigation (LSP/cr-query/hub_refs), post-action understanding (/debrief)."
 argument-hint: "<topic> [--repo PATH]"
 allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 ---

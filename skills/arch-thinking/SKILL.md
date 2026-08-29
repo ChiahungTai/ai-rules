@@ -85,7 +85,7 @@ LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用
 
 **生成資料**（函數/方法級 caller→callee edges，scoped 至 entry symbol + N hops，**非全系統**）；**視覺渲染**（graph pruned subgraph）留 `/illustrate`（既有渲染引擎）。每條 edge 標 parse-time-static。
 
-**Fuel**：code-reality-first（`callers` direct sites＋`closure` BFS＋`impact_radius` transitive blast——LSP 無法高效做；callee 側無 CR 面，併 LSP `outgoingCalls`）→ LSP-fallback（`incomingCalls`/`outgoingCalls` 跨 N symbol AGGREGATION walk，bounded depth，`[WARN]` 無 transitive degraded）→ scan-project dep_graph 模組級脈絡。**code-reality 缺場 → emit `[WARN]`（crg-query GATE）+ LSP fallback**。
+**Fuel**：code-reality-first（`callers` direct sites＋`closure` BFS＋`impact_radius` transitive blast——LSP 無法高效做；callee 側無 CR 面，併 LSP `outgoingCalls`）→ LSP-fallback（`incomingCalls`/`outgoingCalls` 跨 N symbol AGGREGATION walk，bounded depth，`[WARN]` 無 transitive degraded）→ scan-project dep_graph 模組級脈絡。**code-reality 缺場 → emit `[WARN]`（cr-query GATE）+ LSP fallback**。
 
 code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠behavior；dynamic dispatch/config/reflection 不可見）。
 
@@ -109,7 +109,7 @@ code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠beha
 
 **生成資料**（producer→transform→consumer edges，每條附靜態 type/contract 可推導時）；**視覺渲染**（flowchart LR lineage）留 `/illustrate`。**吸收既有「欄位 ← 發布者」authority annotation**（illustrate-structure-viewport.md）為 first-class edge type。
 
-**Fuel**：hybrid 無單一 source——code-reality flows（`list_flows`/`affected_flows`）+ LSP `outgoingCalls`（type-bearing edges，`hover` 取型別）+ scan-project dep_graph（模組級方向）。**code-reality 缺場 → emit `[WARN]`（crg-query GATE）+ LSP/scan-project fallback**。
+**Fuel**：hybrid 無單一 source——code-reality flows（`list_flows`/`affected_flows`）+ LSP `outgoingCalls`（type-bearing edges，`hover` 取型別）+ scan-project dep_graph（模組級方向）。**code-reality 缺場 → emit `[WARN]`（cr-query GATE）+ LSP/scan-project fallback**。
 
 **HARD BOUNDARY**：runtime data VALUES out-of-scope（三者皆不產，須 read/run code，acceptance-evidence L4-L5）；與 acceptance-evidence Runtime Invariant Assurance 互補（本能力=靜態結構骨架；Runtime Invariant Assurance=持續 runtime 監控 silent-corruption invariant——不同軸、不重疊）。
 
@@ -160,7 +160,7 @@ code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠beha
 
 **機械分工**：scan-project / Pattern Radar **枚舉**（撈全 + 相似）= primary；**LSP 驗證**（特定 claim → ✅/❌，見 [lsp-navigation](../../rules/lsp-navigation.md)）= secondary（人鎖定嫌疑後才上驗證）。
 
-> **圖譜 facts（code-reality — index 在場的 repo = co-equal primary，否則 companion fallback）**：transitive impact radius / 跨檔 callers·flows / hub·community 等**圖譜級**結構事實，**`.code-reality/graph.db` 在場的 repo 以 code-reality 為 primary**（見 [crg-query](../crg-query/SKILL.md)）—— 三層 facts 互補：scan-project 給 folder/module 級枚舉、LSP 查單一 symbol、code-reality 查 transitive graph。本 skill 的 City Map 資料 / hub / dep weight / bridge 在這些 repo**優先由 code-reality 機械產**（`hub_nodes`/`bridge_nodes`/`impact_radius`/`list_communities`），scan-project 為無 index repo 的 fallback（仍受 crg-query anti-over-reliance 約束：graph=structure≠behavior；**community ≠ module boundary** — 用目錄+AGENTS.md 為模組真相，community 只當 coupling hint）。engine 缺場 → `[WARN]` + fallback scan-project/LSP（crg-query GATE）。
+> **圖譜 facts（code-reality — index 在場的 repo = co-equal primary，否則 companion fallback）**：transitive impact radius / 跨檔 callers·flows / hub·community 等**圖譜級**結構事實，**`.code-reality/graph.db` 在場的 repo 以 code-reality 為 primary**（見 [cr-query](../cr-query/SKILL.md)）—— 三層 facts 互補：scan-project 給 folder/module 級枚舉、LSP 查單一 symbol、code-reality 查 transitive graph。本 skill 的 City Map 資料 / hub / dep weight / bridge 在這些 repo**優先由 code-reality 機械產**（`hub_nodes`/`bridge_nodes`/`impact_radius`/`list_communities`），scan-project 為無 index repo 的 fallback（仍受 cr-query anti-over-reliance 約束：graph=structure≠behavior；**community ≠ module boundary** — 用目錄+AGENTS.md 為模組真相，community 只當 coupling hint）。engine 缺場 → `[WARN]` + fallback scan-project/LSP（cr-query GATE）。
 
 > **反應式驗證 vs AGGREGATION（釐清）**：本段既有 LSP 查證 = 單一 symbol 的反應式驗證（claim → ✅/❌）；上方 call graph / type structure / data-flow 資料生成 = 多 symbol AGGREGATION（產生資料集，非驗證單一 claim）——同工具、不同 consumption pattern，刻意並列不合併。
 

@@ -163,7 +163,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 **Writer/Reviewer 分離**：用獨立 Agent context 做品質閘門，避免主 LLM 審查自己的 code。
 review 執行預設（force 獨立 / max-agents 預設 3 / model inherit / 3-perspective）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」—— 本段僅定義 build 特有流程。**3-perspective**（① clean + ② UC-anchored + ③ Correctness，多樣性 > 數量）完整設計見 [agent-review-cycle.md](../_common/agent-review-cycle.md)。
 
-> **code-reality（若在場）**：Agent Review 的 wiring 驗證（新/改 symbol 的消費端接對沒）用 MCP `callers`；段 impact 驗證用 `impact_radius`；「沒影響 X」的 claim 機械反證用 code-reality（graph 是 L1 機械證據，補強 Claim→Evidence→Trust，見階段 3 整合路徑檢查）。分工 + GATE 見 [crg-query](../crg-query/SKILL.md)。
+> **code-reality（若在場）**：Agent Review 的 wiring 驗證（新/改 symbol 的消費端接對沒）用 MCP `callers`；段 impact 驗證用 `impact_radius`；「沒影響 X」的 claim 機械反證用 code-reality（graph 是 L1 機械證據，補強 Claim→Evidence→Trust，見階段 3 整合路徑檢查）。分工 + GATE 見 [cr-query](../cr-query/SKILL.md)。
 
 #### Step 1: 確認 max-agents
 

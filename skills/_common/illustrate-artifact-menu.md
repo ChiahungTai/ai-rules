@@ -38,7 +38,7 @@ artifact 詞彙 = drill `artifact <type>` 的 type，全程一致（無同義變
 
 - **方向問題**：新東西落在對的 context/layer 嗎？AI 在重造既有模組嗎？邊界被跨越嗎？
 - **Mermaid**：`flowchart` + `subgraph` per bounded context / Clean Architecture layer；directed edges = 允許依賴方向；`-.->` dashed = leak/forbidden（跨層/跨域）
-- **Fuel**：code-reality-first（`list_communities` + `architecture_overview` + `hub_nodes`/`bridge_nodes`）/ fallback（scan-project `dep_graph.modules.imported_by[]` + AGENTS.md Capabilities）。**code-reality 缺場 → emit `[WARN]`（crg-query GATE）+ scan-project/AGENTS.md fallback**。⚠️ caveat：**community ≠ module boundary**（目錄 + AGENTS.md 是模組真相，community 只 coupling hint）
+- **Fuel**：code-reality-first（`list_communities` + `architecture_overview` + `hub_nodes`/`bridge_nodes`）/ fallback（scan-project `dep_graph.modules.imported_by[]` + AGENTS.md Capabilities）。**code-reality 缺場 → emit `[WARN]`（cr-query GATE）+ scan-project/AGENTS.md fallback**。⚠️ caveat：**community ≠ module boundary**（目錄 + AGENTS.md 是模組真相，community 只 coupling hint）
 - **When-to-use**：mode B 理解整體骨架 / EP（新節點落對 context 嗎）/ post-build drift（boundary-crossing signal）
 - **Anti-pattern**：raw 全系統拓樸 dump（耗盡人類注意力）
 
@@ -46,7 +46,7 @@ artifact 詞彙 = drill `artifact <type>` 的 type，全程一致（無同義變
 
 - **方向問題**：我在意的 data 從哪來、誰 transform、誰消費？新 code 插在 pipeline 對的點嗎？
 - **Mermaid**：`flowchart LR`（nodes = producers/transforms/consumers；edge labels = data type 或 contract）
-- **Fuel**：hybrid（code-reality `affected_flows`/`list_flows` + LSP `outgoingCalls` type-bearing edges + scan-project dep_graph 模組方向 + 吸收「欄位 ← 發布 client」authority edge）。**code-reality 缺場 → emit `[WARN]`（crg-query GATE）+ LSP/scan-project fallback**。**runtime data VALUES：三者皆無——須 read/run code（acceptance-evidence L4-L5），標 static-skeleton-only**
+- **Fuel**：hybrid（code-reality `affected_flows`/`list_flows` + LSP `outgoingCalls` type-bearing edges + scan-project dep_graph 模組方向 + 吸收「欄位 ← 發布 client」authority edge）。**code-reality 缺場 → emit `[WARN]`（cr-query GATE）+ LSP/scan-project fallback**。**runtime data VALUES：三者皆無——須 read/run code（acceptance-evidence L4-L5），標 static-skeleton-only**
 - **When-to-use**：mode B 追蹤 field 來源 / EP（讀對 source、插對 pipeline 點）/ post-build drift（producer shifted 或 consumer 期望 field 被停發 = silent-corruption 前兆）
 - **Anti-pattern**：宣稱 runtime 值（只產靜態骨架）
 
