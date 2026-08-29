@@ -34,7 +34,7 @@
 > graph 是結構事實來源，但會 drift。**不 assume doc-only drift**（實證：doc/test/chore 混合 commit 也改結構）。
 
 1. `code-reality scip_refs --audit --repo <root>` 看 index/HEAD 對齊（[SRC] 行）。
-2. 若不同步 → 語料重生（Python：`pyrefly-index --repo <root>`；Rust：重生 SCIP index——**直呼 repo-pin binary**，rustup proxy 依 cwd 解析 toolchain）→ `code-reality graph_db build --repo <root>`（單一 build 面、冪等、純 producer）。
+2. 若不同步 → 語料重生（Python：`pyrefly-index --repo <root>`；Rust：重生 SCIP index——**直呼 repo-pin binary**，rustup proxy 從 any cwd outside the repo 呼叫會靜默降 toolchain；事故實案＝CR plugin skill）→ `code-reality graph_db build --repo <root>`（單一 build 面、冪等、純 producer）。
 3. refresh 後才信任 impact/caller/community 結果。engine 缺場 → `[WARN]` + fallback [scan-project](../scan-project/SKILL.md)/LSP（crg-query GATE，**不靜默降級**）。
 
 ## 執行模式（直接執行優先，勿過度 workflow）

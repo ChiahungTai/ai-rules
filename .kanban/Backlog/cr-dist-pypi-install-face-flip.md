@@ -29,3 +29,7 @@ CR 分發軸改 PyPI platform wheels（`ep-pypi-wheel-distribution.md`，maturin
 - 觸發狀態：**未滿足**——CR repo 無 `crates/*/pyproject.toml`、無 `.github/workflows/`、git log 無分發軸 commit（HEAD `9f25969` 僅 plugin 0.1.3）→ 本卡留 Backlog
 - 翻轉面盤點：`rg 'cargo install|cargo run --release|uv tool install|uvx' skills/ rules/ agents/` 僅命中 `skills/code-reality/SKILL.md` 三處（L17 存在性偵測段＋L55-56 pyrefly-index）——上列第 2 項（rules 端）**空集合**：lsp-navigation.md 唯一 install 提及是「pyright-langserver 不可解除安裝」（非安裝方式敘述），tool-discipline.md 零命中
 - W6（語法層互補 producer 評估）互動：W6 證據傾向不建→不增 dist、零影響；若裁決「建」→ S1（多一份 pyproject）/S2（CI matrix）/S3（首發範圍）各加一列——EP 在 S1 前修改成本近零
+
+## Grounding 補記（2026-08-29 S2 修剪）
+
+拆遷 EP S2 修剪 `skills/code-reality/SKILL.md`（刪已搬 CR 的工具事實塊＋錨點化）——L17 存在性偵測段與 pyrefly 安裝行**內容不變但行號漂移**；flip 觸發時重 `rg 'cargo install'` 定位，勿沿用舊行號。

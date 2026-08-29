@@ -121,7 +121,7 @@ S1（relay 出）→ S2（回執後）；S3、S4 與 S1/S2 無依賴可先行。
 
 ### 驗證策略
 
-- `rg 'rustup|partial index|12.7|golden_corpus|authoring 程序' skills/code-reality/SKILL.md` → 0 命中（已搬項零殘留）
+- 已搬項零殘留＝**全文級**掃描：`rg '12\.7|byte-deterministic|emit-skip|2442692|rust-callgraph-probe' skills/code-reality/SKILL.md` → 0 命中；錨點句（一句式 pointer）允許提及關鍵詞——S4 審查裁定非殘留
 - `rg 'cargo install' skills/code-reality/SKILL.md` → 命中數與修剪前相同（未搶 cr-dist 管轄）
 - 接線表完整性：`rg 'implement 階段 1|debrief 第 5 段|模式 B' skills/code-reality/SKILL.md` → 全命中（接線層未誤刪）
 - cr-dist 卡 Grounding 段補新行號
@@ -204,6 +204,8 @@ S1（relay 出）→ S2（回執後）；S3、S4 與 S1/S2 無依賴可先行。
 | D4 | baseline.md L37 rustup 副本 trim 延後至 S2 | EP 內文「A1 搬 CR 後」條件未滿足——現在 trim 教訓兩邊皆無全文 |
 | D5 | handoff「source==cache 0.1.4」宣稱失效 | 並行 CR session 前移 source（L30 slot 路徑分歧、cache 版才符 slot 慣例）——handoff 已改分歧注記＋指示以 ai-rules L47 為準修正 |
 | D6 | A7 切割標籤修正（L69-70 實為標題＋空行；欄位語義在示例註解與 authoring 步驟內） | stage-4 review 逐行驗證；EP 附錄 A7 與 handoff 已同步修正 |
+| D7 | handoff 修訂（CR 端 arch-thinking 審後 relay，8 項全採納）：baseline/環境段更新（data-plane 已落地 `ec7952c`..`4b46717`）、決策 5 解銷（L30 已翻＋同版出清＋清償 P1）、A1 新拓撲敘事、A3 時間戳、A5 併 in-repo 語義＋`sidecar_migrate`、A6 in-flight 注記、新增漂移紀律行（B-1）與版本協調（C-3）、驗收 3 放寬 density；另 A7 補保密理由（mosaic 私有 repo 路徑不出公開 repo） | CR 端事實前移＋雙源防腐；relay 宣稱經 ai-rules 端機械驗證屬實（git log／L30／`sidecar_migrate --help`；C-3 CC session 無法此端驗證，照記） |
+| D8 | S1 回執（CR `3bd6215`，0.1.6 三處一致＋evidence 五項驗實）後執行 S2：全檔重寫＋錨點化＋受眾邊界聲明；未吸收項（~8 分鐘/cwd/sqlite 雙訊號——回執偏差 6）留本檔持有；S4 焦點審查 PASS（零誤刪/零斷鏈/零全文殘留）＋兩修正：EP 驗收命令放寬（錨點句允許）、`hazard_registry` 欄位語義錨點改本檔示例塊註解持有（plugin 版覆蓋不足——**CR 端下次 content bump 候選**） | S4 fresh-eyes 審查裁定；手術風險（誤刪/斷鏈）經機械驗證排除 |
 
 ---
 

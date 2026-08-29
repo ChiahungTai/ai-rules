@@ -34,7 +34,7 @@ description: build 後收尾鏈編排 — code-review → judge-review → 修�
 
 ## 階段 1 — Code Review（僅 code 鏈）
 
-執行 `code-review`（[skills/code-review/SKILL.md](../code-review/SKILL.md)；無參 = uncommitted diff，弧模式（階段 0 判定）= EP baseline..HEAD——見該命令「任務弧模式」；dual-context 雙審查者規則見該命令模式 B）。本 skill 是**跨命令自動化場景**，code-review 產出寫 `.review/<branch>.md`（Finding Record 表格）供後續 judge/followup 讀。primed 側 context 依 code-review 模式 B 餵料清單（EP 路徑由 build 上下文帶入；含 transition 報告——code_reality baseline snapshot 在場時機械產「EP 宣稱模組 vs 實際變動」對照，機制見模式 B；無 EP 時依模式 B 降級規則處理）。
+執行 `code-review`（[skills/code-review/SKILL.md](../code-review/SKILL.md)；無參 = uncommitted diff，弧模式（階段 0 判定）= EP baseline..HEAD——見該命令「任務弧模式」；dual-context 雙審查者規則見該命令模式 B）。本 skill 是**跨命令自動化場景**，code-review 產出寫 `.review/<branch>.md`（Finding Record 表格）供後續 judge/followup 讀。primed 側 context 依 code-review 模式 B 餵料清單（EP 路徑由 build 上下文帶入；含 delta_tour 對照——code_reality baseline snapshot 在場時機械產「EP 宣稱模組 vs 實際變動」對照，機制見模式 B；無 EP 時依模式 B 降級規則處理）。
 
 findings 全空 → 報告並直接進 docs 鏈。
 
@@ -63,14 +63,14 @@ findings 全空 → 報告並直接進 docs 鏈。
 ```markdown
 ## Post-Build 收尾報告
 - code 鏈：findings N（✅N/❌N/⚠️N）、修正 N 項、followup <通過|未收斂(殘留清單)>
-- EP 對照：transition=<機械底稿|LLM 對照|無（原因：uncommitted 模式/小變更）>——宣稱觸及 vs 實際變動模組、unexplained 差異項
+- EP 對照：delta_tour=<機械底稿|LLM 對照|無（原因：uncommitted 模式/小變更）>——宣稱觸及 vs 實際變動模組、unexplained 差異項
 - docs 鏈：consistency N 檔（pass N / fail-fixed N）、metadata-sync <跑/跳過>
 - callstack 菜單（repo 有 `ai-analysis/blueprint/callstack-plan.md` 時）：積壓 N 條待生成（機械＝plan **成鏈行數**（①-③ 軌行；④ scripts/索引行不計）− `callstack/` 既有 md 數）——報庫存不催行動，生成＝獨立觸發＋報價（blueprint-bootstrap）
 - ⚠️ 待用戶確認：<決策清單>
 - 下一步：`/commit`（commit 需人類確認，本 skill 止步於此）
 ```
 
-**EP 對照行是再次提醒**（主歸納點在 [implement](../implement/SKILL.md) 階段 6——build 現場最清楚）：弧模式帶階段 1 機械底稿；同 session 接續 → 帶入 implement 階段 6 歸納；修正迴圈有新增變動 → 更新後再報。此行是 commit 決策的 triage 訊號（一眼看出 EP 未解釋的變動），深度渲染屬 `/debrief`；transition 機制與時點條件真相源見 code-review 模式 B。
+**EP 對照行是再次提醒**（主歸納點在 [implement](../implement/SKILL.md) 階段 6——build 現場最清楚）：弧模式帶階段 1 機械底稿；同 session 接續 → 帶入 implement 階段 6 歸納；修正迴圈有新增變動 → 更新後再報。此行是 commit 決策的 triage 訊號（一眼看出 EP 未解釋的變動），深度渲染屬 `/debrief`；delta_tour 機制與時點條件真相源見 code-review 模式 B。
 
 ---
 

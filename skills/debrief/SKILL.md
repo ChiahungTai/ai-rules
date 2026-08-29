@@ -33,7 +33,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 |---|-----|------|
 | 1 | **意圖一句話** | 這次改動解決什麼問題、為什麼改 |
 | 2 | **行為黑盒子** | 改動觸及的核心模組/函式：input/output + 演算法；**明確判定「對外行為變了 vs 純結構重構」**（input/output 合約不變時，這句判定本身就是最高價值訊息）。改動以 `.md` 規則/命令為主時，本段渲染 **behavior delta**：AI 讀了改的 rule 後會做什麼不同 + 影響 UC |
-| 3 | **前後差異** | 語義 diff——能力/行為的 delta，非行數增減；機械底稿：transition 報告＋走讀載體 delta_tour `.tour` 入口（若可跑 code_reality，見下方） |
+| 3 | **前後差異** | 語義 diff——能力/行為的 delta，非行數增減；機械底稿：delta_tour `.tour`（宣稱對照三態＋實際變動模組＋退化/跨面警示；若可跑 code_reality，見下方） |
 | 4 | **檔案地圖** | per-file 1-2 行，**按角色分組**（核心邏輯/配套/測試/文檔）——分組顯現改動形狀（「核心其實只有 2 檔，其餘配套」） |
 | 5 | **波及與缺口** | 受影響消費者 + 該同步未同步（下游/索引/文件/測試）；hub symbol 波及用 `hub_refs` 聚合（若可跑 code_reality，見下方） |
 | 6 | **驗證證據** | demo-checklist：feature → 可跑 target → 覆蓋。**NONE 不掩蓋——「沒 demo = 沒證明完成」** |
@@ -41,7 +41,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 
 小改動不硬撐七段全滿——行為段可一句話；大改動每段完整。Console 紀律：精簡章節、禁 Mermaid 語法（md 模式才可用）。第 7 段前三類（詮釋假設/歧義選擇/推斷行為）是靜態詮釋偏差（Type A，單時點）；動態漂移是累積偏移（Type B）——兩型見 [acceptance-evidence skill](../acceptance-evidence/SKILL.md)「Intent Drift 的兩型」。
 
-**code_reality 機械底稿（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：第 3 段底稿＝transition 報告（邊集差異＋「EP 宣稱模組 vs 實際變動」三欄對照），由本命令自產——與 post-build 先後不固定，不假設上游已產；產出機制與時點條件（HEAD == baseline 不產出、stale 跳過）見 [code-review](../code-review/SKILL.md) 模式 B transition 段。宣稱抽取只認特定模組路徑前綴——不符前綴的變更宣稱欄恆 NONE，視為「未提供對照」（單欄邊集差異仍可用），不當「EP 無宣稱」解讀。**第 3 段走讀載體＝delta_tour**（UC-B「走讀時」消費點）：transition 條件成立時，同組 a/b sidecar 順手跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo>`（out-dir 預設 `.tours/delta`——7 天窗自動清舊檔、不 commit），簡報附產出 `.tour` 路徑＝人類走讀入口（CodeTour vsix panel 點開即走；目錄版控契約見 [tour-bootstrap](../tour-bootstrap/SKILL.md)；a/b 解析同 transition 真相源——code-review 模式 B）。第 5 段 hub symbol 波及吃 `hub_refs` 聚合（callers/callees 按目錄、test/prod 切分＋hazard 註記——dynamic dispatch「0 refs 可刪」誤判防護，規則見 code-reality skill）。機械產物取代 LLM 逐檔推導，渲染成人類 viewport 仍是本命令職責。未裝、缺 baseline snapshot 或時點不符 → LLM 推導（既有行為不變）。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
+**code_reality 機械底稿（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：第 3 段底稿＝delta_tour 產出（`.tour` description：宣稱對照三態＋實際變動模組＋退化/跨面警示），由本命令自產——與 post-build 先後不固定，不假設上游已產；產出機制與時點條件（HEAD == baseline 不產出、stale 跳過）見 [code-review](../code-review/SKILL.md) 模式 B。宣稱抽取只認特定模組路徑前綴——不符前綴的變更宣稱欄恆 NONE，視為「未提供對照」（單欄邊集差異仍可用），不當「EP 無宣稱」解讀。**第 3 段走讀載體＝delta_tour**（UC-B「走讀時」消費點）：時點條件成立時，同組 a/b sidecar 順手跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo>`（out-dir 預設 `.tours/delta`——7 天窗自動清舊檔、不 commit），簡報附產出 `.tour` 路徑＝人類走讀入口（CodeTour vsix panel 點開即走；目錄版控契約見 [tour-bootstrap](../tour-bootstrap/SKILL.md)；a/b 解析真相源——code-review 模式 B）。第 5 段 hub symbol 波及吃 `hub_refs` 聚合（callers/callees 按目錄、test/prod 切分＋hazard 註記——dynamic dispatch「0 refs 可刪」誤判防護，規則見 code-reality skill）。機械產物取代 LLM 逐檔推導，渲染成人類 viewport 仍是本命令職責。未裝、缺 baseline snapshot 或時點不符 → LLM 推導（既有行為不變）。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
 
 ### 第 6 段 demo target 挑選規則（優先序）
 

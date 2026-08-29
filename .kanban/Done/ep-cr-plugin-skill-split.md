@@ -2,11 +2,11 @@
 
 ## 目標
 
-追蹤 `ai-analysis/execution-plans/ep-cr-plugin-skill-split.md`（ai-rules↔code-reality 內容所有權翻轉：工具事實/坑→CR plugin skill standalone 面；接線/紀律留 ai-rules 生態層；同班清 CRG 殘留）。
+追蹤 `ai-analysis/execution-plans/_done/ep-cr-plugin-skill-split.md`（ai-rules↔code-reality 內容所有權翻轉：工具事實/坑→CR plugin skill standalone 面；接線/紀律留 ai-rules 生態層；同班清 CRG 殘留）。
 
 ## 相關
 
-- EP：`ai-analysis/execution-plans/ep-cr-plugin-skill-split.md`
+- EP：`ai-analysis/execution-plans/_done/ep-cr-plugin-skill-split.md`（已歸檔；全弧 S1-S4 結案 2026-08-29——CR 回執 `3bd6215`/0.1.6）
 - 行管轄互動：`cr-dist-pypi-install-face-flip.md`（安裝敘述行本 EP 不動）
 
 ## 驗收標準
