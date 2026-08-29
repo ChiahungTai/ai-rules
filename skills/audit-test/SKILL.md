@@ -56,7 +56,7 @@ allowed-tools: ["Read", "Bash"]
 
 ---
 
-## 6 個檢查角度
+## 檢查角度
 
 | # | 角度 | 對應標準 | 嚴重程度 |
 |---|------|---------|---------|
@@ -66,6 +66,7 @@ allowed-tools: ["Read", "Bash"]
 | 4 | 消費端驗證覆蓋 | acceptance-evidence L3 + quality-constraints 符號 vs 路徑覆蓋 | Important / Suggestion |
 | 5 | 漸進驗證合規 | progressive-validation DEPTH-MIN 集合 | Suggestion |
 | 6 | 測試必要性 | acceptance-evidence 證據時效性 | Important / Suggestion |
+| 7 | 變異測試抽查（mutation-testing-lite） | acceptance-evidence L2 獨立性塌縮（機械量測面） | Critical（survived 真實缺口） |
 
 ---
 
@@ -213,6 +214,21 @@ allowed-tools: ["Read", "Bash"]
 **與靜態隱含覆蓋的區別（/smell-detector zoom 判準 2 收窄後的分界）**：本角度（動態過時）與「靜態他處已測 = 冗餘」語義不同 — 後者指測試的行為已被**另一個測試**隱含驅動。分界：**production wrapper 重複測試**（測 thin wrapper 且 wrapper 無獨立 production 入口）的判斷見 [smell-detector zoom mode](../smell-detector/zoom.md) 判準 2；**其餘靜態冗餘**（同行為不同入口重複測等）屬本命令（角度 1 反模式 / 角度 6 測試必要性）；本段角度 6 聚焦動態過時。
 
 **3-signal correlation（升級 2-signal → 3-signal，捕 intent drift）**：判讀 passing test 是真通過還是 silent drift，單看「過時」（動態）不夠 —— 須關聯三訊號：① 原始 test intent（story / 建立時擷取）② 當前 test result ③ 引入的 code changes。三者不一致 = intent drift 訊號（test 還過但已不驗原意圖）。coverage 增加也不保證 test 仍驗意圖。3-signal taxonomy 見 [acceptance-evidence skill](../acceptance-evidence/SKILL.md)「Intent Drift 的兩型 + 3-signal correlation」（rule 端 always-on 核心見 [acceptance-evidence](../../rules/acceptance-evidence.md)）。
+
+### 角度 7：變異測試抽查（mutation-testing-lite）
+
+**核心原則**：AI 同寫 test+impl 的同義反覆，靜態掃描（角度 1）抓不到其真實形態——實測（mosaic 2026-08-30 spike，mutmut 3.7.0 scoped）證明盲區不是 `assert x==x` 廢話型，而是**測試與 impl 共享同一組典型數字**（happy path 斷言具體、邊界值系統性缺席：0、1、恰好一半、price<1 這類金融商品邊界）。只有機械突變能把這種盲區變成可數的 survived 名單。
+
+**形態＝scoped 手跑抽查，非常態 gate**（ spike 裁決）：觸發條件=審計對象含 silent-corruption critical path（會計/風控/單位邊界）且用戶明示或 EP 要求深度驗證；不隨每次 audit 自動跑。
+
+**執行**（mutmut 3 形態；POC 暫存性，結束零足跡清除）：
+1. 挑 1-2 個 critical path 的 source+test（窄：全量會跑不完）
+2. `uv add --dev mutmut`；scoped config：`[tool.mutmut]` 的 `source_paths`（copy 全 package 保 import）＋`only_mutate`（目標檔 glob）＋`pytest_add_cli_args_test_selection`（目標測試檔）
+3. `mutmut run`；記錄三數字：總耗時／mutant 總數／killed:survived
+4. **survived 必抽讀分類**（主成本在此，非機械跑）：(a) 真實測試缺口（斷言沒鎖行為/邊界）(b) equivalent mutant（語義等價，殺不死是正常的）(c) 無實務意義的極端邊界——每個附 file:line 與 mutated operator
+5. 報告：(a) 類缺口列 Critical finding（測試補強項）；清除聲明（mutants/ 目錄＋pyproject config 段＋dep＋uv.lock 還原）
+
+**成本實證**（供報價）：288 行 critical path＋68 tests＝8.2s wall、103 mutants、87.4% kill rate、13 survived 抽讀約 10 分鐘 LLM 判讀——抓到 10 個真實缺口（含 price<1 會計＋風控雙處無保護）。
 
 ---
 

@@ -256,6 +256,16 @@ T3-1/T3-2 spike（跑一次帶數據）＋ T3-3/T3-4 裁決項
 - **T3-3 ep-validate/spec：留**——ep-validate 的 ad-hoc 路徑（「討論時直接叫 LLM 寫 POC」）繞過遙測，1 次是下界非零採用；雙路徑並存是現狀正解。spec optional by design
 - **T3-2 handoff 已備妥**（貼到 mosaic session 執行；hub-relay：mosaic 只回報 findings＋數據）；**T3-1 spike 已排程**（10-01 上午，九月窗口，一次性手跑）
 
+### T3-2 變異測試 spike 結案（2026-08-30，mosaic 執行回報）
+
+**數據**：scoped 跑 mutmut 3.7.0 於兩個 critical path（cash_tracker 118 行＋risk_guard 170 行、68 tests）——**8.2s wall／103 mutants／90 killed : 13 survived（87.4% kill rate）**。POC 零足跡清除、68 tests 重跑綠、mosaic memory `project-mutation-testing-spike-t32` 固化。
+
+**13 個 survived 全數抽讀分類**：真實測試缺口 **10**（全部同型——比較算子邊界沒鎖：`qty > 0`→`>= 0`、`price >= 0`→`>= 1` 等；兩個最高價值：**price<1〔權證/低僞股〕在會計（cash_tracker:85）＋風控（risk_guard:147）雙處無保護**——台股真實情境）、equivalent 1、極端邊界 2。hub 端已交叉驗證 file:line 錨點全命中。
+
+**理論印證（改寫了假說形態）**：AI 同寫 test+impl 的同義反覆**不是** `assert x==x` 廢話型——happy path 數字斷言具體且鎖死核心代數（90 killed 證明）；真實形態是**測試與 impl 共享同一組典型數字**（1000 股/600 元/85 元），邊界值（0、1、恰好一半、price<1）系統性缺席——測試忠實反映 AI 的 happy-path 理解，盲區也完全一致。只有機械突變能把這種盲區變成可數 survived 名單。
+
+**裁決建議（mosaic 端提出，hub 採納待用戶確認）**：mutation testing 值得進 audit-test，但採 **scoped 手跑抽查形態**（如此 spike）而非常態 gate——機械成本趨近零（8 秒），主成本是 survived 的 LLM 抽讀（13 個約 10 分鐘），一次性投入即抓到 10 個真缺口。待辦：audit-test skill 加此角度（ai-rules 側小改）；mosaic 端 10 個測試缺口補強（mosaic 側，handoff 待出）。
+
 ### T1 落地記錄（2026-08-30，同 session 完成）
 
 - **T1-1 ✅**：`deploy_agents.py` 新增 `check_neutral_purity()`（五檢查程式化，掃 neutral rules）＋`scan_sources(include_guide)`（broken-refs 擴掃 guide）。gate 上線首跑抓到 **3** 違規（預期 2＋黑天鵝 1：`_ai-behavior-constraints.md` 的 `` `/sync-sources` `` 裸 slash）→ 三處修正（context-management:24/36 括號注化、_ai-behavior-constraints 去斜線）＋guide:131 死指標改寫 → dry-run 歸零 → 三端部署成功。設計要點：purity 不掃 guide（guide 合法提及跨 harness 裸 slash `/handoff`——範圍忠於原清單）；rules/AGENTS.md（meta scope）天然不在 neutral 集合，自引用零誤報
