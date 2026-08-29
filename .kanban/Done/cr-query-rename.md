@@ -7,5 +7,5 @@
 - EP：`ai-analysis/execution-plans/_done/ep-crg-query-rename.md`（docs mode、S1-S3 完成；EP review 6 findings 全回寫〔含 🔴 settings.json allowlist〕）
 - S1：git mv＋33 處 token 替換跨 11 檔（計數斷言）＋settings.json 同步；雙掃零活性殘留
 - 偏差：MCP roster 名同步（3b）**結案＝no-op**——MCP 面從未改名（`search`/`arch_overview` 是 CLI op 名被面別混淆概化；CR 回執證據鏈：HEAD ToolRouter 17 現名＋probe 吻合＋文檔本來就對）
-- S2：mosaic 三 wt `CLAUDE.md:12` handoff 待交付
+- S2：mosaic 三 wt `CLAUDE.md:12` handoff **已完成**（08-29 晚 mosaic session：main 直接 commit `da8ec8e4`＋v2 fast-forward＋mkt-lang rebase replay `a4d14af6`〔.mcp.json 衝突取 incoming 保留 branch 特有 code-reality stdio 接線——與 main 的 plugin 掛載模式分歧，日後跟進再清〕；hub 三 wt 複核通過）
 - ⚠️ 待新 session：skill 清單見 `cr-query` 無 `crg-query`（SM-4）
