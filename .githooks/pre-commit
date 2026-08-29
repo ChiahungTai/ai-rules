@@ -1,0 +1,5 @@
+#!/bin/bash
+# 治理工具鏈測試閘門（T1-2）——確定性 git hook，非 /commit skill 內的 prompt 提示。
+# 啟用：git config core.hooksPath .githooks（一次性，per-clone）
+cd "$(dirname "$0")/.." || exit 1
+uv run pytest tests/ -q || exit 1

@@ -97,6 +97,20 @@ INVARIANTS = [
         "bundle），drift 靠外部 session 偶然發現。此檢查把「編輯後須 deploy」從散文"
         "紀律變機械閘門",
     },
+    {
+        "id": "hook_registration",
+        "type": "hook_registration",
+        "registrations": ["settings.json", "hooks/zcode-registration.json"],
+        # 僅接 Claude 端的 hook：settings.json 是 local-only（gitignored），
+        # fresh clone 上缺場 → 這些 hook 豁免（註冊事實存在於本機設定，
+        # repo 內不可驗證）；settings.json 在場時仍照常檢查
+        "claude_only": ["compact-tail-inject.py"],
+        "note": "hooks/*.py 是「code 在、接線不在」的孤兒溫床（真實案例 "
+        "2026-08-29 F8：compact-tail-inject.py 兩處註冊面皆無、從未生效——"
+        "防線看起來存在，實際從未攔截）。每個 hook 腳本至少要出現在一個註冊處"
+        "（settings.json = Claude 端、hooks/zcode-registration.json = ZCode 端"
+        "範本），否則 critical",
+    },
 ]
 
 
@@ -281,6 +295,45 @@ def check_deploy_freshness(inv: dict) -> list[tuple[str, str, str]]:
     return out
 
 
+def check_hook_registration(inv: dict) -> list[tuple[str, str, str]]:
+    """hooks/*.py 每檔至少出現在一個註冊處——抓孤兒 hook。
+
+    註冊處由 inv['registrations'] 列（相對 REPO_ROOT 的文字檔；不存在者
+    skip 不 false positive）。以檔名子字串比對——註冊處以絕對路徑引用
+    hook 腳本，檔名是穩定鍵。
+    """
+    if inv.get("type") != "hook_registration":
+        return []
+    hook_files = sorted((REPO_ROOT / "hooks").glob("*.py"))
+    if not hook_files:
+        return []
+    registered = ""
+    claude_side_present = False
+    for rel in inv["registrations"]:
+        p = REPO_ROOT / rel
+        if p.exists():
+            registered += read_text(p)
+            if rel == "settings.json":
+                claude_side_present = True
+    claude_only = set(inv.get("claude_only", []))
+    out = []
+    for hf in hook_files:
+        # word-boundary 比對——純子字串會讓 a.py 被 xa.py 的註冊行誤判
+        if re.search(rf"\b{re.escape(hf.name)}\b", registered):
+            continue
+        if hf.name in claude_only and not claude_side_present:
+            continue  # Claude 端註冊檔 local-only：缺場機器上豁免
+        out.append(
+            (
+                inv["id"],
+                "critical",
+                f"hooks/{hf.name} 未出現在任何註冊處（{inv['registrations']}）——"
+                "孤兒 hook：code 在、接線從未存在，防線是假的（刪掉或接線）",
+            )
+        )
+    return out
+
+
 def main() -> int:
     findings: list[tuple[str, str, str]] = []
     for inv in INVARIANTS:
@@ -289,6 +342,7 @@ def main() -> int:
         findings += check_coverage(inv)
         findings += check_source_contains(inv)
         findings += check_deploy_freshness(inv)
+        findings += check_hook_registration(inv)
 
     crit = [f for f in findings if f[1] == "critical"]
     imp = [f for f in findings if f[1] == "important"]

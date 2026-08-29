@@ -13,6 +13,7 @@ package = false  # 純腳本倉庫（rules/skills/hooks 非打包對象）；uv 
 
 [dependency-groups]
 dev = [
+    "pytest>=8.4",
     "ruff>=0.16.3",
 ]
 

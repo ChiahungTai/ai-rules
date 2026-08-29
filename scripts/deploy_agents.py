@@ -132,39 +132,91 @@ LINK_PATTERN = re.compile(r"\[([^\]]+)\]\(([^)]+\.md)\)")
 BACKTICK_REF_PATTERN = re.compile(r"`([a-z][a-z0-9_-]*\.md)`")
 
 
+def scan_sources(rules_dir: pathlib.Path, include_guide: bool) -> list[tuple[str, str]]:
+    """Bundle sources as (name, content) pairs, Claude notes stripped.
+
+    Neutral rules always (purity scope per rules/AGENTS.md 機械檢查清單:
+    rules/*.md only -- the guide legitimately mentions cross-harness bare
+    slash commands like `/handoff`, so it must NOT enter the purity scan).
+    Guide included only for broken-ref scanning (it ships in the bundle too).
+    rules/AGENTS.md itself is meta-scoped and never enters the neutral set,
+    so its self-referential examples cannot false-positive either scan.
+    """
+    sources = [
+        (p.name, p.read_text(encoding="utf-8"))
+        for p in discover_rules(rules_dir, {"neutral"})
+    ]
+    if include_guide and GUIDE.exists():
+        sources.append((GUIDE.name, GUIDE.read_text(encoding="utf-8")))
+    return [(name, CLAUDE_NOTE_PATTERN.sub("", content)) for name, content in sources]
+
+
 def check_broken_refs(
     rules_dir: pathlib.Path,
 ) -> list[tuple[str, str, str]]:
-    """Find neutral rules that link to claude-specific rules.
+    """Find bundle sources (neutral rules + guide) linking to claude-specific rules.
 
-    Returns a list of (source_rule_name, link_target, target_rule_name) tuples.
+    Returns a list of (source_name, link_target, target_rule_name) tuples.
     Parenthetical Claude notes `(Claude: ...)` are exempt: their contents are
     stripped before scanning, so refs inside them don't count as broken.
 
     The scan scope is a global invariant -- it always checks neutral sources
     against claude-specific targets, regardless of what deploy is bundling.
+    The guide is scanned since build_bundle ships it verbatim (a guide-side
+    ref to a claude-specific file is just as dead for non-Claude readers).
     """
-    neutral_rules = discover_rules(rules_dir, {"neutral"})
-    claude_rules = discover_rules(rules_dir, {"claude-specific"})
-    claude_stems = {p.stem for p in claude_rules}
+    claude_stems = {p.stem for p in discover_rules(rules_dir, {"claude-specific"})}
 
     broken: list[tuple[str, str, str]] = []
-    for nrule in neutral_rules:
-        content = nrule.read_text(encoding="utf-8")
-        # Strip parenthetical Claude notes so refs inside them are ignored.
-        cleaned = CLAUDE_NOTE_PATTERN.sub("", content)
+    for src_name, cleaned in scan_sources(rules_dir, include_guide=True):
         # Markdown links `[text](target.md)`.
         for _, link_target in LINK_PATTERN.findall(cleaned):
             stem = pathlib.Path(link_target).stem
             if stem in claude_stems:
-                broken.append((nrule.name, link_target, stem))
+                broken.append((src_name, link_target, stem))
         # Bare backtick refs `` `rule-name.md` ``.
         for match in BACKTICK_REF_PATTERN.finditer(cleaned):
             ref = match.group(1)
             stem = ref[:-3]  # strip ".md"
             if stem in claude_stems:
-                broken.append((nrule.name, ref, stem))
+                broken.append((src_name, ref, stem))
     return broken
+
+
+# Neutral-purity patterns -- the programmatic form of rules/AGENTS.md's
+# 機械檢查清單 (which until 2026-08-30 existed only as prose commands nobody
+# ran; two live violations had shipped to all three deployed bundles).
+# 已知限制：(1) 掃描面 = 全文，build_bundle 的 slim skip 段不 ship 但仍被掃
+# （repo 現無 marker；首個 skip marker 出現時重訪此差異）。(2) bare-slash
+# pattern 與 checklist 的 rg 原文逐字等價（僅攔 backtick 形態）。(3)
+# claude-wrapper 的豁免詞「Claude 端」為列舉制——寫「Claude Code」等其他
+# 措辭會誤抓，屬可接受的 heuristic。
+PURITY_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
+    ("bare-slash-command", re.compile(r"`/[a-z][a-z-]+[ `]")),
+    ("at-transclusion", re.compile(r"@~/|@\.\./|@/[a-z]")),
+    ("cross-domain-path", re.compile(r"\.\./(commands|skills)/")),
+    ("abs-user-path", re.compile(r"~/Github/ai-rules/")),
+]
+CLAUDE_WRAPPER_PATTERN = re.compile(r"CLAUDE\.md wrapper")
+
+
+def check_neutral_purity(rules_dir: pathlib.Path) -> list[tuple[str, str, str]]:
+    """Find neutral-rule purity violations (rules/AGENTS.md 機械檢查清單).
+
+    Returns a list of (rule_name, check_label, matched_text) tuples. Input is
+    Claude-note-stripped, matching the checklist's 括號注 exemption.
+    """
+    violations: list[tuple[str, str, str]] = []
+    for rule_name, cleaned in scan_sources(rules_dir, include_guide=False):
+        for label, pattern in PURITY_PATTERNS:
+            for match in pattern.finditer(cleaned):
+                violations.append((rule_name, label, match.group(0)))
+        for line in cleaned.splitlines():
+            if CLAUDE_WRAPPER_PATTERN.search(line) and "Claude 端" not in line:
+                violations.append(
+                    (rule_name, "claude-wrapper-unannotated", line.strip()[:80])
+                )
+    return violations
 
 
 def slim_for_bundle(content: str, rule_name: str = "") -> str:
@@ -244,12 +296,28 @@ def main() -> int:
     broken = check_broken_refs(RULES_DIR)
     if broken:
         print(
-            f"[FAIL] {len(broken)} broken ref(s): neutral rules linking to claude-specific rules:",
+            f"[FAIL] {len(broken)} broken ref(s): bundle sources linking to claude-specific rules:",
             file=sys.stderr,
         )
         for src, target, name in broken:
             print(f"  {src} -> {target} ({name} is claude-specific)", file=sys.stderr)
         print("Fix the ref, or re-scope the target to neutral.", file=sys.stderr)
+        return 1
+
+    impure = check_neutral_purity(RULES_DIR)
+    if impure:
+        print(
+            f"[FAIL] {len(impure)} neutral-purity violation(s) "
+            "(rules/AGENTS.md 機械檢查清單):",
+            file=sys.stderr,
+        )
+        for rule_name, label, hit in impure:
+            print(f"  {rule_name}: [{label}] {hit}", file=sys.stderr)
+        print(
+            "Neutralize it: move into a (Claude: ...) note, describe the skill "
+            "by name, or generalize the path away.",
+            file=sys.stderr,
+        )
         return 1
 
     bundle = build_bundle(rule_paths, scopes_label)

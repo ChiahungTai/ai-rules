@@ -21,7 +21,7 @@ harness-scope: neutral
 
 ## STATE.md（Last session 觀察層）
 
-STATE.md 定義（定位 / 觀察層 vs 事實層邊界 / 職責矩陣 / 生命週期 / 路徑 / 觸發）與寫入步驟見 [state-md-write](../skills/_common/state-md-write.md)（寫入由 at/deep-work 觸發；Open failures 走 kanban 不進 STATE）。
+STATE.md 定義（定位 / 觀察層 vs 事實層邊界 / 職責矩陣 / 生命週期 / 路徑 / 觸發）與寫入步驟見 state-md-write 共用子範本（Claude: `../skills/_common/state-md-write.md`）（寫入由 at/deep-work 觸發；Open failures 走 kanban 不進 STATE）。
 
 ## Memory 寫入紀律（cluster-first）
 
@@ -33,4 +33,4 @@ harness auto memory 預設「one file = one fact」的「fact」操作定義 = *
 2. 命中 → **加段**：段標題保留原始條目 name、標 original type（cluster 慣例）；索引行不動
 3. 無相似主題 → 才開新檔＋新索引行
 
-索引行數隨**主題數**成長，非事故數。量化清理（同主題散檔合併、索引軟上限、計畫完結收斂）由 [memory-audit](../skills/memory-audit/SKILL.md) 承載，寫入端只管 cluster-first。
+索引行數隨**主題數**成長，非事故數。量化清理（同主題散檔合併、索引軟上限、計畫完結收斂）由 memory-audit skill 承載（Claude: `../skills/memory-audit/SKILL.md`），寫入端只管 cluster-first。

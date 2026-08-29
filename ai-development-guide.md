@@ -99,7 +99,8 @@
 
 1. **execution-plan → Backlog**：UC盤點自動建立 .kanban/Backlog/ card（含模組、EP 連結）
 2. **build → InProgress + 結算**：階段 1 搬 Backlog cards 至 In-Progress/（暫時狀態）；階段 5a 結算 UC 完成情境——新增 Capabilities ✅ 行 + 搬 Done/ + EP 歸檔（working tree，隨 commit 帶走）
-3. **commit → 純 git 提交**：finalization 已在 build 階段 5a 結算（working tree），commit 一次帶走 code + finalization（**同 commit** 保證，git add 納入 finalization 檔）
+3. **post-build（收尾鏈）**：build 完成、commit 之前——code-review → judge-review → 修正迴圈 → consistency → metadata-sync，止步於 commit 前（詳見 post-build skill）
+4. **commit → 純 git 提交**：finalization 已在 build 階段 5a 結算（working tree），commit 一次帶走 code + finalization（**同 commit** 保證，git add 納入 finalization 檔）
 
 ---
 
@@ -128,7 +129,7 @@
 
 ### SOLID 精神
 
-SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介面隔離）/ DIP（依賴反轉）— 實作時遵循，詳見 code-edit-constraints.md（Claude 端 claude-specific rule）。
+SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介面隔離）/ DIP（依賴反轉）— 實作時遵循，詳見 code-edit-constraints（Claude 端 claude-specific rule；非 Claude 端此細節從略）。
 
 ### 視角非模板
 

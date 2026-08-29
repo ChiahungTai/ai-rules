@@ -28,5 +28,5 @@ agent prompt 須內嵌的非顯知識（2026-08-24 mosaic dogfood 實測）：
 ## 邊界
 
 - 不做壓縮、不產摘要（harness 職責）；只做 compact 前外部化＋compact 後恢復指針。
-- **ZCode：SessionStart(compact) hook 已實測死路（2026-08-24 L4 終驗：compact 不派發 SessionStart 給 config hooks）——步驟 2/4/5 全跑，hook 分支不適用**。Claude Code 端若已註冊 SessionStart(compact) hook（`hooks/compact-tail-inject.py`，matcher 支援 compact）：步驟 2 的 tail 由 hook 承接、步驟 4 免提醒，本 skill 職責縮減為**步驟 3 memory 新鮮度檢查**（唯一 hook 做不到的——hook 只恢復材料，不外部化新教訓）。
+- **ZCode：SessionStart(compact) hook 已實測死路（2026-08-24 L4 終驗：compact 不派發 SessionStart 給 config hooks）——步驟 2/4/5 全跑，hook 分支不適用**。Claude Code：SessionStart(compact) hook **已註冊**（`hooks/compact-tail-inject.py`，settings.json matcher=compact，2026-08-30 接線；tail 原文取自 CC transcript JSONL）——步驟 2 的 tail 由 hook 承接、步驟 4 免提醒，本 skill 職責縮減為**步驟 3 memory 新鮮度檢查**（唯一 hook 做不到的——hook 只恢復材料，不外部化新教訓）。
 - Claude Code 環境同樣適用（db 路徑改為該環境的 session 儲存；無 db 時步驟 1-2 改為直接把最後幾輪對話內容手動落檔——模型自己 context 內仍有原文）。
