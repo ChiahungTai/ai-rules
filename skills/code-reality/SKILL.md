@@ -1,7 +1,7 @@
 ---
 name: code-reality
-description: "code_reality 工具鏈——repos 之上的 meta 層工具（Rust carrier，住 ~/Github/code-reality），跨 repo 消費單一入口。何時跑：implement 階段 1 baseline snapshot／post-build·code-review 弧模式 delta_tour 對照／debrief 機械底稿／cold-start boundary 掃描／「0 callers 可刪」判斷前 hub_refs hazard。含 repo profile（.code-reality.toml）生態示例與 claims 口徑生態語義。"
-when_to_use: "Running code_reality tools (snapshot/hub_refs+hazard/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_audit/scip_refs), authoring .code-reality.toml, or interpreting delta_tour claims output. Tool availability check: .code-reality.toml in repo root OR code-reality snapshot --help exits 0."
+description: "code_reality 工具鏈——repos 之上的 meta 層工具（Rust carrier，住 ~/Github/code-reality），跨 repo 消費單一入口。何時跑：新 repo 數據面一鍵準備（build）／implement 階段 1 baseline snapshot／post-build·code-review 弧模式 delta_tour 對照／debrief 機械底稿／cold-start boundary 掃描／「0 callers 可刪」判斷前 hub_refs hazard。含 repo profile（.code-reality.toml）生態示例與 claims 口徑生態語義。"
+when_to_use: "Running code_reality tools (build/snapshot/hub_refs+hazard/runtime_edges/boundary/boundary_build/delta_tour/chain_tour/graph_audit/scip_refs), authoring .code-reality.toml, or interpreting delta_tour claims output. Tool availability check: .code-reality.toml in repo root OR code-reality snapshot --help exits 0."
 argument-hint: "（程序 skill——不直接觸發；查閱用）"
 allowed-tools: ["Read", "Bash"]
 ---
@@ -16,7 +16,7 @@ allowed-tools: ["Read", "Bash"]
 code-reality <tool> --repo <repo-root> [args]
 ```
 
-**存在性偵測（單一真相源——implement／code-review／debrief 三檔存在性述語直接引用；post-build 經 code-review 模式 B 間接）**：repo root 有 `.code-reality.toml`，或 `code-reality snapshot --help` exit 0（Rust 載體 `~/.cargo/bin/code-reality`——`cargo install --path ~/Github/code-reality/crates/code-reality` 安裝）。**新舊自報**：`--version` 帶嵌入 rev（`<pkg>+<rev>`）；CR checkout HEAD 前移過嵌入 rev 或帶 uncommitted `crates/` edits 時，WARN-wired bins 每進程一行 stderr stale WARN——binary 查證標準程序＝`--version` 直讀 rev。未裝 → 消費端跳過不阻擋（既有降級語義）。
+**存在性偵測（單一真相源——implement／code-review／debrief 三檔存在性述語直接引用；post-build 經 code-review 模式 B 間接）**：repo root 有 `.code-reality.toml`，或 `code-reality snapshot --help` exit 0。**安裝單層＝uv（PyPI wheels；npm embedded face 已退役——registry 凍結 0.3.1 僅 deprecation grace，非候選）**：手動主面 `uv tool install code-reality`＋`pyrefly-producer`＋`code-reality-lsp-bridge`（免 Rust toolchain、落 `~/.local/bin`；rust-analyzer 仍系統依賴 `rustup component add rust-analyzer`；一次性用 `uvx code-reality <tool>`）；**plugin wrapper 首 session 自動 bootstrap**——`.mcp.json` wrapper 對 `--version` 做 plugin pin 前綴比對，missing/stale 即 `uv tool install --force code-reality==<pin>` 三 dist exact pin（MCP／CLI 同步釘 plugin 版）、無 uv loud 127＋指引、`CODE_REALITY_BOOTSTRAP=off`＝dev cargo-HEAD 機逃逸；**cargo＝developer face**（checkout 開發機 `cargo install --path ~/Github/code-reality/crates/code-reality`——PATH 實測 `~/.local/bin` 先於 `~/.cargo/bin`，uv 版自然反向 shadow cargo 版）。安裝/wrapper 細節真相源＝CR `plugin/README.md`。**新舊自報**：`--version` 帶嵌入 rev（`<pkg>+<rev>`）；CR checkout HEAD 前移過嵌入 rev 或帶 uncommitted `crates/` edits 時，WARN-wired bins 每進程一行 stderr stale WARN——binary 查證標準程序＝`--version` 直讀 rev。未裝 → 消費端跳過不阻擋（既有降級語義）。
 
 **MCP 面（ZCode plugin）**：`refs`／`callers`／`closure`／`audit` 四工具對應 CLI `scip_refs` 家族——**CLI 無 `refs`/`callers` 子命令**，符號查詢 CLI 形態＝`code-reality scip_refs <symbol> --repo <repo>`（`--callers`／`--closure [--depth N]` 旗標）。instruction 引用工具名時標注面別（MCP `refs` vs CLI `scip_refs`）。
 
@@ -24,6 +24,7 @@ code-reality <tool> --repo <repo-root> [args]
 
 | 時點 | 工具 | 消費者 |
 |------|------|--------|
+| 新 repo／缺 graph.db（數據面準備） | `build --repo <repo>`（一鍵傘形：偵測→producer→graph_db build；mixed repo 兩腿 cat-merge 雙語言合一） | 任何 graph 面消費的前置 |
 | implement 階段 1（build 起點） | `snapshot --label <ep>` | delta_tour 的 before 基準 |
 | 弧模式（code 已 commit、HEAD 越過 EP baseline） | `delta_tour <a> <b> --ep <ep.md> --repo <repo>` | code-review 模式 B primed／post-build／implement 階段 6／debrief |
 | hub symbol 波及盤點 | `hub_refs <symbol>`（內建 hazard 安全網；「可刪」判斷前必跑） | debrief 第 5 段 |
@@ -38,23 +39,24 @@ code-reality <tool> --repo <repo-root> [args]
 
 | 工具 | 職責 |
 |------|------|
+| `build` | **數據面一鍵傘形**（v0.4.0 起）：偵測語言面→spawn producer（`pyrefly-index`／`rust-analyzer scip <repo 目錄>`）→in-process `graph_db build`＋`ensure_indexes`；`--producer rust／python` 顯式覆蓋；mixed repo 兩腿 cat-merge＝單一雙語言 graph；陷阱已守衛——scip 需傳**目錄**非 Cargo.toml（後者 exit 0 空輸出）、<128B 空索引擋 |
 | `snapshot` | graph module-edge 導出（讀自有 `.code-reality/graph.db`）＋commit 錨定 sidecar（冪等；`_meta` 慣例） |
-| `hub_refs` | hub symbol 廣度（callers/callees 按目錄、test/prod 切分）＋hazard 分層安全網（常駐 AST 級＋static_prod ≤ 2 觸發 rg 級 dynamic dispatch 偵測，規則在 `hazard` 模組——防「0 refs 可刪」誤判；`--hazard` 強制全掃、`--json` 含 `hazard_findings` 欄） |
+| `hub_refs` | hub symbol 廣度（callers/callees 按目錄、test/prod 切分）＋hazard 分層安全網（常駐 AST 級＋static_prod ≤ 2 觸發 rg 級 dynamic dispatch 偵測，規則在 `hazard` 模組——防「0 refs 可刪」誤判；`--hazard` 強制全掃、`--json` 含 `hazard_findings` 欄）；⚠️ CLI 面無 stale guard——過期 index 上照跑，判讀前先看 `[SRC]` 行 |
 | `runtime_edges` | viztracer trace → 逐函式 runtime 邊 |
 | `boundary_build`／`boundary` | pyo3 宣告↔`.pyi` 合約 sidecar build／查詢 |
-| `delta_tour`／`chain_tour` | delta_tour＝snapshot 對 diff→tour＋**EP 宣稱對照**（三態＋實際變動模組＋退化/跨面 pair 自動警示）；chain_tour＝callstack md→tours（upsert `.tours/manifest.toml`）；`.tour` 契約——渲染消費者 CodeTour |
+| `delta_tour`／`chain_tour` | delta_tour＝snapshot 對 diff→tour＋**EP 宣稱對照**（三態＋實際變動模組＋退化/跨面 pair 自動警示）；`--out-dir` 為 **cwd-relative 非 repo-relative**（落點在執行 cwd 的 `.tours/delta/`）；chain_tour＝callstack md→tours（upsert `.tours/manifest.toml`）；`.tour` 契約——渲染消費者 CodeTour |
 | `tour_validate`／`tour_upgrade`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／manifest 讀寫 |
 | `graph_audit` | 自有 graph.db **Rust 完整度稽核**——D1 同型別多 impl 風險掃描（per-block ≥2，非交集）＋D2 rust-analyzer symbols 對帳（kind 含 Test）；graph rebuild／rebase 大跳後跑 |
 | `sidecar_migrate` | 舊 home slot → in-repo 搬遷（`~/.mosaic` 退役過渡橋；缺索引錯誤自動提示） |
-| `scip_refs` | SCIP 索引查詢——graph_audit 缺差對照（雙鍵歸屬）的 def/refs 真相源 sidecar；查詢首行 `[SRC] scip index @ <sha>`＋與 repo HEAD 不一致 WARN＝漂移守衛；**重生索引直呼 repo-pin binary**（rustup proxy 依 cwd 解析 toolchain——從 any cwd outside the repo 呼叫會靜默降 toolchain；事故實案＝CR plugin skill）；索引生成 ~8 分鐘、輸出寫 cwd；衍生 sqlite `--build-cache` 過期雙訊號自動重建（本檔持有——未吸收項） |
+| `scip_refs` | SCIP 索引查詢——graph_audit 缺差對照（雙鍵歸屬）的 def/refs 真相源 sidecar；查詢首行 `[SRC] scip index @ <sha>`＋與 repo HEAD 不一致 WARN＝漂移守衛；**重生索引直呼 repo-pin binary**（rustup proxy 依 cwd 解析 toolchain——從 any cwd outside the repo 呼叫會靜默降 toolchain；事故實案＝CR plugin skill）；索引生成 ~8 分鐘、輸出寫 cwd；衍生 sqlite `--build-cache` 過期雙訊號自動重建（本檔持有——未吸收項）；DEF 只收**函式/方法**——struct/trait 名不可作查詢鍵（用其方法符號，如 `EventStore::high_watermark`） |
 | `common`／`exclusions`／`profile`／`hazard` | 共用設施：`_meta`/`connect_ro`（WAL fallback）／排除前綴／profile 引擎／hub_refs hazard 判定層（六規則純函數——registry 表由 profile `[[hazard_registry]]` 注入） |
 
 ## Python occurrence producer（pyrefly 預設面）
 
-Python repo 的 occurrence 面預設生產者＝`pyrefly-index`（code-reality repo `crates/pyrefly-producer`；引擎 git-dep pin 實證 rev 非 tag——crates.io 只有占位套件，升級是顯式 commit）：
+Python repo 的 occurrence 面預設生產者＝`pyrefly-index`（code-reality repo `crates/pyrefly-producer`；引擎 git-dep pin 實證 rev 非 tag——crates.io 只有占位套件，升級是顯式 commit）。**資料面準備主入口＝`code-reality build --repo <repo>` 一鍵**（工具表傘形；以下手動分步鏈＝除錯用）：
 
 ```
-pyrefly-index --repo <repo>    # cargo install --path ~/Github/code-reality/crates/pyrefly-producer 後；
+pyrefly-index --repo <repo>    # uv tool install pyrefly-producer 後（bin 落 ~/.local/bin）；dev cargo face＝cargo install --path ~/Github/code-reality/crates/pyrefly-producer；
                                # 或 cargo run --release -p pyrefly-producer --bin pyrefly-index -- --repo <repo>
 ```
 
@@ -95,7 +97,7 @@ registry = "CONDITION_REGISTRY"
 evidence = "mosaic_alpha/conditions/discovery.py:149"   # 可選——註冊鏈證據顯示用
 ```
 
-**無 profile fallback、authoring 程序四步（判斷 module 規則→exclude 目錄粒度帶斜線→scan_root 僅 pyo3 對帳 repo→smoke 驗證）＝CR plugin skill 真相源**（英文通用版，吸收自本檔 A7）；`hazard_registry` 欄位語義目前由本檔示例塊註解持有（plugin 版僅 no-profile 注記一行——欄位語義補進 CR 端為下次 content bump 候選）；示例塊為生態內領域形態參考。
+**無 profile fallback、authoring 程序四步（判斷 module 規則→exclude 目錄粒度帶斜線→scan_root 僅 pyo3 對帳 repo→smoke 驗證）、`hazard_registry` 欄位語義＝CR plugin skill 真相源**（英文通用版，吸收自本檔 A7＋D8 收尾 0.1.7）；示例塊為生態內領域形態參考。
 
 ## 口徑限制（宣稱抽取——delta_tour `--ep`）
 
