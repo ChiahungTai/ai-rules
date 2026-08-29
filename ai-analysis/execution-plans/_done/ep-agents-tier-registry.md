@@ -1,6 +1,8 @@
 # EP: agents tier registry 與兩跳 model 解析
 
-> **build 結算（08-29）**：S1-S4 全段完成；fresh-eyes build 審查 7 findings（下行稱 **B-F***，區別於下方「EP Review Findings」表的 F-*）——B-F1（並發 sizing 主體改為 agent tier）、B-F2（舊直達路徑×3→shared/＋順手收 transition→delta_tour 漏網×3）、B-F5/B-F6 已修；B-F3（並行 session 在製品 skills/code-reality/SKILL.md）commit 時排除；B-F4 維持（偏差記錄）。post-build consistency gate 5 findings（稱 **C-F***）：C-F1 neutral 化殘留（絕對路徑＋跨域 ref）、C-F2 並發表 vision 列、C-F3 execution-plan 舊 sizing 殘留、C-F4 Done 卡 EP 指針、C-F5 本 header F-ID 命名空間碰撞——全修。**待新 session 驗證**：ZCode spawn smoke（A1 pin 合法性）＋CC 端清單確認。
+> **build 結算（08-29）**：S1-S4 全段完成；fresh-eyes build 審查 findings（下行稱 **B-F***，B-F1~B-F6＋A1 未驗證記錄一筆，區別於下方「EP Review Findings」表的 F-*）——B-F1（並發 sizing 主體改為 agent tier）、B-F2（舊直達路徑×3→shared/＋順手收 transition→delta_tour 漏網×3）、B-F5/B-F6 已修；B-F3（並行 session 在製品 skills/code-reality/SKILL.md）commit 時排除；B-F4 維持（偏差記錄）。post-build consistency gate 5 findings（稱 **C-F***）：C-F1 neutral 化殘留（絕對路徑＋跨域 ref）、C-F2 並發表 vision 列、C-F3 execution-plan 舊 sizing 殘留、C-F4 Done 卡 EP 指針、C-F5 本 header F-ID 命名空間碰撞——全修。**待驗證**：ZCode spawn smoke（A1 pin 合法性）＋CC 端清單確認。
+>
+> **⚠️ post-build 修正（08-29 午，並行 session 對照實驗觸發）**：S2 的 symlink 農場假設被實驗證偽——**ZCode registry 不載入 file-level symlink**（目錄 symlink 可穿透、檔案 symlink 靜默不載；code-reviewer/-primed 對新 ZCode session 不可見）；開箱驗證的缺口＝只驗了實檔 agent 的 spawn＋檔案 listing，未驗 symlink agent 的 ZCode spawn。修正＝registry 內改實檔拷貝（shared/ 維持 authoring 單一源＋cmp 同步紀律，hardlink 被 clone 破壞不可用），agents/AGENTS.md 治理段已改寫。**修正驗證已閉環**（08-29 午：CR session spawn code-reviewer PASS＋telemetry `zcode-code-reviewer` 實跑複核）；**CC 臂 spawn 仍未 runtime 驗證**（listing ≠ spawn——與 ZCode 同型缺口，relay 待跑）。
 
 > **ep_type**: implementation
 > **mode**: docs mode（repo 檔案變更全為 `.md`；`rg "^def |^class " --type py` 於變更範圍 = 0。**含非 repo 的環境突變**：S2 頂層 symlink 翻轉〔user-level，F-7〕）
@@ -21,7 +23,7 @@
 | ID | 等級 | 假設 | 驗證 |
 |----|------|------|------|
 | A1 | 中 | ZCode agent 定義 `model: glm-5.3-flash`＋`thoughtLevel: high` 為合法值（欄位名陷阱：非 `reasoningEffort`；flash 於 UI 下拉的實際名稱未確認） | S3 smoke spawn＋telemetry model_id 驗證；建檔前可先查設定 UI 下拉 |
-| A2 | 中 | 檔案級 symlink 在兩家 registry 載入路徑正常（ZCode 快照制重讀；CC 檔案監聽） | S2 兩家新 session spawn probe |
+| A2 | 中 | 檔案級 symlink 在兩家 registry 載入路徑正常（ZCode 快照制重讀；CC 檔案監聽）〔**已證偽** 08-29——檔案 symlink 靜默不載，見 header post-build 修正段；修正後 registry 為實檔拷貝〕 | S2 兩家新 session spawn probe〔原驗證未覆蓋 symlink agent 的 spawn——缺口由並行 session 實驗補上〕 |
 | A3 | 低 | ZCode UI 編輯 shared 角色會寫穿 symlink（in-place 改到本體或 atomic-replace 弄斷連結） | 治理規則先擋（S2）＋git status 兩種皆可偵測；不預先實測 |
 | A4 | 低 | registry 目錄中的 `AGENTS.md`（無 frontmatter）持續被兩家忽略＋診斷（現況即如此） | S2 probe 附帶觀察 |
 
