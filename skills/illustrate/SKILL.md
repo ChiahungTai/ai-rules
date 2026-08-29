@@ -72,7 +72,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 
 ## 智能並行處理
 
-檔案 ≥ 5 時，Agent tool 並行處理（model 依 [model-routing](../../rules/model-routing.md)：session 降一級）：按關聯性分組 → 每組 spawn Agent → 整合結果。
+檔案 ≥ 5 時，Agent tool 並行處理（model 依 [model-routing](../../rules/model-routing.md) 角色 tier——平行分組＝lite）：按關聯性分組 → 每組 spawn Agent → 整合結果。
 
 平行處理架構：[illustrate-parallel-architecture.md](../_common/illustrate-parallel-architecture.md)
 

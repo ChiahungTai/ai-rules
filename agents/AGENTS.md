@@ -1,6 +1,21 @@
 # agents/ — 跨 harness subagent 定義
 
-> 部署與 skills/commands 同款：repo 為單一來源，`~/.claude/agents`、`~/.zcode/agents` symlink → 本目錄。與 hooks/ 不同（config 引用、無目錄載入點），subagent 兩家都是**目錄載入點**，symlink 成立。ZCode 設定 UI 的新建/編輯會直接寫入本目錄（= 產生 repo working tree diff，屬預期行為）。
+> 部署＝registry 視圖：`~/.zcode/agents` symlink → `agents/zcode/`、`~/.claude/agents` → `agents/claude/`。與 hooks/ 不同（config 引用、無目錄載入點），subagent 兩家都是**目錄載入點**，symlink 成立。ZCode 設定 UI 的新建/編輯會穿頂層 symlink 寫入 `agents/zcode/`（= 產生 repo working tree diff，屬預期行為）。
+
+## registry 結構（per-harness 指定＝registry membership）
+
+```
+agents/
+  shared/   # 內容切片：跨 harness 角色定義（model 省略＝inherit、零 harness 專屬欄位）
+  zcode/    # ZCode registry（~/.zcode/agents → 此）：shared 檔的 symlink ＋ ZCode 專屬實體檔（tier-pinned）
+  claude/   # CC registry（~/.claude/agents → 此）：shared 檔的 symlink ＋ CC 專屬實體檔（暫空——CC 分層走 spawn-time）
+```
+
+- **「指定哪個 harness 用哪些 agent」＝哪個檔出現在哪個 registry**（機制，非命名紀律）；shared 檔零複製、只有 symlink
+- **pin 單一源紀律**：zcode/ 檔的 `model:`／`thoughtLevel:` 值以 `rules/model-routing.md` tier 解析表為單一源——改表 → `rg` 同步 zcode/ pins
+- **UI 防護規則**：shared 角色不在 ZCode 設定 UI 調 model／思考強度（編輯會寫穿 file symlink 改到 shared 本體，或 atomic-replace 弄斷連結——git status 兩者皆可見，規則先擋）；要釘模型 → 在 zcode/ 建 fork
+- **tier 命名**：能力語義命名（lite-verify／spec-miner，非 glm-flash-*——model 每代換名，改名級聯）；例外＝rescue 類（引擎在本質內，如 codex-rescue）。tier 詞彙定義在 `rules/model-routing.md`，此處引用不自帶
+- **生效時機**：ZCode 改動需新建 session（快照制；app 重啟續接同對話亦刷新）；CC 定義檔即時監聯。翻轉/新增 symlink 後以首個新 session 驗證
 
 ## 定義檔慣例
 

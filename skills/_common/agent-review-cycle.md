@@ -47,7 +47,7 @@ Writer/Reviewer 分離的品質閘門 — 用獨立 Agent context 審查，避�
 
 印出確認：`[Review Agent] max=N, mode=3-perspective | 2-agent | single`
 
-> review agent 模型預設 = 主 session（inherit）；可調降一級（review command agent 覆蓋 model-routing 通用 review→降級，見 [review-engine](../review-engine/SKILL.md)「review 執行預設」）。spawn `model` param 填對的 literal。
+> review agent 模型預設 = 主 session（inherit——review command＝full tier carve-out，見 [model-routing](../../rules/model-routing.md) 角色 tier 表與 [review-engine](../review-engine/SKILL.md)「review 執行預設」）。spawn `model` param 填對的 literal。
 
 ### >3 配置（機械特徵觸發，非語義 opt-in）
 

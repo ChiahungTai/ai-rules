@@ -155,7 +155,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 
 > **核心原則**：EP 自足——在設計段落之前，先做一次全域 codebase 研究，盤點可複用基礎設施 + 識別風險假設。這取代了舊 `/spec` 的全域研究職責（spec 現為純需求釐清）。
 
-**執行**：spawn Explore Agent（model 依 [model-routing](../../rules/model-routing.md)：session 降一級）深度掃描相關模組：
+**執行**：spawn Explore Agent（model 依 [model-routing](../../rules/model-routing.md) 角色 tier——research/explore＝lite）深度掃描相關模組：
 
 1. **可複用基礎設施盤點**：搜尋需求涉及的模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + LSP `workspaceSymbol` 搜尋相關 class/function，找出可複用的 utilities、base classes、protocols
 2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用。**code-reality（若在場）**：transitive impact radius / 跨檔 callers / flows 用 `impact_radius` / MCP `callers`（LSP 查單 symbol，CR 查 transitive graph —— EP 的 ripple / 影響範圍靠 CR 機械產）—— 分工 + GATE 見 [crg-query](../crg-query/SKILL.md)
@@ -301,9 +301,9 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 
 > EP Review force 獨立 agent、不走 Main LLM（review 執行預設 + 刻意覆蓋，見 [review-engine](../review-engine/SKILL.md)「review 執行預設」）。差別僅在單一 vs 平行：
 
-**max-agents = 1**（haiku/opus）→ 跳至下方「單一 Agent Prompt（Fallback）」，行為等同原 single-agent。
+**max-agents = 1**（查 `rules/model-routing.md` 並發表得 1 時）→ 跳至下方「單一 Agent Prompt（Fallback）」，行為等同原 single-agent。
 
-**max-agents > 1**（如 sonnet = 4）→ 根據 EP 特徵啟用維度。**top-down 審查順序**：先結構（分層依賴/bounded context）後細部正確性（use case 覆蓋/兜底）— 結構錯了正確性審白費（視角見 [arch-thinking](../arch-thinking/SKILL.md)）。
+**max-agents > 1**（並發上限查 `rules/model-routing.md`——以將 spawn 的 agent 所在 tier 為準）→ 根據 EP 特徵啟用維度。**top-down 審查順序**：先結構（分層依賴/bounded context）後細部正確性（use case 覆蓋/兜底）— 結構錯了正確性審白費（視角見 [arch-thinking](../arch-thinking/SKILL.md)）。
 
 審查維度（「審 EP profile」：分層依賴 / bounded context / use case 覆蓋 / 場景 / 完整性 / 合規 / 遺漏 / 兜底拆解）定義見 [/ep-review](../ep-review/SKILL.md) 五維度 + 維度映射表 — 本 Cycle 不自帶維度定義，與獨立 `/ep-review` 共用同一 profile（根治內建 vs 獨立 drift）。啟用：所有維度 always；啟用維度數 > max-agents → 從低優先級（場景/遺漏起）合併至前一個 agent（不丟棄任何維度）。
 

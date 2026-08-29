@@ -158,7 +158,7 @@ export const meta = {
 
 const REVIEW_SCHEMA = { /* DimensionVerdict schema */ }
 const VERIFY_SCHEMA = { /* VerifyVerdict schema */ }
-// review command agent = 主 session（inherit，品質閘門需強度；覆蓋通用 review→降級，見 rules/model-routing.md carve-out + review-engine「review 執行預設」）
+// review command agent = 主 session（inherit，品質閘門需強度＝full tier，見 rules/model-routing.md 角色 tier 表 + review-engine「review 執行預設」）
 // author 時依當前 session 填對的 literal（下為 sonnet session 範例 → inherit = sonnet）
 const REVIEW_MODEL = 'sonnet'
 

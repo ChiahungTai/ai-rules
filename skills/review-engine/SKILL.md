@@ -135,9 +135,9 @@ review finding 可經多層驗證，**各層都可能錯**：
 
 1. **不 auto-detect，force 獨立 agent（預設）**：review 命令預設 spawn 獨立 agent（Workflow / Agent Tool），**不接受 LLM 在裁量點偷懶退 Main LLM 自審**（實證：auto-detect 時 LLM 偷懶 / 搞錯退 Main LLM）。**所有 review 命令含 code-review 都 force 獨立**（取消「低 effort code-review 合法 Main LLM」例外 — 實證:獨立 agent 抓自審盲點）。spawn 失敗降級（顯式標記 fallback，見 [agent-workflow](../agent-workflow/SKILL.md)「spawn 失敗階梯」）除外。
 
-2. **agent 數量 = max-agents**（預設 **3**，與 [build](../implement/SKILL.md) 一致；受並發上限 cap，Claude: `rules/model-routing.md`）。
+2. **agent 數量 = max-agents**（預設 **3**，與 [build](../implement/SKILL.md) 一致；受並發上限 cap，`rules/model-routing.md`）。
 
-3. **agent model 預設 = 主 session（inherit）**；**可調降一級**（降級映射；Claude: `rules/model-routing.md`）。此為 review **command** agent 專屬預設，**覆蓋** model-routing 通用「review→降級」—— review command 是品質閘門需強度；其他 review-ish agent（verify / research / explore，非 review command）維持降級（見 model-routing carve-out；Claude: `rules/model-routing.md`）。
+3. **agent model 預設 = 主 session（inherit）**——review **command** agent＝[model-routing](../../rules/model-routing.md) 角色 tier 表的 **full tier**（品質閘門需強度）；非 review command 的輕量 agent（verify / research / explore）走 lite tier（同表）。
 
 4. **預設 3 agent = ① clean（Fresh，無 anchor）+ ② UC-anchored（Intent）+ ③ Correctness（邊界正確性 lens）**：三 lens 正交（**錨定方式不同**）、同時跑。
    - **① clean（Fresh）** 抓作者 rationalize〔bias〕—— 無 anchor 讀 code 自身 merits（**code smell 視角**），不被「該做 X」綁住

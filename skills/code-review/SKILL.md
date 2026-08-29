@@ -99,8 +99,8 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 | Agent | 定義 | context（spawn prompt 餵） | 抓什麼 |
 |-------|------|---------------------------|--------|
-| fresh-eyes | `agents/code-reviewer.md` | **只餵 diff**，不給任何意圖文件 | 實作層真相：邏輯錯、邊界、silent regression、幻覺 API（不被作者意圖合理化） |
-| primed | `agents/code-reviewer-primed.md` | diff + EP + delta_tour 對照（若有，見下）+ 模組 AGENTS.md Capabilities + `dependency-graph.md` | Type A intent drift：意圖對齊、架構契合、測試精簡且完整、YAGNI↔過度工程光譜 |
+| fresh-eyes | `agents/shared/code-reviewer.md` | **只餵 diff**，不給任何意圖文件 | 實作層真相：邏輯錯、邊界、silent regression、幻覺 API（不被作者意圖合理化） |
+| primed | `agents/shared/code-reviewer-primed.md` | diff + EP + delta_tour 對照（若有，見下）+ 模組 AGENTS.md Capabilities + `dependency-graph.md` | Type A intent drift：意圖對齊、架構契合、測試精簡且完整、YAGNI↔過度工程光譜 |
 
 - **context 差異在 spawn prompt，非 agent 定義**（ZCode subagent 自動注入 AGENTS.md，「空 context」不可能全空；可控制的是不餵 EP/架構文檔）
 - **delta_tour 對照（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：**僅弧模式（code 已 commit、HEAD 越過 EP baseline）產出**——spawn primed 前對當下 HEAD 跑 `code-reality snapshot --repo <repo>`（呼叫形態：`code-reality <tool> --repo <repo>`），與 EP baseline snapshot（implement 階段 1 落下；定位＝EP baseline hash8 → `<repo>-<sha8>.json`，`--label` 僅入 `_meta`）對跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo>`，其 `.tour` description（宣稱對照三態＋實際變動模組＋退化/跨面 pair 自動警示；json 中間產物不落盤）併入 primed 餵料——intent drift（Type A）從 LLM 推導升級為機械底稿（宣稱抽取只認特定模組路徑前綴，宣稱欄 NONE ≠ EP 無宣稱——範圍見真相源）。**HEAD == baseline（uncommitted 審查）→ 不跑**：同 sha 對跑＝零差異假陰性，且此時對 baseline sha 跑 graph 刷新＋snapshot 會以 working-tree 修改覆寫 baseline sidecar；印 `[WARN]` 退回純 LLM 對照。snapshot 報 stale WARN → 視同缺報告跳過（stale snapshot 照寫、基於舊原料）。缺 baseline snapshot 或未裝 → 跳過不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill
