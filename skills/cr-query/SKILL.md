@@ -1,7 +1,7 @@
 ---
 name: cr-query
 description: Query the code knowledge graph — now the code-reality engine face (CRG MCP retired 2026-08-26) — correctly. Use when you need structural facts file-scanning cannot give efficiently — blast radius / impact radius of a change, who calls whom (callers/callees), affected execution flows, hub/bridge nodes, module communities, dead code, architecture overview, or token-efficient review context scoping — in a project with a graph (`.code-reality/graph.db`; MCP `code-reality` engine tools, or CLI `code-reality graph_query <op> --repo <root>`). Provides the LSP-vs-code-reality division (symbol truth→code-reality index: Rust=SCIP, Python=pyrefly-index; type face both languages→code-reality-lsp-bridge hover/check_file, .py/.rs extension-routed; graph ops→code-reality graph_query), the assume-present + warn-if-absent rule, and anti-over-reliance (graph = structure, not runtime behavior). Prevents manually re-tracing dependencies with LSP/rg when the graph has them, and inferring behavior/correctness from graph edges.
-when_to_use: Fires in a graph-equipped project (`code-reality` MCP engine tools available or `.code-reality/graph.db` exists) when the task needs structural/impact facts — "who calls X", "blast radius of this change", "is X dead code", "hubs/communities", "scope my review to impacted nodes only". Load BEFORE manually tracing imports/callers with LSP findReferences or rg. Does NOT fire in projects without the engine (no warn noise). Parallels nt-query (discipline for a tool).
+when_to_use: Fires in a graph-equipped project (`code-reality` MCP engine tools available or `.code-reality/graph.db` exists) when the task needs structural/impact facts — "who calls X", "blast radius of this change", "is X dead code", "hubs/communities", "scope my review to impacted nodes only", EP 撰寫（execution-plan 段落 0 依賴分析）. Load BEFORE manually tracing imports/callers with LSP findReferences or rg. Does NOT fire in projects without the engine (no warn noise). Parallels nt-query (discipline for a tool).
 ---
 
 # cr-query — Query the code knowledge graph correctly
@@ -25,6 +25,8 @@ This skill assumes the project has the code-reality engine. Detect once per task
 3. **Neither** — engine not present in this project.
 
 🔴 **GATE — assume + warn, do not silently degrade.** A review/planning command that expects the engine (impact/callers/scoping) and finds it absent must emit a one-line `[WARN] graph not available — structural context (impact/callers/flows) degraded; build: code-reality graph_db build --repo <root>`, then fall back. **Silent fallback = the user gets a worse review without knowing why.** Do not block — proceed with the fallback below. **查詢面缺口**（該有的邊/符號不在 graph——如 macro 鏈、動態派發）：在**自己 repo** 的 `.kanban/Backlog/` 開 `[cr-demand]` 卡（觸發場景＋實證缺口＋期望能力）——demand-pull 觸發工具弧（ai-rules roadmap relay 段），不靠工具方猜測。
+
+**EP 撰寫面**（[execution-plan](../execution-plan/SKILL.md) 段落 0 依賴分析——CR 第一消費場景）：index 在場的 repo，EP 每個下游/ripple 宣稱必走 CR 查詢（spawned agent 未掛 code-reality MCP——CLI 清單見 execution-plan 段落 0）並在「依賴關係」小節附工具輸出引用（scip_refs 首行 `[SRC]`；graph_query 輸出無 `[SRC]` 行、附完整命令列＋repo root）。**callers 為空是嫌疑不是乾淨**：死路假設（宣稱被觸發、實際無人呼叫——真實案例 `_lazy_populate`）或盲區隱藏消費（字串鍵/meta、動態派發——anti-over-reliance 節）——兩者都以互補腿（`rg "<literal>"`、`hub_refs --hazard`）查證後才可下結論；CR 全綠 ≠ 無 ripple。
 
 ## 🔴 Shared-server rule — every call carries repo_root
 
@@ -104,4 +106,4 @@ They compose: a CRG workflow gives the steps; `cr-query` governs *how each query
 - **code-reality MCP 接線：** stdio `code-reality-mcp --stdio`（plugin 形態）或 streamable-http `127.0.0.1:8200/mcp`（launchd `com.code-reality.mcp`）；工具呼叫一律帶 `repo_root`（不自動偵測）。舊 CRG server（com.user.crg-mcp @5555）已於 2026-08-26 cutover 時 bootout——plist 留檔可回滾。
 - **engine semantics 真相源:** ai-rules `skills/code-reality/SKILL.md`（接線語義）＋code-reality repo（`crates/AGENTS.md`＋plugin skill＝工具事實）
 - **Sibling facts discipline:** [lsp-navigation](../../rules/lsp-navigation.md) (symbol queries) — this skill is its graph counterpart
-- **Consumers:** [review-engine](../review-engine/SKILL.md) (change-impact lens), [arch-thinking](../arch-thinking/SKILL.md) §二 結構機械 (structure-facts lens)
+- **Consumers:** [review-engine](../review-engine/SKILL.md) (change-impact lens), [arch-thinking](../arch-thinking/SKILL.md) §二 結構機械 (structure-facts lens), [execution-plan](../execution-plan/SKILL.md) 段落 0 (EP 依賴分析——ripple 宣稱工具證據 + 死路假設信號)

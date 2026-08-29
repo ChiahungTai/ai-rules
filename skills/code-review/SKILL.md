@@ -124,7 +124,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 ### axis 3：Architecture — 調用 [arch-thinking](../arch-thinking/SKILL.md) skill
 - **機器產 finding（A 軸）**：city map / dep weight / 重用枚舉 / LSP 查證 / call graph（函數級）/ type structure（contract slice）/ data-flow（靜態骨架），調用 skill 取結構資料 → 產 finding（變更融入既有結構？在重造？）
-  - **code-reality（若在場）**：axis 3 的 impact radius / 跨檔 callers / affected flows 用 `impact_radius` / MCP `callers` / `affected_flows` 機械產（取代手動 LSP 逐層追蹤）；change scoping 用 `detect_changes` + `get_minimal_context`（只讀 impacted nodes）。分工 + GATE 見 [cr-query](../cr-query/SKILL.md)。
+  - **code-reality（若在場）**：axis 3 的 impact radius / 跨檔 callers / affected flows 用 `impact_radius` / `callers` / `affected_flows` 機械產（取代手動 LSP 逐層追蹤）；change scoping 用 `detect_changes` + `get_minimal_context`（只讀 impacted nodes）。**spawned agent 未掛 code-reality MCP 工具——CR 查詢一律 CLI 形態**（callers＝`code-reality scip_refs <sym> --callers --repo <repo>`；impact/flows/scoping＝`code-reality graph_query <op> --repo <repo>`）。分工 + GATE 見 [cr-query](../cr-query/SKILL.md)。
 - **條件機制 activation（刪除/refactor 必觸發）**：diff 含刪除整檔/整 class、或 refactor 遷移 logic 時，**必須**調用 arch-thinking 的「補償邏輯盤點」+「變更路徑計數」——兩者預設條件觸發（修缺陷 / 觸及 mutable state），但刪除/refactor 同樣該觸發：刪除可能拆掉補償 pair 另一側（double-count / zero-out），refactor 可能改變 mutation-path ownership。未觸發 = axis 3 漏抓 over-deletion 與補償迴歸（清理日實證：這些機制沒被刪除 diff 觸發 → over-deletion 漏到事後審計才抓）。
 - **受眾明文**：axis 3 與 `/illustrate` 用同一 skill，但 axis 3 產**機器 finding**（A 軸）、illustrate **渲染給人判讀**（B 軸）
 

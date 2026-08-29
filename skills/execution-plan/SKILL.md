@@ -158,16 +158,21 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 **執行**：spawn Explore Agent（model 依 [model-routing](../../rules/model-routing.md) 角色 tier——research/explore＝lite）深度掃描相關模組：
 
 1. **可複用基礎設施盤點**：搜尋需求涉及的模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + LSP `workspaceSymbol` 搜尋相關 class/function，找出可複用的 utilities、base classes、protocols
-2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用。**code-reality（若在場）**：transitive impact radius / 跨檔 callers / flows 用 `impact_radius` / MCP `callers`（LSP 查單 symbol，CR 查 transitive graph —— EP 的 ripple / 影響範圍靠 CR 機械產）—— 分工 + GATE 見 [cr-query](../cr-query/SKILL.md)
+2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用。**code-reality（index 在場）——spawn 的 Explore agent 未掛 code-reality MCP 工具，CR 查詢一律以 CLI 形態寫進 spawn prompt**（工具用法真相源 [code-reality](../code-reality/SKILL.md)；分工 + GATE 見 [cr-query](../cr-query/SKILL.md)）：
+   - 宣稱被整合/觸發的既有符號 → `code-reality scip_refs <sym> --callers --repo <repo>`；追 transitive 鏈 → 同命令 `--closure --depth 2`
+   - 修改檔案的 ripple / 影響範圍 → `code-reality graph_query impact_radius --repo <repo> --files <絕對路徑>`（相對路徑靜默回 `changed_nodes=[]`，非錯誤）
+   - 刪碼/退役場景 → `code-reality hub_refs <sym> --hazard --repo <repo>`（動態派發盲區安全網）
+   - **字串鍵互補腿**：觸碰欄位名 / config key 類 literal → `rg "<literal>"` 掃非符號消費者（測試常以字串鍵驅動 meta 比對——符號查詢與 CR 圖皆不可見）
+   - **誠實界線**：CR 查詢是 ripple 宣稱的必要證據、非充分證據——字串鍵/meta 耦合、registry 動態派發、runtime 行為是 CR 盲區（清單見 cr-query anti-over-reliance），靠上列互補腿覆蓋；**「CR 全綠」≠ 無 ripple**
 3. **類似實作**：LSP `workspaceSymbol` 搜尋相似名稱的 class/function，rg 補充搜尋字串和註解
 4. **風險假設識別**：列出高風險技術假設（外部 API、SDK 行為、架構假設），標注由哪個段落的驗證策略 POC 驗證（吸收舊 `/spec` Phase 3 前期 POC 職責）
    - **致命先驗**：標注為「致命」等級的假設（假設錯了整個 EP 要重寫，等級定義見 [/ep-validate](../ep-validate/SKILL.md)）—— 先跑 `poc/poc_*.py` 驗證可行性再繼續設計段落，避免寫完整 EP 才發現方向死掉；高等級與中等級保留在各段落驗證策略
 
 **產出研究摘要**（放在 EP top-level，段落之前）：
 - 可複用基礎設施清單（附 `ClassName`，路徑選用）
-- 依賴關係和關鍵約束
+- 依賴關係和關鍵約束——每個下游/ripple 宣稱附工具輸出引用（scip_refs 首行 `[SRC]`；graph_query 輸出無 `[SRC]` 行、附完整命令列＋repo root；或 LSP 查證——不接受純讀碼推斷）
 - 類似功能的既有實作位置
-- 風險假設清單（標注等級；致命等級附先驗結果，對應段落驗證策略）
+- 風險假設清單（標注等級；致命等級附先驗結果，對應段落驗證策略）；**死路假設嫌疑入列**——宣稱被整合/觸發的既有符號 callers 查詢為空（CR＋LSP 雙空）即列（真實案例：`_lazy_populate` 宣稱被觸發、實際永不執行）
 - callstack 菜單積壓（repo 有 `ai-analysis/blueprint/callstack-plan.md` 時）：待生成鏈行——新 EP 常踩在未文檔化功能上；僅列清單，生成＝獨立觸發（blueprint-bootstrap）
 
 > **深度上限**：研究摘要層級（可複用元件清單 + 風險假設），**非 codebase 全景報告**——避免 EP 膨脹。後續段落的「基礎設施盤點」在此基礎上補段落特定細節。
