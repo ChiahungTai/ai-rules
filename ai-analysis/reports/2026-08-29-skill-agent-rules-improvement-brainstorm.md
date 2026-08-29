@@ -250,6 +250,12 @@ T3-1/T3-2 spike（跑一次帶數據）＋ T3-3/T3-4 裁決項
 - **T1-3：✅ 照做，但 compact-tail-inject.py 改為「CC 端接線」不刪**（用戶 08-30 翻案，文檔驗證成立）：死路結論只適用 ZCode（08-24 L4 實測＝ZCode compact source 不派發 SessionStart，#167 家族）；CC 官方支援 `SessionStart` + `matcher: "compact"`（ref-docs/harness/claude-code/docs/en/hooks-guide.md:311-323 官方食譜即此場景；hooks.md:983 確認輸入帶 `source` 欄位）。腳本本體已照 CC 形狀寫（stdin JSON / session_id guard / `hookSpecificOutput.additionalContext` 輸出 schema 全相容），**唯一死點是 `fetch_tail()` 硬接 `~/.zcode` db.sqlite**（hooks/compact-tail-inject.py:19）——port 為讀 CC `transcript_path` JSONL。落地：settings.json 註冊＋fetch_tail 換資料源＋compact-prep SKILL:31 改「CC=hook 自動補給／ZCode=手動三動作」；T1-3 invariant 屆時自然滿足
 - **T1-4：(a) settings.json 兩行刪除＋(b) heredoc hook spike 照做；(c) ZCode 側權限盤點取消**——用戶裁定 ZCode 給完全訪問、config.json 視為無效（衰減不是 ZCode 權限預批准造成）
 
+### Side chat 結算補記（2026-08-30，sess_a919d9cc）
+
+- **T3-3 smell-detector 定案：接線不進鏈**——post-build 階段 5 收尾報告加 `smell=<建議 zoom 的 dir|無>` triage 欄（訊號源＝code-review/judge findings 的 `[junk]` tag——code-review Finding 呈現段已加標記規則）；baseline/onboarding mode 不掛 post-build（週期需求另議）。零成本常態化 caller，受眾分離保住
+- **T3-3 ep-validate/spec：留**——ep-validate 的 ad-hoc 路徑（「討論時直接叫 LLM 寫 POC」）繞過遙測，1 次是下界非零採用；雙路徑並存是現狀正解。spec optional by design
+- **T3-2 handoff 已備妥**（貼到 mosaic session 執行；hub-relay：mosaic 只回報 findings＋數據）；**T3-1 spike 已排程**（10-01 上午，九月窗口，一次性手跑）
+
 ### T1 落地記錄（2026-08-30，同 session 完成）
 
 - **T1-1 ✅**：`deploy_agents.py` 新增 `check_neutral_purity()`（五檢查程式化，掃 neutral rules）＋`scan_sources(include_guide)`（broken-refs 擴掃 guide）。gate 上線首跑抓到 **3** 違規（預期 2＋黑天鵝 1：`_ai-behavior-constraints.md` 的 `` `/sync-sources` `` 裸 slash）→ 三處修正（context-management:24/36 括號注化、_ai-behavior-constraints 去斜線）＋guide:131 死指標改寫 → dry-run 歸零 → 三端部署成功。設計要點：purity 不掃 guide（guide 合法提及跨 harness 裸 slash `/handoff`——範圍忠於原清單）；rules/AGENTS.md（meta scope）天然不在 neutral 集合，自引用零誤報

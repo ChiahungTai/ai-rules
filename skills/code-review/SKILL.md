@@ -183,6 +183,8 @@ finding 預設留在審查報告/對話，供用戶 `/copy` 搬到實作 LLM（*
 
 Suggestion 級留在報告即可,不持久化(避免噪音)。
 
+**junk tag**：finding 屬「疑似 AI 亂加／junk／scope creep」類（無對應 UC 的加料、防禦性冗餘、越權 scope）→ 問題欄前綴 `[junk]`——這是 post-build 階段 5 `smell=` triage 欄的訊號源（消費端語義在 post-build；此處只標記不展開）。
+
 ---
 
 ## Commit Message 產生
