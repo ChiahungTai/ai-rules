@@ -25,7 +25,7 @@ read-only 偵測器（不改 code）；先結論（倒金字塔）→ 全貌 →
 
 - [review-engine](../review-engine/SKILL.md) — 嚴重度 / 信心 / 審查者自證 / LSP 查證（共用真相源）
 - [arch-thinking](../arch-thinking/SKILL.md) — **結構性判準（1/4）預設 lens**：core/leaf tiering + dep weight + 重用/邊界 + LSP 查證
-- [crg-query](../crg-query/SKILL.md) — CRG 結構事實（若裝了）
+- [crg-query](../crg-query/SKILL.md) — graph 結構事實（engine 若在場）
 - [rules-reminder](../rules-reminder/SKILL.md) — Bash 規則
 
 ## 核心目標

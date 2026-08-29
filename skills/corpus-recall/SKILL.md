@@ -30,7 +30,7 @@ topic 三形態（symbol／模組路徑／關鍵詞）統一跑以下層，機�
 3. **manifest 交叉**：命中鏈 → `manifest.toml` sources 行 → 對應 callstack md
 4. **md 內文**：`rg -l <topic> <repo>/ai-analysis/blueprint/callstack/`——標題／入口總表／UC 映射表
 5. **delta 層**：`.tours/delta/` 檔名（日期-task）＋內容命中＝近期弧直接脈絡
-6. **（repo 有 CRG 時）影響域擴展**：topic 是 symbol → `hub_refs <symbol> --repo <repo>` 取 callers/callees 目錄面 → 反查哪些鏈錨在那些目錄——撈「topic 沒直接提到但會被波及」的鏈
+6. **（repo 有 code-reality 時）影響域擴展**：topic 是 symbol → `hub_refs <symbol> --repo <repo>` 取 callers/callees 目錄面 → 反查哪些鏈錨在那些目錄——撈「topic 沒直接提到但會被波及」的鏈
 
 ## LLM 判讀層（機械命中 ≠ 語義相關）
 

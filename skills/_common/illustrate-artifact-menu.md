@@ -38,7 +38,7 @@ artifact 詞彙 = drill `artifact <type>` 的 type，全程一致（無同義變
 
 - **方向問題**：新東西落在對的 context/layer 嗎？AI 在重造既有模組嗎？邊界被跨越嗎？
 - **Mermaid**：`flowchart` + `subgraph` per bounded context / Clean Architecture layer；directed edges = 允許依賴方向；`-.->` dashed = leak/forbidden（跨層/跨域）
-- **Fuel**：CRG-first（`list_communities` + `get_architecture_overview` + `get_hub_nodes`/`get_bridge_nodes`）/ fallback（scan-project `dep_graph.modules.imported_by[]` + AGENTS.md Capabilities）。**CRG 缺 → emit `[WARN]`（crg-query GATE，assume-present）+ scan-project/AGENTS.md fallback**。⚠️ caveat：**community ≠ module boundary**（目錄 + AGENTS.md 是模組真相，community 只 coupling hint）
+- **Fuel**：code-reality-first（`list_communities` + `architecture_overview` + `hub_nodes`/`bridge_nodes`）/ fallback（scan-project `dep_graph.modules.imported_by[]` + AGENTS.md Capabilities）。**code-reality 缺場 → emit `[WARN]`（crg-query GATE）+ scan-project/AGENTS.md fallback**。⚠️ caveat：**community ≠ module boundary**（目錄 + AGENTS.md 是模組真相，community 只 coupling hint）
 - **When-to-use**：mode B 理解整體骨架 / EP（新節點落對 context 嗎）/ post-build drift（boundary-crossing signal）
 - **Anti-pattern**：raw 全系統拓樸 dump（耗盡人類注意力）
 
@@ -46,15 +46,15 @@ artifact 詞彙 = drill `artifact <type>` 的 type，全程一致（無同義變
 
 - **方向問題**：我在意的 data 從哪來、誰 transform、誰消費？新 code 插在 pipeline 對的點嗎？
 - **Mermaid**：`flowchart LR`（nodes = producers/transforms/consumers；edge labels = data type 或 contract）
-- **Fuel**：hybrid（CRG `get_affected_flows`/`get_flow` + LSP `outgoingCalls` type-bearing edges + scan-project dep_graph 模組方向 + 吸收「欄位 ← 發布 client」authority edge）。**CRG 缺 → emit `[WARN]`（crg-query GATE）+ LSP/scan-project fallback**。**runtime data VALUES：三者皆無——須 read/run code（acceptance-evidence L4-L5），標 static-skeleton-only**
+- **Fuel**：hybrid（code-reality `affected_flows`/`list_flows` + LSP `outgoingCalls` type-bearing edges + scan-project dep_graph 模組方向 + 吸收「欄位 ← 發布 client」authority edge）。**code-reality 缺場 → emit `[WARN]`（crg-query GATE）+ LSP/scan-project fallback**。**runtime data VALUES：三者皆無——須 read/run code（acceptance-evidence L4-L5），標 static-skeleton-only**
 - **When-to-use**：mode B 追蹤 field 來源 / EP（讀對 source、插對 pipeline 點）/ post-build drift（producer shifted 或 consumer 期望 field 被停發 = silent-corruption 前兆）
 - **Anti-pattern**：宣稱 runtime 值（只產靜態骨架）
 
 ### 3. Change-scoped Call Graph（drift 主幹 substrate）
 
 - **方向問題**：我改這個，誰受影響？
-- **Mermaid**：`graph`（**pruned impact-radius subgraph，禁全系統**）；CRG-sourced edges 附 anti-over-reliance label
-- **Fuel**：CRG-first（`query_graph` callers_of/callees_of direct + `get_impact_radius` transitive blast）/ fallback（LSP `incomingCalls`/`outgoingCalls` AGGREGATION walk——arch-thinking §二 能力，無 transitive，`[WARN]` degraded）/ scan-project dep_graph 模組級脈絡
+- **Mermaid**：`graph`（**pruned impact-radius subgraph，禁全系統**）；code-reality-sourced edges 附 anti-over-reliance label
+- **Fuel**：code-reality-first（`callers` direct sites＋`closure`/`impact_radius` transitive blast）/ fallback（LSP `incomingCalls`/`outgoingCalls` AGGREGATION walk——arch-thinking §二 能力，無 transitive，`[WARN]` degraded）/ scan-project dep_graph 模組級脈絡
 - **When-to-use**：post-build drift（主用——change blast radius）/ mode B 理解 call 結構 / EP（call 方向 vs DIP：domain←use case←adapter）
 - **Anti-pattern**：全系統 call graph（重造 `/code-review` 結構軸 + 耗盡人類注意力）
 
@@ -62,7 +62,7 @@ artifact 詞彙 = drill `artifact <type>` 的 type，全程一致（無同義變
 
 - **方向問題**：這個 use case，對的 component 以對的順序跨對的邊界協作嗎？
 - **Mermaid**：`sequenceDiagram`（lifelines = components/boundaries；messages = calls；layer 分 group + notes）。**單一 scenario**（whole-system sequence 是噪音）
-- **Fuel**：CRG-first（`get_affected_flows`/`get_flow`——real call chains，唯一高效 source）/ fallback（LSP `outgoingCalls` 從 entrypoint recursive walk，manual single-path，`[WARN]` single-path-only）。consume arch-thinking call-graph 資料 scoped to one scenario。anti-over-reliance：parse-time edges 漏 dynamic dispatch/config/reflection
+- **Fuel**：code-reality-first（`affected_flows`/`list_flows`——real call chains，唯一高效 source）/ fallback（LSP `outgoingCalls` 從 entrypoint recursive walk，manual single-path，`[WARN]` single-path-only）。consume arch-thinking call-graph 資料 scoped to one scenario。anti-over-reliance：parse-time edges 漏 dynamic dispatch/config/reflection
 - **When-to-use**：mode B（use case 怎麼跑）/ EP（component 協作順序、跨禁制 layer 嗎）/ post-build drift（scenario 路徑上的新邊）
 - **Anti-pattern**：全系統 sequence；宣稱 runtime tracing（靜態概念流程 viewport-only）
 
@@ -70,7 +70,7 @@ artifact 詞彙 = drill `artifact <type>` 的 type，全程一致（無同義變
 
 - **方向問題**：這個模組由什麼 abstraction 錨定，新 code 是遵循/擴展它還是 fork 它？
 - **Mermaid**：`classDiagram`（**僅 abstracts/Protocols + inheritance/realization edges；hide concrete members**）
-- **Fuel**：**LSP-primary ALWAYS**（CRG 此處弱——持 call/import edges 非 type edges）：`hover` base + `documentSymbol` members + `goToImplementation` overrides（Claude 有 / ZCode 無）+ `findReferences` on base 組裝繼承鏈。**誠實標記**：pyright 無 typeHierarchy op 故 chaining（best-effort，complex hierarchy 產 partial edges）。fallback：rg for class defs
+- **Fuel**：**LSP-primary ALWAYS**（code-reality graph 面此處弱——持 call/refs edges 非 inheritance edges）：`hover` base + `documentSymbol` members + `goToImplementation` overrides（Claude 有 / ZCode 無）+ `findReferences` on base 組裝繼承鏈。**誠實標記**：pyright 無 typeHierarchy op 故 chaining（best-effort，complex hierarchy 產 partial edges）。fallback：rg for class defs
 - **When-to-use**：**conditional**——僅變更觸及 abstract/Protocol/繼承 shape 時 render；純 dataclass 新增靜默跳過（YAGNI）。mode B（模組由什麼 abstraction 錨定）/ EP（新 code 榮譽或 fork 既有 Protocol 嗎）/ post-build drift（+type = parallel-abstraction candidate——是否重造既有）
 - **Anti-pattern**：full class diagram（每 concrete class + attrs + methods——derivable + 人審結構上限）
 
@@ -112,7 +112,7 @@ flowchart LR
 
 ### 流程
 
-1. **SEED**：`git diff` + `git diff --cached` 取變更 symbol（機械、恆可用；無 uncommitted → `HEAD~1`）。CRG 專案可加 `detect_changes`。
+1. **SEED**：`git diff` + `git diff --cached` 取變更 symbol（機械、恆可用；無 uncommitted → `HEAD~1`）。engine 在場可加 `detect_changes`。
 2. **GENERATE**：arch-thinking §二 能力對 changed symbols 產 change-scoped graph facts（call graph blast radius / type structure slice / data-flow lineage）。
 3. **BASELINE degradation ladder**（決定 diff 另一側）：
    - ① **EP-claimed**（gold，**OPTIONAL**——LLM-heuristic parse EP，每 bucket 附 confidence label，低信心可 dismiss；**非 load-bearing**）
