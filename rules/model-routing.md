@@ -27,14 +27,14 @@ subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什�
 
 | tier | harness × provider | agent 定義填法 | 備註 |
 |------|-------------------|---------------|------|
-| lite | ZCode × GLM | `model: glm-5.3-flash`＋`thoughtLevel: high` | flash＝5.3 世代輕量層（多模）；effort 配 high——max 耗時耗 token 增益有限 |
+| lite | ZCode × GLM | `model: glm-5.3-flash`＋`thoughtLevel: high※` | flash＝5.3 世代輕量層（多模）；effort 配 high——max 耗時耗 token 增益有限 |
 | lite | CC × GLM | spawn-time `model: haiku`（＋`effort: high`） | CC enum 是 tier 別名——GLM provider 的對應表直達 flash |
 | lite | CC × Anthropic | `model: haiku`＋`effort: high` | 原生 haiku |
 | lite | ccr 模式（未啟用） | `Fusion/lite` | direct-first 常態（ccr 會斷 ZCode usage 顯示）；啟用時 pins 只換值、角色/tier 不動 |
 | full | 任何 | `model` 省略（inherit） | — |
-| vision | ZCode × GLM | `model: glm-5.3-flash`＋`thoughtLevel: high` | 原生多模已實戰驗證（逐字忠實度高＋像素取樣驗證行為；與 4.6V 對比大致平手——判斷面需更強時升 full） |
+| vision | ZCode × GLM | `model: glm-5.3-flash`＋`thoughtLevel: high※` | 原生多模已實戰驗證（逐字忠實度高＋像素取樣驗證行為；與 4.6V 對比大致平手——判斷面需更強時升 full） |
 
-> ZCode 注意：`thoughtLevel` 綁具體 model（inherit 時不生效）；欄位名**不是** `reasoningEffort`——未知欄位靜默忽略。CC 注意：enum 別名（sonnet/haiku/opus）在 GLM provider 由 provider 別名表解析到對應 GLM 模型。
+> ZCode 注意：`thoughtLevel` 綁具體 model（inherit 時不生效）；欄位名**不是** `reasoningEffort`——未知欄位靜默忽略。**※ thoughtLevel 但書**：sticky user reasoningLevel 在場時（user-scope `local_setting`），定義的 thoughtLevel **不達 wire**——telemetry `variant` 記 user 層級而非定義值（08-29 兩數據點：lite-verify＋vision-review 定義 `high` 皆記 `max`，sticky `max` 在場、主 session rows 同 max）。**model pin 不受影響**（frontmatter model 字串逐字到 wire——vision-review 首筆遙測實證）。sticky override 與 silent no-op 尚未分辨（flip 實驗待跑：改 user level≠定義值再 spawn 看 variant 是否跟隨）——對應**已知 open bug 家族**（zai-org/feedback #339「thought-level changes silently discarded after first selection」＋#306 reasoning effort injection 缺陷；EN/cn 文檔一致、用法無誤）。CC 注意：enum 別名（sonnet/haiku/opus）在 GLM provider 由 provider 別名表解析到對應 GLM 模型。
 
 ## rate limit 與並發上限（model facts 單一源 — 以 provider 現況為準，可能滯後）
 
