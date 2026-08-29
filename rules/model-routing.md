@@ -18,7 +18,7 @@ subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什�
 | code-reviewer / code-reviewer-primed／review **command** agent | full（inherit） | 品質閘門需強度——carve-out：任何「review 順手降級」的直覺不適用 |
 | impl / test-gen agent | full（inherit） | 寫 production code／等價測試設計 |
 | spec-miner / lite-verify / render | lite | 機械查證（rg+Read+逐字引用）、清單驅動驗證、渲染——規則明確、read-only |
-| vision-review | vision | 多模視覺驗收（本地 PNG 走 Read；remote URL 走 4.5V MCP 全名） |
+| vision-review | vision | 多模視覺驗收（Read 本地圖；remote URL 先 Bash curl 落地再 Read——**tools 白名單不掛 MCP 全名**，未連線 MCP 會整顆拒絕 spawn） |
 | research / explore | 內建 Explore 承接（要釘模型時同 lite） | — |
 
 > tier 詞彙（full / lite / vision）單一源在此；agents/AGENTS.md 治理段與 agent 命名引用之，不自帶定義。
@@ -32,7 +32,7 @@ subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什�
 | lite | CC × Anthropic | `model: haiku`＋`effort: high` | 原生 haiku |
 | lite | ccr 模式（未啟用） | `Fusion/lite` | direct-first 常態（ccr 會斷 ZCode usage 顯示）；啟用時 pins 只換值、角色/tier 不動 |
 | full | 任何 | `model` 省略（inherit） | — |
-| vision | ZCode × GLM | `model: glm-5.3-flash`＋`thoughtLevel: high` | 原生多模；判斷面需更強時升 full＋4.5V MCP |
+| vision | ZCode × GLM | `model: glm-5.3-flash`＋`thoughtLevel: high` | 原生多模已實戰驗證（逐字忠實度高＋像素取樣驗證行為；與 4.6V 對比大致平手——判斷面需更強時升 full） |
 
 > ZCode 注意：`thoughtLevel` 綁具體 model（inherit 時不生效）；欄位名**不是** `reasoningEffort`——未知欄位靜默忽略。CC 注意：enum 別名（sonnet/haiku/opus）在 GLM provider 由 provider 別名表解析到對應 GLM 模型。
 
