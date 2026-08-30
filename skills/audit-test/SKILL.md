@@ -219,16 +219,18 @@ allowed-tools: ["Read", "Bash"]
 
 **核心原則**：AI 同寫 test+impl 的同義反覆，靜態掃描（角度 1）抓不到其真實形態——實測（mosaic 2026-08-30 spike，mutmut 3.7.0 scoped）證明盲區不是 `assert x==x` 廢話型，而是**測試與 impl 共享同一組典型數字**（happy path 斷言具體、邊界值系統性缺席：0、1、恰好一半、price<1 這類金融商品邊界）。只有機械突變能把這種盲區變成可數的 survived 名單。
 
-**形態＝scoped 手跑抽查，非常態 gate**（ spike 裁決）：觸發條件=審計對象含 silent-corruption critical path（會計/風控/單位邊界）且用戶明示或 EP 要求深度驗證；不隨每次 audit 自動跑。
+**形態＝scoped 手跑抽查，非常態 gate**（spike 裁決）。**雙 trigger**：
+- **①變更觸發**：審計對象（本週變更的 tests/）含 silent-corruption critical path（會計/風控/單位邊界）且用戶明示或 EP 要求深度驗證。
+- **②存量輪抽查（週期 trigger 必跑一個）**：spot audit 只看本週變更——**零變更的舊測試不在掃描半徑**（真實案例 2026-08-30：mosaic test_cash_tracker.py 舊測試、當週零 commits，變異缺口只被 ad-hoc spike 抓到）。週期 audit-test 跑時從 repo 的 **critical path 模組清單**（來源：AGENTS.md ripple/風控標記、dependency-graph hotspots）**輪選一個**（最久未跑者優先；輪選狀態由 report 歷史或 repo 自存小檔推導）跑 scoped mutmut＋survived 全抽讀。每模組機械成本 ~秒級、不增加常態負擔。
 
 **執行**（mutmut 3 形態；POC 暫存性，結束零足跡清除）：
 1. 挑 1-2 個 critical path 的 source+test（窄：全量會跑不完）
 2. `uv add --dev mutmut`；scoped config：`[tool.mutmut]` 的 `source_paths`（copy 全 package 保 import）＋`only_mutate`（目標檔 glob）＋`pytest_add_cli_args_test_selection`（目標測試檔）
 3. `mutmut run`；記錄三數字：總耗時／mutant 總數／killed:survived
 4. **survived 必抽讀分類**（主成本在此，非機械跑）：(a) 真實測試缺口（斷言沒鎖行為/邊界）(b) equivalent mutant（語義等價，殺不死是正常的）(c) 無實務意義的極端邊界——每個附 file:line 與 mutated operator
-5. 報告：(a) 類缺口列 Critical finding（測試補強項）；清除聲明（mutants/ 目錄＋pyproject config 段＋dep＋uv.lock 還原）
+5. 報告：(a) 類缺口列 Critical finding（測試補強項）；清除聲明（mutants/ 目錄＋pyproject config 段＋dep＋uv.lock 還原）。**輸出落點**：open 項照既有慣例 append 進 daily report；跨 repo open 項 hub-relay 落消費端 pending-decisions inbox（mosaic 例：`ai-analysis/idle-findings/pending-decisions.md`，08-30 起——每日 23:20 report「⏳ 待裁決」節吸收，修復可見性）
 
-**成本實證**（供報價）：288 行 critical path＋68 tests＝8.2s wall、103 mutants、87.4% kill rate、13 survived 抽讀約 10 分鐘 LLM 判讀——抓到 10 個真實缺口（含 price<1 會計＋風控雙處無保護）。
+**成本實證**（供報價）：288 行 critical path＋68 tests＝8.2s wall、103 mutants、87.4% kill rate、13 survived 抽讀約 10 分鐘 LLM 判讀——抓到 10 個真實缺口（含 price<1 會計＋風控雙處無保護）；補強後重跑同模組＝100:3（97.1%）、殘留 3 皆 (b)(c) 類——**輪抽查基準用補強後數字，勿把已修缺口重報**（mosaic memory `project-mutation-testing-spike-t32` 有收案記錄，承接先查勿重做）。
 
 ---
 
