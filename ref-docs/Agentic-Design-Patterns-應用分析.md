@@ -106,7 +106,7 @@ Reflection / Memory / Goal-Monitoring 這類 pattern **跨三個 context 都成�
 | **HITL** | `/deliverable-review`、`/illustrate`、commit-consent | ✅ | `rules/commit-consent.md:9,37`;`deliverable-review.md` | — |
 | **RAG** | `/sync-sources`、`/doc-health` | ✅ | `sync-sources.md:2,3,11,18,25,29` | — |
 | **Resource-Aware** | model-routing.md(研究 agent 降級、並發 3) | ✅ | `rules/model-routing.md:5-12,16-20` | 🟢 無動態校準 / Critique Agent(靜態 tier) |
-| **Reasoning** | deep-thinking + `/judge-review` | ✅ | `rules/deep-thinking.md:9,47-48,133-134` | — |
+| **Reasoning** | deep-thinking + `/judge-review` | ✅ | `rules/design-thinking.md`;`skills/deep-thinking/SKILL.md`（原 rules/deep-thinking.md 已遷移） | — |
 | **Guardrails** | rules-reminder、hooks、review-engine 嚴重度 | ✅(實作) | `rules-reminder/SKILL.md`;`hooks/block-python-c-comment.py`;`settings.json:314-324` | 🟢 無 output-filtering(僅 input-side PreToolUse) |
 | **Evaluation & Monitoring** | `/audit-test`、validation-strategy、acceptance-evidence L1-L6 | ✅ | `acceptance-evidence.md:28-39,76-77` | 🟢 無 production-telemetry(dev-time 框架,by-design) |
 | **Prioritization** | kanban lanes、findings risk matrix | ✅ | `maintain/SKILL.md:5`;`kanban-board/SKILL.md` | — |

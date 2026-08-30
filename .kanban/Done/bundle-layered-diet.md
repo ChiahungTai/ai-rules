@@ -1,5 +1,7 @@
 # deferred：135KB 全域 bundle 分層減肥（F4 拆卡）
 
+> **superseded by** [ep-bundle-diet-wave2](../../ai-analysis/execution-plans/_done/ep-bundle-diet-wave2.md)——觸發條件「90KiB gate 95%+ 現實壓力」成立；本卡護欄（每項搬移須驗證 on-demand 連結存在且可被觸發）已繼承執行
+
 **問題**：部署 bundle（`~/.zcode/AGENTS.md` 等）已達 135KB ≈ 50K tokens——每個 session 地板 52-79K tokens、每個 subagent spawn ~29K，且**每個 request 以 cache-read 折價重送**（token-value 計量下是持續稅）。Claude Max 同構先例明言「長對話每則訊息全 context 重新處理」——bundle 是最固定、最無差異化的那塊。
 
 **方向（分層非刪除）**：理論重的 always-on 內容移 on-demand——候選：`acceptance-evidence.md` 中段理論（A/B 軸細節）、`deep-thinking.md` 長論證、各 rule 的重複範例。機制已存在：skills on-demand 載入、markdown link 不 transclude。寫作治理的「長度預算」從風格建議變有價預算。

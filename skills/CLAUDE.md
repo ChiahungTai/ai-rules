@@ -107,6 +107,7 @@
 ### 開發流程（spec → 交付）
 - `test-driven-development` — TDD 驅動實作（RED → GREEN → 重構；AI 失敗模式反制：反 rationalization、mock 階層、xfail strict）
 - `arch-thinking` — Clean Architecture + DDD 設計視角 + 結構機械（分層依賴/bounded context/use case 驅動[含共用層外溢]；city map/dep weight/Pattern Radar/domain grounding/LSP 查證/補償邏輯盤點/call graph（函數級）/type structure（contract slice）/data-flow（靜態骨架）；視角非模板；受眾中性；與 api-and-interface-design 分工）
+- `deep-thinking` — 深層思考框架深層載體（reference skill：輸出格式模板「深層思考分析」、思維框架圖、關鍵問題清單 0-7 共 8 問、程式碼查證細則、執行自檢清單；rule 端＝design-thinking 兩層思考/決策分級/三視角 always-on 核心——rule+skill 分層控制 bundle 尺寸）
 - `debugging-and-error-recovery` — 系統性根因除錯（非猜測；no-guessing 熔斷、用戶糾正訊號表）
 - `external-api-investigation` — 外部 API / 整合器真實行為調查（monkey-patch dry-run、查 stub、問 domain；實證優先於讀 code 推理）
 - `autonomous-execution` — 無人介入自主執行的決策 / 錯誤恢復 / 完成回報 / workspace safety / path invariants / session recovery（false-done 偵測）
@@ -130,6 +131,7 @@
 - `scan-project` — 統一專案知識掃描（on-demand；imports + Capabilities + kanban → dep_graph / findings）
 - `standup` — 每日晨間簡報昨日活動 digest（跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition；ZCode 23:20 定時任務整合）
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / spawn 預設背景 / 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）
+- `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表〔ZCode×GLM／CC×GLM／CC×Anthropic〕、rate limit 與並發上限表、thoughtLevel 但書〔#339/#306〕、classifier unavailable 處置；rule 端留角色→tier 表＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
 - `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離）
@@ -145,6 +147,7 @@
 - `blueprint-bootstrap` — blueprint 知識庫建置程序（人讀合成視角 scaffold：骨架＋半滿＋🤖/👤 狀態標記＋誘導問題＋治理模板；**callstack 場景敘事生成＝斷點③解法**——重複度盤點前置→鏈枚舉→逐幀實證→coverage 稽核→findings，產出餵 tour-bootstrap 場景層；既有 blueprint 走 audit 模式不重建；位置＝instruction-init 之上、tour-bootstrap 之下）
 - `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀）
 - `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
+- `llm-output-convention` — 雙通道輸出細則載體（reference skill：print tag 全表〔[OK]/[WARN]/[FAIL]/[LOG]/[ACTION]/[progress]〕、print/Logger 慣例細則與閉環、stdlib logging 與框架 Logger 並存、遷移注意；rule 端留核心原則＋Namespace——rule+skill 分層控制 bundle 尺寸）
 - `lsp-navigation` — LSP 深層參考（reference skill：rg 陷阱案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness/reindex 處置、驗證輸出格式；rule 留統一速查/Tool Discovery gate 核心——rule+skill 分層控制 bundle 尺寸）
 - `context7` — Context7 MCP 文檔查詢（library/framework/SDK/API 用法先查最新文檔再回答，優先於 web search；跨 harness MCP 支援）
 - `voice-notification` — 三通道語音通知（系統召回 / 進度提醒 / 完成通知）

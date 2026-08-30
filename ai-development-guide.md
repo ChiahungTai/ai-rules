@@ -15,7 +15,7 @@
 > **核心原則**：測試保護下的架構重構是可接受的，預設不考慮向後相容。
 
 - 有測試保護時，大膽進行架構級重構
-- 向後相容只在影響外部系統整合、已有生產數據、部署環境時需確認
+- 向後相容確認時機見 [edit-discipline.md](rules/edit-discipline.md)（rule 為源，此處不重述）
 - 持續演化（測試 → 重構 → 確認），而非一次到位
 
 ---
@@ -121,19 +121,11 @@
 
 > **核心原則**：所有設計決策（spec/EP/implement/review）用 Clean Architecture + DDD 視角檢視。是**視角非模板**（注入思考，不強制分層、不過度工程）— 補體系缺失的架構紀律層。
 
-### 三主線
-
-- **依賴規則（Clean Architecture 分層）**：domain ← use case ← adapter ← infra，依賴**向內**（內層不依賴外層）。設計時自問「新東西落哪層？依賴方向對嗎？有無循環？」
-- **bounded context（DDD 邊界）**：每個 context 邊界清楚，**不跨域直接存取內部**（`_private`）。設計時自問「這該在哪個 context？有無跨域存取？」
-- **use case 驅動**：先問**消費者要什麼行為**（use case），再設計結構（與 UC-Driven 呼應）。設計時自問「消費者是誰？結構撐得起 use case 嗎？」
+三主線（依賴規則／bounded context／use case 驅動）、決策分級與兩層思考核心見 [design-thinking.md](rules/design-thinking.md)（rule 為源，此處不重述）。
 
 ### SOLID 精神
 
-SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介面隔離）/ DIP（依賴反轉）— 實作時遵循，詳見 code-edit-constraints（Claude 端 claude-specific rule；非 Claude 端此細節從略）。
-
-### 視角非模板
-
-本紀律是**設計視角**（檢視結構方向），非強制分層模板 — 不要求每個專案套四層。原則通用，範例領域特定（mosaic：domain=策略訊號 / use case=回測下單 / adapter=NT·SJ·catalog / infra）。
+SOLID 精神實作時遵循，指標細則見 [edit-discipline.md](rules/edit-discipline.md)（rule 為源；五項縮寫展開屬可推導通用知識，不重述）。
 
 > 深入視角（三主線在 spec/illustrate/EP/implement 各自怎麼用）見 arch-thinking skill（與 api-and-interface-design skill 邊界：本視角檢視整體結構，api-and-interface 設計介面合約；跨 harness skill 機制各家不同，路徑從略）。
 
@@ -145,7 +137,7 @@ SRP（單一職責）/ OCP（擴展開放）/ LSP（子型替換）/ ISP（介�
 
 | 鐵律 | 說明 | 實施策略 |
 |------|------|----------|
-| **數據完整性優先** | 損壞數據比沒有數據更災難 | Fail-fast，無效輸入立即崩潰 |
+| **數據完整性優先** | 損壞數據比沒有數據更災難 | Fail-fast（崩潰策略與完整細則見 [quality-constraints.md](rules/quality-constraints.md)）|
 | **100% 回測可重現** | hash + config + seed | 波動 >0.01 必須重做 |
 | **Crash-Only 恢復機制** | 崩潰後快速恢復 | 狀態外部化，恢復即初始化 |
 | **Live / Backtest 共用代碼** | 避免條件分支 | 統一處理邏輯 |

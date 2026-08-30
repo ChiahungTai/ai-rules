@@ -26,7 +26,7 @@ uv run python scripts/deploy_agents.py
 非 Claude 端單檔 AGENTS.md 受 harness **截斷線**約束——超線內容**靜默失效**（不報錯，直接截掉）：
 
 - **ZCode 實測**：截斷線 **102,400 bytes（100KiB）**，硬編碼於 `zcode.cjs`（`hIn=100*1024`，讀前 100KiB bytes 再 UTF-8 decode），**無任何 config 可調**（官方文檔亦未記載）。載入模型：只讀 user 全域（`~/.zcode/AGENTS.md`）+ workspace（cwd 往上至 project root 第一個 `AGENTS.md`）**兩檔**，各檔獨立 100KiB 預算；**不展開 `@import/@include`、不掃子目錄、不依任務類型選規則檔**。
-- `deploy_agents.py` 內建 **90KiB 硬 fail gate**（常數 `BUNDLE_MAX_BYTES`，此處為描述非真相源）：bundle 超過即拒絕部署。撞線時先精簡 rules/（encoder-philosophy：砍可推導與敘事），或把 on-demand 級內容**下沉 skills/**（reference skill 分層模式：rule 留 always-on 核心＋pointer，深層內容住 `skills/<name>/SKILL.md`——skills/ 經全域 symlink 四 harness 按需可讀。先例：acceptance-evidence / lsp-navigation / instruction-writing / context7 四組 rule+skill 分層）。
+- `deploy_agents.py` 內建 **90KiB 硬 fail gate**（常數 `BUNDLE_MAX_BYTES`，此處為描述非真相源）：bundle 超過即拒絕部署。撞線時先精簡 rules/（encoder-philosophy：砍可推導與敘事），或把 on-demand 級內容**下沉 skills/**（reference skill 分層模式：rule 留 always-on 核心＋pointer，深層內容住 `skills/<name>/SKILL.md`——skills/ 經全域 symlink 四 harness 按需可讀。先例：acceptance-evidence / lsp-navigation / instruction-writing / context7 / deep-thinking / model-routing / llm-output-convention 七組 rule+skill 分層）。
 - 歷史教訓：部署版 141KB 時代，尾部 8 條 rules（含 tool-discipline、quality-constraints）落在截斷區靜默失效（2026-08-20 實證事故：spawn 背景規範沒載入 → 前景 spawn 被 user 插話殺掉）。**規範存在 ≠ 規範載入**。
 
 ### 部署驗證義務（deploy 跑通 ≠ 部署完成）
@@ -46,7 +46,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 
 | rule | scope | 說明 |
 |---|---|---|
-| `deep-thinking` | 🟢 neutral | 決策框架（第一性原理＋第二層）|
+| `design-thinking` | 🟢 neutral | 決策＋架構設計思考核心（兩層思考＋三視角；輸出格式在 deep-thinking skill）|
 | `progressive-validation` | 🟢 neutral | DEPTH-MIN/SAMPLE/FULL 驗證 |
 | `quality-constraints` | 🟢 neutral | crash-only / fail-loud / 消費端驗證 |
 | `acceptance-evidence` | 🟢 neutral | L1-L6 證據階層 / A/B 軸 / Claim→Evidence→Trust（深層理論：Runtime Invariant、Intent Drift、filter trap 在 acceptance-evidence skill）|
@@ -57,16 +57,16 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `python-standards` | 🟢 neutral | Python 標準（language；Python 專案適用）|
 | `context-management` | 🟢 neutral | context 重置原則（Claude 機制用括號註）|
 | `outward-action-consent` | 🟢 neutral | outward action 需用戶授權（commit / deploy / push / send / live order；reversibility test + AUTH line）|
-| `llm-output-convention` | 🟢 neutral | print/Logger 雙通道（Python 段標註）|
+| `llm-output-convention` | 🟢 neutral | print/Logger 雙通道核心——state transition 定義＋Namespace（tag 表/細則在 llm-output-convention skill）|
 | `lsp-navigation` | 🟢 neutral | 符號導航統一速查＋Tool Discovery gate（反例群、Agent prompt 模板、載體對照、staleness 處置在 lsp-navigation skill）|
 | `modern-cli-preference` | 🟢 neutral | fd/rg CLI 速查（Claude 權限段括號註隔離）|
 | `tool-discipline` | 🟢 neutral | 通用工具紀律（uv run / pipe-exit / 禁 sed / pytest 背景跑 / zsh 動態 flags 陣列）|
 | `edit-discipline` | 🟢 neutral | 通用編輯紀律（SRP/DIP/變更紀律/禁混合寫法）|
 | `bash-hard-rules` | 🔴 claude-specific | Claude 權限偵測（`#` 換行註解 / `$` 展開）|
 | `code-edit-constraints` | 🔴 claude-specific | Claude Edit/Write 工具 API（old_string 精確匹配 / 多位元組降級）|
-| `model-routing` | 🟢 neutral | 跨 harness subagent 模型分層（角色→tier→(model, effort) 兩跳解析＋並發表） |
+| `model-routing` | 🟢 neutral | 跨 harness subagent 模型分層骨架（角色→tier 表＋兩跳原則；解析表/並發表在 model-routing skill） |
 
-**default = neutral**：通用知識預設跨 harness — 新 rule 不標 scope 即進 bundle。Claude 專屬 rule 需顯式標 `harness-scope: claude-specific` 才被排除。`deploy_agents.py` 的斷 ref 檢測會阻塞任何 neutral rule 引用 claude-specific rule 的 deploy（強制修 ref 或重劃 scope）。目前 neutral 17 條、claude-specific 2 條（bash-hard-rules / code-edit-constraints）。已下沉 skill 的 rule（self-consistency 五維檢查、context7 MCP 查詢——內容在 instruction-writing skill／context7 skill）。
+**default = neutral**：通用知識預設跨 harness — 新 rule 不標 scope 即進 bundle。Claude 專屬 rule 需顯式標 `harness-scope: claude-specific` 才被排除。`deploy_agents.py` 的斷 ref 檢測會阻塞任何 neutral rule 引用 claude-specific rule 的 deploy（強制修 ref 或重劃 scope）。目前 neutral 17 條、claude-specific 2 條（bash-hard-rules / code-edit-constraints）。已下沉 skill 的 rule（self-consistency 五維檢查、context7 MCP 查詢——內容在 instruction-writing skill／context7 skill；design-thinking 輸出格式、model-routing 解析表、llm-output-convention 細則三組同模式分層）。
 
 ## Rule 寫作原則
 
