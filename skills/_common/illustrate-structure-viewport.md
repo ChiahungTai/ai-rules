@@ -63,6 +63,8 @@ drift detection 細節（5 signal class / baseline degradation ladder / no-sever
 
 **MD**：Mermaid `flowchart`/`classDiagram` with **3 styled bucket**（max-3-styled-group 硬限制，marker 重用 style 不倍增）：added`{+edge,+type}` / removed-broken`{-edge,broken-caller}` / violated`{boundary-crossing}`；fill+color 成對；emoji 優先標狀態。位置用 repo-root 相對 path:line（VS Code Cmd+Click，沿用上方「位置標示」慣例）。
 
+**HTML compare**（opt-in，僅 architecture 型）：base/head JSON 由 drift spine 事實作者化 → archify `compare` 渲染 Before/Delta/After 互動圖；guard 計入 session 總預算合併計；產物一次性審完即棄——細節見 [illustrate-html-mode.md](./illustrate-html-mode.md)。
+
 **no-severity 硬規**（layer-3 viewport 線）：NO severity、NO file:line fix、NO「this is wrong」verdict——僅「this moved; you judge direction」。每個 drift-rendering site 重複此 constraint，防 audience split 崩潰。
 
 ## Selective Review Matrix（既有 core 審查 artifact）

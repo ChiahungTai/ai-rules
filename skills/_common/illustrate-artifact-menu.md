@@ -24,6 +24,8 @@ artifact 詞彙 = drill `artifact <type>` 的 type，全程一致（無同義變
 | Scenario Sequence | `sequence` | 動態行為 |
 | Contract Class Slice | `class-slice` | 靜態結構（型別）|
 
+**HTML 圖型映射**（html 模式）：artifact 選型後可走 archify 渲染——類型映射見 [illustrate-html-mode.md](illustrate-html-mode.md)（class slice 無對應，維持 md）。
+
 ## default + menu 邏輯
 
 - mode B **無 crisp 方向問題**（`/illustrate @模組` 無進一步指定）→ default **Boundary diagram**（whole-picture 骨架，human-viewport fit 最高）

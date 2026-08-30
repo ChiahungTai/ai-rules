@@ -1,8 +1,8 @@
 ---
 name: illustrate
 
-description: "圖解技術概念、架構設計或流程 + 結構 viewport（SA/SD artifact menu：call graph/sequence/class slice/data-flow/boundary；city map/drill/drift detection，三時點 pre-EP/post-EP/post-build）。可指定 @目錄或 @檔案讓 AI 先讀再圖解，支援 console（即時）和 md（寫檔）兩種輸出模式。"
-when_to_use: "Illustrate technical concepts, architecture, or processes. Also structure viewport via SA/SD artifact menu (boundary/data-flow/call-graph/sequence/class-slice) + drift detection at pre-EP / post-EP / post-build. Supports console (ASCII) and md (Mermaid) output. Use with @dir or @file for code-based explanations."
+description: "圖解技術概念、架構設計或流程 + 結構 viewport（SA/SD artifact menu：call graph/sequence/class slice/data-flow/boundary；city map/drill/drift detection，三時點 pre-EP/post-EP/post-build）。可指定 @目錄或 @檔案讓 AI 先讀再圖解，支援 console（即時）、md（寫檔）和 html（archify 展示級互動圖，opt-in）三種輸出模式。"
+when_to_use: "Illustrate technical concepts, architecture, or processes. Also structure viewport via SA/SD artifact menu (boundary/data-flow/call-graph/sequence/class-slice) + drift detection at pre-EP / post-EP / post-build. Supports console (ASCII), md (Mermaid), and html (archify interactive artifact, opt-in) output. Regenerate arch-report from tracked JSON IRs when asked. Use with @dir or @file for code-based explanations."
 ---
 
 # /illustrate — 智能圖解系統
@@ -17,8 +17,9 @@ when_to_use: "Illustrate technical concepts, architecture, or processes. Also st
 |------|------|------|------|
 | **Console**（預設） | ASCII | 精簡（3-5 章，每章 3-5 點） | 即時討論、快速查詢 |
 | **MD** | Mermaid（`skill: "mermaid"`） | 詳盡（多級標題、完整展開） | 深度分析、知識沉澱 |
+| **HTML**（opt-in） | archify 互動圖（委派 [illustrate-html-mode.md](../_common/illustrate-html-mode.md)） | 展示級（互動搜尋/focus/Present） | 分享 / demo / re-onboard / drift 審查 |
 
-**執行鐵律**：Console 禁止 Mermaid 語法。MD 禁止 ASCII 圖表。違反 = 指令執行失敗。
+**執行鐵律**：Console 禁止 Mermaid 語法。MD 禁止 ASCII 圖表。HTML 是**寫檔模式**——僅明示 `html` 或增益判斷時觸發；Console 語境明示 html = 切換輸出模式（檔案交付＋路徑回報），永不 inline 渲染；archify 缺場/壞場或 guard 超限 → 降級 MD Mermaid 並回報（細節見 illustrate-html-mode.md）。違反 = 指令執行失敗。
 
 ## 核心：4 mode（從使用者 use case 歸納，非內部能力）
 
@@ -53,6 +54,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 /illustrate                                    # 無參數 → 委派 /debrief（改動理解簡報）
 /illustrate 微服務架構                         # Console 模式
 /illustrate md Kubernetes 叢集管理              # MD 模式 → ai-analysis/reports/
+/illustrate html @src/components/              # HTML 模式 → archify（mode B 映射；缺場降級）
 /illustrate @src/components/                   # 目錄分析
 /illustrate md @src/ @tests/ --output "分析.md" # 自定義輸出
 ```
@@ -108,12 +110,13 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
     → 讀 code → city map + 流程 + 重用枚舉（調 skill）→ 邊界案例列 2-3 設計替代 + tradeoff → 渲染 → 人判讀
   B 理解既有（@模組 / 概念 / 除錯 / 學習套件）
     → 讀 code → 依方向問題從 artifact menu 選 artifact（default boundary）→ grounded 渲染 → 人理解
+    → html：artifact 選型後走 html 類型映射（class slice 除外，見 illustrate-html-mode.md）
   C 審查驗證（@ep / 重造偵測 / commit 前）
     → 讀 code → 語義 diff / 假設驗證矩陣 / city map → 渲染 → 人判讀
   D 溝通傳達（文檔 / demo / 主題）
-    → 主題 → Mermaid（md）→ 可分享
+    → 主題 → Mermaid（md 沉澱；分享情境建議 html——增益判斷：互動搜尋/focus/Present）→ 可分享
 
-輸入判斷線索：無參數→委派 debrief；@ep→C（假設驗證）；@模組/概念→B；主題+md→D；架構/邊界討論→A
+輸入判斷線索：無參數→委派 debrief；@ep→C（假設驗證）；@模組/概念→B；主題+md→D；主題+html→D（archify）；@dir+html→B（映射）；架構/邊界討論→A
 ```
 
 ### 邊界案例的行動路徑分流（mode A 輸出指引）
@@ -143,7 +146,7 @@ mode A flag 邊界 / smell 時，給兩條行動路徑 + 取捨，**不替 user 
 | data-flow（靜態骨架）資料生成 | `arch-thinking` skill §二 | ✅ 已沉（跨命令）|
 | artifact menu（5 artifact + drift overlay spec）| `illustrate-artifact-menu.md` | ❌ 留（illustrate 特有渲染）|
 | drift diff（5 signal class）| `illustrate-artifact-menu.md` | ❌ 留（viewport framing）|
-| drift rendering（Console/MD overlay）| `illustrate-structure-viewport.md` | ❌ 留（viewport 渲染）|
+| drift rendering（Console/MD overlay + HTML compare）| `illustrate-structure-viewport.md` | ❌ 留（viewport 渲染）|
 
 委託 Skills：
 - [rules-reminder](../rules-reminder/SKILL.md) — Bash 規則
@@ -161,3 +164,4 @@ mode A flag 邊界 / smell 時，給兩條行動路徑 + 取捨，**不替 user 
 | [illustrate-examples.md](../_common/illustrate-examples.md) | 需理解各模式實際輸出時 |
 | [illustrate-structure-viewport.md](../_common/illustrate-structure-viewport.md) | 結構 viewport / drill / pre-EP checkpoint 時 |
 | [illustrate-artifact-menu.md](../_common/illustrate-artifact-menu.md) | mode B code 解釋 / drift checkpoint（5 SA/SD artifact + drift overlay spec）|
+| [illustrate-html-mode.md](../_common/illustrate-html-mode.md) | html 模式觸發 / mode D 增益判斷 / drift compare / **arch-report 重生**（archify 委派、類型映射、偵測降級、輪數 guard、產物生命週期＋重生程序）|

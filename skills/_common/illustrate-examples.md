@@ -96,3 +96,15 @@ MD 模式與 Console 模式的關鍵差異：
 - 使用 Mermaid 圖表取代 ASCII 圖表
 - 多層次展開而非精簡摘要
 - 自動儲存為 `ai-analysis/reports/` 下的檔案
+
+## 範例 4: HTML 展示級輸出（archify，opt-in）
+
+```bash
+/illustrate html @src/components/     # mode B：artifact 選型 → archify 類型映射
+/illustrate html 微服務架構            # mode D：主題 → archify 渲染
+```
+
+產出形態（細節見 [illustrate-html-mode.md](illustrate-html-mode.md)）：
+- grounding 事實 → typed JSON IR（`sources` 證據路徑）→ archify `validate → deliver → visual-check` → 自包含互動 HTML（主題切換/搜尋/focus/Present）
+- 輸出 `arch-report/<主題>/`（repo root；每次任務一個子目錄，入口 `index.html`）；JSON IR 進 git（再生源頭），HTML/截圖依 .gitignore 排除
+- archify 缺場/壞場或輪數 guard 超限 → 降級 MD Mermaid＋回報

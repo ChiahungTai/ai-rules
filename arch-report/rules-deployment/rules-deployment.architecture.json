@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Rules 部署拓撲 — 單一源到四家 Harness",
+    "quality_profile": "showcase",
+    "viewBox": [990, 540],
+    "repository": {
+      "url": "https://github.com/ChiahungTai/ai-rules",
+      "revision": "009e4a6c2f13913a791167eeb51e5f561c00cca1"
+    },
+    "views": [
+      { "id": "bundle-line", "label": "bundle 主線", "focus": ["rules-src", "guide-doc", "deploy", "gate", "bundle"], "note": "rules + guide → deploy 拼裝 → 90KiB gate → 單檔 bundle。" },
+      { "id": "snapshot-consumers", "label": "三家 snapshot", "focus": ["bundle", "zcode", "codex", "opencode"], "note": "非 Claude 端消費 snapshot——改 rule 後須重跑 deploy。" },
+      { "id": "claude-live", "label": "Claude 雙 symlink", "focus": ["rules-src", "guide-doc", "claude-rules", "claude-md"], "note": "Claude 端 symlink 即時生效，不需 deploy。" }
+    ]
+  },
+  "components": [
+    { "id": "rules-src", "type": "database", "label": "rules/", "sublabel": "*.md 規範源", "pos": [40, 80], "size": [150, 64], "sources": [{ "path": "rules/AGENTS.md" }] },
+    { "id": "deploy", "type": "backend", "label": "deploy_agents.py", "sublabel": "拼裝＋部署", "pos": [310, 80], "size": [170, 64], "sources": [{ "path": "scripts/deploy_agents.py" }] },
+    { "id": "guide-doc", "type": "database", "label": "development-guide", "sublabel": "neutral 源", "pos": [580, 80], "size": [180, 64], "sources": [{ "path": "ai-development-guide.md" }] },
+    { "id": "claude-rules", "type": "frontend", "label": "~/.claude/rules/", "sublabel": "symlink → rules/", "tag": "即時生效", "pos": [40, 230], "size": [170, 64] },
+    { "id": "gate", "type": "security", "label": "90KiB gate", "sublabel": "尺寸預算", "pos": [355, 230], "size": [140, 64] },
+    { "id": "claude-md", "type": "frontend", "label": "~/.claude/CLAUDE.md", "sublabel": "symlink → guide", "tag": "即時生效", "pos": [580, 230], "size": [190, 64] },
+    { "id": "zcode", "type": "frontend", "label": "~/.zcode/AGENTS.md", "sublabel": "snapshot 消費端", "tag": "100KiB 截斷線", "pos": [80, 400], "size": [190, 64] },
+    { "id": "bundle", "type": "database", "label": "bundle snapshot", "sublabel": "單檔 AGENTS.md", "pos": [330, 400], "size": [160, 64] },
+    { "id": "codex", "type": "frontend", "label": "~/.codex/AGENTS.md", "sublabel": "snapshot 消費端", "pos": [560, 400], "size": [170, 64] },
+    { "id": "opencode", "type": "frontend", "label": "opencode", "sublabel": "~/.config/opencode", "tag": "snapshot 消費端", "pos": [760, 400], "size": [190, 64] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "ai-rules repo（源）", "wraps": ["rules-src", "deploy", "guide-doc", "gate", "bundle"] },
+    { "kind": "region", "label": "harness 全域位置（部署／連結端）", "wraps": ["claude-rules", "claude-md", "zcode", "codex", "opencode"] }
+  ],
+  "connections": [
+    { "id": "rules-to-deploy", "from": "rules-src", "to": "deploy", "label": "rules 源" },
+    { "id": "guide-to-deploy", "from": "guide-doc", "to": "deploy", "label": "guide 源" },
+    { "id": "assemble", "from": "deploy", "to": "gate", "label": "拼裝", "fromSide": "bottom", "toSide": "top" },
+    { "id": "pass-gate", "from": "gate", "to": "bundle", "label": "≤90KiB", "variant": "emphasis", "fromSide": "bottom", "toSide": "top" },
+    { "id": "deploy-zcode", "from": "bundle", "to": "zcode", "label": "deploy", "fromSide": "left", "toSide": "right" },
+    { "id": "deploy-codex", "from": "bundle", "to": "codex", "label": "deploy" },
+    { "id": "deploy-opencode", "from": "bundle", "to": "opencode", "label": "deploy", "fromSide": "bottom", "toSide": "bottom", "via": [[410, 500], [855, 500]] },
+    { "id": "link-rules", "from": "rules-src", "to": "claude-rules", "label": "目錄 symlink", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "link-guide", "from": "guide-doc", "to": "claude-md", "label": "檔案 symlink", "variant": "dashed", "fromSide": "bottom", "toSide": "top" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "bundle 主線", "items": ["deploy_agents.py 拼裝 guide＋neutral rules", "90KiB gate 超線警示（寫作治理預算）", "三家非 Claude 端消費 snapshot"] },
+    { "dot": "emerald", "title": "Claude 雙 symlink", "items": ["CLAUDE.md → guide（檔案）＋ rules/ → rules（目錄）", "repo 改動即時生效，不需 deploy", "rules auto-load 每 session 全載"] },
+    { "dot": "rose", "title": "同步紀律", "items": ["改 rule → 非 Claude 端須重跑 deploy", "snapshot 非 live-sync（部署即凍結）", "ZCode 100KiB 硬截斷線——尾端靜默不載"] }
+  ]
+}

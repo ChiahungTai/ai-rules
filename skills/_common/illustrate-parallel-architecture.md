@@ -91,11 +91,12 @@ Task (report-coordinator): 整合所有結果，生成統一解釋報告
 ### 階段 2：根據模式生成圖表
 
 ```bash
-Task (visualization-specialist): 根據 Console 或 MD 模式生成對應圖表
+Task (visualization-specialist): 根據 Console / MD / html 模式生成對應圖表
 - Console 模式：ASCII 流程圖、架構圖，終端機友善
 - MD 模式：skill: "mermaid" 生成專業圖表
   - 流程圖、類圖、時序圖、架構圖
   - 確保 Dark/Light 模式相容
+- HTML 模式（opt-in）：specialist 產 grounding 事實，最終渲染走 [illustrate-html-mode.md](illustrate-html-mode.md)（archify 委派）
 ```
 
 ### 階段 3：結果整合

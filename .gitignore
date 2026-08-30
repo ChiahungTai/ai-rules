@@ -43,3 +43,8 @@ ref-docs/*.pdf
 .pytest_cache/
 .code-review-graph/
 .code-reality/
+
+# archify 生成產物（illustrate html 模式）——專屬目錄 arch-report/<主題>/（repo root）
+# 進 git：JSON IR（機器可讀結構快照，~4KB，可再生 HTML）＋ visual-check receipt；不進：HTML（~720KB/顆，內嵌 viewer runtime，git 比例 175:1）＋截圖
+arch-report/**/*.html
+arch-report/**/*.visual-check.*.png

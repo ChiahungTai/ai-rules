@@ -1,0 +1,55 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "illustrate html 模式 — 執行流程",
+    "quality_profile": "showcase",
+    "viewBox": [1058, 534],
+    "views": [
+      { "id": "happy-path", "label": "主線", "focus": ["i0", "i1", "a0", "i2", "a1", "a2", "a3", "art"], "note": "觸發→偵測→doctor→grounding→authoring→validate→交付 index.html。" },
+      { "id": "fallbacks", "label": "三路降級", "focus": ["f0", "f1", "f2"], "note": "缺場/壞場/超限——全部降級 MD Mermaid 不靜默失敗。" },
+      { "id": "lifecycle", "label": "產物生命週期", "focus": ["art"], "note": "主題目錄＋index.html 入口；JSON tracked 為再生源頭。" }
+    ]
+  },
+  "lanes": [
+    { "id": "illustrate", "label": "illustrate（主流程）" },
+    { "id": "archify", "label": "archify（外部引擎）" },
+    { "id": "fallback", "label": "降級路徑", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "preflight", "label": "前置判定", "fromCol": 0, "toCol": 1 },
+    { "id": "health", "label": "引擎健康", "fromCol": 2, "toCol": 2 },
+    { "id": "authoring", "label": "事實→作者→驗證", "fromCol": 3, "toCol": 4, "variant": "emphasis" },
+    { "id": "delivery", "label": "交付", "fromCol": 5, "toCol": 5 }
+  ],
+  "nodes": [
+    { "id": "i0", "type": "frontend", "lane": "illustrate", "col": 0, "label": "觸發判定", "sublabel": "明示/增益/mode 映射" },
+    { "id": "i1", "type": "backend", "lane": "illustrate", "col": 1, "label": "存在性偵測", "sublabel": "skills 根→clone" },
+    { "id": "i2", "type": "backend", "lane": "illustrate", "col": 3, "label": "grounding", "sublabel": "讀 code→圖型映射" },
+    { "id": "a0", "type": "security", "lane": "archify", "col": 2, "label": "doctor 首跑", "sublabel": "node/版本檢查" },
+    { "id": "a1", "type": "backend", "lane": "archify", "col": 3, "label": "author JSON", "sublabel": "schema＋example" },
+    { "id": "a2", "type": "backend", "lane": "archify", "col": 4, "label": "validate", "sublabel": "showcase；≤12 輪" },
+    { "id": "a3", "type": "backend", "lane": "archify", "col": 5, "label": "deliver＋檢查", "sublabel": "visual-check" },
+    { "id": "f0", "type": "messagebus", "lane": "fallback", "col": 1, "label": "缺場降級", "sublabel": "告知安裝方式" },
+    { "id": "f1", "type": "messagebus", "lane": "fallback", "col": 2, "label": "壞場降級", "sublabel": "doctor 診斷回報" },
+    { "id": "f2", "type": "messagebus", "lane": "fallback", "col": 4, "label": "超限降級", "sublabel": "殘留診斷回報" },
+    { "id": "art", "type": "database", "lane": "illustrate", "col": 5, "label": "index.html", "sublabel": "主題目錄入口", "tag": "JSON tracked" }
+  ],
+  "edges": [
+    { "from": "i0", "to": "i1", "label": "觸發成立", "variant": "emphasis" },
+    { "from": "i1", "to": "a0", "label": "偵測命中" },
+    { "from": "i1", "to": "f0", "label": "全 miss", "variant": "dashed" },
+    { "from": "a0", "to": "i2", "label": "健康" },
+    { "from": "a0", "to": "f1", "label": "doctor fail", "variant": "dashed" },
+    { "from": "i2", "to": "a1", "label": "事實＋映射", "variant": "emphasis" },
+    { "from": "a1", "to": "a2", "label": "candidate" },
+    { "from": "a2", "to": "a3", "label": "PASS", "variant": "emphasis" },
+    { "from": "a2", "to": "f2", "label": "guard 超限", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "from": "a3", "to": "art", "label": "交付", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "主線", "items": ["Console 永不 inline——明示 html = 寫檔模式切換", "grounding 事實先產（讀 code）再 author JSON", "validate showcase→deliver→visual-check 三閘門"] },
+    { "dot": "rose", "title": "三路降級", "items": ["缺場：告知安裝（clone 優先）", "壞場：doctor 診斷回報", "超限：單圖 12 輪/session 18＋殘留診斷"] },
+    { "dot": "emerald", "title": "生命週期", "items": ["reports/<主題>/ 子目錄＋index.html 入口", "JSON IR tracked＝再生源頭", "md 仍是 source of record"] }
+  ]
+}
