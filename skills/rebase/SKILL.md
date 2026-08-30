@@ -182,31 +182,32 @@ Rebase 成功後（無衝突或衝突已解決），檢查**非衝突區域**的
 3. 特別關注：import 改名、dataclass 欄位改名、函數簽名改名 — 這些會波及 git 認為「無衝突」auto-merge 的檔案
 4. 發現殘留 → 視同衝突，Read + 分析 + 用戶確認 + Edit 修正
 
-### Phase 3：報告其他 feature worktree 的 trunk 落後狀態（提示，不自動 rebase）
+### Phase 3：報告其他 feature 的 trunk 落後狀態（提示，不自動 rebase）
 
-> **核心：方向由呼叫者決定**（呼應開頭鐵律）。Phase 3 **絕不自動 rebase 任何 worktree**。它只報告「哪些 feature 落後 trunk 多少」並提示你自行切過去 `/rebase <trunk>`。多 worktree 同步是你在 VSCode workspace 切換的決定，不是本命令的批次動作。
+> **核心：方向由呼叫者決定**（呼應開頭鐵律）。Phase 3 **絕不自動 rebase 或 ff 任何 branch**。它只報告「哪些 feature 落後 trunk 多少」並提示對應同步動作（有 wt 切 worktree 跑 `/rebase`；純祖先無 wt 用 ref 層 ff 指令）。多 worktree 同步是你在 VSCode workspace 切換的決定，不是本命令的批次動作。
 
 **觸發條件**（兩條獨立路徑之一，見下表；feature 互 rebase 不觸發，見下方「不觸發」段）：
 
 | 到達方式 | base | 報告對象 |
 |---------|------|---------|
-| 吸收步後（Phase 0 `merge --ff-only` 成功，trunk 剛前進）| 不適用（吸收步不走 rebase）| **所有** feature wt（trunk 前進，每個 feature 都可能落後）|
-| feature onto trunk 後（Phase 2 成功）| trunk | **其他** feature wt（排除當前 —— 當前剛 rebase 完已在 trunk 上）|
+| 吸收步後（Phase 0 `merge --ff-only` 成功，trunk 剛前進）| 不適用（吸收步不走 rebase）| **所有** feature（trunk 前進，每個 feature 都可能落後）|
+| feature onto trunk 後（Phase 2 成功）| trunk | **其他** feature（排除當前 —— 當前剛 rebase 完已在 trunk 上）|
 
 **不觸發**：base = feature（feature 互 rebase，Phase 2 的 base 是另一個 feature）→ **跳過整個 Phase 3**。這次是 feature 間依賴調整，與 trunk 基線同步無關，提示只會是噪音。
 
 **報告步驟**（只讀，不 rebase）：
 
-1. `git worktree list` — 取得 feature wt（排除 trunk wt；報告對象見上表）
-2. 對每個報告對象 feature wt，查落後 trunk 量：
+1. `git branch --format='%(refname:short)'` — feature 全集（**不以 `git worktree list` 當全集**：無 wt 的 branch 在其中結構性不可見）；`git worktree list` — branch → worktree 對應，分出 wt-backed 與無 wt 兩群（都屬報告對象，排除 trunk 與當前）
+2. 對每個報告對象 feature，查落後 trunk 量：
    ```bash
    git rev-list --count <feature>..<trunk>   # trunk 獨有、feature 沒有的 commit 數 = 落後量
    ```
-3. 列出現狀 + 提示，**不執行任何 rebase**：
-   - 落後 > 0 → `⚠️ <feature> 落後 <trunk> N commits → 切到該 worktree 跑 /rebase <trunk>`
+3. 列出現狀 + 提示，**不執行任何 rebase / ff**：
+   - 落後 > 0（有 wt）→ `⚠️ <feature> 落後 <trunk> N commits → 切到該 worktree 跑 /rebase <trunk>`
+   - 落後 > 0（無 wt）→ `git merge-base --is-ancestor <feature> <trunk>`：exit 0（純祖先，零獨有 commit）→ `⚠️ <feature> 落後 <trunk> N commits（無 worktree）→ git fetch . <trunk>:<feature>（ref 層 ff）`；exit 1（diverged）→ `⚠️ <feature> diverged 且無 worktree —— 同步需建 wt`（真死路，如實報）
    - 落後 = 0 → `✅ <feature> 已在 <trunk> 上`（可省略）
 
-無其他 feature worktree → 跳過。
+無其他 feature → 跳過。
 
 > 要讓 feature 的工作**進 trunk**：Phase 2 把 feature rebase 到 trunk 之上（feature 變 trunk 後代）後，在 trunk worktree 跑 `git merge --ff-only <feature>` 才真正推進 trunk（鐵律 3）。
 
@@ -222,9 +223,10 @@ Rebase 成功後（無衝突或衝突已解決），檢查**非衝突區域**的
 
 ### 其他 feature（Phase 3 報告，未自動同步）
 ⚠️ backbone 落後 main 3 commits → 切到 backbone worktree 跑 /rebase main
+⚠️ warrant 落後 main 2 commits（無 worktree，純祖先）→ git fetch . main:warrant
 
 ### 總結
-1/1 成功，0 衝突（backbone 待你手動同步）
+1/1 成功，0 衝突（backbone/warrant 待你手動同步）
 ```
 
 ---
@@ -257,7 +259,8 @@ git worktree list                            # branch → worktree 對應（同�
 - **trunk 解析**：慣例 `main`。同步語義下 `main` 不在 `git branch` 輸出 → 停下問用戶 trunk 是哪條，不猜測。
 - **branch 無 worktree**：
   - 吸收語義：`merge --ff-only <feature>` 不需要 feature wt —— 無 wt 的 branch 照樣是吸收對象。
-  - 同步語義：rebase 須在該 branch 自己的 wt 內跑（`git -C <wt>`）—— 無 wt 的 branch 列入 A4 報告 ⚠️（無 worktree，未同步），不在當前 wt checkout 它 rebase（會切走當前 wt 的 branch）。
+  - 同步語義（diverged）：rebase 須在該 branch 自己的 wt 內跑（`git -C <wt>`）—— 無 wt 且 diverged 的 branch 列入 A4 報告 ⚠️（無 worktree，未同步），不在當前 wt checkout 它 rebase（會切走當前 wt 的 branch）。
+  - 同步語義（純祖先）：`--is-ancestor <feature> <trunk>` exit 0（落後、零獨有 commit）→ `git fetch . <trunk>:<feature>`（ref 層 ff，不碰任何 checkout；refspec 無 `+` 前綴時非 ff git 自動拒絕——內建欄杆）。
 
 ### Step A1：對每個 feature 算分叉分類（Phase 1 既有，批次套用）
 
@@ -266,7 +269,7 @@ git worktree list                            # branch → worktree 對應（同�
 | feature 狀態 | 判定 | 動作 |
 |---|---|---|
 | up-to-date（含 feature 領先 trunk，rebase no-op） | `--is-ancestor <trunk> <feature>` exit 0（trunk 是 feature 祖先 = 相等或領先） | skip ✅ |
-| fast-forward（落後、無自己 commit） | `--is-ancestor <feature> <trunk>` exit 0 | `git -C <wt> rebase <trunk>`（= ff，零風險） |
+| fast-forward（落後、無自己 commit） | `--is-ancestor <feature> <trunk>` exit 0 | 有 wt：`git -C <wt> rebase <trunk>`（= ff，零風險）；無 wt：`git fetch . <trunk>:<feature>`（ref 層 ff，見 Step A0） |
 | diverged（有自己 commit） | 兩個 `--is-ancestor` 鏡像皆 exit 1 | 完整 rebase，**衝突才停** |
 
 吸收語義：`--is-ancestor <trunk> <feature>` exit 0 = ff-able（`merge --ff-only`）；exit 1 = ff 不符（觸發停止點 #4）。並行兄弟 feature 只有第一個能 ff（吸收後 main 前進，其餘相對新 main 不再 ff-able）—— ff-only 自然拒絕，不 special handle。
@@ -275,7 +278,7 @@ git worktree list                            # branch → worktree 對應（同�
 
 ### Step A2：批次驅動（`git -C`，不換 session）
 
-依分類執行。up-to-date / ff 自動跑完不問。**遇停止點才停 + 給菜單**（Step A3）。每個 rebase 成功的 feature 跑 Phase 2.5 語義驗證（identifier 改名殘留，見「Phase 2.5：Post-Rebase 語義驗證」段）——與既有 reuse 的 Phase 1 / 衝突流程並列。
+依分類執行。up-to-date / ff 自動跑完不問（`git fetch .` ff 無 replay，不需 Phase 2.5）。**遇停止點才停 + 給菜單**（Step A3）。每個 rebase 成功的 feature 跑 Phase 2.5 語義驗證（identifier 改名殘留，見「Phase 2.5：Post-Rebase 語義驗證」段）——與既有 reuse 的 Phase 1 / 衝突流程並列。
 
 ### Step A3：停止點菜單（每個停止點 = 問題 + 處置選項，等你選）
 
@@ -298,11 +301,12 @@ git worktree list                            # branch → worktree 對應（同�
 
 ### 結果
 ✅ replay: rebase onto main（2 commits replayed）
+✅ warrant: fetch ff onto main（無 worktree）
 ⚠️ backbone: 跳過（dirty，未處理）
 ❌ features-x: 衝突未解（卡在 rebase，等你處置）
 
 ### 總結
-1/3 完成，1 跳過，1 待處置
+2/4 完成，1 跳過，1 待處置
 ```
 
 跳過/失敗的 feature 不能默默丟下——報告列遺留，你一眼看到哪些還沒同步。
@@ -321,7 +325,7 @@ git worktree list                            # branch → worktree 對應（同�
 - 在 `main`（trunk）上 `/rebase replay` → `<branch>` = `replay`（feature）→ `git merge --ff-only replay`（吸收步）
 - 在 `replay`（feature）上 `/rebase main` → `<branch>` = `main`（trunk）→ `git rebase main`
 - 在 `replay`（feature）上 `/rebase backbone` → `<branch>` = `backbone`（另個 feature）→ `git rebase backbone`（feature 互 rebase，依賴鏈由呼叫者自負）
-- 在 `replay`（feature）上 `/rebase all` → 批次同步：當前 `rebase main` + 對每個其他 feature（`git branch` 動態列舉，見 Step A0）`git -C <wt> rebase main`
+- 在 `replay`（feature）上 `/rebase all` → 批次同步：當前 `rebase main` + 對每個其他 feature（`git branch` 動態列舉，見 Step A0）`git -C <wt> rebase main`（無 wt 且純祖先 → `git fetch . main:<feature>`，見 Step A0）
 - 在 `main`（trunk）上 `/rebase all` → 批次吸收：對每個 feature（`git branch` 動態列舉，見 Step A0）逐一 `merge --ff-only`（只 ff-able）
 
 ---
@@ -332,7 +336,7 @@ git worktree list                            # branch → worktree 對應（同�
 
 - 必須先確認當前分支和工作目錄狀態
 - 必須當前 worktree clean 才能 rebase（帶 `--autostash` 例外：dirty 由 git 自動 stash/pop）
-- Phase 3 僅報告其他 feature 落後狀態，**不執行 rebase** —— 無需在此確認其他 worktree clean（要同步由你切到該 worktree 自行跑 `/rebase`，屆時各自做 clean 檢查）
+- Phase 3 僅報告其他 feature 落後狀態，**不執行 rebase、也不自動執行 `git fetch .` ff** —— 正因不執行，無需確認其他 worktree clean（要同步由你自行跑：有 wt 切過去 `/rebase`、純祖先無 wt 直接 `git fetch .`；屆時各自做 clean 檢查）
 - 必須使用 `git -C <path>` 操作跨 worktree，禁止 `cd`
 - 衝突時必須分析雙方變更意圖，提出解決方案，等用戶確認後才執行
 - 未經用戶確認不得執行 `git rebase --continue`
@@ -345,7 +349,7 @@ git worktree list                            # branch → worktree 對應（同�
 - ❌ 跳過 clean 檢查直接 rebase
 - ❌ **未先 `git branch --show-current` 分流 arg 角色就動作**（本命令最常見誤判：假設 arg 一律是 trunk）
 - ❌ **當前 = trunk 卻跑 `git rebase`**（鐵律 2；trunk 用 `merge --ff-only` 吸收）
-- ❌ **一般 `/rebase <branch>` 的 Phase 3 自動 rebase 其他 feature worktree**（方向由呼叫者決定；Phase 3 只報告 + 提示）。批次同步/吸收改用 `/rebase all`（顯式 opt-in，帶停止點菜單）
+- ❌ **一般 `/rebase <branch>` 的 Phase 3 自動 rebase / ff 其他 feature**（含對無 wt branch 跑 `git fetch .`；方向由呼叫者決定，Phase 3 只報告 + 提示）。批次同步/吸收改用 `/rebase all`（顯式 opt-in，帶停止點菜單）
 - ❌ **all 模式自動跳過卡住的 feature**（停止點必須停下給菜單；跳過是用戶選的，非預設）
 - ❌ **all 模式把目標 branch 寫死**（目標集合 = 當次 `git branch` 即時輸出 − trunk；本文件示例中的 `replay`/`backbone` 是格式示意，不是列舉來源）
 
