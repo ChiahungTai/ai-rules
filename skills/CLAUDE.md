@@ -155,6 +155,7 @@
 ### UI / 協作
 - `frontend-ui-engineering` — Panel/Bokeh 互動 dashboard / 視覺化
 - `ui-collab` — 互動式 UI 的 LLM 協作模式（`[ACTION]` 操作日誌）
+- `ui-visual-verify` — UI 開發/健檢**驗收**編排（啟動就緒判定 → playwright 截圖＋shadow DOM 量測 → vision-review 盲判讀 → findings 合流 → 契約沉澱 pytest；與 ui-collab 分工＝驗收期 vs 互動期）
 
 ### 領域特定
 - `trading-analysis` — 股票 / 市場走勢三層分析（經典 TA → 量化 → 第二層思考）
