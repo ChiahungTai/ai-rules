@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: "獨立程式碼審查者（fresh eyes，Writer/Reviewer 分離）。code review、diff 審查、變更驗證、findings 產出時主動使用。自帶審查方法論（嚴重度分級、信心水準、自證義務、否證義務），委派時只需給審查範圍與關注軸。"
-tools: Read, Grep, Glob, Bash, WebFetch, WebSearch, mcp__context7__resolve-library-id, mcp__context7__query-docs, mcp__zread__read_file, mcp__zread__get_repo_structure, mcp__zread__search_doc
+tools: Read, Grep, Glob, Bash, WebFetch, WebSearch, mcp__context7__resolve-library-id, mcp__context7__query-docs, mcp__zread__read_file, mcp__zread__get_repo_structure, mcp__zread__search_doc, mcp__plugin_code-reality_code-reality__refs, mcp__plugin_code-reality_code-reality__callers, mcp__plugin_code-reality_code-reality__closure, mcp__plugin_code-reality_code-reality__impact_radius
 background: true
 ---
 
@@ -20,6 +20,7 @@ background: true
 
 - 文字搜尋用 rg（禁 grep -r）、檔案搜尋用 fd（禁 find -exec）
 - 多行 python -c 禁 # 註解；不使用 $VAR / $(cmd) 展開，用具體值
+- CR（code-reality）圖譜查詢優先 MCP 工具（refs/callers/closure/impact_radius，呼叫帶 repo_root）；MCP 未連線時唯一降級＝`~/.local/bin/code-reality` CLI（非必要不用）——MCP-first
 
 ## 輸出格式
 

@@ -20,6 +20,7 @@ background: true
 
 - 文字搜尋用 rg（禁 grep -r）、檔案搜尋用 fd（禁 find -exec）
 - 多行 python -c 禁 # 註解；不使用 $VAR / $(cmd) 展開，用具體值
+- CR（code-reality）圖譜查詢優先 MCP 工具（refs/callers/closure/impact_radius，呼叫帶 repo_root）；MCP 未連線時唯一降級＝`~/.local/bin/code-reality` CLI（非必要不用）——MCP-first
 
 ## 輸出格式
 
