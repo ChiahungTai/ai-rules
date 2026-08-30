@@ -53,7 +53,7 @@ Workflow 執行協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 ## 審查模式選擇
 
-review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」—— code-review **預設 spawn 獨立 agent**（與其他 review 命令一致，force 獨立；取消 Main LLM 自審 — 實證：獨立 agent 抓自審盲點）。模式判定規則（effort/max-agents → A/B）見 [review-engine](../review-engine/SKILL.md)；max-agents 查 [model-routing 並發上限](../../rules/model-routing.md)（agent-workflow defer 到此、不自帶數字）。下方 A/B 為本命令的六軸啟用配置（C 已廢除，見下方 C 段）：
+review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」—— code-review **預設 spawn 獨立 agent**（與其他 review 命令一致，force 獨立；取消 Main LLM 自審 — 實證：獨立 agent 抓自審盲點）。模式判定規則（effort/max-agents → A/B）見 [review-engine](../review-engine/SKILL.md)；max-agents 查 [model-routing 並發上限](../model-routing/SKILL.md)（agent-workflow defer 到此、不自帶數字）。下方 A/B 為本命令的六軸啟用配置（C 已廢除，見下方 C 段）：
 
 **A. Workflow 模式**（判定條件見 [review-engine](../review-engine/SKILL.md)）：
 
@@ -139,7 +139,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 - **追蹤後果**：這個修改的下游影響是什麼？依賴模組是否受影響？
 - **審查者自證**：提出問題前必須查證宣稱（LSP 查證方法 + 自我否證義務：找不到 ≠ 不存在）— 完整方法見 [review-engine](../review-engine/SKILL.md)
 
-深層思考框架見 `~/Github/ai-rules/rules/deep-thinking.md`
+深層思考框架見 `~/Github/ai-rules/skills/deep-thinking/SKILL.md`
 
 ---
 

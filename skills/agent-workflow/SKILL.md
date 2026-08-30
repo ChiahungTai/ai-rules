@@ -46,7 +46,7 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 | `claude-opus-*` / `glm-5-turbo` | opus | glm-5-turbo |
 | `glm-5.3-flash` | haiku | glm-5.3-flash（5.3 世代 lite 層） |
 
-**Step 2**：查「rate limit 與並發上限」表得**並發上限**——以**將 spawn 的 agent 所在 tier** 為準（lite tier agent 查 flash 列；與主 session 同 tier 的 spawn 才用 Step 1 偵測結果）（單一源 — 本檔不自帶數字，避免 provider 改限額時這裡 drift；`rules/model-routing.md`）。
+**Step 2**：查「rate limit 與並發上限」表得**並發上限**——以**將 spawn 的 agent 所在 tier** 為準（lite tier agent 查 flash 列；與主 session 同 tier 的 spawn 才用 Step 1 偵測結果）（單一源 — 本檔不自帶數字，避免 provider 改限額時這裡 drift；表在 [model-routing skill](../model-routing/SKILL.md)）。
 
 **spawn Agent 前必須印出確認**：`[Agent] model=<依 model-routing 角色 tier>, max=N, current=M`
 
@@ -157,7 +157,7 @@ Scope Fence（上）擋機械任務 agent「順手重構」scope 外區塊，但
 
 ### `/implement` 整合
 
-`/implement --max-agents N` 的 N 由用戶指定，預設 3（受並發上限 cap；`rules/model-routing.md`）。
+`/implement --max-agents N` 的 N 由用戶指定，預設 3（受並發上限 cap；[model-routing](../model-routing/SKILL.md) 並發表）。
 
 ---
 
@@ -177,7 +177,7 @@ claude --permission-mode auto -p "fix all lint errors"
 
 **注意**：非互動式 `-p` 模式下，如果 classifier **反覆阻擋**操作（主動擋 scope 升級 / 惡意），auto mode 中止（沒有用戶可回退）。
 
-**classifier unavailable ≠ 阻擋**（服務端間歇故障，非主動擋）：spawn Agent 收 classifier unavailable note（只回警告、無 findings）→ **先重試 spawn（≤ 2 次，間歇常成功）**；仍 unavailable 才降級主 LLM 自審 + **顯式標記 fallback**（警示獨立 review 丟失，非靜默降級）。GLM / 非 Claude harness 的 classifier 間歇 unavailable 是已知風險，重試是正解非異常（`rules/model-routing.md`）。
+**classifier unavailable ≠ 阻擋**（服務端間歇故障，非主動擋）：spawn Agent 收 classifier unavailable note（只回警告、無 findings）→ **先重試 spawn（≤ 2 次，間歇常成功）**；仍 unavailable 才降級主 LLM 自審 + **顯式標記 fallback**（警示獨立 review 丟失，非靜默降級）。GLM / 非 Claude harness 的 classifier 間歇 unavailable 是已知風險，重試是正解非異常（[model-routing](../model-routing/SKILL.md) classifier 段）。
 
 ---
 
@@ -211,7 +211,7 @@ Rules 檔在 session 啟動時載入，但**更新不會傳播到已 spawn 的 a
 
 ### Agent tool spawn 前
 
-- [ ] 已查「並發上限」表確認——以將 spawn 的 agent 所在 tier 為準（`rules/model-routing.md`）；Agent **model 依角色 tier**
+- [ ] 已查「並發上限」表確認——以將 spawn 的 agent 所在 tier 為準（[model-routing](../model-routing/SKILL.md) 並發表）；Agent **model 依角色 tier**
 - [ ] 已印出 `[Agent] model=X, max=N, current=M`
 - [ ] 當前 Agent 數量未超過上限
 - [ ] spawn 帶 `run_in_background: true`（前台僅限 <30s 短 probe——見上「Spawn 預設背景」）

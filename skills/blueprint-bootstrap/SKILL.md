@@ -52,7 +52,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 5. **findings 彙整**：跨系列 🔴／🟡／🟢 優先序（深挖副產品＝code review 輸入）
 6. **UC 映射表**：任務／UC × 鏈（「查某 UC 的 how 從這進」）
 
-**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（原地）或退役 `_done/`——平行版本需求才開版號目錄。**執行模式與效率**：①單 session 逐鏈（原版實證：16 篇／24 模組／一個完整 session 額度）②agent 群並行（跑批實證：29 篇／~2.5k 幀／牆鐘 ~2h／token ~150M——高於單 session 額度，但每篇自帶錨定機械驗證、可並行；token 量級是模式抉擇的輸入）——**並行上限 ≤3**（全強度模型實證：mosaic 六並行掛 2；NT 13 agents 併 ≤3 零失敗——lite tier〔flash〕並發上限較寬，見 [model-routing](../../rules/model-routing.md) 並發表）＋失敗者**序列重試一次一個**，勿立即重 spawn。agent 群模式**共用 context 打包**：枚舉產物（鏈清單＋每鏈入口細節＋相關 AGENTS.md 段）直接嵌入每篇 agent prompt——冷啟重讀是重複成本主因，打包入口細節實證有效。品質基準：工具實測錨定率（>90%）＋`  # ` 附註率（~100%）。
+**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（原地）或退役 `_done/`——平行版本需求才開版號目錄。**執行模式與效率**：①單 session 逐鏈（原版實證：16 篇／24 模組／一個完整 session 額度）②agent 群並行（跑批實證：29 篇／~2.5k 幀／牆鐘 ~2h／token ~150M——高於單 session 額度，但每篇自帶錨定機械驗證、可並行；token 量級是模式抉擇的輸入）——**並行上限 ≤3**（全強度模型實證：mosaic 六並行掛 2；NT 13 agents 併 ≤3 零失敗——lite tier〔flash〕並發上限較寬，見 [model-routing](../model-routing/SKILL.md) 並發表）＋失敗者**序列重試一次一個**，勿立即重 spawn。agent 群模式**共用 context 打包**：枚舉產物（鏈清單＋每鏈入口細節＋相關 AGENTS.md 段）直接嵌入每篇 agent prompt——冷啟重讀是重複成本主因，打包入口細節實證有效。品質基準：工具實測錨定率（>90%）＋`  # ` 附註率（~100%）。
 
 ## audit 模式（既有 blueprint——預設防護）
 

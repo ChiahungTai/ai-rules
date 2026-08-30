@@ -2,7 +2,7 @@
 
 ## 這個目錄是什麼
 
-`agents/` 收納跨 harness 的 subagent 定義檔（markdown + YAML frontmatter，正文 = 系統提示詞）。部署＝registry 視圖：`~/.zcode/agents` symlink → `agents/zcode/`、`~/.claude/agents` → `agents/claude/`——`shared/` 是 authoring 單一源（跨 harness 角色定義），zcode/＋claude/ 各持 `shared/` 檔的**實檔拷貝**（registry 不載 file-level symlink）＋ per-harness 專屬實體檔（zcode/ 的 tier-pinned 家族：lite-verify／spec-miner／vision-review——pins 單一源 `rules/model-routing.md`）。subagent 在兩家 harness 都是「目錄載入點」，所以頂層目錄 symlink 成立（對比 hooks/ 是 config 絕對路徑引用、不能 symlink）。ZCode 設定 UI 的新建/編輯穿頂層 symlink 寫入 `agents/zcode/`（= 產生 repo working tree diff，屬預期行為）。
+`agents/` 收納跨 harness 的 subagent 定義檔（markdown + YAML frontmatter，正文 = 系統提示詞）。部署＝registry 視圖：`~/.zcode/agents` symlink → `agents/zcode/`、`~/.claude/agents` → `agents/claude/`——`shared/` 是 authoring 單一源（跨 harness 角色定義），zcode/＋claude/ 各持 `shared/` 檔的**實檔拷貝**（registry 不載 file-level symlink）＋ per-harness 專屬實體檔（zcode/ 的 tier-pinned 家族：lite-verify／spec-miner／vision-review——pins 單一源＝model-routing skill 解析表〔`rules/model-routing.md` 留角色→tier 骨架〕）。subagent 在兩家 harness 都是「目錄載入點」，所以頂層目錄 symlink 成立（對比 hooks/ 是 config 絕對路徑引用、不能 symlink）。ZCode 設定 UI 的新建/編輯穿頂層 symlink 寫入 `agents/zcode/`（= 產生 repo working tree diff，屬預期行為）。
 
 **誰消費它**：主 agent 在需要獨立 context 的專家任務時 spawn 這些 subagent——典型情境是 Writer/Reviewer 分離的 code review（主 agent 剛寫完 code，審查委派給持有不同 context 的 reviewer agent）。frontmatter `description` 是主 agent 決定「何時委派」的依據，所以要把觸發時機寫清楚。
 
@@ -54,6 +54,6 @@ dual-context 審查：對同一個 diff，code-reviewer（fresh eyes）與 code-
 | `description` | 兩檔皆填，含觸發時機與配對關係說明 | 必填；主 agent 依此決定何時委派，寫清楚觸發時機 |
 | `tools` | 兩檔皆列 built-in 共通名 + context7/zread MCP 全名 | 只列兩家 union（`Grep`/`Glob` 在 ZCode 靜默忽略）；MCP 全名只對 user-level server 安全，專案層 server 全名 spawn 報錯不可寫進共用定義 |
 | `background` | 兩檔皆 `true` | review/research 類長任務建議加；Claude 端強制背景，ZCode 靜默忽略（背景化靠 spawn 端 `run_in_background: true`） |
-| `model` | 兩檔皆省略 | 省略 → 兩家皆 inherit 主 session（Claude 別名 sonnet/opus 在 ZCode 無效）；例外＝zcode/ tier-pinned 家族實檔有 pin（單一源 `rules/model-routing.md`） |
+| `model` | 兩檔皆省略 | 省略 → 兩家皆 inherit 主 session（Claude 別名 sonnet/opus 在 ZCode 無效）；例外＝zcode/ tier-pinned 家族實檔有 pin（單一源＝model-routing skill 解析表） |
 
 Claude 專屬欄位（`permissionMode` / `skills` / `hooks` / `memory` / `isolation` / `effort` / `initialPrompt`）可寫、ZCode 官方明說靜默忽略；ZCode 專屬欄位（`thoughtLevel` / `injectAgentsMd`）禁寫進共用檔（Claude 對未知欄位容忍度未明）——需要 per-harness 差異時另建 fork 檔。

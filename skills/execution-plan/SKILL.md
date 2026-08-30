@@ -300,16 +300,16 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 
 ### Step 1: 偵測模型 → 查表
 
-從系統提示詞偵測 GLM 模型，查 [agent-workflow 並發表](../agent-workflow/SKILL.md) 決定 max-agents。
+從系統提示詞偵測 GLM 模型，查 [model-routing 並發表](../model-routing/SKILL.md) 決定 max-agents。
 印出確認：`[Review Agent] model=X, max=N`
 
 ### Step 2: Adaptive Agent 數量
 
 > EP Review force 獨立 agent、不走 Main LLM（review 執行預設 + 刻意覆蓋，見 [review-engine](../review-engine/SKILL.md)「review 執行預設」）。差別僅在單一 vs 平行：
 
-**max-agents = 1**（查 `rules/model-routing.md` 並發表得 1 時）→ 跳至下方「單一 Agent Prompt（Fallback）」，行為等同原 single-agent。
+**max-agents = 1**（查 [model-routing](../model-routing/SKILL.md) 並發表得 1 時）→ 跳至下方「單一 Agent Prompt（Fallback）」，行為等同原 single-agent。
 
-**max-agents > 1**（並發上限查 `rules/model-routing.md`——以將 spawn 的 agent 所在 tier 為準）→ 根據 EP 特徵啟用維度。**top-down 審查順序**：先結構（分層依賴/bounded context）後細部正確性（use case 覆蓋/兜底）— 結構錯了正確性審白費（視角見 [arch-thinking](../arch-thinking/SKILL.md)）。
+**max-agents > 1**（並發上限查 [model-routing](../model-routing/SKILL.md)——以將 spawn 的 agent 所在 tier 為準）→ 根據 EP 特徵啟用維度。**top-down 審查順序**：先結構（分層依賴/bounded context）後細部正確性（use case 覆蓋/兜底）— 結構錯了正確性審白費（視角見 [arch-thinking](../arch-thinking/SKILL.md)）。
 
 審查維度（「審 EP profile」：分層依賴 / bounded context / use case 覆蓋 / 場景 / 完整性 / 合規 / 遺漏 / 兜底拆解）定義見 [/ep-review](../ep-review/SKILL.md) 五維度 + 維度映射表 — 本 Cycle 不自帶維度定義，與獨立 `/ep-review` 共用同一 profile（根治內建 vs 獨立 drift）。啟用：所有維度 always；啟用維度數 > max-agents → 從低優先級（場景/遺漏起）合併至前一個 agent（不丟棄任何維度）。
 

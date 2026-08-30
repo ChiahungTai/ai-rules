@@ -37,7 +37,7 @@ Writer/Reviewer 分離的品質閘門 — 用獨立 Agent context 審查，避�
 
 ## 自適應：max-agents
 
-偵測 effort level 和 max-agents（見 [agent-workflow 並發表](../agent-workflow/SKILL.md)）。
+偵測 effort level 和 max-agents（見 [model-routing 並發表](../model-routing/SKILL.md)）。
 
 | 條件 | 模式 |
 |------|------|

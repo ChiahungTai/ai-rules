@@ -13,7 +13,7 @@ agents/
 
 - **「指定哪個 harness 用哪些 agent」＝哪個檔出現在哪個 registry**（機制，非命名紀律）。**registry 內是實檔拷貝非 symlink**——ZCode registry 不載入 file-level symlink（2026-08-29 對照實驗定案：目錄 symlink 可穿透〔頂層 ~/.zcode/agents → agents/zcode 生效〕、檔案 symlink 靜默不載；hardlink 被 clone 破壞不可用）
 - **同步紀律**：shared/ 是 authoring 單一源——**只改 shared/**，改完 `cp` 到 zcode/＋claude/（三份一起 commit）。**已知刻意分歧（2026-08-30 T2-3）**：ZCode 專屬 CR MCP 白名單行（`mcp__plugin_code-reality_code-reality__*` 四顆，只加在 frontmatter tools）——zcode 拷貝＝shared 全文；**claude 拷貝＝shared 減 MCP 行**（CC 接線未確認是前置，確認後同步補）。sync 檢查＝`cmp shared/<f> zcode/<f>` ＋ claude 差異僅限 MCP 行（`diff shared/<f> claude/<f>` 只出 tools 行的 `mcp__plugin_code-reality_*` 片段）
-- **pin 單一源紀律**：zcode/ 檔的 `model:`／`thoughtLevel:` 值以 `rules/model-routing.md` tier 解析表為單一源——改表 → `rg` 同步 zcode/ pins
+- **pin 單一源紀律**：zcode/ 檔的 `model:`／`thoughtLevel:` 值以 model-routing skill（`skills/model-routing/SKILL.md`）tier 解析表為單一源——改表 → `rg` 同步 zcode/ pins（角色→tier 表與 tier 詞彙仍在 `rules/model-routing.md`）
 - **UI 防護規則**：shared 角色不在 ZCode 設定 UI 編輯（model／思考強度／正文皆然）——UI 編輯落在**拷貝**上，shared/ 不變，下次同步 `cp` 會**無預警覆蓋** UI 編輯；要釘模型 → 在 zcode/ 建 fork（tier-pinned 實檔，不經同步）
 - **tier 命名**：能力語義命名（lite-verify／spec-miner，非 glm-flash-*——model 每代換名，改名級聯）；例外＝rescue 類（引擎在本質內，如 codex-rescue）。tier 詞彙定義在 `rules/model-routing.md`，此處引用不自帶
 - **生效時機**：ZCode 改動需新建 session（快照制；app 重啟續接同對話亦刷新）；CC 定義檔即時監聽。翻轉頂層 symlink／更新 registry 拷貝後以首個新 session 驗證
