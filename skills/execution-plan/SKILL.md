@@ -158,7 +158,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 **執行**：spawn Explore Agent（model 依 [model-routing](../../rules/model-routing.md) 角色 tier——research/explore＝lite）深度掃描相關模組：
 
 1. **可複用基礎設施盤點**：搜尋需求涉及的模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + LSP `workspaceSymbol` 搜尋相關 class/function，找出可複用的 utilities、base classes、protocols
-2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用。**code-reality（index 在場）——spawn 的 Explore agent 未掛 code-reality MCP 工具，CR 查詢一律以 CLI 形態寫進 spawn prompt**（工具用法真相源 [code-reality](../code-reality/SKILL.md)；分工 + GATE 見 [cr-query](../cr-query/SKILL.md)）：
+2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用。**code-reality（index 在場）——spawn 的 Explore agent 不在 CR MCP 白名單，CR 查詢以 CLI 形態寫進 spawn prompt**（掛白名單的 registry agents 走 MCP 優先——分層事實見 [cr-query](../cr-query/SKILL.md)；工具用法真相源 [code-reality](../code-reality/SKILL.md)；GATE 見 cr-query）：
    - 宣稱被整合/觸發的既有符號 → `code-reality scip_refs <sym> --callers --repo <repo>`；追 transitive 鏈 → 同命令 `--closure --depth 2`
    - 修改檔案的 ripple / 影響範圍 → `code-reality graph_query impact_radius --repo <repo> --files <絕對路徑>`（相對路徑靜默回 `changed_nodes=[]`，非錯誤）
    - 刪碼/退役場景 → `code-reality hub_refs <sym> --hazard --repo <repo>`（動態派發盲區安全網）

@@ -26,7 +26,7 @@ This skill assumes the project has the code-reality engine. Detect once per task
 
 🔴 **GATE — assume + warn, do not silently degrade.** A review/planning command that expects the engine (impact/callers/scoping) and finds it absent must emit a one-line `[WARN] graph not available — structural context (impact/callers/flows) degraded; build: code-reality graph_db build --repo <root>`, then fall back. **Silent fallback = the user gets a worse review without knowing why.** Do not block — proceed with the fallback below. **查詢面缺口**（該有的邊/符號不在 graph——如 macro 鏈、動態派發）：在**自己 repo** 的 `.kanban/Backlog/` 開 `[cr-demand]` 卡（觸發場景＋實證缺口＋期望能力）——demand-pull 觸發工具弧（ai-rules roadmap relay 段），不靠工具方猜測。
 
-**EP 撰寫面**（[execution-plan](../execution-plan/SKILL.md) 段落 0 依賴分析——CR 第一消費場景）：index 在場的 repo，EP 每個下游/ripple 宣稱必走 CR 查詢（spawned agent 未掛 code-reality MCP——CLI 清單見 execution-plan 段落 0）並在「依賴關係」小節附工具輸出引用（scip_refs 首行 `[SRC]`；graph_query 輸出無 `[SRC]` 行、附完整命令列＋repo root）。**callers 為空是嫌疑不是乾淨**：死路假設（宣稱被觸發、實際無人呼叫——真實案例 `_lazy_populate`）或盲區隱藏消費（字串鍵/meta、動態派發——anti-over-reliance 節）——兩者都以互補腿（`rg "<literal>"`、`hub_refs --hazard`）查證後才可下結論；CR 全綠 ≠ 無 ripple。
+**EP 撰寫面**（[execution-plan](../execution-plan/SKILL.md) 段落 0 依賴分析——CR 第一消費場景）：index 在場的 repo，EP 每個下游/ripple 宣稱必走 CR 查詢（分層：主 session 與掛白名單的 registry agents 走 MCP；generic Explore spawn 以 CLI 清單寫進 prompt——見 execution-plan 段落 0）並在「依賴關係」小節附工具輸出引用（scip_refs 首行 `[SRC]`；graph_query 輸出無 `[SRC]` 行、附完整命令列＋repo root）。**callers 為空是嫌疑不是乾淨**：死路假設（宣稱被觸發、實際無人呼叫——真實案例 `_lazy_populate`）或盲區隱藏消費（字串鍵/meta、動態派發——anti-over-reliance 節）——兩者都以互補腿（`rg "<literal>"`、`hub_refs --hazard`）查證後才可下結論；CR 全綠 ≠ 無 ripple。
 
 ## 🔴 Shared-server rule — every call carries repo_root
 
@@ -71,7 +71,7 @@ Two facts backends, complementary not competing:
 | "architectural hotspots / chokepoints" | `hub_nodes` / `bridge_nodes` (CLI: `graph_query hub` / `bridge`) |
 | "module clusters / coupling" | `list_communities` / `get_community` / `architecture_overview` (CLI: `graph_query communities` / `arch_overview`；`get_community` MCP-only) |
 | "is X dead code" | `callers` 歸零＋CLI `hub_refs <sym> --repo <root>` hazard 分層（含 test/prod 切分）——「0 refs 可刪」前必跑安全網 |
-| EP 規劃期投影（整合器型/跨模組 EP） | CLI `code-reality project --repo <repo> --plan <plan.toml>`（v0.5.0）——overlay 鑄造＋投影面查詢：規劃新符號反向鏈＋claims 三態（`HOLE`/`MISSING`/`WIRED`）；輸出帶 `[projected]` 標籤＝**宣告非證據**（洗衣陷阱防護）；操作/語義真相源 [code-reality](../code-reality/SKILL.md) 工具表；EP 接線見 [execution-plan](../execution-plan/SKILL.md) 段落 0 |
+| EP 規劃期投影（整合器型/跨模組 EP） | MCP `project`（v0.6.0 起）或 CLI `code-reality project --repo <repo> --plan <plan.toml>`——overlay 鑄造＋投影面查詢：規劃新符號反向鏈＋claims 三態（`HOLE`/`MISSING`/`WIRED`）；輸出帶 `[projected]` 標籤＝**宣告非證據**（洗衣陷阱防護）；操作/語義真相源 [code-reality](../code-reality/SKILL.md) 工具表；EP 接線見 [execution-plan](../execution-plan/SKILL.md) 段落 0 |
 | "find symbol by concept/keyword" | `semantic_search` (keyword face；embeddings 未採用) or rg |
 
 > **Stale graph check:** Rust repos — `code-reality scip_refs <sym> --repo` prints `[SRC] scip index @ <sha> · repo HEAD @ <sha>`; mismatch → regenerate the index before trusting results. Graph freshness — rebuild with `graph_db build --repo <root>` (Python cache first: `pyrefly-index --repo <root>`). Graph facts are build-time; stale graph = stale facts (parallel: LSP workspace state-dependence — re-verify before concluding).
