@@ -18,7 +18,7 @@ M="$HOME/.claude/projects/$(echo "$CLAUDE_PROJECT_DIR" | sed 's|[^A-Za-z0-9]|-|g
 F=$(python3 -c 'import sys,json;print(json.load(sys.stdin).get("tool_input",{}).get("file_path",""))'); D=$(dirname "$F"); if [ "${F##*/}" = "MEMORY.md" ] && [ -f "$D/_generate_index.py" ]; then echo "⛔ MEMORY.md 是 generator 投影，禁手寫——改條目檔後執行: python3 $D/_generate_index.py（Stop hook 也會自動重生成）" >&2; exit 2; fi
 ```
 
-改動需**新 session** 才生效（兩家 hook config 皆 per-session snapshot）。
+改動生效時效：**ZCode 需新 session**（官方文檔 per-session snapshot 語義）；**Claude 端新 session 必生效**（熱載入未證——config 定稿後啟動的 session 屬保證路徑，編輯後同 session 即測的結果不可預期）。
 
 ## ZCode 端（live `~/.zcode/cli/config.json`，repo 外）
 

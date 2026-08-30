@@ -57,6 +57,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 ### 層 3：清理執行（用戶核可後）
 
 - 刪檔前 `rg "\[\[<name>\]\]"` 查反向引用——不留新 dangling（引用者同步改）
+- **多池殘留掃描**：雙 harness 共用腳本跨多池部署後，清理/驗證掃描以「檔名 × 池」為維度——每個 pool 都要 rg（2026-08-30 實例：清理清單漏了 mosaic 池的同名測試條目）
 - 合併檔帶 `merged_from` 標記（保留追溯）
 - **cluster merge 機械觸發**：同主題散檔 ≥3（rg 主題詞/同前綴判定）→ merge candidate；併入目標優先既有最大 cluster（閾值可在 `_audit-state.md` per-project 覆寫）
 - 索引精簡：generator 池＝修條目檔 description（索引行是投影、禁手寫）；未裝池＝一行 = 主題 + 一個鉤子，細節留在條目檔內

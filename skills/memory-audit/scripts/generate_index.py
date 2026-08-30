@@ -3,7 +3,8 @@
 # 用法: python3 _generate_index.py [--check]（--check 只驗證不寫入、零檔案系統副作用）
 # Gate: 產物 >17,000 字元、>24,000 bytes 或 >190 行 → fail-loud exit 1（不寫入）。
 # 單位實證：harness 載入限「前 200 行或 25KB」（24.4KiB≈24,985，chars/bytes 兩讀同值），
-# ZCode 實測以 chars 計（2026-08-30 對 42,110 chars 檔案報 41KB over 24.4KB）；
+# 雙 harness 實證以 chars 計（2026-08-30：42,110 chars/56,604 bytes 檔案報「41KB over
+# 24.4KB」——41K 只能對上 chars；ZCode session 警示 26.4K chars 同口徑）；
 # bytes 維度是對「以 bytes 計」讀法的縱深防禦。寫入用 unique tmp（os.getpid()）
 # ＋只清 aged（>60s）殘檔——並行 process 的 in-flight tmp 不被誤殺。
 # 條目 frontmatter 必含 name / description / type（頂層 `type:` 或 `metadata.type:` 皆可）。

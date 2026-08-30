@@ -312,3 +312,8 @@ def check_zcode_live_parity(inv, live_path=None) -> list[tuple]:
 雙 harness 兩池全腿通過：Gate 擋寫（exit 2＋**stderr 指引送達模型**——A3 已證）／self-gating opt-in／Stop dispatch（mosaic 池 mtime 與 CC turn 邊界**秒級吻合**）／regen **add→remove 完整週期**（兩池各有直接觀察：ai-rules line 85 在→不在、mosaic line 91 在→自癒剔除）／兩池 `--check` 全綠（91＋97 entries）、無 `_regen-failed`。Rollback 備而未用。時效語義更正一筆：CC session「watcher 熱載入」宣稱為誤歸因——該 session 於 config 定稿（15:34）後啟動，屬新 session 預期路徑，「需新 session」假設未被推翻。
 
 **協調面教訓（CC 驗證 session 回報，非 memory 材料）**：並行清理 race 掉了進行中驗證的觀察窗口——清理清單與驗證 session 的完成回報之間缺同步點；本次證據靠 19:21 regen 恰好落在寫入與刪除之間才救回（運氣非設計）。未來同類雙 session 協作：清理動作前先與進行中驗證 session 對時序，或驗證觀察點以 mtime/log 快照先行落底。
+
+**深夜 relay 三項裁決（2026-08-30 收案後證據補強）**：
+1. **A2 降級 ✅採納**：Claude 端 25KB 單位已實證＝**chars**——超限警示對 42,110 chars／56,604 bytes 的檔案報「at 41KB」，41K 只能對上 chars（bytes 口徑為 55.3KB）。雙 harness chars 口徑一致；bytes gate 保留為縱深防禦（成本零、防未來版本改口徑）。
+2. **「watcher 熱載入」❌拒絕**：relay 宣稱「編輯 settings 的同一 session 內被攔」——transcript 查證不成立：該 session 19:01:04 啟動（settings 定稿於 15:34）、全程零 settings 編輯、gate 測試在 19:08/19:12。屬「config 定稿後新 session」預期路徑。「需新 session」假設維持（ZCode 有官方文檔；Claude 端熱載入未證）。
+3. **多池清理維度 ✅採納**：清理/殘留掃描的維度是「檔名 × 池」——雙 harness 共用腳本跨多池後，每個 pool 都要 rg（本次 mosaic 池同名測試條目即漏件實例）。已補入 memory-audit SKILL 層 3。
