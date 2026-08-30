@@ -71,6 +71,7 @@ Two facts backends, complementary not competing:
 | "architectural hotspots / chokepoints" | `hub_nodes` / `bridge_nodes` (CLI: `graph_query hub` / `bridge`) |
 | "module clusters / coupling" | `list_communities` / `get_community` / `architecture_overview` (CLI: `graph_query communities` / `arch_overview`；`get_community` MCP-only) |
 | "is X dead code" | `callers` 歸零＋CLI `hub_refs <sym> --repo <root>` hazard 分層（含 test/prod 切分）——「0 refs 可刪」前必跑安全網 |
+| EP 規劃期投影（整合器型/跨模組 EP） | CLI `code-reality project --repo <repo> --plan <plan.toml>`（v0.5.0）——overlay 鑄造＋投影面查詢：規劃新符號反向鏈＋claims 三態（`HOLE`/`MISSING`/`WIRED`）；輸出帶 `[projected]` 標籤＝**宣告非證據**（洗衣陷阱防護）；操作/語義真相源 [code-reality](../code-reality/SKILL.md) 工具表；EP 接線見 [execution-plan](../execution-plan/SKILL.md) 段落 0 |
 | "find symbol by concept/keyword" | `semantic_search` (keyword face；embeddings 未採用) or rg |
 
 > **Stale graph check:** Rust repos — `code-reality scip_refs <sym> --repo` prints `[SRC] scip index @ <sha> · repo HEAD @ <sha>`; mismatch → regenerate the index before trusting results. Graph freshness — rebuild with `graph_db build --repo <root>` (Python cache first: `pyrefly-index --repo <root>`). Graph facts are build-time; stale graph = stale facts (parallel: LSP workspace state-dependence — re-verify before concluding).
@@ -103,7 +104,7 @@ They compose: a CRG workflow gives the steps; `cr-query` governs *how each query
 ## Reference
 
 - **CLI commands:** `code-reality --help`（graph_query 家族＋scip_refs＋graph_db build 等）
-- **code-reality MCP 接線：** stdio `code-reality-mcp --stdio`（plugin 形態）或 streamable-http `127.0.0.1:8200/mcp`（launchd `com.code-reality.mcp`）；工具呼叫一律帶 `repo_root`（不自動偵測）。舊 CRG server（com.user.crg-mcp @5555）已於 2026-08-26 cutover 時 bootout——plist 留檔可回滾。
+- **code-reality MCP 接線：** stdio `code-reality-mcp --stdio`（plugin 形態）或 streamable-http `127.0.0.1:8200/mcp`（launchd `com.code-reality.mcp`）；工具呼叫一律帶 `repo_root`（不自動偵測）。舊 CRG server（com.user.crg-mcp @5555）已**完全退場**（2026-08-30：launchd 服務退場＋plist 刪＋uv tool v2.3.7 解裝；5555/launchctl 清潔態）。
 - **engine semantics 真相源:** ai-rules `skills/code-reality/SKILL.md`（接線語義）＋code-reality repo（`crates/AGENTS.md`＋plugin skill＝工具事實）
 - **Sibling facts discipline:** [lsp-navigation](../../rules/lsp-navigation.md) (symbol queries) — this skill is its graph counterpart
 - **Consumers:** [review-engine](../review-engine/SKILL.md) (change-impact lens), [arch-thinking](../arch-thinking/SKILL.md) §二 結構機械 (structure-facts lens), [execution-plan](../execution-plan/SKILL.md) 段落 0 (EP 依賴分析——ripple 宣稱工具證據 + 死路假設信號)

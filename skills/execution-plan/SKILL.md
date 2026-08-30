@@ -164,13 +164,14 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
    - 刪碼/退役場景 → `code-reality hub_refs <sym> --hazard --repo <repo>`（動態派發盲區安全網）
    - **字串鍵互補腿**：觸碰欄位名 / config key 類 literal → `rg "<literal>"` 掃非符號消費者（測試常以字串鍵驅動 meta 比對——符號查詢與 CR 圖皆不可見）
    - **誠實界線**：CR 查詢是 ripple 宣稱的必要證據、非充分證據——字串鍵/meta 耦合、registry 動態派發、runtime 行為是 CR 盲區（清單見 cr-query anti-over-reliance），靠上列互補腿覆蓋；**「CR 全綠」≠ 無 ripple**
+   - **投影圖（僅整合器型/跨模組 EP；觸發條件與 scope 升級同套）**：全域研究後寫 projection plan——EP 同層 `projection/plan.toml`＋假想碼放同層 `sources/`（格式真相源 `code-reality project --help`）→ 跑 `code-reality project --repo <repo> --plan <plan.toml>` → 報告的 graft surface（規劃新符號的投影 callers 反向鏈）與 claims 判定**帶 `[projected]` 標籤**寫進「依賴關係」產出（與本組 CLI 查詢並列）；`[projected]`＝宣告非證據（洗衣陷阱防護，判讀語義見 [cr-query](../cr-query/SKILL.md)）
 3. **類似實作**：LSP `workspaceSymbol` 搜尋相似名稱的 class/function，rg 補充搜尋字串和註解
 4. **風險假設識別**：列出高風險技術假設（外部 API、SDK 行為、架構假設），標注由哪個段落的驗證策略 POC 驗證（吸收舊 `/spec` Phase 3 前期 POC 職責）
    - **致命先驗**：標注為「致命」等級的假設（假設錯了整個 EP 要重寫，等級定義見 [/ep-validate](../ep-validate/SKILL.md)）—— 先跑 `poc/poc_*.py` 驗證可行性再繼續設計段落，避免寫完整 EP 才發現方向死掉；高等級與中等級保留在各段落驗證策略
 
 **產出研究摘要**（放在 EP top-level，段落之前）：
 - 可複用基礎設施清單（附 `ClassName`，路徑選用）
-- 依賴關係和關鍵約束——每個下游/ripple 宣稱附工具輸出引用（scip_refs 首行 `[SRC]`；graph_query 輸出無 `[SRC]` 行、附完整命令列＋repo root；或 LSP 查證——不接受純讀碼推斷）
+- 依賴關係和關鍵約束——每個下游/ripple 宣稱附工具輸出引用（scip_refs 首行 `[SRC]`；graph_query 輸出無 `[SRC]` 行、附完整命令列＋repo root；投影查詢輸出帶 `[projected]` 標籤；或 LSP 查證——不接受純讀碼推斷）
 - 類似功能的既有實作位置
 - 風險假設清單（標注等級；致命等級附先驗結果，對應段落驗證策略）；**死路假設嫌疑入列**——宣稱被整合/觸發的既有符號 callers 查詢為空（CR＋LSP 雙空）即列（真實案例：`_lazy_populate` 宣稱被觸發、實際永不執行）
 - callstack 菜單積壓（repo 有 `ai-analysis/blueprint/callstack-plan.md` 時）：待生成鏈行——新 EP 常踩在未文檔化功能上；僅列清單，生成＝獨立觸發（blueprint-bootstrap）

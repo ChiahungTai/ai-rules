@@ -83,6 +83,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 5 個 Dimensio
 - **段落一致性**：段落間依賴順序合理？對同一檔案的修改矛盾？技術方案一致？
 - **語義約束**（共享型別、命名慣例、架構假設）是否標記？drift 檢查
 - **依賴錨點 drift**：EP 對現有 code 的雙向錨定（定義端 + 消費端）是否 drift — 用 LSP `goToDefinition`/`findReferences` 驗證
+- **投影 claims 判讀**（EP 段落 0 有跑 `code-reality project` 時）：報告的 `[projected][HOLE]`／`[projected][MISSING]` 進 Findings 表（前綴保留）——**HOLE**＝宣稱整合的符號有 DEF 但零呼叫邊（**未驗證假設非 bug**——回作者接線或撤宣稱）；**MISSING**＝宣稱符號不存在（EP 錨點錯）；WIRED＝邊已鑄（通過）；`[projected]` 一律＝宣告非證據（overlay 是 producer 假設——落地後以真實 index 重驗；洗衣陷阱措辭，工具語義見 [cr-query](../cr-query/SKILL.md)）
 - **分層依賴**（承接 execution-plan ①）：domain←use case←adapter←infra 依賴向內？有循環？— 視角與結構資料見 [arch-thinking](../arch-thinking/SKILL.md)（視角 §一、機械 §二）
 - **bounded context**（承接 ②）：跨域存取 `_private`？邊界清楚？職責單一？
 

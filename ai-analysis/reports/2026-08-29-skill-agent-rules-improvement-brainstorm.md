@@ -266,6 +266,8 @@ T3-1/T3-2 spike（跑一次帶數據）＋ T3-3/T3-4 裁決項
 
 **裁決建議（mosaic 端提出，hub 採納待用戶確認）**：mutation testing 值得進 audit-test，但採 **scoped 手跑抽查形態**（如此 spike）而非常態 gate——機械成本趨近零（8 秒），主成本是 survived 的 LLM 抽讀（13 個約 10 分鐘），一次性投入即抓到 10 個真缺口。待辦：audit-test skill 加此角度（ai-rules 側小改）；mosaic 端 10 個測試缺口補強（mosaic 側，handoff 待出）。
 
+**補強完成（2026-08-30 晚，mosaic 回報＋hub 錨點驗證）**：10 缺口全補（cash_tracker 6＝TestApplyFillBoundaryValidation、risk_guard 4）、78 tests 綠、驗收輪 mutmut **100:3（kill rate 87.4%→97.1%）**——10 目標 mutant 全滅、殘留 3 正是指定不補項（1 equivalent＋2 極端邊界）、零 production code 變更、POC 零足跡。equity=0 語義確認＝原 impl 明示 guard（skip 非歧義）。T3-2 全弧閉環：spike → findings → audit-test 角度 7（206d967）→ 補強落地。
+
 ### T1 落地記錄（2026-08-30，同 session 完成）
 
 - **T1-1 ✅**：`deploy_agents.py` 新增 `check_neutral_purity()`（五檢查程式化，掃 neutral rules）＋`scan_sources(include_guide)`（broken-refs 擴掃 guide）。gate 上線首跑抓到 **3** 違規（預期 2＋黑天鵝 1：`_ai-behavior-constraints.md` 的 `` `/sync-sources` `` 裸 slash）→ 三處修正（context-management:24/36 括號注化、_ai-behavior-constraints 去斜線）＋guide:131 死指標改寫 → dry-run 歸零 → 三端部署成功。設計要點：purity 不掃 guide（guide 合法提及跨 harness 裸 slash `/handoff`——範圍忠於原清單）；rules/AGENTS.md（meta scope）天然不在 neutral 集合，自引用零誤報

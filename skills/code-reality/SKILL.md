@@ -45,6 +45,7 @@ code-reality <tool> --repo <repo-root> [args]
 | `runtime_edges` | viztracer trace → 逐函式 runtime 邊 |
 | `boundary_build`／`boundary` | pyo3 宣告↔`.pyi` 合約 sidecar build／查詢 |
 | `delta_tour`／`chain_tour` | delta_tour＝snapshot 對 diff→tour＋**EP 宣稱對照**（三態＋實際變動模組＋退化/跨面 pair 自動警示）；`--out-dir` 為 **cwd-relative 非 repo-relative**（落點在執行 cwd 的 `.tours/delta/`）；chain_tour＝callstack md→tours（upsert `.tours/manifest.toml`）；`.tour` 契約——渲染消費者 CodeTour |
+| `project`（v0.5.0） | **投影圖 orchestrator**（EP 規劃期專用）：`--repo <repo> --plan <plan.toml>`——plan 同層 `sources/` 假想碼→overlay SCIP 鑄造→cat-merge 真實 index→投影面查詢（規劃新符號反向鏈 callers＋claims 三態 `HOLE`〔有 DEF 零呼叫邊＝未驗證假設〕/`MISSING`〔宣稱符號不存在〕/`WIRED`）；輸出帶 `[projected]` 標籤＝**宣告非證據**；前置＝真實 index 在場（先 `code-reality build --repo`）；消費接線＝execution-plan 段落 0（EP 作者）＋ep-review F3（判讀）——分工與防洗衣陷阱語義見 [cr-query](../cr-query/SKILL.md) |
 | `tour_validate`／`tour_upgrade`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／manifest 讀寫 |
 | `graph_audit` | 自有 graph.db **Rust 完整度稽核**——D1 同型別多 impl 風險掃描（per-block ≥2，非交集）＋D2 rust-analyzer symbols 對帳（kind 含 Test）；graph rebuild／rebase 大跳後跑 |
 | `sidecar_migrate` | 舊 home slot → in-repo 搬遷（`~/.mosaic` 退役過渡橋；缺索引錯誤自動提示） |
