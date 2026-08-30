@@ -336,7 +336,7 @@ git worktree list                            # branch → worktree 對應（同�
 
 - 必須先確認當前分支和工作目錄狀態
 - 必須當前 worktree clean 才能 rebase（帶 `--autostash` 例外：dirty 由 git 自動 stash/pop）
-- Phase 3 僅報告其他 feature 落後狀態，**不執行 rebase、也不自動執行 `git fetch .` ff** —— 正因不執行，無需確認其他 worktree clean（要同步由你自行跑：有 wt 切過去 `/rebase`、純祖先無 wt 直接 `git fetch .`；屆時各自做 clean 檢查）
+- Phase 3 僅報告其他 feature 落後狀態，**不執行 rebase、也不自動執行 `git fetch .` ff** —— 正因不執行，無需確認其他 worktree clean（要同步由你自行跑：有 wt 切過去 `/rebase`，屆時做 clean 檢查；純祖先無 wt 直接 `git fetch .`——ref 層不碰 checkout，無 clean 檢查問題）
 - 必須使用 `git -C <path>` 操作跨 worktree，禁止 `cd`
 - 衝突時必須分析雙方變更意圖，提出解決方案，等用戶確認後才執行
 - 未經用戶確認不得執行 `git rebase --continue`
