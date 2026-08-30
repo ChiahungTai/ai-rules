@@ -5,7 +5,7 @@ description: 架構設計、clean architecture、分層依賴、bounded context�
 
 # Architecture Thinking — Clean Architecture + DDD 視角 + 結構機械
 
-用 Clean Architecture + DDD 視角檢視結構（**設計視角**：怎麼判斷），並提供結構查證的**機械能力**（**結構機械**：怎麼撈事實）。單一 skill 承載兩者 — 視角給方向、機械給事實，組合才有湧現價值。**視角非模板** — 注入思考，不強制分層、不過度工程。頂層總綱見 [ai-development-guide.md](../../ai-development-guide.md)「架構設計紀律」。
+用 Clean Architecture + DDD 視角檢視結構（**設計視角**：怎麼判斷），並提供結構查證的**機械能力**（**結構機械**：怎麼撈事實）。單一 skill 承載兩者 — 視角給方向、機械給事實，組合才有湧現價值。**視角非模板** — 注入思考，不強制分層、不過度工程。頂層總綱見 [design-thinking rule](../../rules/design-thinking.md)。
 
 ## 受眾中性（適用整個 skill）
 
@@ -15,7 +15,7 @@ description: 架構設計、clean architecture、分層依賴、bounded context�
 
 ## 一、設計視角（人類/LLM 思考提示層）
 
-> **架構決策的思考格式**：本 skill 給**視角**（依賴規則 / bounded context / use case 驅動），架構決策的**深度推導**（第一性原理 + 第二層後果追蹤）用 [deep-thinking](../../rules/deep-thinking.md) 輸出格式——視角給方向、deep-thinking 給推導深度，組合才有湧現價值（同本 skill「視角 + 機械組合」哲學）。
+> **架構決策的思考格式**：本 skill 給**視角**（依賴規則 / bounded context / use case 驅動），架構決策的**深度推導**（第一性原理 + 第二層後果追蹤）用 [deep-thinking](../deep-thinking/SKILL.md) 輸出格式——視角給方向、deep-thinking 給推導深度，組合才有湧現價值（同本 skill「視角 + 機械組合」哲學）。
 
 ### ① 依賴規則（Clean Architecture 分層）
 
