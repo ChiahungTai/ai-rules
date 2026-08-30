@@ -55,7 +55,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `_ai-behavior-constraints` | 🟢 neutral | single-source drift 修改紀律＋元資訊禁止 pointer（行為表在 instruction-writing skill）|
 | `instruction-writing` | 🟢 neutral | instruction file 撰寫核心（完整規範在 instruction-writing skill）|
 | `python-standards` | 🟢 neutral | Python 標準（language；Python 專案適用）|
-| `context-management` | 🟢 neutral | context 重置原則（Claude 機制用括號註）|
+| `context-management` | 🟢 neutral | context 重置＋memory 生命周期（cluster-first 四問／索引機械投影；Claude 機制用括號註）|
 | `outward-action-consent` | 🟢 neutral | outward action 需用戶授權（commit / deploy / push / send / live order；reversibility test + AUTH line）|
 | `llm-output-convention` | 🟢 neutral | print/Logger 雙通道核心——state transition 定義＋Namespace（tag 表/細則在 llm-output-convention skill）|
 | `lsp-navigation` | 🟢 neutral | 符號導航統一速查＋Tool Discovery gate（反例群、Agent prompt 模板、載體對照、staleness 處置在 lsp-navigation skill）|

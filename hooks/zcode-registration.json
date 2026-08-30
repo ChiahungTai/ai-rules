@@ -29,6 +29,17 @@
             "timeoutMs": 10000
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "process",
+            "command": "python3",
+            "args": ["/Users/ctai/Github/ai-rules/hooks/block-memory-index-write.py"],
+            "timeoutMs": 10000
+          }
+        ]
       }
     ],
     "Stop": [
@@ -38,6 +49,12 @@
             "type": "process",
             "command": "/bin/bash",
             "args": ["/Users/ctai/Github/ai-rules/hooks/stop-notification.sh"],
+            "timeoutMs": 10000
+          },
+          {
+            "type": "process",
+            "command": "python3",
+            "args": ["/Users/ctai/Github/ai-rules/hooks/memory-index-regen.py"],
             "timeoutMs": 10000
           }
         ]

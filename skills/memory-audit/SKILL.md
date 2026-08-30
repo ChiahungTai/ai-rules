@@ -30,6 +30,8 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 ### 層 1：索引機械量測
 
+> **generator 池**（memory dir 有 `_generate_index.py`）：索引是 frontmatter 投影，重複/orphan/missing 由生成保證不存在——層 1 縮為 `python3 memory/_generate_index.py --check`（gate 17,000 字元/24,000 bytes/190 行 fail-loud——雙單位防 harness chars/bytes 兩種上限讀法）＋確認 MEMORY.md 非手寫。資產源：ai-rules repo `skills/memory-audit/scripts/generate_index.py`（部署 = 複製進各專案 memory dir；Stop hook 自動重生成、PreToolUse hook 擋手寫）；副本新鮮度＝層 1 先 `cmp` 部署副本與資產源（stale 先 cp＋mv 原子刷新再 `--check`——Stop hook 對不符副本跳過執行）；`memory/_regen-failed` 標記存在＝regen 失敗待修（Stop stdout 不進模型 context 的可見錨點）。下表全量手檢僅適用未裝 generator 的池。數值調和：下表「<25,000 bytes」＝未裝池軟目標；24,000 bytes＝generator 池硬 gate——單一硬數值源在 generator 註解。
+
 | 檢查 | 命令 | 判準 |
 |------|------|------|
 | 索引預算 | `wc -l MEMORY.md` / `wc -c MEMORY.md` | 載入上限「前 200 行或 25KB 先到為準」；超限=尾端條目靜默不載。**目標 <25,000 bytes**（兩種 KB 解讀都安全）＋ **行數軟上限 150**（逼近=合併建議觸發；預設值可在 `_audit-state.md` per-project 覆寫） |
@@ -57,7 +59,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 - 刪檔前 `rg "\[\[<name>\]\]"` 查反向引用——不留新 dangling（引用者同步改）
 - 合併檔帶 `merged_from` 標記（保留追溯）
 - **cluster merge 機械觸發**：同主題散檔 ≥3（rg 主題詞/同前綴判定）→ merge candidate；併入目標優先既有最大 cluster（閾值可在 `_audit-state.md` per-project 覆寫）
-- 索引精簡原則：一行 = 主題 + 一個鉤子；細節留在條目檔內
+- 索引精簡：generator 池＝修條目檔 description（索引行是投影、禁手寫）；未裝池＝一行 = 主題 + 一個鉤子，細節留在條目檔內
 - 每輪結束**重跑層 1**——驗證清理本身沒引入新問題
 
 ### 層 4：EP/任務狀態盤點

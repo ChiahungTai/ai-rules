@@ -134,7 +134,7 @@
 - `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表〔ZCode×GLM／CC×GLM／CC×Anthropic〕、rate limit 與並發上限表、thoughtLevel 但書〔#339/#306〕、classifier unavailable 處置；rule 端留角色→tier 表＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
-- `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離）
+- `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離；generator 池層 1 縮為 `--check` 投影驗證——資產 `scripts/generate_index.py`）
 - `dependency-upgrade-watch` — 偵測 nautilus_trader / shioaji 版本漂移，主動建議 /upgrade-nt|/upgrade-sj（碰 pyproject.toml 時 auto-load）
 - `zcode-session-query` —（ZCode 專用）跨 session 查詢與參考：查 session id / 讀指定 session 尾部真人互動（scripts/zcode_tail_chat.py）/ ReadSessionContext（handoff 策略；relevant 大 session 逾時）；handoff / relay 的「讀進來」側；id 禁手打、sqlite3 CLI 無聲空輸出改 python ro uri
 

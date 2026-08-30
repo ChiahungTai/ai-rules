@@ -3,3 +3,5 @@
 # 啟用：git config core.hooksPath .githooks（一次性，per-clone）
 cd "$(dirname "$0")/.." || exit 1
 uv run pytest tests/ -q || exit 1
+# hook runtime 是系統 python3（3.9）——機械擋 3.10+ 語法於 generator/hooks 部署面
+python3 -m py_compile hooks/*.py skills/memory-audit/scripts/*.py || exit 1

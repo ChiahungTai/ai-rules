@@ -13,6 +13,7 @@ Exit: non-zero if any critical/important finding（未來可掛 commit gate）�
 """
 
 import importlib.util
+import json
 import re
 import sys
 from pathlib import Path
@@ -110,6 +111,19 @@ INVARIANTS = [
         "防線看起來存在，實際從未攔截）。每個 hook 腳本至少要出現在一個註冊處"
         "（settings.json = Claude 端、hooks/zcode-registration.json = ZCode 端"
         "範本），否則 critical",
+    },
+    {
+        "id": "zcode_live_parity",
+        "type": "zcode_live_parity",
+        "template": "hooks/zcode-registration.json",
+        "live": "~/.zcode/cli/config.json",
+        "note": "zcode-registration.json（repo 模板）的每個 hook 接線必須已部署到 "
+        "live ~/.zcode/cli/config.json 且 hooks.enabled=true——template 有、live 無 "
+        "= hook 不會 fire（F8 形狀：防線看起來存在實際從未攔截；2026-08-30 實例："
+        "block-python-file-write 在模板、live 缺席直到人工補）。live 檔不存在"
+        "（非 ZCode 機器）→ skip 不 false positive。單向 template→live：live 端 "
+        "UI 手加的 hook 不誤報（coverage 語義同 skill_allowlist_coverage）；"
+        "結構比對（event/matcher/檔名三元組）——掛錯 matcher 或 .bak 殘字樣不算已部署",
     },
 ]
 
@@ -334,6 +348,103 @@ def check_hook_registration(inv: dict) -> list[tuple[str, str, str]]:
     return out
 
 
+def _wiring(data: dict) -> set[tuple[str, str, str]]:
+    """(event, matcher, basename) 接線三元組——matcher 缺席＝""（Stop 型）。
+
+    檔名以 negative lookahead 收尾（`ok.py.bak` 不算 ok.py）；從已 parse 的
+    command/args 取樣，不對 live 文字做存在性比對（文字出現≠接線正確）。
+    """
+    out: set[tuple[str, str, str]] = set()
+    hooks = data.get("hooks")
+    if not isinstance(hooks, dict):
+        return out
+    events = hooks.get("events")
+    if not isinstance(events, dict):
+        return out
+    for event, groups in events.items():
+        if not isinstance(groups, list):
+            continue
+        for g in groups:
+            if not isinstance(g, dict):
+                continue
+            matcher = g.get("matcher") or ""
+            for h in g.get("hooks") or []:
+                if not isinstance(h, dict) or h.get("enabled") is False:
+                    continue
+                text = (
+                    str(h.get("command", ""))
+                    + " "
+                    + " ".join(str(a) for a in h.get("args") or [])
+                )
+                for name in re.findall(r"([A-Za-z0-9_-]+\.(?:py|sh))(?![\w.-])", text):
+                    out.add((event, matcher, name))
+    return out
+
+
+def check_zcode_live_parity(
+    inv: dict, live_path: Path | None = None
+) -> list[tuple[str, str, str]]:
+    """zcode-registration.json（repo 模板）的 hook 接線必須已部署到 live config。
+
+    抓「註冊≠fire」的部署漂移：template 加了 hook、live config 沒 merge →
+    hook 從未執行（F8 形狀）。**結構比對**（event＋matcher＋檔名三元組）：
+    掛錯 matcher 或僅文字出現（如 `.bak` 殘字樣）都不算已部署。
+    單向 template→live（live 端 UI 手加不誤報）；live 缺場（非 ZCode 機器）skip。
+    matcher 視為精確字串（template 與 live 皆 repo 自管，同串即同語義）。
+    """
+    if inv.get("type") != "zcode_live_parity":
+        return []
+    tpl = REPO_ROOT / inv["template"]
+    if not tpl.exists():
+        return [
+            (
+                inv["id"],
+                "important",
+                f"template 檔不存在: {inv['template']}（INVARIANTS 路徑 typo？）",
+            )
+        ]
+    live = Path(live_path) if live_path else Path(inv["live"]).expanduser()
+    if not live.exists():
+        return []
+    try:
+        tpl_data = json.loads(read_text(tpl))
+        live_data = json.loads(read_text(live))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return [
+            (
+                inv["id"],
+                "important",
+                f"template/live 非 JSON（手改壞？）: {tpl} / {live}",
+            )
+        ]
+    if not isinstance(tpl_data, dict) or not isinstance(live_data, dict):
+        return [(inv["id"], "important", "template/live JSON 非 object")]
+    hooks_live = live_data.get("hooks")
+    if not isinstance(hooks_live, dict):
+        return [(inv["id"], "important", f"live config hooks 區塊非 object: {live}")]
+    out: list[tuple[str, str, str]] = []
+    if hooks_live.get("enabled") is not True:
+        out.append(
+            (
+                inv["id"],
+                "critical",
+                f"{live} hooks.enabled 非 true——所有 ZCode hook 不會 fire",
+            )
+        )
+    missing = _wiring(tpl_data) - _wiring(live_data)
+    for event, matcher, name in sorted(missing):
+        where = f"{event}/{matcher}" if matcher else event
+        out.append(
+            (
+                inv["id"],
+                "critical",
+                f"{name}（{where}）在 template 的接線未以同 matcher 部署到 {live}"
+                "——註冊≠fire（F8 形狀：防線存在但從未攔截）",
+            )
+        )
+    return out
+
+
 def main() -> int:
     findings: list[tuple[str, str, str]] = []
     for inv in INVARIANTS:
@@ -343,6 +454,7 @@ def main() -> int:
         findings += check_source_contains(inv)
         findings += check_deploy_freshness(inv)
         findings += check_hook_registration(inv)
+        findings += check_zcode_live_parity(inv)
 
     crit = [f for f in findings if f[1] == "critical"]
     imp = [f for f in findings if f[1] == "important"]
