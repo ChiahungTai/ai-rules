@@ -55,6 +55,22 @@ spawn vision-review（背景），prompt 要點：
 - 判讀回報「預期與實牆不符」→ **先懷疑預期**（drift 機率不低），code 查證後再定 finding 歸屬
 - 多輪追加的 findings report，「最終/現況」結論須帶**時間錨**（標明屬哪輪範圍）——末節易沉積過時結論
 
+## Self-driven app probe（平行 N agent 進階形態）
+
+盲判讀的被動形態（讀既有截圖）之上，**一被測 app 一 agent 端到端自主**：agent 自己起 app（Bash）→ 跑 playwright 操作腳本 → 截圖 → 判讀。caller 只給合約，不預跑截圖。適用：多 app 平行健檢（agent 定義是通例——「怎樣叫他做事」全在 caller 合約）。
+
+**合約五要素**（每 agent prompt 必含）：
+
+1. **入口指令＋port 配額**——完整啟動命令、平行 agent 各配一 port 不互撞
+2. **操作清單**——切 tab→點互動→截圖序列；**附腳本骨架直接可跑**（agent 微調即執行），重試上限＋降級路徑（腳本失敗→只截 boot 圖判讀並註明）
+3. **視覺錨點**——每張圖預期看見什麼；**對照該路徑的 app 實際形態**：測試級 stub boot（資料 placeholder/no-host）的預期要對應降級，把真入口形態的元素寫進 stub 圖的預期＝合約錯（agent 會忠實 FAIL——**合約品質決定 verdict 品質**，實證：預期寫了 transport 控制列但 boot 形態本就無 host）
+4. **產物隔離**——`.agent-tmp/<run>/<app>/`（截圖＋pageerror 收集），可追溯
+5. **verdict 格式**——每張一行 PASS/FAIL＋一句話證據，末行總結；pageerror/console 清單必附
+
+**可行性邊界預先標注**（caller 職責）：哪些 app 可自主跑（唯讀資料源、無外部連線/鎖）哪些降級——需外部服務（broker 連線）、solo lockfile 在場、依賴重 runtime 的 app 用**測試級截圖**（flash lane env 開啟跑測試）交被動判讀。
+
+**收尾紀律**：agent 殺自己起的進程（port 對應 process）；**彙整**（caller）：FAIL 先查「合約錯還是真缺陷」（形態/預期寫錯優先）；「僅互動測試覆蓋的 UI 無截圖」類缺口＝在對應測試補截圖呼叫（flash lane）重跑。
+
 ## 測試端整合（shift-left）
 
 健檢是一次性的；其中的**確定性契約**（幾何不溢出、渲染到達 client、range 不變）沉澱為 pytest 元件測試：
