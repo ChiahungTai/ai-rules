@@ -139,6 +139,7 @@ EP UC盤點完成時（自動建卡機制）：
 
 1. 在 `Backlog/` 建立卡片
 2. 卡片內記錄 EP 引用的能力描述
+3. 建卡後即 `git add`（卡隨第一顆 commit 帶走——修「卡 untracked 滯後」；規則源見 [execution-plan](../execution-plan/SKILL.md) UC 盤點自動建卡）
 
 ## 卡片與 UC 的關係
 

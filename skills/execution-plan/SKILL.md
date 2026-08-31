@@ -86,6 +86,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
      2. 對照 `.kanban/Backlog/` 已有卡片，篩出**缺少卡片的能力**
      3. 為每個缺少卡片的能力在 `.kanban/Backlog/` 建立卡片（格式見 [kanban-board](../kanban-board/SKILL.md)「建立卡片」段：`[tag:module]` / 目標 / 相關 / 驗收標準 / 備註）
      4. 為 EP 整體建立一張 Backlog 卡片（追蹤 EP 進度），內容引用所有相關能力
+     5. **建卡後即 `git add <卡片路徑>`**（卡隨第一顆 commit 帶走——修「卡 untracked 滯後」；add 是 staging 非 commit，不觸 outward-action-consent）
    - 無 `.kanban/` 目錄時：提醒用戶建立（`mkdir -p .kanban/{Backlog,Next-Up,In-Progress,Done}`），建立後再建卡
 
 4. **掃描 SYSTEM-MAP.md 關聯**（如果存在）：
@@ -354,9 +355,9 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類導讀殼（Report Shell，user 裁決：「EP 我現在很少看了，太難理解」——md 給 AI，殼給人）：
 
-- 產物 `00-tasks/YYYY-MM-DD-<task-name>/index.html`（+ 可選 archify 圖）——完整規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「html 報告殼」段（三層結構/內容篩選通則/敘事骨架/雙向一致性），此處不重述
+- 產物 `00-tasks/MM-DD-<task-name>/index.html`（+ 可選 archify 圖）——完整規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「html 報告殼」段（三層結構/內容篩選通則/敘事骨架/雙向一致性/殼生命週期掛點），此處不重述
 - **成本分級**：基礎款（純文字殼，~200 行）**必備**；升級款（+archify workflow/architecture 圖）按 EP 規模（多段/有結構主張）或 user 點名
-- 投影鎖定 EP 當下 hash（殼頭部聲明）；badge 📋——implement 階段 5/6 同步（詳 implement skill）
+- 投影鎖定 EP 當下 hash（殼頭部聲明 **EP 路徑＋baseline hash**——下游 `/post-build`/`/code-review` 弧模式跨 session 可從殼讀，baseline 傳遞不依賴 build session context 存活）；badge 📋——推進時 badge 同步掛 implement 階段 5a，實作章節掛 post-build hook 2（無 post-build 弧 fallback implement 階段 6；詳 [implement](../implement/SKILL.md)）
 - 交付時引導 user 開殼 review（大方向判讀用殼、批准後進 `/implement`；AI 消費仍以 md 為源）
 
 ---
@@ -398,12 +399,12 @@ EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類�
 
 ## 輸出
 
-- **位置**：`ai-analysis/execution-plans/`（相對於專案根目錄）
-- **檔名**：從任務描述自動衍生（kebab-case，`ep-` 前綴）
+- **位置**：`00-tasks/MM-DD-<task-name>/ep.md`（相對於專案根目錄；與 Report Shell 同 task 目錄——一弧全生命檔案同處，放置學見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」；`ai-analysis/execution-plans/` 慣例退役）
+- **檔名**：固定 `ep.md`（task 名已在目錄名，檔名不重複）
 - **結構**：實作總覽 → **UC 盤點** → Scenario Matrix → 段落劃分原則 → 各段落（Context → 要點 → Pseudo Code → 驗證）→ 整合策略 → 收尾步驟
 - **整合策略必含 baseline 記錄**：一行 `baseline: <hash>`（`git rev-parse HEAD`，EP 建立當下）——下游 `/post-build`/`/code-review` 任務弧審查的範圍邊界，由 EP 攜帶跨 session 不重新推導（缺漏由 implement 階段 1 補記；模式見 [code-review](../code-review/SKILL.md)「任務弧模式」）
 
-> **🔴 路徑警告**：Claude Code plan mode 的硬編碼路徑是 `~/.claude/plans/`，**那不是 EP 的存放位置**。EP 必須寫到專案目錄下的 `ai-analysis/execution-plans/ep-<name>.md`。若已寫入 `~/.claude/plans/`，完成後必須複製到正確位置。
+> **🔴 路徑警告**：Claude Code plan mode 的硬編碼路徑是 `~/.claude/plans/`，**那不是 EP 的存放位置**。EP 必須寫到專案目錄下的 `00-tasks/<task>/ep.md`。若已寫入 `~/.claude/plans/`，完成後必須複製到正確位置。
 
 ---
 

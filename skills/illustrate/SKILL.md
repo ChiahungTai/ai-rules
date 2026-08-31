@@ -40,7 +40,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 
 | 情境 | 現有程式碼的角色 | 關注點 |
 |------|----------------|--------|
-| EP 審查（`@ep-*.md`） | **Ground Truth** — EP 假設對不對？ | 依賴錨點、API 簽名、行號、架構假設逐一比對 |
+| EP 審查（`@00-tasks/<task>/ep.md`） | **Ground Truth** — EP 假設對不對？ | 依賴錨點、API 簽名、行號、架構假設逐一比對 |
 | 變更審查（明示 diff / post-build drift） | **Baseline** — 改動融入得好不好？ | 語義 diff、架構一致性、下游缺口 |
 | 一般圖解 | **Context** — 現有結構是什麼？ | 先理解再解釋 |
 
@@ -55,7 +55,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 /illustrate 微服務架構                         # Console 模式
 /illustrate md Kubernetes 叢集管理              # MD 模式 → ai-analysis/reports/
 /illustrate html @src/components/              # HTML 模式 → archify（mode B 映射；缺場降級）
-/illustrate html @ep-*.md                      # HTML 模式 → 報告殼導讀（Report Shell）
+/illustrate html @00-tasks/<task>/ep.md        # HTML 模式 → 報告殼導讀（Report Shell）
 /illustrate @src/components/                   # 目錄分析
 /illustrate md @src/ @tests/ --output "分析.md" # 自定義輸出
 ```

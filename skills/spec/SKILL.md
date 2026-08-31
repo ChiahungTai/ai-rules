@@ -1,7 +1,7 @@
 ---
 name: spec
 
-description: "需求釐清：結構化需求討論（User Story、UC 定位、Scenario Matrix、邊界），為 /execution-plan 做需求層準備。/spec [需求描述] [--write]"
+description: "需求釐清：結構化需求討論（User Story、UC 定位、Scenario Matrix、邊界），為 /execution-plan 做需求層準備。/spec [需求描述] [--write]（--write 落 00-tasks/<task>/spec.md）"
 when_to_use: "Clarify a requirement (User Story + UC + Scenario Matrix + boundaries) before /execution-plan. Lightweight, optional — EP is self-sufficient."
 argument-hint: "你要做什麼功能或改變"
 ---
@@ -23,7 +23,7 @@ UC-Driven Development 方法論見 [ai-development-guide.md](../../ai-developmen
 | 參數 | 說明 |
 |------|------|
 | 無參數 | 預設：對話中產出需求摘要（不寫檔案），可直接接 `/execution-plan` |
-| `--write` | 寫入 `ai-analysis/specs/{feature-name}-spec.md`。適用於換 session 時傳遞 context |
+| `--write` | 寫入 `00-tasks/MM-DD-<task-name>/spec.md`（task 目錄與後續 EP／Report Shell 同處——一弧全生命檔案同處；`ai-analysis/specs/` 慣例退役）。適用於換 session 時傳遞 context |
 
 ---
 
@@ -88,7 +88,7 @@ Never（不做）：[列表]
 
 **預設（無參數）**：在對話中產出需求摘要，不寫檔案。用戶可直接接 `/execution-plan`。
 
-**`--write`**：寫入 `ai-analysis/specs/{feature-name}-spec.md`。適用於換 session 時傳遞 context。
+**`--write`**：寫入 `00-tasks/MM-DD-<task-name>/spec.md`（task 目錄與後續 EP／Report Shell 同處）。適用於換 session 時傳遞 context。
 
 **需求摘要格式**：
 

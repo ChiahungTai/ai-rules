@@ -28,10 +28,10 @@
 
 ```
 〔pre-EP 軟 gate〕對話討論新功能 →〔提醒〕/illustrate 結構化提案（city map/重用，軟 gate 不硬擋）→ 人判讀 → 確認
-/spec（純輔助·需求釐清，可選）→ /execution-plan（自足：段落0全域研究 + UC盤點 + EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP）→ [/ep-validate（可選）]
-          ↓ post-EP checkpoint: /illustrate @<ep-*.md>（layer 3 結構：撐得起嗎；方向確認 = 人讀 EP SM 情境 + /ep-review）
-  → /implement（含 Agent Review + /audit-test + 階段 5a metadata-sync 結算 [UC 狀態+SYSTEM-MAP+EP 歸檔]，LLM 鏈）
-          ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport，漂移/重造檢查）/ /debrief（layer 3 改動理解簡報：改了啥/證據/認知誤差點）→ /post-build（收尾鏈編排：/code-review [dual-context] → /judge-review → 修正迴圈 → /consistency → /metadata-sync）→ /commit（純 git 提交；post-build 可拆開手動單跑各命令）
+/spec（純輔助·需求釐清，可選）→ /execution-plan（自足：段落0全域研究 + UC盤點 + EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP；定稿生 Report Shell〔hook 1〕＋EP 落 00-tasks/<task>/ep.md）→ [/ep-validate（可選）]
+          ↓ post-EP checkpoint: 方向確認 = 人讀 Report Shell（00-tasks/<task>/index.html，定稿已建）+ /ep-review
+  → /implement（含 Agent Review + /audit-test + 階段 5a metadata-sync 結算 [UC 狀態+SYSTEM-MAP+EP 歸檔+殼 badge 同步]，LLM 鏈）
+          ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport，漂移/重造檢查）/ /debrief（深度選配：模組/檔案級深挖——日常判斷材料由殼實作章節吸收）→ /post-build（收尾鏈編排：/code-review [dual-context] → /judge-review → 修正迴圈 → /consistency → /metadata-sync → 殼 refresh [hook 2：實作章節＋badge ✅＋持久 delta tour]）→ /commit（純 git 提交；post-build 可拆開手動單跑各命令）
 ```
 
 **review-pipeline recipe**（變更類型 → review 序列）：
@@ -41,15 +41,15 @@
 
 ### 工作流 skills — 核心開發流程
 
-- `/spec` — 需求釐清（User Story + UC 定位 + Scenario Matrix + 邊界，純輔助；`--write` 寫需求 MD）
+- `/spec` — 需求釐清（User Story + UC 定位 + Scenario Matrix + 邊界，純輔助；`--write` 落 `00-tasks/<task>/spec.md`）
 - `/execution-plan` — 段落式實作計畫書，自足生成 Self-Contained Segments（含段落0全域研究 + UC盤點 + Scenario Matrix + EP Review Cycle；ep_type blueprint/implementation 支援大型任務綱要+子 EP 結構），掃描 SYSTEM-MAP.md 取得功能上下文
 - `/ep-review` — 深層思考審查 Execution Plan 合理性（已內建於 `/execution-plan`，可獨立使用）
 - `/ep-validate` — POC 驅動的 EP 技術假設驗證（高技術風險 EP 的動態驗證）
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
-- `/implement` — 基於 Execution Plan 逐段實作（TDD + 階段 5a metadata-sync 結算：UC 狀態 + SYSTEM-MAP + EP 歸檔）（原 `/build`，ZCode 保留名改名；文內「build 階段」即本 skill 階段）
-- `/post-build` — build 後收尾鏈編排（diff triage → code 鏈 [dual-context code-review → judge-review → 修正迴圈] → docs 鏈 [consistency → metadata-sync] → 收尾報告；止步於 /commit 前）
+- `/implement` — 基於 Execution Plan 逐段實作（TDD + 階段 5a metadata-sync 結算：UC 狀態 + SYSTEM-MAP + EP 歸檔 + 殼 badge 同步；階段 6＝無 post-build 弧的殼 fallback）（原 `/build`，ZCode 保留名改名；文內「build 階段」即本 skill 階段）
+- `/post-build` — build 後收尾鏈編排（diff triage → code 鏈 [dual-context code-review → judge-review → 修正迴圈] → docs 鏈 [consistency → metadata-sync] → 殼 refresh [hook 2：實作章節＋badge ✅＋持久 delta tour] → 收尾報告；止步於 /commit 前）
 - `/code-review` — 深層思考六軸代碼審查（含 axis 3 結構 = arch 吸收，top-down；UC 覆蓋度；中型以上 dual-context 雙審查者：fresh-eyes + primed）
-- `/debrief` — AI 改動理解簡報（layer 3，行動後）：七段倒金字塔——意圖／行為黑盒子（行為 vs 純結構判定；docs 變更渲染 behavior delta）／前後差異／分組檔案地圖／波及缺口／驗證證據（demo-checklist，NONE 逼問+清單完整性）／認知誤差點；無參數=uncommitted（fallback：EP baseline 任務弧，無則 HEAD~1）；`--ep` 方向確認已移除（改人讀 EP + /ep-review）
+- `/debrief` — AI 改動理解簡報（layer 3，行動後，**深度選配**——日常判斷材料由 00-tasks 殼實作章節吸收〔post-build hook 2〕，本命令＝模組/檔案級深挖）：七段倒金字塔——意圖／行為黑盒子（行為 vs 純結構判定；docs 變更渲染 behavior delta）／前後差異／分組檔案地圖／波及缺口／驗證證據（demo-checklist，NONE 逼問+清單完整性）／認知誤差點；無參數=uncommitted（fallback：EP baseline 任務弧，無則 HEAD~1）；`--ep` 方向確認已移除（改人讀 Report Shell + /ep-review）
 - `/illustrate` — 結構 viewport + 技術圖解（SA/SD artifact menu：call graph / sequence / class slice / data-flow / boundary；city map / drill / drift detection；console / md / html〔archify 展示級，opt-in〕）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build drift detection，見上圖），結構能力調 arch-thinking skill
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置 → message → 確認）；finalization 已在 build 階段 5a 結算，commit 前可跑 `/metadata-sync` 更新

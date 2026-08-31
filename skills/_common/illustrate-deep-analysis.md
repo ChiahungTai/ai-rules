@@ -63,7 +63,7 @@
 
 ## EP 審查模式（mode C 審查驗證）
 
-> **觸發**：輸入含 EP 檔案（`ep-*.md` 或 `@execution-plans/`）。現有程式碼是 **Ground Truth**，EP 的假設必須逐一驗證。
+> **觸發**：輸入含 EP 檔案（`00-tasks/<task>/ep.md` 或 `@00-tasks/`）。現有程式碼是 **Ground Truth**，EP 的假設必須逐一驗證。
 
 ### 假設驗證矩陣
 
@@ -95,4 +95,4 @@ S2: ⚠️ 2 項需確認 — 行號已偏移（65→68）、agent-workflow 未�
 | 論文 | `@paper.pdf` 或描述含「論文」 | 學術結構 + 技術深度 + 影響力 |
 | 文章 | `@article.md` 或描述含「文章」 | 論述結構 + 內容深度 + 價值判斷 |
 | 程式碼 | `@src/` 或 `@file.py` | 技術實作 + 實作細節 + 系統整合 |
-| EP | `@ep-*.md` 或 `@execution-plans/` | 假設驗證 + 依賴錨點 drift + 架構一致性 |
+| EP | `00-tasks/<task>/ep.md` 或 `@00-tasks/` | 假設驗證 + 依賴錨點 drift + 架構一致性 |

@@ -32,7 +32,7 @@ Workflow 執行協調：[workflow-review-pattern.md](../_common/workflow-review-
 **任務弧模式（逐段 commit 後的整弧審查）**：implement 的並行 pre-flight commit 與逐段檢查點會讓變更在 build 中途落地，無參調用只剩尾段殘留甚至空 diff——逐 commit 或只看 uncommitted 都會漏跨段互動（大規模刪除段只有對照抽取段才看得出是遷移不是丟失）。
 
 - **觸發**：① 明確傳 baseline hash；② 無參且 uncommitted 空/trivial 且 context EP 記有 baseline → 自動切弧模式（印 `[Code Review] mode=arc baseline=<hash>`）；空且無 EP baseline → 印 `[WARN] no diff（弧模式需 EP baseline）` 終止（fail-loud，同 post-build）
-- **baseline 來源**：EP 整合策略的 `baseline: <hash>`（記錄：execution-plan 建 EP 時；implement 階段 1 補記）——優於 merge-base 推導：同 branch 可能混入他任務 commits，拓撲邊界 ≠ 任務邊界
+- **baseline 來源**：EP 整合策略的 `baseline: <hash>`（記錄：execution-plan 建 EP 時；implement 階段 1 補記）——優於 merge-base 推導：同 branch 可能混入他任務 commits，拓撲邊界 ≠ 任務邊界；跨 session context 無 EP 記憶 → 從 Report Shell 殼頭部讀（`00-tasks/*/index.html` 聲明 EP 路徑＋baseline hash——hook 1 起攜帶，機制見 [post-build](../post-build/SKILL.md) 階段 0）
 - **非本任務 commits 註明**：`<hash>..HEAD` 範圍內不屬本 EP 的 commits 列進 reviewer prompt（避免誤判 scope；diff 連續仍涵蓋它們）
 - dual-context 兩側吃同一份 diff——範圍錯則兩側同瞎，範圍判定先於 spawn
 
@@ -103,7 +103,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 | primed | `agents/shared/code-reviewer-primed.md` | diff + EP + delta_tour 對照（若有，見下）+ 模組 AGENTS.md Capabilities + `dependency-graph.md`（若有） | Type A intent drift：意圖對齊、架構契合、測試精簡且完整、YAGNI↔過度工程光譜 |
 
 - **context 差異在 spawn prompt，非 agent 定義**（ZCode subagent 自動注入 AGENTS.md，「空 context」不可能全空；可控制的是不餵 EP/架構文檔）
-- **delta_tour 對照（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：**僅弧模式（code 已 commit、HEAD 越過 EP baseline）產出**——spawn primed 前對當下 HEAD 跑 `code-reality snapshot --repo <repo>`（呼叫形態：`code-reality <tool> --repo <repo>`），與 EP baseline snapshot（implement 階段 1 落下；定位＝EP baseline hash8 → `<repo>-<sha8>.json`，`--label` 僅入 `_meta`）對跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo>`，其 `.tour` description（宣稱對照三態＋實際變動模組＋退化/跨面 pair 自動警示；json 中間產物不落盤）併入 primed 餵料——intent drift（Type A）從 LLM 推導升級為機械底稿（宣稱抽取只認特定模組路徑前綴，宣稱欄 NONE ≠ EP 無宣稱——範圍見真相源）。**HEAD == baseline（uncommitted 審查）→ 不跑**：同 sha 對跑＝零差異假陰性，且此時對 baseline sha 跑 graph 刷新＋snapshot 會以 working-tree 修改覆寫 baseline sidecar；印 `[WARN]` 退回純 LLM 對照。snapshot 報 stale WARN → 視同缺報告跳過（stale snapshot 照寫、基於舊原料）。缺 baseline snapshot 或未裝 → 跳過不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill
+- **delta_tour 對照（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：**僅弧模式（code 已 commit、HEAD 越過 EP baseline）產出**——spawn primed 前對當下 HEAD 跑 `code-reality snapshot --repo <repo>`（呼叫形態：`code-reality <tool> --repo <repo>`），與 EP baseline snapshot（implement 階段 1 落下；定位＝EP baseline hash8 → `<repo>-<sha8>.json`，`--label` 僅入 `_meta`）對跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo> --out-dir .agent-tmp/`（**臨時自產不持久**——不寫 `.tours/delta/`：持久版單一產點＝post-build 完成〔hook 2〕、無 post-build 弧＝implement 階段 6 fallback；`.tours/delta/` 進 git），其 `.tour` description（宣稱對照三態＋實際變動模組＋退化/跨面 pair 自動警示；json 中間產物不落盤）併入 primed 餵料——intent drift（Type A）從 LLM 推導升級為機械底稿（宣稱抽取只認特定模組路徑前綴，宣稱欄 NONE ≠ EP 無宣稱——範圍見真相源）。**HEAD == baseline（uncommitted 審查）→ 不跑**：同 sha 對跑＝零差異假陰性，且此時對 baseline sha 跑 graph 刷新＋snapshot 會以 working-tree 修改覆寫 baseline sidecar；印 `[WARN]` 退回純 LLM 對照。snapshot 報 stale WARN → 視同缺報告跳過（stale snapshot 照寫、基於舊原料）。缺 baseline snapshot 或未裝 → 跳過不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill
 - **無 EP 時降級規則**（dual 情境）：EP 是 primed 側的意圖合約核心；無 EP（跨 session resume、非 build 場景）→ 降級單 fresh-eyes agent 並印 `[WARN] no EP for primed context`（primed 缺 EP 仍跑 = 架構契合/完整度光譜可審、意圖對齊空轉，findings 噪音可能多於信號）
 - **findings 合併**：同 file:line 去重；**矛盾不裁決**——標 `conflict` 欄（兩方意點並列）交 `/judge-review` 裁決層；合併/衝突規則真相源見 [review-engine](../review-engine/SKILL.md)「dual-context 編排」
 - 小型變更（< 3 files）單 agent（fresh-eyes 即可——方向審查對小 diff 報酬低）
@@ -217,7 +217,7 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 > **canonical review flow（詳細）以本檔為單一源** —— 其他命令畫 flow 須引用此處、不重畫（防 flow drift；機械追蹤見 [/sync-sources](../sync-sources/SKILL.md)）。skills/CLAUDE.md 的 review-pipeline recipe 是高層概觀，非重畫。
 
 ```
-/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review）→ [/ep-validate] → /implement（含 Agent Review）→ /code-review（六軸含 axis 3 結構 = arch 吸收，top-down，含 commit message）→ /judge-review（一次）→ /commit
+/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review；定稿生 Report Shell〔hook 1〕＋EP 落 00-tasks/<task>/ep.md）→ [/ep-validate] → /implement（含 Agent Review）→ /code-review（六軸含 axis 3 結構 = arch 吸收，top-down，含 commit message）→ /judge-review（一次）→ /commit
 ```
 
 後續：用戶確認 commit message → `/commit` 捷徑（跳過階段 2 Git 狀態分析；保留 2.7 POC/Demo 處置閘門；見 [commit](../commit/SKILL.md) 捷徑模式）

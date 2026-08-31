@@ -1,7 +1,7 @@
 ---
 name: debrief
-description: "AI 改完 code 想理解改了啥 / what changed / 聽取報告 / 檢查 AI 產出 / brief / debrief——七段理解簡報（意圖/行為黑盒子/前後差異/檔案地圖/波及缺口/驗證證據/認知誤差點）。理解非審判：機器 finding 交 /code-review、結構交 /illustrate。無參數=簡報 uncommitted 變更（fallback：EP baseline 任務弧，無則 HEAD~1）。"
-when_to_use: "After AI coding: understand what changed (behavior / before-after / file map), force runnable evidence per feature (NONE 逼問), surface cognitive gaps. NOT for: diff correctness findings (/code-review), structure viewport (/illustrate), existence skepticism (/smell-detector)."
+description: "AI 改完 code 想理解改了啥 / what changed / 聽取報告 / 檢查 AI 產出 / brief / debrief——七段理解簡報（意圖/行為黑盒子/前後差異/檔案地圖/波及缺口/驗證證據/認知誤差點）。理解非審判：機器 finding 交 /code-review、結構交 /illustrate。深度選配：日常弧判斷材料（做了什麼/證據/誤差點）由 00-tasks 報告殼實作章節吸收（post-build hook 2）；debrief＝模組/檔案級深挖。無參數=簡報 uncommitted 變更（fallback：EP baseline 任務弧，無則 HEAD~1）。"
+when_to_use: "After AI coding: understand what changed (behavior / before-after / file map), force runnable evidence per feature (NONE 逼問), surface cognitive gaps. Deep-dive optional — routine judgment material lives in the 00-tasks Report Shell implementation chapter (post-build hook 2). NOT for: diff correctness findings (/code-review), structure viewport (/illustrate), existence skepticism (/smell-detector)."
 argument-hint: "無參數=uncommitted | commit hash | branch | --md"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 ---
@@ -9,6 +9,8 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 # /debrief — AI 改動理解簡報（行動後聽取報告）
 
 > **受眾：layer 3 人類 viewport / B 軸**。AI coding 任務結束後，把「改了什麼、為什麼、證據在哪、哪裡可能會錯意」渲染成一份人可直接判讀的簡報。與 `/smell-detector`（行動前：壞味道偵測）對仗——偵察在行動前，debrief 在行動後。
+>
+> **深度選配（弧後敘事政策化）**：日常弧的判斷材料（做了什麼／驗證證據／認知誤差點）已由 Report Shell 實作章節吸收（post-build hook 2 自動、commit 前穩定點，見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」）；debrief 的獨特價值在**模組/檔案級深挖**（波及缺口、hub 波及、跨檔敘事）——user 點名深挖時才跑，跳過不算欠債。
 >
 > **理解非審判**：不產機器 finding（正確性交 `/code-review`）、不審結構（交 `/illustrate`）、不質疑存在（交 `/smell-detector` zoom）。人在讀簡報的過程中自然完成方向判讀（「這是我要的嗎」）。
 >
@@ -41,7 +43,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 
 小改動不硬撐七段全滿——行為段可一句話；大改動每段完整。Console 紀律：精簡章節、禁 Mermaid 語法（md 模式才可用）。第 7 段前三類（詮釋假設/歧義選擇/推斷行為）是靜態詮釋偏差（Type A，單時點）；動態漂移是累積偏移（Type B）——兩型見 [acceptance-evidence skill](../acceptance-evidence/SKILL.md)「Intent Drift 的兩型」。
 
-**code_reality 機械底稿（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：第 3 段底稿＝delta_tour 產出（`.tour` description：宣稱對照三態＋實際變動模組＋退化/跨面警示），由本命令自產——與 post-build 先後不固定，不假設上游已產；產出機制與時點條件（HEAD == baseline 不產出、stale 跳過）見 [code-review](../code-review/SKILL.md) 模式 B。宣稱抽取只認特定模組路徑前綴——不符前綴的變更宣稱欄恆 NONE，視為「未提供對照」（單欄邊集差異仍可用），不當「EP 無宣稱」解讀。**第 3 段走讀載體＝delta_tour**（UC-B「走讀時」消費點）：時點條件成立時，同組 a/b sidecar 順手跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo>`（out-dir 預設 `.tours/delta`——7 天窗自動清舊檔、不 commit），簡報附產出 `.tour` 路徑＝人類走讀入口（CodeTour vsix panel 點開即走；目錄版控契約見 [tour-bootstrap](../tour-bootstrap/SKILL.md)；a/b 解析真相源——code-review 模式 B）。第 5 段 hub symbol 波及吃 `hub_refs` 聚合（callers/callees 按目錄、test/prod 切分＋hazard 註記——dynamic dispatch「0 refs 可刪」誤判防護，規則見 code-reality skill）。機械產物取代 LLM 逐檔推導，渲染成人類 viewport 仍是本命令職責。未裝、缺 baseline snapshot 或時點不符 → LLM 推導（既有行為不變）。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
+**code_reality 機械底稿（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：第 3 段底稿＝delta_tour 產出（`.tour` description：宣稱對照三態＋實際變動模組＋退化/跨面警示）——持久版**復用** post-build hook 2 產物（單一產點＝post-build 完成；無 post-build 弧＝implement 階段 6 fallback；`.tours/delta/` 進 git）；尚無持久版（弧未收尾）且時點條件成立 → 本命令自產**臨時版**（落 `.agent-tmp/`，不寫持久目錄）。產出機制與時點條件（HEAD == baseline 不產出、stale 跳過）見 [code-review](../code-review/SKILL.md) 模式 B。宣稱抽取只認特定模組路徑前綴——不符前綴的變更宣稱欄恆 NONE，視為「未提供對照」（單欄邊集差異仍可用），不當「EP 無宣稱」解讀。**第 3 段走讀載體＝delta_tour**（UC-B「走讀時」消費點）：時點條件成立時，同組 a/b sidecar 跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo>`，簡報附產出 `.tour` 路徑＝人類走讀入口（CodeTour vsix panel 點開即走；目錄版控契約見 [tour-bootstrap](../tour-bootstrap/SKILL.md)；a/b 解析真相源——code-review 模式 B）。第 5 段 hub symbol 波及吃 `hub_refs` 聚合（callers/callees 按目錄、test/prod 切分＋hazard 註記——dynamic dispatch「0 refs 可刪」誤判防護，規則見 code-reality skill）。機械產物取代 LLM 逐檔推導，渲染成人類 viewport 仍是本命令職責。未裝、缺 baseline snapshot 或時點不符 → LLM 推導（既有行為不變）。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
 
 ### 第 6 段 demo target 挑選規則（優先序）
 
@@ -74,5 +76,5 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 ## 流程位置
 
 ```
-/smell-detector（行動前偵察）→ EP → /implement → /debrief（行動後簡報）→ /post-build（機器收尾鏈）→ /commit
+/smell-detector（行動前偵察）→ EP（定稿生殼〔hook 1〕）→ /implement → /debrief（深度選配：模組/檔案級深挖；弧後敘事選配不欠債）→ /post-build（機器收尾鏈；完成時殼 refresh〔hook 2〕＝實作章節＋持久 delta tour）→ /commit
 ```

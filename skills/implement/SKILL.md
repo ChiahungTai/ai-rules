@@ -78,7 +78,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 **code_reality baseline snapshot（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：一律跑（不綁「補記 baseline」條件）：`code-reality snapshot --repo <repo> --label <ep>`——錨定 build 起點 code 結構（HEAD 通常 = EP baseline；resume 或 EP 後另有 commits 時錨 build 起點現狀，git 弧邊界仍由 EP baseline hash 管轄），是 delta_tour（EP 宣稱模組 vs 實際變動對照）的 before 基準，階段 6 EP 對照歸納、`/code-review` 模式 B primed（含 `/post-build` 編排；弧模式才產出 delta_tour 對照——時點條件見模式 B）與 `/debrief` 前後差異段消費。docs mode EP 跳過（code edges 不變）；未裝跳過，不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
 
-1. 讀取 Execution Plan，識別段落結構、依賴關係
+1. 讀取 Execution Plan（慣例路徑 `00-tasks/<task>/ep.md`——與 Report Shell 同 task 目錄，一弧全生命檔案同處；舊 `ai-analysis/execution-plans/` 慣例退役），識別段落結構、依賴關係
 2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在階段 5a 結算時執行）
 3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）。LSP `goToDefinition` 驗證 dependency anchors 的定義端，`findReferences` 驗證消費端，`hover` 確認關鍵參數型別——三者對不同 anchor 獨立，同 block 併發（[tool-discipline](../../rules/tool-discipline.md) 批次化）
 4. **POC + demo 盤點**：掃描 `poc/**/*.py`、`demo_*.py`、`scripts/demo_*.py`、`notebooks/*.ipynb`，建立 `{module} → [poc/demo paths]` 映射表
@@ -253,6 +253,8 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 > **為什麼結算在 build 不在 commit**：finalization 是 working tree 編輯（改 instruction 檔 / mv EP / 搬 Kanban），不需 `outward-action-consent` rule（commit 場景）；commit 退回純 git 提交（一次帶走 code + finalization）。舊設計（commit 階段 3 內嵌）對 LLM 是建議性、會漏跑（實證：commit 歷史多個「補漏」單獨 commit）。working tree 編輯沒 commit 就不永久，跟 code 一起 stash/checkout。Kanban 搬 In-Progress/（暫時狀態）已在階段 1 完成；消費場景提煅隨 Capabilities 寫入一併落地（原「暫存供 commit 寫入」取消）。
 
+**Report Shell badge 同步**：本 EP 對應殼（`00-tasks/<task>/index.html`，execution-plan 定稿 hook 1 所建）存在時隨結算同步——情境 A（全項結算）→ badge ✅；情境 B（中間段）→ 🟡；無殼（hook 1 未跑）跳過不阻擋。殼掛點全貌（hook 1/2、fallback、持久 delta tour）見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」。
+
 #### 5b. 模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）+ architecture.md 更新（大型/中型變更）
 
 > **為什麼兩份一起**：AGENTS.md（what / where，雙檔模式內容來源）與 architecture.md（why / whole-picture）同為導航文檔（見 [ai-development-guide](../../ai-development-guide.md) 文檔體系）。涉及設計變更時兩份都要看，避免 architecture.md 漂移成 LLM 讀不到現狀設計。純 feature（不改設計）只更 AGENTS.md。
@@ -282,6 +284,8 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 **EP 對照（宣稱 vs 實際差異歸納——主歸納點在此，post-build 只再提醒）**：build 現場是差異最清楚的時點（post-build/debrief 只能事後推導），兩個來源缺一不可——① **偏差記錄歸納（why）**：階段 2「EP 專屬約束」逐段累積的偏差（與 Pseudo Code 出入、疑慮、自癒 ⚠️）統一歸納，差異原因只在 build session 記得；② **機械對照（what）**：弧條件成立（HEAD 越過 EP baseline）時跑 `code-reality delta_tour`（呼叫形態與時點條件真相源見 [code-review](../code-review/SKILL.md) 模式 B；未裝/條件不符 → 標明降級）——session 歸納是 self-report，機械對照反證之（Claim→Evidence→Trust，見 [acceptance-evidence](../../rules/acceptance-evidence.md)）。歸納供 `/post-build` 收尾報告帶入與人類直接判讀；深度渲染（邊集差異+行為 delta）屬 `/debrief`。
 
+**Report Shell 實作章節 fallback（hook 2 由本階段承接——僅無 post-build 弧時）**：本弧不會跑 `/post-build`（user 直接 `/commit`、或弧在此終止）→ 實作章節＋badge ✅＋**持久版 delta tour**（弧條件成立時產、落 `.tours/delta/` 進 git）在本階段產出，內容與掛點規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」；會跑 post-build → 跳過（hook 2 掛 post-build 完成點——實作章節須反映修正迴圈後**最終態**，本階段早於修正迴圈）。
+
 **layer 旗標（硬性 — commit 前方向提示）**：偵測本 EP 變更是否觸及**跨模組**（`git diff --name-only` top-level 模組目錄計數 ≥2；模組目錄 = 專案 bounded context 根目錄，各專案自訂）、**公開簽名變更**（階段 2 路徑覆蓋觸發）、**整合器段落**（階段 0 標記）、或 **build loop 未收斂**（階段 4 達 3 輪上限）。命中 → 完成報告必含：
 
 > ⚠️ 本 build 僅 layer 1（AI 自洽天花板）。此變更觸及 [跨模組/公開簽名/外部整合]，**建議跑跨 session `/code-review`（layer 2）** 抓全貌漣漪 / 同 session 盲點（段落自檢 + Agent Review 都是 layer 1，看不全跨模組 ripple）。
@@ -301,7 +305,7 @@ layer 旗標（本段）與檔尾「與其他命令的協作」段的軟提醒�
 3. 每段必須 TDD（RED → GREEN → REFACTOR）—— docs mode EP 除外
 4. 每段必須獨立驗證（ruff + mypy + pytest）—— docs mode EP 除外（改 rg 殘留 + 跨檔一致性 + `/consistency`）
 5. 禁止 `from __future__ import annotations`
-6. 必須執行收尾步驟（階段 5）：大型/中型 → metadata-sync 依情境結算（5a：情境 A 全項結算 / B 預覽 / D EP 歸檔）+ instruction 檔 / architecture.md 內容同步（5b）+ /audit-test（5c）+ /consistency 導航文檔閘門（5d，含 Capabilities 行複驗）；小型（情境 C）→ /audit-test（5c）
+6. 必須執行收尾步驟（階段 5）：大型/中型 → metadata-sync 依情境結算（5a：情境 A 全項結算 / B 預覽 / D EP 歸檔；含 Report Shell badge 同步）+ instruction 檔 / architecture.md 內容同步（5b）+ /audit-test（5c）+ /consistency 導航文檔閘門（5d，含 Capabilities 行複驗）；小型（情境 C）→ /audit-test（5c）
 
 ### 禁止
 
@@ -317,7 +321,7 @@ layer 旗標（本段）與檔尾「與其他命令的協作」段的軟提醒�
 ## 與其他命令的協作
 
 ```
-/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review）→ [/ep-validate] → post-EP: /illustrate @<ep-*.md>（layer 3 結構；方向確認 = 人讀 EP SM 情境 + /ep-review）→ /implement（含 Agent Review + /audit-test, LLM 鏈）→ post-build（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport）/ /debrief（layer 3 改動理解簡報：改了啥/證據/認知誤差點）→ /post-build（收尾鏈編排：code-review [dual-context] → judge-review → 修正迴圈 → consistency → metadata-sync；可拆開單跑）→ /commit
+/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review；定稿生 Report Shell〔hook 1〕＋EP 落 00-tasks/<task>/ep.md）→ [/ep-validate] → post-EP: 方向確認 = 人讀 Report Shell（00-tasks/<task>/index.html）+ /ep-review → /implement（含 Agent Review + /audit-test, LLM 鏈；階段 5a 殼 badge 同步）→ post-build（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport）/ /debrief（深度選配：模組/檔案級深挖——日常判斷材料由殼實作章節吸收）→ /post-build（收尾鏈編排：code-review [dual-context] → judge-review → 修正迴圈 → consistency → metadata-sync → 殼 refresh〔hook 2〕；可拆開單跑）→ /commit
 ```
 
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。

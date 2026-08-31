@@ -17,7 +17,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 |------|------|--------|
 | `ai-analysis/blueprint/callstack-plan.md` | 鏈菜單（錨點×職責×優先序）——主索引 | 回「本 repo 無 callstack 語料」＋指向 blueprint-bootstrap 生成路徑，**不硬湊** |
 | `.tours/manifest.toml`＋`.tours/**/*.tour` | tour 走讀入口＋sources 交叉 | chain md 可獨立存在——跳過 tour 層續查 |
-| `.tours/delta/*.tour` | 近期弧 delta（7 天窗） | 跳過該層 |
+| `.tours/delta/*.tour` | 弧 delta（持久進 git——post-build hook 2 產出） | 跳過該層 |
 
 `--repo` 省略＝cwd；跨 repo 消費用 `--repo <repo-root>`。
 
@@ -45,7 +45,7 @@ topic 三形態（symbol／模組路徑／關鍵詞）統一跑以下層，機�
 - 相關鏈 N 條（高 x／中 y／低 z）：
   - [高] <鏈名>（<軌>）：<plan 職責一句>——為何相關：<理由>；
     走讀 .tours/<路徑>／深讀 callstack/<md>
-- 近期 delta（7 天窗命中時）：<task> @ <date>——一句摘要
+- delta 命中時：<task> @ <date>——一句摘要
 - 空手誠實：無命中 → 「無相關鏈」＋一句建議（生成候選走
   blueprint-bootstrap plan 枚舉；或該 topic 尚無語料）——不硬湊
 ```

@@ -31,7 +31,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 | sequence | `sequence` | y 排序，authoring 成本最低 |
 | call graph | `workflow` 或 `sequence` | **優先語意排版型** |
 | class slice | **無對應** | 維持 md，不硬映射 |
-| **報告殼（`@ep-*.md`／實作報告／@module／@dir + html）** | 按報告類型選型（見下節變體表） | Report Shell——人類 viewport 通用模式 |
+| **報告殼（`@00-tasks/<task>/ep.md`／實作報告／@module／@dir + html）** | 按報告類型選型（見下節變體表） | Report Shell——人類 viewport 通用模式 |
 
 ## html 報告殼（Report Shell——人類 viewport 的通用模式）
 
@@ -58,7 +58,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 | 報告類型 | 敘事骨架 | archify 視圖選型 |
 |---------|---------|------------------|
-| EP 計畫導讀（`@ep-*.md`） | 為什麼（動機鏈）→資產與命運→推進與驗收→各段細節→風險降級→決策記錄 | workflow（主：gate/exception）＋architecture（輔） |
+| EP 計畫導讀（`00-tasks/<task>/ep.md`） | 為什麼（動機鏈）→資產與命運→推進與驗收→各段細節→風險降級→決策記錄 | workflow（主：gate/exception）＋architecture（輔） |
 | 實作完成報告（implement 完成報告/debrief） | 意圖→做了什麼→**驗證證據**（命令+exit code）→認知誤差點/待確認 | workflow（流程變更時）＋architecture 前後對照（drift compare） |
 | codebase 架構報告 | 分層地圖→資料流→熱點與風險區 | architecture＋dataflow |
 | module 現況（`@module`／AGENTS.md 域） | 職責→Capabilities 精華→依賴與邊界 | architecture（局部視圖） |
@@ -66,9 +66,18 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 **產物位置分流（user 裁決「開心目錄」——一弧一殼、隨生命週期生長）**：
 
-- **流程性 brief（EP 計畫導讀＋實作完成結果）→ `00-tasks/YYYY-MM-DD-<task-name>/`**（repo root，`00-` 前綴 VSCode/`ls` 排最前；目錄名**無 ep-/impl- 前綴**——計畫/實作是同一殼的兩幕：execution-plan 定稿時建殼〔計畫章節，📋〕；implement 完成**同一殼長實作章節**（做了什麼檔案地圖/驗證證據命令+exit/delta 前後對照圖 archify compare/認知誤差點＋連 delta tour 細看）＋badge ✅；段落結算時 badge 同步（📋→🟡→✅）——掛 implement 階段 5/6。殼目錄內 JSON IR 沿用 `<主題>.<type>.json` 命名（與 arch-report 同慣例）。與 debrief（文字簡報）/delta tour（行級走讀）三層互補：殼=high-level 圖形、debrief=模組/檔案文字、tour=行級
+- **流程性 brief（EP 計畫導讀＋實作完成結果）→ `00-tasks/MM-DD-<task-name>/`**（repo root，`00-` 前綴 VSCode/`ls` 排最前；目錄名**無年份、無 ep-/impl- 前綴**——活躍弧停留短，年份由歸檔層承接：完結弧 task 目錄**整目錄**搬 `00-tasks/_done/YYYY/` 按年分層）。計畫/實作是同一殼的兩幕，殼**自動產生雙掛點**（見下「殼生命週期掛點」）；spec（`spec.md`）與 EP 本體（`ep.md`）同 task 目錄——一弧全生命檔案同處。殼目錄內 JSON IR 沿用 `<主題>.<type>.json` 命名（與 arch-report 同慣例）。與 debrief（文字簡報）/delta tour（行級走讀）三層互補：殼=high-level 圖形、debrief=模組/檔案文字、tour=行級；殼實作章節吸收日常判斷材料（做了什麼/證據/誤差點），debrief 為深度選配（模組/檔案級深挖）
 - **按需性視覺產物（codebase 架構/module 現況/目錄導覽 illustrate）→ `arch-report/<主題>/`**（現狀不變）
-- git 慣例**同一原則、兩處條目不同**：投影源頭進 git（00-tasks＝自製殼 index.html＋JSON IR；arch-report＝JSON IR＋visual-check receipt）、archify 渲染產物不進（`diagram-*.html` 與 arch-report 的 `index.html` 都是渲染產物；各自目錄 gitignore 條目）
+- git 慣例**同一原則、兩處條目不同**：投影源頭進 git（00-tasks＝自製殼 `index.html`＋JSON IR＋`ep.md`/`spec.md`；arch-report＝JSON IR＋visual-check receipt）、archify 渲染產物不進（`diagram-*.html` 與 arch-report 的 `index.html` 是渲染產物；各自目錄 gitignore 條目）。⚠ **00-tasks 殼 `index.html` 是手寫殼、非 JSON 可再生**——gitignore 條目只排除 `00-tasks/**/diagram-*.html`；排過寬（`00-tasks/**/*.html`）會連殼一起 ignore（規格↔實作分歧實證：殼蒸發死鏈）
+
+**殼生命週期掛點（自動產生雙掛點＋fallback）**——修「掛弧後（commit 後）的產物在 session context 耗盡時必死」：掛點全落在 commit **前**的穩定點。
+
+| 掛點 | 時機 | 產出 |
+|------|------|------|
+| **hook 1** | EP 定稿（[execution-plan](../execution-plan/SKILL.md) 定稿交付） | 建殼＋計畫章節，badge 📋；殼頭部聲明 EP 路徑＋baseline hash（＝EP 整合策略 baseline——post-build/code-review 弧模式跨 session 可從殼讀，baseline 傳遞不依賴 build session context 存活） |
+| **badge 推進** | [implement](../implement/SKILL.md) 階段 5a 結算 | 情境 A（全項結算）→ ✅；情境 B（中間段）→ 🟡 |
+| **hook 2** | **post-build 完成**（commit 前最後穩定點；程序載體＝[post-build](../post-build/SKILL.md) 階段 5） | 同一殼長**實作章節**：做了什麼（分組檔案地圖）／驗證證據（命令+exit code）／delta 前後對照（archify compare，有圖時）／認知誤差點＋回源連結——反映修正迴圈後**最終態**；badge ✅；並產**持久版 delta tour**（單一產點，落 `.tours/delta/` 進 git——它是弧的行級理解產物非暫態快照；不進 git 則殼連結蒸發後死鏈） |
+| **fallback** | 無 post-build 弧（user 直接 `/commit`、弧終止）→ implement 階段 6 | hook 2 同款產出由 implement 階段 6 承接 |
 
 **共通必備**：狀態 badge（📋 計畫／🟡 進行中／✅ 完成——與全域 UC 狀態標記同符號語義）；計畫 vs 既有顯式區分（計畫物 tag「S<N> 計畫中」——並列無區分＝誤導）；回源連結（本體檔案路徑＋baseline commit）；狀態隨本體結算更新、本體歸檔殼隨之（殼服務本體生命期）
 

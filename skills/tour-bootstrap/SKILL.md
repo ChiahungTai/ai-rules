@@ -10,7 +10,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 一句話：使用者說「**幫我 bootstrap 這個 repo 的 tour**」→ 產出走讀 corpus（地圖層視重複度盤點；場景＋時間層）→ 使用者「**走讀**」它（裝 CodeTour vsix，panel 點開即走）。
 
-**分層**：工具層＝[code-reality](../code-reality/SKILL.md)（chain_tour／delta_tour CLI、repo profile）；本 skill＝程序層（工具的編排、`.tour` 語言契約、驗證、停點設計）。能力命名體系：Repo Tour Bootstrap（能力）／Overview·Chain·Delta Tour（三層產物）／Walkthrough 走讀（消費）。**基數鏈**：一份 callstack md → N 場景 → N 條 tour → 一族（同目錄）——md 與 tour 非一對一，呈現各自獨立（md 給人讀、corpus 受 player 正則約束），唯一耦合是資料流邊（chain_tour 以檔名為錨）。**delta 層不在本程序產出**——由 `delta_tour` CLI 在 commit 走讀時按需重產（7 天窗），bootstrap 只負責其目錄版控契約（步驟 1）。
+**分層**：工具層＝[code-reality](../code-reality/SKILL.md)（chain_tour／delta_tour CLI、repo profile）；本 skill＝程序層（工具的編排、`.tour` 語言契約、驗證、停點設計）。能力命名體系：Repo Tour Bootstrap（能力）／Overview·Chain·Delta Tour（三層產物）／Walkthrough 走讀（消費）。**基數鏈**：一份 callstack md → N 場景 → N 條 tour → 一族（同目錄）——md 與 tour 非一對一，呈現各自獨立（md 給人讀、corpus 受 player 正則約束），唯一耦合是資料流邊（chain_tour 以檔名為錨）。**delta 層不在本程序產出**——由 `delta_tour` CLI 產出（持久版單一產點＝post-build 完成〔hook 2〕、無 post-build 弧＝implement 階段 6 fallback；`.tours/delta/` 進 git），bootstrap 只負責其目錄版控契約（步驟 1）。
 
 ## 前置偵測（決定 corpus 形態）
 
@@ -22,7 +22,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 ## 程序（五步）
 
-1. **盤點**：`.tours/` 現況、文檔源（root／模組 AGENTS.md 群、架構文檔、SYSTEM-MAP）、`.gitignore` 對 `.tours` 的契約；manifest `generator` 非 `chain_tour`（現值域＝`manual`）rows＝**curated 資產**——重產前逐列提示保留／重寫決策（勿盲目覆蓋；M1 實證）。⚠ **arch 進版控是契約變更**（預設 `.tours/` 常被整目錄排除）——改 `.tours/` → `.tours/delta/`（delta 7 天窗不版控不變）＋前例補追蹤，`git check-ignore` 雙向驗證，需用戶知情。
+1. **盤點**：`.tours/` 現況、文檔源（root／模組 AGENTS.md 群、架構文檔、SYSTEM-MAP）、`.gitignore` 對 `.tours` 的契約；manifest `generator` 非 `chain_tour`（現值域＝`manual`）rows＝**curated 資產**——重產前逐列提示保留／重寫決策（勿盲目覆蓋；M1 實證）。⚠ **arch 進版控是契約變更**（預設 `.tours/` 常被整目錄排除）——改 `.tours/` → `.tours/delta/`（delta 層**進版控**——弧的行級理解產物非暫態快照，post-build hook 2 產出）＋前例補追蹤，`git check-ignore` 雙向驗證，需用戶知情。
 2. **場景層**（有 callstack 文檔才做）：`code-reality chain_tour <md> --repo <repo> --out-dir <repo>/.tours/arch/<族名>/`（`--primary` 見「優先序裁定」；<族名>＝**人類標題**——中文／中英混合皆可，panel 標題的職責＝讓人一眼決定要不要進去看；與 md 檔名（英文 slug 供 grep/CLI）解耦，僅 manifest sources 連結——**族名不帶軌別前綴**（軌分類住 README 地圖/plan）、推薦動線族加數字前綴亦見「優先序裁定」）。**收錄語義**：每份 callstack md 落地一族，收錄子集屬策展決策（初稿停點裁定）——M1 實證：全量 16 族 97 條落地、策展核心族 byte-identical 重現。zsh 變數不 word-split——動態 flags 用陣列 `args=(--flag 1); cmd "${args[@]}"`、固定參數直接寫明（通用條目見 tool-discipline rule「zsh 動態 flag 組合」）。驗收：產出檔數＝文檔場景數（場景＝含樹狀幀的 code block）；重錨分佈統計記錄；每條抽樣 ≤5 步 `line`+`pattern` 與源碼 def 對齊。0-step tour（描述殼）保留但勿連入。
 3. **地圖層（先做重複度盤點，再判受眾，再選步錨）**：**重複度盤點＝是否做 overview 的前置裁決**——比對潛在 overview 與既有文檔源：模組步是否＝文檔模組導航表的逐步慢讀、文檔錨步邊際值（落地所見 − description 所述）是否≈0、（若已有雙版——audit 時點才可盤）版間錨點重複度；**事後退役同等有效**（mosaic 即先產後盤退役）。高重複（repo 已有強導航文檔群）→ **地圖層退役**：前門改 chain `--primary`＋目錄前綴群序（見「優先序裁定」），省 curated 維護稅；低重複 → 續做，判受眾：受眾＝**冷啟動新手**（clone 即讀）→ 分層步**錨模組 AGENTS.md h1**、description＝職責一句＋file link（文檔是新手的自然入口）；受眾＝**理解程式碼**（含 repo 主人走讀）→ 分層步**錨真實源碼**（入口函式／註冊點／核心機制，`line`+`pattern` 雙錨，講這段程式碼做什麼、上下游是誰），文檔退 file link——**文檔索引對 repo 主人是零價值**。骨架＝開場（contents 步無檔）＋分層 4–6 步＋資料入口 1–2 步（代表檔雙錨）＋場景目錄步（tour link）＋開發工作流步＋收尾；長版可選（30–40 步、`00b - `）。**宣稱紀律：description 每個實質宣稱可追溯到文檔或源碼**（防 AI 造假敘事），不自行發明。
 4. **`.tour` 語言契約**（消費端 CodeTour 的正則決定，寫錯＝死鏈）：
