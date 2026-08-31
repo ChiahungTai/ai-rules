@@ -63,7 +63,7 @@ spawn vision-review（背景），prompt 要點：
 
 1. **入口指令＋port 配額**——完整啟動命令、平行 agent 各配一 port 不互撞
 2. **操作清單**——切 tab→點互動→截圖序列；**附腳本骨架直接可跑**（agent 微調即執行），重試上限＋降級路徑（腳本失敗→只截 boot 圖判讀並註明）
-3. **視覺錨點**——每張圖預期看見什麼；**對照該路徑的 app 實際形態**：測試級 stub boot（資料 placeholder/no-host）的預期要對應降級，把真入口形態的元素寫進 stub 圖的預期＝合約錯（agent 會忠實 FAIL——**合約品質決定 verdict 品質**，實證：預期寫了 transport 控制列但 boot 形態本就無 host）
+3. **視覺錨點**——每張圖預期看見什麼；**對照該路徑的 app 實際形態**：測試級 stub boot（資料 placeholder/no-host）的預期要對應降級，把真入口形態的元素寫進 stub 圖的預期＝合約錯（agent 會忠實 FAIL——**合約品質決定 verdict 品質**，實證：預期寫了 transport 控制列但 boot 形態本就無 host）。**repo 有結構化規格單一源時，錨點直接投影該檔內容、caller 禁手寫預期**——手寫副本必然漂移（上例的根治法是「不手寫」而非「更小心寫」）；實例：mosaic aria snapshot baseline `tests/integration_tests/ui/browser/__snapshots__/*.spec`（YAML 語義樹人可讀可直接貼進 prompt，形態編碼於檔名如 `*-nohost` vs `*-fakehost`；邊界＝aria 不含 canvas 圖表本體，截圖判讀互補）
 4. **產物隔離**——`.agent-tmp/<run>/<app>/`（截圖＋pageerror 收集），可追溯
 5. **verdict 格式**——每張一行 PASS/FAIL＋一句話證據，末行總結；pageerror/console 清單必附
 
