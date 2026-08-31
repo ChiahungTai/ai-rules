@@ -30,11 +30,11 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 ### 層 1：索引機械量測
 
-> **generator 池**（memory dir 有 `_generate_index.py`）：索引是 frontmatter 投影，重複/orphan/missing 由生成保證不存在——層 1 縮為 `python3 memory/_generate_index.py --check`（gate 17,000 字元/24,000 bytes/190 行 fail-loud——雙單位防 harness chars/bytes 兩種上限讀法）＋確認 MEMORY.md 非手寫。資產源：ai-rules repo `skills/memory-audit/scripts/generate_index.py`（部署 = 複製進各專案 memory dir；Stop hook 自動重生成、PreToolUse hook 擋手寫）；副本新鮮度＝層 1 先 `cmp` 部署副本與資產源（stale 先 cp＋mv 原子刷新再 `--check`——Stop hook 對不符副本跳過執行）；`memory/_regen-failed` 標記存在＝regen 失敗待修（Stop stdout 不進模型 context 的可見錨點）。下表全量手檢僅適用未裝 generator 的池。數值調和：下表「<25,000 bytes」＝未裝池軟目標；24,000 bytes＝generator 池硬 gate——單一硬數值源在 generator 註解。
+> **generator 池**（memory dir 有 `_generate_index.py`）：索引是 frontmatter 投影，重複/orphan/missing 由生成保證不存在——層 1 縮為 `python3 memory/_generate_index.py --check`（gate 18,500 字元/24,000 bytes/190 行 fail-loud——雙單位防 harness chars/bytes 兩種上限讀法）＋確認 MEMORY.md 非手寫。寫入端另有 PreToolUse hook 治理（`block-memory-index-write.py`：description >120 chars 或條目膨脹 >12,000 chars 硬擋、收斂方向放行）——hook 是流入節流第一道，audit 是存量收斂；**hook 僅攔主 session——subagent 寫入不觸發**（ZCode 實證），寫入型 subagent 的上限＝prompt 紀律。資產源：ai-rules repo `skills/memory-audit/scripts/generate_index.py`（部署 = 複製進各專案 memory dir；Stop hook 自動重生成、PreToolUse hook 擋手寫）；副本新鮮度＝層 1 先 `cmp` 部署副本與資產源（stale 先 cp＋mv 原子刷新再 `--check`——Stop hook 對不符副本跳過執行）；`memory/_regen-failed` 標記存在＝regen 失敗待修（Stop stdout 不進模型 context 的可見錨點）。下表全量手檢僅適用未裝 generator 的池。數值調和：下表「<25,000 bytes」＝未裝池軟目標；24,000 bytes＝generator 池硬 gate——單一硬數值源在 generator 註解；120/12,000 單一源＝hook `DESC_LIMIT`/`BODY_LIMIT`（generator `TRUNCATE_DESC` 對齊，`tests/test_memory_lifecycle.py` cross-layer 錨）。
 
 | 檢查 | 命令 | 判準 |
 |------|------|------|
-| 索引預算 | `wc -l MEMORY.md` / `wc -c MEMORY.md` | 載入上限「前 200 行或 25KB 先到為準」；超限=尾端條目靜默不載。**目標 <25,000 bytes**（兩種 KB 解讀都安全）＋ **行數軟上限 150**（逼近=合併建議觸發；預設值可在 `_audit-state.md` per-project 覆寫） |
+| 索引預算 | `wc -l MEMORY.md` / `wc -c MEMORY.md` | 載入上限「前 200 行或 25KB 先到為準」；超限=尾端條目靜默不載。**目標 <25,000 bytes**（兩種 KB 解讀都安全）＋ **行數軟上限 150**（逼近=合併建議觸發；預設值可在 `_audit-state.md` per-project 覆寫）。寫入端預算：frontmatter `description` ≤100 chars（hook >120 硬擋）、條目 body ≤12,000 chars（膨脹方向 hook 擋、收斂放行） |
 | 索引重複 | `rg -o '\]\(([^)]+)\)' -r '$1' MEMORY.md \| sort \| uniq -d` | 0 輸出 |
 | orphan（有檔無索引行） | `comm -23 <(ls *.md \| grep -v -e MEMORY.md -e '^_' \| sort) <(rg -o '\]\(([^)]+)\)' -r '$1' MEMORY.md \| sort)` | 0 輸出（`_` 前綴檔不進索引，排除） |
 | missing（索引行無檔） | 同上，`comm -13` 反向 | 0 輸出 |
@@ -60,6 +60,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 - **多池殘留掃描**：雙 harness 共用腳本跨多池部署後，清理/驗證掃描以「檔名 × 池」為維度——每個 pool 都要 rg（2026-08-30 實例：清理清單漏了 mosaic 池的同名測試條目）
 - 合併檔帶 `merged_from` 標記（保留追溯）
 - **cluster merge 機械觸發**：同主題散檔 ≥3（rg 主題詞/同前綴判定）→ merge candidate；併入目標優先既有最大 cluster（閾值可在 `_audit-state.md` per-project 覆寫）
+- **蒸餾執行載體**：spawn `mem-distill`（registry `agents/zcode/`、flash pin——registry 是 session 快照，須新建 session 才可解析）；prompt 給檔案清單＋每檔硬上限（預設 11,000 chars）＋desc 一併改寫 ≤100 指示
 - 索引精簡：generator 池＝修條目檔 description（索引行是投影、禁手寫）；未裝池＝一行 = 主題 + 一個鉤子，細節留在條目檔內
 - 每輪結束**重跑層 1**——驗證清理本身沒引入新問題
 
@@ -83,6 +84,8 @@ git log --oneline <base_commit>..HEAD → 抽主題詞（模組名/命令名/遷
 
 drift 原因絕大多數是 repo 演進——git log 就是 drift 索引，沒碰過的主題不過時。
 
+**流入率監控（lite 必做）**：比對本次 `--check` 輸出 chars 與狀態戳 `last_index_chars`（欄位缺＝首次：本次寫入、下輪起監控）——平均日增 >300 chars（總差值 ÷ 距上次 audit 天數）＝流入超過收斂速率訊號，lite 報告列 **mini-merge 觸發**（挑近重複/同主題條目 cluster merge），不等 full audit。寫入治理 hook（desc/body 硬擋，僅主 session）落地後正常流入應 <300/day。
+
 ## 狀態戳：`memory/_audit-state.md`
 
 獨立檔（底線前綴**不進索引**；**不放 MEMORY.md frontmatter**——harness 管理索引檔有重寫風險）。欄位：
@@ -92,6 +95,7 @@ last_full_audit: <date>
 last_lite_audit: <date>
 base_commit: <sha>    # 用 sha 不用時間——精確對齊 git log 增量範圍
 coverage: <n>         # 上次核實覆蓋條目數
+last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 ```
 
 ## 治理三分離

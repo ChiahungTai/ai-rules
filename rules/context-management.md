@@ -36,9 +36,9 @@ harness auto memory 預設「one file = one fact」的「fact」操作定義 = *
 
 ### 寫入四問（新教訓產生時依序）
 
-1. **repo 可推導？**（git log / instruction 檔 / 程式碼本身）→ 不寫
-2. **同主題已有？** → `rg -i <關鍵詞> <memory-dir>/` 全檔掃（**不信 MEMORY.md 索引**——載入截斷下尾部條目不可見）；命中 → 既有檔加段（段標題保留原始 name、標 original type）；無 → 才開新檔
+1. **repo 可推導 or 通用原則？** → git log / instruction 檔 / 程式碼 / **進行中 EP 的進度與狀態（住 EP 檔）**可推導 → 不寫；**LLM 通用做事原則/方法論**（與 user 個人化無關、任何 session 都適用）屬 rules/skills 知識——rule 缺就補 rule，不開 memory 條目。memory 收與 user／專案綁定的事實（偏好、糾正、專案約束、外部資源參照）——通用工程原則不收
+2. **同主題已有？** → `rg -i <關鍵詞> <memory-dir>/` 全檔掃（**不信 MEMORY.md 索引**——載入截斷下尾部條目不可見）；命中 → 既有檔加段（段標題保留原始 name、標 original type）；**進行中弧線條目禁加段**——弧線進度每 session 追加是膨脹主因（實證：單檔 98 次 Edit 養到 84KB），等弧線收案一次性蒸餾；無 → 才開新檔
 3. **project-\* 已完結？** → 任務閉環先收斂既有 project 條目（刪現況細節、留決策教訓）再開新檔
-4. **索引預算？** → 軟上限 150 行；逼近 = cluster merge／收斂觸發
+4. **尺寸預算？** → frontmatter `description` ≤100 chars（索引行原料；>120 被 PreToolUse hook 硬擋——hook 僅攔主 session，subagent 寫入不觸發）；條目檔（含 frontmatter）≤12,000 chars（膨脹超限被 hook 擋；收斂方向＝改後比原檔短，放行）——超額 = 內容該住 EP 檔/repo 的訊號；索引軟上限 150 行，逼近 = cluster merge／收斂觸發
 
 量化清理（同主題散檔合併、收斂執行、audit）由 memory-audit skill 承載（Claude: `../skills/memory-audit/SKILL.md`），寫入端只管四問。

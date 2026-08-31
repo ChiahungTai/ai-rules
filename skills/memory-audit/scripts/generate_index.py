@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 # MEMORY.md 索引 generator——條目檔 frontmatter 是單一 source，索引是其機械投影。
 # 用法: python3 _generate_index.py [--check]（--check 只驗證不寫入、零檔案系統副作用）
-# Gate: 產物 >17,000 字元、>24,000 bytes 或 >190 行 → fail-loud exit 1（不寫入）。
+# Gate: 產物 >18,500 字元、>24,000 bytes 或 >190 行 → fail-loud exit 1（不寫入）。
 # 單位實證：harness 載入限「前 200 行或 25KB」（24.4KiB≈24,985，chars/bytes 兩讀同值），
 # 雙 harness 實證以 chars 計（2026-08-30：42,110 chars/56,604 bytes 檔案報「41KB over
 # 24.4KB」——41K 只能對上 chars；ZCode session 警示 26.4K chars 同口徑）；
 # bytes 維度是對「以 bytes 計」讀法的縱深防禦。寫入用 unique tmp（os.getpid()）
 # ＋只清 aged（>60s）殘檔——並行 process 的 in-flight tmp 不被誤殺。
+# 2026-09-01 chars gate 17,000→18,500（harness 線內 ~25% 餘裕）：寫入治理
+# hook 上線（block-memory-index-write.py 擋 desc>120/膨脹>12,000）後流入率
+# 下降，原 17,000 餘裕（~700）只撐一天（08-31 晚 16,308 → 隔晨 17,269 撞線）。
+# （hook 僅攔主 session——subagent 寫入不觸發；「流入率下降」以主 session 寫入為主）
+# description 截斷 140→120 對齊 hook DESC_LIMIT（>120 在寫入端已擋，此為存量縱深）。
 # 條目 frontmatter 必含 name / description / type（頂層 `type:` 或 `metadata.type:` 皆可）。
 # 語言層約束：跑在 hook runtime 系統 python3 3.9——禁 PEP 604（X | None）等 3.10+ 語法。
 import os
@@ -14,7 +19,8 @@ import pathlib
 import sys
 import time
 
-GATE_CHARS = 17_000
+GATE_CHARS = 18_500
+TRUNCATE_DESC = 120  # desc 截斷線——須 == hooks/block-memory-index-write.py DESC_LIMIT（tests cross-layer 錨）
 GATE_BYTES = 24_000
 GATE_LINES = 190
 ORDER = [
@@ -60,7 +66,7 @@ def main() -> int:
         if not (fm.get("name") and desc and typ in dict(ORDER)):
             errs.append(f"  {f.name}: type={typ!r}")
             continue
-        hook = desc if len(desc) <= 140 else desc[:139] + "…"
+        hook = desc if len(desc) <= TRUNCATE_DESC else desc[: TRUNCATE_DESC - 1] + "…"
         entries.append((typ, f.stem, f.name, hook))
     if errs:
         print(

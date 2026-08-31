@@ -1,12 +1,14 @@
 """Memory 生命周期工具鏈測試（generator 投影 / MEMORY.md 手寫 gate / Stop 重生成推導）。
 
-三件套行為錨點：索引生成 gate（17,000 字元/24,000 bytes/190 行 fail-loud——雙單位：
+三件套行為錨點：索引生成 gate（18,500 字元/24,000 bytes/190 行 fail-loud——雙單位：
 harness 上限 24.4KiB 的 chars 與 bytes 兩種讀法都安全）與 frontmatter 解析、手寫攔截
-的 self-gating 條件、跨 harness memory 目錄推導——Claude 端底線也轉 dash 的專案名
+＋條目寫入治理（desc>120/body 膨脹>12,000 硬擋、收斂放行）的 self-gating 條件、
+跨 harness memory 目錄推導——Claude 端底線也轉 dash 的專案名
 編碼陷阱與 ZCode 端 basename-sha256 命名皆以本機真實目錄名為錨（hash 是路徑字串的
 純函數，跨機器成立）。
 """
 
+import json
 import os
 import shutil
 import subprocess
@@ -120,7 +122,7 @@ def test_generator_e2e_gate_fail_loud(tmp_path):
 def test_generator_e2e_byte_gate(tmp_path):
     """SM-3：CJK 重池——chars gate 內、bytes 破 24,000 → fail-loud 不寫入。
 
-    70 條 × 130 CJK 字 description：chars ≈ 10,700（<17,000）、bytes ≈ 29,000（>24,000）
+    70 條 × 130 CJK 字 description：chars ≈ 10,700（<18,500）、bytes ≈ 29,000（>24,000）
     ——bytes 維度是對「harness 以 bytes 計」未證假設的縱深防禦。
     """
     pool = make_pool(tmp_path, n=70, desc="深" * 130)
@@ -214,20 +216,224 @@ def test_generator_concurrent_smoke(tmp_path):
 
 
 def test_block_memory_violation_with_generator():
-    assert block_memory.is_violation("/x/memory/MEMORY.md", True)
+    assert block_memory.is_index_violation("/x/memory/MEMORY.md", True)
 
 
 def test_block_memory_ok_no_generator():
     """self-gating：同目錄沒裝 generator 的專案不攔（opt-in）。"""
-    assert not block_memory.is_violation("/x/memory/MEMORY.md", False)
+    assert not block_memory.is_index_violation("/x/memory/MEMORY.md", False)
 
 
 def test_block_memory_ok_other_file():
-    assert not block_memory.is_violation("/x/memory/some-entry.md", True)
+    assert not block_memory.is_index_violation("/x/memory/some-entry.md", True)
 
 
 def test_block_memory_violation_relative_path():
-    assert block_memory.is_violation("MEMORY.md", True)
+    assert block_memory.is_index_violation("MEMORY.md", True)
+
+
+# ---------------------------------------------------------------------------
+# block-memory-index-write：條目寫入治理（subprocess 餵 stdin JSON——hook 真實形態）
+# ---------------------------------------------------------------------------
+
+HOOK = REPO_ROOT / "hooks" / "block-memory-index-write.py"
+
+
+def run_hook(payload: dict) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, str(HOOK)],
+        input=json.dumps(payload),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def hook_payload(tool: str, file_path: Path, **kw) -> dict:
+    ti = {"file_path": str(file_path)}
+    ti.update(kw)
+    return {"tool_name": tool, "tool_input": ti}
+
+
+def test_entry_write_desc_overlong_blocked(tmp_path):
+    """desc 130 chars（>120）→ exit 2；語義：索引行原料超額在寫入端擋。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "fat-desc.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content="---\nname: fat-desc\ndescription: "
+            + "長" * 130
+            + "\nmetadata:\n  type: project\n---\nbody\n",
+        )
+    )
+    assert r.returncode == 2
+    assert "description" in r.stderr
+
+
+def test_entry_write_body_overlimit_blocked(tmp_path):
+    """Write content 13,000 chars（>12,000，desc 合規）→ exit 2——EP 流水該住 EP 檔。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "fat-body.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content="---\nname: fat-body\ndescription: 合規短述\nmetadata:\n  type: project\n---\n"
+            + "x" * 13_000,
+        )
+    )
+    assert r.returncode == 2
+    assert "12,000" in r.stderr
+
+
+def test_entry_write_within_limits_allowed(tmp_path):
+    """合規 Write（desc 短、body <12,000）→ exit 0。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "ok-entry.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content="---\nname: ok-entry\ndescription: 合規短述\nmetadata:\n  type: project\n---\nbody\n",
+        )
+    )
+    assert r.returncode == 0
+
+
+def test_entry_edit_grow_overlimit_blocked(tmp_path):
+    """既有 11,800 chars 檔 Edit +500（變大且超 12,000）→ exit 2——膨脹方向擋。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "growing.md"
+    base = (
+        "---\nname: growing\ndescription: 合規\nmetadata:\n  type: project\n---\n"
+        + "y" * 11_700
+    )
+    target.write_text(base, encoding="utf-8")
+    r = run_hook(
+        hook_payload(
+            "Edit",
+            target,
+            old_string="y" * 10,
+            new_string="y" * 10 + "z" * 500,
+        )
+    )
+    assert r.returncode == 2
+    assert "膨脹" in r.stderr
+
+
+def test_entry_edit_shrink_overlimit_file_allowed(tmp_path):
+    """既有超大檔（13,000）收斂型 Edit（delta<0）→ exit 0——不卡 audit 收縮。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "shrinking.md"
+    base = (
+        "---\nname: shrinking\ndescription: 合規\nmetadata:\n  type: project\n---\n"
+        + "y" * 12_900
+    )
+    target.write_text(base, encoding="utf-8")
+    r = run_hook(
+        hook_payload(
+            "Edit",
+            target,
+            old_string="y" * 5_000,
+            new_string="y" * 10,
+        )
+    )
+    assert r.returncode == 0
+
+
+def test_entry_edit_desc_overlong_blocked(tmp_path):
+    """Edit 的 new_string 含 description: 行且值 >120 → exit 2。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "desc-edit.md"
+    target.write_text(
+        "---\nname: desc-edit\ndescription: 短\n---\nbody\n", encoding="utf-8"
+    )
+    r = run_hook(
+        hook_payload(
+            "Edit",
+            target,
+            old_string="description: 短",
+            new_string="description: " + "長" * 130,
+        )
+    )
+    assert r.returncode == 2
+
+
+def test_entry_governance_self_gated(tmp_path):
+    """同目錄無 generator → 條目寫入不攔（裝 script 即 opt-in，沿襲索引 gate 語義）。"""
+    target = tmp_path / "plain-entry.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content="---\nname: plain\ndescription: " + "長" * 130 + "\n---\nbody\n",
+        )
+    )
+    assert r.returncode == 0
+
+
+def test_entry_write_desc_boundary_120_pass_121_blocked(tmp_path):
+    """F6：desc 邊界值——恰 120 放行、121 擋（rule 契約以 >120 為線）。"""
+    pool = make_pool(tmp_path, n=1)
+    for n, expect in ((120, 0), (121, 2)):
+        r = run_hook(
+            hook_payload(
+                "Write",
+                pool / f"desc-{n}.md",
+                content="---\nname: desc-{n}\ndescription: "
+                + "長" * n
+                + "\nmetadata:\n  type: project\n---\nbody\n".replace("{n}", str(n)),
+            )
+        )
+        assert r.returncode == expect, f"desc={n}"
+
+
+def test_entry_write_shrink_overlimit_file_allowed(tmp_path):
+    """F2 行為錨：既有 13K 檔 Write 收斂到 12.5K（仍 >12,000 但變短）→ 放行。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "shrink.md"
+    target.write_text(
+        "---\nname: shrink\ndescription: 合規\nmetadata:\n  type: project\n---\n"
+        + "y" * 12_900,
+        encoding="utf-8",
+    )
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content="---\nname: shrink\ndescription: 合規\nmetadata:\n  type: project\n---\n"
+            + "y" * 12_500,
+        )
+    )
+    assert r.returncode == 0
+
+
+def test_entry_edit_replace_all_bloat_blocked(tmp_path):
+    """F3 行為錨：replace_all 膨脹 = delta × occurrences——多處置換越線要擋。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "rep.md"
+    body = ("y" * 10 + "\n") * 1_050
+    target.write_text(
+        "---\nname: rep\ndescription: 合規\nmetadata:\n  type: project\n---\n" + body,
+        encoding="utf-8",
+    )
+    r = run_hook(
+        hook_payload(
+            "Edit",
+            target,
+            old_string="y" * 10,
+            new_string="y" * 10 + "z" * 20,
+            replace_all=True,
+        )
+    )
+    assert r.returncode == 2
+
+
+def test_truncate_threshold_cross_layer_alignment():
+    """F4：generator 截斷線 == hook DESC_LIMIT（跨層單一源機械錨）。"""
+    assert generator.TRUNCATE_DESC == block_memory.DESC_LIMIT
 
 
 # ---------------------------------------------------------------------------

@@ -18,6 +18,7 @@ subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什�
 | code-reviewer / code-reviewer-primed／review **command** agent | full（inherit） | 品質閘門需強度——carve-out：任何「review 順手降級」的直覺不適用 |
 | impl / test-gen agent | full（inherit） | 寫 production code／等價測試設計 |
 | spec-miner / lite-verify / render | lite | 機械查證（rg+Read+逐字引用）、清單驅動驗證、渲染——規則明確、read-only |
+| mem-distill | lite（寫入型） | memory 條目蒸餾——規則明確的語義壓縮（清單內 Read→Write 全覆寫）；hook 不攔 subagent 寫入，上限＝prompt 紀律（registry `agents/zcode/`） |
 | vision-review | vision | 多模視覺驗收（Read 本地圖；remote URL 先 Bash curl 落地再 Read。白名單 MCP 全名**僅對連線中 server 合法**——未連線全名才整顆拒絕 spawn〔d32ddb0 邊界定版〕；CR plugin per-session 連線故白名單可掛） |
 | research / explore | 內建 Explore 承接（要釘模型時同 lite）；EP 段落 0 全域研究＝registry `cr-research`（ZCode：lite pin＋CR MCP 白名單） | — |
 
