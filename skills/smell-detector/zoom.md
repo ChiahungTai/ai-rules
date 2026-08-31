@@ -178,7 +178,7 @@ docstring / 註解 / 範例引用不存在的 method / class（AI 文檔幻覺�
 
 ### 判準 5：mixed-tree scope framing（完全無既有承載）
 
-> 既有 [git-workflow-and-versioning](../git-workflow-and-versioning/SKILL.md) 講「commit 前分組」（commit 視角），但 **review 面對 mixed working tree 怎麼 framing 結論**完全無承載。本 mode 補此缺口（最大省 prompt 價值之一）。
+> **review 面對 mixed working tree 怎麼 framing 結論**在 commit 視角工具之外完全無承載——本 mode 補此缺口（最大省 prompt 價值之一）。
 
 mixed working tree = 多 session / 來源的變更混在同一 working tree。zoom 審某 scope 時，working tree 常有無關變更（其他 session、pre-existing、unstaged）。
 

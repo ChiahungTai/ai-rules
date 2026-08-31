@@ -64,6 +64,12 @@ TARGETS = [
 # so tail rules never land in the silent-truncation zone.
 BUNDLE_MAX_BYTES = 90 * 1024
 
+# Early-warning threshold (fraction of BUNDLE_MAX_BYTES). Deploy-time visibility
+# only -- the weekly bundle-watch advisory owns per-rule composition analysis
+# and slimming candidates; this WARN just prevents "gate abort" being the
+# first signal.
+BUNDLE_WARN_RATIO = 0.85
+
 # Appended as the bundle's last line; a deployed file whose tail lacks it was
 # cut short (or hand-edited) -- load-time truncation is proven by size gate.
 BUNDLE_END_SENTINEL = "<!-- bundle-end -->"
@@ -336,6 +342,15 @@ def main() -> int:
         f"(~{tok_est}K tokens est, {bundle_bytes * 100 // BUNDLE_MAX_BYTES}% of "
         f"{BUNDLE_MAX_BYTES // 1024}KiB gate)"
     )
+
+    if bundle_bytes >= BUNDLE_MAX_BYTES * BUNDLE_WARN_RATIO:
+        print(
+            f"[WARN] bundle at {bundle_bytes * 100 // BUNDLE_MAX_BYTES}% of "
+            f"size gate ({BUNDLE_MAX_BYTES // 1024}KiB) -- deploy still OK, "
+            "but slimming should happen before the gate, not at it "
+            "(see rules/AGENTS.md size-gate note)",
+            file=sys.stderr,
+        )
 
     if bundle_bytes > BUNDLE_MAX_BYTES:
         print(

@@ -11,6 +11,7 @@ harness-scope: neutral
 ## 工具選擇原則
 
 - 符號/圖譜查詢用 code-reality（index 在場時；refs/callers/closure＋graph_query 家族），hover／型別簽名用 code-reality-lsp-bridge（`hover`/`check_file`——.py→pyrefly、.rs→rust-analyzer 副檔路由），文字搜尋用 `rg`，檔案搜尋用 `fd`（工具對照速查見 [lsp-navigation.md](lsp-navigation.md)）
+- **視覺判讀（截圖/圖表/證據影像/UI 驗收）→ vision-review agent**（合約式 dispatch：視覺錨點＋verdict 格式＋read-only），非單發 image-analysis MCP——差距不在模型能力，在 agent loop 的查證迴路＋合約紀律（單發 MCP 讀圖：CJK 誤讀、無法回答「是否互 clip」；agent：截切機制＋跨圖佐證＋「畫面內無 X 則宣稱無從核實」的證據紀律）
 - **Agent prompt 必須指定工具**：spawn agent 時，根據任務性質在 prompt 中明確寫「用 LSP hover/ goToDefinition 查簽名」或「用 rg 搜文字」。禁止 agent prompt 只寫「讀取/驗證」不指定工具
 
 ## Python 命令執行

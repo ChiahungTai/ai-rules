@@ -2,136 +2,56 @@
 harness-scope: neutral
 ---
 
-# LSP 語義導航優先
+# 符號／型別查詢路由（code-reality 優先）
 
-> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）。**深層參考**（反例案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness 處置、驗證輸出格式）見 **lsp-navigation skill**（on-demand）
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）。檔名保留 lsp-navigation（LSP 殘留面＋skill 同名配對）。**深層參考**（LSP operation 速查表、驗證輸出格式、反例案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness 處置）見 **lsp-navigation skill**（on-demand）
 
 ---
 
-## 核心原則
+## 核心原則（cr-first 路由）
 
-**符號/圖譜查詢用 code-reality（index 在場），型別面（hover/diagnostics）雙語言用 code-reality-lsp-bridge（.py→pyrefly、.rs→rust-analyzer 副檔路由），當下編輯回饋（harness 免 LSP 面）用 LSP，文字搜尋用 rg/fd。**
+**符號/圖譜查詢用 code-reality（index 在場），型別面（hover/diagnostics）用 code-reality-lsp-bridge（.py→pyrefly、.rs→rust-analyzer 副檔路由），當下編輯回饋與 documentSymbol 即時形用 LSP（ZCode 端無原生 LSP——型別/編輯回饋由 bridge 承接；documentSymbol 即時形為 CC 端原生能力），文字搜尋用 rg，檔案搜尋用 fd。**
 
-LSP 提供語義級程式碼導航（~50ms，workspace 索引最新時 100% 準確），rg/fd 提供文字級搜尋。LSP 理解程式碼結構（區分定義、引用、型別、scope）；rg 只匹配字串。
-
-> **搜尋前自問（3 秒）**：找的是**符號**（class/def/引用/型別/呼叫鏈）還是**文字**（字串/註解/config/路徑）？符號 → LSP；文字 → rg/fd。直覺想 rg 時停一下 —— 符號查詢 rg 會 truncated/漏動態引用，LSP 100% 涵蓋（索引最新時）。
+> **搜尋前自問（3 秒）**：找的是**符號**（class/def/引用/型別/呼叫鏈）還是**文字**（字串/註解/config/路徑）？符號 → code-reality；文字 → rg/fd。直覺想 rg 時停一下——符號查詢 rg 會 truncated/漏動態引用。
 
 **反例速覽**（完整案例群見 lsp-navigation skill）：
 
 - rg 符號查詢結果會 **truncated**（只顯示 `n`）與 **display masking**（把 method 名 mask 掉，輸出看起來像真的但不是——比 truncation 危險：「給錯的」讓你停止往下查）
 - **符號覆蓋/存在性判斷**用 rg 會因命名 pattern 差異 false negative，把「自己沒查到」誤判為「不存在」（audit 誤報、judge-review 誤判兩真實案例）
 - **依賴枚舉**錨 `^` toplevel 會系統性漏 local import（`# noqa: PLC0415` 是「刻意就地掩蓋」的指紋，恰恰是最該抓的結構債）
-- workspace stale 時 LSP `findReferences` 回可疑少（只 intra-file）—— 先 reindex 再下結論，非工具 false-negative（處置見 skill）
-
-**結論**：符號查詢預設 code-reality 起手（index 在場時——Rust＝SCIP、Python＝pyrefly-index；見下方「code-reality 分工」段），hover／簽名→code-reality-lsp-bridge（.py／.rs 副檔路由；bridge 缺場退 LSP），documentSymbol 即時形與 harness 內建編輯回饋→LSP；兩者皆缺時 rg＋標「未 LSP/index 驗證」；rg 只做文字/註解/config。
+- workspace stale／index 過期時引用查詢回可疑少（只 intra-file）——先 reindex/重建再下結論，非工具 false-negative（處置見 skill）
 
 ---
 
-## 任務啟動：Tool Discovery（符號查詢任務強制）
+## code-reality 分工
 
-> **此段解決結構性失誤模式**：LLM 遇分析任務（依賴審計、符號引用查證、跨域存取盤點）直覺落 rg 全程不碰 LSP — 即使 LSP 工具可用。被動決策樹攔不住這個慣性；需要任務啟動時的**主動強制 step**。
-
-### 強制 step：符號查詢任務開頭必須測 LSP 可用性
-
-任務涉及以下關鍵詞之一 → **第一步**調用一次 LSP 工具（如 `workspaceSymbol` 或 `hover`）確認可用性，不可跳過：
-
-- 「查詢/盤點/審計依賴」「引用」「reference」「fan-in」「消費者」「呼叫鏈」
-- 「跨域」「context」「_private」「邊界洩漏」
-- 「循環依賴」「反向耦合」
-- 「簽名」「型別」「定義位置」「實作」
-
-反之，純 Read 檔案理解結構、跑 demo、讀 log 等非符號查詢任務不觸發本 gate。
-
-**禁 proxy 測試**：不可用 shell 命令（`timeout`、`which`、`command -v`）測 LSP 可用性 — 這些測的是 shell 環境，與 MCP LSP 工具無關。**唯一有效測試是直接調用 LSP 工具本身**。
-
-| LSP 測試結果 | 行動 |
-|-------------|------|
-| 成功回傳 | 全程符號查詢用 LSP 為主工具；rg 僅輔助（文字、註解、config） |
-| 失敗 / 工具不存在 | 標註「未 LSP 驗證」；rg 為主工具；報告方法論限制段明確記錄（loopback 紀律見 skill：限制段承認的邊界，結論段必須回照，禁自相矛盾的「不存在」斷言） |
+- **符號面**：cr index（Rust＝SCIP、Python＝pyrefly-index）——MCP `refs`/`callers`/`closure`＋`graph_query` 家族；index 在場時優先（`[SRC]` provenance＋stale 守衛、免 workspace stale、跨 session 一致）
+- **型別面**：`code-reality-lsp-bridge` MCP（`hover`/`check_file`/`edit_file`；副檔路由 .py→pyrefly、.rs→rust-analyzer；缺場退 LSP）
+- **LSP 保留面**：documentSymbol 即時形、**working-tree 即時性**（index 是 build-time 產物——編輯後未重 harvest 前是舊態；查「當下」用 LSP 或先重建 index）。pyright-langserver 是 harvest 的 golden oracle 引擎——不可解除安裝
+- index 缺場/過期且不可重建 → **退 LSP**（LSP 面亦缺——subagent worktree、無語言伺服器的語言——才退 rg）＋標「未 index 驗證」；報告方法論限制段必須記錄（loopback 紀律見 skill：限制段承認的邊界，結論段必須回照，禁自相矛盾的「不存在」斷言）
 
 ---
 
-## 查什麼 → 用什麼工具（LSP×rg/fd 統一速查）
+## 任務啟動 gate（符號查詢任務強制）
 
-LSP operation 語義跨 harness 一致（`goToDefinition` / `findReferences` / `hover` 等），呼叫載體因 harness 而異（對照表見 lsp-navigation skill）。
+> 此段攔「遇符號分析直覺落 rg 全程」的結構性慣性（被動決策樹攔不住，需要任務啟動的主動強制 step）。
 
-| 查什麼 | 首選（LSP operation） | 降級 | 說明 |
-|--------|----------------------|------|------|
-| 符號的定義（class/function/variable/type） | `goToDefinition`（跳到定義） | `rg "class\|def"` | LSP 100% 精準（索引最新時），rg 有 false positive |
-| 符號的所有引用（誰在用它） | `findReferences`（找所有引用） | `rg "symbol"` | LSP 區分 scope，rg 匹配所有文字；找 dead code（zero hits）、確認 API 變更影響範圍 |
-| 符號的型別資訊 | `hover` | Read 檔案 | hover 不消耗 context（不讀檔案知道變數型別、函式簽名） |
-| 專案中的 class/function（按名稱） | `workspaceSymbol`（全域搜尋） | — | 找特定名稱的 class/function |
-| 單一檔案的所有符號大綱 | `documentSymbol`（檔案大綱） | — | 快速了解檔案結構 |
-| 介面的具體實作 | `goToImplementation` | — | 「誰實作了 Actor？」（ZCode pyright 不支援，載體差異見 skill） |
-| 呼叫鏈（誰呼叫它） | `incomingCalls` | 手動 rg 追蹤 | LSP 結構化，rg 需逐檔追蹤 |
-| 呼叫鏈（它呼叫誰） | `outgoingCalls` | 手動 rg 追蹤 | 「handle_order 呼叫了誰？」 |
-| 編輯後的型別檢查 | `diagnostics`（即時） | — | 即時快速反饋；mypy 是權威驗證（見「Diagnostics 定位」） |
-| 註解、字串、config 值、日誌、TODO、FIXME | rg | — | LSP 不索引非程式碼內容 |
-| 檔案搜尋（按名稱模式） | fd | — | LSP 不處理檔案系統 |
-| Markdown、YAML、TOML、JSON 等非程式碼 | rg | — | LSP 只涵蓋已配置的語言伺服器 |
-
-**被動能力**（Claude: 每次檔案編輯後 LSP 自動推送 diagnostics — 型別錯誤、missing import，在同一 turn 修正）。其他 harness 需主動觸發 diagnostics operation。
-
-**code-reality 分工（符號與圖譜的預設主查詢面，2026-08-27 起）**：code-reality 符號面
-（MCP 工具 `refs`／`callers`／`closure`；CLI 形態 `scip_refs`＋`--callers`/`--closure`
-旗標）**雙語料**——Rust 走 rust-analyzer SCIP index；**Python 走 `pyrefly-index`**
-（code-reality producer；refs 密度語義、fallback 與 golden 對帳見 code-reality skill）。index 在場時符號 refs／callers／closure／圖譜
-（graph_query 家族）優先 code-reality（`[SRC]` provenance＋stale 守衛、免 workspace
-stale、跨 session 一致）。**型別面已由 bridge 全語言承接（2026-08-28 P1＋P2）**：
-hover／diagnostics／記憶體 edit-recheck 走 `code-reality-lsp-bridge`
-MCP（tools `hover`/`check_file`/`edit_file`；副檔路由——.py→pyrefly、
-.rs→rust-analyzer；雙 backend 獨立 lazy session；ZCode plugin entry，
-發版前 inert——缺場退 LSP）。
-**LSP 保留面**：documentSymbol 即時形、
-**working-tree 即時性**（index 是 build-time 產物
-——編輯後未重 harvest 前反映的是舊態；要查「當下」用 LSP 或先重建 index）。
-index 缺場/過期且不可重建 → LSP fallback（標「未 index 驗證」）。pyright-langserver
-同時是 harvest 的 golden oracle 引擎——不可解除安裝。工具用法見 code-reality skill。
+任務涉及「查詢/盤點/審計依賴」「引用/reference」「fan-in」「消費者」「呼叫鏈」「跨域」「context」「_private」「邊界洩漏」「循環依賴」「反向耦合」「簽名」「型別」「定義位置」「實作」之一 → **第一步**確認 cr 引擎在場（MCP 工具可調用或 `.code-reality/graph.db` 存在；detect 細節與 assume+warn gate 見 cr-query skill），不可跳過；**禁 shell proxy 測試**（`timeout`/`which` 測的是 shell 環境非查詢工具）。純 Read 理解結構、跑 demo、讀 log 不觸發本 gate。
 
 ---
 
-## 何時不用 LSP
+## 重構前必要步驟
 
-- 搜尋 Markdown、YAML、TOML、JSON、INI
-- 搜尋註解內容、TODO、FIXME
-- 搜尋字串常數、錯誤訊息
-- 搜尋配置值、環境變數名
-- LSP 不可用時（無語言伺服器的語言、subagent worktree）
-
----
-
-## 重構前的必要步驟
-
-重新命名、改簽名、改回傳型別前，**必須先用 `findReferences` 找出所有呼叫點**。LSP 涵蓋所有已索引引用（workspace 過時時先 reindex，處置見 skill），rg 可能遺漏動態引用。
-
----
-
-## 驗證任務 workflow
-
-每次 LSP 驗證任務遵循 5 步：
-
-1. **Start with LSP** — 每個導航動作先 LSP（符號查詢禁 rg 起手）
-2. **Verify with evidence** — 禁「looks correct」，一律 LSP 驗簽名/回傳/呼叫鏈
-3. **Trace full chains** — 被問函式 → 同時追 incomingCalls + outgoingCalls
-4. **Report precise locations** — 每個 finding 附 `file:line`
-5. **Cross-verify** — LSP 結果非預期時用 Read 交叉確認
-
-（驗證輸出 4 段格式——State question / Show operation / file:line finding / ✅❌ conclusion——見 lsp-navigation skill）
+重新命名、改簽名、改回傳型別前，**必須先查所有呼叫點**（cr `refs`/`callers`；cr 缺場用 LSP `findReferences`）——涵蓋所有已索引引用，rg 可能遺漏動態引用。
 
 ---
 
 ## Diagnostics 定位
 
-LSP diagnostics 是**快速反饋**（即時型別檢查），mypy 是**權威驗證**（完整分析）：
+bridge `check_file`／LSP diagnostics 是**快速反饋**（即時型別檢查），mypy 是**權威驗證**：
 
 ```
-Edit → ruff → LSP diagnostics（即時）→ mypy（完整驗證）→ pytest
+Edit → ruff → check_file（即時）→ mypy（完整驗證）→ pytest
 ```
 
-diagnostics 不能取代 mypy 在品質閘門中的角色。
-
----
-
-## Agent Prompt 工具選擇
-
-spawn agent 時的 prompt 工具指定模板與判斷方式見 lsp-navigation skill「Agent Prompt 工具選擇」章；rule 端 always-on 摘要見 [tool-discipline.md](tool-discipline.md)「工具選擇原則」。
+diagnostics 不能取代 mypy 在品質閘門中的角色。Claude 端每次檔案編輯後 LSP 自動推送 diagnostics（同 turn 修正）；其他 harness 主動觸發。

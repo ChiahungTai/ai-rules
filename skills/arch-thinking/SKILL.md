@@ -148,7 +148,7 @@ code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠beha
 - 觸發訊號：宣稱含「X 支援/不做 Y」「X 底層是 Z」「跨模型成立」等能力邊界語句
 - **未 grounding 標 `open`（未驗證）非 `verified`** — 不隨 fix 寫進 instruction file 變正式宣稱
 
-**RC-3 邊界**：domain grounding = **review / 結構審查時** grounding；與 實作 grounding（grounding 於官方文檔，LLM 原生紀律）/ [external-api-investigation](../external-api-investigation/SKILL.md)（runtime 調查）/ [nt-query](../nt-query/SKILL.md)（能力查詢）區分，非第四個過載。
+**RC-3 邊界**：domain grounding = **review / 結構審查時** grounding；與 實作 grounding（grounding 於官方文檔，LLM 原生紀律）/ [nt-query](../nt-query/SKILL.md)（能力查詢）區分，非第四個過載。
 
 ### LSP 查證（call chain）
 

@@ -4,7 +4,7 @@
 
 ## 觸發條件
 
-- **明示**：`/illustrate html <主題或 @dir/@file>`（mode D 主題 → archify；mode B @dir → artifact 類型映射；mode A/C 明示 html → city map 走 architecture 映射）
+- **明示**：`/illustrate html <主題或 @dir/@file>`（mode D 主題 → archify；mode B @dir → artifact 類型映射；mode A/C 明示 html → city map 走 architecture 映射）；`@ep`／實作報告／`@module`／`@dir` + html 明示報告導讀 → **Report Shell**（見「html 報告殼」段）
 - **增益建議**（不自動切換）：mode D 分享情境——互動搜尋 / focus / reach 追蹤 / Present 導覽對位人類 viewport 消費方式時，建議 html 並由 user 決定
 - **drift compare**（opt-in）：post-build drift 審查明示要比對圖時（見下「drift compare」段）
 - **永不**：Console 語境不 inline 渲染（明示 html = 切換輸出模式，檔案交付＋路徑回報）
@@ -31,6 +31,56 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 | sequence | `sequence` | y 排序，authoring 成本最低 |
 | call graph | `workflow` 或 `sequence` | **優先語意排版型** |
 | class slice | **無對應** | 維持 md，不硬映射 |
+| **報告殼（`@ep-*.md`／實作報告／@module／@dir + html）** | 按報告類型選型（見下節變體表） | Report Shell——人類 viewport 通用模式 |
+
+## html 報告殼（Report Shell——人類 viewport 的通用模式）
+
+> 本質：任何「AI 消費為主、人類需要快速理解」的產物（EP 計畫／實作完成報告／codebase 架構／module 現況／目錄導覽）共用同一模式——**本體層**（markdown source of record）＋**報告殼層**（順序敘事 viewport）——同源雙消費。起源實證：EP「我現在很少看了，太難理解，都給 AI 用的」。
+
+**三層結構（順序性是核心——user 實證：「兩張圖並列搞得好亂、不知道從哪看起、S1 S2 S3 那排不能點」）**：
+
+```
+報告殼（自製薄殼 index.html——非 archify）
+  左 sidebar＝章節順序，點章節切主區
+  主區＝該章節文字精華＋該章節該看的圖（iframe 嵌入）
+      ↓ iframe
+視圖素材層（archify 圖引擎——每張圖=一個視圖，檔名 diagram-<type>.html）
+```
+
+- **archify 是單視圖圖表引擎**（pan/zoom/search 是空間探索；`meta.views` guided story 也只在同圖內）——順序性敘事導覽它沒有也不該有；**殼自製**（~200 行 static HTML：sidebar nav＋section 切換＋iframe），入口命名 `index.html`、圖命名 `diagram-<type>.html`
+- **殼按 NB 級視口設計（user 裁決：MBP 14/16"＝1512/1728 CSS px 基準）——圖是主角不是配角**：iframe `height: calc(100vh - 190px)`（min-height 640px）填滿視口剩餘高度、寬度吃滿 main（main `max-width: ≥1400px`，不沿用文件站 980px 窄欄）；實證教訓：首版 640px 固定高＋980px 窄欄在 NB 上圖被壓成小框
+- **消費單位是章節不是圖**——多圖並列無導覽＝亂（實證）；每章節只放該章該看的圖
+- **殼不整殼降級**：archify 缺場/壞場時報告殼退**基礎款**（純文字殼，章節敘事完整，diagram 區塊顯示待裝提示）——「降級 MD」規則適用單圖任務，不把殼一起降掉
+
+**內容篩選通則（user 勘正：「缺漏要看是不是人類真的需要知道」）**：殼裝**判斷材料**（意圖/為什麼動機鏈、風險與降級、取捨決策、驗收判準、當前狀態、實物樣本、回源路徑），**不裝執行細節**（治理規則、AI 流程產物如 UC 盤點表、機械完整性逐項覆蓋）——後者留本體層，殼至多一句指路。**實物樣本要進殼**（如 aria baseline 真實 YAML 開頭——人類沒看過實物，機制敘述等於空談）。
+
+**報告類型的敘事骨架變體**（殼固定、骨架變）：
+
+| 報告類型 | 敘事骨架 | archify 視圖選型 |
+|---------|---------|------------------|
+| EP 計畫導讀（`@ep-*.md`） | 為什麼（動機鏈）→資產與命運→推進與驗收→各段細節→風險降級→決策記錄 | workflow（主：gate/exception）＋architecture（輔） |
+| 實作完成報告（implement 完成報告/debrief） | 意圖→做了什麼→**驗證證據**（命令+exit code）→認知誤差點/待確認 | workflow（流程變更時）＋architecture 前後對照（drift compare） |
+| codebase 架構報告 | 分層地圖→資料流→熱點與風險區 | architecture＋dataflow |
+| module 現況（`@module`／AGENTS.md 域） | 職責→Capabilities 精華→依賴與邊界 | architecture（局部視圖） |
+| 目錄導覽（`@dir`） | 這裡有什麼→入口→慣例 | architecture（目錄級） |
+
+**產物位置分流（user 裁決「開心目錄」——一弧一殼、隨生命週期生長）**：
+
+- **流程性 brief（EP 計畫導讀＋實作完成結果）→ `00-tasks/YYYY-MM-DD-<task-name>/`**（repo root，`00-` 前綴 VSCode/`ls` 排最前；目錄名**無 ep-/impl- 前綴**——計畫/實作是同一殼的兩幕：execution-plan 定稿時建殼〔計畫章節，📋〕；implement 完成**同一殼長實作章節**（做了什麼檔案地圖/驗證證據命令+exit/delta 前後對照圖 archify compare/認知誤差點＋連 delta tour 細看）＋badge ✅；段落結算時 badge 同步（📋→🟡→✅）——掛 implement 階段 5/6。殼目錄內 JSON IR 沿用 `<主題>.<type>.json` 命名（與 arch-report 同慣例）。與 debrief（文字簡報）/delta tour（行級走讀）三層互補：殼=high-level 圖形、debrief=模組/檔案文字、tour=行級
+- **按需性視覺產物（codebase 架構/module 現況/目錄導覽 illustrate）→ `arch-report/<主題>/`**（現狀不變）
+- git 慣例**同一原則、兩處條目不同**：投影源頭進 git（00-tasks＝自製殼 index.html＋JSON IR；arch-report＝JSON IR＋visual-check receipt）、archify 渲染產物不進（`diagram-*.html` 與 arch-report 的 `index.html` 都是渲染產物；各自目錄 gitignore 條目）
+
+**共通必備**：狀態 badge（📋 計畫／🟡 進行中／✅ 完成——與全域 UC 狀態標記同符號語義）；計畫 vs 既有顯式區分（計畫物 tag「S<N> 計畫中」——並列無區分＝誤導）；回源連結（本體檔案路徑＋baseline commit）；狀態隨本體結算更新、本體歸檔殼隨之（殼服務本體生命期）
+
+**雙向一致性（html ↔ md——user 勘正：「同一個 md 每個人理解都不一樣，AI 跟人有理解差異正常，但是大方向不要錯」）**：
+
+- **分級而非逐字**——零差異不可能也不追求；分兩級：
+  - **大方向（硬，不可錯）**：目的與動機、範圍邊界（做什麼/不做什麼）、段落劃分與順序、驗收判準的語義（gate 過關條件）、風險的有無與等級、關鍵數字的數量級——判準句：「**拿殼給人看形成的大方向預期，vs 拿本體給 AI 實作產出的結果——兩者對得上嗎**」；對不上＝投影失真（這才是 bug）
+  - **細節（軟，容忍理解差異）**：語氣/詳略/例子選擇/口語化改寫——不逐字逐句核對
+- **殼是投影非平行創作**——殼想說本體沒有的東西 → **先改本體再投影**（發現順序顛倒是警訊：本體缺該內容）；禁止殼內出現本體沒有的**大方向級主張**（新決策/新範圍/新風險等級）
+- **投影鎖定與 stale 標記**：殼頭部聲明「投影自本體 @ <baseline hash>」；本體修訂（review 修訂/段落結算/狀態變化）→ 殼**同步重投影**（大方向級變更必同步；純文字潤飾可不動）。同步義務與「測試斷言變更→驗收規格同步」「code 變更→Capabilities 同步」同一模式（single source of truth 的投影紀律）
+- **提煉篩選≠語義漂移**：篩選通則（判斷材料 vs 執行細節）授權「刪」不授權「改」——刪掉的內容一個指路連結回本體即可
+- **archify authoring invariants 以其 SKILL.md 為準全文適用**（visual_preset/subtitle 預設省略、labelAt/via 診斷驅動單控制修復——實證：違反前兩條者多花修復輪次）
 
 ## Authoring 紀律（委派，不重述）
 
@@ -50,16 +100,16 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 ## 產物生命週期
 
-- **輸出位置**：`arch-report/<主題>/`（**repo root 層級**——結構理解視覺產物是人類瀏覽優先，不是 AI session 中間產物，故不進 `ai-analysis/`）——**每次 html 任務（主題）一個子目錄**，入口 HTML 命名 **`index.html`**（靜態伺服器慣例——`python -m http.server`/GitHub Pages 開目錄即入圖）；JSON IR 用自描述名 `<主題>.<type>.json` 並存（每圖約 8 檔）；`--output <path>` 自訂路徑尊崇（track 與否使用者決定）
+- **輸出位置**：`arch-report/<主題>/`（**repo root 層級**——結構理解視覺產物是人類瀏覽優先，不是 AI session 中間產物，故不進 `ai-analysis/`；html 報告殼的分流放置見上「產物位置分流」）——**每次 html 任務（主題）一個子目錄**，入口 HTML 命名 **`index.html`**（靜態伺服器慣例——`python -m http.server`/GitHub Pages 開目錄即入圖）；JSON IR 用自描述名 `<主題>.<type>.json` 並存（每圖約 8 檔）；`--output <path>` 自訂路徑尊崇（track 與否使用者決定）
 - **目錄即索引**：不建 index——kebab 檔名＋JSON `meta.title` 自描述；手維護 index 是 drift-prone 清單（同 skills/CLAUDE.md 索引教訓），量大再考慮機械投影生成（YAGNI）
 - **git 分工**：**JSON IR＋visual-check receipt 進 git**（JSON=機器可讀結構快照＋HTML 再生源頭）；**HTML/截圖/contact sheet 不進**（每顆 ~720KB 內嵌 viewer runtime，git 比例 175:1——本地在盤、分享時複製出檔、fresh clone 用 JSON＋archify `deliver` 一命令再生）；排除規則 scope 在 `arch-report/`（`.gitignore`：`arch-report/**/*.html`、`arch-report/**/*.visual-check.*.png`）
 - **html→md 雙輸出**：同主題先 html 後要 md 沉澱 → 從同一 grounding 事實再渲染 Mermaid（非 JSON 機械轉譯）；md 是 source of record
 
 ## 重生（regeneration）
 
-**觸發**：user 說「**重生 arch-report**」（全量）或「重生 `<主題>`」（單目錄）；fresh clone 後；`git clean -Xf arch-report/` 之後。
+**觸發**：user 說「**重生 arch-report**」／「**重生報告殼**」（全量）或「重生 `<主題>`」（單目錄）；fresh clone 後；`git clean -Xf arch-report/` 之後。
 
-**程序**（對每個含 JSON IR 的 `arch-report/<主題>/`）：
+**程序**（對每個含 JSON IR 的報告目錄——`arch-report/<主題>/` 與 `00-tasks/*/` 殼目錄）：
 
 1. 圖型 = JSON 檔名後綴（`.architecture` / `.workflow` / `.sequence` / `.dataflow` / `.lifecycle`）
 2. `deliver <type> <主題>.<type>.json <目錄>/index.html`——JSON 含 `meta.repository`（證據圖）者加 `--repo-root <repo根>`；archify 路徑依上方存在性偵測

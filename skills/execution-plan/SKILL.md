@@ -350,6 +350,15 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 根據 judge-review 的 ✅ 採納清單修正 EP。**修正必須寫入 EP 段落本身**（加入 EP review 區段表格，格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md) Finding Record），不是只記在審查報告裡。build 可能由不同 LLM session 執行，看不到審查報告。
 
+### 定稿交付：生成 task brief（人類 viewport）
+
+EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類導讀殼（Report Shell，user 裁決：「EP 我現在很少看了，太難理解」——md 給 AI，殼給人）：
+
+- 產物 `00-tasks/YYYY-MM-DD-<task-name>/index.html`（+ 可選 archify 圖）——完整規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「html 報告殼」段（三層結構/內容篩選通則/敘事骨架/雙向一致性），此處不重述
+- **成本分級**：基礎款（純文字殼，~200 行）**必備**；升級款（+archify workflow/architecture 圖）按 EP 規模（多段/有結構主張）或 user 點名
+- 投影鎖定 EP 當下 hash（殼頭部聲明）；badge 📋——implement 階段 5/6 同步（詳 implement skill）
+- 交付時引導 user 開殼 review（大方向判讀用殼、批准後進 `/implement`；AI 消費仍以 md 為源）
+
 ---
 
 ## 收尾步驟（所有功能段落完成後必做）
@@ -418,7 +427,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 ```
 〔pre-EP 軟 gate〕對話討論 →〔提醒〕/illustrate 結構化提案（軟 gate 不硬擋）→ 確認
-/spec（純輔助·需求釐清，可選）→ /execution-plan（自足：段落0全域研究 + UC盤點 + EP Review, Clean Arch 視角 top-down）→ [/ep-validate] → /implement（含 Agent Review）→ [/code-review] → /commit
+/spec（純輔助·需求釐清，可選）→ /execution-plan（自足：段落0全域研究 + UC盤點 + EP Review, Clean Arch 視角 top-down；定稿時生成 task brief 報告殼）→ [/ep-validate] → /implement（含 Agent Review）→ [/code-review] → /commit
 ```
 
 前置：`/spec`（純輔助·需求釐清，可選；pre-EP illustrate 結構確認為軟 gate 提醒，不硬擋）

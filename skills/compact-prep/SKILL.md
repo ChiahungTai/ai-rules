@@ -9,7 +9,7 @@ description: /compact 前的外部化前置：把最後幾輪對話原文（raw 
 
 ## 步驟
 
-1. **定位當前 session（自我錨定，禁用「取 db 最新 session」法——同 worktree 並行 session 會撈到別的 session）**：以本 skill 的調用字串為錨——`SELECT DISTINCT session_id FROM part WHERE data LIKE '%compact-prep%' ORDER BY time_created DESC LIMIT 1;`（調用訊息本身就在當前 session 的 part 裡）。撈出後抽查該 session 最後一則 user part 是否為本次調用，確認非鄰近 session 誤中。
+1. **定位當前 session（自我錨定，禁用「取 db 最新 session」法——同 worktree 並行 session 會撈到別的 session）**：以本 skill 的調用字串為錨——**必須 join message 限定 user-role part**：`SELECT DISTINCT p.session_id FROM part p JOIN message m ON p.message_id=m.id WHERE p.data LIKE '%compact-prep%' AND json_extract(m.data,'$.role')='user' ORDER BY p.time_created DESC LIMIT 1;`——裸 `part.data LIKE` 會誤中**後spawn 的 subagent session**（其繼承 context 含 skill 內文，時間戳更晚；2026-08-31 實測錨到 subagent）。另注意 schema：role/type 都在 data JSON 內（`json_extract`），無獨立欄位。撈出後抽查該 session 最後一則 user part 是否為本次調用，確認非鄰近 session 誤中。
 2. **落檔 raw tail**（無 hook 環境；有 hook 跳至步驟 3）：取該 session 最後 6 則 user/assistant text part 原文（唯讀連線），寫入 `<repo>/.agent-tmp/compact-tail-<date>.md`，檔頭標註 session id 與時間。
 3. **memory 新鮮度檢查**：本 session 的裁決/教訓是否已寫進 memory（cluster-first）？缺 → 補寫。
 4. **交付確認**：印出 tail 檔路徑＋摘要（幾輪、多少字元），然後請 user 執行 `/compact`，並**明確提醒 user：compact 後開口第一句讓 AI 讀 tail 檔**（例如「讀 tail 檔續任務」）——新 context 的 AI 不知道 tail 檔存在，沒有這句步驟 5 不會發生。

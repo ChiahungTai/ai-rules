@@ -1,8 +1,8 @@
 ---
 name: illustrate
 
-description: "圖解技術概念、架構設計或流程 + 結構 viewport（SA/SD artifact menu：call graph/sequence/class slice/data-flow/boundary；city map/drill/drift detection，三時點 pre-EP/post-EP/post-build）。可指定 @目錄或 @檔案讓 AI 先讀再圖解，支援 console（即時）、md（寫檔）和 html（archify 展示級互動圖，opt-in）三種輸出模式。"
-when_to_use: "Illustrate technical concepts, architecture, or processes. Also structure viewport via SA/SD artifact menu (boundary/data-flow/call-graph/sequence/class-slice) + drift detection at pre-EP / post-EP / post-build. Supports console (ASCII), md (Mermaid), and html (archify interactive artifact, opt-in) output. Regenerate arch-report from tracked JSON IRs when asked. Use with @dir or @file for code-based explanations."
+description: "圖解技術概念、架構設計或流程 + 結構 viewport（SA/SD artifact menu：call graph/sequence/class slice/data-flow/boundary；city map/drill/drift detection，三時點 pre-EP/post-EP/post-build）。可指定 @目錄或 @檔案讓 AI 先讀再圖解，支援 console（即時）、md（寫檔）和 html（archify 展示級互動圖＋report shell 報告殼——AI 文檔產物〔EP/實作報告/@module/@dir〕的人類 viewport，opt-in）三種輸出模式。"
+when_to_use: "Illustrate technical concepts, architecture, or processes. Also structure viewport via SA/SD artifact menu (boundary/data-flow/call-graph/sequence/class-slice) + drift detection at pre-EP / post-EP / post-build. Supports console (ASCII), md (Mermaid), and html (archify interactive artifact + report shell — human viewport for EP plan / implementation report / module / dir walkthroughs, opt-in) output. Regenerate arch-report from tracked JSON IRs when asked. Use with @dir or @file for code-based explanations."
 ---
 
 # /illustrate — 智能圖解系統
@@ -17,7 +17,7 @@ when_to_use: "Illustrate technical concepts, architecture, or processes. Also st
 |------|------|------|------|
 | **Console**（預設） | ASCII | 精簡（3-5 章，每章 3-5 點） | 即時討論、快速查詢 |
 | **MD** | Mermaid（`skill: "mermaid"`） | 詳盡（多級標題、完整展開） | 深度分析、知識沉澱 |
-| **HTML**（opt-in） | archify 互動圖（委派 [illustrate-html-mode.md](../_common/illustrate-html-mode.md)） | 展示級（互動搜尋/focus/Present） | 分享 / demo / re-onboard / drift 審查 |
+| **HTML**（opt-in） | archify 互動圖＋報告殼（委派 [illustrate-html-mode.md](../_common/illustrate-html-mode.md)） | 展示級（互動搜尋/focus/Present；報告殼＝sidebar 順序敘事） | 分享 / demo / re-onboard / drift 審查／**報告殼**——AI 文檔產物（EP 計畫、實作完成報告、module 現況、目錄導覽）的人類 viewport（`@ep`／實作報告／`@module`／`@dir` + html） |
 
 **執行鐵律**：Console 禁止 Mermaid 語法。MD 禁止 ASCII 圖表。HTML 是**寫檔模式**——僅明示 `html` 或增益判斷時觸發；Console 語境明示 html = 切換輸出模式（檔案交付＋路徑回報），永不 inline 渲染；archify 缺場/壞場或 guard 超限 → 降級 MD Mermaid 並回報（細節見 illustrate-html-mode.md）。違反 = 指令執行失敗。
 
@@ -55,6 +55,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
 /illustrate 微服務架構                         # Console 模式
 /illustrate md Kubernetes 叢集管理              # MD 模式 → ai-analysis/reports/
 /illustrate html @src/components/              # HTML 模式 → archify（mode B 映射；缺場降級）
+/illustrate html @ep-*.md                      # HTML 模式 → 報告殼導讀（Report Shell）
 /illustrate @src/components/                   # 目錄分析
 /illustrate md @src/ @tests/ --output "分析.md" # 自定義輸出
 ```
@@ -116,7 +117,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
   D 溝通傳達（文檔 / demo / 主題）
     → 主題 → Mermaid（md 沉澱；分享情境建議 html——增益判斷：互動搜尋/focus/Present）→ 可分享
 
-輸入判斷線索：無參數→委派 debrief；@ep→C（假設驗證）；@模組/概念→B；主題+md→D；主題+html→D（archify）；@dir+html→B（映射）；架構/邊界討論→A
+輸入判斷線索：無參數→委派 debrief；@ep→C（假設驗證）；@module／概念→B；主題+md→D；主題+html→D（archify）；@dir+html→B（映射）；@ep／實作報告／@module／@dir + html 明示報告導讀→**Report Shell**（見 illustrate-html-mode.md 變體表）；架構/邊界討論→A
 ```
 
 ### 邊界案例的行動路徑分流（mode A 輸出指引）

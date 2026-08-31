@@ -77,7 +77,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Edit"]
 
 ## 查證工具指定
 
-> 符號引用查證優先 LSP `findReferences`（100% 涵蓋），rg 文字搜尋易 pattern 失誤。完整工具決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)。
+> 符號引用查證 cr-first（index 在場用 cr `refs`；缺場退 LSP `findReferences`），rg 文字搜尋易 pattern 失誤。完整工具決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)。
 
 | 查證對象 | 必用工具 | 禁止 |
 |---------|---------|------|

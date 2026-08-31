@@ -1,11 +1,34 @@
 ---
 name: lsp-navigation
-description: LSP 語義導航深層參考 — rg 陷阱真實案例群（truncation/masking/local import/覆蓋判斷 false negative）、方法論限制 loopback、Agent prompt 工具指定模板（spawn agent 必填工具選擇）、跨 harness LSP 載體對照（Claude native vs ZCode lsp-python MCP）、workspace staleness/reindex 與條件式 fallback、LSP 驗證輸出格式。always-on 核心（核心原則、Tool Discovery gate、統一速查表）在 rules/lsp-navigation.md；做依賴審計/符號查證/review 需要反例論證、spawn agent 工具指定或跨 harness 呼叫細節時載入。觸發詞：LSP、findReferences、reindex、workspace stale、rg 陷阱、載體對照、lsp-python、agent prompt 工具指定。
+description: LSP 語義導航深層參考 — LSP operation 速查表（自 rule 下沉 2026-08-31）、驗證任務 workflow 與輸出格式、rg 陷阱真實案例群（truncation/masking/local import/覆蓋判斷 false negative）、方法論限制 loopback、Agent prompt 工具指定模板（spawn agent 必填工具選擇）、跨 harness LSP 載體對照（Claude native vs ZCode bridge）、workspace staleness/reindex 與條件式 fallback。always-on 核心（cr-first 四路路由、任務啟動 gate、code-reality 分工）在 rules/lsp-navigation.md；做依賴審計/符號查證/review 需要反例論證、operation 對照、spawn agent 工具指定或跨 harness 呼叫細節時載入。觸發詞：LSP、findReferences、reindex、workspace stale、rg 陷阱、載體對照、operation 速查、agent prompt 工具指定。
 ---
 
 # LSP Navigation — 深層參考
 
-> 本 skill 是 `rules/lsp-navigation.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（核心原則、Tool Discovery gate、統一速查表）；本檔承載反例論證、Agent prompt 工具指定模板、跨 harness 載體細節、staleness 處置與驗證輸出格式。
+> 本 skill 是 `rules/lsp-navigation.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（cr-first 四路路由、任務啟動 gate、code-reality 分工）；本檔承載 LSP operation 速查表、驗證 workflow 與輸出格式、反例論證、Agent prompt 工具指定模板、跨 harness 載體細節與 staleness 處置。
+
+## LSP operation 速查表（自 rule 下沉 2026-08-31）
+
+| 查什麼 | 首選 | 降級／備註 |
+|--------|------|-----------|
+| 符號引用（dead code、API 變更影響範圍） | `findReferences` | LSP 區分 scope；rg 只匹配文字 |
+| 介面的具體實作 | `goToImplementation` | ZCode pyright 不支援（載體差異見下方對照） |
+| 型別/簽名即時查 | `hover` | 不耗 context（不讀檔知型別） |
+| 編輯後型別檢查 | `diagnostics`（即時） | mypy 是權威驗證（rule 端「Diagnostics 定位」） |
+| 註解/字串/config 值/日誌/TODO；Markdown、YAML、TOML、JSON 等非程式碼 | rg | LSP 不索引非程式碼內容 |
+| 檔案搜尋（按名稱模式） | fd | LSP 不處理檔案系統 |
+
+（`goToDefinition`／`workspaceSymbol`／`documentSymbol`／`incoming·outgoingCalls` 等標準 operation 語義跨 harness 一致、可推導；ZCode 端型別面由 code-reality-lsp-bridge 承接，非原生 LSP）
+
+## LSP 驗證任務 workflow（5 步）
+
+1. **Start with LSP／cr** — 符號導航禁 rg 起手（cr index 在場用 cr）
+2. **Verify with evidence** — 禁「looks correct」，一律驗簽名/回傳/呼叫鏈
+3. **Trace full chains** — 被問函式 → 同時追 incomingCalls + outgoingCalls
+4. **Report precise locations** — 每個 finding 附 `file:line`
+5. **Cross-verify** — 結果非預期時用 Read 交叉確認
+
+（驗證輸出 4 段格式——State question / Show operation / file:line finding / ✅❌ conclusion——見下方專段）
 
 ## 反例群：rg 的陷阱（符號查詢 + 依賴枚舉）
 
@@ -74,6 +97,8 @@ LSP operation 語義一致，差異只在載體（native tool vs MCP tool）— 
 ## Workspace 狀態相依性（reindex 後再下結論）
 
 LSP 結果是 workspace 狀態相依的 — 若 `findReferences` 回傳意外少的結果（尤其對 `_`-prefixed 私有 symbol），**先觸發 workspace reindex 再下結論**，不要直接推論為工具固有 false-negative。
+
+> **⚠️ 現況（2026-08-28 起）**：`lsp-python` MCP server 已停擺（:8000 無 listener；退役屬 cr-lsp roadmap）——ZCode 符號面 LSP dispatch 無載體：符號查詢走 cr index（`pyrefly-index`／SCIP）、型別面走 `code-reality-lsp-bridge`。下方 reindex 觸發與條件式 fallback 兩節為 lsp-python 時代的歷史設計記錄（CC 端原生 LSP 的 stale 處置概念仍可參考）。
 
 | harness | reindex 觸發 |
 |---------|-------------|

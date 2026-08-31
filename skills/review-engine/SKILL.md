@@ -70,7 +70,7 @@ workflow-review-pattern 的 schema、各命令的輸出分類，皆引用此。
 
 ## LSP 查證方法
 
-符號查證用 LSP（~50ms，100% 涵蓋），文字搜尋用 rg，檔案用 fd。完整決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)。
+符號查證 cr-first（index 在場；缺場退 LSP），文字搜尋用 rg，檔案用 fd。完整決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)。
 
 | 查證對象 | 工具 |
 |---------|------|

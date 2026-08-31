@@ -22,7 +22,7 @@
 
 > 現有 skills 依用途分組。Skill 靠 frontmatter `description` 語意匹配自動 discovery，本索引供「一眼看全」之用，非載入機制；詳見各 `skills/<name>/SKILL.md`。
 >
-> **⚠ drift-prone**：手動維護的現狀清單——新增/移除/改名 skill 需同步此索引，否則與 `skills/` 目錄漂移。可定期用 `skill-cleaner` 稽核。
+> **⚠ drift-prone**：手動維護的現狀清單——新增/移除/改名 skill 需同步此索引，否則與 `skills/` 目錄漂移。
 
 ### 核心開發流程（工作流拓撲）
 
@@ -72,7 +72,6 @@
 - `/corpus-recall` — 行動前敘事脈絡檢索（topic→前因後果卡片，與 smell-detector 對仗＝行動前偵察雙軸）：symbol/模組/關鍵詞→callstack-plan 錨點＋tour 景點＋manifest 交叉＋md 內文＋hub_refs 影響域的機械求全，LLM 判讀 confidence 三級；輸出相關鏈（職責一句＋為何相關＋走讀/深讀雙入口）——corpus 超過瀏覽閾值後的檢索前門；無語料誠實停不硬湊
 - `/consistency` — 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度、Signal/Noise）
 - `/sync-sources` — 跨檔 single-source invariant 機械檢查（含非 Claude 部署 bundle 新鮮度）
-- `/distill-spec` — 蒸餾肥大的 spec 文檔
 
 ### 工作流 skills — instruction file 維護
 
@@ -91,7 +90,6 @@
 
 ### 工作流 skills — 日常工具
 
-- `/task-status` — Kanban-centric 進度儀表板（Capabilities 完成率 + Kanban lane 分佈 + 模組 Breakdown）
 - `/doc-health` — Capabilities + Kanban 健康檢查（12 角度驗證文件準確性）；`--report` 產出完整能力地圖；`--sync-system-map` 用 Capabilities 狀態同步 SYSTEM-MAP.md
 - `/rebase <branch|all> [--autostash]` — Trunk-based rebase。**原則：trunk 永不被 rebase**，故已對齊的 feature 由 trunk 上 `merge --ff-only` 吸收（非 rebase）；feature 可 rebase onto trunk 或另個 feature；Phase 3 報告其他 feature 落後狀況 + 提示自行同步，不自動 rebase／ff。`all` 批次：feature 上 = 同步所有 feature onto trunk、trunk 上 = 吸收所有 ff-able feature（5 停止點菜單，不自動跳過；目標集合 = `git branch` 動態列舉 − trunk，禁寫死）
 
@@ -109,7 +107,6 @@
 - `arch-thinking` — Clean Architecture + DDD 設計視角 + 結構機械（分層依賴/bounded context/use case 驅動[含共用層外溢]；city map/dep weight/Pattern Radar/domain grounding/LSP 查證/補償邏輯盤點/call graph（函數級）/type structure（contract slice）/data-flow（靜態骨架）；視角非模板；受眾中性；與 api-and-interface-design 分工）
 - `deep-thinking` — 深層思考框架深層載體（reference skill：輸出格式模板「深層思考分析」、思維框架圖、關鍵問題清單 0-7 共 8 問、程式碼查證細則、執行自檢清單；rule 端＝design-thinking 兩層思考/決策分級/三視角 always-on 核心——rule+skill 分層控制 bundle 尺寸）
 - `debugging-and-error-recovery` — 系統性根因除錯（非猜測；no-guessing 熔斷、用戶糾正訊號表）
-- `external-api-investigation` — 外部 API / 整合器真實行為調查（monkey-patch dry-run、查 stub、問 domain；實證優先於讀 code 推理）
 - `autonomous-execution` — 無人介入自主執行的決策 / 錯誤恢復 / 完成回報 / workspace safety / path invariants / session recovery（false-done 偵測）
 
 > 通用方法論（發散收斂、任務分解/垂直切片、增量交付、spec-first、官方文檔 grounding）屬 LLM 原生能力，不設 skill——相關委託點已改為就地摘要。
@@ -125,7 +122,6 @@
 - `api-and-interface-design` — 穩定 API / 模組邊界 / 公開介面設計（Hyrum's Law、邊界驗證、agent-friendly interface）
 
 ### 專案維運
-- `git-workflow-and-versioning` — git commit / branch / 衝突 / 平行流
 - `kanban-board` — Tasks.md 看板卡片管理（讀 / 建 / 移動 / 回顧）
 - `maintain` — `/daily-maintain`（自動）與 `/project-review`（互動）共用的 4-phase 維護核心（勿直接呼叫）
 - `scan-project` — 統一專案知識掃描（on-demand；imports + Capabilities + kanban → dep_graph / findings）
@@ -133,9 +129,7 @@
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / spawn 預設背景 / 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）
 - `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表〔ZCode×GLM／CC×GLM／CC×Anthropic〕、rate limit 與並發上限表、thoughtLevel 但書〔#339/#306〕、classifier unavailable 處置；rule 端留角色→tier 表＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
-- `skill-cleaner` — 稽核 skill：重複 / 未用 / prompt-budget / compact
 - `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離；generator 池層 1 縮為 `--check` 投影驗證——資產 `scripts/generate_index.py`）
-- `dependency-upgrade-watch` — 偵測 nautilus_trader / shioaji 版本漂移，主動建議 /upgrade-nt|/upgrade-sj（碰 pyproject.toml 時 auto-load）
 - `zcode-session-query` —（ZCode 專用）跨 session 查詢與參考：查 session id / 讀指定 session 尾部真人互動（scripts/zcode_tail_chat.py）/ ReadSessionContext（handoff 策略；relevant 大 session 逾時）；handoff / relay 的「讀進來」側；id 禁手打、sqlite3 CLI 無聲空輸出改 python ro uri
 
 ### 工具與查詢
@@ -148,7 +142,7 @@
 - `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀）
 - `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
 - `llm-output-convention` — 雙通道輸出細則載體（reference skill：print tag 全表〔[OK]/[WARN]/[FAIL]/[LOG]/[ACTION]/[progress]〕、print/Logger 慣例細則與閉環、stdlib logging 與框架 Logger 並存、遷移注意；rule 端留核心原則＋Namespace——rule+skill 分層控制 bundle 尺寸）
-- `lsp-navigation` — LSP 深層參考（reference skill：rg 陷阱案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness/reindex 處置、驗證輸出格式；rule 留統一速查/Tool Discovery gate 核心——rule+skill 分層控制 bundle 尺寸）
+- `lsp-navigation` — LSP 深層參考（reference skill：LSP operation 速查表、驗證 workflow/輸出格式、rg 陷阱案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness/reindex 處置；rule 留 cr-first 路由/任務啟動 gate 核心——rule+skill 分層控制 bundle 尺寸）
 - `context7` — Context7 MCP 文檔查詢（library/framework/SDK/API 用法先查最新文檔再回答，優先於 web search；跨 harness MCP 支援）
 - `voice-notification` — 三通道語音通知（系統召回 / 進度提醒 / 完成通知）
 
@@ -160,8 +154,6 @@
 ### 領域特定
 - `trading-analysis` — 股票 / 市場走勢三層分析（經典 TA → 量化 → 第二層思考）
 - `broker-flow-analysis` — 台股券商分點進出（BSR）盤底接手 playbook + 單分點角色診斷（反散槍 focal-point 紀律）
-- `golden-sample-research` — golden-sample 研究方法論（正樣本收割→歸納 setup 籤名→分類器；過程紀律 domain 中立）
-- `pre-attack-setup` — 台股攻擊前 setup 分類（收斂/多頭拉回）→ 大漲 watchlist + 分K策略路由
 
 ## Frontmatter 配置
 
