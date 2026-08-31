@@ -26,7 +26,9 @@ This skill assumes the project has the code-reality engine. Detect once per task
 
 🔴 **GATE — assume + warn, do not silently degrade.** A review/planning command that expects the engine (impact/callers/scoping) and finds it absent must emit a one-line `[WARN] graph not available — structural context (impact/callers/flows) degraded; build: code-reality graph_db build --repo <root>`, then fall back. **Silent fallback = the user gets a worse review without knowing why.** Do not block — proceed with the fallback below. **查詢面缺口**（該有的邊/符號不在 graph——如 macro 鏈、動態派發）：在**自己 repo** 的 `.kanban/Backlog/` 開 `[cr-demand]` 卡（觸發場景＋實證缺口＋期望能力）——demand-pull 觸發工具弧（ai-rules roadmap relay 段），不靠工具方猜測。
 
-**EP 撰寫面**（[execution-plan](../execution-plan/SKILL.md) 段落 0 依賴分析——CR 第一消費場景）：index 在場的 repo，EP 每個下游/ripple 宣稱必走 CR 查詢（分層：主 session 與掛白名單的 registry agents 走 MCP；generic Explore spawn 以 CLI 清單寫進 prompt——見 execution-plan 段落 0）並在「依賴關係」小節附工具輸出引用（scip_refs 首行 `[SRC]`；graph_query 輸出無 `[SRC]` 行、附完整命令列＋repo root）。**callers 為空是嫌疑不是乾淨**：死路假設（宣稱被觸發、實際無人呼叫——真實案例 `_lazy_populate`）或盲區隱藏消費（字串鍵/meta、動態派發——anti-over-reliance 節）——兩者都以互補腿（`rg "<literal>"`、`hub_refs --hazard`）查證後才可下結論；CR 全綠 ≠ 無 ripple。
+**EP 撰寫面**（[execution-plan](../execution-plan/SKILL.md) 段落 0 依賴分析——CR 第一消費場景）：index 在場的 repo，EP 每個下游/ripple 宣稱必走 CR 查詢（分層：主 session 與掛白名單的 registry agents 走 MCP——EP 段落 0 research spawn＝registry `cr-research`〔2026-09-01 升級①：sidecar 形態零滲透實證後換軌〕；generic 無白名單 spawn 才以 CLI 清單寫進 prompt——見 execution-plan 段落 0）並在「依賴關係」小節附工具輸出引用（scip_refs 首行 `[SRC]`；graph_query 輸出無 `[SRC]` 行、附完整命令列＋repo root）。**callers 為空是嫌疑不是乾淨**：死路假設（宣稱被觸發、實際無人呼叫——真實案例 `_lazy_populate`）或盲區隱藏消費（字串鍵/meta、動態派發——anti-over-reliance 節）——兩者都以互補腿（`rg "<literal>"`、`hub_refs --hazard`）查證後才可下結論；CR 全綠 ≠ 無 ripple。
+
+**滲透量測**（評估 CR 是否被實際消費；2026-09-01 評估的汙染教訓）：CLI 面計數帶 subcommand 錨——`rg "code-reality (scip_refs|graph_query|hub_refs|impact_radius|snapshot|delta_tour|detect_changes) "`，裸 `code-reality`／裸工具名會誤配檔名與路徑（`test_hub_refs.py`、`~/Github/code-reality` 實證）；MCP 面直接數 `mcp__plugin_code-reality_*` 工具名（零誤配）；排除 code-reality repo 自身 sessions（dogfooding）；歸因窗口＝skill 調用起至下一個 skill 調用。
 
 ## 🔴 Shared-server rule — every call carries repo_root
 

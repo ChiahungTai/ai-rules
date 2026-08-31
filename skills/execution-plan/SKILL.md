@@ -156,10 +156,10 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 
 > **核心原則**：EP 自足——在設計段落之前，先做一次全域 codebase 研究，盤點可複用基礎設施 + 識別風險假設。這取代了舊 `/spec` 的全域研究職責（spec 現為純需求釐清）。
 
-**執行**：spawn Explore Agent（model 依 [model-routing](../../rules/model-routing.md) 角色 tier——research/explore＝lite）深度掃描相關模組：
+**執行**：spawn 全域研究 agent——ZCode registry [`cr-research`](../../agents/AGENTS.md)（掛 CR MCP 白名單、lite pin；CR 查詢 in-path）；registry 缺場（Claude 端）→ Explore（model 依 [model-routing](../../rules/model-routing.md)——research/explore＝lite）＋spawn prompt 帶下方 CLI 清單。深度掃描相關模組：
 
 1. **可複用基礎設施盤點**：搜尋需求涉及的模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + LSP `workspaceSymbol` 搜尋相關 class/function，找出可複用的 utilities、base classes、protocols
-2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用。**code-reality（index 在場）——spawn 的 Explore agent 不在 CR MCP 白名單，CR 查詢以 CLI 形態寫進 spawn prompt**（掛白名單的 registry agents 走 MCP 優先——分層事實見 [cr-query](../cr-query/SKILL.md)；工具用法真相源 [code-reality](../code-reality/SKILL.md)；GATE 見 cr-query）：
+2. **依賴分析**：LSP `goToDefinition` / `findReferences` 追蹤 import 鏈和介面關係，rg 補充非程式碼引用。**code-reality（index 在場）——cr-research 的 CR MCP 工具（callers／closure／refs／impact_radius）in-path 執行**；Explore fallback 形態＝CLI 清單寫進 spawn prompt（分層事實見 [cr-query](../cr-query/SKILL.md)；工具用法真相源 [code-reality](../code-reality/SKILL.md)；GATE 見 cr-query）：
    - 宣稱被整合/觸發的既有符號 → `code-reality scip_refs <sym> --callers --repo <repo>`；追 transitive 鏈 → 同命令 `--closure --depth 2`
    - 修改檔案的 ripple / 影響範圍 → `code-reality graph_query impact_radius --repo <repo> --files <絕對路徑>`（相對路徑靜默回 `changed_nodes=[]`，非錯誤）
    - 刪碼/退役場景 → `code-reality hub_refs <sym> --hazard --repo <repo>`（動態派發盲區安全網）
