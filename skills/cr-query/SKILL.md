@@ -34,7 +34,7 @@ This skill assumes the project has the code-reality engine. Detect once per task
 
 共享 HTTP server 沒有 per-session cwd：`repo_root` 是唯一的 repo 路由鍵。**每個 `code-reality:*` 呼叫都必須帶 `repo_root=<當前 repo root 絕對路徑>`**。
 
-省略的失敗形態是**自信假陰性**而非報錯：server 落到自身 cwd 的空 graph，回 `"graph is empty"` + not_found（2026-08-24 spike 實證：NT graph 近 8 萬節點下查 `InstrumentId` 回空）。查詢結果出現 "graph is empty" 指紋＝漏了 repo_root，補上重試。ZCode 端由 PreToolUse hook（`hooks/require-crg-repo-root.py`）機械阻擋缺參數呼叫；server 無 session/workspace 綁定（repo 是參數非拓撲），所有端一律顯式帶上。
+省略的失敗形態是**自信假陰性**而非報錯：server 落到自身 cwd 的空 graph，回 `"graph is empty"` + not_found（2026-08-24 spike 實證：NT graph 近 8 萬節點下查 `InstrumentId` 回空）。查詢結果出現 "graph is empty" 指紋＝漏了 repo_root，補上重試。server 無 session/workspace 綁定（repo 是參數非拓撲），所有端一律顯式帶上。
 
 ## LSP vs code-reality — the division (core)
 
