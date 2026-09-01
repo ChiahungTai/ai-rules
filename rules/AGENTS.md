@@ -60,7 +60,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `llm-output-convention` | 🟢 neutral | print/Logger 雙通道核心——state transition 定義＋Namespace（tag 表/細則在 llm-output-convention skill）|
 | `lsp-navigation` | 🟢 neutral | cr-first 符號/型別查詢路由＋任務啟動 gate（LSP operation 速查表、反例群、Agent prompt 模板、載體對照、staleness 處置在 lsp-navigation skill）|
 | `modern-cli-preference` | 🟢 neutral | fd/rg CLI 速查（Claude 權限段括號註隔離）|
-| `tool-discipline` | 🟢 neutral | 通用工具紀律（uv run / pipe-exit / 禁 sed / pytest 背景跑 / zsh 動態 flags 陣列）|
+| `tool-discipline` | 🟢 neutral | 通用工具紀律（uv run / pipe-exit / 禁 sed / pytest 背景跑 / zsh 動態 flags 陣列 / 視覺判讀 agent 路由——禁主 session 讀圖）|
 | `edit-discipline` | 🟢 neutral | 通用編輯紀律（SRP/DIP/變更紀律/禁混合寫法）|
 | `bash-hard-rules` | 🔴 claude-specific | Claude 權限偵測（`#` 換行註解 / `$` 展開）|
 | `code-edit-constraints` | 🔴 claude-specific | Claude Edit/Write 工具 API（old_string 精確匹配 / 多位元組降級）|
