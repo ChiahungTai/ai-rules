@@ -66,7 +66,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 **產物位置分流（user 裁決「開心目錄」——一弧一殼、隨生命週期生長）**：
 
-- **流程性 brief（EP 計畫導讀＋實作完成結果）→ `00-tasks/MM-DD-<task-name>/`**（repo root，`00-` 前綴 VSCode/`ls` 排最前；目錄名**無年份、無 ep-/impl- 前綴**——活躍弧停留短；完結弧 task 目錄**整目錄**搬歸檔層——repo 既有慣例 `done/` 扁平或 `_done/<YYYY>/` 年分層、年分層由歸檔層承接年份；歸檔目錄判定單一源見 [metadata-sync](../metadata-sync/SKILL.md) EP 歸檔項）。計畫/實作是同一殼的兩幕，殼**自動產生雙掛點**（見下「殼生命週期掛點」）；spec（`spec.md`）與 EP 本體（`ep.md`）同 task 目錄——一弧全生命檔案同處。殼目錄內 JSON IR 沿用 `<主題>.<type>.json` 命名（與 arch-report 同慣例）。與 debrief（文字簡報）/delta tour（行級走讀）三層互補：殼=high-level 圖形、debrief=模組/檔案文字、tour=行級；殼實作章節吸收日常判斷材料（做了什麼/證據/誤差點），debrief 為深度選配（模組/檔案級深挖）
+- **流程性 brief（EP 計畫導讀＋實作完成結果）→ `00-tasks/MM-DD-<task-name>/`**（repo root，`00-` 前綴 VSCode/`ls` 排最前；目錄名**無年份、無 ep-/impl- 前綴**——活躍弧停留短；完結弧 task 目錄**整目錄**搬歸檔層——repo 既有慣例 `done/` 扁平或 `_done/<YYYY>/` 年分層；年份僅由 `_done/<YYYY>/` 年分層形態承接；歸檔目錄判定單一源見 [metadata-sync](../metadata-sync/SKILL.md) EP 歸檔項）。計畫/實作是同一殼的兩幕，殼**自動產生雙掛點**（見下「殼生命週期掛點」）；spec（`spec.md`）與 EP 本體（`ep.md`）同 task 目錄——一弧全生命檔案同處。殼目錄內 JSON IR 沿用 `<主題>.<type>.json` 命名（與 arch-report 同慣例）。與 debrief（文字簡報）/delta tour（行級走讀）三層互補：殼=high-level 圖形、debrief=模組/檔案文字、tour=行級；殼實作章節吸收日常判斷材料（做了什麼/證據/誤差點），debrief 為深度選配（模組/檔案級深挖）
 - **按需性視覺產物（codebase 架構/module 現況/目錄導覽 illustrate）→ `arch-report/<主題>/`**（現狀不變）
 - git 慣例**同一原則、兩處條目不同**：投影源頭進 git（00-tasks＝自製殼 `index.html`＋JSON IR＋`ep.md`/`spec.md`；arch-report＝JSON IR＋visual-check receipt）、archify 渲染產物不進（`diagram-*.html` 與 arch-report 的 `index.html` 是渲染產物；各自目錄 gitignore 條目）。⚠ **00-tasks 殼 `index.html` 是手寫殼、非 JSON 可再生**——gitignore 條目只排除 `00-tasks/**/diagram-*.html`；排過寬（`00-tasks/**/*.html`）會連殼一起 ignore（規格↔實作分歧實證：殼蒸發死鏈）
 
