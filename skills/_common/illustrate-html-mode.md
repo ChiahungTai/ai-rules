@@ -140,3 +140,8 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 - **CJK sublabel 是字級殺手**：中文每字 2× 寬，sublabel 帶 CJK 易縮到字級下限——優先縮文字（去 CJK/去裝飾詞），再縮 viewBox 寬
 - **低價值邊先砍再繞**：backward 邊/交叉邊引發穿點與 label 衝突——依 archify 紀律移除並沉到卡片，比硬繞 via 便宜且語意更清楚
 - **卡片行高參與頁高預算**：cards item 過長 wrap 推高頁面——item 單行為原則
+- **dataflow 座標系先讀 renderer 常數再 author**：stage/row 座標是 renderer 固定值（`render-dataflow.mjs` layout 常數段：stageX=leftX+k×colGap、rowYs/nodeW/nodeH 寫死）——via/labelAt 是絕對座標，盲猜座標每輪 validate 都在錯地方修（真實案例：2026-09-01 golden-data-pipeline 作者未讀常數，多輪修復耗在錯座標系，含一次整圖按錯誤欄寬重排全廢）
+- **dataflow viewBox 寬 930 是 readability 分水嶺**：寬 >930 → scale <1 → sublabel/tag 的 preferred 7px 投影 <7px；而 stages 有最小寬（5 stages＝1068）**超過 930**——此約束下 sublabel/tag 必須短到 fitted=preferred（7px→6.09px 壓線過）；任何被壓到 minimum 6px 的字即 readability fail。CJK sublabel 縮文字是首要手段
+- **via 首尾段必須垂直於節點邊**：fromSide bottom → 首段 vertical 向下；via[0] 直接放側向座標會連環觸發 diagonal-segment 與 endpoint-side-direction——正確形態從錨點同軸出發再轉走廊（`[[315,230],[395,230],...]` 而非 `[[395,186],...]`）
+- **跨 ≥3 stage 的長邊在 stage 佈局幾乎必死結**：起訖欄中間的橫向走廊（他邊的底部/頂部繞行）與長邊的垂直穿越段不可調和（真實案例：mosaic `arch-report/golden-data-pipeline/`——csv→rebuild2 長邊砍掉、語義沉到 rebuild2 sublabel「同源 CSV 重算」——一次解掉 5 條連鎖 constraint）
+- **visual-check containment（viewport-overflow）對 dataflow 頁面是基線 fail**：官方 example 同樣 fail（header＋圖＋cards 在 1440×900 必垂直滾）——**交付標準＝validate showcase 全綠＋deliver pass**；containment fail 如實回報為 viewer 基線行為，非 authoring 缺陷。連帶：viewBox 高度有下限（最後 row 底 + stageBottomPad）——為頁高壓高度會觸發 readable-area fail
