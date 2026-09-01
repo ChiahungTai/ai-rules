@@ -34,7 +34,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 | 檢查 | 命令 | 判準 |
 |------|------|------|
-| 索引預算 | `wc -l MEMORY.md` / `wc -c MEMORY.md` | 載入上限「前 200 行或 25KB 先到為準」；超限=尾端條目靜默不載。**目標 <25,000 bytes**（兩種 KB 解讀都安全）＋ **行數軟上限 150**（逼近=合併建議觸發；預設值可在 `_audit-state.md` per-project 覆寫）。寫入端預算：frontmatter `description` ≤100 chars（hook >120 硬擋）、條目 body ≤12,000 chars（膨脹方向 hook 擋、收斂放行） |
+| 索引預算 | `wc -l MEMORY.md` / `wc -c MEMORY.md` | 載入上限「前 200 行或 25KB 先到為準」；超限=尾端條目靜默不載。**目標 <25,000 bytes**（兩種 KB 解讀都安全）＋ **行數軟上限 150**（逼近=合併建議觸發；預設值可在 `_audit-state.md` per-project 覆寫）。寫入端預算：frontmatter `description` ≤100 chars（hook >120 硬擋）、條目檔（含 frontmatter）≤12,000 chars（膨脹方向 hook 擋、收斂放行） |
 | 索引重複 | `rg -o '\]\(([^)]+)\)' -r '$1' MEMORY.md \| sort \| uniq -d` | 0 輸出 |
 | orphan（有檔無索引行） | `comm -23 <(ls *.md \| grep -v -e MEMORY.md -e '^_' \| sort) <(rg -o '\]\(([^)]+)\)' -r '$1' MEMORY.md \| sort)` | 0 輸出（`_` 前綴檔不進索引，排除） |
 | missing（索引行無檔） | 同上，`comm -13` 反向 | 0 輸出 |
