@@ -49,6 +49,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 - **archify 是單視圖圖表引擎**（pan/zoom/search 是空間探索；`meta.views` guided story 也只在同圖內）——順序性敘事導覽它沒有也不該有；**殼自製**（~200 行 static HTML：sidebar nav＋section 切換＋iframe），入口命名 `index.html`、圖命名 `diagram-<type>.html`
 - **殼按 NB 級視口設計（user 裁決：MBP 14/16"＝1512/1728 CSS px 基準）——圖是主角不是配角**：iframe `height: calc(100vh - 190px)`（min-height 640px）填滿視口剩餘高度、寬度吃滿 main（main `max-width: ≥1400px`，不沿用文件站 980px 窄欄）；實證教訓：首版 640px 固定高＋980px 窄欄在 NB 上圖被壓成小框
+- **殼預設 dark theme**（user 2026-09-01 裁決：golden-pretriage 殼首版淺色被要求改深色）——深底（GitHub `#0d1117` 系）淺字低對比邊框；與 archify viewer 內建 dark 模式一致（visual-check 即 dark/light 雙截），殼嵌圖視覺統一。無 user 明示不用淺色
 - **消費單位是章節不是圖**——多圖並列無導覽＝亂（實證）；每章節只放該章該看的圖
 - **殼不整殼降級**：archify 缺場/壞場時報告殼退**基礎款**（純文字殼，章節敘事完整，diagram 區塊顯示待裝提示）——「降級 MD」規則適用單圖任務，不把殼一起降掉
 
