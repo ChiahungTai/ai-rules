@@ -28,6 +28,7 @@ harness-scope: neutral
 - **適用**：量化交易、高頻、實時風控、批次處理。**不適用**：長時間用戶會話、複雜 UI 狀態、UX 優先的互動應用
 
 - **推薦做法**：嚴格驗證，失敗即崩潰——`assert not data.empty`、必要欄位存在、`notna().all()`、`not np.isinf(result).any()`；禁 try/except 吞錯續行。
+- **持久化產物禁 `tempfile.TemporaryDirectory`**：目錄隨 scope 結束即毀＝備份/輸出自動失效——落專案外持久路徑（如 `~/.mosaic/backup/`）
 
 ### 誤用警告：crash-only 不是「graceful 不修」的藉口
 

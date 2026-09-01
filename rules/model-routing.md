@@ -32,4 +32,4 @@ subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什�
 
 spawn 前印出確認：`[Agent] model=<依角色 tier>, max=N, current=M`（max 查 skill 並發表——lite 層較寬）。
 
-> tier→(model, effort) 解析表、thoughtLevel 但書（#339/#306）、rate limit 與並發上限表、classifier 間歇 unavailable 處置——見 model-routing skill（on-demand；觸發詞：並發上限、rate limit、thoughtLevel、classifier unavailable、spawn model）。
+> tier→(model, effort) 解析表、thoughtLevel 但書（#339/#306）、rate limit 與並發上限表、classifier 間歇 unavailable 處置＋spawn 失敗三態辨識（classifier 重試／1301 內容攔改寫 prompt／1308 額度窗口）——見 model-routing skill（on-demand；觸發詞：並發上限、rate limit、thoughtLevel、classifier unavailable、1301、1308、spawn model）。

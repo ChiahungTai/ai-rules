@@ -1,6 +1,6 @@
 ---
 name: model-routing
-description: Model routing 深層載體 — tier→(model, effort) 解析表（ZCode×GLM flash＋thoughtLevel、CC×GLM haiku 別名、CC×Anthropic）、rate limit 與並發上限表（haiku/sonnet/opus 並發 3、flash 高）、thoughtLevel 但書（sticky user reasoningLevel 不達 wire、zai-org/feedback #339/#306 已知 bug 家族）、classifier 間歇 unavailable 處置（重試 ≤2 次）。always-on 骨架（角色→tier 表、兩跳解析原則、套用路徑）在 rules/model-routing.md；spawn agent 前查並發上限、維護 zcode/ pins、診斷 thoughtLevel 行為時載入。觸發詞：並發上限、rate limit、spawn model、tier 解析、thoughtLevel、reasoningEffort、classifier unavailable、flash、haiku、pins。
+description: Model routing 深層載體 — tier→(model, effort) 解析表（ZCode×GLM flash＋thoughtLevel、CC×GLM haiku 別名、CC×Anthropic）、rate limit 與並發上限表（haiku/sonnet/opus 並發 3、flash 高）、thoughtLevel 但書（sticky user reasoningLevel 不達 wire、zai-org/feedback #339/#306 已知 bug 家族）、classifier 間歇 unavailable 處置（重試 ≤2 次）＋spawn 失敗三態辨識（classifier 重試／1301 內容攔改寫 prompt／1308 額度窗口）。always-on 骨架（角色→tier 表、兩跳解析原則、套用路徑）在 rules/model-routing.md；spawn agent 前查並發上限、維護 zcode/ pins、診斷 thoughtLevel 行為時載入。觸發詞：並發上限、rate limit、spawn model、tier 解析、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、flash、haiku、pins。
 ---
 
 # Model Routing — 解析表與 provider 事實
@@ -32,3 +32,11 @@ description: Model routing 深層載體 — tier→(model, effort) 解析表（Z
 ## classifier 間歇 unavailable（harness 已知風險，與 model 分派正交）
 
 GLM / 非 Claude harness 的 safety classifier 可能**間歇 unavailable**（spawn agent 收 note、無 findings，非主動阻擋）。這是已知服務端間歇故障，**重試 spawn 是正解**（≤ 2 次，常成功），非異常 —— 別因此直接降級主 LLM 自審（會丟失獨立 review）。完整處置（重試 / 降級 + 標記 fallback）見 agent-workflow skill「Auto Mode」（on-demand 載入）。
+
+### spawn 失敗三態辨識（處置相反，禁混用）
+
+| 症狀 | 機制 | 處置 |
+|------|------|------|
+| 收 note、無 findings、無錯誤碼 | classifier 間歇 unavailable（服務端暫態） | 重試 spawn ≤2 次（上段正解） |
+| 錯誤碼 **1301**（content filter） | 內容審查攔截——prompt 用詞觸發 provider 端關鍵詞過濾；**同 prompt 重試必再撞** | **禁原 prompt 重試**——改寫用詞後再 spawn；仍撞 → 換任務表述或升 full 層 |
+| 錯誤碼 **1308**（usage limit） | 額度窗口耗盡（錯誤內含重置時間戳；~2 秒即敗＝根本沒跑） | 等窗口重置再派（重置前重派無效）；中途陣亡 ≠ 沒跑——先查產物判進度；不用預先降級 |

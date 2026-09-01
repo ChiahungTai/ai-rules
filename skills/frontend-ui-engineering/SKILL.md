@@ -48,6 +48,11 @@ description: Builds production-quality UIs with Panel/Bokeh. Use when building o
 | Widget 當 class attribute | 多 instance 共用狀態 | 在 `__init__` 中建立 |
 | 重建 Panel 物件 | 閃爍 + 低效 | 更新 `.object` |
 | `col.objects[0] = 'x'` | 不觸發 watcher | 用 `col[0] = 'x'` |
+| Tabulator Styler runtime 賦值 | `TypeError: Unsupported dataframe type: Styler`（constructor 會拆、setter 不拆；server state 已改但 widget 不更新） | runtime 分開賦：`tab.value = df; tab.style = styler_df` |
+| `RadioButtonGroup` options 用 (label, value) tuple | 按鈕名整串 stringify（tuple 不分離；Select 家族才支援） | 改 **dict options**（key=按鈕名、value=widget value；動態更新 options 後 value 持久——label 帶計數/value 穩定的動態 badge 唯一安全形態） |
+| 程式化驅動 slider 等 Constant param | `value_throttled` 不觸發、直接賦值被拒 | 唯一路＝`with param.edit_constant(True):`（用畢自動還原 Constant） |
+| `Tabulator.name` 建構後賦值 | `TypeError: Constant parameter 'name' cannot be modified` | 動態表題改外側 Markdown pane，不走 name |
+| FlexBox wrap 容器放可變寬文字 | 瞬態內容（如 loading 後綴 +~100px）擠換行、完成後跳回 | transient 回饋走 **overlay**（`Viewable.loading`）不走文字通道 |
 
 ## Deployment
 

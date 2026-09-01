@@ -32,6 +32,8 @@ uv run ruff check .          # Step 3: 最終驗證（必須 0 errors）
 uv run mypy .                # 必須 0 errors
 ```
 
+**mixed-tree 歸因分支**：全 repo 閘門 FAIL 時先歸因——FAIL 檔案**全非本次範圍**（並行 session 的未 commit 改動混入 working tree）→ 改 path-scoped 閘門（`uv run ruff check <本次檔案>`／`uv run mypy <本次檔案>`）＋報告註明並行線遺留；FAIL 在本次範圍內（含 pre-existing）→ 依下方手動修正流程處理。
+
 **執行順序**：Step 1 → Step 2 → **並行** Step 3 + MyPy（ruff format 後同時跑 ruff verify 和 mypy，省時間）。
 
 > ⚠️ **MyPy/Pytest 閘門禁止 pipe 到 tail/grep**（exit code 會被遮蔽，見 [bash-hard-rules](../../rules/bash-hard-rules.md)）：`uv run mypy . | tail` 回報的是 `tail` 的 exit 0 而非 mypy 的非 0 → 誤判通過。看 output 重導檔案再 Read，別 `| tail`。
@@ -55,6 +57,13 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 `git status --porcelain` + `git diff` + `git diff --cached` + `git log --oneline -10`
 
 深度理解：檔案層級（模組、功能區域）+ 程式碼層級（業務邏輯）+ 變更類型（feat/fix/refactor/perf/test/docs/style/chore）
+
+**並行 session 防護（四條）**：
+
+- **staged 範圍核對**：commit 前 `git diff --cached --name-only` 必須 == 本次清單——staging area 是**單一共享狀態**，並行 session 的 staged 檔會混入（隔離式 add 對 active race 無效）；多餘 staged → `git restore --staged <他檔>` 後再 commit（補救四步：reset → add 正確集合 → commit → `git show --stat` 驗）
+- **git mv 順序陷阱**：`git mv` 搬的是 **HEAD 內容**——先 Edit 後 mv 會把未 commit 改動留在原地（舊路徑冒出殘檔）。順序＝先 mv 再 Edit 新路徑；commit 後 `git show --stat` 驗搬家完整
+- **同根因同 commit**：同一邏輯改動的多檔一個 commit（寧晚不拆散——拆散的中繼 commit 語義不完整）
+- **外來產物對帳**：commit 非本 session 產生的檔案前，對可機械驗證宣稱（路徑存在／入口有效／狀態宣稱）跑 rg/ls 對帳——他 session 的自述不可信
 
 ### 階段 2.5：引用同步掃描
 
@@ -136,6 +145,8 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 ### 階段 5：用戶確認
 
 展示變更摘要 + 建議 commit message + Capabilities/Kanban 狀態提醒（如適用）→ **等待用戶明確確認**。
+
+**留審時必附檢視指令**：user 要求「先不要 commit 我看一下」→ 變更留 working tree，報告附逐檔檢視指令（`git diff <path>`）與行號定位——user 要能一鍵看到改了什麼，不自行猜路徑。
 
 **遵守 `outward-action-consent` rule（commit 場景）**：未收到確認絕不執行 git commit。
 

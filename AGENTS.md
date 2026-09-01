@@ -38,7 +38,7 @@
 | **① LLM 執行鏈** | 機器自讀自判自修 | 工程化、self-contained（EP、findings、code） | AI 自主（人類開頭觸發） |
 | **② 人類 viewport** | 人類用「大原則」判讀 | 意圖（行為 artifact + 認知誤差點）+ 結構（whole-picture 心智模型） | 人類切入（或 AI 產出、人類讀） |
 
-兩軌道平行不交匯，服務不同讀者。`/ep-review`、`/code-review`、`/audit-test`、`/implement` 內部審查、`/judge-review` 屬軌道 ①；`/debrief`（改動理解）、`/illustrate`（結構 viewport）、`/smell-detector`（壞味道：zoom 放大鏡 / baseline 盤點）是軌道 ② 的命令。
+兩軌道平行不交匯，服務不同讀者。`/ep-review`、`/code-review`、`/audit-test`、`/implement` 內部審查、`/judge-review` 屬軌道 ①；`/debrief`（改動理解）、`/illustrate`（結構 viewport）、`/smell-detector`（壞味道：zoom 放大鏡 / baseline 盤點）是軌道 ② 的命令。**一檔兩受眾必然產生 token 牆——單檔單受眾**（失敗實證：/human-review 三度重建又棄）。
 
 ### 原理：人補 LLM 的結構性 blind spot（direction >> quality）
 

@@ -206,6 +206,13 @@ def process(data: dict[str, int | float]) -> list[str]:
 
 當第三方套件的 type annotations 不完整時，遵循 [python-type-gap](../python-type-gap/SKILL.md) skill 的四層處理策略（isinstance narrowing → Project Stubs → `# type: ignore[code]` → pyproject.toml Override）。
 
+### 工具陷阱（ruff／uv／pytest／mypy 實測）
+
+- **RUF100 對帳必 `--extend-select RUF100`**：`--select` 會**替換**專案 select → 專案啟用的 noqa 全變 unused（大量假值）。`--fix` 刪 noqa 前先確認理由真消失；per-file-ignores 條目刪 rule 要整體對帳（原子性）。
+- **uv resolver「最高版本優先」兩頭都不可信**：floor-only constraint 遇 transitive cap 衝突會**穿過 pre-release 找解**（實證：解析成 alpha 版）——constraint 明寫 cap `>=目標,<依賴的cap` 並註解 cap 來源；`uv run` 會回寫 lock＝lock 漂移檢查點。
+- **pytest `.pytest_cache/lastfailed` 是歷史不是現況**：刪檔條目永存（只在「跑且 pass」時移除）——拿它當現況失敗清單會追殺幽靈。
+- **mypy overrides 的 unused note 以全 repo run 為準**：單檔 run 只觸及該檔依賴圖 → 其他模組 overrides 全報 unused（範圍假象）；刪 pyproject override 死條目前必跑全 repo mypy 取 note。
+
 ## 📋 輸出格式
 
 ### 標準輸出結構
@@ -236,6 +243,7 @@ def process(data: dict[str, int | float]) -> list[str]:
 
 ### 必須遵守
 - **使用 uv run**：所有 Python 命令必須使用 `uv run`
+- **空 path＝工具預設＝全專案 sweep，禁自行窄化**：不把範圍代決成 git-modified 檔（實證：漏掉 lab/poc 檔 7 errors、user 兩度糾正）——跑工具的自然 scope
 - **`$ARGUMENTS` 是 Claude Code placeholder**：Phase 1/2 的 `$ARGUMENTS` 是 slash command 參數替換（Claude Code 在 shell 執行前把它換成使用者傳入的路徑），非 shell `$VAR` 展開，不觸發 rules-reminder 的 `$` 禁令
 - **尊重專案配置**：使用現有的 `pyproject.toml`，不覆蓋
 - **分析前先查證**：確認問題真的存在，不基於猜測

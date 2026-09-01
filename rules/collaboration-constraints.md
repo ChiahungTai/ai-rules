@@ -29,6 +29,7 @@ harness-scope: neutral
 
 - **概覽最易漏**：問「介紹一下 X」時傾向用 upstream-general 知識快速作答，把特定宣稱夾帶進去而未驗證——這些夾帶宣稱正是高風險點
 - **自審不等於驗證**：事後檢查「我有沒有查證？」抓不到與作答共享盲點的錯。把「沒驗證、但大概對」當成「沒驗證」處理（自審是零獨立性驗證，理論見 [acceptance-evidence](acceptance-evidence.md)）
+- **AGPL 乾淨室紀律**：參考 AGPL 授權專案（讀行為/學設計）可以；**不可搬碼、不可逐行翻譯**（衍生作品汙染）——實作只對自己的規格寫，不逐行對照其源碼
 - **fork ≠ upstream**：專案用 forked / divergent 版本依賴時，upstream 文檔描述的是 upstream；runtime 可能不同。state-dependent 宣稱用本地 checkout（`.venv/` source），不用 upstream 文檔
 
 ### 破壞性選擇的查證觸發

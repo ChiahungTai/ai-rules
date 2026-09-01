@@ -61,6 +61,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 - 合併檔帶 `merged_from` 標記（保留追溯）
 - **cluster merge 機械觸發**：同主題散檔 ≥3（rg 主題詞/同前綴判定）→ merge candidate；併入目標優先既有最大 cluster（閾值可在 `_audit-state.md` per-project 覆寫）
 - **蒸餾執行載體**：spawn `mem-distill`（registry `agents/zcode/`、flash pin——registry 是 session 快照，須新建 session 才可解析）；prompt 給檔案清單＋每檔硬上限（預設 11,000 chars）＋desc 一併改寫 ≤100 指示
+- **固化→濃縮同步義務**（user 2026-09-01 定案）：經驗固化成 ai-rules skill/rule 落地後，對應 memory 條目把已承載段**同步壓成指針**（觸發詞→skill 名＋一句精髓）；user 事實/事故實例/commit 錨留——固化與濃縮不同步＝兩處 drift（skill 演進、memory 停舊版）
 - 索引精簡：generator 池＝修條目檔 description（索引行是投影、禁手寫）；未裝池＝一行 = 主題 + 一個鉤子，細節留在條目檔內
 - 每輪結束**重跑層 1**——驗證清理本身沒引入新問題
 

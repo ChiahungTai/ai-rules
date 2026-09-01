@@ -44,6 +44,18 @@ description: UI 開發/健檢驗收編排配方。觸發詞：UI 驗收、視覺
 - attach 後 mutation 走 framework doc-lock（marshal 路徑）——測試 thread 裸 mutate 觸發 RuntimeError 是 crash-only 如設計，不是 bug
 - `evaluate` 只收單一 arg（陣列不會解構成多參數）
 - **UI 元件 YAGNI 判定：零直呼 ≠ 零消費**——UI 元件常經內部工廠鏈渲染（無外部 caller 但每張圖都建）；判 dormant 前先追工廠鏈（filter trap 的 UI 變體。真實案例：mosaic kchart `create_all_buttons` 無外部直呼但經 `from_behaviors` 工廠鏈活躍渲染，兩輪 AI 審查皆誤判、二次查證才翻案）
+- **斷言面選擇**：先查互動鏈有無 verb（captured actions 非空）——零 verb 時改斷 server state＋shadow DOM 文字，勿對空行為鏈斷言；屬性斷言選載體層級（param value vs DOM text vs aria）；資料對齊類斷言的前提（silent no-op）要顯式驗
+
+## aria snapshot baseline 治理
+
+Playwright aria snapshot（YAML 語義樹）作 UI 行為基線的治理規則：
+
+- **containment 單向語義**：`to_match_aria_snapshot(expected)` 是 **expected ⊆ actual**——刪 spec 行不會紅（expected 變小仍被包含）、actual 多出節點也不 FAIL（**vacuous-baseline 風險**）；破壞演練須「改語義」非「刪行」才驗證得到防線
+- **settle 迴圈**：baseline 生成「**連續兩拍相同才寫回**」——pre-settle 抓到的是轉態瞬間（雙按鈕並存）；手動 while-poll 無迴圈後斷言＝timeout 靜默落出，會在 stale-but-stable DOM 烙錯 baseline——改用 `expect(...).to_have_value` 類語義斷言
+- **`.gitignore` 包裝 glob 靜默吞 baseline**（如 `*.spec`）：「baseline 入 git」決策要 `git check-ignore` 驗證非想當然；修法 negation（父目錄未被排除時有效）
+- **Python playwright 無 `--update-snapshots`**（那是 pytest-playwright plugin／Node 生態）；`to_match_aria_snapshot` 只吃 inline 字串——檔案化 baseline 需自製 helper（讀 `.spec` 餵字串＋env flag 寫回）
+- **版本漂移**：playwright/Panel 升級會改 aria 樹 → 全量 regenerate＋diff review；aria 不含 canvas 圖表本體（與截圖判讀互補）
+- **selector 給精準錨勿文字模糊條件**：`has_text="<唯一值>"` 直取（如 id），寬泛文字比對會多命中
 
 ## 盲判讀 spawn 模板
 

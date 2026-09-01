@@ -45,6 +45,21 @@ Shioaji release notes 通常較簡短（非結構化 changelog），需逐條判
 
 若 release notes 提及 API 行為變更（callback、stream、order），使用 **Shioaji Skill**（`shioaji:shioaji`）查證實際行為，不憑記憶猜測。
 
+## SJ 專屬：Sync Stubs（升級後、commit 前）
+
+**stub 重新同步**（SJ wheel 無 `py.typed`——`stubs/shioaji/` 是 fork+patch 手養的，升級換 venv 內版本後必同步）：
+
+```bash
+make sync-sj-stubs
+```
+
+**檢查 API 變更是否影響 stub**：
+
+- SJ 改了 `WarrantInfo`、`Contract` 等 class 欄位/方法 → 更新 `stubs/shioaji/` 對應 `.pyi` 後重新 sync
+- 新增 API（如 1.7.0 `contracts.warrants(underlying)`）→ 補 stub 條目
+
+提交 `pyproject.toml` + stub 變更（commit 範本見 upgrade-flow）。**漏跑實證**：2026-08-27 升級漏跑 sync——夜間 stub drift gate 攔截才發現。
+
 ## 輸出報告
 
 依 [upgrade-flow.md](../_common/upgrade-flow.md) 骨架，抬頭「SJ 升級報告」；另加「Release Notes 分析」表（fix/feat 條目 × 影響分級）。SJ 外部 API 測試是升級的**關鍵驗證**——Shioaji 是台股唯一的交易閘道，任何 API 行為變更都可能在這裡暴露。

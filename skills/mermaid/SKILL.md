@@ -30,7 +30,7 @@ allowed-tools:
 | 警告 | `#f59e0b` | `#000000` | 注意節點 |
 | 資訊 | `#3b82f6` | `#ffffff` | 處理中 |
 
-禁止 **fill** 用：`#000000`（Dark 消失）、`#ffffff`（Light 消失）、`#808080`（對比不足）——`color`（字色）配深色 fill 時用 `#ffffff` 是安全配置。
+禁止 **fill** 用：`#000000`（Dark 消失）、`#ffffff`（Light 消失）、`#808080`（對比不足）——`color`（字色）配深色 fill 時用 `#ffffff` 是安全配置。另**禁淺 tint**（tailwind-50 級淺底）：dark theme 下產生刺眼白框。
 
 ### Emoji 優先
 

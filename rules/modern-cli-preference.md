@@ -22,6 +22,7 @@ harness-scope: neutral
 - **隱藏檔/gitignored 檔陷阱**：fd/rg 預設跳過 dotfiles 與 ignore 檔，**旗標跨工具不同義**——fd：`-H` hidden、`-u` 全解；rg：`--hidden`/`--no-ignore`（`-H` 是 with-filename 非 hidden）；dot+ignore 疊加態（如 `.code-review-graph/` 自帶 `*` ignore）兩旗標併用（NT graph.db 1.4G 誤判不存在實案）
 - **rg alternation 陷阱**：`rg "a\|b"` 搜尋 literal `a|b`，**不是**「a 或 b」。多選一用 `rg "a|b"`（雙引號內 `|` 直傳 rg）或 `rg -e a -e b`（markdown 表格 cell 內一律用 `-e` 多 pattern，避開 `\|` 轉義歧義）
 - **固定字串用 `-F`**（預設走正則）；**glob `-g` 比 `--type` 靈活**（`--type py` 不含 `.pyx`/`.rs`）
+- **shell 版號比較禁字串不等**（字串序 `"1.10" < "1.9"` 為真）——比版號用 `sort -V` 語義序
 - **多檔搜尋加 `--heading`**：檔名只印一次（預設每行重複完整路徑）；路徑已知時直接指定檔案不遞迴
 - **grep 旗標不可遷移到 rg**：grep `-h`（抑制檔名）rg 是 help——免檔名用 `-I`；`-r` grep=遞迴、rg=--replace（複合旗標 `-rn` 拆開讀，`-r` 會替換 match 污染輸出）。真實案例：`rg -h pattern` 印整份 help、`rg -rn pattern` match 全成 "n"（grep 慣性遷移）
 - **rg `-g` glob 錨定路徑 arg 形態**：`-g '!dir/**'` 對絕對路徑 root arg 靜默失效——要生效用 cwd＋arg `.` 或 `!**/dir/**`（hazard runner 實案：mock 全繞過、真 rg 測試才抓到）

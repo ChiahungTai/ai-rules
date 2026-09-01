@@ -131,6 +131,10 @@ stubs/
 
 `from X import *` 不保證 re-export 所有符號。Bokeh 的 `__init__.py` 用 `from .glyph_renderer import *` 但 `*` 只導出 `__all__` 列出的符號。在 stubs 中需要明確 `as` import 確保 re-export。
 
+### `ignore_missing_imports` 的空心綠
+
+`mypy ignore_missing_imports = true` 的綠**只證沒 import 到，不證型別正確**——stub 缺口靜默通過（全綠但零覆蓋）；驗 stub 覆蓋度用顯式 probe（對已知用法看 mypy 型別回饋）。fork venv `_core.pyi`＋patches 優於 `__init__.pyi` override（nominal-type split：兩來源同名型別不相容，override 靜默分裂型別身分）。
+
 ### 何時不該寫 Partial Stubs（直接走 Layer 3 per-line）
 
 以下情境寫 stubs 的成本遠高於收益，per-line suppress 是務實選擇：

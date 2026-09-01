@@ -71,7 +71,7 @@ def process(data):
 
 - **價值驅動，不投機**：可以加 validation / logging / config，但每個新增都必須能回答「解決什麼具體問題」
 - **修 bug 與架構重構分開**：修 bug 只改必要的行；架構改善在重構段一次改好
-- **清理自己的孤兒**：自己的改動造成的 dead import/variable 必須清理；預先存在的 dead code 只標記不刪
+- **清理自己的孤兒**：自己的改動造成的 dead import/variable 必須清理；預先存在的 dead code 只標記不刪。刪除**不留 tombstone**（「已除役」註記/遷墓誌）——歷史去 git log/歸檔區查；歸檔的歷史文檔例外不動
 
 ---
 

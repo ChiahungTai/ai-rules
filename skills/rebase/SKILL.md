@@ -137,7 +137,9 @@ Git index stages: `:1:` = 共同祖先, `:2:` = HEAD（base branch = `<branch>`�
 | **獨立新增** | 雙方在同一位置加不同東西（最常見：import 衝突） | **兩者都保留** |
 | **架構重構** | 一方重構結構，另一方用舊結構 | 採重構方，適配另一方邏輯 |
 | **邏輯衝突** | 雙方對同一行有不同意圖 | 需用戶判斷 |
-| **刪除 vs 修改** | 一方刪除，另一方修改同處 | 需用戶判斷（刪除是否過時？） |
+| **刪除 vs 修改** | 一方刪除，另一方修改同處 | 需用戶判斷（刪除是否過時？）；機械遷移 vs **較新 user 裁決**衝突＝較新裁決勝出 |
+| **同名 drift**（cherry-pick／跨 wt 雙寫） | 同名同目的、不同結局（兩邊各自改了同一檔） | **取 incoming**（replay 語義忠實——保留 feature branch 已 commit 的意圖；取 HEAD 會吃掉 feature 獨有內容） |
+| **核銷 replay**（`[ ]`→`[x]`） | commit message 明言核銷意圖的 checklist replay | **採 incoming**（零判斷機械保留使用者自己的 commit 內容；同型續解不需再確認） |
 
 比對表格式：
 
@@ -157,6 +159,8 @@ Git index stages: `:1:` = 共同祖先, `:2:` = HEAD（base branch = `<branch>`�
 - 指定不同方案
 - 要求看更多細節（如完整 conflict block 內容）
 - **`abort`** — 放棄 rebase（`git rebase --abort`，完整回到 rebase 前狀態，不需 reflog）
+
+**確認 gate 無回應 fallback**（AskUserQuestion 未獲回覆）：衝突屬**零歧義機械型**（上表「兩者都保留／取 incoming／採 incoming」類）＋操作可逆（rebase 可 abort／reflog 舊 tip 可回復）→ 依建議自主解決＋報告附回復路徑（abort 指令／舊 tip sha）；**邏輯衝突仍停等**。兩條件缺一不得套用。
 
 #### Step 4：執行解決 + 驗證
 
@@ -241,6 +245,10 @@ Rebase 成功後（無衝突或衝突已解決），檢查**非衝突區域**的
 | **feature** | 批次**同步** | 當前 `git rebase main` + 其他 `git -C <wt> rebase main` | 當前 + 其他（`git -C`，不換 session） |
 
 > all 永遠 onto trunk，**不管 feature 互 rebase**（那是呼叫者手動的 `/rebase <other-feature>`，依賴鏈自負）。多個 diverged feature 各自 onto trunk rebase，互不影響，順序無關。
+
+> **user 慣用泛化（超出「永遠 onto trunk」文法）**：「all rebase on `<branch>`」＝非 trunk base 批次（user 實證用法）——全員 ff-able 時：main 側走**吸收步**（wt clean 前置＋`git -C <main-wt> merge --ff-only <branch>`，鐵律不 rebase trunk）、有 wt feature `git -C <wt> rebase <branch>`（=ff）、無 wt `git fetch . <branch>:<feature>`——零 replay 零風險，終態同 tip。
+
+> **雙 feature 同內容收斂**：feature 互 rebase 後兩條攜帶「同內容、不同 hash」——收斂順序＝main 吸收**超集**那條（`merge --ff-only`），另一條 `git rebase --empty=drop <tip>`：patch-identical commits 全變空自動 drop（replay 原版 patch-id 與已解衝突副本不同，`--skip` 手動逐個不等效；rerere 已啟用時同款衝突自動套前次解）。
 
 > ⚠️ **同步語義改寫其他 worktree HEAD**：`git -C <wt> rebase` 會改寫其他 feature wt 的 HEAD/index。執行前確認其他 feature wt 無並行 session（否則該 session 的 git 假設失效）。dirty 檢查擋住資料遺失，但 clean wt 的進行中 session 仍受影響。
 
