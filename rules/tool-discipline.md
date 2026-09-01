@@ -14,6 +14,13 @@ harness-scope: neutral
 - **視覺判讀（截圖/圖表/證據影像/UI 驗收）→ vision-review agent**（合約式 dispatch：視覺錨點＋verdict 格式＋read-only），非單發 image-analysis MCP——差距不在模型能力，在 agent loop 的查證迴路＋合約紀律（單發 MCP 讀圖：CJK 誤讀、無法回答「是否互 clip」；agent：截切機制＋跨圖佐證＋「畫面內無 X 則宣稱無從核實」的證據紀律）
 - **Agent prompt 必須指定工具**：spawn agent 時，根據任務性質在 prompt 中明確寫「用 LSP hover/ goToDefinition 查簽名」或「用 rg 搜文字」。禁止 agent prompt 只寫「讀取/驗證」不指定工具
 
+## Skill 調用紀律（意圖→skill 先載入）
+
+> **核心原則**：意圖對應到既有 skill 時，主 session 必須**先載入該 skill 並按其流程執行**，才分派或動手。skill 是**編排者的方法論**，agent 是執行載體——「用 agent 做 X」只換載體、不換方法論：載入 skill 後再分派（自寫遵循，或把 skill 路徑注入 agent prompt 令其先讀再做）。
+
+- 繞過 skill 的失敗形態是**流程產物整線靜默缺席**（hook 殼、delta tour、post-build 銜接物）——下游步驟看到前置物不存在會「合法跳過」，事後不可見
+- 真實案例（2026-09-01 mosaic）：三份 EP 全由 agent 裸寫 ep.md、主 session 未載 execution-plan skill → hook 1 殼從未建立、post-build 階段 5（殼 refresh＋delta tour）整線合法跳過。問題在編排者跳過方法論，不在 agent 載體選擇
+
 ## Python 命令執行
 
 - 所有 Python 命令用 `uv run` 前綴（`uv run python script.py`、`uv run pytest`）
