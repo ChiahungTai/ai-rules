@@ -33,7 +33,7 @@
 |------|---------------------|---------------|
 | 1.5 依賴鏈擴展 | `dep_graph.edges[]` | naive grep import chain |
 | 4 驗證一致性 | LLM 直接 Read instruction 檔 | 逐一 Read AGENTS.md/CLAUDE.md |
-| 10.5 交叉驗證 | `findings[]` + LLM 直接讀取 Capabilities/.kanban/ | 無（新增能力） |
+| 10.5 交叉驗證 | `findings[]` + LLM 直接讀取 Capabilities/backlog 卡 | 無（新增能力） |
 
 ---
 

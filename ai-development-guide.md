@@ -51,7 +51,7 @@
 
 ## UC-Driven Development
 
-> **核心原則**：AGENTS.md Capabilities 記錄已完成能力（✅），.kanban/ 追蹤待辦與進行中任務（📋/🔧）。所有功能開發以 UC（Use Case）定義為前置條件。能力描述和入口路徑是索引鍵。
+> **核心原則**：AGENTS.md Capabilities 記錄已完成能力（✅），backlog board（`backlog/`，Backlog.md——機制單一源見 kanban-board skill）追蹤待辦與進行中任務（📋/🔧）。所有功能開發以 UC（Use Case）定義為前置條件。能力描述和入口路徑是索引鍵。
 
 ### 文檔體系
 
@@ -63,19 +63,19 @@
 | `architecture.md` | 設計決策 / whole-picture（why）— 有此檔才適用 | 永久 |
 | `SYSTEM-MAP.md` | 跨域功能狀態總覽（status） | 現在 |
 | `dependency-graph.md` | 跨模組依賴 / ripple 風險地圖 — 有此檔才適用（per-repo opt-in，人工策展；機械依賴/ripple 查詢由 code-reality graph 承擔） | 現在 |
-| `.kanban/` | 任務追蹤（Kanban lanes——跨線承諾池） | 暫時（結案＝刪卡或搬 Done/——repo 慣例） |
+| `backlog/` | 任務追蹤（Backlog.md board——承諾池；機制單一源見 kanban-board skill） | 暫時（結案＝`task complete` 搬 `completed/`） |
 
-**UC 生命週期**：📋（execution-plan → Backlog card，UC盤點自動建卡）→ 🟡（build → 進行中：In-Progress lane 或任務目錄存在性〔repo 慣例〕）→ ✅（build 階段 5a → Capabilities + 結案〔搬 Done/ 或刪卡——repo 慣例〕，UC 完成情境）
+**UC 生命週期**：📋（execution-plan → `backlog task create`，建卡即 `git add backlog/`）→ 🟡（build 階段 1 → `task edit -s "In Progress"`＋開工雙 ref）→ ✅（build 階段 5a → Capabilities＋結案三步：`-s Done --final-summary` → `--ref` 換 `done/` URL → `task complete`；UC 完成情境）
 
 ### UC 狀態標記
 
 | 標記 | 含義 | 存放位置 |
 |------|------|---------|
 | ✅ | 已完成 | AGENTS.md Capabilities 表格（Claude 端 CLAUDE.md wrapper 同步） |
-| 📋 | 待實作 | .kanban/Backlog/ card |
+| 📋 | 待實作 | backlog To Do 卡（或 drafts——未承諾想法） |
 | ❌ | 已棄用 | 從 Capabilities 移除 |
-| 🔧 | 部分完成 | .kanban/Backlog/ card |
-| 🟡 | 進行中 | .kanban/Next-Up/ 或 In-Progress/ |
+| 🔧 | 部分完成 | backlog To Do 卡 |
+| 🟡 | 進行中 | backlog In Progress 卡 |
 | 🟢 | 部分覆蓋 | AGENTS.md Capabilities（附限制；Claude 端 CLAUDE.md wrapper 同步） |
 
 **Capabilities 表格格式**：`| 能力 | 入口 | 狀態 |`（每行一個 ✅ UC，入口含 CLI + 函式路徑）
@@ -83,7 +83,7 @@
 ### 放置原則（Domain-First）
 
 - ✅ → **主要實作模組的 AGENTS.md**（如 `mosaic_alpha/data/AGENTS.md`，Claude 端 CLAUDE.md wrapper 同步）
-- 📋/🔧 → **.kanban/Backlog/** cards
+- 📋/🔧 → **backlog To Do 卡**（`backlog/`）
 - **UC 不重複**：同一能力只在一個 instruction 檔記錄
 - **scripts/ 不放 Capabilities**：scripts/ 是 demo 給老闆的呈現入口（基於 library 重寫，可用 typer），不放 Capabilities
 
@@ -97,8 +97,8 @@
 
 ### 銜接機制
 
-1. **execution-plan → Backlog**：UC盤點自動建立 .kanban/Backlog/ card（含模組、EP 連結）
-2. **build → 進行中＋結算**：階段 1 將 Backlog cards 反映進行中（有 In-Progress lane → 搬入；刪卡制 repo → 留 Backlog 由任務目錄表達）；階段 5a 結算 UC 完成情境——新增 Capabilities ✅ 行 + 結案（搬 Done/ 或刪卡——repo 慣例）+ EP 歸檔（任務家 done/，放置學見 illustrate-html-mode「產物位置分流」）（working tree，隨 commit 帶走）
+1. **execution-plan → backlog**：UC盤點自動 `backlog task create` 建卡（含 labels、EP 連結；建卡即 `git add backlog/`——命令合約見 kanban-board skill）
+2. **build → 進行中＋結算**：階段 1 `backlog task edit <id> -s "In Progress"`（無 `backlog/` 容錯跳過）；階段 5a 結算 UC 完成情境——新增 Capabilities ✅ 行 + backlog 結案三步（`-s Done --final-summary` → `--ref` 換 `done/` 新 URL → `task complete`）+ EP 歸檔（任務家 done/，放置學見 illustrate-html-mode「產物位置分流」）（working tree，隨 commit 帶走）
 3. **post-build（收尾鏈）**：build 完成、commit 之前——code-review → judge-review → 修正迴圈 → consistency → metadata-sync，止步於 commit 前（詳見 post-build skill）
 4. **commit → 純 git 提交**：finalization 已在 build 階段 5a 結算（working tree），commit 一次帶走 code + finalization（**同 commit** 保證，git add 納入 finalization 檔）
 

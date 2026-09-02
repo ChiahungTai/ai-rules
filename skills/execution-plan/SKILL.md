@@ -62,13 +62,13 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 
 ## 🔴 UC 盤點（大型/中型變更必填，寫在 Scenario Matrix 之前）
 
-> **核心原則**：UC-Driven Development 要求模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + .kanban/ 是開發的**起點**，不是段落的附屬品。EP 必須在一開始就盤點 UC，後續段落才能引用。
+> **核心原則**：UC-Driven Development 要求模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + backlog board 卡（`backlog/`，Backlog.md——機制單一源見 [kanban-board](../kanban-board/SKILL.md)）是開發的**起點**，不是段落的附屬品。EP 必須在一開始就盤點 UC，後續段落才能引用。
 
 **何時需要**：大型/中型變更必填；小型變更（bug fix、文檔）跳過。
 
 **執行步驟**（生成 EP 時的強制前置動作）：
 
-1. **掃描相關模組 instruction 檔 Capabilities（AGENTS.md 為主，CLAUDE.md legacy）+ .kanban/ 卡片**：`rg` 搜尋受影響 library 模組目錄的 AGENTS.md（legacy 單檔模組：CLAUDE.md）Capabilities 表格 + `.kanban/` cards，列出與本次變更相關的既有 UC
+1. **掃描相關模組 instruction 檔 Capabilities（AGENTS.md 為主，CLAUDE.md legacy）+ backlog 卡**：`rg` 搜尋受影響 library 模組目錄的 AGENTS.md（legacy 單檔模組：CLAUDE.md）Capabilities 表格 + `backlog task list --plain`（有 `backlog/` 時），列出與本次變更相關的既有 UC
 2. **判定 UC 變更類型**：
 
 | 變更類型 | 說明 | EP 中的動作 |
@@ -77,17 +77,14 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 | 更新既有 UC | 既有 UC 的能力擴展或行為改變 | 標記能力描述 + 改變摘要，後續段落引用 |
 | 無影響 | 既有 UC 不受影響 | 標記「無 UC 變更」即可 |
 
-3. **掃描 .kanban/Backlog/ 關聯 + 自動建卡**（如果存在）：
-   - 搜尋專案根目錄的 `.kanban/Backlog/` 目錄
-   - 找出本次 EP 對應的 Backlog 卡片（能力描述 + 名稱）
-   - EP 可能對應多張 Backlog 卡片，全部列出
+3. **掃描 backlog 卡關聯 + 自動建卡**（repo 有 `backlog/` 時）：
+   - `backlog task list --plain` 列既有卡，找出本次 EP 對應的卡（能力描述＋名稱）；EP 可能對應多張，全部列出
    - **自動建卡**（EP 產出後執行）：
      1. 收集 EP 中所有「新增 UC」（UC 盤點 → 新增 UC 表格中的 📋 項目）
-     2. 對照 `.kanban/Backlog/` 已有卡片，篩出**缺少卡片的能力**
-     3. 為每個缺少卡片的能力在 `.kanban/Backlog/` 建立卡片（格式見 [kanban-board](../kanban-board/SKILL.md)「建立卡片」段：`[tag:module]` / 目標 / 相關 / 驗收標準 / 備註）
-     4. 為 EP 整體建立一張 Backlog 卡片（追蹤 EP 進度），內容引用所有相關能力
-     5. **建卡後即 `git add <卡片路徑>`**（卡隨第一顆 commit 帶走——修「卡 untracked 滯後」；add 是 staging 非 commit，不觸 outward-action-consent）
-   - 無 `.kanban/` 目錄時：提醒用戶建立（`mkdir -p .kanban/{Backlog,Next-Up,In-Progress,Done}`），建立後再建卡
+     2. 對照既有卡，篩出**缺少卡的能力**
+     3. 逐能力 `backlog task create "<標題>" -l <labels> -d <目標一句>`；為 EP 整體另建一張追蹤卡（命令合約與**開工雙 ref 規則**見 [kanban-board](../kanban-board/SKILL.md)——卡 references 必須同時掛 http URL＋repo 相對路徑，相對路徑單獨出現＝board 上不可點＝錯誤形態）
+     4. **建卡後即 `git add backlog/`**（卡隨第一顆 commit 帶走——CLI `autoCommit=false` 下只改檔不 commit；add 是 staging 非 commit，不觸 outward-action-consent）
+   - 無 `backlog/` 目錄時：提醒 user `backlog init --agent-instructions none`（**禁**再教 `mkdir .kanban/`——`.kanban/` 舊制已退役；`--agent-instructions none` 避免注入與本 repo AGENTS.md 治理衝突的 CRITICAL_INSTRUCTION 區塊）；repo 不採 board 制 → 卡片動作整項跳過
 
 4. **掃描 SYSTEM-MAP.md 關聯**（如果存在）：
    - 搜尋專案根目錄的 `SYSTEM-MAP.md`
@@ -109,7 +106,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 - 無對應功能時寫「無」
 
 ### 掃描範圍
-- [列出掃描的 instruction 檔 Capabilities 路徑 + .kanban/ cards]
+- [列出掃描的 instruction 檔 Capabilities 路徑 + backlog 卡（`backlog task list --plain` 輸出）]
 
 ### 既有 UC 狀態
 | 能力 | 狀態 | 來源 | 影響 | 說明 |
@@ -241,8 +238,8 @@ EP 專屬約束：
 
 ## 段落設計檢查清單
 
-- [ ] UC 盤點已完成（大型/中型變更：掃描 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + .kanban/、列出新增/更新 UC、Backlog 關聯）
-- [ ] Backlog 自動建卡已完成（新增 UC 已有對應 Backlog 卡片 + EP 整體追蹤卡片）
+- [ ] UC 盤點已完成（大型/中型變更：掃描 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + backlog 卡、列出新增/更新 UC、卡關聯）
+- [ ] Backlog 自動建卡已完成（新增 UC 已有對應卡 + EP 整體追蹤卡；`git add backlog/` 已跑）
 - [ ] Scenario Matrix 已填寫（大型/中型變更；涵蓋 happy path、錯誤操作、邊界、效能期待差異）
 - [ ] 標題明確且獨立
 - [ ] Context 包含所有必要背景
@@ -371,9 +368,9 @@ EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類�
 ### 1. 模組 instruction 檔 Capabilities + Kanban 更新
 
 - 已完成 UC：在對應模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）Capabilities 表格新增一行（能力 + 入口 + ✅）
-- Kanban 卡結案——**repo 慣例探測（2026-09-02 語義修訂）**：`.kanban/` 有 `Done/` lane → 搬入（舊制）；無 → **刪卡**（新制：UC 完成情境寫 Capabilities，任務史由任務家 `done/` 承載——以 repo `.kanban/CLAUDE.md` 為準）
+- 卡結案（repo 有 `backlog/` 時）——**結案三步**（命令合約見 [kanban-board](../kanban-board/SKILL.md)）：`backlog task edit <id> -s Done --final-summary "<一句>"` → `task edit <id> --ref "<done/ 新URL>,<相對路徑>"`（任務目錄遷 done/ 後 URL 更新）→ `task complete <id>`（搬 `completed/`；**當場結案**，不留 lane 囤積）；無 `backlog/` → 跳過
 - **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成
-- **從 EP Scenario Matrix 提煉「消費場景」**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），寫入 Capabilities 表格備註或 Kanban card 描述
+- **從 EP Scenario Matrix 提煉「消費場景」**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），寫入 Capabilities 表格備註或 backlog 卡（`backlog task edit <id> --append-notes`）
 
 ### 2. SYSTEM-MAP.md 更新（如果存在）
 

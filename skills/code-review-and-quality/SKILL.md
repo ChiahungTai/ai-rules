@@ -56,7 +56,7 @@ For projects using UC-Driven Development, verify implementation against module i
 
 - Does implementation cover all Capabilities-defined behaviors?
 - Are Capabilities-referenced behaviors present in the diff?
-- EP segment capability references consistent with Capabilities tables or .kanban/ cards?
+- EP segment capability references consistent with Capabilities tables or backlog cards?
 - Capabilities entry points point to library modules (not scripts/ — scripts/ is demo entry, not capability)?
 - Implementation covers all consumer scenarios (happy path, error handling, boundaries, performance expectations)?
 - Skip for small changes (bug fix, docs)

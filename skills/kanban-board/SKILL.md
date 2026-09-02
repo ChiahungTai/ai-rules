@@ -1,171 +1,65 @@
----
-name: kanban-board
-description: 管理 Tasks.md 看板卡片（讀取、建立、移動、回顧）。用於任務規劃、進度追蹤、每日回顧。觸發詞：看板、kanban、任務看板、卡片、card、lane、backlog、task board、我的任務、today、what's next。
----
+# kanban-board — backlog board（Backlog.md）機制單一源
 
-# Kanban Board (Tasks.md)
+> **繼承**: `@../CLAUDE.md`。UC-Driven 方法論見全局 guide。本 skill 是 **backlog board 的機制單一源**（命令合約、ref 規則、結案流程、UI 入口）——execution-plan／implement／metadata-sync 等消費端引用此處，不自帶定義。
 
-## 概述
+## 定位
 
-Tasks.md 是自架的 Markdown 任務看板。每個 lane 是一個目錄，每張 card 是一個 `.md` 檔案。LLM 透過檔案系統直接操作看板，不需要網頁 UI。
+**board = view not container**：任務卡是 `backlog/` 下的 plain markdown（frontmatter＋段落標記），CLI 與 AI session 直接讀寫檔案，board 只是渲染層。`.kanban/` 四 lane 目錄制已退役（2026-09-02）——`mkdir .kanban/` 是錯誤動作。
 
-**資料位置**：專案根目錄 `.kanban/`
-
-## Lane 結構
-
-```
-.kanban/
-├── Backlog/       ← 所有想做的事，未排序（無限制）
-├── Next-Up/       ← 排好優先順序，下一個要做（WIP ≤ 3）
-├── In-Progress/   ← 正在做（WIP ≤ 2）
-└── Done/          ← 完成歸檔（無限制）
-```
-
-> **無 Review lane**：AI 開發流程已內建 review（/implement 含 Agent Review → /code-review → /commit），不需要獨立的 Review lane。In-Progress 完成後直接移至 Done。
->
-> **lane 慣例探測（2026-09-02 語義修訂）**：縮編 repo 的 `.kanban/` 僅有 `Backlog/`（如 mosaic 三池重構後）——跨線承諾池單 lane：進行中＝任務目錄存在性（任務家 `tasks/`）、結案＝**刪卡**（無 Done/）。四 lane 結構是預設形態；實際以 repo `.kanban/CLAUDE.md` 為準。
-
-### `.gitkeep` 規則
-
-每個 lane 目錄**必須**包含 `.gitkeep`。Git 不追蹤空目錄，lane 清空後整個目錄會從 repo 消失，導致工具和腳本因路徑不存在而報錯。
-
-- 所有 lane 統一加 `.gitkeep`，不假設某個 lane「不會空」
-- 初始化 `.kanban/` 時，建立目錄同時建立 `.gitkeep`
-- `/instruction-init` 或任何建立 kanban 的流程都必須遵守
-
-### WIP 限制（Work In Progress）
-
-Solo 開發者同時進行太多任務會造成 context switching 損失。移動卡片前必須檢查目標 lane 的卡片數量，超過限制時提醒用戶。
-
-### 移動卡片 = 移動檔案
-
-lane 間的移動是檔案系統的 rename（跨目錄）：
-
-```
-Backlog/feature-X.md → Next-Up/feature-X.md
-```
-
-## 操作指南
-
-### 讀取看板狀態
+## 初始化（repo 首次採用）
 
 ```bash
-# 總覽：每個 lane 有幾張卡片
-fd -e md . .kanban/ --max-depth 2 | rg -o '([^/]+)/[^/]+\.md' -r '$1' | sort | uniq -c | sort -rn
-
-# 查看某個 lane 的所有卡片
-fd -e md . .kanban/In-Progress/
+backlog init "<project>" --agent-instructions none
 ```
 
-### 建立卡片
+- `--agent-instructions none`：不注入 CRITICAL_INSTRUCTION 區塊（與本 repo AGENTS.md 治理／元資訊禁令衝突）
+- config.yml 關鍵鍵：`statuses`（建議三欄 To Do/In Progress/Done）、`task_prefix`（repo 識別前綴，如 mosaic=`mos`、ai-rules=`air`）、`auto_commit: false`（外部 git 紀律——CLI 只改檔）
 
-在對應 lane 目錄下建立 `.md` 檔案，檔名即為卡片標題：
+## 命令合約（消費端引用本段）
 
-```markdown
-[tag:module]
-
-# 卡片標題（中文，與檔名相同）
-
-## 目標
-[這張卡片要完成什麼]
-
-## 相關
-- EP: [EP 路徑或編號]
-- 分支: [git branch name]
-
-## 驗收標準
-- [ ] [具體可驗證的條件]
-
-## 備註
-[額外資訊]
-```
-
-> **卡片來源之一**：agent-workflow [Side-Discovery](../agent-workflow/SKILL.md)（agent 發現 scope 外 meaningful 改進 → 建 Backlog 卡）用此模板；依賴關係寫「備註」欄標 `[blocked-by: <當前任務>]`（blockedBy 非模板標準欄位，故入「備註」）。
-
-**檔名規則**：
-- **中文標題**：檔名使用繁體中文，保留必要的英文縮寫（如 NT、SJ、SMA、LGBM）
-- **純描述性**：檔名只描述功能，不含編號 prefix
-- 範例：`訂閱分級語意重構.md`（而非 `SJ-04-revised-tiered-semantics.md`）
-- Tag 負責模組歸屬，檔名只負責描述功能
-
-### 移動卡片
-
-用 `mv` 在 lane 目錄間移動：
-
+**建卡**（execution-plan UC 盤點）：
 ```bash
-mv .kanban/Next-Up/feature-X.md .kanban/In-Progress/feature-X.md
+backlog task create "<標題>" -l <labels> -d <目標一句> [--ac "<驗收條件>"]
+git add backlog/    # 建卡即 staged（autoCommit=false 下 CLI 不 commit）
 ```
 
-移動後告知用戶變更內容。
-
-### 完成卡片
-
-結案時——repo 慣例：有 `Done/` lane → 移動過去並在卡片末尾加上完成紀錄：
-
-```markdown
-## 完成紀錄
-- 完成日期: YYYY-MM-DD
-- commit: [commit hash]（如適用）
+**開工**（implement 階段 1）：
+```bash
+backlog task edit <id> -s "In Progress"
+backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 ```
 
-無 `Done/`（刪卡制 repo）→ **刪卡**（完成資訊隨 Capabilities ✅ 行與任務家任務 ep 承載）。
+**🔴 雙 ref 內建合約**：references 只對 http(s) 前綴渲染可點連結（`TaskDetailsModal.tsx:1362-1375`）——**相對路徑單獨出現＝board 上不可點＝錯誤形態**。兩值都要掛：
+- `http URL`＝report server 上的 Report Shell／md preview 位址（**repo 慣例**——如 mosaic `http://127.0.0.1:6421/<wt>/<任務路徑>/index.html`；殼未建前的過渡形態指 md viewer `/_md-viewer.html?p=/<route>/<任務路徑>/ep.md`；hook 1 建殼後更新為殼 URL）
+- `repo 相對路徑`＝AI session／VSCode 消費形態
 
-## 與現有流程的整合
+**結案三步**（build 5a / post-build；URL 生命週期隨任務目錄遷 `done/` 變更）：
+```bash
+backlog task edit <id> -s Done --final-summary "<一句>"
+backlog task edit <id> --ref "<done/ 新URL>,<相對路徑>"   # --ref 整組替換
+backlog task complete <id>                                # 搬 completed/——當場結案，不留 lane 囤積
+```
 
-### standup skill 整合
+**掃描**：
+- AI 消費：`backlog task list --plain`（非互動 canonical 輸出）
+- 機械消費：`--json`（**僅 list/view/task/search 四指令支援**）
+- 想法池：`backlog draft create "<想法>"` → Drafts 頁累積 → 拍板 `backlog draft promote <id>`（想法→承諾）
 
-standup skill（`/standup`，ZCode 23:20 定時任務整合）的 transition digest 涵蓋 `.kanban/**/*.md` 昨日變更——摘狀態變化於晨間簡報的 `## 📝 昨日活動` section：
+**註記追加**（消費場景等）：`backlog task edit <id> --append-notes "<文字>"`
 
-- 📋 新增 Backlog 卡片
-- Kanban lane 變動（卡片移動）
-- Backlog 剩餘總數
+## UI 入口
 
-（舊 `/standup` command 的「列 In-Progress/Next-Up + 昨日 Done + 建議聚焦」3 步，已由 skill 的 git-log transition digest 取代——見 `skills/standup/SKILL.md`。）
+| 形態 | 命令 | 說明 |
+|------|------|------|
+| Web board | `backlog browser` | `127.0.0.1:6420`（config `default_port`）；WebSocket 雙向 live——CLI/AI 改檔→瀏覽器秒更、拖卡→frontmatter 變更 |
+| TUI | `backlog board` | 終端互動板（fs.watch live）；CJK 寬度有測試釘住，邊角字形留意 |
 
-### /implement 整合
+## 與官方工作流的差異宣告（三條）
 
-EP 段落完成後：
+1. **PLAN 不寫進卡**——實作計畫唯一源＝EP（任務家 `<task>/ep.md`）；卡用 `references` 指回 EP/殼（EP 深度＝baseline hash/Report Shell/post-build 鏈，是卡 PLAN 欄位的超集）
+2. **結案當場 `task complete`**——不留 Done lane 囤積；歷史在 `completed/`＋git
+3. **不掝 per-task branch**——任務與分支解耦（多 worktree 紀律由各 repo 自訂）
 
-1. 消費場景隨 Capabilities 寫入一併落地（build 階段 5a 結算，非暫存供 commit）
-2. 全部段落完成 → build 階段 5a 結算（情境 A）結案（搬 `Done/` 加完成紀錄〔舊制〕或刪卡〔刪卡制 repo〕——以 `.kanban/CLAUDE.md` 為準）
+## 容錯
 
-### deep-work 整合
-
-自主實作模式啟動時：
-
-1. 從 `Next-Up/` 拉第一張卡片到 `In-Progress/`（縮編 repo 無此二 lane——卡留 Backlog，開任務目錄表達進行中）
-2. 實作過程中更新卡片內容（加上決策記錄）
-3. 完成後結案（搬 `Done/` 或刪卡——repo 慣例）
-
-### /execution-plan 整合
-
-EP UC盤點完成時（自動建卡機制）：
-
-1. 在 `Backlog/` 建立卡片
-2. 卡片內記錄 EP 引用的能力描述
-3. 建卡後即 `git add`（卡隨第一顆 commit 帶走——修「卡 untracked 滯後」；規則源見 [execution-plan](../execution-plan/SKILL.md) UC 盤點自動建卡）
-
-## 卡片與 UC 的關係
-
-| 概念 | 追蹤維度 | 生命週期 |
-|------|---------|---------|
-| **Kanban Card** | 時間（現在做什麼） | 建立 → 移動 → 歸檔到 Done |
-| **模組 Capabilities**（AGENTS.md 為主，CLAUDE.md legacy） | 功能（系統能做什麼） | 📋 → 🔧 → ✅ |
-
-**關聯方式**：卡片內用能力描述引用 Capabilities 條目，但不取代 Capabilities 的狀態追蹤。一張卡片可能涉及多個能力，一個能力也可能跨多張卡片完成。
-
-## 每週回顧
-
-用戶要求「看板回顧」或「kanban review」時：
-
-1. **統計**：各 lane 卡片數量、本週完成數量
-2. **Backlog 整理**：標記過時卡片（超過 30 天未動）、建議刪除或拆分
-3. **優先順序**：建議 Backlog → Next-Up 的移動
-4. **WIP 健康度**：In-Progress 是否堆積、Next-Up 是否過長
-
-## 注意事項
-
-- **不自動建立卡片**：除非用戶明確要求，或是在 `/execution-plan`、`/implement` 等流程中依規則建立
-- **不自動刪除卡片**：刪除前必須確認
-- **Tag 管理**：LLM 建立或更新卡片時，依模組目錄掃描決定 tag（見專案 root instruction 檔「Tag 慣例」）。用戶也可透過 Tasks.md 網頁 UI 手動管理 tag 顏色和自訂 tag
-- **並行安全**：看板檔案可能同時被網頁 UI 和 LLM 修改，避免同時編輯同一張卡片
+無 `backlog/` 目錄 → 卡片動作整項跳過不報錯（board 是 repo opt-in 層；任務追蹤退化為任務目錄存在性）。

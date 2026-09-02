@@ -71,16 +71,16 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 - **按需性視覺產物（codebase 架構/module 現況/目錄導覽 illustrate）→ `arch-report/<主題>/`**（現狀不變）
 - git 慣例**同一原則、條目隨任務家**：投影源頭進 git（任務家＝自製殼 `index.html`＋JSON IR＋`ep.md`/`spec.md`；arch-report＝JSON IR＋visual-check receipt）、archify 渲染產物不進（`diagram-*.html` 與 arch-report 的 `index.html` 是渲染產物；gitignore 條目隨任務家路徑——如 `ai-analysis/{_tasks,_projects}/**/diagram-*.html` 或 `00-tasks/**/diagram-*.html`）。⚠ **任務家殼 `index.html` 是手寫殼、非 JSON 可再生**——gitignore 條目只排除 `**/diagram-*.html`；排過寬（`**/*.html`）會連殼一起 ignore（規格↔實作分歧實證：殼蒸發死鏈）
 
-**殼生命週期掛點（自動產生雙掛點＋fallback）**——修「掛弧後（commit 後）的產物在 session context 耗盡時必死」：掛點全落在 commit **前**的穩定點。
+**殼生命週期掛點（自動產生雙掛點＋fallback）**——修「掛弧後（commit 後）的產物在 session context 耗盡時必死」：掛點全落在 commit **前**的穩定點。**backlog 卡同步與主動顯示隨掛點聯動**（命令合約＝[kanban-board](../kanban-board/SKILL.md)；「顯示」走 report server URL——與卡上連結同一條，server 未開 fallback `open <絕對路徑>`）。
 
-| 掛點 | 時機 | 產出 |
-|------|------|------|
-| **hook 1** | EP 定稿（[execution-plan](../execution-plan/SKILL.md) 定稿交付） | 建殼＋計畫章節，badge 📋；殼頭部聲明 EP 路徑＋baseline hash（＝EP 整合策略 baseline——post-build/code-review 弧模式跨 session 可從殼讀，baseline 傳遞不依賴 build session context 存活） |
-| **badge 推進** | [implement](../implement/SKILL.md) 階段 5a 結算 | 情境 A（全項結算）→ ✅；情境 B（中間段）→ 🟡 |
-| **hook 2** | **post-build 完成**（commit 前最後穩定點；程序載體＝[post-build](../post-build/SKILL.md) 階段 5） | 同一殼長**實作章節**：做了什麼（分組檔案地圖）／驗證證據（命令+exit code）／delta 前後對照（archify compare，有圖時）／認知誤差點＋回源連結——反映修正迴圈後**最終態**；badge ✅；並產**持久版 delta tour**（單一產點，落 `.tours/delta/` 進 git——它是弧的行級理解產物非暫態快照；不進 git 則殼連結蒸發後死鏈） |
-| **fallback** | 無 post-build 弧（user 直接 `/commit`、弧終止）→ implement 階段 6 | hook 2 同款產出由 implement 階段 6 承接 |
+| 掛點 | 時機 | 殼 | backlog 卡同步 | 主動顯示 |
+|------|------|-----|---------------|---------|
+| **hook 1** | EP 定稿（[execution-plan](../execution-plan/SKILL.md) 定稿交付） | 建殼＋計畫章節，badge 📋；殼頭部聲明 EP 路徑＋baseline hash（＝EP 整合策略 baseline——post-build/code-review 弧模式跨 session 可從殼讀） | `task edit <id> --ref "<殼URL>,<相對路徑>"`（**開工雙 ref 合約**——殼未建前的過渡 URL 指 md preview，建殼後更新） | **`open <殼URL>`**——殼建好即彈出 |
+| **badge 推進** | [implement](../implement/SKILL.md) 階段 5a 結算 | 情境 A（全項結算）→ ✅；情境 B（中間段）→ 🟡 | 卡不動（仍 In Progress） | 不主動開——board portal 隨時點同一 URL |
+| **hook 2** | **post-build 完成**（commit 前最後穩定點；程序載體＝[post-build](../post-build/SKILL.md) 階段 5） | 同一殼長**實作章節**：做了什麼／驗證證據／delta 前後對照／認知誤差點＋回源連結——反映修正迴圈後**最終態**；badge ✅；並產**持久版 delta tour**（落 `.tours/delta/` 進 git） | **結案三步**：`-s Done --final-summary` → `--ref` 換 `done/` 新 URL（任務目錄遷 done/ 後）→ `task complete` | **`open <殼URL>`**——終態殼彈出 |
+| **fallback** | 無 post-build 弧（user 直接 `/commit`、弧終止）→ implement 階段 6 | hook 2 同款產出由 implement 階段 6 承接 | 同 hook 2 | 同 hook 2 |
 
-**共通必備**：狀態 badge（📋 計畫／🟡 進行中／✅ 完成——與全域 UC 狀態標記同符號語義）；計畫 vs 既有顯式區分（計畫物 tag「S<N> 計畫中」——並列無區分＝誤導）；回源連結（本體檔案路徑＋baseline commit）；狀態隨本體結算更新、本體歸檔殼隨之（殼服務本體生命期）
+**共通必備**：狀態 badge（📋 計畫／🟡 進行中／✅ 完成——與全域 UC 狀態標記同符號語義）；計畫 vs 既有顯式區分（計畫物 tag「S<N> 計畫中」——並列無區分＝誤導）；回源連結（本體檔案路徑＋baseline commit）；**board 反向連結**（repo 有 backlog board 時，殼頭部 nav 加 `http://127.0.0.1:6420`——best-effort）；狀態隨本體結算更新、本體歸檔殼隨之（殼服務本體生命期）
 
 **雙向一致性（html ↔ md——user 勘正：「同一個 md 每個人理解都不一樣，AI 跟人有理解差異正常，但是大方向不要錯」）**：
 

@@ -36,8 +36,8 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 | 項目 | 情境 | 做什麼 |
 |------|------|--------|
 | **Capabilities 寫入** | A | 對應模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）`## Capabilities` 表格新增 ✅ 行(格式 `\| 能力 \| 入口 \| 狀態 \|`,入口含 CLI + 函式路徑;見 [ai-development-guide](../../ai-development-guide.md)) |
-| **消費場景寫入** | A | 從 EP Scenario Matrix 提煅引用該 UC 的場景為自包含一句話(不引用 EP/SM 編號),寫入 Capabilities 備註或 Kanban card |
-| **Kanban 結案** | A | 已完成 UC 的卡片結案——repo 慣例探測（2026-09-02 語義修訂）：有 `Done/` lane → 搬入（舊制）；無 → **刪卡**（UC 完成情境已在 Capabilities，任務史在任務家 `done/`） |
+| **消費場景寫入** | A | 從 EP Scenario Matrix 提煅引用該 UC 的場景為自包含一句話(不引用 EP/SM 編號),寫入 Capabilities 備註或 backlog 卡(`backlog task edit <id> --append-notes`) |
+| **backlog 結案** | A | 已完成 UC 的卡結案三步：`task edit <id> -s Done --final-summary` → `--ref` 換 `done/` 新 URL → `task complete <id>`（搬 `completed/`，當場結案；命令合約見 [kanban-board](../kanban-board/SKILL.md)） |
 | **SYSTEM-MAP 結算** | A | 受影響功能生命週期升級(`✅ Built → ✅🔍 Verified`,若有整合驗證);移除已修復 ⚠️;更新全域統計(若有) |
 | **SYSTEM-MAP 預覽** | B | 中間段:生命週期 `📋→✅ Built`(全 UC ✅ + 測試通過 + build loop 收斂);**不升級 Verified**;loop 未收斂 → 阻止升級 + 標 ⚠️;**全域統計由情境 A 結算,預覽不動** |
 | **architecture.md** | A(條件) | 本次涉及設計決策 / 原則 / 模組結構 / 新抽象層 → 同步更新對應段落;純 feature(不改設計)跳過 |
@@ -74,7 +74,7 @@ build 情境 A 憑整合驗證升 Verified;情境 B(中間段)只到 Built 預�
 |------|----------------------|--------|
 | EP 歸檔漏 | EP 段落交付物已 commit(code/test)且任務家對應 task 目錄仍未歸檔（未搬歸檔目錄） | `fd -e md -E done -E _done . <任務家>`（存在的任務家：`ai-analysis/_tasks/`、`00-tasks/`；線任務另查 `fd -e md . ai-analysis/_projects/*/tasks/`）比對已交付未歸檔 |
 | Capabilities 漏 | feat/fix commit 觸及模組目錄,但該模組 AGENTS.md(CLAUDE.md legacy)不在變更檔集 | 讀**該模組** AGENTS.md Capabilities 表比對(窄讀) |
-| Kanban 漏 | Capabilities 漏命中 | `ls .kanban/In-Progress/` 查命中 UC 卡片 |
+| backlog 漏 | Capabilities 漏命中 | `backlog task list --json` 比對命中 UC 卡仍非 Done（無 `backlog/` 跳過） |
 | SYSTEM-MAP 漏 | Capabilities 漏命中 | 消費 `/doc-health` findings(不重造偵測) |
 | architecture.md 漏 | commit 觸及新模組/新抽象/依賴方向,且 architecture.md 不在變更檔集 | 讀對應段落窄比對 |
 | flow-feedback 漏 | 修復型 commit(fix) | `ls ai-analysis/flow-feedback/*.md`(單 call) |
@@ -88,7 +88,7 @@ build 情境 A 憑整合驗證升 Verified;情境 B(中間段)只到 Built 預�
 3. **執行**:寫入 / 搬移 / 歸檔
 4. **consistency 閘門**:對動過的導航文檔跑 `/consistency`
 
-> **原子性**:build 情境 A 的「Capabilities 寫入 + Kanban 搬 Done + SYSTEM-MAP 結算」必須同時完成(三者描述同一 UC 的狀態,部分完成 = 狀態不一致誤導 LLM)。architecture.md 更新 / EP 歸檔 / flow-feedback 歸檔**非原子**(各自獨立條件時序,與三件狀態結算平行)。standalone 補漏/更新不要求原子(補的是各自獨立的漏項)。
+> **原子性**:build 情境 A 的「Capabilities 寫入 + backlog 結案 + SYSTEM-MAP 結算」必須同時完成(三者描述同一 UC 的狀態,部分完成 = 狀態不一致誤導 LLM)。architecture.md 更新 / EP 歸檔 / flow-feedback 歸檔**非原子**(各自獨立條件時序,與三件狀態結算平行)。standalone 補漏/更新不要求原子(補的是各自獨立的漏項)。
 
 ## 容錯(兩 mode 共用)
 
@@ -97,7 +97,7 @@ build 情境 A 憑整合驗證升 Verified;情境 B(中間段)只到 Built 預�
 | 缺漏 | 跳過項 |
 |------|--------|
 | 無 SYSTEM-MAP.md | SYSTEM-MAP 預覽 / 結算(如 ai-rules 元專案無 SYSTEM-MAP) |
-| 無 `.kanban/` | Kanban 搬 Done |
+| 無 `backlog/` | backlog 結案三步（卡層動作全跳過） |
 | 無 architecture.md | architecture.md 條件更新 |
 | 無 `ai-analysis/flow-feedback/` | flow-feedback 歸檔 |
 

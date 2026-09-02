@@ -42,7 +42,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/aggregate_sessions.py --project-root .
 4. **empty-sessions 分支**:若 JSON `sessions` 空 → body 標「昨日無對話活動」,僅含 commit/uncommitted/今日建議子段(仍 output,不空白)
 5. **session 敘事**(消費 JSON):每 session 2-3 句——用戶要求(`user_messages`,**過濾 system slash-commands** `/clear`、`/help`、skill 載入等)/ 主要操作(`tool_calls` 的 file_path/description,同檔去重)/ AI 結論(`conclusions` 最末幾段)。跨 wt 分組標示 wt 名。
 6. **cross-session 主題**:跨 session 綜合(當日主軸、重複模式、多 session 協作)
-7. **transition digest**:`git log -p --since="yesterday 00:00:00" -- "**/AGENTS.md" "**/CLAUDE.md" ".kanban/**/*.md" "SYSTEM-MAP.md"` → 摘狀態變化(Capabilities ✅/📋/❌、Kanban lane 變動、SYSTEM-MAP 功能生命週期升降級)
+7. **transition digest**:`git log -p --since="yesterday 00:00:00" -- "**/AGENTS.md" "**/CLAUDE.md" "backlog/tasks/**/*.md" "backlog/completed/**/*.md" "SYSTEM-MAP.md"` → 摘狀態變化(Capabilities ✅/📋/❌、backlog 卡 status 變動、SYSTEM-MAP 功能生命週期升降級)
 8. **今日建議**:基於 uncommitted + 未完成 task,不憑空建議
 
 ## 輸出格式(body,無 `## ` header)

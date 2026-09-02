@@ -20,9 +20,9 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 | 檢查類型 | 負責者 | 資料來源 |
 |---------|--------|---------|
 | 機械性（路徑、tag、重複） | scan_project.py → `findings` | `.project-snapshot.json` |
-| 判斷性（品質、導航、覆蓋） | LLM 直接讀取 | instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）+ .kanban/ |
+| 判斷性（品質、導航、覆蓋） | LLM 直接讀取 | instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）+ backlog 卡（`backlog/`） |
 
-LLM 需要細節時，直接 Read instruction 檔（AGENTS.md 為主，legacy 單檔模組 fallback CLAUDE.md）和 .kanban/ 檔案，不依賴中間 registry。
+LLM 需要細節時，直接 Read instruction 檔（AGENTS.md 為主，legacy 單檔模組 fallback CLAUDE.md）和 backlog 卡（`backlog/tasks/` 檔或 `backlog task list --plain`），不依賴中間 registry。
 
 ---
 
@@ -46,7 +46,7 @@ LLM 需要細節時，直接 Read instruction 檔（AGENTS.md 為主，legacy �
 | 2 | 清單一致性 | 預設 | Capabilities 表格/入口有效性 + Skill 索引↔`skills/` 目錄比對 |
 | 2.5 | 知識庫真相源偵測 | 預設（慣例命中時） | 知識庫 instruction 檔帶「真相源映射」宣告 → 對可機械驗證宣稱跑 drift 偵測（report-only） |
 | 3 | instruction 檔品質 | --quality | LLM 評估 signal/noise + 導航有效性 |
-| 4 | 過時卡片 | --all | 讀 .kanban/ 檔案 mtime，標記長期未動卡片 |
+| 4 | 過時卡片 | --all | 讀 `backlog/tasks/` frontmatter `updated_date`（比 mtime 可靠），標記長期未動卡 |
 | 5 | SYSTEM-MAP 同步 | --all / --sync-system-map | LLM 讀 SYSTEM-MAP.md + Capabilities，比對狀態 |
 | 6 | 產出報告 | 預設（聊天）或 --report（檔案） | — |
 
@@ -108,10 +108,9 @@ LLM 直接讀取索引/清單類段落，驗證與實際檔案一致：
 
 ### 步驟 4：過時卡片（--all）
 
-讀取 .kanban/ 下每張卡片的檔案修改時間：
-- Backlog > 30 天 → important
-- In-Progress > 14 天 → important
-- Next-Up > 7 天 → suggestion
+讀 `backlog/tasks/` 每張卡 frontmatter 的 `updated_date`（CLI 寫入維護，比 mtime 可靠）：
+- To Do > 30 天 → important
+- In Progress > 14 天 → important
 
 ### 步驟 5：SYSTEM-MAP 同步（--all / --sync-system-map）
 
@@ -185,7 +184,7 @@ LLM 直接讀取索引/清單類段落，驗證與實際檔案一致：
 - **前瞻 vs 回溯分工**：本命令的 X-cap-path 是**回溯查**（既有 Capabilities 路徑還在嗎）；**前瞻查**（這次 doc 編輯有沒有新增指向虛無的引用）屬 `/code-review` docs mode 的「前瞻 phantom 偵測」——兩者互補，不重疊。
 - **容錯**：無 `.project-snapshot.json` 時降級為純 LLM 檢查，不報錯
 - **容錯**：無「真相源映射」慣例命中時跳過步驟 2.5，不報錯
-- **容錯**：無 .kanban/ 目錄時只檢查 Capabilities，不報錯
+- **容錯**：無 `backlog/` 目錄時只檢查 Capabilities，不報錯
 - **容錯**：無 SYSTEM-MAP.md 時跳過步驟 5，不報錯
 - **容錯**：無 `## Capabilities` 的 instruction 檔跳過，不報錯
 - `--report` 產出覆蓋既有 `doc-health-report.md`（不備份）

@@ -52,4 +52,4 @@ repo root `STATE.md`，**覆寫**（非累積）。三要素：
 
 ## Open failures 不寫此處
 
-跨 session 未結案的 bug/failure（含 repro）→ **走 `.kanban/Backlog/`**（failure card），**不進 STATE.md**（kanban 已是跨 session 未結案追蹤）。
+跨 session 未結案的 bug/failure（含 repro）→ **走 backlog**（`backlog task create` failure 卡；無 `backlog/` 的 repo 走該 repo 慣例的 pending 家），**不進 STATE.md**（board/pending 已是跨 session 未結案追蹤）。

@@ -25,7 +25,7 @@
 | v3 欄位 | v5 對應 | 說明 |
 |---------|---------|------|
 | `capabilities_registry` | —（移除） | LLM 直接讀 instruction 檔（AGENTS.md/CLAUDE.md） |
-| `kanban_registry` | —（移除） | LLM 直接讀 .kanban/ |
+| `kanban_registry` | —（移除） | LLM 直接讀 backlog 卡（`backlog/`——`backlog task list --json`） |
 | `claude_md_registry` | —（移除） | LLM 直接讀 instruction 檔（AGENTS.md/CLAUDE.md） |
 | `cross_validation` | `findings` | 重新命名，更新 check IDs |
 | `modules/edges/hotspots` | `dep_graph.modules/edges/hotspots` | 移至 dep_graph 子物件 |
@@ -107,13 +107,13 @@
       "check_id": "X-tag-module",
       "severity": "important",
       "detail": "Card '騰落線指標' has tag 'nonexistent' which does not match any package subdirectory or top-level dir",
-      "kanban_source": ".kanban/Backlog/騰落線指標.md"
+      "kanban_source": "backlog/tasks/task-42 - 騰落線指標.md"
     },
     {
       "check_id": "X-ep-ready",
       "severity": "important",
       "detail": "Card '重構 Pipeline' in Next-Up references EP 'ep-refactor-pipeline.md' but file not found",
-      "kanban_source": ".kanban/Next-Up/重構Pipeline.md"
+      "kanban_source": "backlog/tasks/task-43 - 重構Pipeline.md"
     },
     {
       "check_id": "X6",
@@ -187,8 +187,8 @@ Cargo workspace 的機械解析（無 Rust 時為 `null`）。
 |------|------|------|
 | `capabilities_total` | int | 所有 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities ✅ 條目總數 |
 | `capabilities_hash` | string | sorted capability:module:status 的 MD5 前 12 碼 |
-| `kanban_total` | int | .kanban/ 卡片總數 |
-| `kanban_by_lane` | dict | 各 lane 卡片數 |
+| `kanban_total` | int | backlog 任務總數（欄位名歷史保留——源已遷 `backlog/tasks/`） |
+| `kanban_by_lane` | dict | 各 status 任務數（欄位名歷史保留） |
 | `kanban_hash` | string | sorted title:lane:tags 的 MD5 前 12 碼 |
 | `instruction_file_total` | int | instruction 檔總數（AGENTS.md + legacy CLAUDE.md） |
 

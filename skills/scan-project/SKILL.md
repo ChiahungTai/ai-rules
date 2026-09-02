@@ -3,7 +3,7 @@ name: scan-project
 description: >
   Unified project knowledge scanner (on-demand). Scans Python imports (built-in AST), Rust Cargo
   workspaces (members + internal crate deps + PyO3 binding marker), mechanical directory inventory,
-  instruction files (AGENTS.md preferred, CLAUDE.md legacy), and .kanban/ cards. Produces dep_graph +
+  instruction files (AGENTS.md preferred, CLAUDE.md legacy), and backlog/ cards. Produces dep_graph +
   rust_workspace + dir_inventory + instruction_files + findings + fingerprint. Nightly maintain no
   longer generates snapshots (structural graph freshness is code-reality's domain); run on demand
   for mechanical inventory / cross-validation findings.
@@ -17,7 +17,7 @@ allowed-tools: Bash(uv run python *)
 
 # /scan-project — 統一專案知識掃描器
 
-掃描 Python import 依賴（內建 AST）、Rust Cargo workspace、機械目錄盤點、模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities 表格、.kanban/ 卡片，產出 **dep_graph + rust_workspace + dir_inventory + instruction_files + findings + fingerprint**。
+掃描 Python import 依賴（內建 AST）、Rust Cargo workspace、機械目錄盤點、模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities 表格、backlog 卡（`backlog/tasks/` frontmatter），產出 **dep_graph + rust_workspace + dir_inventory + instruction_files + findings + fingerprint**。
 
 Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.md)
 
@@ -35,7 +35,7 @@ Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.m
 5. **findings** — 機械性交叉驗證問題（路徑、tag、重複等）
 6. **fingerprint** — 輕量變化偵測（counts + hashes）
 
-內部解析（instruction 檔（AGENTS.md 為主、CLAUDE.md legacy）、.kanban/）僅用於計算 findings，**不在輸出中包含 registry**。
+內部解析（instruction 檔（AGENTS.md 為主、CLAUDE.md legacy）、backlog 卡）僅用於計算 findings，**不在輸出中包含 registry**。
 
 **LSP 與 dep_graph 的分工（正交，非競爭）**：
 
@@ -64,7 +64,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 
 - **內建 AST 掃描**（模組 = package root 下第一層目錄；`source: builtin`）；連 package root 都沒有才為空（`source: none`）
 - 沒有 Cargo workspace：`rust_workspace` 為 `null`
-- 如果沒有 `.kanban/` 目錄：kanban 相關 findings 不產出
+- 如果沒有 `backlog/` 目錄：backlog 卡相關 findings 不產出
 - 輸出格式 schema_version: 6
 
 ## 產出
@@ -93,7 +93,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 |------|-----------------|
 | `/instruction-sync` | 可選：載入 dep_graph 用於 import 驗證 |
 | `/instruction-init` | 可選：執行本 skill，用 findings 報告缺口 |
-| `/doc-health` | 步驟 1 消費 findings，LLM 直接讀 instruction 檔（AGENTS.md/CLAUDE.md）+ .kanban/ 做品質檢查 |
+| `/doc-health` | 步驟 1 消費 findings，LLM 直接讀 instruction 檔（AGENTS.md/CLAUDE.md）+ backlog 卡（`backlog/`）做品質檢查 |
 
 ## 交叉驗證（機械性）
 

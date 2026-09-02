@@ -79,7 +79,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 **code_reality baseline snapshot（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：一律跑（不綁「補記 baseline」條件）：`code-reality snapshot --repo <repo> --label <ep>`——錨定 build 起點 code 結構（HEAD 通常 = EP baseline；resume 或 EP 後另有 commits 時錨 build 起點現狀，git 弧邊界仍由 EP baseline hash 管轄），是 delta_tour（EP 宣稱模組 vs 實際變動對照）的 before 基準，階段 6 EP 對照歸納、`/code-review` 模式 B primed（含 `/post-build` 編排；弧模式才產出 delta_tour 對照——時點條件見模式 B）與 `/debrief` 前後差異段消費。docs mode EP 跳過（code edges 不變）；未裝跳過，不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
 
 1. 讀取 Execution Plan（慣例路徑＝任務家 `<task>/ep.md`——探測：`ai-analysis/_tasks/`／`ai-analysis/_projects/<線>/tasks/`／否則 repo-root `00-tasks/`，單一源見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」；與 Report Shell 同 task 目錄——一弧全生命檔案同處；舊 `ai-analysis/execution-plans/` 慣例退役），識別段落結構、依賴關係
-2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應 `.kanban/Backlog/` cards 反映「正在做」——repo 慣例探測：有 `In-Progress/` lane → 搬入；無（2026-09-02 後縮編 repo）→ 卡留 Backlog，進行中由任務目錄存在性表達（結算在階段 5a）
+2. **backlog 卡狀態更新**（repo 有 `backlog/` 時）：EP 對應卡翻進行中——`backlog task edit <id> -s "In Progress"`（＋開工雙 ref，合約見 [kanban-board](../kanban-board/SKILL.md)）；無 `backlog/` → 容錯跳過（進行中由任務目錄存在性表達；結算在階段 5a）
 3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）。LSP `goToDefinition` 驗證 dependency anchors 的定義端，`findReferences` 驗證消費端，`hover` 確認關鍵參數型別——三者對不同 anchor 獨立，同 block 併發（[tool-discipline](../../rules/tool-discipline.md) 批次化）
 4. **POC + demo 盤點**：掃描 `poc/**/*.py`、`demo_*.py`、`scripts/demo_*.py`、`notebooks/*.ipynb`，建立 `{module} → [poc/demo paths]` 映射表
 5. 檢查清單：Kanban InProgress ✓ | POC/demo 映射表 ✓ | 測試檔案 ✓ | instruction 檔同步 ✓ | 依賴完整 ✓
@@ -246,7 +246,7 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 | 情境 | 結算 |
 |------|------|
-| **情境 A** EP 最後段、UC 全完成 | **全項結算**：Capabilities ✅ 寫入 + Kanban 搬 Done + SYSTEM-MAP 結算（原子三件）+ EP 歸檔 + flow-feedback 歸檔 |
+| **情境 A** EP 最後段、UC 全完成 | **全項結算**：Capabilities ✅ 寫入 + backlog 結案三步（`-s Done --final-summary` → `--ref` 換 `done/` 新 URL → `task complete`，見 [kanban-board](../kanban-board/SKILL.md)）+ SYSTEM-MAP 結算（原子三件）+ EP 歸檔 + flow-feedback 歸檔 |
 | **情境 B** EP 中間段 | **預覽 only**：SYSTEM-MAP `📋→✅ Built`（不寫 ✅、不升 Verified）；loop 未收斂（達 3 輪上限）→ 阻止升級 + ⚠️ |
 | **情境 C** 純 refactor（無新 UC） | **跳過**結算 |
 | **情境 D** docs-mode EP（無 .py UC，EP 完成） | **EP 歸檔 only** |
