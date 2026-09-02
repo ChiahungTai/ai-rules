@@ -4,10 +4,13 @@ title: muse-plugin-cc 委派 plugin（ZCode/CC 雙端）
 status: In Progress
 assignee: []
 created_date: '2026-09-02 13:07'
-updated_date: '2026-09-02 13:08'
+updated_date: '2026-09-02 13:33'
 labels:
   - plugins
 dependencies: []
+references:
+  - 'http://127.0.0.1:6421/ai-rules/_tasks/09-02-muse-plugin-cc/index.html'
+  - ai-analysis/_tasks/09-02-muse-plugin-cc/ep.md
 ordinal: 12000
 ---
 
