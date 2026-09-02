@@ -250,6 +250,7 @@ muse-rescue agent flow:
 ### 語義約束（verdict 一律 JSON schema 判定，永不由 exit code 推導——S1 共享語義）
 ### 核心實作要點
 - **bridge `review` 子命令（EP review S-P1 採納：schema 驗證 owner 在 bridge 層，`task` 保持純 forwarder）**：prompt 組裝（模板＋diff＋completion-check 要求）＋ spawn（`--sandbox-network restricted`、`--reasoning-effort xhigh` 預設）＋ verdict JSON 解析＋schema 驗證（不符 = review-fail，不猜）＋ export trajectory
+- **CR 條件式接線（2026-09-02 軌跡實證＋同日 MCP 接線後修訂）**：muse 端已於 `~/.config/muse/settings.json` 掛 `mcp_servers.code-reality`（stdio `code-reality-mcp --stdio`、mode optional——實證 headless run 可見 20+ `mcp__code_reality.*` 工具）。「存在認知」機器層已解；review prompt 模板教的是**用法指引**：repo 有 `.code-reality.toml`（或 graph.db）時符號/呼叫鏈/影響面查證優先 CR 查詢工具（refs/callers/closure/impact_radius），無 index 退 rg；**禁用寫入面工具**（build/snapshot/delta_tour——MCP 不在 muse 沙箱內，防 review run 產生副作用）。根據：rules-based tool routing 不傳播給委派 agent（mosaic 軌跡實證 CR 零呼叫）——接線須顯式做（本條＝MCP 機器層＋prompt 用法層雙保險）
 - `commands/muse-review.md` + `prompts/review.md`：
   - prompt 模板內建 requirement-by-requirement completion check（研究 B 節 `/goal` 補償）
   - 大 diff 走 `--prompt-file`（S1 契約：超閾值自動改暫存檔）
@@ -269,6 +270,7 @@ review(baseRef)   [bridge 子命令]
 ### 驗證策略
 - 整合：fake-muse 回 fixture verdict JSON（合法/非法各一）驗 schema 閘
 - E2E：對本 repo 一個小 commit 真跑 review，verdict + trajectory 落檔
+- **CR 紅利實驗（可選，單變數設計）**：同 diff、`--model muse-spark-1.2` pin（防 R7 漂移）、只切「prompt 明示 CR CLI」一項——量 findings 差異。注意：`--trust-workspace` 是另一個實驗（規則載入混合效應，非純 CR），勿混組
 - 未覆蓋：finding 品質（模型面）；大 diff 1M context 消化（模型賣點，記錄不測）
 
 ---
