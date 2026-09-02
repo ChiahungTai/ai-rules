@@ -130,8 +130,8 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 
 | 檢查 | 條件 | 嚴重度 | 自動修正 |
 |------|------|--------|---------|
-| Stale card | Next-Up > 7 天、In-Progress > 14 天無修改 | 🟡 | 不修正（只報告） |
-| Lane 限額 | Backlog > 100 張 | 🟡 | 不修正（只報告） |
+| Stale card | To Do > 7 天、In Progress > 14 天無修改 | 🟡 | 不修正（只報告） |
+| Lane 限額 | To Do > 100 張 | 🟡 | 不修正（只報告） |
 | 無 tag 卡片 | 卡片第一行無 `[tag:xxx]` | 🟢 | auto: 從內容推導 tag（同 X-tag-module 修正邏輯） |
 
 ### 無 tag 卡片推導
@@ -143,7 +143,7 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 
 ### backlog 卡處置（2026-09-02 起單制）
 
-`backlog/` 制：**completed/ 是歷史檔案庫，不套年齡 stale heuristic**（價值正是歷史追溯——決策脈絡、驗收紀錄；過大由人類在 `/project-review` 留意）。活躍卡年齡檢查（To Do/In Progress）＝ doc-health 步驟 4（讀 frontmatter `updated_date`）。無 `backlog/` 的 repo 無卡層清理面。`.kanban/` 四 lane 舊制已退役。
+`backlog/` 制：**completed/ 是歷史檔案庫，不套年齡 stale heuristic**（價值正是歷史追溯——決策脈絡、驗收紀錄；過大由人類在 `/project-review` 留意）。**Done 欄卡清場＝`backlog task complete <id>` 搬 `completed/`**——結案兩步延後的批次執行點（命令合約見 [kanban-board](../kanban-board/SKILL.md)）。活躍卡年齡檢查（To Do/In Progress）＝ doc-health 步驟 4（讀 frontmatter `updated_date`）。無 `backlog/` 的 repo 無卡層清理面。`.kanban/` 四 lane 舊制已退役。
 
 ---
 
@@ -200,8 +200,8 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 ⚠️ findings: N issues (0 critical, N important)
 - [X-cap-path] xxx 不存在 → [自動修正已完成]
 - [X-tag-module] 卡片 'xxx' tag 錯誤 → [自動修正已完成]
-Kanban: Backlog N 張, Next-Up N 張, In-Progress N 張, Done N 張
-  - Stale: Next-Up 'xxx' 已 8 天未更新
+Kanban: To Do N 張, In Progress N 張, Done N 張
+  - Stale: To Do 'xxx' 已 8 天未更新
 
 ### Phase 4: Health Report
 - 跨 phase 關聯：Phase 2 Instruction 問題 ↔ Phase 3 findings 同根因

@@ -63,9 +63,9 @@
 | `architecture.md` | 設計決策 / whole-picture（why）— 有此檔才適用 | 永久 |
 | `SYSTEM-MAP.md` | 跨域功能狀態總覽（status） | 現在 |
 | `dependency-graph.md` | 跨模組依賴 / ripple 風險地圖 — 有此檔才適用（per-repo opt-in，人工策展；機械依賴/ripple 查詢由 code-reality graph 承擔） | 現在 |
-| `backlog/` | 任務追蹤（Backlog.md board——承諾池；機制單一源見 kanban-board skill） | 暫時（結案＝`task complete` 搬 `completed/`） |
+| `backlog/` | 任務追蹤（Backlog.md board——承諾池；機制單一源見 kanban-board skill） | 暫時（結案兩步後卡留 Done 欄；`task complete` 搬 `completed/` 延後到清理批次） |
 
-**UC 生命週期**：📋（execution-plan → `backlog task create`，建卡即 `git add backlog/`）→ 🟡（build 階段 1 → `task edit -s "In Progress"`＋開工雙 ref）→ ✅（build 階段 5a → Capabilities＋結案三步：`-s Done --final-summary` → `--ref` 換 `done/` URL → `task complete`；UC 完成情境）
+**UC 生命週期**：📋（execution-plan → `backlog task create`，建卡即 `git add backlog/`）→ 🟡（build 階段 1 → `task edit -s "In Progress"`＋開工雙 ref）→ ✅（build 階段 5a → Capabilities＋結案兩步：`-s Done --final-summary` → `--ref` 換 `done/` URL，卡留 Done 欄；UC 完成情境）
 
 ### UC 狀態標記
 
@@ -98,9 +98,10 @@
 ### 銜接機制
 
 1. **execution-plan → backlog**：UC盤點自動 `backlog task create` 建卡（含 labels、EP 連結；建卡即 `git add backlog/`——命令合約見 kanban-board skill）
-2. **build → 進行中＋結算**：階段 1 `backlog task edit <id> -s "In Progress"`（無 `backlog/` 容錯跳過）；階段 5a 結算 UC 完成情境——新增 Capabilities ✅ 行 + backlog 結案三步（`-s Done --final-summary` → `--ref` 換 `done/` 新 URL → `task complete`）+ EP 歸檔（任務家 done/，放置學見 illustrate-html-mode「產物位置分流」）（working tree，隨 commit 帶走）
+2. **build → 進行中＋結算**：階段 1 `backlog task edit <id> -s "In Progress"`（無 `backlog/` 容錯跳過）；階段 5a 結算 UC 完成情境——新增 Capabilities ✅ 行 + backlog 結案兩步（`-s Done --final-summary` → `--ref` 換 `done/` 新 URL，卡留 Done 欄）+ EP 歸檔（任務家 done/，放置學見 illustrate-html-mode「產物位置分流」）（working tree，隨 commit 帶走）
 3. **post-build（收尾鏈）**：build 完成、commit 之前——code-review → judge-review → 修正迴圈 → consistency → metadata-sync，止步於 commit 前（詳見 post-build skill）
 4. **commit → 純 git 提交**：finalization 已在 build 階段 5a 結算（working tree），commit 一次帶走 code + finalization（**同 commit** 保證，git add 納入 finalization 檔）
+5. **卡動作約束（任何 session——含 automation 衍生／監控迴路等不載 build-chain skill 者）**：要對 backlog 卡做事（含結案、歸檔），第一個動作＝`task edit <id> -s "In Progress"`（讓平行 session 可見）；任何 `task complete`／`archive`／清板前必跑 kanban-board skill 的 `scripts/backlog_precheck.sh`（exit 1 = 停手）
 
 ---
 

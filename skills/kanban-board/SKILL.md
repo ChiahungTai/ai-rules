@@ -23,9 +23,9 @@ backlog task create "<標題>" -l <labels> -d <目標一句> [--ac "<驗收條�
 git add backlog/    # 建卡即 staged（autoCommit=false 下 CLI 不 commit）
 ```
 
-**開工**（implement 階段 1）：
+**開工**（凡要動某卡的 session——implement 階段 1 是標準入口；automation／監控／report 等衍生 session 不走 implement 亦同）：
 ```bash
-backlog task edit <id> -s "In Progress"
+backlog task edit <id> -s "In Progress"   # 🔴 必是動卡的第一個動作——卡掛 To Do 度過工作期間＝平行 session 眼中可清項
 backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 ```
 
@@ -33,12 +33,18 @@ backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 - `http URL`＝report server 上的 Report Shell／md preview 位址（**repo 慣例**——如 mosaic `http://127.0.0.1:6421/<wt>/<任務路徑>/index.html`；殼未建前的過渡形態指 md viewer `/_md-viewer.html?p=/<route>/<任務路徑>/ep.md`；hook 1 建殼後更新為殼 URL）
 - `repo 相對路徑`＝AI session／VSCode 消費形態
 
-**結案三步**（build 5a / post-build；URL 生命週期隨任務目錄遷 `done/` 變更）：
+**結案兩步**（build 5a / post-build；URL 生命週期隨任務目錄遷 `done/` 變更）：
 ```bash
 backlog task edit <id> -s Done --final-summary "<一句>"
 backlog task edit <id> --ref "<done/ 新URL>,<相對路徑>"   # --ref 整組替換
-backlog task complete <id>                                # 搬 completed/——當場結案，不留 lane 囤積
 ```
+結案後**卡留 board Done 欄**（官方預設工作流——Done 欄可見＝完成工作可見）；`task complete <id>`（搬 `completed/`）是清場動作，延後到 board 清理批次（maintain 週期）或 user 指示，不隨結案當場執行。
+
+**🔴 清理前跨線掃描**（凡 `task complete`／歸檔／清板之前，強制先跑；結案兩步本身不需 precheck——結案 Done 留板可見）：
+```bash
+bash <skills 根>/kanban-board/scripts/backlog_precheck.sh [卡id ...]   # skills 根：ZCode ~/.zcode/skills、Claude ~/.claude/skills（symlink 同源）；無參=掃全部 To Do 卡；exit 1 = 停手
+```
+腳本檢查：①`status=In Progress` 卡永不可清；②跨線訊號 `git log --all --not HEAD --grep <卡id>`——「有 commit 提及此卡、但當前 branch 不包含」＝真平行線訊號（裸 `--all --grep` 會命中本線建卡 commit，永遠誤報）。exit 1 → 停手先協調，不就地清（真實案例：分岔 branch commit 標題含卡 id、平行 session 對同卡各自結案，此檢查可攔下）。
 
 **掃描**：
 - AI 消費：`backlog task list --plain`（非互動 canonical 輸出）
@@ -54,11 +60,10 @@ backlog task complete <id>                                # 搬 completed/——
 | Web board | `backlog browser` | `127.0.0.1:6420`（config `default_port`）；WebSocket 雙向 live——CLI/AI 改檔→瀏覽器秒更、拖卡→frontmatter 變更 |
 | TUI | `backlog board` | 終端互動板（fs.watch live）；CJK 寬度有測試釘住，邊角字形留意 |
 
-## 與官方工作流的差異宣告（三條）
+## 與官方工作流的差異宣告（兩條）
 
 1. **PLAN 不寫進卡**——實作計畫唯一源＝EP（任務家 `<task>/ep.md`）；卡用 `references` 指回 EP/殼（EP 深度＝baseline hash/Report Shell/post-build 鏈，是卡 PLAN 欄位的超集）
-2. **結案當場 `task complete`**——不留 Done lane 囤積；歷史在 `completed/`＋git
-3. **不掝 per-task branch**——任務與分支解耦（多 worktree 紀律由各 repo 自訂）
+2. **不掝 per-task branch**——任務與分支解耦（多 worktree 紀律由各 repo 自訂）；spawned／automation session 的 owning-WT 約束單一源＝[collaboration-constraints rule](../../rules/collaboration-constraints.md)「Agent 派發與產出回收」（always-load 層—— spawned session 不載本 skill 也約束得到）
 
 ## 容錯
 

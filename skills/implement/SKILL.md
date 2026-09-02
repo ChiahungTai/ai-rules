@@ -246,7 +246,7 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 | 情境 | 結算 |
 |------|------|
-| **情境 A** EP 最後段、UC 全完成 | **全項結算**：Capabilities ✅ 寫入 + backlog 結案三步（`-s Done --final-summary` → `--ref` 換 `done/` 新 URL → `task complete`，見 [kanban-board](../kanban-board/SKILL.md)）+ SYSTEM-MAP 結算（原子三件）+ EP 歸檔 + flow-feedback 歸檔 |
+| **情境 A** EP 最後段、UC 全完成 | **全項結算**：Capabilities ✅ 寫入 + backlog 結案兩步（`-s Done --final-summary` → `--ref` 換 `done/` 新 URL，卡留 Done 欄；見 [kanban-board](../kanban-board/SKILL.md)）+ SYSTEM-MAP 結算（原子三件）+ EP 歸檔 + flow-feedback 歸檔 |
 | **情境 B** EP 中間段 | **預覽 only**：SYSTEM-MAP `📋→✅ Built`（不寫 ✅、不升 Verified）；loop 未收斂（達 3 輪上限）→ 阻止升級 + ⚠️ |
 | **情境 C** 純 refactor（無新 UC） | **跳過**結算 |
 | **情境 D** docs-mode EP（無 .py UC，EP 完成） | **EP 歸檔 only** |

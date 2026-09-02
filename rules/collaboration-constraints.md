@@ -82,6 +82,7 @@ harness-scope: neutral
 > **核心原則**：跨 repo 寫入是 spawn 端（主 session）的責任，不丟給受限 worktree 的 agent。
 
 - **spawn 前判斷 worktree 能力**：跨 repo 任務優先在目標 repo 的 session 做；agent 寫不進目標 → agent 寫當前 repo，主 session 事後搬運回收；禁把「跨 repo 寫入」責任丟給 agent（worktree 隔離下前置確認無效——根因是 spawn 端 routing）
+- **spawned／automation session 不在非 owning worktree 寫卡或結案**：卡的 owning WT 依各 repo 線 tag↔WT 規則判定；判定不了 → 回報 spawn 端，不在當前 WT 動手（真實案例：owning=main 的 backlog 卡被 warrant branch 的監控 session 結案——規則存在但住在對方不載入的檔案）
 - **Agent 檔案寫入紀律**（注入義務：agent 不自動載入本 rule，spawn 會寫檔的 agent 時主 session 須將此三條寫入 prompt）：
   1. **禁 /tmp**——產出寫在自己當前工作目錄（repo/worktree）內（易丟、不可追溯、session 中斷即消失）
   2. **寫不進指定路徑（跨 repo / worktree 隔離）→ 回報「環境限制：我寫不進 X」**，不自行妥協到 /tmp；交回主 session 決定
