@@ -1,16 +1,16 @@
 ---
 id: AIR-12
 title: muse-plugin-cc 委派 plugin（ZCode/CC 雙端）
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-02 13:07'
-updated_date: '2026-09-02 13:33'
+updated_date: '2026-09-02 14:11'
 labels:
   - plugins
 dependencies: []
 references:
-  - 'http://127.0.0.1:6421/ai-rules/_tasks/09-02-muse-plugin-cc/index.html'
-  - ai-analysis/_tasks/09-02-muse-plugin-cc/ep.md
+  - 'http://127.0.0.1:6421/ai-rules/_tasks/done/09-02-muse-plugin-cc/index.html'
+  - ai-analysis/_tasks/done/09-02-muse-plugin-cc/ep.md
 ordinal: 12000
 ---
 
@@ -47,3 +47,9 @@ Muse Code 委派 plugin：headless muse exec 委派、結構化 review、runs �
 ## 備註
 已裁定：不支援 META_API_KEY（純訂閱）、--yolo 呼叫端 opt-in、--trust-workspace 獨立於 --yolo、預設模型 pin `muse-spark-1.2`（standard tier，CLI 預設不穩定）。EP review 雙 agent＋muse 第三輪複審全數寫回（2026-09-02）。殘留清單見 repo `docs/build-acceptance.md` Round 3（截斷 marker 測試、status 語義邊角等——併 S5）。
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+五 UC 全數完成：委派（S1+S3）/review（S4）/runs+lifecycle hooks（S5）/setup（S2）/雙端發佈（S6）。雙端消費端驗收通過（ZCode muse-rescue 真委派 job-mtk53peu＋CC headless 完整迴路 job-mtk5g9qe）。muse repo Round 4 已 commit（c5b7d8d/5c4b9ca/2ca1bb7、0.2.1）；ai-rules 側收尾：ep/build-acceptance 回同步任務家並遷 done/、AGENTS.md 專案結構加 repo 指紋行
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -130,7 +130,7 @@ ai-rules 為 meta repo（無模組 Capabilities 表格）——本 EP 變更不�
 - caller flag 面（S3/S4 消費）：`--yolo`（opt-in，取代 disable-approval）、`--trust-workspace`、`--resume`→bridge 解析 last session、`--steps N`、`--effort <v>`→`--reasoning-effort <v>`、`--model <id>`、`--network <v>`→`--sandbox-network <v>`、`--allow-workspace-switch`
 - **硬前提**：`task` 拒跑條件＝binary 缺失或 setup 綠燈未取得（SM-13 防stored PAYG key 靜默繞過訂閱；綠燈快取於 ledger，setup 重跑可失效）
 - exit code 映射表：`0`→completed、`1`→failed-or-capped、`2`→usage-error、`130/143`→interrupted；verdict 永不由 exit code 推導；**細分狀態（capped/failed-usage/auth-failed/workspace-mismatch）由 JSONL 錯誤事件關鍵字剖析**（事件樣本以 POC 記錄為規格源；分類失敗＝原文透傳，不猜）
-- **ledger 契約（升 S1 擁有）**：per-repo `.muse-bridge/jobs.json`（job index：id、sessionId〔來源＝事件流首行 `stream.id`〕、status、steps、effort、model、summary、exitCode、timestamp）＋ per-job JSONL 原始檔。**寫入原子化（write-tmp＋rename）**——S3/S4/S5 平行段共享，併發 bridge 同寫不得丟 job（muse 複審 #3 採納）；`status` 枚舉 `running|completed|failed|failed-usage|capped|interrupted`（JSONL 事件剖析產出），`exitCode` 另存原值——雙源並存非二選一
+- **ledger 契約（升 S1 擁有）**：per-repo `.muse-bridge/jobs.json`（job index：id、sessionId〔來源＝事件流首行 `stream.id`〕、status、steps、effort、model、summary、exitCode、timestamp）＋ per-job JSONL 原始檔。**寫入原子化（write-tmp＋rename）**——S3/S4/S5 平行段共享，併發 bridge 同寫不得丟 job（muse 複審 #3 採納）；`status` 枚舉 `running|completed|failed|failed-usage|capped|interrupted|review-fail`（JSONL 事件剖析產出；`review-fail` 為 S4 review verdict schema 驗證失敗專屬——S4 fix round 回寫），`exitCode` 另存原值——雙源並存非二選一
 - prompt 傳遞：一律 `--` 分隔後接 prompt（防 `-` 開頭誤判 flag）；超過閾值（~2KB）自動改寫暫存檔＋`--prompt-file`
 - spawn cwd＝workspace root（git root；無 git 則 cwd）
 
@@ -250,17 +250,17 @@ muse-rescue agent flow:
 ### 語義約束（verdict 一律 JSON schema 判定，永不由 exit code 推導——S1 共享語義）
 ### 核心實作要點
 - **bridge `review` 子命令（EP review S-P1 採納：schema 驗證 owner 在 bridge 層，`task` 保持純 forwarder）**：prompt 組裝（模板＋diff＋completion-check 要求）＋ spawn（`--sandbox-network restricted`、`--reasoning-effort xhigh` 預設）＋ verdict JSON 解析＋schema 驗證（不符 = review-fail，不猜）＋ export trajectory
-- **CR 條件式接線（2026-09-02 軌跡實證＋同日 MCP 接線後修訂）**：muse 端已於 `~/.config/muse/settings.json` 掛 `mcp_servers.code-reality`（stdio `code-reality-mcp --stdio`、mode optional——實證 headless run 可見 20+ `mcp__code_reality.*` 工具）。「存在認知」機器層已解；review prompt 模板教的是**用法指引**：repo 有 `.code-reality.toml`（或 graph.db）時符號/呼叫鏈/影響面查證優先 CR 查詢工具（refs/callers/closure/impact_radius），無 index 退 rg；**禁用寫入面工具**（build/snapshot/delta_tour——MCP 不在 muse 沙箱內，防 review run 產生副作用）。根據：rules-based tool routing 不傳播給委派 agent（mosaic 軌跡實證 CR 零呼叫）——接線須顯式做（本條＝MCP 機器層＋prompt 用法層雙保險）
 - `commands/muse-review.md` + `prompts/review.md`：
   - prompt 模板內建 requirement-by-requirement completion check（研究 B 節 `/goal` 補償）
   - 大 diff 走 `--prompt-file`（S1 契約：超閾值自動改暫存檔）
 - `schemas/review-output.schema.json`：codex 版搬（verdict/summary/findings[severity,title,...]/next_steps）
+- **CR 條件式接線（2026-09-02 軌跡實證＋同日 MCP 接線後修訂）**：muse 端已於 `~/.config/muse/settings.json` 掛 `mcp_servers.code-reality`（stdio `code-reality-mcp --stdio`、mode optional——實證 headless run 可見 20+ `mcp__code_reality.*` 工具）。「存在認知」機器層已解；review prompt 模板教的是**用法指引**：repo 有 `.code-reality.toml`（或 graph.db）時符號/呼叫鏈/影響面查證優先 CR 查詢工具（refs/callers/closure/impact_radius），無 index 退 rg；**禁用寫入面工具**（build/snapshot/delta_tour——MCP 不在 muse 沙箱內，防 review run 產生副作用）。根據：rules-based tool routing 不傳播給委派 agent（mosaic 軌跡實證 CR 零呼叫）——接線須顯式做（本條＝MCP 機器層＋prompt 用法層雙保險）
 - review 完成後自動 `muse export --session <id>` 存 trajectory，verdict JSON 附路徑（審計鏈）
 
 ### Pseudo Code
 ```
 review(baseRef)   [bridge 子命令]
-├── git diff 範圍收集（--base/--scope，codex review 同參數面）
+├── git diff 範圍收集（--base/--scope，codex review 同參數面；--scope 縮減為僅 --base——S4 fix round 裁定記 deviation，實作留後續段，見 BUILD-REPORT）
 ├── prompt = review 模板 + diff + completion-check 要求（超閾值 → --prompt-file）
 ├── spawn：flags = {network: "restricted", effort: "xhigh"}
 ├── 解析 verdict JSON → schema 驗證（不符 = review-fail，不猜）
@@ -270,8 +270,8 @@ review(baseRef)   [bridge 子命令]
 ### 驗證策略
 - 整合：fake-muse 回 fixture verdict JSON（合法/非法各一）驗 schema 閘
 - E2E：對本 repo 一個小 commit 真跑 review，verdict + trajectory 落檔
-- **CR 紅利實驗（可選，單變數設計）**：同 diff、`--model muse-spark-1.2` pin（防 R7 漂移）、只切「prompt 明示 CR CLI」一項——量 findings 差異。注意：`--trust-workspace` 是另一個實驗（規則載入混合效應，非純 CR），勿混組
 - 未覆蓋：finding 品質（模型面）；大 diff 1M context 消化（模型賣點，記錄不測）
+- **CR 紅利實驗（可選，單變數設計）**：同 diff、`--model muse-spark-1.2` pin（防 R7 漂移）、只切「prompt 明示 CR CLI」一項——量 findings 差異。注意：`--trust-workspace` 是另一個實驗（規則載入混合效應，非純 CR），勿混組
 
 ---
 

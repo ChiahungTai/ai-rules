@@ -95,13 +95,14 @@
 - `agents/` — 跨 harness subagent 定義（registry 結構：`shared/` 內容切片＋`zcode/`／`claude/` per-harness registry 視圖，`~/.zcode/agents`→`agents/zcode/`、`~/.claude/agents`→`agents/claude/`；tier-pinned 家族〔lite-verify/spec-miner/vision-review/cr-research〕、欄位相容策略與 ZCode Beta 限制見 [agents/AGENTS.md](agents/AGENTS.md)）
 - `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）。`ref-docs/harness/` 是五家 harness 官方文檔鏡像（claude-code/opencode/zcode/codex/meta〔Muse Code〕）+ `contracts.md` 對照分析——**更新鏡像用既有工具 `ref-docs/harness/crawl.py`**（`uv run python ref-docs/harness/crawl.py [--source zcode]`，discover + sha256 增量寫入 + manifest 維護；不要手動逐頁鏡像）
 - code-reality 工具鏈 — meta 層工具，**住獨立 repo `~/Github/code-reality`（Rust carrier，非本 repo 目錄）**；消費形態 `code-reality <tool> --repo <repo-root>`（binary 安裝與存在性偵測真相源見 skill）；工具用法/時點真相源 [skills/code-reality/SKILL.md](skills/code-reality/SKILL.md)；repo 知識歸各 repo 的 `.code-reality.toml` profile
+- muse-plugin-cc — Muse Code 委派 plugin（ZCode/CC 雙端 marketplace 發佈），**住獨立 repo `~/Github/muse-plugin-cc`（非本 repo 目錄）**；消費形態 plugin agent（`muse-rescue` 委派、`muse:muse-runtime` skills）；計費鐵則＝純訂閱 5h 窗口（無 API key 面）、預設模型 pin `muse-spark-1.2`；CLI 事實真相源 [memory reference_muse-code-cli-facts]、委派細節真相源 repo `docs/`
 
 ## 寫作治理
 
 新增 rule/skill/command 時遵守：
 
 1. **先修剪測試**：這行知識從程式碼推導得出嗎？是 → 不寫
-2. **選對載體**：Hook？Rule？Skill？按上面的分界判斷——且 always-on 預算是稀缺資源：rule 只放每次 session 都需要的硬紀律，on-demand 級內容（理論深掘、失敗案例群、撰寫規範細則）住 skill（reference 分層）；`deploy_agents.py` 的 90KiB gate 撞線時以此為處方
+2. **選對載體**：Hook？Rule？Skill？Prompt/LLM 流程？判準——hook＝純機械＋單一入口＋無語義例外**三者皆是**（缺一即退 LLM 流程，假確定性比真語義危險）；rule＝每次 session 都需要的硬紀律（always-on 預算稀缺）；skill＝on-demand 方法論（理論深掘、失敗案例群、撰寫規範細則＝reference 分層）；語義判斷（有「看情況」例外）＝prompt/LLM 流程。完整決策樹與對照組見 instruction-writing skill「載體決策樹」；`deploy_agents.py` 的 90KiB gate 撞線時以此為處方
 3. **驗證附著**：rule/command 是否包含可驗證的標準？沒有驗證的規則是噪音
 4. **長度預算**：CLAUDE.md 越長，AI 越容易忽略重要規則。一條規則一行能說完最好
 5. **部署同步**：編輯 `rules/` 後的部署與驗證紀律見 [rules/AGENTS.md](rules/AGENTS.md)「部署紀律」（含 `/sync-sources` 機械新鮮度檢查）
