@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>muse-plugin-cc — EP Task Brief</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "PingFang TC", "Noto Sans TC", sans-serif; background: #16181d; color: #d7dae0; line-height: 1.65; padding: 2.5rem 1.5rem; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  h1 { font-size: 1.7rem; margin-bottom: .3rem; color: #f0f2f5; }
+  h2 { font-size: 1.15rem; margin: 2.2rem 0 .8rem; color: #8ab4f8; border-bottom: 1px solid #2a2e37; padding-bottom: .35rem; }
+  p, li { font-size: .95rem; color: #b8bdc7; }
+  .meta { font-size: .8rem; color: #6f7683; margin-bottom: 1.5rem; word-break: break-all; }
+  .badge { display: inline-block; background: #2d3a5f; color: #8ab4f8; border-radius: 4px; padding: .1rem .6rem; font-size: .8rem; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; margin: .6rem 0 1rem; font-size: .88rem; }
+  th { text-align: left; color: #9aa3b2; font-weight: 600; border-bottom: 1px solid #2a2e37; padding: .45rem .6rem; }
+  td { border-bottom: 1px solid #21252d; padding: .45rem .6rem; vertical-align: top; }
+  .ok { color: #7dd487; font-weight: 600; } .warn { color: #e8c468; font-weight: 600; } .fail { color: #e8798a; font-weight: 600; }
+  .todo { background: #232734; border-left: 3px solid #e8c468; padding: .8rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0; }
+  code { background: #21252d; border-radius: 4px; padding: .08rem .4rem; font-size: .85em; color: #c9d1d9; }
+  ul { padding-left: 1.4rem; margin: .4rem 0 .8rem; }
+</style>
+</head>
+<body><div class="wrap">
+
+<h1>muse-plugin-cc <span class="badge">📋 EP 已定稿</span></h1>
+<div class="meta">
+  EP：00-tasks/09-02-muse-plugin-cc/ep.md ｜ baseline：6efae1690a6d955e66a16f02e9f1ac8dbf734f45<br>
+  研究：research.md ｜ POC 實證：poc-results.md ｜ 雙 agent EP review 已寫回（P0×1＋P1×9＋P2 全採納）
+</div>
+
+<h2>這是什麼</h2>
+<p>致敬 codex / grok-build 兩個 plugin-cc（皆 Apache-2.0）開發 <strong>Muse Code 委派 plugin</strong>（ZCode / Claude Code 雙端）：透過 headless <code>muse exec</code> 把任務委派給 Muse Code CLI。
+架構取 grok 的單一 bridge、功能取 codex 的 forwarder 契約與結構化 review、grok 的 runs 表格 UX。</p>
+<p><strong>核心差異化</strong>：唯一能吃到 <strong>Muse coding plan 月訂閱（flat-rate）</strong>的接入路徑——bridge 主動剝除 <code>META_API_KEY</code>，讓計費落在訂閱綁定的簽入 credential（API 接入路徑全是 pay-as-you-go）。</p>
+
+<h2>你已拍板的裁定</h2>
+<ul>
+  <li>不支援 <code>META_API_KEY</code>（純訂閱制；bridge 防禦性剝除＋setup 警告）</li>
+  <li><code>--yolo</code> 由呼叫端 opt-in；預設 <code>--disable-approval</code>（sandbox 開）</li>
+  <li>讀 repo 規則用 <code>--trust-workspace</code>（獨立 flag，非 yolo）</li>
+  <li><strong>預設模型 <code>muse-spark-1.2</code></strong>（standard tier——數據不用於訓練；CLI 預設模型實測不穩定，顯式 pin）</li>
+</ul>
+
+<h2>風險先驗狀態（POC 實證）</h2>
+<table>
+  <tr><th>#</th><th>假設</th><th>狀態</th></tr>
+  <tr><td>R1</td><td>muse CLI 可跑（headless exec）</td><td class="ok">✅ 已過</td></tr>
+  <tr><td>R3</td><td>--json JSONL 可解析</td><td class="ok">✅ 已過（事件 schema 已映射）</td></tr>
+  <tr><td>R7</td><td>CLI 預設模型不穩定（4 runs：contributor×2、standard×2）</td><td class="warn">⚠️ 已對策：顯式 pin model</td></tr>
+  <tr><td>R2</td><td>headless 走訂閱計費</td><td class="warn">⚠️ 半證——待你 dashboard 核對（見下）</td></tr>
+</table>
+<p>實證收穫：委派 E2E 通（修 bug＋自驗證＋獨立複驗 PASS）、session resume 通（正確回想任務）、網路任務通（default flags 下 curl 200）、muse 掃到 91 個既有 skills（python-type-gap frontmatter 已修）。</p>
+
+<h2>⚠️ 你的待辦（R2 判別實驗，兩側都要看）</h2>
+<div class="todo">
+  4 個帳務錨點（18:43–19:00，明細見 poc-results.md 末表）：<br>
+  ① dev.meta.ai → Usage：這 4 個 request <strong>都不應出現</strong>（出現＝被算 PAYG）<br>
+  ② Accounts Center → 訂閱用量：5h 窗口計數<strong>應 +4</strong><br>
+  特別注意 standard 模型的 2 個 runs——若只有它們進 API dashboard，代表訂閱僅涵蓋 contributor tier，預設模型需重裁。
+</div>
+
+<h2>段落地圖（6 段）</h2>
+<table>
+  <tr><th>段</th><th>內容</th><th>備註</th></tr>
+  <tr><td>S1</td><td>骨架＋bridge MVP（task、env 剝除、exit 映射、ledger 契約）</td><td>flag 契約唯一源</td></tr>
+  <tr><td>S2</td><td>setup 健檢（credential 判別、綠燈快取）</td><td>SM-13 硬前提</td></tr>
+  <tr><td>S3</td><td>muse-rescue agent＋<code>/muse</code> command＋skills</td><td>委派入口（P0 修正）</td></tr>
+  <tr><td>S4</td><td>結構化 review（bridge review 子命令＋schema＋trajectory 審計）</td><td>唯讀 restricted</td></tr>
+  <tr><td>S5</td><td>runs 管理（表格 UX＋SessionEnd cancel/kill）</td><td>狀態=事件剖析</td></tr>
+  <tr><td>S6</td><td>marketplace 打包＋雙端安裝＋README</td><td>缺任一端不算完成</td></tr>
+</table>
+
+<h2>下一步</h2>
+<p>EP 已定稿（review 全數寫回）。R2 dashboard 核對完成後即可進 <code>/implement</code>（S1 起步）。</p>
+
+</div></body></html>

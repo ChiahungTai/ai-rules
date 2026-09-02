@@ -1,0 +1,4 @@
+muse: workspace root: /private/tmp (cwd default)
+muse: Skills: 91 loaded · 1 warning · 1 detail hidden
+muse:   python-type-gap: invalid skill package: skill file at /Users/ctai/.agents/skills/python-type-gap/SKILL.md is malformed: SKILL.md frontmatter must end with ---
+muse:   Run `muse skills list --source all` for full diagnostics.

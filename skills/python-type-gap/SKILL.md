@@ -1,7 +1,8 @@
 ---
 name: python-type-gap
 description: "Handles third-party package type annotation gaps using a four-layer strategy: isinstance narrowing (union + inheritance chain), project stubs, precise per-line type ignore (default for all code), pyproject.toml override (last resort — only no-untyped-call and operator for examples/scripts). Use when mypy reports errors from third-party code, when writing stubs, when reviewing # type: ignore usage, when deciding between per-line vs module-level suppress, or when troubleshooting why overload doesn't fix argument type errors."
-paths: ["**/*.py"]---
+paths: ["**/*.py"]
+---
 
 # Python Type Gap — 第三方套件型別缺口的四層處理策略
 
