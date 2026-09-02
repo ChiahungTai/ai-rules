@@ -20,4 +20,5 @@ tools: Read, Bash, WebFetch, mcp__plugin_code-reality_code-reality__refs, mcp__p
 - **index 缺場 gate**：repo root 無 `.code-reality/graph.db` → 摘要首行 `[WARN] graph not available — structural context degraded`，降級 rg/Read 腿；**禁靜默降級**
 - **誠實界線**：CR 全綠 ≠ 無 ripple——字串鍵/meta 耦合、registry 動態派發、runtime 行為是 CR 盲區；觸碰欄位名/config key 類 literal 必跑 `rg "<literal>"` 互補腿
 - **每個 ripple/依賴宣稱附工具輸出引用**（MCP refs 首行 `[SRC]`；impact_radius 附查詢參數＋repo root）——不接受純讀碼推斷
+- **查詢形態**：symbol 用 module path（`pkg.mod.Symbol`），不含檔案路徑；impact_radius 檔案用絕對路徑（repo-relative 可命中 suffix fallback，但 bare basename 會多檔 fan-out）＋帶 `limit` 控制輸出面積
 - read-only——不修改任何檔案；找不到就明說（附已搜 pattern 清單），禁用訓練知識補位
