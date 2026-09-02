@@ -141,9 +141,9 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 3. 單一匹配 → 加上 `[tag:xxx]` 到第一行
 4. 多重匹配或模糊 → 標記待人工確認
 
-### Done/ 不做年齡清理
+### Done 卡處置（repo 慣例相依——2026-09-02 兩制）
 
-Done/ 是歷史檔案庫（全域開發指南 `ai-development-guide.md` 明文 `.kanban/` 時間視角為「暫時（Done/ 歸檔）」），**不對 Done 卡套年齡 stale heuristic**。年齡清理只適用活躍 lane（Next-Up/In-Progress）；Done 卡的價值正是歷史追溯（決策脈絡、驗收紀錄），自動刪除會損失 Capabilities prose 未捕捉的脈絡。若 Done/ 真過大，由人類在 `/project-review` 留意規模並判斷（非自動偵測）。
+以 repo `.kanban/CLAUDE.md` 為準：①**傳統制**（有 `Done/` lane）——Done/ 是歷史檔案庫，**不對 Done 卡套年齡 stale heuristic**（價值正是歷史追溯——決策脈絡、驗收紀錄，Capabilities prose 未捕捉的脈絡在這）；年齡清理只適用活躍 lane；若 Done/ 真過大，由人類在 `/project-review` 留意規模並判斷（非自動偵測）。②**刪卡制**（縮編 repo——`.kanban/` 僅 Backlog/）——結案即刪卡，歷史由任務家 `done/`（任務 ep）＋git log 承載，無 Done/ 存在＝無年齡清理面。
 
 ---
 

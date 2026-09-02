@@ -78,8 +78,8 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 **code_reality baseline snapshot（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：一律跑（不綁「補記 baseline」條件）：`code-reality snapshot --repo <repo> --label <ep>`——錨定 build 起點 code 結構（HEAD 通常 = EP baseline；resume 或 EP 後另有 commits 時錨 build 起點現狀，git 弧邊界仍由 EP baseline hash 管轄），是 delta_tour（EP 宣稱模組 vs 實際變動對照）的 before 基準，階段 6 EP 對照歸納、`/code-review` 模式 B primed（含 `/post-build` 編排；弧模式才產出 delta_tour 對照——時點條件見模式 B）與 `/debrief` 前後差異段消費。docs mode EP 跳過（code edges 不變）；未裝跳過，不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
 
-1. 讀取 Execution Plan（慣例路徑 `00-tasks/<task>/ep.md`——與 Report Shell 同 task 目錄，一弧全生命檔案同處；舊 `ai-analysis/execution-plans/` 慣例退役），識別段落結構、依賴關係
-2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應的 `.kanban/Backlog/` cards 搬至 `.kanban/In-Progress/`（反映「正在做」的暫時狀態；搬至 Done/ 在階段 5a 結算時執行）
+1. 讀取 Execution Plan（慣例路徑＝任務家 `<task>/ep.md`——探測：`ai-analysis/_tasks/`／`ai-analysis/_projects/<線>/tasks/`／否則 repo-root `00-tasks/`，單一源見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」；與 Report Shell 同 task 目錄——一弧全生命檔案同處；舊 `ai-analysis/execution-plans/` 慣例退役），識別段落結構、依賴關係
+2. **Kanban 狀態更新**：掃描 EP 中引用的能力描述，將對應 `.kanban/Backlog/` cards 反映「正在做」——repo 慣例探測：有 `In-Progress/` lane → 搬入；無（2026-09-02 後縮編 repo）→ 卡留 Backlog，進行中由任務目錄存在性表達（結算在階段 5a）
 3. **深度查證現有程式碼**（不同於階段 0 的 drift 快掃，此處是理解程式碼上下文與設計意圖）。LSP `goToDefinition` 驗證 dependency anchors 的定義端，`findReferences` 驗證消費端，`hover` 確認關鍵參數型別——三者對不同 anchor 獨立，同 block 併發（[tool-discipline](../../rules/tool-discipline.md) 批次化）
 4. **POC + demo 盤點**：掃描 `poc/**/*.py`、`demo_*.py`、`scripts/demo_*.py`、`notebooks/*.ipynb`，建立 `{module} → [poc/demo paths]` 映射表
 5. 檢查清單：Kanban InProgress ✓ | POC/demo 映射表 ✓ | 測試檔案 ✓ | instruction 檔同步 ✓ | 依賴完整 ✓
@@ -253,7 +253,7 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 > **為什麼結算在 build 不在 commit**：finalization 是 working tree 編輯（改 instruction 檔 / mv EP / 搬 Kanban），不需 `outward-action-consent` rule（commit 場景）；commit 退回純 git 提交（一次帶走 code + finalization）。舊設計（commit 階段 3 內嵌）對 LLM 是建議性、會漏跑（實證：commit 歷史多個「補漏」單獨 commit）。working tree 編輯沒 commit 就不永久，跟 code 一起 stash/checkout。Kanban 搬 In-Progress/（暫時狀態）已在階段 1 完成；消費場景提煅隨 Capabilities 寫入一併落地（原「暫存供 commit 寫入」取消）。
 
-**Report Shell badge 同步**：本 EP 對應殼（`00-tasks/<task>/index.html`，execution-plan 定稿 hook 1 所建）存在時隨結算同步——情境 A（全項結算）→ badge ✅；情境 B（中間段）→ 🟡；無殼（hook 1 未跑）跳過不阻擋。殼掛點全貌（hook 1/2、fallback、持久 delta tour）見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」。
+**Report Shell badge 同步**：本 EP 對應殼（任務家 `<task>/index.html`，execution-plan 定稿 hook 1 所建）存在時隨結算同步——情境 A（全項結算）→ badge ✅；情境 B（中間段）→ 🟡；無殼（hook 1 未跑）跳過不阻擋。殼掛點全貌（hook 1/2、fallback、持久 delta tour）見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」。
 
 #### 5b. 模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）+ architecture.md 更新（大型/中型變更）
 
@@ -321,7 +321,7 @@ layer 旗標（本段）與檔尾「與其他命令的協作」段的軟提醒�
 ## 與其他命令的協作
 
 ```
-/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review；定稿生 Report Shell〔hook 1〕＋EP 落 00-tasks/<task>/ep.md）→ [/ep-validate] → post-EP: 方向確認 = 人讀 Report Shell（00-tasks/<task>/index.html）+ /ep-review → /implement（含 Agent Review + /audit-test, LLM 鏈；階段 5a 殼 badge 同步）→ post-build（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport）/ /debrief（深度選配：模組/檔案級深挖——日常判斷材料由殼實作章節吸收）→ /post-build（收尾鏈編排：code-review [dual-context] → judge-review → 修正迴圈 → consistency → metadata-sync → 殼 refresh〔hook 2〕；可拆開單跑）→ /commit
+/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review；定稿生 Report Shell〔hook 1〕＋EP 落任務家 <task>/ep.md）→ [/ep-validate] → post-EP: 方向確認 = 人讀 Report Shell（任務家殼）+ /ep-review → /implement（含 Agent Review + /audit-test, LLM 鏈；階段 5a 殼 badge 同步）→ post-build（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport）/ /debrief（深度選配：模組/檔案級深挖——日常判斷材料由殼實作章節吸收）→ /post-build（收尾鏈編排：code-review [dual-context] → judge-review → 修正迴圈 → consistency → metadata-sync → 殼 refresh〔hook 2〕；可拆開單跑）→ /commit
 ```
 
 **搭配 `/goal`**：啟動後設定 `all segments implemented, uv run pytest exits 0, ruff clean, mypy clean, all demos run` 搭配 auto mode 效果最佳。

@@ -152,7 +152,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 ### 階段 6：執行 Commit
 
-確認後 `git add`（**納入本次開發的完整產物**：主變更 + build 階段 5a 結算的 finalization 檔 —— instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）/ `.kanban/` / `00-tasks/`（EP＋spec＋Report Shell，含歸檔搬移）/ `.tours/delta/`（持久 delta tour——post-build hook 2 產）/ flow-feedback 歸檔）+ `git commit`（含 attribution footer：`Co-Authored-By: <當前 harness 名>`——ZCode session 寫 `Co-Authored-By: ZCode`）。
+確認後 `git add`（**納入本次開發的完整產物**：主變更 + build 階段 5a 結算的 finalization 檔 —— instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）/ `.kanban/` / 任務家（EP＋spec＋Report Shell，含歸檔搬移——`ai-analysis/{_tasks,_projects}` 或 `00-tasks/`）/ `.tours/delta/`（持久 delta tour——post-build hook 2 產）/ flow-feedback 歸檔）+ `git commit`（含 attribution footer：`Co-Authored-By: <當前 harness 名>`——ZCode session 寫 `Co-Authored-By: ZCode`）。
 
 **commit 成功後清除 ephemeral 工作產物**：review 筆記為工作過程產物，commit 結算後清除（同 POC 生命週期哲學，不進 git 歷史）。**per-branch 清除**（`.review/` 可能含多 branch — 如 main / replay / backbone）：只刪當前 branch 的 `.review/<branch>.md`，**勿 `rm -f .review/*.md`**（會誤刪他 branch review）。先 `ls .review/` 確認內容；`.review/` 為 gitignore ephemeral 產物（無 git 復原途徑），per-branch 清除正是為避免誤刪他 branch。保留 `.review/` 目錄供下次 review 直接寫入。
 

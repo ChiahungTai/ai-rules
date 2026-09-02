@@ -22,6 +22,8 @@ Tasks.md 是自架的 Markdown 任務看板。每個 lane 是一個目錄，每�
 ```
 
 > **無 Review lane**：AI 開發流程已內建 review（/implement 含 Agent Review → /code-review → /commit），不需要獨立的 Review lane。In-Progress 完成後直接移至 Done。
+>
+> **lane 慣例探測（2026-09-02 語義修訂）**：縮編 repo 的 `.kanban/` 僅有 `Backlog/`（如 mosaic 三池重構後）——跨線承諾池單 lane：進行中＝任務目錄存在性（任務家 `tasks/`）、結案＝**刪卡**（無 Done/）。四 lane 結構是預設形態；實際以 repo `.kanban/CLAUDE.md` 為準。
 
 ### `.gitkeep` 規則
 
@@ -98,13 +100,15 @@ mv .kanban/Next-Up/feature-X.md .kanban/In-Progress/feature-X.md
 
 ### 完成卡片
 
-移動到 `Done/` 時，在卡片末尾加上完成日期：
+結案時——repo 慣例：有 `Done/` lane → 移動過去並在卡片末尾加上完成紀錄：
 
 ```markdown
 ## 完成紀錄
 - 完成日期: YYYY-MM-DD
 - commit: [commit hash]（如適用）
 ```
+
+無 `Done/`（刪卡制 repo）→ **刪卡**（完成資訊隨 Capabilities ✅ 行與任務家任務 ep 承載）。
 
 ## 與現有流程的整合
 
@@ -123,15 +127,15 @@ standup skill（`/standup`，ZCode 23:20 定時任務整合）的 transition dig
 EP 段落完成後：
 
 1. 消費場景隨 Capabilities 寫入一併落地（build 階段 5a 結算，非暫存供 commit）
-2. 全部段落完成 → build 階段 5a 結算（情境 A）移動到 `Done/` 並加完成紀錄
+2. 全部段落完成 → build 階段 5a 結算（情境 A）結案（搬 `Done/` 加完成紀錄〔舊制〕或刪卡〔刪卡制 repo〕——以 `.kanban/CLAUDE.md` 為準）
 
 ### deep-work 整合
 
 自主實作模式啟動時：
 
-1. 從 `Next-Up/` 拉第一張卡片到 `In-Progress/`
+1. 從 `Next-Up/` 拉第一張卡片到 `In-Progress/`（縮編 repo 無此二 lane——卡留 Backlog，開任務目錄表達進行中）
 2. 實作過程中更新卡片內容（加上決策記錄）
-3. 完成後移動到 `Done/`
+3. 完成後結案（搬 `Done/` 或刪卡——repo 慣例）
 
 ### /execution-plan 整合
 

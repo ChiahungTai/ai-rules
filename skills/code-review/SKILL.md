@@ -32,7 +32,7 @@ Workflow 執行協調：[workflow-review-pattern.md](../_common/workflow-review-
 **任務弧模式（逐段 commit 後的整弧審查）**：implement 的並行 pre-flight commit 與逐段檢查點會讓變更在 build 中途落地，無參調用只剩尾段殘留甚至空 diff——逐 commit 或只看 uncommitted 都會漏跨段互動（大規模刪除段只有對照抽取段才看得出是遷移不是丟失）。
 
 - **觸發**：① 明確傳 baseline hash；② 無參且 uncommitted 空/trivial 且 context EP 記有 baseline → 自動切弧模式（印 `[Code Review] mode=arc baseline=<hash>`）；空且無 EP baseline → 印 `[WARN] no diff（弧模式需 EP baseline）` 終止（fail-loud，同 post-build）
-- **baseline 來源**：EP 整合策略的 `baseline: <hash>`（記錄：execution-plan 建 EP 時；implement 階段 1 補記）——優於 merge-base 推導：同 branch 可能混入他任務 commits，拓撲邊界 ≠ 任務邊界；跨 session context 無 EP 記憶 → 從 Report Shell 殼頭部讀（`00-tasks/*/index.html` 聲明 EP 路徑＋baseline hash——hook 1 起攜帶，機制見 [post-build](../post-build/SKILL.md) 階段 0）
+- **baseline 來源**：EP 整合策略的 `baseline: <hash>`（記錄：execution-plan 建 EP 時；implement 階段 1 補記）——優於 merge-base 推導：同 branch 可能混入他任務 commits，拓撲邊界 ≠ 任務邊界；跨 session context 無 EP 記憶 → 從 Report Shell 殼頭部讀（任務家 `*/index.html`——探測見 [illustrate html-mode](../_common/illustrate-html-mode.md)；聲明 EP 路徑＋baseline hash——hook 1 起攜帶，機制見 [post-build](../post-build/SKILL.md) 階段 0）
 - **非本任務 commits 註明**：`<hash>..HEAD` 範圍內不屬本 EP 的 commits 列進 reviewer prompt（避免誤判 scope；diff 連續仍涵蓋它們）
 - dual-context 兩側吃同一份 diff——範圍錯則兩側同瞎，範圍判定先於 spawn
 
@@ -217,7 +217,7 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 > **canonical review flow（詳細）以本檔為單一源** —— 其他命令畫 flow 須引用此處、不重畫（防 flow drift；機械追蹤見 [/sync-sources](../sync-sources/SKILL.md)）。skills/CLAUDE.md 的 review-pipeline recipe 是高層概觀，非重畫。
 
 ```
-/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review；定稿生 Report Shell〔hook 1〕＋EP 落 00-tasks/<task>/ep.md）→ [/ep-validate] → /implement（含 Agent Review）→ /code-review（六軸含 axis 3 結構 = arch 吸收，top-down，含 commit message）→ /judge-review（一次）→ /commit
+/spec（純輔助·需求釐清，可選）→ /execution-plan（含 EP Review；定稿生 Report Shell〔hook 1〕＋EP 落任務家 <task>/ep.md）→ [/ep-validate] → /implement（含 Agent Review）→ /code-review（六軸含 axis 3 結構 = arch 吸收，top-down，含 commit message）→ /judge-review（一次）→ /commit
 ```
 
 後續：用戶確認 commit message → `/commit` 捷徑（跳過階段 2 Git 狀態分析；保留 2.7 POC/Demo 處置閘門；見 [commit](../commit/SKILL.md) 捷徑模式）

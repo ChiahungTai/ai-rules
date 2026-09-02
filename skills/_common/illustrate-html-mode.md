@@ -31,7 +31,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 | sequence | `sequence` | y 排序，authoring 成本最低 |
 | call graph | `workflow` 或 `sequence` | **優先語意排版型** |
 | class slice | **無對應** | 維持 md，不硬映射 |
-| **報告殼（`@00-tasks/<task>/ep.md`／實作報告／@module／@dir + html）** | 按報告類型選型（見下節變體表） | Report Shell——人類 viewport 通用模式 |
+| **報告殼（`@任務家/<task>/ep.md`／實作報告／@module／@dir + html）** | 按報告類型選型（見下節變體表） | Report Shell——人類 viewport 通用模式 |
 
 ## html 報告殼（Report Shell——人類 viewport 的通用模式）
 
@@ -59,7 +59,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 | 報告類型 | 敘事骨架 | archify 視圖選型 |
 |---------|---------|------------------|
-| EP 計畫導讀（`00-tasks/<task>/ep.md`） | 為什麼（動機鏈）→資產與命運→推進與驗收→各段細節→風險降級→決策記錄 | workflow（主：gate/exception）＋architecture（輔） |
+| EP 計畫導讀（任務家 `<task>/ep.md`） | 為什麼（動機鏈）→資產與命運→推進與驗收→各段細節→風險降級→決策記錄 | workflow（主：gate/exception）＋architecture（輔） |
 | 實作完成報告（implement 完成報告/debrief） | 意圖→做了什麼→**驗證證據**（命令+exit code）→認知誤差點/待確認 | workflow（流程變更時）＋architecture 前後對照（drift compare） |
 | codebase 架構報告 | 分層地圖→資料流→熱點與風險區 | architecture＋dataflow |
 | module 現況（`@module`／AGENTS.md 域） | 職責→Capabilities 精華→依賴與邊界 | architecture（局部視圖） |
@@ -67,9 +67,9 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 **產物位置分流（user 裁決「開心目錄」——一弧一殼、隨生命週期生長）**：
 
-- **流程性 brief（EP 計畫導讀＋實作完成結果）→ `00-tasks/MM-DD-<task-name>/`**（repo root，`00-` 前綴 VSCode/`ls` 排最前；目錄名**無年份、無 ep-/impl- 前綴**——活躍弧停留短；完結弧 task 目錄**整目錄**搬歸檔層——repo 既有慣例 `done/` 扁平或 `_done/<YYYY>/` 年分層；年份僅由 `_done/<YYYY>/` 年分層形態承接；歸檔目錄判定單一源見 [metadata-sync](../metadata-sync/SKILL.md) EP 歸檔項）。計畫/實作是同一殼的兩幕，殼**自動產生雙掛點**（見下「殼生命週期掛點」）；spec（`spec.md`）與 EP 本體（`ep.md`）同 task 目錄——一弧全生命檔案同處。殼目錄內 JSON IR 沿用 `<主題>.<type>.json` 命名（與 arch-report 同慣例）。與 debrief（文字簡報）/delta tour（行級走讀）三層互補：殼=high-level 圖形、debrief=模組/檔案文字、tour=行級；殼實作章節吸收日常判斷材料（做了什麼/證據/誤差點），debrief 為深度選配（模組/檔案級深挖）
+- **流程性 brief（EP 計畫導讀＋實作完成結果）→ 任務家（task home）下 `MM-DD-<task-name>/`**（目錄名**無年份、無 ep-/impl- 前綴**——活躍弧停留短；完結弧 task 目錄**整目錄**搬同家歸檔層——repo 慣例探測 `done/` 扁平或 `_done/<YYYY>/` 年分層，皆無建 `done/`；年份僅由年分層形態承接；歸檔目錄判定單一源見 [metadata-sync](../metadata-sync/SKILL.md) EP 歸檔項）。**任務家探測（2026-09-02 三池重構定案，各 skill 放置規則共用本源）**：`<repo>/ai-analysis/_tasks/` 在場 → 雜項任務家＝它（**線任務另居 `ai-analysis/_projects/<線>/tasks/`**——session 從線 context 來時；完成→同線 `done/`）；否則 repo-root `00-tasks/`（`00-` 前綴 VSCode/`ls` 排最前）。spec（`spec.md`）與 EP 本體（`ep.md`）同 task 目錄——一弧全生命檔案同處。殼目錄內 JSON IR 沿用 `<主題>.<type>.json` 命名（與 arch-report 同慣例）。與 debrief（文字簡報）/delta tour（行級走讀）三層互補：殼=high-level 圖形、debrief=模組/檔案文字、tour=行級；殼實作章節吸收日常判斷材料（做了什麼/證據/誤差點），debrief 為深度選配（模組/檔案級深挖）
 - **按需性視覺產物（codebase 架構/module 現況/目錄導覽 illustrate）→ `arch-report/<主題>/`**（現狀不變）
-- git 慣例**同一原則、兩處條目不同**：投影源頭進 git（00-tasks＝自製殼 `index.html`＋JSON IR＋`ep.md`/`spec.md`；arch-report＝JSON IR＋visual-check receipt）、archify 渲染產物不進（`diagram-*.html` 與 arch-report 的 `index.html` 是渲染產物；各自目錄 gitignore 條目）。⚠ **00-tasks 殼 `index.html` 是手寫殼、非 JSON 可再生**——gitignore 條目只排除 `00-tasks/**/diagram-*.html`；排過寬（`00-tasks/**/*.html`）會連殼一起 ignore（規格↔實作分歧實證：殼蒸發死鏈）
+- git 慣例**同一原則、條目隨任務家**：投影源頭進 git（任務家＝自製殼 `index.html`＋JSON IR＋`ep.md`/`spec.md`；arch-report＝JSON IR＋visual-check receipt）、archify 渲染產物不進（`diagram-*.html` 與 arch-report 的 `index.html` 是渲染產物；gitignore 條目隨任務家路徑——如 `ai-analysis/{_tasks,_projects}/**/diagram-*.html` 或 `00-tasks/**/diagram-*.html`）。⚠ **任務家殼 `index.html` 是手寫殼、非 JSON 可再生**——gitignore 條目只排除 `**/diagram-*.html`；排過寬（`**/*.html`）會連殼一起 ignore（規格↔實作分歧實證：殼蒸發死鏈）
 
 **殼生命週期掛點（自動產生雙掛點＋fallback）**——修「掛弧後（commit 後）的產物在 session context 耗盡時必死」：掛點全落在 commit **前**的穩定點。
 
@@ -110,7 +110,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 ## 產物生命週期
 
-- **輸出位置**：`arch-report/<主題>/`（**repo root 層級**——結構理解視覺產物是人類瀏覽優先，不是 AI session 中間產物，故不進 `ai-analysis/`；html 報告殼的分流放置見上「產物位置分流」）——**每次 html 任務（主題）一個子目錄**，入口 HTML 命名 **`index.html`**（靜態伺服器慣例——`python -m http.server`/GitHub Pages 開目錄即入圖）；JSON IR 用自描述名 `<主題>.<type>.json` 並存（每圖約 8 檔）；`--output <path>` 自訂路徑尊崇（track 與否使用者決定）
+- **輸出位置**：`arch-report/<主題>/`（**repo root 層級**——結構理解視覺產物是人類瀏覽優先的渲染產物，與任務家（`ai-analysis/` 下的活躍工作面——收**流程**產物 ep/spec/殼）角色不同，故維持 root 不進 `ai-analysis/`；html 報告殼的分流放置見上「產物位置分流」）——**每次 html 任務（主題）一個子目錄**，入口 HTML 命名 **`index.html`**（靜態伺服器慣例——`python -m http.server`/GitHub Pages 開目錄即入圖）；JSON IR 用自描述名 `<主題>.<type>.json` 並存（每圖約 8 檔）；`--output <path>` 自訂路徑尊崇（track 與否使用者決定）
 - **目錄即索引**：不建 index——kebab 檔名＋JSON `meta.title` 自描述；手維護 index 是 drift-prone 清單（同 skills/CLAUDE.md 索引教訓），量大再考慮機械投影生成（YAGNI）
 - **git 分工**：**JSON IR＋visual-check receipt 進 git**（JSON=機器可讀結構快照＋HTML 再生源頭）；**HTML/截圖/contact sheet 不進**（每顆 ~720KB 內嵌 viewer runtime，git 比例 175:1——本地在盤、分享時複製出檔、fresh clone 用 JSON＋archify `deliver` 一命令再生）；排除規則 scope 在 `arch-report/`（`.gitignore`：`arch-report/**/*.html`、`arch-report/**/*.visual-check.*.png`）
 - **html→md 雙輸出**：同主題先 html 後要 md 沉澱 → 從同一 grounding 事實再渲染 Mermaid（非 JSON 機械轉譯）；md 是 source of record
@@ -119,7 +119,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 **觸發**：user 說「**重生 arch-report**」／「**重生報告殼**」（全量）或「重生 `<主題>`」（單目錄）；fresh clone 後；`git clean -Xf arch-report/` 之後。
 
-**程序**（對每個含 JSON IR 的報告目錄——`arch-report/<主題>/` 與 `00-tasks/*/` 殼目錄）：
+**程序**（對每個含 JSON IR 的報告目錄——`arch-report/<主題>/` 與任務家 `*/` 殼目錄〔`ai-analysis/_tasks/`、`ai-analysis/_projects/*/tasks/`、`00-tasks/`——存在者〕）：
 
 1. 圖型 = JSON 檔名後綴（`.architecture` / `.workflow` / `.sequence` / `.dataflow` / `.lifecycle`）
 2. `deliver <type> <主題>.<type>.json <目錄>/index.html`——JSON 含 `meta.repository`（證據圖）者加 `--repo-root <repo根>`；archify 路徑依上方存在性偵測

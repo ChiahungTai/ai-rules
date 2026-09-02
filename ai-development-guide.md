@@ -63,9 +63,9 @@
 | `architecture.md` | 設計決策 / whole-picture（why）— 有此檔才適用 | 永久 |
 | `SYSTEM-MAP.md` | 跨域功能狀態總覽（status） | 現在 |
 | `dependency-graph.md` | 跨模組依賴 / ripple 風險地圖 — 有此檔才適用（per-repo opt-in，人工策展；機械依賴/ripple 查詢由 code-reality graph 承擔） | 現在 |
-| `.kanban/` | 任務追蹤（Kanban lanes） | 暫時（Done/ 歸檔） |
+| `.kanban/` | 任務追蹤（Kanban lanes——跨線承諾池） | 暫時（結案＝刪卡或搬 Done/——repo 慣例） |
 
-**UC 生命週期**：📋（execution-plan → Backlog card，UC盤點自動建卡）→ 🟡（build → InProgress）→ ✅（build 階段 5a → Capabilities + Done，UC 完成情境）
+**UC 生命週期**：📋（execution-plan → Backlog card，UC盤點自動建卡）→ 🟡（build → 進行中：In-Progress lane 或任務目錄存在性〔repo 慣例〕）→ ✅（build 階段 5a → Capabilities + 結案〔搬 Done/ 或刪卡——repo 慣例〕，UC 完成情境）
 
 ### UC 狀態標記
 
@@ -98,7 +98,7 @@
 ### 銜接機制
 
 1. **execution-plan → Backlog**：UC盤點自動建立 .kanban/Backlog/ card（含模組、EP 連結）
-2. **build → InProgress + 結算**：階段 1 搬 Backlog cards 至 In-Progress/（暫時狀態）；階段 5a 結算 UC 完成情境——新增 Capabilities ✅ 行 + 搬 Done/ + EP 歸檔（working tree，隨 commit 帶走）
+2. **build → 進行中＋結算**：階段 1 將 Backlog cards 反映進行中（有 In-Progress lane → 搬入；刪卡制 repo → 留 Backlog 由任務目錄表達）；階段 5a 結算 UC 完成情境——新增 Capabilities ✅ 行 + 結案（搬 Done/ 或刪卡——repo 慣例）+ EP 歸檔（任務家 done/，放置學見 illustrate-html-mode「產物位置分流」）（working tree，隨 commit 帶走）
 3. **post-build（收尾鏈）**：build 完成、commit 之前——code-review → judge-review → 修正迴圈 → consistency → metadata-sync，止步於 commit 前（詳見 post-build skill）
 4. **commit → 純 git 提交**：finalization 已在 build 階段 5a 結算（working tree），commit 一次帶走 code + finalization（**同 commit** 保證，git add 納入 finalization 檔）
 

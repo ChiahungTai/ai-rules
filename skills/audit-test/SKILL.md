@@ -228,7 +228,7 @@ allowed-tools: ["Read", "Bash"]
 2. `uv add --dev mutmut`；scoped config：`[tool.mutmut]` 的 `source_paths`（copy 全 package 保 import）＋`only_mutate`（目標檔 glob）＋`pytest_add_cli_args_test_selection`（目標測試檔）
 3. `mutmut run`；記錄三數字：總耗時／mutant 總數／killed:survived
 4. **survived 必抽讀分類**（主成本在此，非機械跑）：(a) 真實測試缺口（斷言沒鎖行為/邊界）(b) equivalent mutant（語義等價，殺不死是正常的）(c) 無實務意義的極端邊界——每個附 file:line 與 mutated operator
-5. 報告：(a) 類缺口列 Critical finding（測試補強項）；清除聲明（mutants/ 目錄＋pyproject config 段＋dep＋uv.lock 還原）。**輸出落點**：open 項照既有慣例 append 進 daily report；跨 repo open 項 hub-relay 落消費端 pending-decisions inbox（mosaic 例：`ai-analysis/idle-findings/pending-decisions.md`，08-30 起——每日 23:20 report「⏳ 待裁決」節吸收，修復可見性）
+5. 報告：(a) 類缺口列 Critical finding（測試補強項）；清除聲明（mutants/ 目錄＋pyproject config 段＋dep＋uv.lock 還原）。**輸出落點**：open 項照既有慣例 append 進 daily report；跨 repo open 項 hub-relay 落消費端 pending-decisions inbox（mosaic 例：`ai-analysis/_inbox/pending-decisions.md`——2026-09-02 三池重構後路徑，每日 23:20 report「⏳ 待裁決」節吸收，修復可見性）
 
 **成本實證**（供報價）：288 行 critical path＋68 tests＝8.2s wall、103 mutants、87.4% kill rate、13 survived 抽讀約 10 分鐘 LLM 判讀——抓到 10 個真實缺口（含 price<1 會計＋風控雙處無保護）；補強後重跑同模組＝100:3（97.1%）、殘留 3 皆 (b)(c) 類——**輪抽查基準用補強後數字，勿把已修缺口重報**（mosaic memory `project-mutation-testing-spike-t32` 有收案記錄，承接先查勿重做）。
 

@@ -355,7 +355,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類導讀殼（Report Shell，user 裁決：「EP 我現在很少看了，太難理解」——md 給 AI，殼給人）：
 
-- 產物 `00-tasks/MM-DD-<task-name>/index.html`（+ 可選 archify 圖）——完整規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「html 報告殼」段（三層結構/內容篩選通則/敘事骨架/雙向一致性/殼生命週期掛點），此處不重述
+- 產物＝任務家 `MM-DD-<task-name>/index.html`（+ 可選 archify 圖；**任務家探測**見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」）——完整規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「html 報告殼」段（三層結構/內容篩選通則/敘事骨架/雙向一致性/殼生命週期掛點），此處不重述
 - **成本分級**：基礎款（純文字殼，~200 行）**必備**；升級款（+archify workflow/architecture 圖）按 EP 規模（多段/有結構主張）或 user 點名
 - 投影鎖定 EP 當下 hash（殼頭部聲明 **EP 路徑＋baseline hash**——下游 `/post-build`/`/code-review` 弧模式跨 session 可從殼讀，baseline 傳遞不依賴 build session context 存活）；badge 📋——推進時 badge 同步掛 implement 階段 5a，實作章節掛 post-build hook 2（無 post-build 弧 fallback implement 階段 6；詳 [implement](../implement/SKILL.md)）
 - 交付時引導 user 開殼 review（大方向判讀用殼、批准後進 `/implement`；AI 消費仍以 md 為源）
@@ -371,7 +371,7 @@ EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類�
 ### 1. 模組 instruction 檔 Capabilities + Kanban 更新
 
 - 已完成 UC：在對應模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）Capabilities 表格新增一行（能力 + 入口 + ✅）
-- 移動 Kanban 卡片至 Done/ lane
+- Kanban 卡結案——**repo 慣例探測（2026-09-02 語義修訂）**：`.kanban/` 有 `Done/` lane → 搬入（舊制）；無 → **刪卡**（新制：UC 完成情境寫 Capabilities，任務史由任務家 `done/` 承載——以 repo `.kanban/CLAUDE.md` 為準）
 - **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成
 - **從 EP Scenario Matrix 提煉「消費場景」**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），寫入 Capabilities 表格備註或 Kanban card 描述
 
@@ -399,12 +399,12 @@ EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類�
 
 ## 輸出
 
-- **位置**：`00-tasks/MM-DD-<task-name>/ep.md`（相對於專案根目錄；與 Report Shell 同 task 目錄——一弧全生命檔案同處，放置學見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」；`ai-analysis/execution-plans/` 慣例退役）
+- **位置**：任務家 `MM-DD-<task-name>/ep.md`（相對於專案根目錄；**任務家探測**：`ai-analysis/_tasks/` 在場→雜項家、session 從線 context 來→`ai-analysis/_projects/<線>/tasks/`、否則 repo-root `00-tasks/`——單一源見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」；與 Report Shell 同 task 目錄——一弧全生命檔案同處；`ai-analysis/execution-plans/` 慣例退役）
 - **檔名**：固定 `ep.md`（task 名已在目錄名，檔名不重複）
 - **結構**：實作總覽 → **UC 盤點** → Scenario Matrix → 段落劃分原則 → 各段落（Context → 要點 → Pseudo Code → 驗證）→ 整合策略 → 收尾步驟
 - **整合策略必含 baseline 記錄**：一行 `baseline: <hash>`（`git rev-parse HEAD`，EP 建立當下）——下游 `/post-build`/`/code-review` 任務弧審查的範圍邊界，由 EP 攜帶跨 session 不重新推導（缺漏由 implement 階段 1 補記；模式見 [code-review](../code-review/SKILL.md)「任務弧模式」）
 
-> **🔴 路徑警告**：Claude Code plan mode 的硬編碼路徑是 `~/.claude/plans/`，**那不是 EP 的存放位置**。EP 必須寫到專案目錄下的 `00-tasks/<task>/ep.md`。若已寫入 `~/.claude/plans/`，完成後必須複製到正確位置。
+> **🔴 路徑警告**：Claude Code plan mode 的硬編碼路徑是 `~/.claude/plans/`，**那不是 EP 的存放位置**。EP 必須寫到專案目錄下的任務家 `<task>/ep.md`（探測規則見上方輸出段）。若已寫入 `~/.claude/plans/`，完成後必須複製到正確位置。
 
 ---
 

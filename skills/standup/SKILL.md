@@ -81,4 +81,4 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/aggregate_sessions.py --project-root .
 - **工具呼叫去重**:同檔同工具連續操作只記一次(腳本已 dedupe by `(name, target)`)
 - **今日建議基於客觀狀態**(uncommitted / 未完成 task),不憑空
 - **body 無 `## ` header**:header 是 invoker 職責(decision A)
-- **文檔引用附 repo 相對路徑**:提及 spec/EP/validate/daily-report 等檔案時附 repo 相對路徑(如 `00-tasks/<task>/spec.md`),不用裸檔名——body 會逐字進 daily-report,讀者需能直接定位
+- **文檔引用附 repo 相對路徑**:提及 spec/EP/validate/daily-report 等檔案時附 repo 相對路徑(如 `ai-analysis/_tasks/<task>/spec.md`——repo 任務家下實際路徑;無 ai-analysis 樹的 repo 用 `00-tasks/<task>/spec.md`),不用裸檔名——body 會逐字進 daily-report,讀者需能直接定位

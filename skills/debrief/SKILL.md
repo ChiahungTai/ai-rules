@@ -1,7 +1,7 @@
 ---
 name: debrief
-description: "AI 改完 code 想理解改了啥 / what changed / 聽取報告 / 檢查 AI 產出 / brief / debrief——七段理解簡報（意圖/行為黑盒子/前後差異/檔案地圖/波及缺口/驗證證據/認知誤差點）。理解非審判：機器 finding 交 /code-review、結構交 /illustrate。深度選配：日常弧判斷材料（做了什麼/證據/誤差點）由 00-tasks 報告殼實作章節吸收（post-build hook 2）；debrief＝模組/檔案級深挖。無參數=簡報 uncommitted 變更（fallback：EP baseline 任務弧，無則 HEAD~1）。"
-when_to_use: "After AI coding: understand what changed (behavior / before-after / file map), force runnable evidence per feature (NONE 逼問), surface cognitive gaps. Deep-dive optional — routine judgment material lives in the 00-tasks Report Shell implementation chapter (post-build hook 2). NOT for: diff correctness findings (/code-review), structure viewport (/illustrate), existence skepticism (/smell-detector)."
+description: "AI 改完 code 想理解改了啥 / what changed / 聽取報告 / 檢查 AI 產出 / brief / debrief——七段理解簡報（意圖/行為黑盒子/前後差異/檔案地圖/波及缺口/驗證證據/認知誤差點）。理解非審判：機器 finding 交 /code-review、結構交 /illustrate。深度選配：日常弧判斷材料（做了什麼/證據/誤差點）由任務家報告殼實作章節吸收（post-build hook 2）；debrief＝模組/檔案級深挖。無參數=簡報 uncommitted 變更（fallback：EP baseline 任務弧，無則 HEAD~1）。"
+when_to_use: "After AI coding: understand what changed (behavior / before-after / file map), force runnable evidence per feature (NONE 逼問), surface cognitive gaps. Deep-dive optional — routine judgment material lives in the task-home Report Shell implementation chapter (post-build hook 2). NOT for: diff correctness findings (/code-review), structure viewport (/illustrate), existence skepticism (/smell-detector)."
 argument-hint: "無參數=uncommitted | commit hash | branch | --md"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent"]
 ---

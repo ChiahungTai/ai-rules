@@ -26,7 +26,7 @@ description: build 後收尾鏈編排 — code-review → judge-review → 修�
 | 僅 `.md` 變更 | ❌ 跳過 | ✅ 跑 |
 | 兩者皆有 | ✅ 先跑 | ✅ 後跑（code 修正可能再動 doc，先收斂 code 再驗 doc，避免驗兩次） |
 
-**逐段 commit 後（弧模式）**：uncommitted 空（或僅尾段殘留）且 context EP 記有 baseline → 切**弧模式**：triage 與階段 1 的審查對象改為 `git diff <baseline>..HEAD`（+ uncommitted；模式細則見 [code-review](../code-review/SKILL.md)「任務弧模式」）。context 無 EP 記憶（跨 session 接續）→ **從殼讀 baseline**：`00-tasks/*/index.html` 殼頭部聲明 EP 路徑＋baseline hash（hook 1 起攜帶）——baseline 傳遞不依賴 build session context 存活。uncommitted 空且無 EP baseline（context 與殼皆無）→ 印 `[WARN] no diff（逐段 commit 已落地？弧模式需 EP baseline）` 並停止——收尾鏈靜默 no-op 等於大聲錯誤被靜默化。
+**逐段 commit 後（弧模式）**：uncommitted 空（或僅尾段殘留）且 context EP 記有 baseline → 切**弧模式**：triage 與階段 1 的審查對象改為 `git diff <baseline>..HEAD`（+ uncommitted；模式細則見 [code-review](../code-review/SKILL.md)「任務弧模式」）。context 無 EP 記憶（跨 session 接續）→ **從殼讀 baseline**：任務家 `*/index.html`（`ai-analysis/_tasks/`、`ai-analysis/_projects/*/tasks/`、或 `00-tasks/`——探測見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」）殼頭部聲明 EP 路徑＋baseline hash（hook 1 起攜帶）——baseline 傳遞不依賴 build session context 存活。uncommitted 空且無 EP baseline（context 與殼皆無）→ 印 `[WARN] no diff（逐段 commit 已落地？弧模式需 EP baseline）` 並停止——收尾鏈靜默 no-op 等於大聲錯誤被靜默化。
 
 **Resume 場景**：若 `.review/<branch>.md` 已存在且有 `open` 狀態 findings（跨 session 從 reviewer session 帶回），跳過 code-review，直接從階段 2 接續。
 
@@ -60,7 +60,7 @@ findings 全空 → 報告並直接進 docs 鏈。
 
 ## 階段 5 — Report Shell refresh（hook 2——commit 前最後穩定點）
 
-本 EP 對應殼存在（`00-tasks/<task>/index.html`——execution-plan 定稿 hook 1 所建）時，在收尾鏈收斂後 refresh（掛點規格單一源見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」）：
+本 EP 對應殼存在（任務家 `<task>/index.html`——execution-plan 定稿 hook 1 所建）時，在收尾鏈收斂後 refresh（掛點規格單一源見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」）：
 
 1. **實作章節生長**（同一殼的第二幕；內容＝殼規格「敘事骨架變體」實作完成報告列）：做了什麼（分組檔案地圖）／驗證證據（命令+exit code）／delta 前後對照（archify compare，有圖時）／認知誤差點＋回源連結——**反映修正迴圈後最終態**（排在階段 3 修正迴圈之後，正是為此）
 2. **badge ✅**（implement 階段 5a 已同步則驗證、未同步則補上；中間段殘留 → 🟡）
@@ -75,7 +75,7 @@ findings 全空 → 報告並直接進 docs 鏈。
 ## Post-Build 收尾報告
 - code 鏈：findings N（✅N/❌N/⚠️N）、修正 N 項、followup <通過|未收斂(殘留清單)>
 - EP 對照：delta_tour=<機械底稿|LLM 對照|無（原因：uncommitted 模式/小變更）>——宣稱觸及 vs 實際變動模組、unexplained 差異項
-- 殼 refresh（hook 2）：<完成（badge ✅＋持久 delta tour 落點 `00-tasks/<task>/index.html`）|跳過（原因：無殼/條件不符）>
+- 殼 refresh（hook 2）：<完成（badge ✅＋持久 delta tour 落點＝任務家殼）|跳過（原因：無殼/條件不符）>
 - docs 鏈：consistency N 檔（pass N / fail-fixed N）、metadata-sync <跑/跳過>
 - callstack 菜單（repo 有 `ai-analysis/blueprint/callstack-plan.md` 時）：積壓 N 條待生成（機械＝plan **成鏈行數**（①-③ 軌行；④ scripts/索引行不計）− `callstack/` 既有 md 數）——報庫存不催行動，生成＝獨立觸發＋報價（blueprint-bootstrap）
 - smell=<建議 zoom 的 dir|無>——訊號源＝階段 1/2 findings 中「疑似 AI 亂加／junk／scope creep」類 finding 所指目錄。**triage 訊號非鏈內調用**：人類看到再決定開 viewport session 跑 [smell-detector](../smell-detector/SKILL.md) zoom（受眾分離——smell-detector 是軌道②人類 viewport，不進本鏈自動跑；baseline/onboarding 盤點屬週期需求，不掛 post-build）

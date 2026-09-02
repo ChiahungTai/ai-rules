@@ -49,6 +49,7 @@ harness-scope: neutral
 
 - `pytest` 用背景跑（Claude: `run_in_background: true`；其他 harness 用各家背景機制）；例外：併入機械驗證組合命令的段級短測試（單檔、秒級）隨組合命令跑（見下「獨立呼叫批次化」）
 - **Subagent spawn 預設背景**：Agent tool 呼叫帶背景參數（ZCode: `run_in_background: true`——runtime 實測有效（2026-08-14），官方文檔未記載此參數、僅說前台/後台由主 Agent 決定；Claude 2.1.198+ 已預設背景免動作）。主對話回報「進行中」後結束 turn——使用者可繼續對話，subagent 完成後結果自動回到主對話接手
+- **背景 agent 的收法（spawn 的配套，缺此等於沒背景）**：spawn 後**結束 turn 等完成通知**。禁用 `TaskOutput(block=true)` 長阻等收背景 agent——阻等卡住主對話（使用者無法插話，體感＝「沒有在背景跑」）；且阻等待被中斷/取消時 **agent 連帶被殺**（status=killed、結果遺失——2026-09-02 實證：驗證 agent 因此被殺須重跑）。block=true 僅限預期 <30s 短 probe；前景有其他工作時就先做，通知到了再接手
 - 例外（前台）：結果是當前步驟立即依賴且預期 <30s 的短 probe（如載入驗證）
 - 為什麼：前台 spawn 佔住主對話 turn，使用者無法插話——長任務（review、大範圍 research）前台 = 對話卡死；背景不改變結果可用性，只改變等待方式
 - 注意（ZCode）：背景執行的 Explore 強制唯讀（安全設計）；subagent 定義檔**不支援** `background` 欄位（Claude 支援——frontmatter `background: true` 在 Claude 端有效、ZCode 靜默忽略）——ZCode 端背景化是 spawn 端行為，定義檔控制不到
