@@ -68,7 +68,6 @@ binary 不存在或 build 失敗 → 記 `[WARN]` 後續行 Phase 2——graph �
 | check_id | 風險 | 自動模式 | 互動模式 | 修正程序 |
 |----------|------|---------|---------|---------|
 | X-cap-path | 🟢 Low | 自動修正 | 呈現待確認 | 見下方 |
-| X-tag-module | 🟢 Low | 自動修正 | 呈現待確認 | 見下方 |
 | X-ep-ready | 🟡 Medium | 只報告 | 呈現待確認 | EP 可能未建立 |
 | X6 | 🟡 Medium | 只報告 | 呈現待確認 | 需人類決定是否建 instruction 檔 |
 
@@ -112,14 +111,6 @@ binary 不存在或 build 失敗 → 記 `[WARN]` 後續行 Phase 2——graph �
 | git 顯示功能拆分為多檔 | 🟡 中 | 標記待確認 |
 | git 無歷史（從未 commit） | 🟡 中 | 幽靈路徑，標記待確認 |
 
-### X-tag-module 修正
-
-1. Read 卡片檔案，找到第一行的 `[tag:xxx]`
-2. 從 scan_project.py 的 valid_tags 或 `fd . <package>/ --max-depth 1 --type d` 取得合法 tag 清單
-3. 比對卡片內容中的模組引用，推導正確 tag
-4. 確定性高（卡片引用單一模組）→ 更新 tag
-5. 確定性低（多模組引用或模糊）→ 標記待人工確認
-
 ---
 
 ## Kanban 維護程序
@@ -132,15 +123,6 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 |------|------|--------|---------|
 | Stale card | To Do > 7 天、In Progress > 14 天無修改 | 🟡 | 不修正（只報告） |
 | Lane 限額 | To Do > 100 張 | 🟡 | 不修正（只報告） |
-| 無 tag 卡片 | 卡片第一行無 `[tag:xxx]` | 🟢 | auto: 從內容推導 tag（同 X-tag-module 修正邏輯） |
-
-### 無 tag 卡片推導
-
-1. 讀取卡片內容，搜尋模組引用（程式碼路徑、模組名）
-2. 對照 `<package>/` 子目錄清單
-3. 單一匹配 → 加上 `[tag:xxx]` 到第一行
-4. 多重匹配或模糊 → 標記待人工確認
-
 ### backlog 卡處置（2026-09-02 起單制）
 
 `backlog/` 制：**completed/ 是歷史檔案庫，不套年齡 stale heuristic**（價值正是歷史追溯——決策脈絡、驗收紀錄；過大由人類在 `/project-review` 留意）。**Done 欄卡清場＝`backlog task complete <id>` 搬 `completed/`**——結案兩步延後的批次執行點（命令合約見 [kanban-board](../kanban-board/SKILL.md)）。活躍卡年齡檢查（To Do/In Progress）＝ doc-health 步驟 4（讀 frontmatter `updated_date`）。無 `backlog/` 的 repo 無卡層清理面。`.kanban/` 四 lane 舊制已退役。
@@ -154,8 +136,6 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 | 決策點 | 自動預設 | 說明 |
 |--------|---------|------|
 | X-cap-path 修正 | 自動修 | 🟢 low risk |
-| X-tag-module 修正 | 自動修 | 🟢 low risk |
-| 無 tag 卡片 | 推導後自動加 | 🟢 low risk |
 | X-ep-ready / X6 | 只報告 | 🟡 需語義判斷 |
 | /instruction-sync --changed-since | `yesterday` | 每日增量 |
 | /doc-health 參數 | 預設（不含 --quality --all） | 核心 findings 即可 |
@@ -199,7 +179,6 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 ### Phase 3: Doc Health + Kanban
 ⚠️ findings: N issues (0 critical, N important)
 - [X-cap-path] xxx 不存在 → [自動修正已完成]
-- [X-tag-module] 卡片 'xxx' tag 錯誤 → [自動修正已完成]
 Kanban: To Do N 張, In Progress N 張, Done N 張
   - Stale: To Do 'xxx' 已 8 天未更新
 
@@ -226,8 +205,7 @@ Kanban: To Do N 張, In Progress N 張, Done N 張
 - 跨 phase 關聯待確認: Phase 1 import 變化 ↔ Phase 2 Instruction 問題
 
 ## ✅ 已自動處理（你不用管）
-- auto-fixed: X-cap-path(N), X-tag-module(N)
-- Kanban: 無 tag 卡片補 tag(N)
+- auto-fixed: X-cap-path(N)
 
 ## 📈 趨勢
 - findings: X→Y、kanban 卡片流動
@@ -257,7 +235,7 @@ Commit message 格式：
 ```
 chore(maintain): daily auto-maintain — X findings fixed, Y reported
 
-Auto-fixed: X-cap-path(N), X-tag-module(N)
+Auto-fixed: X-cap-path(N)
 Reported: X6(N)
 Morning report: ai-analysis/daily-report/YYYY-MM-DD.md
 ```

@@ -44,7 +44,7 @@ Schema 定義：[unified-snapshot-schema.md](reference/unified-snapshot-schema.m
 | 單點依賴（「X 用到 Y 嗎？」「誰呼叫 Z？」） | **LSP** findReferences / incomingCalls | live、無 snapshot 時效衰減 |
 | 否定宣稱（X1：instruction 檔「Does NOT depend on」是否為真） | **dep_graph** edges 集合差集 | 證明「不存在」需窮舉邊，LSP 點查詢不擅長否定驗證 |
 | 全域拓撲（fan-out、熱點、blast radius、遞迴閉包） | **dep_graph** | 一次看全圖；LSP 需 N 次點查詢重建 |
-| code↔doc 一致性（X-cap-path / X-tag-module / X6 等 findings） | **scan-project** | LSP 符號世界裡沒有「文檔宣稱什麼」這一側 —— **scan-project 真正不可替代的價值，非 dependency graph 本身** |
+| code↔doc 一致性（X-cap-path / X6 等 findings） | **scan-project** | LSP 符號世界裡沒有「文檔宣稱什麼」這一側 —— **scan-project 真正不可替代的價值，非 dependency graph 本身** |
 
 **原則**：單點查詢優先 LSP（dep_graph snapshot 可能 stale）；否定宣稱、全域拓撲、code↔doc 一致性用 dep_graph / scan-project。兩者在不同軸上互補。
 
@@ -80,7 +80,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 | `rust_workspace` | Cargo.toml 解析 | workspace 成員 + crate 內部依賴 + `has_python_bindings` |
 | `dir_inventory` | 檔案系統盤點 | 深度 ≤3 目錄清單（subdirs、檔名/副檔統計）——列舉 ground truth |
 | `instruction_files` | instruction 檔掃描 | 各目錄 AGENTS.md/CLAUDE.md 位置 + 邊界/能力表有無 |
-| `findings` | 機械性交叉檢查 | X-cap-path / X-tag-module / X-ep-ready / X6 |
+| `findings` | 機械性交叉檢查 | X-cap-path / X-ep-ready / X6 |
 | `fingerprint` | 計數 + 雜湊 | capabilities_total, kanban_total, kanban_by_lane, hashes |
 
 **不在輸出中的**：capabilities_registry、kanban_registry、claude_md_registry、cross_validation（v3 舊格式）。
@@ -100,8 +100,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 | Check | 說明 | 嚴重度 |
 |-------|------|--------|
 | X-cap-path | Capabilities 入口路徑不存在（檢查 project root / package root / instruction 檔目錄（AGENTS.md/CLAUDE.md）） | important |
-| X-tag-module | Kanban 卡片 `[tag:xxx]` 不對應 `<package>/` 子目錄 | important |
-| X-ep-ready | Next-Up/In-Progress 卡片引用的 EP 檔案不存在 | important |
+| X-ep-ready | To Do/In Progress 卡片引用的 EP 檔案不存在 | important |
 | X6 | dep-graph 有模組（≥3 files）但無 instruction 檔（AGENTS.md/CLAUDE.md） | important |
 
 語義性驗證（X1 dep-graph 矛盾、X8 幽靈 Capabilities 引用）由 `/instruction-sync` 和 `/doc-health` 的 LLM 判斷完成。

@@ -4,10 +4,10 @@ Unified Project Knowledge Scanner.
 
 Produces three things (no full registries — LLM reads files directly):
 1. dep_graph — AST-parsed Python import relationships
-2. findings — mechanical cross-validation issues (X-cap-path, X-tag-module, etc.)
+2. findings — mechanical cross-validation issues (X-cap-path, X-ep-ready, etc.)
 3. fingerprint — lightweight change detection (counts + hashes)
 
-Internal parsing of instruction files (AGENTS.md preferred, CLAUDE.md legacy) and .kanban/ is kept for computing findings,
+Internal parsing of instruction files (AGENTS.md preferred, CLAUDE.md legacy) and backlog/tasks/ is kept for computing findings,
 but registries are NOT included in output.
 
 Designed for the /scan-project skill (on-demand mechanical inventory + findings).
@@ -55,13 +55,9 @@ SKIP_DIRS_SCAN = {
 # tests/ (which often has more .py files than the real package).
 NON_PACKAGE_DIRS = {"tests", "test", "docs", "examples", "stubs"}
 
-KANBAN_LANES = {"Backlog", "Next-Up", "In-Progress", "Done"}
-ACTIVE_KANBAN_LANES = KANBAN_LANES - {"Done"}
+KANBAN_STATUSES = {"To Do", "In Progress", "Done"}
 
-# [tag:module] on first line of kanban cards
-TAG_RE = re.compile(r"\[tag:([^\]]+)\]")
-
-# EP reference in ## 相關 section
+# EP reference in card body (checked by X-ep-ready)
 EP_REF_RE = re.compile(r"^- EP:\s*`?([^`*\n]+)`?", re.MULTILINE)
 
 # Capabilities table header detection
@@ -383,45 +379,46 @@ def _parse_single_claude_md(
 
 
 # ---------------------------------------------------------------------------
-# .kanban/ card parsing (tag-based identity)
+# backlog/tasks/ card parsing (frontmatter identity)
 # ---------------------------------------------------------------------------
 
 
 def parse_kanban_registry(project_root: Path) -> list[dict]:
-    """Parse all .kanban/ cards."""
-    kanban_dir = project_root / ".kanban"
-    if not kanban_dir.is_dir():
+    """Parse all backlog/tasks/ cards (Backlog.md frontmatter format)."""
+    tasks_dir = project_root / "backlog" / "tasks"
+    if not tasks_dir.is_dir():
         return []
 
     registry = []
-    for lane_dir in sorted(kanban_dir.iterdir()):
-        if not lane_dir.is_dir():
-            continue
-        if lane_dir.name not in KANBAN_LANES:
-            continue
-        lane = lane_dir.name
-        for card_file in sorted(lane_dir.glob("*.md")):
-            entry = _parse_kanban_card(card_file, lane, project_root)
+    for card_file in sorted(tasks_dir.glob("*.md")):
+        entry = _parse_kanban_card(card_file, project_root)
+        if entry.get("lane") in KANBAN_STATUSES:
             registry.append(entry)
     return registry
 
 
-def _parse_kanban_card(card_file: Path, lane: str, project_root: Path) -> dict:
-    """Parse a single Kanban card.
+def _parse_kanban_card(card_file: Path, project_root: Path) -> dict:
+    """Parse a single Backlog.md task card.
 
-    Card identity: title (= filename stem) + [tag:module] on line 1.
-    No YAML frontmatter, no UC ID as primary key.
+    Card identity: frontmatter id + title; lane = frontmatter status
+    (To Do / In Progress / Done — Backlog.md three-column workflow).
     """
     content = card_file.read_text(encoding="utf-8")
     source_rel = str(card_file.relative_to(project_root))
 
-    # Title: filename stem (Chinese name, e.g. "騰落線指標")
-    title = card_file.stem
+    # Frontmatter (id/title/status) — plain regex parse, no yaml dependency
+    fm_match = re.match(r"^---\n(.*?)\n---", content, re.DOTALL)
+    fm = fm_match.group(1) if fm_match else ""
 
-    # Tags: [tag:xxx] on first line (space-separated for multiple)
-    tags = TAG_RE.findall(content.split("\n", 1)[0]) if content else []
+    def _fm_value(key: str) -> str:
+        m = re.search(rf"^{key}: (.+)$", fm, re.MULTILINE)
+        return m.group(1).strip() if m else ""
 
-    # EP reference from ## 相關 section
+    card_id = _fm_value("id")
+    title = _fm_value("title") or card_file.stem
+    lane = _fm_value("status")
+
+    # EP reference from body (`- EP: path` convention, checked by X-ep-ready)
     ep_match = EP_REF_RE.search(content)
     ep_ref = ""
     has_ep = False
@@ -429,12 +426,11 @@ def _parse_kanban_card(card_file: Path, lane: str, project_root: Path) -> dict:
         ep_ref = ep_match.group(1).strip()
         has_ep = ep_ref not in ("待定", "")
 
-    # Has spec: check for spec references in body
     has_spec = bool(re.search(r"spec[：:]", content, re.IGNORECASE))
 
     return {
+        "id": card_id,
         "title": title,
-        "tags": tags,
         "lane": lane,
         "has_ep": has_ep,
         "ep_ref": ep_ref,
@@ -446,55 +442,6 @@ def _parse_kanban_card(card_file: Path, lane: str, project_root: Path) -> dict:
 # ---------------------------------------------------------------------------
 # Cross-validation (mechanical checks)
 # ---------------------------------------------------------------------------
-
-
-def _find_valid_tag_names(project_root: Path) -> set[str]:
-    """Find valid tag names from package root subdirectories + top-level dirs.
-
-    Tag convention: tag name = a real directory in the repo.
-    Sources (combined, both generic — no project-specific hardcoding):
-      1. Package root (e.g. my_package/) subdirectories — the library modules.
-         Shorthand: adapters/sj → sj (nested package with __init__.py).
-      2. Project root top-level dirs — cross-cutting domains that live outside
-         the importable package (tools/, deploy/, scripts/, tests/). These host
-         real product-adjacent work (dev utilities, launchd ops, CLI entries)
-         and carry kanban cards, so their names are valid tags.
-
-    Excluded: SKIP_DIRS_SCAN + dotdirs + transient/experimental top-level dirs
-    (poc/, lab/) — temporary or deprecated, not stable tag targets.
-    """
-    valid_tags: set[str] = set()
-
-    # Source 1: package root subdirectories (library modules)
-    pkg_root = _find_package_root(project_root)
-    if pkg_root:
-        for child in sorted(pkg_root.iterdir()):
-            if not child.is_dir():
-                continue
-            if child.name.startswith((".", "_")):
-                continue
-            if child.name in SKIP_DIRS_SCAN:
-                continue
-            valid_tags.add(child.name)
-            # Add shorthand for nested modules (e.g. adapters/sj → sj)
-            for nested in sorted(child.iterdir()):
-                if nested.is_dir() and (nested / "__init__.py").exists():
-                    valid_tags.add(nested.name)
-
-    # Source 2: project root top-level dirs (cross-cutting domains outside package)
-    transient_top_dirs = {"poc", "lab"}  # temporary / deprecated — not stable tags
-    for child in sorted(project_root.iterdir()):
-        if not child.is_dir():
-            continue
-        if child.name.startswith((".", "_")):
-            continue
-        if child.name in SKIP_DIRS_SCAN or child.name in transient_top_dirs:
-            continue
-        if pkg_root is not None and child == pkg_root:
-            continue  # package root itself (already covered by source 1)
-        valid_tags.add(child.name)
-
-    return valid_tags
 
 
 def run_cross_validation(
@@ -589,39 +536,27 @@ def run_cross_validation(
 
     # --- Kanban checks ---
 
-    # X-tag-module: tag does not correspond to any valid module/domain directory
-    valid_tags = _find_valid_tag_names(project_root)
-    if valid_tags:
-        for e in kanban_registry:
-            for tag in e.get("tags", []):
-                if tag not in valid_tags:
-                    findings.append(
-                        {
-                            "check_id": "X-tag-module",
-                            "severity": "important",
-                            "detail": (
-                                f"Card '{e['title']}' has tag '{tag}' "
-                                f"which does not match any package "
-                                f"subdirectory or top-level dir"
-                            ),
-                            "kanban_source": e["source_file"],
-                        }
-                    )
-
-    # X-ep-ready: Next-Up/In-Progress card has EP ref but file missing
+    # X-ep-ready: To Do/In Progress card has EP ref but file missing
     for e in kanban_registry:
-        if e["lane"] not in ("Next-Up", "In-Progress"):
+        if e["lane"] not in ("To Do", "In Progress"):
             continue
         if not e.get("has_ep") or not e.get("ep_ref"):
             continue
         ep_ref = e["ep_ref"]
-        # EP files live under ai-analysis/ or similar directories
-        # Check common locations
+        # Task-home conventions: ai-analysis/_tasks/, line projects, 00-tasks/
+        # (probe mirrors metadata-sync EP archiving)
         ep_candidates = [
-            project_root / "ai-analysis" / "execution-plans" / ep_ref,
-            project_root / "ai-analysis" / "done_plans" / ep_ref,
+            project_root / "ai-analysis" / "_tasks" / ep_ref,
+            project_root / "ai-analysis" / "_tasks" / "done" / ep_ref,
+            project_root / "00-tasks" / ep_ref,
             project_root / ep_ref,
         ]
+        projects_dir = project_root / "ai-analysis" / "_projects"
+        if projects_dir.is_dir():
+            for line_dir in sorted(projects_dir.iterdir()):
+                if line_dir.is_dir():
+                    ep_candidates.append(line_dir / "tasks" / ep_ref)
+                    ep_candidates.append(line_dir / "done" / ep_ref)
         ep_exists = any(p.exists() for p in ep_candidates)
         if not ep_exists:
             findings.append(
@@ -878,7 +813,7 @@ def _compute_fingerprint(
 ) -> dict:
     """Compute lightweight fingerprint for change detection.
 
-    LLM reads CLAUDE.md and .kanban/ directly when it needs details.
+    LLM reads CLAUDE.md and backlog/tasks/ directly when it needs details.
     The fingerprint only answers: "did something change since last scan?"
     """
 
@@ -888,11 +823,8 @@ def _compute_fingerprint(
     )
     cap_hash = hashlib.md5("|".join(cap_keys).encode()).hexdigest()[:12]
 
-    # Kanban hash: sorted title + lane + tags
-    kanban_keys = sorted(
-        f"{e['title']}:{e['lane']}:{','.join(sorted(e['tags']))}"
-        for e in kanban_registry
-    )
+    # Kanban hash: sorted id + title + lane
+    kanban_keys = sorted(f"{e['id']}:{e['title']}:{e['lane']}" for e in kanban_registry)
     kanban_hash = hashlib.md5("|".join(kanban_keys).encode()).hexdigest()[:12]
 
     # Kanban by lane
@@ -919,7 +851,7 @@ def scan_project(project_root: Path) -> dict:
     3. fingerprint — lightweight change detection (counts + hashes)
 
     Internal parsing (registries) is kept for computing findings,
-    but NOT included in output. LLM reads CLAUDE.md and .kanban/
+    but NOT included in output. LLM reads CLAUDE.md and backlog/tasks/
     directly when it needs details.
     """
     project_root = project_root.resolve()
@@ -945,7 +877,7 @@ def scan_project(project_root: Path) -> dict:
     # Phase 2: Parse CLAUDE.md files (internal — not in output)
     claude_md_registry, capabilities_registry = parse_claude_md_registry(project_root)
 
-    # Phase 3: Parse .kanban/ cards (internal — not in output)
+    # Phase 3: Parse backlog/tasks/ cards (internal — not in output)
     kanban_registry = parse_kanban_registry(project_root)
 
     # Phase 4: Run mechanical cross-validation → findings

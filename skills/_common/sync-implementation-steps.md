@@ -20,7 +20,7 @@
       不阻塞後續步驟（資料可能過時但仍有參考價值）
    d. 提取以下的資料供後續步驟使用：
       - dep_graph.modules + dep_graph.edges → 步驟 1.5 依賴鏈擴展（精確取代 naive grep）
-      - findings → 步驟 10.5（預計算的 X-cap-path/X-tag-module/X-ep-ready/X6 問題）
+      - findings → 步驟 10.5（預計算的 X-cap-path/X-ep-ready/X6 問題）
       - fingerprint → 變化偵測（counts + hashes）
 3. 如果不存在：記錄 "running without snapshot"，後續步驟用傳統方式
 ```
@@ -285,8 +285,7 @@ fi
 ```
 1. 消費 findings[] 中的預計算結果：
    - X-cap-path 問題：Capabilities 入口路徑不存在 → 標記為 important
-   - X-tag-module 問題：Kanban 卡片 tag 不對應模組目錄 → 標記為 important
-   - X-ep-ready 問題：Next-Up/In-Progress 卡片引用的 EP 不存在 → 標記為 important
+   - X-ep-ready 問題：To Do/In Progress 卡片引用的 EP 不存在 → 標記為 important
    - X6 問題：模組缺 instruction 檔 → 轉為角度 11（模組覆蓋缺口）
 
 2. 角度 10：dep-graph 矛盾（X1）
@@ -308,5 +307,4 @@ fi
 - [X1] data/CLAUDE.md 宣告 "Does NOT depend on strategies" 但 dep_graph.edges 有 data→strategies
 - [X6] Module 'services' (12 files) 缺少 instruction 檔（AGENTS.md/CLAUDE.md）
 - [X-cap-path] Capabilities entry path 'runner.py' does not exist (in <package>/data/CLAUDE.md)
-- [X-tag-module] Card '<card_title>' has tag 'nonexistent' which does not match any <package>/ subdirectory
 ```

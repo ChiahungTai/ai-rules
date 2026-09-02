@@ -65,8 +65,7 @@ LLM 需要細節時，直接 Read instruction 檔（AGENTS.md 為主，legacy �
 | check_id | 說明 | 嚴重度 |
 |----------|------|--------|
 | X-cap-path | Capabilities 入口路徑不存在 | important |
-| X-tag-module | Kanban 卡片 tag 不對應 `<package>/` 子目錄 | important |
-| X-ep-ready | Next-Up/In-Progress 卡片引用的 EP 檔案不存在 | important |
+| X-ep-ready | To Do/In Progress 卡片引用的 EP 檔案不存在 | important |
 | X6 | 模組有 .py 但無 instruction 檔（AGENTS.md/CLAUDE.md） | important |
 
 ### 步驟 2：清單一致性（預設）

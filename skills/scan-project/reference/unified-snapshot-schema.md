@@ -104,15 +104,9 @@
       "source_claude_md": "my_package/data/AGENTS.md"
     },
     {
-      "check_id": "X-tag-module",
-      "severity": "important",
-      "detail": "Card '騰落線指標' has tag 'nonexistent' which does not match any package subdirectory or top-level dir",
-      "kanban_source": "backlog/tasks/task-42 - 騰落線指標.md"
-    },
-    {
       "check_id": "X-ep-ready",
       "severity": "important",
-      "detail": "Card '重構 Pipeline' in Next-Up references EP 'ep-refactor-pipeline.md' but file not found",
+      "detail": "Card '重構 Pipeline' in To Do references EP 'ep-refactor-pipeline.md' but file not found",
       "kanban_source": "backlog/tasks/task-43 - 重構Pipeline.md"
     },
     {
@@ -127,7 +121,7 @@
     "capabilities_total": 151,
     "capabilities_hash": "c647a67bf05a",
     "kanban_total": 66,
-    "kanban_by_lane": { "Backlog": 63, "Next-Up": 2, "Done": 1 },
+    "kanban_by_lane": { "To Do": 63, "In Progress": 2, "Done": 1 },
     "kanban_hash": "0b84e82352fd",
     "instruction_file_total": 71
   }
@@ -189,7 +183,7 @@ Cargo workspace 的機械解析（無 Rust 時為 `null`）。
 | `capabilities_hash` | string | sorted capability:module:status 的 MD5 前 12 碼 |
 | `kanban_total` | int | backlog 任務總數（欄位名歷史保留——源已遷 `backlog/tasks/`） |
 | `kanban_by_lane` | dict | 各 status 任務數（欄位名歷史保留） |
-| `kanban_hash` | string | sorted title:lane:tags 的 MD5 前 12 碼 |
+| `kanban_hash` | string | sorted id:title:lane 的 MD5 前 12 碼 |
 | `instruction_file_total` | int | instruction 檔總數（AGENTS.md + legacy CLAUDE.md） |
 
 ---
@@ -199,8 +193,7 @@ Cargo workspace 的機械解析（無 Rust 時為 `null`）。
 | check_id | 檢查邏輯 | severity |
 |----------|---------|----------|
 | `X-cap-path` | Capabilities 入口路徑不存在（檢查 project root / package root / instruction 檔目錄（AGENTS.md/CLAUDE.md）三個候選位置） | important |
-| `X-tag-module` | Kanban 卡片的 `[tag:xxx]` 不對應 package 子目錄或頂層 dir | important |
-| `X-ep-ready` | Next-Up/In-Progress 卡片引用的 EP 檔案在 ai-analysis/ 等目錄找不到 | important |
+| `X-ep-ready` | To Do/In Progress 卡片引用的 EP 檔案在任務家目錄找不到 | important |
 | `X6` | dep-graph modules 中有模組（≥3 files）但該模組目錄下無 instruction 檔（AGENTS.md/CLAUDE.md）；模組目錄在 project root 與 package root 兩處都檢查 | important |
 
 **語義性驗證（由 LLM 判斷，不在 findings 中）**：
