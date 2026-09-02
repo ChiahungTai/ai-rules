@@ -2,7 +2,8 @@
 """
 Multi-harness docs mirror crawler.
 
-Mirrors official docs from Claude Code, OpenCode, ZCode, Codex into ref-docs/harness/<source>/.
+Mirrors official docs from Claude Code, OpenCode, ZCode, Codex, Meta (Muse Code)
+into ref-docs/harness/<source>/.
 Prefers markdown endpoints (llms.txt / .md suffix); falls back to HTML extraction
 (zcode, and Claude blog when .md unavailable). Deterministic: writes a file only
 when its sha256 changed, so refresh produces minimal diff.
@@ -269,11 +270,40 @@ def fetch_codex(page: Page) -> tuple[str, bytes]:
     return "fail", b""
 
 
+META_BASE = "https://dev.meta.ai"
+META_LLM = "https://dev.meta.ai/docs/llms.txt"  # docs-wide index (no root llms.txt)
+
+_META_DOC_LINK = re.compile(r"\]\((https?://dev\.meta\.ai/docs/[^)]+\.md)\)")
+
+
+def discover_meta() -> list[Page]:
+    # dev.meta.ai exposes a docs-scoped llms.txt listing every page as verbatim
+    # .md links (same scheme as codex). Covers the Meta Model API, Muse Code
+    # CLI, and Muse Glimmer docs.
+    llms = fetch_until_ok(META_LLM)
+    if not llms:
+        print("[WARN] meta: /docs/llms.txt unreachable; docs skipped")
+        return []
+    pages: list[Page] = []
+    for url in _META_DOC_LINK.findall(llms):
+        rel = url.removeprefix(META_BASE).lstrip("/").removeprefix("docs/")
+        pages.append(Page(url, rel))
+    return _dedup(pages)
+
+
+def fetch_meta(page: Page) -> tuple[str, bytes]:
+    status, body = http_get(page.url)
+    if 200 <= status < 300:
+        return "ok", _norm(body)
+    return "fail", b""
+
+
 SOURCES = {
     "claude-code": (CLAUDE_BASE, discover_claude_code, fetch_claude_code),
     "opencode": (OPENCODE_BASE, discover_opencode, fetch_opencode),
     "zcode": (ZCODE_BASE, discover_zcode, fetch_zcode),
     "codex": (CODEX_BASE, discover_codex, fetch_codex),
+    "meta": (META_BASE, discover_meta, fetch_meta),
 }
 
 

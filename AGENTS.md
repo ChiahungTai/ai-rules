@@ -93,7 +93,7 @@
 - `skills/_common/` — 共用子範本（跨 skill 引用單元，非 skill；`instruction-*` 等使用）
 - `hooks/` — Hook 實作腳本（跨 Claude/ZCode 單一來源。hooks 無目錄載入點，**不能 symlink**——兩家 config 以絕對路徑引用本目錄腳本：Claude `~/.claude/settings.json`；ZCode 3.7.7+ user-level hooks，註冊範本 `hooks/zcode-registration.json`——**範本內容是 `~/.zcode/cli/config.json` `hooks:` 鍵下的子樹值，merge 進去而非整檔覆蓋**（整檔覆蓋會毀掉 config 的 mcp/plugins 區塊）、`notification.sh` 不移植。詳細實測與 ZCode 限制（事件子集、專案層忽略、per-session 快照）見 [04 報告 §7 修訂](ai-analysis/reports/superpowers/04-multi-harness機制對照.md)）
 - `agents/` — 跨 harness subagent 定義（registry 結構：`shared/` 內容切片＋`zcode/`／`claude/` per-harness registry 視圖，`~/.zcode/agents`→`agents/zcode/`、`~/.claude/agents`→`agents/claude/`；tier-pinned 家族〔lite-verify/spec-miner/vision-review/cr-research〕、欄位相容策略與 ZCode Beta 限制見 [agents/AGENTS.md](agents/AGENTS.md)）
-- `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）。`ref-docs/harness/` 是四家 harness 官方文檔鏡像（claude-code/opencode/zcode/codex）+ `contracts.md` 對照分析——**更新鏡像用既有工具 `ref-docs/harness/crawl.py`**（`uv run python ref-docs/harness/crawl.py [--source zcode]`，discover + sha256 增量寫入 + manifest 維護；不要手動逐頁鏡像）
+- `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）。`ref-docs/harness/` 是五家 harness 官方文檔鏡像（claude-code/opencode/zcode/codex/meta〔Muse Code〕）+ `contracts.md` 對照分析——**更新鏡像用既有工具 `ref-docs/harness/crawl.py`**（`uv run python ref-docs/harness/crawl.py [--source zcode]`，discover + sha256 增量寫入 + manifest 維護；不要手動逐頁鏡像）
 - code-reality 工具鏈 — meta 層工具，**住獨立 repo `~/Github/code-reality`（Rust carrier，非本 repo 目錄）**；消費形態 `code-reality <tool> --repo <repo-root>`（binary 安裝與存在性偵測真相源見 skill）；工具用法/時點真相源 [skills/code-reality/SKILL.md](skills/code-reality/SKILL.md)；repo 知識歸各 repo 的 `.code-reality.toml` profile
 
 ## 寫作治理

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-28T14:29:13+00:00",
+  "generated_at": "2026-09-02T10:05:54+00:00",
   "sources": {
     "claude-code": {
       "base": "https://code.claude.com",
@@ -2138,6 +2138,656 @@
           "status": "ok",
           "sha256": "9bd9fe21e038fc24d69d79cbd22dd33fecf07d99cc9dd180470d98313e51b4c6",
           "bytes": 10965
+        }
+      ]
+    },
+    "meta": {
+      "base": "https://dev.meta.ai",
+      "page_count": 92,
+      "pages": [
+        {
+          "url": "https://dev.meta.ai/docs/agent-frameworks.md",
+          "path": "agent-frameworks.md",
+          "status": "ok",
+          "sha256": "afe2619dbeb30baa4b4dc316c4fde74bdce09af17abc145f0a4ffb88b7f53650",
+          "bytes": 18614
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference.md",
+          "path": "api-reference.md",
+          "status": "ok",
+          "sha256": "9bc0a515752639b6d41b49742de94e391527bb3cb278bb059627764b1df64428",
+          "bytes": 2387
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/chat-completions.md",
+          "path": "api-reference/chat-completions.md",
+          "status": "ok",
+          "sha256": "57cdb34215f9cff3a2fd953bd0aa47e23777aa84b34c0cefd455053c54e77557",
+          "bytes": 943
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/chat-completions/create-chat-completion.md",
+          "path": "api-reference/chat-completions/create-chat-completion.md",
+          "status": "ok",
+          "sha256": "bdfebcca064a9d970035701f7138d606079846bc78b964bdef224bf9d2caf0f3",
+          "bytes": 7564
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/chat-completions/schemas.md",
+          "path": "api-reference/chat-completions/schemas.md",
+          "status": "ok",
+          "sha256": "3f1ccb7be0e5c7466e7cc9574b54bbc2da93850652ad959c7033174496b812ad",
+          "bytes": 53287
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/files.md",
+          "path": "api-reference/files.md",
+          "status": "ok",
+          "sha256": "99a1c94ec6571d01db88c80d9b974cae0c969b993c4d9cf08b6800358833d05d",
+          "bytes": 922
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/files/delete-file.md",
+          "path": "api-reference/files/delete-file.md",
+          "status": "ok",
+          "sha256": "c056c26eab75b56619f613747cc349a81a3730f17d171e5f4881d6db05dda455",
+          "bytes": 1840
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/files/list-files.md",
+          "path": "api-reference/files/list-files.md",
+          "status": "ok",
+          "sha256": "4f590ddfb3e8d97ac9c73a2e530f0b52a9426c55550042ed0224e3c750973315",
+          "bytes": 2456
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/files/retrieve-file-content.md",
+          "path": "api-reference/files/retrieve-file-content.md",
+          "status": "ok",
+          "sha256": "b1064048f8242e230a1fabeedff5c98f38e5dbeca5b04a0b911652624d1c2e27",
+          "bytes": 1332
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/files/retrieve-file.md",
+          "path": "api-reference/files/retrieve-file.md",
+          "status": "ok",
+          "sha256": "d675d774be02787a32aa99579095d2a7bb1467aea396f8100eddb956baa8b5de",
+          "bytes": 1840
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/files/schemas.md",
+          "path": "api-reference/files/schemas.md",
+          "status": "ok",
+          "sha256": "419ea0252772587ca6a7839d0fc1c43ee75938f7ddcddd7e4833cc344ff6eef4",
+          "bytes": 4647
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/files/upload-file.md",
+          "path": "api-reference/files/upload-file.md",
+          "status": "ok",
+          "sha256": "7ef92f8b5ba8cd2f0ce9d8a29414556b18e5faf2f899e8c023c5b434b043e08c",
+          "bytes": 2223
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/images.md",
+          "path": "api-reference/images.md",
+          "status": "ok",
+          "sha256": "475223d61af633db328c0fcc668a299d4ea0dc32e5cd6afc0d6eef28a8a8a941",
+          "bytes": 761
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/images/create-image.md",
+          "path": "api-reference/images/create-image.md",
+          "status": "ok",
+          "sha256": "1720b23add2b0f8384133d07d072bbc261a7c0a23113c86b657ea88fb6327f59",
+          "bytes": 3114
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/images/edit-image.md",
+          "path": "api-reference/images/edit-image.md",
+          "status": "ok",
+          "sha256": "a0d65d3ca3b18d755fd69e2664ef4c62a2fab0b6f6507a8391f47460d51baea2",
+          "bytes": 3562
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/images/schemas.md",
+          "path": "api-reference/images/schemas.md",
+          "status": "ok",
+          "sha256": "2bac126eb99854e650c14cdd4aff77a2581ada22ef2eea4ce8db2e3f84d40823",
+          "bytes": 18819
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/messages.md",
+          "path": "api-reference/messages.md",
+          "status": "ok",
+          "sha256": "8962060bcc3f39717ff7bdaf30125406b55267ec43821bc90eabb905c3fc40cb",
+          "bytes": 1159
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/messages/count-tokens.md",
+          "path": "api-reference/messages/count-tokens.md",
+          "status": "ok",
+          "sha256": "382b1eb05b6315b81f7ed88866cfe4fb522eda059eda003e9610372cee7c0127",
+          "bytes": 3924
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/messages/create-message.md",
+          "path": "api-reference/messages/create-message.md",
+          "status": "ok",
+          "sha256": "2f7dc6bc217702c0eb8389f2d8fa9ec5bebc9741ebdb8ccd3b9242737fe03c97",
+          "bytes": 4335
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/messages/schemas.md",
+          "path": "api-reference/messages/schemas.md",
+          "status": "ok",
+          "sha256": "c4a54a05dad636c83b34d2e87c0f80e924ad187591bb3ca9e13c90997b28f213",
+          "bytes": 10555
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/models.md",
+          "path": "api-reference/models.md",
+          "status": "ok",
+          "sha256": "0355691800ef1a7025cc3132ce24b8276def908452348637b6397c138420ce04",
+          "bytes": 677
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/models/list-models.md",
+          "path": "api-reference/models/list-models.md",
+          "status": "ok",
+          "sha256": "b2c3aa82b788c84fb3befa2cf112bb2590ab93829048dcdd970325243c0e0d5c",
+          "bytes": 1836
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/models/retrieve-model.md",
+          "path": "api-reference/models/retrieve-model.md",
+          "status": "ok",
+          "sha256": "ec4e8dc7ad973e14d9c32b2b114a05d7650f13c4b0dc5ca5abf7b22016d46705",
+          "bytes": 1825
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/models/schemas.md",
+          "path": "api-reference/models/schemas.md",
+          "status": "ok",
+          "sha256": "a7f61c9e333c11a268f32c95428e34ad1aa66bfd4b4a93100c2ba20e4241d486",
+          "bytes": 1991
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/responses.md",
+          "path": "api-reference/responses.md",
+          "status": "ok",
+          "sha256": "b127ddefcbc2ee26dcc42e68d64dc34bcca9bdacfbe5a0f24686e859d8f57e55",
+          "bytes": 1190
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/responses/cancel-response.md",
+          "path": "api-reference/responses/cancel-response.md",
+          "status": "ok",
+          "sha256": "2b0bbf6c7bff60463e2558988207423d30e9e350574357daac73a96a32f9a571",
+          "bytes": 5365
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/responses/count-input-tokens.md",
+          "path": "api-reference/responses/count-input-tokens.md",
+          "status": "ok",
+          "sha256": "9253568ab2db52466f6214208479ac40ac363d3c313d7e2e87aa1a2d814aa689",
+          "bytes": 8335
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/responses/create-response.md",
+          "path": "api-reference/responses/create-response.md",
+          "status": "ok",
+          "sha256": "3e760483faf2bc62d32a5e38a44ff753ca9672ff8ae231f8ed2e39382a0e541e",
+          "bytes": 12737
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/responses/delete-response.md",
+          "path": "api-reference/responses/delete-response.md",
+          "status": "ok",
+          "sha256": "3de6939e0afc925aa403cd6b27354839793067354528e9a3e7fa10c8c730adf0",
+          "bytes": 1969
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/responses/retrieve-response.md",
+          "path": "api-reference/responses/retrieve-response.md",
+          "status": "ok",
+          "sha256": "5884a8c31564b4002a2910e755e31507036ea44ed16e8c0786502bdfb735adb6",
+          "bytes": 12356
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/responses/schemas.md",
+          "path": "api-reference/responses/schemas.md",
+          "status": "ok",
+          "sha256": "eb7293c96f2778df9bf75c59525b75cece2dcd16e11697627cf56bbc3abbbf14",
+          "bytes": 170013
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/status.md",
+          "path": "api-reference/status.md",
+          "status": "ok",
+          "sha256": "10e5a1f1b57e3cf8a8de96cce57414432923483f3e4cde8b41d5128dbc82033f",
+          "bytes": 3870
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/voice.md",
+          "path": "api-reference/voice.md",
+          "status": "ok",
+          "sha256": "ca3ce4253e6c8fbdffa7e45c390f7b81916cf0c5e0dbb88a5ea5cecabef9e45d",
+          "bytes": 829
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/voice/realtime.md",
+          "path": "api-reference/voice/realtime.md",
+          "status": "ok",
+          "sha256": "cca750b3006745c625d2df7aaa5d1c6b03a4c1cfeb0a96ea64af3b607dba3481",
+          "bytes": 10544
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/voice/schemas.md",
+          "path": "api-reference/voice/schemas.md",
+          "status": "ok",
+          "sha256": "e10d45f92e80981751c18f7796e552e90efd4299d8a5386b39fde90c2cd85e83",
+          "bytes": 17129
+        },
+        {
+          "url": "https://dev.meta.ai/docs/api-reference/voice/transcribe.md",
+          "path": "api-reference/voice/transcribe.md",
+          "status": "ok",
+          "sha256": "85a24bc6494230330029ebc877a31fec4e0e0f7e833a6b66c3845f6cdbd994f7",
+          "bytes": 8026
+        },
+        {
+          "url": "https://dev.meta.ai/docs/authentication.md",
+          "path": "authentication.md",
+          "status": "ok",
+          "sha256": "ba7b9a3156e41151f92548b5933ec709197a8a5c681721335468c8f9dde1002e",
+          "bytes": 2599
+        },
+        {
+          "url": "https://dev.meta.ai/docs/coding-agents.md",
+          "path": "coding-agents.md",
+          "status": "ok",
+          "sha256": "c93f4f799647e9b01dce139d995371fa40cd161e2b34016f93fb5a6abc5c1c91",
+          "bytes": 22834
+        },
+        {
+          "url": "https://dev.meta.ai/docs/computer-use.md",
+          "path": "computer-use.md",
+          "status": "ok",
+          "sha256": "54e95110033df36eaeefaa58ee8714bae6354e9f31c9893b5416bb7025e0952b",
+          "bytes": 17020
+        },
+        {
+          "url": "https://dev.meta.ai/docs/cookbook.md",
+          "path": "cookbook.md",
+          "status": "ok",
+          "sha256": "80ff16c0d7d3a8f2dac6adab9f1df53641a496dba5f1ea38db6c225203a93ef8",
+          "bytes": 10101
+        },
+        {
+          "url": "https://dev.meta.ai/docs/cookbook/agent-patterns.md",
+          "path": "cookbook/agent-patterns.md",
+          "status": "ok",
+          "sha256": "13156779b43ec52042885eb25f08a3a91f197e73e6214ea9eeba173ecb19496d",
+          "bytes": 1570
+        },
+        {
+          "url": "https://dev.meta.ai/docs/cookbook/api-fundamentals.md",
+          "path": "cookbook/api-fundamentals.md",
+          "status": "ok",
+          "sha256": "2aae0cfd6135203b39a00dd6afb7d2aa29042e58c4678a310e014c646ae01fbf",
+          "bytes": 2352
+        },
+        {
+          "url": "https://dev.meta.ai/docs/cookbook/muse-code.md",
+          "path": "cookbook/muse-code.md",
+          "status": "ok",
+          "sha256": "9330e002f95406cdab1aec06f8747ded875225a099705fc4b1eaaf36bb4e3417",
+          "bytes": 2999
+        },
+        {
+          "url": "https://dev.meta.ai/docs/cookbook/muse-image.md",
+          "path": "cookbook/muse-image.md",
+          "status": "ok",
+          "sha256": "85a11bba360f45d7aa82cae36c77842ac12bd329e3dcec203b0e62c6c6f969b4",
+          "bytes": 1734
+        },
+        {
+          "url": "https://dev.meta.ai/docs/cookbook/use-cases.md",
+          "path": "cookbook/use-cases.md",
+          "status": "ok",
+          "sha256": "c19bb85007161a5dc8d16e1af085564fae225959553fb051e187a88feda4934a",
+          "bytes": 3109
+        },
+        {
+          "url": "https://dev.meta.ai/docs/error-handling.md",
+          "path": "error-handling.md",
+          "status": "ok",
+          "sha256": "dd6f0b56dc29841d2841bc7b3261f8d51a003b4d4493687d4c87ea0599a81759",
+          "bytes": 27040
+        },
+        {
+          "url": "https://dev.meta.ai/docs/file-handling.md",
+          "path": "file-handling.md",
+          "status": "ok",
+          "sha256": "6b55f761c0dd858d755a32f5eee52a1b2c7cab2201f4eacc530a75e17806365b",
+          "bytes": 24418
+        },
+        {
+          "url": "https://dev.meta.ai/docs/image-generation.md",
+          "path": "image-generation.md",
+          "status": "ok",
+          "sha256": "c5325354a3f46a67072e72d836779061b87ffe6b930d0ba4f877c32826033b71",
+          "bytes": 23617
+        },
+        {
+          "url": "https://dev.meta.ai/docs/image-understanding.md",
+          "path": "image-understanding.md",
+          "status": "ok",
+          "sha256": "0243b46ccfec93a06ff48afe0afab77ee859326f4cb652bbe86a4c94ef9e8073",
+          "bytes": 24638
+        },
+        {
+          "url": "https://dev.meta.ai/docs/models.md",
+          "path": "models.md",
+          "status": "ok",
+          "sha256": "01b5f2dc3ba311c0bef8acaf8e7bac4c9437665de6cd6055a0494c6573aa8f06",
+          "bytes": 8302
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code.md",
+          "path": "muse-code.md",
+          "status": "ok",
+          "sha256": "69e4b07515154b1216c5a717dda43a7c49d0b9d8317cdbabbee37c1ce784a65a",
+          "bytes": 3815
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/auth.md",
+          "path": "muse-code/auth.md",
+          "status": "ok",
+          "sha256": "7561c73d5e9c5eab4bc2d5a92e05b367e49e638f94d49ae904318d29e51caba2",
+          "bytes": 4918
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/changelog.md",
+          "path": "muse-code/changelog.md",
+          "status": "ok",
+          "sha256": "91c64a8916a624d9a598e5bce4706a7b5c67114952a824584874d2f09c0dc7eb",
+          "bytes": 11238
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/configuration.md",
+          "path": "muse-code/configuration.md",
+          "status": "ok",
+          "sha256": "0a845619c7b3455e5e233f6b4a886e09c141486a739001ebb5e86868190a0ec6",
+          "bytes": 7844
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/extending.md",
+          "path": "muse-code/extending.md",
+          "status": "ok",
+          "sha256": "1ff0c787bd7a18f52cc0530c8f479dca9f39431378a8aeba3bd424fb25027840",
+          "bytes": 12383
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/interactive.md",
+          "path": "muse-code/interactive.md",
+          "status": "ok",
+          "sha256": "a541662591cda1c1a8a4f5a3676afc1c378f03a9783cfaa8c0f698bb7b057d32",
+          "bytes": 13320
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/permissions.md",
+          "path": "muse-code/permissions.md",
+          "status": "ok",
+          "sha256": "b2dc9e1ce12aaf19aa15585d52aec7ca1231fd588929be186ef2417dcd2f33e7",
+          "bytes": 8250
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/rewind.md",
+          "path": "muse-code/rewind.md",
+          "status": "ok",
+          "sha256": "f4b25f6b43e2c9525f1696af0c2b21cf3b27b1bd1a62c26b834bc2b8bfb32dc2",
+          "bytes": 4771
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/session-messaging.md",
+          "path": "muse-code/session-messaging.md",
+          "status": "ok",
+          "sha256": "7178a0826a7ba5b3c18b252afe3f79d5cd40fb45e21bac0112f36ddc80a4c330",
+          "bytes": 8254
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/subscriptions.md",
+          "path": "muse-code/subscriptions.md",
+          "status": "ok",
+          "sha256": "b74d558a92ee5271b8ff202cb00d0b1ffb282a211fafcf5ab28b774469e79142",
+          "bytes": 6321
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-code/workflows.md",
+          "path": "muse-code/workflows.md",
+          "status": "ok",
+          "sha256": "fa3ca81bd36a2928f6fd16c89e55761a0f183827c13f1c880588b86729106835",
+          "bytes": 9541
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer.md",
+          "path": "muse-glimmer.md",
+          "status": "ok",
+          "sha256": "bbd6e05090c41e3290809959bd0ac0c51924cc85d5a4f295e436ce13bd4bfd2d",
+          "bytes": 2821
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/customization.md",
+          "path": "muse-glimmer/customization.md",
+          "status": "ok",
+          "sha256": "a35d8e9deb411ea209a811145dfc515cbe123cdcd7ec753a71f47fdf94a79b43",
+          "bytes": 2360
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/deploy.md",
+          "path": "muse-glimmer/deploy.md",
+          "status": "ok",
+          "sha256": "af52c0c27a45570be9850e798f1c6756054c5ba5f452105041ad0fc6018d1bc5",
+          "bytes": 2874
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/executorch.md",
+          "path": "muse-glimmer/executorch.md",
+          "status": "ok",
+          "sha256": "ad40070e4d690d661ba38658b91c5c82d412378aa416e937e28453ce6ed98151",
+          "bytes": 12038
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/fine-tuning.md",
+          "path": "muse-glimmer/fine-tuning.md",
+          "status": "ok",
+          "sha256": "da94ee725d249b4b976ca8f4db47b9f59c9753ed613855ae9a39981d47e29180",
+          "bytes": 8960
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/get-the-model.md",
+          "path": "muse-glimmer/get-the-model.md",
+          "status": "ok",
+          "sha256": "061a57b7c4d567dfb20155dd72a11141eb3a547d6b9cf01eedcb3fa634a4c519",
+          "bytes": 4622
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/llama-cpp.md",
+          "path": "muse-glimmer/llama-cpp.md",
+          "status": "ok",
+          "sha256": "a31737cb6140e2da324181671a5e51f0e7037db3fbca07f0b4f78de6b6a97116",
+          "bytes": 13387
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/prompting.md",
+          "path": "muse-glimmer/prompting.md",
+          "status": "ok",
+          "sha256": "4ad4ca61f7413ef2d4273c65313035dd5b4f05f60b7d9a99d257ec6afb05e91a",
+          "bytes": 10092
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/quantization.md",
+          "path": "muse-glimmer/quantization.md",
+          "status": "ok",
+          "sha256": "51cea0fc1f2f87a38030cb7a6dbeffe2e433f8680206c6a699874147807e8160",
+          "bytes": 5016
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/rl.md",
+          "path": "muse-glimmer/rl.md",
+          "status": "ok",
+          "sha256": "0f3ff41bd5bc11ede44412466cb6100eaedceedc62751de8cb88516f7db9d4d3",
+          "bytes": 7169
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/sglang.md",
+          "path": "muse-glimmer/sglang.md",
+          "status": "ok",
+          "sha256": "d3c31dfa84b6c4251556467c2636655c7f5d2b6fcf1432c95ed4a289276e023d",
+          "bytes": 3343
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/spec-decode.md",
+          "path": "muse-glimmer/spec-decode.md",
+          "status": "ok",
+          "sha256": "324634c6d08befd0b6a2d9b74f24202b8523985d910f5523d240ce15e3c2325d",
+          "bytes": 2477
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/together-ai.md",
+          "path": "muse-glimmer/together-ai.md",
+          "status": "ok",
+          "sha256": "e004e5c247a23919fe2fd903719fdb4c67505dd3c9df8ab773aa30b0029494ef",
+          "bytes": 8078
+        },
+        {
+          "url": "https://dev.meta.ai/docs/muse-glimmer/vllm.md",
+          "path": "muse-glimmer/vllm.md",
+          "status": "ok",
+          "sha256": "a4982e2906e1381feb086a2def78eee5838bccf5705f50ace13edb8d38e343db",
+          "bytes": 11105
+        },
+        {
+          "url": "https://dev.meta.ai/docs/overview.md",
+          "path": "overview.md",
+          "status": "ok",
+          "sha256": "08f83fe0341c215911c057626963550296b73963eec16d6e78a11fd169537182",
+          "bytes": 11757
+        },
+        {
+          "url": "https://dev.meta.ai/docs/pricing-rate-limits.md",
+          "path": "pricing-rate-limits.md",
+          "status": "ok",
+          "sha256": "e08b56ece6ea2b62f921bb692d8a49ae744f0d75f40c08e304b246aed304d7ea",
+          "bytes": 8089
+        },
+        {
+          "url": "https://dev.meta.ai/docs/prompt-caching.md",
+          "path": "prompt-caching.md",
+          "status": "ok",
+          "sha256": "71e81fe0e4c6a7aff161be59b6254afd5f0c75caa4a2f7c9c7ef702f633ce24d",
+          "bytes": 11144
+        },
+        {
+          "url": "https://dev.meta.ai/docs/protocols.md",
+          "path": "protocols.md",
+          "status": "ok",
+          "sha256": "53b4daf0bb0b11c9584400b88367c10d794d7c8a68db7ab9792c1fc76b52f99f",
+          "bytes": 3601
+        },
+        {
+          "url": "https://dev.meta.ai/docs/protocols/chat-completions.md",
+          "path": "protocols/chat-completions.md",
+          "status": "ok",
+          "sha256": "476cde40f2704fdde92df7ed155cd6d1920ee92d00f69c0bb931b458ab9eb1ff",
+          "bytes": 20377
+        },
+        {
+          "url": "https://dev.meta.ai/docs/protocols/messages.md",
+          "path": "protocols/messages.md",
+          "status": "ok",
+          "sha256": "bf6500821b8a7e59362d58f97f50e99cc0800a981e9c348d3b0dbaf2770c237a",
+          "bytes": 10906
+        },
+        {
+          "url": "https://dev.meta.ai/docs/protocols/responses.md",
+          "path": "protocols/responses.md",
+          "status": "ok",
+          "sha256": "44ebd2d176ea5e0b267f158c9835cee7a993a18d2b47223a6baebb049f972fad",
+          "bytes": 34739
+        },
+        {
+          "url": "https://dev.meta.ai/docs/quickstart.md",
+          "path": "quickstart.md",
+          "status": "ok",
+          "sha256": "b951ab18bb0ad03be7deecb0871938eef2bd68b601f19a55d827484a2305cbdd",
+          "bytes": 8743
+        },
+        {
+          "url": "https://dev.meta.ai/docs/reasoning.md",
+          "path": "reasoning.md",
+          "status": "ok",
+          "sha256": "dc515dddb0c8328c53a1fd023289e9e05c64d95e1f33a6566fe2528d38b36930",
+          "bytes": 12063
+        },
+        {
+          "url": "https://dev.meta.ai/docs/sdks.md",
+          "path": "sdks.md",
+          "status": "ok",
+          "sha256": "5ad0fd42910bbb29ca4845e01a9ad1f7731793572e7d9563820116d3e1399841",
+          "bytes": 3749
+        },
+        {
+          "url": "https://dev.meta.ai/docs/search-grounding.md",
+          "path": "search-grounding.md",
+          "status": "ok",
+          "sha256": "530a9cb9f2052b46b9da2831b8741e83530a492cb36a52d6b1501bf2ab00b1ff",
+          "bytes": 18525
+        },
+        {
+          "url": "https://dev.meta.ai/docs/speech-to-text.md",
+          "path": "speech-to-text.md",
+          "status": "ok",
+          "sha256": "00f012d321c82c4ae802c32667c4507fd035c5d94b1671542bdb17e5b55816cf",
+          "bytes": 23640
+        },
+        {
+          "url": "https://dev.meta.ai/docs/structured-output.md",
+          "path": "structured-output.md",
+          "status": "ok",
+          "sha256": "099a2bd361f65b81dcc62bfd52ab9df9fd13c46251c32b693edaaa0c95c031b3",
+          "bytes": 13580
+        },
+        {
+          "url": "https://dev.meta.ai/docs/token-counting.md",
+          "path": "token-counting.md",
+          "status": "ok",
+          "sha256": "3306fb1438137a7ed94161c09d13dd33c662c19fbc32bce92b22bd16afe40f32",
+          "bytes": 6675
+        },
+        {
+          "url": "https://dev.meta.ai/docs/tool-calling.md",
+          "path": "tool-calling.md",
+          "status": "ok",
+          "sha256": "4ae44f1c80b520e4ccd8426bf64cba129b516b5602fb18eb094c2123cdacb1df",
+          "bytes": 23388
+        },
+        {
+          "url": "https://dev.meta.ai/docs/tool-search.md",
+          "path": "tool-search.md",
+          "status": "ok",
+          "sha256": "d8bb5bcf66923e17ee714671b7cc2a559893617dff21192dbf1f98b7bb7e3f9e",
+          "bytes": 17212
+        },
+        {
+          "url": "https://dev.meta.ai/docs/video-understanding.md",
+          "path": "video-understanding.md",
+          "status": "ok",
+          "sha256": "dcf3f6c109688d4ef3753c0fbfc6c5646b51b84ffdfe2ec00e3196bbe29b2d17",
+          "bytes": 15952
         }
       ]
     },
