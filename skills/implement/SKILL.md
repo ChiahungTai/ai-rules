@@ -104,13 +104,13 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 **max-agents > 1 且有可平行段落**時：
 1. 依賴圖分層為 waves
-2. 同 wave 平行 Agent（上限 max-agents）
-3. Wave 合併：讀取 Agent 產出 → 應用到主 worktree → `uv run ruff check --fix && uv run ruff format`
-4. **Agent 產出機械驗證 = Claim→Evidence→Trust 校驗**（原則見 [acceptance-evidence](../../rules/acceptance-evidence.md)「證據獨立性 + Claim→Evidence→Trust」—— agent 自述是 L2 同義反覆風險、`git diff` 是 L1 機械證據）。**此模式適用所有 no-impact claim**（agent / producer 宣稱「沒影響 X」：accounting / risk / invariant）：claim 須獨立機械證據反證，否則退化為 self-report：
+2. 同 wave 平行 Agent（上限 max-agents；Agent 直接寫入主 worktree，產出即 working tree 變更）
+3. **Agent 產出機械驗證 = Claim→Evidence→Trust 校驗**（原則見 [acceptance-evidence](../../rules/acceptance-evidence.md)「證據獨立性 + Claim→Evidence→Trust」—— agent 自述是 L2 同義反覆風險、`git diff` 是 L1 機械證據）。**此模式適用所有 no-impact claim**（agent / producer 宣稱「沒影響 X」：accounting / risk / invariant）：claim 須獨立機械證據反證，否則退化為 self-report：
    - `git diff --name-only` 列實際變更檔（機械事實）
    - 比對各 Agent 自述「改了哪些檔 / 幾處」vs git 實際 → flag mismatch（**稱「零修改」但 git 顯示有改**最危險，曾釀 scope-creep 近乎 ship）
    - scope-creep：diff 檔是否超出該 Agent prompt 指定 scope → flag 超出（附 prompt scope 引用）
    - mismatch / scope-creep → 列為 finding 進階段 4 Agent Review，**不靜默採信自述**
+4. Agent 全部完成後統一 `uv run ruff check --fix && uv run ruff format`
 
 **Agent Context 邊界**：Agent 看不到主對話歷史、其他 Agent 結果、EP 準備結論。**主 LLM 的 prompt 是 Agent 理解任務的唯一來源。**
 
