@@ -48,6 +48,24 @@
 
 **ZCode 有、Claude 無**：Repo Wiki（自動架構指南、宣稱帶 source location、隨 code 自動刷新、存 `~/.zcode/v2/repo-wiki/` 不進 repo，`zcode/cn/docs/repo-wiki.md`）、閒時任務（算力富餘免費執行）、飛書/微信 Bot Channel、內建瀏覽器 UI（element 選成 context）。
 
+## Auto-memory 載入截斷（2026-09-03 雙端源碼反組譯，CLI 三版同構）
+
+兩家同語義：**200 行 或 25,000 字元（UTF-16 code units，CJK 一字計 1）先到者截**——截斷處附 WARNING（易忽略）、尾端條目不進 context；注入路徑不剝 frontmatter（K9r 讀碼：`Wut()` 直收 `indexContent` 全文，行數含 frontmatter 行）。
+
+| | 行數限 | 大小限 | 證據 |
+|---|---|---|---|
+| ZCode | 200（`Vut`） | 25,000 字元（`mre=25e3`——`Wut()` 以 `t.length` 比較） | `/Applications/ZCode.app/Contents/Resources/glm/zcode.cjs` |
+| Claude Code | 200（`YD`） | 25,000 字元（`GF=25000`——`mLe()` 回傳 `byteCount:t.length`：**欄位名叫 byteCount、計量是 `.length`＝字元**；TextEncoder 在另一 scope 屬 crypto，勿誤讀） | `~/.local/share/claude/versions/<v>` |
+
+「25KB」＝兩端警告把 25,000 字元 ÷1024 顯示成 "24.4KB" 的**假象**——全鏈無 bytes 量測。重跑驗證（量詞須彈性——常數前綴不足 100 字元，`.{100}` 會 0 hits）：
+
+```bash
+rg -a -o '.{30}mre=[0-9*]+.{30}' /Applications/ZCode.app/Contents/Resources/glm/zcode.cjs
+rg -a -o '.{0,100}YD=200,GF=25000.{0,60}' ~/.local/share/claude/versions/$(ls -t ~/.local/share/claude/versions/ | head -1)
+```
+
+治理配套（ai-rules 端）：generator 硬 gate chars 22,500（真線 90%）／lines 190＋bytes 24,000 info 預警——單一源在 `skills/memory-audit/scripts/generate_index.py` 註解。
+
 
 ## 對 ai-rules 的啟示
 

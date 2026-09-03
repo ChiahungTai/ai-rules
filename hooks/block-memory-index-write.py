@@ -8,7 +8,7 @@ PreToolUse hook（matcher Edit|Write|NotebookEdit）: memory 寫入治理（兩�
    → 近重複寫入正回授（2026-08-30 mosaic 56.6KB 實證）。
 ② 條目檔寫入檢查（2026-09-01 寫入治理）——對應 rules/context-management.md
    寫入四問 Q1/Q2/Q4：
-   - frontmatter description >120 chars → 擋（索引行原料；紀律 ≤100，
+   - frontmatter description >100 chars → 擋（索引行原料＝寫入紀律值，
      name×2 重複已佔索引行 40% 開銷，desc 是主要槓桿）
    - 條目檔膨脹 >12,000 chars → 擋（Write 看 content 全長；Edit 只擋
      「變大且超限」方向——收斂型編輯放行，不卡 audit 收縮既有肥檔）。
@@ -35,7 +35,7 @@ import sys
 from pathlib import Path
 
 GENERATOR_NAME = "_generate_index.py"
-DESC_LIMIT = 120  # frontmatter description 硬上限（寫入紀律 ≤100）
+DESC_LIMIT = 100  # frontmatter description 硬上限（＝寫入紀律值；09-03 P1 對齊）
 BODY_LIMIT = 12_000  # 條目檔總長上限（chars）
 
 

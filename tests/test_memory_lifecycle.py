@@ -2,7 +2,7 @@
 
 三件套行為錨點：索引生成 gate 分級（22,500 字元/190 行 fail-loud 守兩端共同截斷線〔200 行／
 25,000 字元〕；24,000 bytes 降 info 縱深預警）與 frontmatter 解析、手寫攔截
-＋條目寫入治理（desc>120/body 膨脹>12,000 硬擋、收斂放行）的 self-gating 條件、
+＋條目寫入治理（desc>100/body 膨脹>12,000 硬擋、收斂放行）的 self-gating 條件、
 跨 harness memory 目錄推導——Claude 端底線也轉 dash 的專案名
 編碼陷阱與 ZCode 端 basename-sha256 命名皆以本機真實目錄名為錨（hash 是路徑字串的
 純函數，跨機器成立）。
@@ -122,11 +122,11 @@ def test_generator_e2e_gate_fail_loud(tmp_path):
 def test_generator_e2e_byte_gate(tmp_path):
     """SM-3：CJK 重池——chars/lines gate 內、bytes 破 24,000 → info 縱深預警不擋寫入。
 
-    70 條 × 130 CJK 字 description：chars ≈ 10,700（<22,500）、bytes ≈ 27,400（>24,000）
+    80 條 × 130 CJK 字 description：chars ≈ 10,418（<22,500）、bytes ≈ 26,464（>24,000）
     ——bytes 非任何端實際截斷線（兩端皆 25,000 chars、量 UTF-16 length）；info 為
     縱深預警（CJK 一字 3B 提前折射），ZCode 主力場景照常寫入（2026-09-03 裁決「zcode 優先」）。
     """
-    pool = make_pool(tmp_path, n=70, desc="深" * 130)
+    pool = make_pool(tmp_path, n=80, desc="深" * 130)
     r = subprocess.run(
         [sys.executable, str(pool / "_generate_index.py")],
         capture_output=True,
@@ -142,11 +142,11 @@ def test_generator_e2e_byte_gate(tmp_path):
 def test_generator_e2e_chars_gate(tmp_path):
     """SM-9：chars gate 邊界——chars 破 22,500 而 lines 未超 → fail-loud（chars 路徑錨）。
 
-    160 條 × desc 130 CJK（截 120）：chars ≈ 23,600（>22,500）、lines = 167（<190）
-    ——gate_fail_loud（n=200）走 lines 路徑，chars 邊界由此釘住：gate 值 typo 或
+    178 條 × desc 130 CJK（截 100）：chars ≈ 23,060（>22,500）、lines = 184（<190）
+    ——gate_fail_loud（n=200）兩 gate 皆破，chars-only 邊界由本測試釘住：gate 值 typo 或
     再調整（09-03 18,500→22,500）時有紅燈保護。
     """
-    pool = make_pool(tmp_path, n=160, desc="深" * 130)
+    pool = make_pool(tmp_path, n=178, desc="深" * 130)
     r = subprocess.run(
         [sys.executable, str(pool / "_generate_index.py")],
         capture_output=True,
@@ -278,7 +278,7 @@ def hook_payload(tool: str, file_path: Path, **kw) -> dict:
 
 
 def test_entry_write_desc_overlong_blocked(tmp_path):
-    """desc 130 chars（>120）→ exit 2；語義：索引行原料超額在寫入端擋。"""
+    """desc 130 chars（>100）→ exit 2；語義：索引行原料超額在寫入端擋。"""
     pool = make_pool(tmp_path, n=1)
     target = pool / "fat-desc.md"
     r = run_hook(
@@ -366,7 +366,7 @@ def test_entry_edit_shrink_overlimit_file_allowed(tmp_path):
 
 
 def test_entry_edit_desc_overlong_blocked(tmp_path):
-    """Edit 的 new_string 含 description: 行且值 >120 → exit 2。"""
+    """Edit 的 new_string 含 description: 行且值 >100 → exit 2。"""
     pool = make_pool(tmp_path, n=1)
     target = pool / "desc-edit.md"
     target.write_text(
@@ -396,10 +396,10 @@ def test_entry_governance_self_gated(tmp_path):
     assert r.returncode == 0
 
 
-def test_entry_write_desc_boundary_120_pass_121_blocked(tmp_path):
-    """F6：desc 邊界值——恰 120 放行、121 擋（rule 契約以 >120 為線）。"""
+def test_entry_write_desc_boundary_100_pass_101_blocked(tmp_path):
+    """F6：desc 邊界值——恰 100 放行、101 擋（＝寫入紀律值；09-03 P1 對齊）。"""
     pool = make_pool(tmp_path, n=1)
-    for n, expect in ((120, 0), (121, 2)):
+    for n, expect in ((100, 0), (101, 2)):
         r = run_hook(
             hook_payload(
                 "Write",

@@ -26,7 +26,8 @@
 # 2026-09-03 晚 chars gate 18,500→22,500（真線 90%）：寫入原則配套＋每日夜間收斂
 # cron 承接流出（user 裁定「有進有出」）——gate 即時閥語義下餘裕＝收斂反應時間，
 # 夜間收斂前置清理使 jam 罕見，放寬安全。
-# description 截斷 140→120 對齊 hook DESC_LIMIT（>120 在寫入端已擋，此為存量縱深）。
+# description 截斷線隨 hook DESC_LIMIT：140→120（09-01）→100（09-03 P1：硬限對齊
+# 紀律值）——寫入端已擋，此為存量縱深。
 # 條目 frontmatter 必含 name / description / type（頂層 `type:` 或 `metadata.type:` 皆可）。
 # 語言層約束：跑在 hook runtime 系統 python3 3.9——禁 PEP 604（X | None）等 3.10+ 語法。
 import os
@@ -35,7 +36,7 @@ import sys
 import time
 
 GATE_CHARS = 22_500
-TRUNCATE_DESC = 120  # desc 截斷線——須 == hooks/block-memory-index-write.py DESC_LIMIT（tests cross-layer 錨）
+TRUNCATE_DESC = 100  # desc 截斷線——須 == hooks/block-memory-index-write.py DESC_LIMIT（tests cross-layer 錨）
 GATE_BYTES = 24_000
 GATE_LINES = 190
 ORDER = [
