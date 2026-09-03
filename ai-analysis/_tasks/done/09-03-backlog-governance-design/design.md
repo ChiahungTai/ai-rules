@@ -108,23 +108,26 @@ rg -c "baseline|已決策|驗收" backlog/tasks/<卡檔>.md  # 應 ≥3（豁免
 
 | 層 | 對應分級 | 卡形態 | handoff 主體 | 判定時點 |
 |----|----------|--------|--------------|----------|
-| small | `≈simple` | 卡即 handoff——卡自足直行 | 卡 `desc`＋`notes` | 起手式第③步 |
-| standard+ | `standard`／`full` | 卡為追蹤錨（`references` 指向 EP）＋EP 為 handoff 主體 | `EP`（本檔描述的 `design.md` 亦屬此類的交付物形態） | 同上 |
+| small | `≈simple` | 不建 EP——卡即 handoff，卡自足直行 | 卡 `desc`＋`notes` | **承諾時**（升卡/建卡前的 `/execution-plan` 分級——與 §2.4 分界線同一站） |
+| standard+ | `standard`／`full` | 寫 EP——卡為追蹤錨（`references` 指向 EP）＋EP 為 handoff 主體 | `EP` | 同上 |
+
+**執行端不分岔**：起手式（§2.6）讀卡即知形態（`references` 有無 EP），不做第二次規模判定；執行中 scope 遠超 `desc` → 先升 EP 再動工（逃逸口，非分岔——與 §2.5「notes 像EP」信號同源）。
 
 AIR-13（To Do 等待型，desc 裝裁決＋批次清單、規劃層薄）為 small 自洽實例；MOS-14 與本卡 AIR-14 為 standard+ 實例。
 
 ### 2.4 drafts 進口慣例（已決策②③⑤）
 
-**不建卡的兩種暫存形態**：
+**區分線＝有沒有開 `/execution-plan`**：未開＝`draft` 未承諾池；已開（規模判定＋UC 盤點過）＝`task` 承諾池。draft 三形：
 
 | 形態 | 觸發 | 格式 | 出口 |
 |------|------|------|------|
+| 想法捕獲 | 有需求直覺、還沒開 `/execution-plan` 細拆——想到要做先記，不佔承諾池 | `backlog draft create "<想法>"`（一句話＋範圍草案） | 熬到 `scope 定＋跨 session＋可驗收` 三條齊 → promote |
 | 觸發型 draft | 條件到才做（如 `drafts/rules-audit`：目標／觸發條件／範圍草案） | `backlog/drafts/<topic>.md`（標題＋觸發條件＋草擬範圍） | 條件滿足→`backlog draft promote <id>` 升卡（升卡時蒸餾 `desc` 過 gate）；條件永久失效→刪 |
-| session 斷結晶 | 討論題尚未拍板但 session 將斷、對話即將丟失 | 同上，內容為對話結晶摘要 | 同上；或在對話中拍板→直接建卡（不經 draft） |
+| session 斷結晶 | 討論題尚未拍板但 session 將斷、對話即將丟失 | 同上，內容為對話結晶摘要 | 同上；或在對話中拍板→直接走升卡流程（不經 draft） |
 
 **收口**：`_inbox/` 不另設進口——`drafts/` 即進口（已決策⑤）。理由：進口分裂增加一治理面，solo 場景無外部批量湧入，`drafts/` 已覆蓋「未承諾／觸發型」語義。
 
-**升卡流程**：對話拍板→直接 `backlog task create`（過 gate）；`draft`→`promote`；卡→`EP`（開工判定 standard+ 才建，見 2.3）。
+**升卡流程**：對話拍板 → 跑 `/execution-plan`（規模判定＋UC 盤點）→ `simple` 直接 `task create`（過 gate，不建 EP）／`standard+` 寫 EP 後建卡（雙 ref 掛 EP）；`draft`→`promote` 時同站判定；執行中 scope 漲 → 升 EP（§2.3 逃逸口）。
 
 ### 2.5 notes 治理
 
@@ -139,7 +142,7 @@ AIR-13（To Do 等待型，desc 裝裁決＋批次清單、規劃層薄）為 sm
 ```
 ① backlog task edit <id> -s "In Progress"   # 第一動——平行 session 可見（kanban-board 機制單一源 §開工）
 ② 讀卡三層：frontmatter → desc → notes → references  # 了解決策與接手指針
-③ 規模判定（§2.3：small 直行／standard+ 建 EP 或接續）
+③ 讀卡知形態（references 有無 EP——形態承諾時已定 §2.3，此步不重判；scope 遠超 desc → 先升 EP 再動工）
 ④ 新鮮度核對——
      desc baseline vs `git log --oneline <baseline>..HEAD` 非空→對照 desc 範圍確認；
      notes relay 宣稱（如「排程真相源」材料）→機械驗證當前狀態（relay 快照落後實證）
@@ -183,8 +186,8 @@ ai-rules report URL 形態（實測 2026-09-03）：`http://127.0.0.1:6421/ai-ru
 | 區 | 實測 | 備註 |
 |---|------|------|
 | `.agent-tmp/` | **38 項**（09-03 14:xx 實測；卡 desc 記 36、EP 記 37——快照漂移，新增 1 檔 `mos14-append.md` 等） | Sep 1: ~21、Sep 2-3: 累積；三天跨度，印證「session 結束列清單」有慣例無出口執行率 |
-| `.at-contexts/` | 1 檔 `handoff-20260901-postbuild-distill.md` | `at` 排程 09-01 建、消費後未刪（`at` 只定義 `at-context-*` 的 resume 後刪，`handoff --save` 同區檔無刪除機制） |
-| `.review/` | 空目錄 | 決策落點首選 `EP` review 區段（tracked），本區僅 local-only fallback |
+| `.at-contexts/` | 1 檔 `handoff-20260901-postbuild-distill.md`——**09-03 午後裁定：`handoff --save` 退場**（SM-12：交接改 `backlog task edit --comment` 掛卡 `comments` 段，隨卡歸檔），本區只剩 `at` 的 `at-context-*`（resume 後刪已定義） | `at` 排程 09-01 建、消費後未刪的殘留即退場前的遺證 |
+| `.review/` | 空目錄 | 決策落點首選 `EP` review 區段（tracked），本區僅 local-only fallback——**09-03 /arch-thinking 評：solo 場景可退場（EP 全承載），多 WT 並行 review 時才留作不干擾主線的暫存板** |
 
 > 數字漂移屬常態（09-03 內從 36→37→38），設計取「時點標註＋趨勢判斷」而非精確計數。
 
@@ -192,19 +195,20 @@ ai-rules report URL 形態（實測 2026-09-03）：`http://127.0.0.1:6421/ai-ru
 
 | 區 | 誰進來 | 停多久 | 誰清（第一腿→保底） | 清去哪 | 健康形態 |
 |---|--------|--------|---------------------|--------|----------|
-| `.agent-tmp/` | agent 暫時產物：中間分析／草稿／POC／探測腳本輸出 | session 生命＋**7 天緩衝**（`mtime>7d`） | session 自清（實踐報告列清單，既有慣例）→ 接手續用後過期 → 夜間掃腿 | 刪；有價值先升格進 `EP`／`reports/`／`memory`——判「值得保存」非搬移 | 當前弧線檔案少數（非 38 檔全量常駐） |
-| `.at-contexts/` | `at` 一次性 context＋`handoff --save` 產物 | 一次性：`at` 定義 `resume` 後刪；`handoff` 貼出即過期——**但無刪除機制**，故同樣 **7 天緩衝** | 消費 session 刪＋夜間掃腿 | 刪（一次性語義——消費後無保留價值） | 空或 pending 中（有 1 檔＝有 session 給了 `--save` 但消費方未刪） |
-| `.review/` | `judge-review`／`followup-review` 的 local-only finding | branch 活躍期；**30 天緩衝**（finding 生命週期長於一次性 context） | decision 落點首選 `EP` review 區段（tracked，隨任務家遷 `done/` 永久保存）→ branch 完結即死檔 → 夜間掃腿 | 刪（落點已在 `EP`，本區為未落點的草稿） | **空**——決策都在 `EP` 即健康（本區即「健康形態參照」樣本：local-only fallback＋tracked 首選的語義） |
+| `.agent-tmp/` | agent 暫時產物：中間分析／草稿／POC／探測腳本輸出 | session 生命＋**7 天緩衝**（`mtime>7d`） | **post-build 預設清**（收尾列清單→LLM 判「後續還用嗎」→用則保留、不用當場刪＋報清單——09-03 午後 user 裁定）→ 夜間掃腿兜底（併發線混入的漏網） | 刪；有價值先升格進 `EP`／`reports/`／`memory`——判「值得保存」非搬移 | **post-build 後應近空**（非 38 檔全量常駐） |
+| `.at-contexts/` | `at` 一次性 context（`at-context-*`）——**`handoff --save` 已退場**：交接改 `backlog task edit --comment` 掛卡 `comments` 段（SM-12，隨卡歸檔） | 一次性：`at` 定義 `resume` 後刪；夜間掃 **7 天緩衝**兜底 | 消費 session 刪＋夜間掃腿 | 刪（一次性語義——消費後無保留價值） | 空或 pending 中 |
+| `.review/` | `judge-review`／`followup-review` 的 local-only finding | branch 活躍期；**30 天緩衝**（finding 生命週期長於一次性 context） | decision 落點首選 `EP` review 區段（tracked，隨任務家遷 `done/` 永久保存）→ branch 完結即死檔 → 夜間掃腿。**arch-thinking 評（09-03）：solo 場景可退場**（EP 全承載），多 WT 並行 review 才留 | 刪（落點已在 `EP`，本區為未落點的草稿） | **空**——決策都在 `EP` 即健康（本區即「健康形態參照」樣本：local-only fallback＋tracked 首選的語義） |
 
 **共同原則**：時限是緩衝不是保存承諾——被續用的檔案會 `touch` 刷新 `mtime`；門檻以「最後被需要」為代理。
 
-### 3.3 夜間掃殘留腿
+### 3.3 出口兩腿：post-build 預設清＋夜間掃殘留腿
 
-- **掛點**：每晚 **23:40** 收斂 cron（`automation-751ecce2-a79c-4309-a79c-08486e2ee893`，ai-rules 池寫手）——寫手角色每夜動手；**不掛週日 23:00** 治理看照（`automation-fed036ff-17bf-4cf0-a50e-3216a7de6665`，advisory 審計——不動手，角色不混）。
+- **第一腿 post-build 預設清**（09-03 午後 user 裁定）：`/post-build` 收尾階段列 `.agent-tmp/` 清單→逐項 LLM 判「後續還用嗎」→用則保留（可 `touch` 保活）、不用當場刪＋報清單——「單一 session 產物單一 session 清」；**夜掃定位降為兜底**（併發線混入、session 意外中斷的漏網）。
+- **兜底腿掛點**：每晚 **23:40** 收斂 cron（`automation-751ecce2-a79c-4309-a79c-08486e2ee893`，ai-rules 池寫手）——寫手角色每夜動手；**不掛週日 23:00** 治理看照（`automation-fed036ff-17bf-4cf0-a50e-3216a7de6665`，advisory 審計——不動手，角色不混）。
 - **掃描表**：`.agent-tmp/` 7d／`.at-contexts/` 7d／`.review/` 30d（`mtime` 判準）。
 - **動作**：報告列明細（可復原判斷的證據）＋刪；有價值先升格（判「值得保存」）。
 - **首跑驗證**：比照 AIR-17 模式——隔日產物驗證（報告是否產出、明細是否可復原判斷、`_audit-state` 是否更新），通過即關卡。部署≠生效，生效要產物驗證。
-- **落地**：cron prompt 手術（L5，本卡不動，見 §6）。
+- **落地**：post-build skill 收尾段（L 列）＋cron prompt 手術（L5，本卡不動，見 §6）。
 
 ### 3.4 新 dot-area 門檻（四條全過才開）
 
@@ -268,18 +272,19 @@ cron 職責散在各 `automation` prompt 內，無總覽——同一週內兩次
 
 > 卡驗收明定「文檔化落地清單（kanban-board／handoff／execution-plan／collaboration-constraints 手術）含 sync-sources 檢查」。本段只文檔化規格＋掃描，**不動四檔本體**——手術執行屬後續卡。
 
-### L1-L8 落地清單
+### L1-L9 落地清單
 
 | # | 載體 | 手術內容 | 對應設計節 | 驗證命令 |
 |---|------|----------|------------|----------|
 | L1 | [kanban-board skill](../../../skills/kanban-board/SKILL.md) | 「開工」段改寫為起手式五步（§2.6）；「建卡」段加 desc gate 三必有（§2.2，適用時機與豁免）；新增「卡即 handoff」小節（三層分工／兩層判定／desc 同步義務，引用 execution-plan 規模分級不新造） | §2.2／§2.3／§2.6／§2.7 | `rg "已決策\|baseline\|起手式" skills/kanban-board/SKILL.md` 行齊 |
-| L2 | [handoff skill](../../../skills/handoff/SKILL.md) | 邊界注記：有卡任務交接優先「卡即 handoff」；`/handoff` 用於無卡一次性交接（原 handoff 八欄 schema 不變，卡拼裝映射回指 self-contained-prompt） | §2.2 | `rg "卡即 handoff" skills/handoff/SKILL.md` |
+| L2 | [handoff skill](../../../skills/handoff/SKILL.md) | 邊界注記：有卡任務交接優先「卡即 handoff」；**`--save` 退場**（SM-12：不寫 `.at-contexts/handoff-*.md`，交接內容改 `backlog task edit --comment` 掛卡 `comments` 段隨卡歸檔；原 handoff 八欄 schema 不變，卡拼裝映射回指 self-contained-prompt） | §2.2／§3.2 | `rg "comment" skills/handoff/SKILL.md` 且 `rg -c "at-contexts/handoff" skills/handoff/SKILL.md`=0 |
 | L3 | [execution-plan skill](../../../skills/execution-plan/SKILL.md) | UC 盤點建卡段——建卡時 desc 過 gate（蒸餾自 EP 總覽：baseline／已決策／驗收）；EP review apply 段——F-1 型 findings 觸發卡 desc 同步義務（§2.7） | §2.2／§2.7 | `rg "desc gate\|F-1.*同步" skills/execution-plan/SKILL.md` |
-| L4 | [collaboration-constraints rule](../../../rules/collaboration-constraints.md) | 「Agent 檔案寫入紀律」段補 dot-area 治理（三區清單＋時限表＋新區門檻四條＋夜間掃注記）；**動 rule → `scripts/deploy_agents.py` 重跑＋三部署檔 cmp 兩兩比對一致**（cmp 出處＝週日治理 cron 段 1 同款檢查，R-7） | §3.2／§3.4 | `deploy_agents.py` 後 `cmp ~/.zcode/AGENTS.md ~/.config/opencode/AGENTS.md && cmp ~/.config/opencode/AGENTS.md ~/.codex/AGENTS.md` |
-| L5 | 夜間 23:40 cron prompt（`automation-751ecce2-a79c-4309-a79c-08486e2ee893`） | 加檔案型清淤腿：三區 `mtime` 掃（7／7／30 天）＋報告列明細＋刪（§3.3）——`CronUpdate` | §3.3 | `CronList` prompt 含 `mtime.*7d.*30d` 且 `report.*明細` |
-| L6 | [at skill](../../../skills/at/SKILL.md) | `.at-contexts/` 出口段補 `handoff --save` 檔的夜間清注記（消費後無刪除機制→7 天緩衝由掃腿兜底） | §3.2 | `rg "handoff.*--save.*7.*天\|夜間.*掃" skills/at/SKILL.md` |
+| L4 | [collaboration-constraints rule](../../../rules/collaboration-constraints.md) | 「Agent 檔案寫入紀律」段補 dot-area 治理（三區清單＋出口兩腿——post-build 預設清第一腿＋時限表＋新區門檻四條＋兜底掃注記）；**動 rule → `scripts/deploy_agents.py` 重跑＋三部署檔 cmp 兩兩比對一致**（cmp 出處＝週日治理 cron 段 1 同款檢查，R-7） | §3.2／§3.3／§3.4 | `deploy_agents.py` 後 `cmp ~/.zcode/AGENTS.md ~/.config/opencode/AGENTS.md && cmp ~/.config/opencode/AGENTS.md ~/.codex/AGENTS.md` |
+| L5 | 夜間 23:40 cron prompt（`automation-751ecce2-a79c-4309-a79c-08486e2ee893`） | 加檔案型清淤兜底腿：三區 `mtime` 掃（7／7／30 天）＋報告列明細＋刪（§3.3 兜底腿）——`CronUpdate` | §3.3 | `CronList` prompt 含 `mtime.*7d.*30d` 且 `report.*明細` |
+| L6 | [at skill](../../../skills/at/SKILL.md) | `.at-contexts/` 段注記：**只剩 `at-context-*`**（`handoff --save` 已退場改 `--comment`，見 L2）；`at-context-*` resume 後刪既有紀律維持，夜掃 7 天兜底 | §3.2 | `rg "at-context-\*" skills/at/SKILL.md` 且 prompt 注記含兜底 |
 | L7 | [schedule-registry.md](../../../ai-analysis/schedule-registry.md) | S2 已建初版；memory `reference_periodic-task-landscape` 壓指針（現值清單→指針，memory 治理紀律——僅指針可跨 workspace 通用） | §4 | `rg "reference_periodic-task-landscape" ai-analysis/schedule-registry.md` |
 | L8 | 週日 23:00 治理 cron prompt（`automation-fed036ff-17bf-4cf0-a50e-3216a7de6665`） | 加 `CronList` vs `registry` 比對腿：`rg automationId` 抽兩側，drift 列報告（§4 驗證腿） | §4 | `CronList` prompt 含 `schedule-registry.*比對\|registry.*drift` |
+| L9 | [post-build skill](../../../skills/post-build/SKILL.md) | 收尾段加 `.agent-tmp/` 預設清：列清單→LLM 判「後續還用嗎」→用則保留、不用當場刪＋報清單（§3.3 第一腿——「單一 session 產物單一 session 清」） | §3.3 | `rg "agent-tmp" skills/post-build/SKILL.md` |
 
 ### sync-sources 檢查規格（落地 session 執行）
 
@@ -301,7 +306,7 @@ cron 職責散在各 `automation` prompt 內，無總覽——同一週內兩次
 - [ ] 三區×四問表 12 格齊＋門檻四條（§3.2／§3.4）
 - [ ] §4 兩次過時實證照錄
 - [ ] 對照表七行齊、每行有命中＋反饋兩欄（§5）
-- [ ] L1-L8 行齊（含四點名檔案）、每行有驗證命令（§6）
+- [ ] L1-L9 行齊（含四點名檔案）、每行有驗證命令（§6）
 - [ ] 設計文件內相對連結 `../../../` 深度可導航（R-1）
 - [ ] 報告 URL 形態 `http://127.0.0.1:6421/ai-rules/<相對於 ai-analysis/ 的路徑>` 實測 200（R-3）
 - [ ] `schedule-registry.md` 三條 `automationId` 與 `CronList` 逐字一致（R-8）

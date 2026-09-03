@@ -1,0 +1,48 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "任務型卡生命週期——卡即 handoff",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    { "id": "board", "label": "Board 承諾池（進口→出口）" },
+    { "id": "work", "label": "規劃與執行（EP／Session）" }
+  ],
+  "phases": [
+    { "id": "in", "label": "進口", "fromCol": 0, "toCol": 0 },
+    { "id": "commit", "label": "承諾（規模判定→建卡）", "fromCol": 1, "toCol": 2, "variant": "emphasis" },
+    { "id": "out", "label": "執行與出口", "fromCol": 3, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": ["talk", "plan", "card", "open", "exec", "close", "done"],
+  "nodes": [
+    { "id": "talk", "lane": "board", "col": 0, "type": "external", "label": "對話結晶", "sublabel": "討論題·對話即載體", "width": 124 },
+    { "id": "plan", "lane": "board", "col": 1, "type": "security", "label": "規模判定", "sublabel": "simple ↔ standard/full", "tag": "/execution-plan", "width": 124 },
+    { "id": "card", "lane": "board", "col": 2, "type": "frontend", "label": "建卡 task create", "sublabel": "desc gate 三必有＋雙 ref", "width": 124 },
+    { "id": "drift", "lane": "board", "col": 3, "type": "security", "label": "desc 漂移→修正", "sublabel": "如實化／F-1 回寫 desc", "width": 124 },
+    { "id": "close", "lane": "board", "col": 4, "type": "backend", "label": "結案兩步", "sublabel": "Done＋final-summary", "width": 124 },
+    { "id": "done", "lane": "board", "col": 5, "type": "database", "label": "Done 欄", "sublabel": "留板→completed/ 清場", "width": 124 },
+    { "id": "draft", "lane": "work", "col": 1, "type": "database", "label": "draft 未承諾池", "sublabel": "未開 /execution-plan", "width": 124 },
+    { "id": "ep", "lane": "work", "col": 2, "type": "backend", "label": "EP", "sublabel": "standard+ 才建·規劃層", "width": 124 },
+    { "id": "open", "lane": "work", "col": 3, "type": "security", "label": "起手式", "sublabel": "讀卡知形態→新鮮度→雙 ref", "width": 124 },
+    { "id": "exec", "lane": "work", "col": 4, "type": "frontend", "label": "執行", "sublabel": "卡直行／EP 段落", "width": 124 }
+  ],
+  "edges": [
+    { "from": "talk", "to": "plan", "label": "拍板承諾", "variant": "emphasis" },
+    { "from": "talk", "to": "draft", "label": "想法/未拍板", "role": "branch" },
+    { "from": "draft", "to": "plan", "label": "promote" },
+    { "from": "plan", "to": "card", "label": "simple：不建 EP", "variant": "emphasis" },
+    { "from": "plan", "to": "ep", "label": "standard/full", "role": "branch" },
+    { "from": "ep", "to": "card", "label": "建卡雙 ref 掛 EP" },
+    { "from": "card", "to": "open", "label": "「做 AIR-N」接手" },
+    { "from": "card", "to": "drift", "label": "快照過時", "role": "error", "variant": "security" },
+    { "from": "open", "to": "exec" },
+    { "from": "exec", "to": "close", "label": "完成" },
+    { "from": "close", "to": "done" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "承諾時定形態——draft↔task 分界", "items": ["分界線＝有沒有開 /execution-plan：未開＝draft 未承諾池（想法捕獲/觸發型/session 斷）", "simple 不建 EP——卡 desc 過 gate 即 handoff；standard/full 寫 EP、卡雙 ref 掛 EP", "執行不分岔：讀卡知形態（有無 EP ref）；scope 漲→升 EP 是逃逸非分岔"] },
+    { "dot": "rose", "title": "出口——有進有出", "items": ["結案兩步→卡留 Done 欄；completed/ 清場延到 maintain 週期", "過時卡走 archive/ 退場——可復活（AIR-4 先例）；draft 出口＝promote 或刪"] },
+    { "dot": "cyan", "title": "漂移防護", "items": ["起手式核新鮮度：desc baseline vs git log——過時即對照範圍", "並行搶走→desc 如實化；F-1 型→決策層變更回寫 desc"] }
+  ]
+}

@@ -77,10 +77,15 @@
 | SM-2 | desc 缺 baseline/已決策/驗收 | 開卡時 | gate 三必有補齊才建卡（session 內即辦卡豁免） | 設計文件 §2 gate 段 | S1 |
 | SM-3 | desc 快照過時 | baseline 後 repo 前進／並行 commit 搶走項目 | 起手式新鮮度核對（`git log <baseline>..HEAD`）；如實化記錄（AIR-16 樣本） | 同上 | S1 |
 | SM-4 | EP review 校準 scope/驗收 | F-1 型 finding | desc 同步義務觸發——決策層變更回寫卡 desc | 設計文件 §2 同步義務段 | S1 |
-| SM-5 | .agent-tmp 殘留累積 | 每日 agent 暫存（09-03 實測 37 項跨 3 天） | 夜間掃腿 mtime>7d：列報告＋刪 | 設計文件 §3＋落地清單 L5 | S2 |
+| SM-5 | .agent-tmp 殘留累積 | 每日 agent 暫存（09-03 實測 37 項跨 3 天） | `post-build` 列清單預設刪（LLM 判後續還用則保留）+ 夜間掃腿 mtime>7d 兜底 | 設計文件 §3＋落地清單 L5（*本 EP 原寫夜掃，09-03 討論補 `post-build 預設清`） | S2 |
 | SM-6 | 新暫存需求出現 | 想開新 dot-area | 門檻四條：語義最近區→四問有答→規則承載→掃腿覆蓋 | 設計文件 §3 門檻段 | S2 |
 | SM-7 | 排程認知過時 | session 查「現有排程」 | 查 registry 檔（職責總覽）；機械操作仍走 CronList | 設計文件 §4＋落地 L7/L8 | S2 |
 | SM-8 | 卡結案 | 驗收達成 | 結案兩步＋final-summary；notes 不蒸餾（durable lesson 走正規歸宿） | 設計文件 §2 出口段 | S1 |
+| SM-9 | 多 session 並行搶同一卡 | Sessions A/B 同時 `edit -s In Progress` | 第一動可見 + `backlog_precheck.sh` 擋併發清板；後到者見 `In Progress` 退讓 | 設計文件 §2 起手式＋kanban-board 前置去重 | S1 |
+| SM-10 | 多 WT 同 repo | WT-1 已 `In Progress AIR-14` 時 WT-2 誤開同名任務 | 依 `backlog → 執行家` 單向 + `owning-WT` 約束攔截，不在 `ai-analysis/_tasks` 另建獨立承諾 | 設計文件 §2＋README 三池紀律 | S1 |
+| SM-11 | 跨 repo 指針與卡重複 | mosaic `_inbox/pending-decisions` 已有一行指針時誤 `task create` | `backlog search` + 查 `pending-decisions`/`open-items.md` 命中復用指針，不重複承諾 | 設計文件 §2 去重前置＋§3 三池 | S1/S2 |
+| SM-12 | review/handoff 落點 | `judge/followup` 的交接落 `handoff --save` 檔 | 不寫 `.at-contexts/handoff-*.md`，改 `backlog task edit --comment` 掛卡 `comments` 段，隨卡歸檔 | 設計文件 §2 notes 治理（含 `handoff --save` 退場） | S1 |
+| SM-13 | 想法未細拆先丟 draft | 有需求直覺、未 UC 盤點/成本細拆 | `backlog draft create` 不經 `/execution-plan`，僅記一句話+範圍草案 | 設計文件 §2.4 想法捕獲 | S1 |
 
 ## 段落劃分原則
 
@@ -101,11 +106,11 @@
 3. **§2 任務型治理**（卡即 handoff）：
    - **2.1 三層分工**（已決策⑥）：desc＝決策層（baseline/已決策/範圍/驗收——不變的）；EP＝規劃層（怎麼做：段落/錨點/驗證策略）；notes＝留言層（接手交代/實踐記錄/漂移修正/指針）。
    - **2.2 卡即 handoff 契約**＝desc＋notes＋references＋EP 四件拼裝，八欄映射表：任務一句話→title＋desc 首句；baseline→desc 標記；來源 EP→references；已完成→EP 段落進度或 notes；**已決策→desc「已決策勿重辯」段（最關鍵——決策脈絡不交就重辯）**；下一步→notes 接手指針；驗收→desc；承接不重做→desc baseline＋notes。**desc gate 三必有**（baseline/已決策勿重辯/驗收）——適用時機＝**開卡狀態 To Do 且預期跨 session 執行**；session 內即辦記錄卡（開卡即做即結，AIR-15 樣本）豁免；gate 是內容 gate 非格式 gate（語義標記自由：〔〕或 **bold**）；不做 hook（desc 完備性是語義判斷→LLM 流程；載體決策樹三者條件不滿）；附 rg 軟自查（`rg -c "baseline|已決策|驗收" <卡檔>`）。
-   - **2.3 兩層判定**：對齊 execution-plan 流程規模分級（simple/standard/full），不新造——small（≈simple）＝卡即 handoff（desc＋notes 自足直行）；standard+（standard/full）＝卡為追蹤錨（references 指向 EP）＋EP 為 handoff 主體；判定時點＝開工起手式第③步。
-   - **2.4 drafts 進口**（已決策②③⑤）：兩形——觸發型（條件到→promote；rules-audit 樣本格式：目標/觸發條件/範圍草案）、session 斷（對話結晶落 draft 不建卡）；出口＝promote（升卡時蒸餾 desc 過 gate）或刪（未承諾無負擔；觸發型 draft 刪前確認條件永久失效）。
-   - **2.5 升卡流程**：對話拍板→直接建卡（過 gate）；draft→promote；卡→EP（開工判定 standard+ 才建）。
+   - **2.3 兩層判定**：對齊 execution-plan 流程規模分級（simple/standard/full），不新造——small（≈simple）＝不建 EP、卡即 handoff（desc＋notes 自足直行）；standard+（standard/full）＝寫 EP、卡為追蹤錨（references 指向 EP）＋EP 為 handoff 主體。**判定時點＝承諾時**（升卡/建卡前的 `/execution-plan` 分級——與 2.4 分界線同一站）；執行端不分岔——起手式讀卡即知形態（references 有無 EP），執行中 scope 遠超 desc → 先升 EP 再動工（逃逸口，非分岔）。
+   - **2.4 drafts 進口**（已決策②③⑤）：三形——①**想法捕獲**（有需求直覺、**還沒開 `/execution-plan`**→`backlog draft create` 丟池，不 UC 盤點；熬到 `scope 定+跨 session+可驗收` 三條齊才升為 `task`）、②**觸發型**（`rules-audit` 樣本：目標/觸發條件/範圍草案→條件到才 `promote`）、③**session 斷結晶**（對話要丟前結晶落 draft 不建卡）；**區分線＝有沒有開 `/execution-plan`：未開＝`draft 未承諾池`，已開 UC 盤點＝`task` 承諾池**；出口統一：`promote`（升卡時蒸餾 `desc` 過 gate）或刪。
+   - **2.5 升卡流程**：對話拍板→跑 `/execution-plan`（規模判定＋UC 盤點）→simple 直接建卡（過 gate，不建 EP）／standard+ 寫 EP 後建卡（雙 ref 掛 EP）；draft→promote 時同站判定；執行中 scope 漲→升 EP（§2.3 逃逸口）。
    - **2.6 notes 治理**：與 EP 邊界＝規劃性內容（怎麼做）住 EP、notes 只收接手當下需知（EP 已有不重複）；長度＝無硬限，**機械信號＝notes 開始像 EP（段落結構/pseudo code/驗證策略出現）→ 該升 EP**；**結案蒸餾＝不做**——durable lesson 走正規歸宿（memory 四問/skill/rule），notes 隨卡歸檔為考古材料（過程留言不沉澱、沉澱走正規歸宿）。
-   - **2.7 「做 AIR-N」起手式**（五步）：①`task edit <id> -s "In Progress"`（第一動——平行 session 可見）②讀卡三層（frontmatter→desc→notes→references）③規模判定（small 直行／standard+ 建 EP 或接續）④**新鮮度核對**——desc baseline vs `git log --oneline <baseline>..HEAD` 非空→對照 desc 範圍確認；notes relay 宣稱→機械驗證當前狀態（relay 快照落後實證）⑤開工雙 ref。
+   - **2.7 「做 AIR-N」起手式**（五步）：①`task edit <id> -s "In Progress"`（第一動——平行 session 可見）②讀卡三層（frontmatter→desc→notes→references）③讀卡知形態（references 有無 EP——形態承諾時已定 §2.3，此步不重判；scope 遠超 desc → 先升 EP 再動工）④**新鮮度核對**——desc baseline vs `git log --oneline <baseline>..HEAD` 非空→對照 desc 範圍確認；notes relay 宣稱→機械驗證當前狀態（relay 快照落後實證）⑤開工雙 ref。
    - **2.8 EP 修訂 desc 同步義務**：**決策層變更才同步**（scope 擴張收縮/驗收校準/已決策翻案〔須 user〕→回寫 desc）；規劃層調整（段落重排/錨點修正）不動 desc；機械觸發＝ep-review findings 含 F-1 型（scope/驗收校準）→ apply 時同步。反證樣本：MOS-14 F-1 驗收 110→80-100 區間校準寫進 EP 未回寫 desc（desc 仍寫 ~75-80）＝同步缺失實證。
    - **2.9 出口**：結案兩步→Done 欄留板；completed/ 清場（maintain 週期）；archive＝退場可復活（AIR-4 先例）；品質衰減防護（CJK 損壞 rg 驗證；baseline 交付前刷新）。
 
@@ -123,8 +128,8 @@
 
 1. **design.md §3 檔案型治理**：
    - **3.1 現況盤點**（09-03 實測照錄＋時點標註——快照漂移常態，卡 desc 記 36、本 EP 實測 37〔Sep1:21＋Sep2:2＋Sep3:16〕，R-6）。
-   - **3.2 三區治理表**（每區四問＋健康形態）：`.agent-tmp`——進＝agent 暫時產物；停＝session＋緩衝；清＝三腿（session 自清列清單〔既有慣例〕/接手續用後過期/夜間掃）；去＝刪（有價值先升格進 EP/reports/memory——判「值得保存」非搬）；健康＝當前弧線檔案少數。`.at-contexts`——進＝at 一次性 context＋handoff --save；停＝一次性（at：resume 後刪已定義；handoff：貼出即過期但無刪除機制）；清＝消費 session 刪＋夜間掃；健康＝空或 pending 中。`.review`——進＝judge/followup local-only finding；停＝branch 活躍期；清＝decision 落點首選 EP review 區段（tracked），branch 完結即死檔；掃＝30 天（finding 生命週期長於 context）；健康＝空（決策都在 EP）——**本區即「健康形態參照」樣本：local-only fallback＋tracked 首選的語義**。
-   - **3.3 夜間掃殘留腿**：掛 23:40 收斂 cron（理由：寫手角色每夜動手；週日 23:00 是審計 advisory 不動手——不混角色）；掃描表＝.agent-tmp 7d/.at-contexts 7d/.review 30d（mtime＝「最後被需要」代理——被續用會 touch 刷新；時限是緩衝不是保存承諾）；動作＝報告列明細＋刪；首跑 AIR-17 式驗證。落地＝cron prompt 手術（L5，本 EP 不動）。
+   - **3.2 三區治理表**（每區四問＋健康形態）：`.agent-tmp`——進＝agent 暫時產物；停＝session＋7 天緩衝；清＝**兩腿**（第一腿 post-build 預設清：收尾列清單→LLM 判「後續還用嗎」→用則保留不用當場刪〔09-03 午後 user 裁定〕；兜底＝夜間掃）；去＝刪（有價值先升格進 EP/reports/memory——判「值得保存」非搬）；健康＝post-build 後應近空。`.at-contexts`——進＝at 一次性 context（**handoff --save 已退場**：交接改 `backlog --comment` 掛卡 comments 段，SM-12）；停＝一次性（at：resume 後刪已定義）＋7 天緩衝兜底；健康＝空或 pending 中。`.review`——進＝judge/followup local-only finding（**arch 評：solo 可退場**，多 WT 並行才留）；停＝branch 活躍期＋30 天緩衝；清＝decision 落點首選 EP review 區段（tracked）；健康＝空（決策都在 EP）——**本區即「健康形態參照」樣本：local-only fallback＋tracked 首選的語義**。
+   - **3.3 出口兩腿**：第一腿＝post-build 預設清（「單一 session 產物單一 session 清」；落地＝post-build skill 收尾段）；兜底腿＝夜間掃殘留掛 23:40 收斂 cron（寫手角色每夜動手；週日 23:00 是審計 advisory 不動手——不混角色）；掃描表＝.agent-tmp 7d/.at-contexts 7d/.review 30d（mtime＝「最後被需要」代理——被續用會 touch 刷新；時限是緩衝不是保存承諾）；動作＝報告列明細＋刪；首跑 AIR-17 式驗證。落地＝cron prompt 手術（L5，本 EP 不動）。
    - **3.4 新 dot-area 門檻**（四條全過才開）：①語義最近既有區裝得下嗎（三區已覆蓋暫存語義空間）②四問有答案③規則承載（寫進 collaboration-constraints＋.gitignore）④掃腿覆蓋（進場即有出口）。
 2. **design.md §4 排程單一真相源**：問題（散在 prompt 無總覽＋兩次過時實證）；設計＝`ai-analysis/schedule-registry.md`——**registry 是人/AI 可讀職責總覽，機械真相源仍是 CronList**（registry drift 後果限縮為認知過時）；欄位＝automationId/cron/職責一句/對象範圍/紅線注記；scope＝ai-rules workspace（ZCode cron 3 條＋ai-rules 相關 plist；mosaic 側指針→memory `reference_periodic-task-landscape`——條目名逐字全名）；同步義務＝動排程的 session 順手同步；驗證腿＝週日治理 cron 加 CronList vs registry 比對（落地 L8）。
 3. **registry 初版建檔**（本段唯一新建檔）：三條 ZCode cron——`automation-751ecce2-a79c-4309-a79c-08486e2ee893`（每晚 23:40 memory 收斂，ai-rules 池寫手）／`automation-fed036ff-17bf-4cf0-a50e-3216a7de6665`（週日 23:00 治理看照，advisory 審計）／`automation-370fafc5-a050-479e-b62f-9c7988d23521`（週六 23:10 糾正週報＋CR 健檢）——automationId 全名照錄（本 session CronList 實錄；R-8）＋backlog-browser plist 注記＋維護規則頭註（同步義務+機械真相源宣告）。
@@ -169,7 +174,7 @@
 - **L8 週日治理 cron prompt**：加 CronList vs registry 比對腿（drift 報告）。
 - **sync-sources 檢查規格**（落地 session 執行）：手術對象互引掃描（`rg "kanban-board" skills/`——execution-plan/metadata-sync 等引用面；`rg "collaboration-constraints" rules/ skills/`）；L4 動 rule 的 bundle 部署驗證；術語漂移掃（「起手式」「desc gate」新詞的定義源唯一性）。
 
-**驗證策略**：落地清單 L1-L8 行齊且含四點名檔案；每行有驗證命令欄；sync-sources 段有三類掃描（互引/部署/術語）。
+**驗證策略**：落地清單 L1-L9 行齊且含四點名檔案；每行有驗證命令欄；sync-sources 段有三類掃描（互引/部署/術語）。
 
 ---
 
@@ -177,7 +182,7 @@
 
 - 全部變更 working tree 隨 docs commit 一次帶走（design.md＋registry＋卡收尾）；無程式碼風險。
 - 不碰：skills/rules 四檔本體（落地清單對象）、既有 cron prompt（L5/L8 落地項）、memory 條目（L7 落地項）。
-- 手術（L1-L8）執行＝後續卡（建卡建議：落地清單表即規格，可一卡一批或分批）。
+- 手術（L1-L9）執行＝後續卡（建卡建議：落地清單表即規格，可一卡一批或分批）。
 
 ## 收尾步驟（implement 階段 5）
 
