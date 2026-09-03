@@ -1,0 +1,38 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "檔案型中繼站——三區四問與夜間掃腿",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    { "id": "areas", "label": "dot-area 三區（誰進來／停多久）" },
+    { "id": "clean", "label": "出口（誰清／清去哪）" }
+  ],
+  "phases": [
+    { "id": "stay", "label": "進站與停留", "fromCol": 0, "toCol": 2 },
+    { "id": "sweep", "label": "夜間掃腿", "fromCol": 3, "toCol": 4, "variant": "emphasis" },
+    { "id": "gone", "label": "去處", "fromCol": 5, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": ["tmp", "scan", "report", "del"],
+  "nodes": [
+    { "id": "tmp", "lane": "areas", "col": 0, "type": "backend", "label": ".agent-tmp/", "sublabel": "agent 暫存——中間分析/草稿/POC", "tag": "緩衝 7 天", "width": 136 },
+    { "id": "atctx", "lane": "areas", "col": 1, "type": "frontend", "label": ".at-contexts/", "sublabel": "at 一次性 context＋handoff --save", "tag": "緩衝 7 天", "width": 136 },
+    { "id": "revw", "lane": "areas", "col": 2, "type": "security", "label": ".review/", "sublabel": "judge/followup local-only finding", "tag": "緩衝 30 天", "width": 136 },
+    { "id": "scan", "lane": "clean", "col": 3, "type": "backend", "label": "夜間掃腿 23:40", "sublabel": "掛收斂 cron（寫手角色）", "tag": "mtime 判準", "width": 136 },
+    { "id": "report", "lane": "clean", "col": 4, "type": "external", "label": "報告列明細", "sublabel": "可復原判斷的證據", "width": 136 },
+    { "id": "del", "lane": "clean", "col": 5, "type": "database", "label": "刪除", "sublabel": "有價值先升格 EP/reports/memory", "width": 136 }
+  ],
+  "edges": [
+    { "from": "tmp", "to": "scan", "label": "mtime >7d" },
+    { "from": "atctx", "to": "scan", "label": "mtime >7d" },
+    { "from": "revw", "to": "scan", "label": "mtime >30d" },
+    { "from": "scan", "to": "report" },
+    { "from": "report", "to": "del" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "共同四問——有進有出", "items": ["誰進來：agent 暫存／一次性 context／review finding（三區覆蓋暫存語義）", "停多久：時限是緩衝不是保存承諾——被續用的檔案會 touch 刷新 mtime", "誰清／清去哪：session 自清列清單＋夜間掃腿；刪除前有價值先升格"] },
+    { "dot": "rose", "title": "角色分離", "items": ["掃腿掛每晚 23:40 收斂 cron——寫手角色每夜動手", "週日 23:00 治理看照是審計（advisory 不動手）——不混角色", "首跑比照 AIR-17：隔日產物驗證，通過即關卡"] },
+    { "dot": "cyan", "title": "新 dot-area 門檻（四條全過才開）", "items": ["語義最近的既有區裝得下嗎", "四問有答案", "規則承載——寫進 collaboration-constraints＋.gitignore", "掃腿覆蓋——進場即有出口"] }
+  ]
+}
