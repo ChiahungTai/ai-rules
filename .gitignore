@@ -49,3 +49,7 @@ ref-docs/*.pdf
 arch-report/**/*.html
 arch-report/**/*.visual-check.*.png
 .muse-bridge/
+
+# Muse 共享記憶鎖（ephemeral）
+.agents/memory/.muse-memory.lock
+.agents/memory/*.lock

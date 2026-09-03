@@ -21,6 +21,8 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 ## 兩級稽核（開場決策）
 
+> **姊妹弧**：rules audit × bundle 減量（聯合弧——`backlog/` 內 `rules-audit-bundle-diet-joint-arc`〔drafts 或已升卡〕；觸發＝`deploy_agents.py` 輸出 ≥93% gate）。user 2026-09-03 定調與本 skill 同班次聯合執行——lite/full audit 跑時順手執行 `uv run python scripts/deploy_agents.py` 回報 bundle 百分比，過觸發線即提案聯合弧。
+
 開場先讀狀態戳 `memory/_audit-state.md`（規格見下方）：
 
 - 無戳 / `base_commit` 之後 repo 大幅演進 / 距上次 full 已久 → 建議 **full**

@@ -96,6 +96,7 @@
 - `ref-docs/` — 參考文檔（外部書籍 PDF + 衍生分析）；PDF 受版權不 commit（`.gitignore` `ref-docs/*.pdf`）。`ref-docs/harness/` 是五家 harness 官方文檔鏡像（claude-code/opencode/zcode/codex/meta〔Muse Code〕）+ `contracts.md` 對照分析——**更新鏡像用既有工具 `ref-docs/harness/crawl.py`**（`uv run python ref-docs/harness/crawl.py [--source zcode]`，discover + sha256 增量寫入 + manifest 維護；不要手動逐頁鏡像）
 - code-reality 工具鏈 — meta 層工具，**住獨立 repo `~/Github/code-reality`（Rust carrier，非本 repo 目錄）**；消費形態 `code-reality <tool> --repo <repo-root>`（binary 安裝與存在性偵測真相源見 skill）；工具用法/時點真相源 [skills/code-reality/SKILL.md](skills/code-reality/SKILL.md)；repo 知識歸各 repo 的 `.code-reality.toml` profile
 - muse-plugin-cc — Muse Code 委派 plugin（ZCode/CC 雙端 marketplace 發佈），**住獨立 repo `~/Github/muse-plugin-cc`（非本 repo 目錄）**；消費形態 plugin agent（`muse-rescue` 委派、`muse:muse-runtime` skills）；計費鐵則＝純訂閱 5h 窗口（無 API key 面）、預設模型 pin `muse-spark-1.2`；CLI 事實真相源 [memory reference_muse-code-cli-facts]、委派細節真相源 repo `docs/`
+- **Muse memory 唯讀**：`muse` 在本 repo **只讀不寫**——可用 `read_memory`（三 scope）與 `read_file` fallback 到 CC 實體池 `~/.claude/projects/-Users-ctai-Github-ai-rules/memory/`，**禁 `add_memory`/`edit_memory`**；需固化事實由 ZCode/CC 側寫入（見 `cross-harness-memory-symlink`）
 
 ## 寫作治理
 
