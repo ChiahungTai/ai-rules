@@ -2,7 +2,7 @@
 # MEMORY.md 索引 generator——條目檔 frontmatter 是單一 source，索引是其機械投影。
 # 用法: python3 _generate_index.py [--check]（--check 只驗證不寫入、零檔案系統副作用）
 # Gate 分級（2026-09-03 裁決「zcode 優先」——ZCode 為主力 harness）：
-#   硬 gate（fail-loud exit 1、不寫入、Stop hook 留 _regen-failed）：>18,500 字元 或 >190 行
+#   硬 gate（fail-loud exit 1、不寫入、Stop hook 留 _regen-failed）：>22,500 字元 或 >190 行
 #     ——守兩端共同截斷線（200 行／25,000 字元）
 #   bytes info（照常寫入、exit 0）：>24,000 bytes 印 [INFO] 一行——縱深預警
 #     （非任何 harness 的實際截斷線：兩端皆量 chars；CJK 一字 3B，bytes 提前折射）
@@ -23,6 +23,9 @@
 # hook 上線（block-memory-index-write.py 擋 desc>120/膨脹>12,000）後流入率
 # 下降，原 17,000 餘裕（~700）只撐一天（08-31 晚 16,308 → 隔晨 17,269 撞線）。
 # （hook 僅攔主 session——subagent 寫入不觸發；「流入率下降」以主 session 寫入為主）
+# 2026-09-03 晚 chars gate 18,500→22,500（真線 90%）：寫入原則配套＋每日夜間收斂
+# cron 承接流出（user 裁定「有進有出」）——gate 即時閥語義下餘裕＝收斂反應時間，
+# 夜間收斂前置清理使 jam 罕見，放寬安全。
 # description 截斷 140→120 對齊 hook DESC_LIMIT（>120 在寫入端已擋，此為存量縱深）。
 # 條目 frontmatter 必含 name / description / type（頂層 `type:` 或 `metadata.type:` 皆可）。
 # 語言層約束：跑在 hook runtime 系統 python3 3.9——禁 PEP 604（X | None）等 3.10+ 語法。
@@ -31,7 +34,7 @@ import pathlib
 import sys
 import time
 
-GATE_CHARS = 18_500
+GATE_CHARS = 22_500
 TRUNCATE_DESC = 120  # desc 截斷線——須 == hooks/block-memory-index-write.py DESC_LIMIT（tests cross-layer 錨）
 GATE_BYTES = 24_000
 GATE_LINES = 190

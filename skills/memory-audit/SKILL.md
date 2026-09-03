@@ -30,7 +30,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 ### 層 1：索引機械量測
 
-> **generator 池**（memory dir 有 `_generate_index.py`）：索引是 frontmatter 投影，重複/orphan/missing 由生成保證不存在——層 1 縮為 `python3 memory/_generate_index.py --check`（硬 gate 18,500 字元/190 行 fail-loud 守兩端共同截斷線〔200 行／25,000 字元〕；bytes >24,000 降為 `[INFO]` 縱深預警不擋寫入——兩端截斷線皆量 chars，CJK 一字 3B、bytes 提前折射；源碼實證與重跑命令見 generator 註解）＋確認 MEMORY.md 非手寫。寫入端另有 PreToolUse hook 治理（`block-memory-index-write.py`：description >120 chars 或條目膨脹 >12,000 chars 硬擋、收斂方向放行）——hook 是流入節流第一道，audit 是存量收斂；**hook 僅攔主 session——subagent 寫入不觸發**（ZCode 實證），寫入型 subagent 的上限＝prompt 紀律。資產源：ai-rules repo `skills/memory-audit/scripts/generate_index.py`（部署 = 複製進各專案 memory dir；Stop hook 自動重生成、PreToolUse hook 擋手寫）；副本新鮮度＝層 1 先 `cmp` 部署副本與資產源（stale 先 cp＋mv 原子刷新再 `--check`——Stop hook 對不符副本跳過執行）；`memory/_regen-failed` 標記存在＝regen 失敗待修（Stop stdout 不進模型 context 的可見錨點）。下表全量手檢僅適用未裝 generator 的池。數值調和：下表「≤24,000 bytes」＝兩型池共用 bytes 目標（generator 池＝info 縱深預警線、未裝池＝手檢目標）——單一數值源在 generator 註解；120/12,000 單一源＝hook `DESC_LIMIT`/`BODY_LIMIT`（generator `TRUNCATE_DESC` 對齊，`tests/test_memory_lifecycle.py` cross-layer 錨）。
+> **generator 池**（memory dir 有 `_generate_index.py`）：索引是 frontmatter 投影，重複/orphan/missing 由生成保證不存在——層 1 縮為 `python3 memory/_generate_index.py --check`（硬 gate 22,500 字元〔真線 90%〕/190 行 fail-loud 守兩端共同截斷線〔200 行／25,000 字元〕；bytes >24,000 降為 `[INFO]` 縱深預警不擋寫入——兩端截斷線皆量 chars，CJK 一字 3B、bytes 提前折射；源碼實證與重跑命令見 generator 註解）＋確認 MEMORY.md 非手寫。寫入端另有 PreToolUse hook 治理（`block-memory-index-write.py`：description >120 chars 或條目膨脹 >12,000 chars 硬擋、收斂方向放行）——hook 是流入節流第一道，audit 是存量收斂；**hook 僅攔主 session——subagent 寫入不觸發**（ZCode 實證），寫入型 subagent 的上限＝prompt 紀律。資產源：ai-rules repo `skills/memory-audit/scripts/generate_index.py`（部署 = 複製進各專案 memory dir；Stop hook 自動重生成、PreToolUse hook 擋手寫）；副本新鮮度＝層 1 先 `cmp` 部署副本與資產源（stale 先 cp＋mv 原子刷新再 `--check`——Stop hook 對不符副本跳過執行）；`memory/_regen-failed` 標記存在＝regen 失敗待修（Stop stdout 不進模型 context 的可見錨點）。下表全量手檢僅適用未裝 generator 的池。數值調和：下表「≤24,000 bytes」＝兩型池共用 bytes 目標（generator 池＝info 縱深預警線、未裝池＝手檢目標）——單一數值源在 generator 註解；120/12,000 單一源＝hook `DESC_LIMIT`/`BODY_LIMIT`（generator `TRUNCATE_DESC` 對齊，`tests/test_memory_lifecycle.py` cross-layer 錨）。
 
 | 檢查 | 命令 | 判準 |
 |------|------|------|
@@ -54,7 +54,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 > 真實案例（self-report discount，mosaic_alpha）：memory 記「sync-stubs loop 有 bug」，實跑無法重現——歷史 commit 已修、memory 沒跟上；實跑反而挖出 memory 沒記的兩個真陷阱（NT source stub 舊於 venv、`set -e` 下 `diff | head` 截斷）。雙向教訓：memory 記的 bug 可能已修（過時），沒記的陷阱仍在（欠收）——兩者都只有實跑能揭露。
 
-### 層 3：清理執行（用戶核可後）
+### 層 3：清理執行（用戶核可後；夜間 cron 輕量形態預先授權）
 
 - 刪檔前 `rg "\[\[<name>\]\]"` 查反向引用——不留新 dangling（引用者同步改）
 - **多池殘留掃描**：雙 harness 共用腳本跨多池部署後，清理/驗證掃描以「檔名 × 池」為維度——每個 pool 都要 rg（2026-08-30 實例：清理清單漏了 mosaic 池的同名測試條目）
@@ -63,6 +63,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 - **蒸餾執行載體**：spawn `mem-distill`（registry `agents/zcode/`、flash pin——registry 是 session 快照，須新建 session 才可解析）；prompt 給檔案清單＋每檔硬上限（預設 11,000 chars）＋desc 一併改寫 ≤100 指示
 - **固化→濃縮同步義務**（user 2026-09-01 定案）：經驗固化成 ai-rules skill/rule 落地後，對應 memory 條目把已承載段**同步壓成指針**（觸發詞→skill 名＋一句精髓）；user 事實/事故實例/commit 錨留——固化與濃縮不同步＝兩處 drift（skill 演進、memory 停舊版）
 - **收斂落點慣例**（與上互補，2026-09-03）：跨 repo 方法論→ai-rules skills/rules；模組知識（project 條目 durable lesson）→對應目錄的模組 AGENTS.md（3-6 行約束形態，非流水帳搬移；root 不動）；user/專案綁定事實→留 memory——三個載體各司其職，收斂時先判條目屬哪類
+- **夜間收斂＝流出腿**（user 2026-09-03 定案「有進有出」，gate 22,500 配套）：每日夜間 cron（ZCode automation、owning workspace）跑本層收斂波，輕量形態**隨 cron 預先授權**（heavier 清理仍走「用戶核可後」）。波次：①`--check` 盤點 ②觸發（gate FAIL、`_regen-failed` 在場、或逼近線）→ desc>100 掃尾＋同主題 cluster merge ③regen 至過、清 marker。掃尾紀律：**壓縮改寫非截斷**——被刪細節若有價值先落 body（desc 是索引摘要層）；不確定的條目跳過，禁大規模語義重寫（那是 full audit 的事）。週日治理 cron 跑 lite audit（健檢腿）——兩 cron 分工：每日流出、週日健檢
 - 索引精簡：generator 池＝修條目檔 description（索引行是投影、禁手寫）；未裝池＝一行 = 主題 + 一個鉤子，細節留在條目檔內
 - 每輪結束**重跑層 1**——驗證清理本身沒引入新問題
 

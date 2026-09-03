@@ -1,6 +1,6 @@
 """Memory 生命周期工具鏈測試（generator 投影 / MEMORY.md 手寫 gate / Stop 重生成推導）。
 
-三件套行為錨點：索引生成 gate 分級（18,500 字元/190 行 fail-loud 守兩端共同截斷線〔200 行／
+三件套行為錨點：索引生成 gate 分級（22,500 字元/190 行 fail-loud 守兩端共同截斷線〔200 行／
 25,000 字元〕；24,000 bytes 降 info 縱深預警）與 frontmatter 解析、手寫攔截
 ＋條目寫入治理（desc>120/body 膨脹>12,000 硬擋、收斂放行）的 self-gating 條件、
 跨 harness memory 目錄推導——Claude 端底線也轉 dash 的專案名
@@ -122,7 +122,7 @@ def test_generator_e2e_gate_fail_loud(tmp_path):
 def test_generator_e2e_byte_gate(tmp_path):
     """SM-3：CJK 重池——chars/lines gate 內、bytes 破 24,000 → info 縱深預警不擋寫入。
 
-    70 條 × 130 CJK 字 description：chars ≈ 10,700（<18,500）、bytes ≈ 27,400（>24,000）
+    70 條 × 130 CJK 字 description：chars ≈ 10,700（<22,500）、bytes ≈ 27,400（>24,000）
     ——bytes 非任何端實際截斷線（兩端皆 25,000 chars、量 UTF-16 length）；info 為
     縱深預警（CJK 一字 3B 提前折射），ZCode 主力場景照常寫入（2026-09-03 裁決「zcode 優先」）。
     """
@@ -137,6 +137,26 @@ def test_generator_e2e_byte_gate(tmp_path):
     assert "[INFO]" in r.stdout
     assert "25,000 chars" in r.stdout
     assert (pool / "MEMORY.md").exists()
+
+
+def test_generator_e2e_chars_gate(tmp_path):
+    """SM-9：chars gate 邊界——chars 破 22,500 而 lines 未超 → fail-loud（chars 路徑錨）。
+
+    160 條 × desc 130 CJK（截 120）：chars ≈ 23,600（>22,500）、lines = 167（<190）
+    ——gate_fail_loud（n=200）走 lines 路徑，chars 邊界由此釘住：gate 值 typo 或
+    再調整（09-03 18,500→22,500）時有紅燈保護。
+    """
+    pool = make_pool(tmp_path, n=160, desc="深" * 130)
+    r = subprocess.run(
+        [sys.executable, str(pool / "_generate_index.py")],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 1
+    assert "[FAIL]" in r.stdout
+    assert "chars" in r.stdout
+    assert not (pool / "MEMORY.md").exists()
 
 
 def test_generator_stale_tmp_aged_removed(tmp_path):
@@ -483,7 +503,7 @@ def test_regen_skips_pool_without_generator(tmp_path):
 def test_generator_frontmatter_violation_fail_loud(tmp_path):
     """F-1②：frontmatter 違規（缺 type）→ exit 1＋[FAIL] 含檔名＋不寫入。
 
-    fail-loud 硬 gate 路徑（frontmatter 違規/chars/lines——bytes 已降 info，另由 SM-3 錨定）。
+    fail-loud 硬 gate 路徑之一（frontmatter 違規；chars 邊界由 SM-9、lines 由 gate_fail_loud 錨定——bytes 已降 info，另由 SM-3 錨定）。
     """
     pool = make_pool(tmp_path, n=1)
     (tmp_path / "bad-entry.md").write_text(
