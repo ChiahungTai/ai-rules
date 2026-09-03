@@ -54,11 +54,11 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `_ai-behavior-constraints` | 🟢 neutral | single-source drift 修改紀律＋元資訊禁止 pointer（行為表在 instruction-writing skill）|
 | `instruction-writing` | 🟢 neutral | instruction file 撰寫核心（完整規範在 instruction-writing skill）|
 | `python-standards` | 🟢 neutral | Python 標準（language；Python 專案適用）|
-| `context-management` | 🟢 neutral | context 重置＋memory 生命周期（cluster-first 四問／索引機械投影；Claude 機制用括號註）|
+| `context-management` | 🟢 neutral | context 重置＋STATE.md pointer＋memory 生命周期 pointer（四問/寫入點規範在 memory-audit skill「寫入端紀律」；Claude 機制用括號註）|
 | `outward-action-consent` | 🟢 neutral | outward action 需用戶授權（commit / deploy / push / send / live order；reversibility test + AUTH line）|
 | `llm-output-convention` | 🟢 neutral | print/Logger 雙通道核心——state transition 定義＋Namespace（tag 表/細則在 llm-output-convention skill）|
 | `lsp-navigation` | 🟢 neutral | cr-first 符號/型別查詢路由＋任務啟動 gate（LSP operation 速查表、反例群、Agent prompt 模板、載體對照、staleness 處置在 lsp-navigation skill）|
-| `modern-cli-preference` | 🟢 neutral | fd/rg CLI 速查（Claude 權限段括號註隔離）|
+| `modern-cli-preference` | 🟢 neutral | fd/rg 核心分工（陷阱目錄在 modern-cli-preference skill；Claude 權限段括號註隔離）|
 | `tool-discipline` | 🟢 neutral | 通用工具紀律（uv run / pipe-exit / 禁 sed / pytest 背景跑 / zsh 動態 flags 陣列 / 視覺判讀 agent 路由——禁主 session 讀圖）|
 | `edit-discipline` | 🟢 neutral | 通用編輯紀律（SRP/DIP/變更紀律/禁混合寫法）|
 | `bash-hard-rules` | 🔴 claude-specific | Claude 權限偵測（`#` 換行註解 / `$` 展開）|

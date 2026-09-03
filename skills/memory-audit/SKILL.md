@@ -1,6 +1,6 @@
 ---
 name: memory-audit
-description: "memory 清理/稽核/過時/記憶健康檢查（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。"
+description: "memory 清理/稽核/過時/記憶健康檢查＋寫入端紀律（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。寫 memory 前的寫入四問（repo 可推導就不寫/同主題加段/cluster-first）、單一寫入點（條目檔 frontmatter 唯一、MEMORY.md 機械投影）、desc/條目尺寸預算見「寫入端紀律」段。觸發詞：寫入四問、cluster-first、單一寫入點、索引投影、desc 上限、寫 memory。"
 argument-hint: "full | lite | 無參數（讀狀態戳後建議）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 ---
@@ -106,3 +106,25 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 ## 治理三分離
 
 **advisory 報告 → 用戶核可 → 執行**。稽核不得自行刪改用戶想留的條目；報告每項附機械證據（file:line / 命令輸出）。驗證紀律（Claim→Evidence、self-report discount 理論基礎）見 [acceptance-evidence](../../rules/acceptance-evidence.md)，不重抄。
+
+## 寫入端紀律：寫入四問與單一寫入點（寫 memory 前必查）
+
+> 本段是 `rules/context-management.md`「Memory 生命周期規範」的承載體（rule 留 pointer）——寫入側紀律與稽核側同檔，記憶治理單一源。
+
+harness auto memory 預設「one file = one fact」的「fact」操作定義 = **一個主題的教訓群（cluster）**，非一個事故；「check for an existing file — update rather than duplicate」的 update 目標 = 既有主題檔**加段**（非開新檔）。
+
+### 單一寫入點：條目檔 frontmatter
+
+**條目檔（frontmatter `name`/`description`/`type`）是唯一寫入點；`MEMORY.md` 索引是其機械投影，禁手寫**。索引載入上限＝200 行或 25,000 字元（UTF-16，兩端同語義）先到為準，超限截斷（附 WARNING，尾端條目不載）——手維護索引必漂移（截斷 → 查重漏同主題 → 近重複寫入 → 更肥 → 更截斷，正回授；2026-08-30 mosaic 56.6KB 實證）。
+
+- 裝有 generator（`memory/_generate_index.py`）的專案：寫/改條目檔後跑 `python3 <memory-dir>/_generate_index.py`（Stop hook 亦自動重生成；手寫 MEMORY.md 被 PreToolUse hook 擋）。資產源與部署操作見本 skill generator 段
+- 未裝 generator 的專案：手維護索引，cluster-first 沿用
+
+### 寫入四問（新教訓產生時依序）
+
+1. **repo 可推導 or 通用原則？** → git log / instruction 檔 / 程式碼 / **進行中 EP 的進度與狀態（住 EP 檔）**可推導 → 不寫；**LLM 通用做事原則/方法論**（與 user 個人化無關、任何 session 都適用）屬 rules/skills 知識——rule 缺就補 rule，不開 memory 條目。memory 收與 user／專案綁定的事實（偏好、糾正、專案約束、外部資源參照）——通用工程原則不收
+2. **同主題已有？** → `rg -i <關鍵詞> <memory-dir>/` 全檔掃（**不信 MEMORY.md 索引**——載入截斷下尾部條目不可見）；命中 → 既有檔加段（段標題保留原始 name、標 original type）；**進行中弧線條目禁加段**——弧線進度每 session 追加是膨脹主因（實證：單檔 98 次 Edit 養到 84KB），等弧線收案一次性蒸餾；無 → 才開新檔
+3. **project-\* 已完結？** → 任務閉環先收斂既有 project 條目（刪現況細節、留決策教訓）再開新檔
+4. **尺寸預算？** → frontmatter `description` ≤100 chars（索引行原料；>100 被 PreToolUse hook 硬擋——hook 僅攔主 session，subagent 寫入不觸發）；條目檔（含 frontmatter）≤12,000 chars（膨脹超限被 hook 擋；收斂方向＝改後比原檔短，放行）——超額 = 內容該住 EP 檔/repo 的訊號；索引軟上限 150 行，逼近 = cluster merge／收斂觸發
+
+量化清理（同主題散檔合併、收斂執行、audit）由本 skill 兩級稽核承載，寫入端只管四問。
