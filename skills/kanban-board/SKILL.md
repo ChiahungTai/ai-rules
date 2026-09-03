@@ -27,6 +27,7 @@ backlog init "<project>" --agent-instructions none
 backlog task create "<標題>" -l <labels> -d <目標一句> [--ac "<驗收條件>"]
 git add backlog/    # 建卡即 staged（autoCommit=false 下 CLI 不 commit）
 ```
+**建卡前去重**（中）：`backlog search <關鍵詞>` + 查 `ai-analysis/_inbox/pending-decisions.md`（與同域 `open-items.md`；例：mosaic 側 `marking/open-items.md`）待處理段，命中則復用/連結既有指針，不重複承諾（一行指針 ≠ 承諾，`backlog` 卡 = 承諾）。
 
 **開工**（凡要動某卡的 session——implement 階段 1 是標準入口；automation／監控／report 等衍生 session 不走 implement 亦同）：
 ```bash
@@ -55,6 +56,15 @@ bash <skills 根>/kanban-board/scripts/backlog_precheck.sh [卡id ...]   # skill
 - AI 消費：`backlog task list --plain`（非互動 canonical 輸出）
 - 機械消費：`--json`（**僅 list/view/task/search 四指令支援**）
 - 想法池：`backlog draft create "<想法>"` → Drafts 頁累積 → 拍板 `backlog draft promote <id>`（想法→承諾）
+
+**遠期卡治理（draft vs archive vs Icebox）**（實證 2026-09-03，例：mosaic `MOS-2/3/7 → DRAFT-1/2/3` 後 `To Do: MOS-10/16 + Done 7`；決策見 [Backlog.md 治理設計](../../ai-analysis/_tasks/09-03-backlog-governance-design/design.md)）：
+| 情境 | 動作 | 命令 | 版面效果 |
+|------|------|------|----------|
+| 遠期研究/暫緩（`To Do` 噪音） | **demote → draft**（官方停車場） | `backlog task demote <id>` → `backlog/drafts/draft-*.md` | board 完全隱形；`backlog draft list --plain`/`view DRAFT-x --plain`/`browser /drafts` 可見；`search`/`board` 不撈 |
+| 廢棄/永不做 | **archive** | `backlog task archive <id>` → `backlog/archive/` | 同上隱形，但語義為廢棄 |
+| 想保留 To Do 可見性 | **不加 Icebox 欄** | 維持 `statuses [To Do, In Progress, Done]` 三欄，遠期用 `draft` 替代 | 加 `Icebox` 仍多一欄、噪音未根除；`To Do` 應只留可開工承諾 |
+
+- 起手式：`backlog draft list --plain` 巡 `drafts` → `backlog draft view DRAFT-x --plain` 看內容 → `backlog draft promote DRAFT-x` 回 `backlog/tasks`（遠期如 `ECPPE` 可先記 `ai-analysis/_projects/<線>/open-items.md` 一行指針，熬到可開工才 `task create`，避免先佔承諾池）
 
 **註記追加**（消費場景等）：`backlog task edit <id> --append-notes "<文字>"`
 
