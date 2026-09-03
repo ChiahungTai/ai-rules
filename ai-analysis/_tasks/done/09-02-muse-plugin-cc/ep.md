@@ -7,7 +7,7 @@
 
 致敬 [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) 與 [xai-org/grok-build-plugin-cc](https://github.com/xai-org/grok-build-plugin-cc)（兩者 Apache-2.0）開發 Muse Code 委派 plugin：ZCode / Claude Code session 透過 headless `muse exec` 把任務委派給 Muse Code CLI。架構取 grok 的單一 bridge（每 task spawn 一次、無常駐 broker——`muse exec` 是 one-shot 行程），功能面取 codex 的 forwarder 契約與結構化 review、grok 的 runs 表格 UX。
 
-**核心差異化（兩個前輩都沒有）**：訂閱制計費——bridge 主動從子行程環境剝除 `META_API_KEY`（Muse auth 優先序 env key > stored key > browser session，`ref-docs/harness/meta/muse-code/auth.md:47`）。剝除 env key 後依優先序落到 stored key（onboarding 自動連接的那支＝訂閱載體，`subscriptions.md:42`）或 browser session——兩者都是訂閱計費。**殘餘風險**：user 曾以 `muse auth set` 存入 PAYG key 時，stored key 會**靜默**蓋掉訂閱（文件只承諾 env key 蓋 session 時告知）→ 對策：SM-13 ＋「setup 綠燈」為 bridge task 的硬前提。這是唯一 flat-rate 路徑——ZCode 直連／ccr／codex plugin 三種 API 供給路徑全是 pay-as-you-go（`subscriptions.md:53`："Your subscription only works through the Muse Code CLI while signed in"）。
+**核心差異化（兩個前輩都沒有）**：訂閱制計費——bridge 主動從子行程環境剝除 `META_API_KEY`（Muse auth 優先序 env key > stored key > browser session，`ref-docs/harness/meta/muse-code/auth.md:47`）。剝除 env key 後依優先序落到 stored key（onboarding 自動連接的那支＝訂閱載體，`subscriptions.md:42`）或 browser session——兩者都是訂閱計費。**殘餘風險**：user 曾以 `muse auth set` 存入 PAYG key 時，stored key 會**靜默**蓋掉訂閱（文件只承諾 env key 蓋 session 時告知）→ 對策：env 剝除＋`auth-failed` 錯誤分類（2026-09-02 修訂：原「SM-13 ＋ setup 綠燈硬前提」已移除——auth.json 實證為 oauth/device_code 訂閱載體，stored-key 向量由使用紀律承擔，見 S1 硬前提條款；發佈公開前重評）。這是唯一 flat-rate 路徑——ZCode 直連／ccr／codex plugin 三種 API 供給路徑全是 pay-as-you-go（`subscriptions.md:53`："Your subscription only works through the Muse Code CLI while signed in"）。
 
 **已裁定設計決策**（user 2026-09-02）：
 1. 不支援 `META_API_KEY` 設定——純訂閱制；bridge 防禦性剝除 + setup 警告
@@ -98,7 +98,7 @@ ai-rules 為 meta repo（無模組 Capabilities 表格）——本 EP 變更不�
 | SM-10 | 長任務背景化 | `--background` | bridge 記 ledger、detach；`/muse-runs` 查表格 | ledger 檔 | runs 管理 |
 | SM-11 | workspace 不信任 | repo 從未信任 | 預設忽略 repo 規則；caller 明示 `--trust-workspace` 才載入 | 無 | 任務委派 |
 | SM-12 | JSONL 異常 | muse 升版新增 event type／SIGTERM 死在半行 JSON 上 | bridge 鬆剖析：unknown type 與不可解析行（尤其尾行）跳過並計數，不炸 | 無 | 任務委派 |
-| SM-13 | stored PAYG key 靜默蓋訂閱 | user 曾 `muse auth set` | bridge task 硬前提＝setup 綠燈未過即拒跑（拒跑訊息指引清除）；setup 偵測 credential 是否 onboarding 自動連接那支 | setup 綠燈 | 環境健檢 |
+| SM-13 | stored PAYG key 靜默蓋訂閱 | user 曾 `muse auth set` | ~~bridge task 硬前提＝setup 綠燈未過即拒跑~~ **2026-09-02 修訂：綠燈硬前提移除（user 裁定，依據見 S1 硬前提條款）；防線＝env 剝除（SM-4）＋`auth-failed` 錯誤分類；發佈公開前重評** | 無 | 環境健檢 |
 | SM-14 | 跨 workspace resume 被拒 | session 的 workspace 與當前 cwd 不符 | `--allow-workspace-switch` caller 明示 pass-through；未帶時錯誤分類「workspace-mismatch」＋提示 | 無 | 任務委派 |
 | SM-15 | 雙流消費與容錯 | `muse exec --json` 人類可讀在 stderr、JSONL 在 stdout；ledger 損毀／`muse export` 失敗 | bridge 同時消費 stdout（事件）與 stderr（狀態行）；ledger 解析失敗＝重建索引＋原始檔保留；export 失敗＝review verdict 照常交付、標記 trajectory-missing | 無 | 任務委派／runs 管理 |
 
@@ -128,7 +128,7 @@ ai-rules 為 meta repo（無模組 Capabilities 表格）——本 EP 變更不�
 - env 剝除清單：`META_API_KEY`（唯一強制項）
 - 預設 flags：`--json`、`--disable-approval`、`--model muse-spark-1.2`（R7：CLI 預設模型不穩定，顯式 pin；standard tier＝數據不用於訓練）、`--max-model-steps 200`
 - caller flag 面（S3/S4 消費）：`--yolo`（opt-in，取代 disable-approval）、`--trust-workspace`、`--resume`→bridge 解析 last session、`--steps N`、`--effort <v>`→`--reasoning-effort <v>`、`--model <id>`、`--network <v>`→`--sandbox-network <v>`、`--allow-workspace-switch`
-- **硬前提**：`task` 拒跑條件＝binary 缺失或 setup 綠燈未取得（SM-13 防stored PAYG key 靜默繞過訂閱；綠燈快取於 ledger，setup 重跑可失效）
+- **硬前提（2026-09-02 修訂）**：`task` 拒跑條件＝binary 缺失。原「setup 綠燈未取得即拒跑」條款**移除**——user 裁定：auth.json 實證為 oauth/device_code 訂閱載體（無 stored API key），stored-key 向量由使用紀律承擔（不執行 `muse auth set`）；發佈公開前重評 spawn 時即時檢查方案。setup 降為診斷工具（綠燈仍計算顯示，不再作為 task 前提）；auth 類失敗仍由錯誤分類 `auth-failed` 攔截＋指引
 - exit code 映射表：`0`→completed、`1`→failed-or-capped、`2`→usage-error、`130/143`→interrupted；verdict 永不由 exit code 推導；**細分狀態（capped/failed-usage/auth-failed/workspace-mismatch）由 JSONL 錯誤事件關鍵字剖析**（事件樣本以 POC 記錄為規格源；分類失敗＝原文透傳，不猜）
 - **ledger 契約（升 S1 擁有）**：per-repo `.muse-bridge/jobs.json`（job index：id、sessionId〔來源＝事件流首行 `stream.id`〕、status、steps、effort、model、summary、exitCode、timestamp）＋ per-job JSONL 原始檔。**寫入原子化（write-tmp＋rename）**——S3/S4/S5 平行段共享，併發 bridge 同寫不得丟 job（muse 複審 #3 採納）；`status` 枚舉 `running|completed|failed|failed-usage|capped|interrupted|review-fail`（JSONL 事件剖析產出；`review-fail` 為 S4 review verdict schema 驗證失敗專屬——S4 fix round 回寫），`exitCode` 另存原值——雙源並存非二選一
 - prompt 傳遞：一律 `--` 分隔後接 prompt（防 `-` 開頭誤判 flag）；超過閾值（~2KB）自動改寫暫存檔＋`--prompt-file`
@@ -179,7 +179,7 @@ muse-bridge.mjs
 ### Context
 **UC 引用**：環境健檢。所有失敗路徑（SM-2/3/4）的診斷入口。研究發現的觀察者保護與平台偵測落在這裡。
 
-### 語義約束（binary 偵測沿用 S1；與 S3 共享警告文案語彙：SM-4 的 META_API_KEY 警告、SM-13 的拒跑訊息）
+### 語義約束（binary 偵測沿用 S1；與 S3 共享警告文案語彙：SM-4 的 META_API_KEY 警告、auth-failed 分類指引——SM-13 綠燈硬前提已於 2026-09-02 移除，setup 為診斷工具）
 ### 核心實作要點
 - `muse-bridge.mjs setup`：逐項檢查輸出 `[OK]/[WARN]/[FAIL]` 表
   1. binary＋版本（對照 changelog 已知 flag 面）
@@ -189,7 +189,7 @@ muse-bridge.mjs
   5. verification observer 狀態（研究 #7：確保沒被 settings 關掉）
   6. workflows engine 偵測（aarch64 缺席 = `[WARN]` 降級文檔）
   7. `muse skills list` 抽驗（SK 載入面）
-  8. 綠燈結果快取進 ledger（SM-13：bridge task 的硬前提）
+  8. 綠燈結果快取進 ledger（診斷資訊——2026-09-02 修訂後**非** task 前提）
 - `commands/muse-setup.md`：渲染健檢表 + 修復指引
 
 ### Pseudo Code
