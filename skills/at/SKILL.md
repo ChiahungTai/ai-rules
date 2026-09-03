@@ -142,6 +142,7 @@ Resume 觸發時，LLM 應：
 
 - **觸發時 host 必須開啟**：排程由 host 進程在觸發時刻 dispatch — Claude Code 是 terminal session、ZCode 是 app；關閉期間到點不觸發，重開後排程定義仍在但補觸發無保證，需接續就把 host 開到觸發時刻
 - **生命週期因 harness 而異**：Claude Code 綁 session，session 結束排程即消失；ZCode automation 持久於 workspace（跨重啟存活、one-shot 跑完留 completed 記錄不自動刪）— 殘留檢查用 CronList、清理用 CronDelete。一次性接續用途足夠（善用 usage reset 後的配額窗口內接續工作）
+- **one-shot miss 識別**：ZCode 上 one-shot 若觸發時刻 host 未開啟，記錄可能呈 `enabled=false`＋`lifecycleStatus=completed`＋`runCount=0` 且無 `lastRunAt`——外觀為 completed 但並未執行、無執行證據且仍佔名額；殘留判讀與 supersede 掃描**不可依賴 `runCount`/`lastRunAt` 判斷是否真的跑過**，以 `CronList` 現場狀態與 `.at-contexts/` 殘留為準
 - **清理**：Resume 完成後必須刪除 context 檔案，避免殘留
 - **多個排程**：若 `.at-contexts/` 已有 `at-context-*` 檔案，提示用戶確認是否有衝突
 - **版控排除（一次性設定，與 auto-mode 放行無關）**：`.at-contexts/` 含任務目標描述，建議加入該專案 `.gitignore` 或全域 `core.excludesFile`，避免誤 commit

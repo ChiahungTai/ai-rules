@@ -133,6 +133,8 @@ review finding 可經多層驗證，**各層都可能錯**：
 
 > 各 review 命令（ep-review / code-review / audit-test / execution-plan EP Review / build Agent Review）的**執行層預設**集中於此 —— 消除「預設行為跨命令重複定義且 drift」。各命令保留自己的 profile（維度）+ 產出動作，執行預設（force 獨立 / max-agents / model / 視角 / spawn-vs-session）引用本段。
 
+> 審查類命令 spawn agent 預設背景跑（細則見 rules/tool-discipline 背景執行段）
+
 1. **不 auto-detect，force 獨立 agent（預設）**：review 命令預設 spawn 獨立 agent（Workflow / Agent Tool），**不接受 LLM 在裁量點偷懶退 Main LLM 自審**（實證：auto-detect 時 LLM 偷懶 / 搞錯退 Main LLM）。**所有 review 命令含 code-review 都 force 獨立**（取消「低 effort code-review 合法 Main LLM」例外 — 實證:獨立 agent 抓自審盲點）。spawn 失敗降級（顯式標記 fallback，見 [agent-workflow](../agent-workflow/SKILL.md)「spawn 失敗階梯」）除外。
 
 2. **agent 數量 = max-agents**（預設 **3**，與 [build](../implement/SKILL.md) 一致；受並發上限 cap，[model-routing](../model-routing/SKILL.md) 並發表）。

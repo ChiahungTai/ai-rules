@@ -29,6 +29,8 @@ Facade 的解耦價值只在「發佈給**外部**消費者的套件」為真；
 
 禁止直接刪除，先改消費端：① `rg -t py "from package import"` 找出所有 re-export 消費者 → ② 逐一改直接路徑 `from package.module import X` → ③ 消費端全改完後才清除 `__init__.py` 的 re-export 行。
 
+> re-export 遷移掃消費端時，相對 import（`from .submodule import X`）消費者同樣要改成完整路徑——相對 import 穿透 `__init__` 邊界，`rg "from \."` 也要掃。
+
 ## 型別註解（Python 3.12+）
 
 - ❌ 禁止 `from __future__ import annotations`（將註解轉字串，掩蓋缺失 import 和 circular import）。前向引用用字串註解：`def process(node: "TreeNode") -> None:`

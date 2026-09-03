@@ -127,7 +127,7 @@
 - `scan-project` — 統一專案知識掃描（on-demand；imports + Capabilities + kanban → dep_graph / findings）
 - `standup` — 每日晨間簡報昨日活動 digest（跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition；ZCode 23:20 定時任務整合）
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / spawn 預設背景 / 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）
-- `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表〔ZCode×GLM／CC×GLM／CC×Anthropic〕、rate limit 與並發上限表、thoughtLevel 但書〔#339/#306〕、classifier unavailable 處置；rule 端留角色→tier 表＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
+- `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表〔ZCode×GLM／CC×GLM／CC×Anthropic〕＋external-runtime family→(model,effort,容量) 解析表〔muse／codex 委派＋工單 profile〕、rate limit 與並發上限表、thoughtLevel 但書〔#339/#306〕、classifier unavailable 處置；rule 端留角色→tier 表＋external-runtime family 軸＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離；generator 池層 1 縮為 `--check` 投影驗證——資產 `scripts/generate_index.py`）
 - `zcode-session-query` —（ZCode 專用）跨 session 查詢與參考：查 session id / 讀指定 session 尾部真人互動（scripts/zcode_tail_chat.py）/ ReadSessionContext（handoff 策略；relevant 大 session 逾時）；handoff / relay 的「讀進來」側；id 禁手打、sqlite3 CLI 無聲空輸出改 python ro uri

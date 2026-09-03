@@ -1,0 +1,71 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "統一 External-Runtime Subagent 架構",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    { "id": "orchestrate", "label": "主 Session（GLM）" },
+    { "id": "protocol", "label": "工單協議層" },
+    { "id": "runtime", "label": "Foreign Runtime" },
+    { "id": "assurance", "label": "驗收治理" }
+  ],
+  "phases": [
+    { "id": "decide", "label": "決策", "fromCol": 0, "toCol": 1 },
+    { "id": "delegate", "label": "委派", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "verify", "label": "驗收", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": ["task", "gate", "wo", "dispatch", "muse", "reviewer", "verdict", "record"],
+  "nodes": [
+    { "id": "task", "lane": "orchestrate", "col": 0, "type": "backend", "label": "任務規劃", "sublabel": "orchestrator", "width": 132 },
+    { "id": "gate", "lane": "orchestrate", "col": 1, "type": "security", "label": "Eligibility Gate", "sublabel": "五條逐判", "tag": "≥30min 僅信號", "width": 138 },
+    { "id": "directdo", "lane": "orchestrate", "col": 2, "type": "frontend", "label": "主 Session 直做", "sublabel": "gate 不過", "width": 132 },
+    { "id": "record", "lane": "orchestrate", "col": 5, "type": "database", "label": "EP Record", "sublabel": "結案憑證", "tag": "無 record 不結卡", "width": 138 },
+    { "id": "wo", "lane": "protocol", "col": 2, "type": "messagebus", "label": "工單十節", "sublabel": "work-order.md", "tag": "紅線首段", "width": 138 },
+    { "id": "dispatch", "lane": "protocol", "col": 3, "type": "backend", "label": "Dispatch Face", "sublabel": "直呼 bridge CLI", "width": 138 },
+    { "id": "muse", "lane": "runtime", "col": 4, "type": "cloud", "label": "muse spark", "sublabel": "terminal 回報", "width": 132 },
+    { "id": "reviewer", "lane": "assurance", "col": 4, "type": "security", "label": "GLM Reviewer", "sublabel": "讀料順序四步", "tag": "writer report 最後", "width": 140 },
+    { "id": "verdict", "lane": "assurance", "col": 5, "type": "backend", "label": "三態 Verdict", "sublabel": "accept／reject", "width": 132 }
+  ],
+  "edges": [
+    { "id": "task-gate", "from": "task", "to": "gate", "variant": "default" },
+    { "id": "gate-direct", "from": "gate", "to": "directdo", "label": "任一不過", "variant": "dashed", "role": "branch" },
+    { "id": "gate-wo", "from": "gate", "to": "wo", "label": "五條全過", "variant": "emphasis" },
+    { "id": "wo-dispatch", "from": "wo", "to": "dispatch", "variant": "default" },
+    { "id": "dispatch-muse", "from": "dispatch", "to": "muse", "label": "背景派發", "variant": "emphasis" },
+    { "id": "muse-reviewer", "from": "muse", "to": "reviewer", "label": "完成回報→獨立重跑", "variant": "emphasis" },
+    { "id": "reviewer-verdict", "from": "reviewer", "to": "verdict", "variant": "default" },
+    { "id": "verdict-record", "from": "verdict", "to": "record", "label": "accept", "variant": "emphasis", "role": "return" },
+    { "id": "verdict-muse", "from": "verdict", "to": "muse", "label": "needs-fix ≤3 輪", "variant": "dashed", "role": "branch" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "治理鐵則",
+      "items": [
+        "muse 實作＋GLM 驗收——reviewer 不可省",
+        "transport status ≠ verification ≠ review verdict",
+        "sandbox-error 禁 --yolo 賭重試"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Dispatch 三態判定",
+      "items": [
+        "未啟動（env 錯）→ 可安全重派",
+        "在跑 wrapper 已收 → poll，禁重派",
+        "死中途 → 機械驗收＋TaskStop"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "三層落地",
+      "items": [
+        "路由表＝rules/model-routing.md＋skill 解析表",
+        "介面＝agents/AGENTS.md flag profile",
+        "協議＝skills/_common/work-order.md"
+      ]
+    }
+  ]
+}

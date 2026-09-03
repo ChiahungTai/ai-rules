@@ -148,6 +148,8 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
   - **0 hits → 該段不得 pass**，必須先補消費端整合測試（驅動真實消費端流程 + 新參數組合路徑，非僅符號 import）
   - 有 hits → 確認 hits 是「驅動消費端流程」的測試，而非僅符號 import
 
+> 受影響測試集列舉走機械反查、禁目錄直覺（配方見 cr-query skill）。
+
 ### 階段 3：整合驗證
 
 > **scope 邊界（階段 2 vs 階段 3）**：階段 2 抓「新參數/注入點的接線路徑」（機械 rg 初篩）；階段 3 抓「既有接線的行為正確性」（需真實邊界跑）。**鐵律：階段 2 rg 有 hits ≠ 階段 3 真實邊界已滿足** — 符號出現在 tests（如被測單元自己的單元測試）≠ 消費端驅動該符號的路徑被覆蓋。例（真實歷史案例）：`rg "<符號>=" tests/` 有 hits 但全在被測單元自己的測試，消費端 integration 路徑不存在 — 符號有測 ≠ 消費路徑有測，bug 漏到補 integration test 才抓到。

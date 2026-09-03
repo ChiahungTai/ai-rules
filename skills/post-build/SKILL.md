@@ -18,6 +18,8 @@ description: build 後收尾鏈編排 — code-review → judge-review → 修�
 
 ## 階段 0 — Diff Triage（決定跑哪些子鏈）
 
+收尾鏈開跑前先盤點背景寫入者（背景 agent／bridge job／排程任務）——有在跑的寫入者先收斂或明確排除，避免掃描吃到中間態。
+
 分析 uncommitted diff（`git status` + `git diff` + `git diff --cached` + untracked）：
 
 | Diff 內容 | code 鏈 | docs 鏈 |
@@ -31,6 +33,8 @@ description: build 後收尾鏈編排 — code-review → judge-review → 修�
 **Resume 場景**：若 `.review/<branch>.md` 已存在且有 `open` 狀態 findings（跨 session 從 reviewer session 帶回），跳過 code-review，直接從階段 2 接續。
 
 印出 triage 結果：`[Post-Build] code=<yes/no> docs=<yes/no> resume=<yes/no> mode=<uncommitted|arc>`
+
+收尾掃描（rg 殘留／consistency 範圍）須明列並行線排除清單——非本弧的 working tree 變更不納入、不順手修（並行原則見 [collaboration-constraints](../../rules/collaboration-constraints.md)「同 working tree 並行原則」）。
 
 ## 階段 1 — Code Review（僅 code 鏈）
 
@@ -51,6 +55,8 @@ findings 全空 → 報告並直接進 docs 鏈。
 1. 實作所有 ✅ 採納項（反拖延原則：合理就當下落地；**先規劃整批再批次套用**——目標檔先 Read、多個 Edit 同 block 發、鄰近一行式小修合併、真依賴才序列，見 [tool-discipline](../../rules/tool-discipline.md)「獨立呼叫批次化」+「檔案修改禁令」（Read 紀律））
 2. 執行 `followup-review`（[skills/followup-review/SKILL.md](../followup-review/SKILL.md)；讀 `.review/<branch>.md`）驗收
 3. 未通過 → 再修 → 再驗收（**上限 3 輪**；超過 = 停下，殘留項列入收尾報告標「未收斂」——連續失敗比乾淨報告更糟，不硬撐）
+
+修正迴圈或收尾期間 diff 增量擴至 ≥3 檔時，補一輪審查視角（不需全鏈重跑、但不得零審）——與 code-review 模式 B 的 dual-context ≥3 files 升級門檻對齊，已觸發則不重複。
 
 ## 階段 4 — Docs 鏈（僅有 `.md` 變更時）
 
@@ -86,6 +92,8 @@ findings 全空 → 報告並直接進 docs 鏈。
 ```
 
 **EP 對照行是再次提醒**（主歸納點在 [implement](../implement/SKILL.md) 階段 6——build 現場最清楚）：弧模式帶階段 1 機械底稿；同 session 接續 → 帶入 implement 階段 6 歸納；修正迴圈有新增變動 → 更新後再報。此行是 commit 決策的 triage 訊號（一眼看出 EP 未解釋的變動），深度渲染屬 `/debrief`；delta_tour 機制與時點條件真相源見 code-review 模式 B。
+
+dual-family 第二審查者因訂閱窗口／額度不足跳過時，必須顯式記錄降級（「額度降級：X 跳過，原因＝…」入收尾報告），禁靜默略過——與 [quality-constraints](../../rules/quality-constraints.md)「主動揭露錯誤（Fail Loud）」同族。
 
 ---
 

@@ -15,8 +15,39 @@ agents/
 - **同步紀律**：shared/ 是 authoring 單一源——**只改 shared/**，改完 `cp` 到 zcode/＋claude/（三份一起 commit）。**已知刻意分歧（2026-08-30 T2-3）**：ZCode 專屬 CR MCP 白名單行（`mcp__plugin_code-reality_code-reality__*` 四顆，只加在 frontmatter tools）——zcode 拷貝＝shared 全文；**claude 拷貝＝shared 減 MCP 行**（CC 接線未確認是前置，確認後同步補）。sync 檢查＝`cmp shared/<f> zcode/<f>` ＋ claude 差異僅限 MCP 行（`diff shared/<f> claude/<f>` 只出 tools 行的 `mcp__plugin_code-reality_*` 片段）
 - **pin 單一源紀律**：zcode/ 檔的 `model:`／`thoughtLevel:` 值以 model-routing skill（`skills/model-routing/SKILL.md`）tier 解析表為單一源——改表 → `rg` 同步 zcode/ pins（角色→tier 表與 tier 詞彙仍在 `rules/model-routing.md`）
 - **UI 防護規則**：shared 角色不在 ZCode 設定 UI 編輯（model／思考強度／正文皆然）——UI 編輯落在**拷貝**上，shared/ 不變，下次同步 `cp` 會**無預警覆蓋** UI 編輯；要釘模型 → 在 zcode/ 建 fork（tier-pinned 實檔，不經同步）
-- **tier 命名**：能力語義命名（lite-verify／spec-miner，非 glm-flash-*——model 每代換名，改名級聯）；例外＝rescue 類（引擎在本質內，如 codex-rescue）。tier 詞彙定義在 `rules/model-routing.md`，此處引用不自帶
+- **tier 命名**：能力語義命名（lite-verify／spec-miner，非具體模型名-*——model 每代換名，改名級聯）；例外＝rescue 類（引擎在本質內，如 codex-rescue）。tier 詞彙定義在 `rules/model-routing.md`，此處引用不自帶
 - **生效時機**：ZCode 改動需新建 session（快照制；app 重啟續接同對話亦刷新）；CC 定義檔即時監聽。翻轉頂層 symlink／更新 registry 拷貝後以首個新 session 驗證
+- **external-runtime 職責**：本 registry 亦承載 external-runtime 委派的入口指派（family／profile 見 `rules/model-routing.md` external-runtime 節與 `skills/model-routing/SKILL.md` 解析表）；詳見下節 thin forwarder 與 flag profile。
+
+## Thin forwarder 與 flag profile
+
+> 治理原則：external-runtime 家族入口＝單一 thin forwarder（工單即介面），**不長特化 agent**——routing 混入 transport agent 的前車之鑑（`~/Github/muse-plugin-cc/FIX-S3-R2.md:49`）。跨 harness agent 定義保持 thin，路由決策在 `rules/model-routing.md`，flag 具體值在 `skills/model-routing/SKILL.md`，工單協議在 `skills/_common/work-order.md`。
+
+- **原則**：muse／codex 家族不新增特化 agent 定義檔；任務以工單為介面派發（派發形態見下方 dispatch face 與收法——muse 預設直呼 bridge CLI，wrapper 為別名），profile 決定 spawn 形態。
+- **flag profile 表（形態）**：具體值見 `skills/model-routing/SKILL.md` external-runtime 解析表，本表只寫形態。
+
+| profile | family | spawn 形態 | 說明 |
+|---------|--------|------------|------|
+| advisory | muse | read-only（bridge 暴露 `--disable-write` 前由工單紅線承載，暴露後改 flag） | 唯讀掃描，禁寫入 |
+| implement | muse | `trust-workspace` | 實作寫入型，背景跑 |
+| implement | codex | `workspace-write` | 診斷／救援寫入型 |
+| review | muse | bridge `review` 子命令（schema verdict） | 產出 accept／reject／needs-fix |
+| review | codex | `--output-schema` | 同上，codex 形態 |
+
+> 外部 runtime flag 未暴露項的對策：以工單紅線替代（見 `skills/_common/work-order.md` 紅線首段），flag 暴露列 muse-plugin-cc 側 bridge roadmap（本 repo 不動跨 repo，僅記錄）。
+
+### dispatch face 與收法
+
+- **muse 委派預設＝主 session 直呼 bridge CLI**：背景 Bash＋`.muse-bridge/jobs.json` 輪詢（`rg .muse-bridge/jobs.json`＋`ps` 進程核對），繞開 wrapper 生命週期錯位；wrapper agent 形態為別名（alias），續用時收法＝resume-to-poll。理由：wrapper 在 runtime 未終局時提前 complete 是系統性常態（生命週期錯位，本弧實證：muse×2＋codex×2 均需介入），直呼橋接層不經 wrapper 轉發、終局以 jobs.json 與 working tree 為準
+- **codex 委派＝wrapper＋標準收法 resume-to-poll＋prompt 內預寫 env fallback**：prompt 內預寫 plugin root 路徑的 env 兜底（`CLAUDE_PLUGIN_ROOT` 缺失時 `MODULE_NOT_FOUND` 形態），wrapper 標準收法同為 resume-to-poll
+
+### 三態判定（症狀→證據→處置）
+
+| 症狀 | 證據 | 處置 |
+|------|------|------|
+| transport 未啟動 | env/module 錯誤、log `MODULE_NOT_FOUND`、exit 1、jobs.json 無該 job | 可安全重派 |
+| transport 在跑、wrapper 已收 | jobs.json 狀態 running、ps 進程在 | poll 收集，禁重派（雙跑） |
+| transport 死中途、wrapper 空轉 | 進程已亡、jobs.json 停滯、無新輸出 | 機械驗收（working tree＋jobs.json 終局）＋TaskStop wrapper |
 
 ## 定義檔慣例
 

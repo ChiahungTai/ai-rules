@@ -76,6 +76,14 @@ Two facts backends, complementary not competing:
 | EP 規劃期投影（整合器型/跨模組 EP） | MCP `project`（v0.6.0 起）或 CLI `code-reality project --repo <repo> --plan <plan.toml>`——overlay 鑄造＋投影面查詢：規劃新符號反向鏈＋claims 三態（`HOLE`/`MISSING`/`WIRED`）；輸出帶 `[projected]` 標籤＝**宣告非證據**（洗衣陷阱防護）；操作/語義真相源 [code-reality](../code-reality/SKILL.md) 工具表；EP 接線見 [execution-plan](../execution-plan/SKILL.md) 段落 0 |
 | "find symbol by concept/keyword" | `semantic_search` (keyword face；embeddings 未採用) or rg |
 
+## 受影響測試集 → test files 標準配方（修改檔 → 受影響 test files）
+
+> 受影響測試集列舉必須走機械反查，禁目錄直覺（測試檔跨目錄擺放時直覺必漏）。
+
+- ① 有 graph：`code-reality graph_query impact_radius --repo <root> --files <絕對路徑>` 取影響檔案集，再對 tests 目錄 `rg "<符號>"` 交叉確認
+- ② 無 graph／stale：退 `rg "<符號>" tests/ -l`
+- ③ 輸出證據三級標記：`graph-derived`／`text-derived`／`未驗證 dynamic consumers`——`rg` 命中 ≠ 完整 impact（動態派發與字串鍵耦合是 CR 盲區，graph 亦盲）
+
 > **Stale graph check:** Rust repos — `code-reality scip_refs <sym> --repo` prints `[SRC] scip index @ <sha> · repo HEAD @ <sha>`; mismatch → regenerate the index before trusting results. Graph freshness — rebuild with `graph_db build --repo <root>` (Python cache first: `pyrefly-index --repo <root>`). Graph facts are build-time; stale graph = stale facts (parallel: LSP workspace state-dependence — re-verify before concluding).
 
 ## 🔴 Anti-over-reliance (the failure this skill prevents)

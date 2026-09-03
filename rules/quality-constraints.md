@@ -58,7 +58,7 @@ harness-scope: neutral
 | DB schema 變更 | 整個 data pipeline | 從 fetch → transform → write → read 全跑一次 |
 | Pipeline Step | 上層 Pipeline | 在 Pipeline 完整流程中跑，不只測單一 Step |
 
-**跨模組影響擴散**：修改共用模組（如 `_validate_output`、`column_metadata`）時，影響跨測試檔案（parity / interaction / consistency test）——必須跑整個受影響目錄而非單一檔案。
+**跨模組影響擴散**：修改共用模組（如 `_validate_output`、`column_metadata`）時，影響跨測試檔案（parity / interaction / consistency test）——必須跑整個受影響目錄而非單一檔案。**受影響測試集必須機械反查**——`code-reality graph_query impact_radius --repo <root> --files <絕對路徑>` 或 `code-reality scip_refs <符號> --callers --repo <root>` 或 `rg "<符號>" tests/ -l`——**禁以目錄直覺代替**（測試檔跨目錄擺放時直覺必漏）。
 
 ### 符號覆蓋 vs 整合路徑覆蓋
 
