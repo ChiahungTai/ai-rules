@@ -46,7 +46,7 @@ allowed-tools: ["Bash", "CronCreate", "CronDelete", "CronList"]
 以下獨立動作**同一批並行發出**（tool-discipline：批次化省 request）：
 
 1. `CronCreate` × 3——每發 `recurring: false`、pinned cron（`分 時 日 月 *`）、prompt 用下方模板（prompt 首行自帶 `usage-ping` marker，兩端 supersede 匹配都靠它）；title `usage-ping {rung_i 實際時刻} 叫醒 rung {i}/3`（ZCode 必填；Claude Code 端工具無 title 參數則省略。**標實際觸發時刻（+1 分後的 T），非輸入時間**——標輸入值會讓人誤以為沒 +1）
-   - **ZCode session 綁定限制（pending 期間鎖定）**：session 建立首個 automation 後、該 task **未 fire 前**，同 session 後續 `CronCreate` 全拒（錯誤訊息要求「start a new chat」；並行批次與單發重試皆同，2026-08-18 實測）；task fire 後額度釋放、同 session 可再建（2026-08-19 實測：one-shot 落地後同 session 成功建 recurring）。ZCode 實務不變：建 rung 1 即止（rung 2/3 建立時 rung 1 仍 pending → 拒），降級 1-rung 階梯、摘要明說，錯過 T 的召回改由 sentinel 語音承擔；Claude Code 端無此限制（×3 同批照建）
+   - **ZCode session 綁定限制（pending 期間鎖定）**：session 建立首個 automation 後、該 task **未 fire 前**，同 session 後續 `CronCreate` 全拒（錯誤訊息要求「start a new chat」；並行批次與單發重試皆同，2026-08-18 實測）。2026-09-01/09-02 實測推翻「fire 後釋放」舊模型——**pending 或 completed 記錄在場皆鎖，刪除該 session 相關 automation 記錄才釋放**（fire 本身不釋放）。ZCode 實務不變：建 rung 1 即止（rung 2/3 建立時 rung 1 仍 pending → 拒），降級 1-rung 階梯、摘要明說，錯過 T 的召回改由 sentinel 語音承擔；Claude Code 端無此限制（×3 同批照建）
 2. 建召回 sentinel（**原子寫入**，防他 session 的 Stop hook 讀到半寫檔）：`printf '%s\n' {T_epoch} > /tmp/.usage-ping-pending.tmp && mv /tmp/.usage-ping-pending.tmp /tmp/.usage-ping-pending`（內容 = 首 rung 絕對時刻的 epoch 秒；Stop hook 在 [T, T+90min) 內有 turn 結束時機械 say「配額回來了」並自清——0 LLM call）
 3. 語音確認：`say -v Meijia -r 180 "已排程在 {T} 叫醒"`（T = rung 1 實際時刻，同 title 標實際觸發時刻）
 
