@@ -9,8 +9,8 @@
 
 | # | automationId | cron | 職責一句 | 對象範圍 | 角色／紅線 |
 |---|--------------|------|----------|----------|------------|
-| 1 | `automation-751ecce2-a79c-4309-a79c-08486e2ee893` | `40 23 * * *`（每晚 23:40） | ai-rules memory 池收斂（輕掃／弧線預警／波段收斂＋regen）——檔案型清淤腿掛此 | 僅 ai-rules 池 `/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/` | 寫手（每夜動手）；紅線：不碰 mosaic 池、不 commit、不改 DB schema、不刪 shared |
-| 2 | `automation-fed036ff-17bf-4cf0-a50e-3216a7de6665` | `0 23 * * 0`（週日 23:00） | 治理看照：bundle 組成看照（`deploy_agents.py` 三部署檔 cmp）＋memory lite 稽核（advisory） | ai-rules repo＋memory 池 | 審計（advisory 不動手）；禁止改 rules／memory 條目（戳記除外）；比對腿：`CronList` vs 本表 drift 報告（落地 L8） |
+| 1 | `automation-751ecce2-a79c-4309-a79c-08486e2ee893` | `40 23 * * *`（每晚 23:40） | ai-rules memory 池收斂（輕掃／弧線預警／波段收斂＋regen）＋**檔案型清淤兜底腿已上線**（`.agent-tmp`/`.at-contexts` `mtime>7d`、`.review` `>30d`；AIR-14 L5，2026-09-03 起） | 僅 ai-rules 池 `/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/`＋repo 三 dot-area | 寫手（每夜動手）；紅線：不碰 mosaic 池、不 commit、不改 DB schema、不刪 shared |
+| 2 | `automation-fed036ff-17bf-4cf0-a50e-3216a7de6665` | `0 23 * * 0`（週日 23:00） | 治理看照：bundle 組成看照（`deploy_agents.py` 三部署檔 cmp）＋memory lite 稽核＋**registry/卡 ref 一致性比對已上線**（`CronList` vs 本表 drift＋raw `.md` 直連卡 ref lint；AIR-14 L8，2026-09-03 起） | ai-rules repo＋memory 池 | 審計（advisory 不動手）；禁止改 rules／memory 條目（戳記除外） |
 | 3 | `automation-370fafc5-a050-479e-b62f-9c7988d23521` | `10 23 * * 6`（週六 23:10） | 糾正模式週報＋CR 使用健檢（`corrections-weekly` skill） | ai-rules workspace | 報告；DB 唯讀、一頁、腳本失敗 2 次即止 |
 
 > 全名照錄 `CronList` 輸出 `automationId`（非前綴），逐字比對通過。
@@ -28,7 +28,7 @@
 ## 同步義務
 
 - 動排程的 session 順手 `rg automationId` 抽 `CronList` 與本表，更新本表對應行與本節「更新時點」；操作後跑 `CronList` 再 `cat` 本表逐字核對。
-- 週日治理看照（automation-fed036ff）含 `CronList` vs 本表比對腿——drift 列報告，不自動改（落地 L8）。
+- 週日治理看照（automation-fed036ff）含 `CronList` vs 本表比對腿＋卡 ref lint——drift 列報告，不自動改（AIR-14 L8 已上線，2026-09-03）。
 
 ---
 
