@@ -59,7 +59,7 @@ user 的 quote 必須**涵蓋該具體動作**，不能是更廣的意圖：
 - user 說「測試 strategy」**不涵蓋**「下 live order」（測試 ≠ 下單）
 - user 說「跑 deploy」**不涵蓋**「send notification」（deploy ≠ send）
 - 判定：quote 的字面範圍 vs 動作的具體性,若需推理才能讓 quote 涵蓋動作,則不涵蓋 → 列 PENDING
-- **俗語豁免**：常識俗語或明顯意圖(如「送出去」= send、「跑一下」= run)不算「需推理」,quote scope 判準只擋邏輯跳躍(如「測試」≠ 下單)
+- **俗語豁免**：常識俗語或明顯意圖(如「送出去」= send、「跑一下」= run)不算「需推理」,quote scope 判準只擋邏輯跳躍(如「測試」≠ 下單；跨 worktree 需 user 明說「全部 worktree 一起改」才涵蓋)
 
 ### documentation ≠ authorization
 
@@ -75,14 +75,9 @@ README、workflow doc、installed skill 說某動作「必須伴隨」你的變�
 
 | 場景 | 正確行為 |
 |------|---------|
-| **git commit**（專屬段，見下） | 展示 message，等用戶獨立確認（commit 專屬段：例外無） |
-| 任務段落完成（如 build） | 展示結果，不 auto-commit；不 auto-deploy |
-| 採納 review 建議 | 展示變更，等待用戶確認 |
-| deploy / push / send | 需 AUTH line；無 quote → 列 PENDING |
-| live trading order / broker write | 需 AUTH line；quote scope 須涵蓋「下單」具體動作 |
-| DB schema change / delete shared data | 需 AUTH line |
-| 付費操作 / 權限變更 | 需 AUTH line |
-| 跨 worktree 操作 | 需 AUTH line；user 須明確說「全部 worktree 一起改」才涵蓋 |
+| **git commit**（專屬段，見下） | 展示 message，等用戶獨立確認（例外無） |
+| 任務段落完成 / 採納 review 建議 | 展示結果，等待確認，不 auto-commit/deploy |
+| deploy / push / send / 跨 worktree / DB / 付費 / live order 等 | 需 AUTH line；無 quote → 列 PENDING（quote scope 須涵蓋具體動作；完整清單見上方 outward action 定義） |
 
 ---
 
@@ -109,9 +104,7 @@ autonomous shortcut:autonomous session（deep-work、排程執行、半夜自主
 
 ## Source of truth 邊界
 
-- **outward-action-consent rule（本檔）** = 通用定義清單（authoritative）,定義什麼是 outward action + reversibility test + AUTH line 模板
-- **autonomous-execution 紅線清單** = deep-work 半夜自主場景的**快查子集**,只列最危險的不可逆操作，其餘一律指回本 rule
-- 未來新增 outward action 場景時**只改本 rule**；紅線清單隨 deep-work 場景需求局部同步
+本檔為 outward action 通用定義（authoritative，含 reversibility test + AUTH line 模板）；autonomous-execution 紅線清單為快查子集，詳見 autonomous-execution skill，新增場景只改本 rule。
 
 ---
 

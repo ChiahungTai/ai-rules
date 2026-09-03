@@ -10,7 +10,7 @@ harness-scope: neutral
 
 ## 工具選擇原則
 
-- 符號/圖譜查詢用 code-reality（index 在場時；refs/callers/closure＋graph_query 家族），hover／型別簽名用 code-reality-lsp-bridge（`hover`/`check_file`——.py→pyrefly、.rs→rust-analyzer 副檔路由），文字搜尋用 `rg`，檔案搜尋用 `fd`（工具對照速查見 [lsp-navigation.md](lsp-navigation.md)）
+- 工具四路路由（符號→code-reality、型別→bridge、文字→rg、檔案→fd）見 [lsp-navigation.md](lsp-navigation.md)；本檔載紀律與陷阱
 - **視覺判讀（截圖/圖表/證據影像/UI 驗收）→ vision-review agent**（合約式 dispatch：視覺錨點＋verdict 格式＋read-only），**禁主 session 直接 Read 圖檔**——圖像 token 全量駐留主 context、多張即灌爆（GLM 5.3 實測），agent 在自身 context 消化、主 session 只收文字 verdict；亦非單發 image-analysis MCP——差距不在模型能力，在 agent loop 的查證迴路＋合約紀律（單發 MCP 讀圖：CJK 誤讀、無法回答「是否互 clip」；agent：截切機制＋跨圖佐證＋「畫面內無 X 則宣稱無從核實」的證據紀律）
 - **Agent prompt 必須指定工具**：spawn agent 時，根據任務性質在 prompt 中明確寫「用 LSP hover/ goToDefinition 查簽名」或「用 rg 搜文字」。禁止 agent prompt 只寫「讀取/驗證」不指定工具
 
@@ -49,12 +49,10 @@ harness-scope: neutral
 
 ## 背景執行（不阻塞對話）
 
-- `pytest` 用背景跑（Claude: `run_in_background: true`；其他 harness 用各家背景機制）；例外：併入機械驗證組合命令的段級短測試（單檔、秒級）隨組合命令跑（見下「獨立呼叫批次化」）
-- **Subagent spawn 預設背景**：Agent tool 呼叫帶背景參數（ZCode: `run_in_background: true`——runtime 實測有效（2026-08-14），官方文檔未記載此參數、僅說前台/後台由主 Agent 決定；Claude 2.1.198+ 已預設背景免動作）。主對話回報「進行中」後結束 turn——使用者可繼續對話，subagent 完成後結果自動回到主對話接手
-- **背景 agent 的收法（spawn 的配套，缺此等於沒背景）**：spawn 後**結束 turn 等完成通知**。禁用 `TaskOutput(block=true)` 長阻等收背景 agent——阻等卡住主對話（使用者無法插話，體感＝「沒有在背景跑」）；且阻等待被中斷/取消時 **agent 連帶被殺**（status=killed、結果遺失——2026-09-02 實證：驗證 agent 因此被殺須重跑）。block=true 僅限預期 <30s 短 probe；前景有其他工作時就先做，通知到了再接手
-- 例外（前台）：結果是當前步驟立即依賴且預期 <30s 的短 probe（如載入驗證）
-- 為什麼：前台 spawn 佔住主對話 turn，使用者無法插話——長任務（review、大範圍 research）前台 = 對話卡死；背景不改變結果可用性，只改變等待方式
-- 注意（ZCode）：背景執行的 Explore 強制唯讀（安全設計）；subagent 定義檔**不支援** `background` 欄位（Claude 支援——frontmatter `background: true` 在 Claude 端有效、ZCode 靜默忽略）——ZCode 端背景化是 spawn 端行為，定義檔控制不到
+- `pytest` 用背景跑（Claude: `run_in_background: true`；其他 harness 用各家背景機制）；例外：併入機械驗證組合命令的短測試隨組合命令跑（見下「獨立呼叫批次化」）
+- **Subagent spawn 預設背景**：Agent tool 呼叫帶 `run_in_background: true`（ZCode 實測有效；Claude 已預設背景）。主對話回報「進行中」後結束 turn——subagent 完成後自動回到主對話
+- **背景 agent 的收法**：spawn 後**結束 turn 等完成通知**，禁用 `TaskOutput(block=true)` 長阻等——阻等卡住主對話且被中斷時 agent 連帶被殺（status=killed，結果遺失）。`block=true` 僅限 <30s 短 probe；有前台工作先做，通知到再接手
+- 前台與背景取捨：前台佔住主對話 turn 使長任務卡死，背景不改結果可用性；例外（前台）為結果立即依賴的短 probe，Explore 背景強制唯讀，定義檔 `background` 欄位僅 Claude 有效
 
 ## 閘門命令禁 pipe 到 tail/grep
 

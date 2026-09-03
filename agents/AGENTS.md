@@ -17,11 +17,11 @@ agents/
 - **UI 防護規則**：shared 角色不在 ZCode 設定 UI 編輯（model／思考強度／正文皆然）——UI 編輯落在**拷貝**上，shared/ 不變，下次同步 `cp` 會**無預警覆蓋** UI 編輯；要釘模型 → 在 zcode/ 建 fork（tier-pinned 實檔，不經同步）
 - **tier 命名**：能力語義命名（lite-verify／spec-miner，非具體模型名-*——model 每代換名，改名級聯）；例外＝rescue 類（引擎在本質內，如 codex-rescue）。tier 詞彙定義在 `rules/model-routing.md`，此處引用不自帶
 - **生效時機**：ZCode 改動需新建 session（快照制；app 重啟續接同對話亦刷新）；CC 定義檔即時監聽。翻轉頂層 symlink／更新 registry 拷貝後以首個新 session 驗證
-- **external-runtime 職責**：本 registry 亦承載 external-runtime 委派的入口指派（family／profile 見 `rules/model-routing.md` external-runtime 節與 `skills/model-routing/SKILL.md` 解析表）；詳見下節 thin forwarder 與 flag profile。
+- **external-runtime 職責**：本 registry 亦承載 external-runtime 委派的入口指派（family／profile 映射見 `skills/model-routing/SKILL.md`，詞彙定義見 `rules/model-routing.md` tier 詞彙句）；詳見下節 thin forwarder 與 flag profile。
 
 ## Thin forwarder 與 flag profile
 
-> 治理原則：external-runtime 家族入口＝單一 thin forwarder（工單即介面），**不長特化 agent**——routing 混入 transport agent 的前車之鑑（`~/Github/muse-plugin-cc/FIX-S3-R2.md:49`）。跨 harness agent 定義保持 thin，路由決策在 `rules/model-routing.md`，flag 具體值在 `skills/model-routing/SKILL.md`，工單協議在 `skills/_common/work-order.md`。
+> 治理原則：external-runtime 家族入口＝單一 thin forwarder（工單即介面），**不長特化 agent**——routing 混入 transport agent 的前車之鑑（`~/Github/muse-plugin-cc/FIX-S3-R2.md:49`）。跨 harness agent 定義保持 thin，路由決策與解析表在 `skills/model-routing/SKILL.md`（詞彙定義在 `rules/model-routing.md`），flag 具體值見同 skill 解析表，工單協議在 `skills/_common/work-order.md`。
 
 - **原則**：muse／codex 家族不新增特化 agent 定義檔；任務以工單為介面派發（派發形態見下方 dispatch face 與收法——muse 預設直呼 bridge CLI，wrapper 為別名），profile 決定 spawn 形態。
 - **flag profile 表（形態）**：具體值見 `skills/model-routing/SKILL.md` external-runtime 解析表，本表只寫形態。

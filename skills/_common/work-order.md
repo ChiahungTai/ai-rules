@@ -60,7 +60,7 @@
 
 1. `rg -n "external-runtime" rules/model-routing.md` → ≥1 命中
 2. `rg -n "eligibility" rules/model-routing.md` → 命中
-3. `rg -n "needs-fix" rules/model-routing.md` → 命中
+3. `rg -n "needs-fix" skills/model-routing/SKILL.md` → 命中
 4. `rg -n "flag profile|thin forwarder" agents/AGENTS.md` → 兩詞皆命中
 5. `test -f skills/_common/work-order.md && rg -n "紅線|Baseline|矛盾例外|PII|交付報告格式" skills/_common/work-order.md` → 檔在且五關鍵詞皆命中
 6. `head -3 skills/_common/work-order.md | rg -c "^---"` → 0
@@ -89,4 +89,4 @@
 
 ---
 
-> 消費形態：skill 間以 `../_common/work-order.md` link 引用，或主 session 直接依本模板填寫新工單本文後經 bridge `task`／codex 派發。`rules/model-routing.md` external-runtime 節與 `skills/model-routing/SKILL.md` 解析表為 family／profile 詞彙單一源，本模板不自帶定義。
+> 消費形態：skill 間以 `../_common/work-order.md` link 引用，或主 session 直接依本模板填寫新工單本文後經 bridge `task`／codex 派發。`rules/model-routing.md` tier 詞彙句與 `skills/model-routing/SKILL.md` 解析表為 family／profile 詞彙與映射單一源，本模板不自帶定義。

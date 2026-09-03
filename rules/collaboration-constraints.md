@@ -42,17 +42,7 @@ harness-scope: neutral
 
 - **具體性**：避免「大概」「可能」「應該可以」等模糊詞
 - **可操作性**：提供明確執行步驟；引用具體檔案路徑和程式碼位置
-- **對比格式**：解釋技術概念、對比做法、或說明約束時，必須用標準對比格式（自檢：有 ❌/✅ 標記、有具體範例、有原理說明）：
-
-```markdown
-## ❌ 錯誤做法：[簡要描述問題]
-[具體錯誤範例或描述]
-
-## ✅ 正確做法：[簡要描述優點]
-[具體正確範例或描述]
-
-💡 **原理說明**：[解釋為什麼正確做法更好——不只說「怎麼做」]
-```
+- **對比格式**：解釋技術概念、對比做法時用標準對比格式（自檢：❌/✅ 標記＋範例＋原理說明）：`❌ 錯誤：[描述]` / `✅ 正確：[描述]` / `💡 原理：[為何更好]`
 
 ---
 
@@ -83,9 +73,9 @@ harness-scope: neutral
 
 - **spawn 前判斷 worktree 能力**：跨 repo 任務優先在目標 repo 的 session 做；agent 寫不進目標 → agent 寫當前 repo，主 session 事後搬運回收；禁把「跨 repo 寫入」責任丟給 agent（worktree 隔離下前置確認無效——根因是 spawn 端 routing）
 - **spawned／automation session 不在非 owning worktree 寫卡或結案**：卡的 owning WT 依各 repo 線 tag↔WT 規則判定；判定不了 → 回報 spawn 端，不在當前 WT 動手（真實案例：owning=main 的 backlog 卡被 warrant branch 的監控 session 結案——規則存在但住在對方不載入的檔案）
-- **Agent 檔案寫入紀律**（注入義務：agent 不自動載入本 rule，spawn 會寫檔的 agent 時主 session 須將此三條寫入 prompt）：
-  1. **禁 /tmp**——產出寫在自己當前工作目錄（repo/worktree）內（易丟、不可追溯、session 中斷即消失）
-  2. **寫不進指定路徑（跨 repo / worktree 隔離）→ 回報「環境限制：我寫不進 X」**，不自行妥協到 /tmp；交回主 session 決定
-  3. **暫時產物**（中間分析/草稿/POC 輸出——agent 暫存 `.agent-tmp/`，非 ep-validate poc/ 正式生命週期）→ 集中 repo 內暫存區；出口兩腿：①`post-build` 預設清（列 `.agent-tmp/` 清單→LLM 判→刪＋報，單 session 清）②夜間掃兜底（`.agent-tmp/` `mtime>7d`、`.at-contexts/` `mtime>7d`、`.review/` `mtime>30d`；時限緩衝非保存承諾）；`.at-contexts/` 僅收 `at-context-*`（handoff 交接走 `backlog --comment`）；新區門檻四條：語義最近區→四問有答→規則承載→掃腿覆蓋
+- **Agent 檔案寫入紀律**（注入義務：agent 不自動載入本 rule，spawn 會寫檔時主 session 須注入此三條）：
+  1. **禁 /tmp**——產出寫當前工作目錄（repo/worktree）內
+  2. **寫不進指定路徑（跨 repo / worktree 隔離）→ 回報「環境限制：我寫不進 X」**，不妥協到 /tmp
+  3. **暫時產物**（中間分析/草稿/POC——agent 暫存 `.agent-tmp/`）→ 集中 repo 內暫存區；出口：①`post-build` 預設清 ②夜間掃兜底（`.agent-tmp/`/`.at-contexts/` 7d、`.review/` 30d）
 
 **為什麼**：agent 跑很久才在末端因跨 repo 寫入被擋 → 前面 context 全浪費。回收責任放 spawn 端讓失敗收斂到 spawn 時刻（快失敗）。

@@ -36,16 +36,7 @@ harness-scope: neutral
 | L5 對抗性 POC | 刻意用髒資料 / 邊界 / 已知陷阱 | **AI 對邊界的盲區**(除權息、減資、NaN、時區、溢出) | 若 POC 標的也是 AI 挑,會潛意識避開自己盲區 | 🔴 高(數據完整性) |
 | L6 人類觀察 | 人在迴圈看真實輸出 / 畫面 / log | **需求誤解**(AI 正確實作了錯誤的理解) | 不會誤信 PASS,但會「看一眼就夠」 | 單向門決策 |
 
-**根本禁令**:用低層證據冒充高層驗收是核心錯誤 — 不是「測不夠多」,而是「用錯層的證據」。現有零散禁令統一解釋為這個原則的不同表現:
-
-| 既有禁令 | 冒充關係 |
-|--|--|
-| [must-execute](./must-execute-before-complete.md) 禁 ast.parse 取代執行 | L1 冒充 L4+ |
-| [quality-constraints](./quality-constraints.md) 禁隔離 unit test 宣稱功能完成 | L2 冒充 L3+ |
-| test-driven-development skill 警告過度 mock | L2 的獨立性被掏空 |
-| 消費端驗證模式(見 quality-constraints) | L3 的具體化 |
-
-L3 整合層正向實例（mock 抓不到的 source bug）、filter trap 重構查證義務：見 acceptance-evidence skill。
+**根本禁令**:用低層證據冒充高層驗收是核心錯誤——現有零散禁令（L1 冒充 L4+ 等）皆為此原則的表現（層級定義見上方證據階層表）；驗證深度順序見 [quality-constraints](./quality-constraints.md) 漸進式驗證、消費端驗證模式同檔，L3 正向實例與 filter trap 查證見 acceptance-evidence skill。
 
 ### 證據時效性
 
@@ -62,4 +53,4 @@ L3 整合層正向實例（mock 抓不到的 source bug）、filter trap 重構�
 
 ## 與既有規則的關係
 
-風險分級（ai-development-guide「驗證約束」段）決定爬到第幾層（🟢 低風險不需六層——避免過度工程是內建約束）；漸進驗證（[progressive-validation](./progressive-validation.md)）是 L1→L3 爬坡順序（DEPTH-MIN→SAMPLE→FULL）；消費端驗證模式（[quality-constraints](./quality-constraints.md)）是 L3 的具體化，本階層為它提供「為什麼」。階層降低風險、**不消除風險**——每一層都值得懷疑，包括最頂層（L6 人類觀察會疲勞漏見；L5 POC 可能打自己畫的靶）。
+風險分級（ai-development-guide「驗證約束」段）決定爬到第幾層（🟢 低風險不需六層——避免過度工程是內建約束）；漸進式驗證（[quality-constraints](./quality-constraints.md) 漸進式驗證（DEPTH-MIN→SAMPLE→FULL））是 L1→L3 爬坡順序；消費端驗證模式（[quality-constraints](./quality-constraints.md)）是 L3 的具體化，本階層為它提供「為什麼」。階層降低風險、**不消除風險**——每一層都值得懷疑，包括最頂層（L6 人類觀察會疲勞漏見；L5 POC 可能打自己畫的靶）。

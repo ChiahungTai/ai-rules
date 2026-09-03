@@ -38,7 +38,7 @@
 - **🟡 中等風險**（新功能、演算法優化、性能改進）→ 核心功能測試 + 經驗分析
 - **🟢 低風險**（樣式、文檔、配置）→ 至少執行一次確保無語法錯誤
 
-> 詳細執行規範見 [must-execute-before-complete.md](rules/must-execute-before-complete.md)；漸進式驗證見 [progressive-validation.md](rules/progressive-validation.md)
+> 詳細執行規範見 [must-execute-before-complete.md](rules/must-execute-before-complete.md)；漸進式驗證（DEPTH-MIN→FULL）見 [quality-constraints.md](rules/quality-constraints.md)
 
 ### 務實評估約束
 

@@ -64,7 +64,7 @@ allowed-tools: ["Read", "Bash"]
 | 2 | 覆蓋對稱性 | 本檔角度 2 判定流程（+ quality-constraints 符號 vs 路徑覆蓋） | Important |
 | 3 | Mock 健康度 | test-driven-development SKILL.md（Mock 階層） | Important |
 | 4 | 消費端驗證覆蓋 | acceptance-evidence L3 + quality-constraints 符號 vs 路徑覆蓋 | Important / Suggestion |
-| 5 | 漸進驗證合規 | progressive-validation DEPTH-MIN 集合 | Suggestion |
+| 5 | 漸進驗證合規 | quality-constraints 漸進式驗證（DEPTH-MIN 集合） | Suggestion |
 | 6 | 測試必要性 | acceptance-evidence 證據時效性 | Important / Suggestion |
 | 7 | 變異測試抽查（mutation-testing-lite） | acceptance-evidence L2 獨立性塌縮（機械量測面） | Critical（survived 真實缺口） |
 
@@ -190,7 +190,7 @@ allowed-tools: ["Read", "Bash"]
 | 無 DEPTH-MIN / smoke test marker | Suggestion | `tests/` 下無 `@pytest.mark.quick` / `@pytest.mark.smoke` 或對應 marker |
 | 全部測試都是慢速（無分層） | Suggestion | `pytest.ini` / `pyproject.toml` 無 marker 定義 |
 
-定義見 [progressive-validation](../../rules/progressive-validation.md)。
+定義見 [quality-constraints](../../rules/quality-constraints.md) 漸進式驗證（DEPTH-MIN→SAMPLE→FULL）。
 
 ### 角度 6：測試必要性
 
