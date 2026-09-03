@@ -68,7 +68,7 @@ git rev-parse HEAD            # baseline commit hash
 
 帶 `--save` → 交接內容寫入追蹤卡 `backlog task edit <id> --comment "<交接內容>"`（卡 `comments` 段，隨卡歸檔，board 可見；不另寫檔案）。
 
-> **有卡任務優先「卡即 handoff」**：卡 `desc`＋`notes`＋`references`＋`EP` 已 self-contained（見 [kanban-board](../kanban-board/SKILL.md)「卡即 handoff」），交接優先掛卡 `--comment`；原寫檔路徑已退場。
+> **有卡任務優先「卡即 handoff」**：卡 `desc`＋`notes`＋`references`＋`EP` 已 self-contained（見 [kanban-board](../kanban-board/SKILL.md)「卡即 handoff」），交接優先掛卡 `--comment`；原寫檔路徑已退場。**無追蹤卡**（跨 provider 一次性等）→ 不落檔，直接複製輸出貼給目標——`--save` 無標的可掛＝不適用。
 
 ---
 
@@ -78,7 +78,7 @@ git rev-parse HEAD            # baseline commit hash
 |------|------|
 | 接手方（可選）| `同repo` / `跨repo` / `跨provider`；省略則偵測或問 |
 | 任務描述（可選）| 交接的工作；省略則從當前對話推導 |
-| `--save` | 交接內容掛卡 `backlog task edit <id> --comment`（隨卡歸檔，不寫檔） |
+| `--save` | 有追蹤卡：交接內容掛卡 `--comment`（隨卡歸檔，不寫檔）；無卡＝不適用（直接複製輸出） |
 
 ## 執行約束
 
