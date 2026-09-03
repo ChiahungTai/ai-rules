@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>md preview</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--border:#30363d;--fg:#c9d1d9;--dim:#8b949e;--accent:#58a6ff}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;margin:0;padding:28px 40px}
+header{border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:20px}
+header .p{color:var(--dim);font-family:ui-monospace,Menlo,monospace;font-size:12.5px;word-break:break-all}
+h1{font-size:22px;margin:0 0 4px}
+article{max-width:1080px;line-height:1.75;font-size:14.5px}
+article h1{font-size:20px;border-bottom:1px solid var(--border);padding-bottom:6px}
+article h2{font-size:17px;color:var(--accent)}
+article h3{font-size:15px;color:var(--accent)}
+article code{background:#21262d;padding:1px 6px;border-radius:5px;font-size:13px;color:#79c0ff}
+article pre{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 18px;overflow-x:auto}
+article pre code{background:none;padding:0}
+article table{border-collapse:collapse;font-size:13px}
+article th,article td{border:1px solid var(--border);padding:6px 10px;text-align:left}
+article th{background:#1c2129}
+article blockquote{border-left:3px solid var(--border);margin-left:0;padding-left:14px;color:var(--dim)}
+article a{color:var(--accent)}
+.err{color:#f85149}
+</style>
+</head>
+<body>
+<header><h1>📝 markdown preview</h1><div class="p" id="path"></div></header>
+<article id="md">載入中…</article>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+const p = new URLSearchParams(location.search).get('p');
+document.getElementById('path').textContent = p || '（缺 ?p= 參數）';
+if (!p) { document.getElementById('md').innerHTML = '<p class="err">無 ?p= 參數</p>'; }
+else fetch(p)
+  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+  .then(t => {
+    const el = document.getElementById('md');
+    // fetch text() 依 spec 以 UTF-8 解碼（不受 response content-type charset 影響）
+    if (typeof marked === 'undefined') { el.style.whiteSpace = 'pre-wrap'; el.textContent = t; return; }  // 離線 fallback：原文（非亂碼）
+    el.innerHTML = marked.parse(t);
+    document.title = p.split('/').pop();
+    // mermaid：language-mermaid code blocks → 渲染圖（CDN 不在時 code block 原樣顯示）
+    if (typeof mermaid !== 'undefined') {
+      mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'strict' });
+      el.querySelectorAll('code.language-mermaid').forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'mermaid';
+        div.textContent = c.textContent;
+        (c.parentElement || c).replaceWith(div);
+      });
+      mermaid.run({ querySelector: '.mermaid' });
+    }
+  })
+  .catch(e => { document.getElementById('md').innerHTML = '<p class="err">載入失敗：' + p + '（' + e + '）</p>'; });
+</script>
+</body>
+</html>

@@ -60,6 +60,8 @@ findings 全空 → 報告並直接進 docs 鏈。
 
 ## 階段 5 — Report Shell refresh（hook 2——commit 前最後穩定點）
 
+**前置清理（第一腿，夜掃兜底）**：列 `.agent-tmp/` 清單（`ls .agent-tmp/`）→逐項 LLM 判「後續還用嗎」→用則保留（可 `touch` 保活）、不用當場刪＋清單入收尾報告；夜間 23:40 掃腿兜底（7 天）。
+
 本 EP 對應殼存在（任務家 `<task>/index.html`——execution-plan 定稿 hook 1 所建）時，在收尾鏈收斂後 refresh（掛點規格單一源見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」）：
 
 1. **實作章節生長**（同一殼的第二幕；內容＝殼規格「敘事骨架變體」實作完成報告列）：做了什麼（分組檔案地圖）／驗證證據（命令+exit code）／delta 前後對照（archify compare，有圖時）／認知誤差點＋回源連結——**反映修正迴圈後最終態**（排在階段 3 修正迴圈之後，正是為此）

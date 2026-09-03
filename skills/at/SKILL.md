@@ -66,6 +66,8 @@ project_path: "{當前專案路徑}"
 
 **寫 STATE.md**（session 結束）：若本 session 有轉向 / 卡點觀察，寫 repo root `STATE.md` 補「為什麼」（覆寫非累積；步驟見 [state-md-write](../_common/state-md-write.md)）。`.at-contexts` 維持一次性 ephemeral lifecycle（排程時建立 → resume 後刪、gitignore），STATE.md 是持久觀察層——**兩者不取代**（不同 lifecycle，不可混溶）。
 
+> **本區現況**：`.at-contexts/` 只剩 `at-context-*`（`handoff --save` 寫檔已退場，交接改 `backlog --comment` 掛卡）；`at-context-*` resume 後刪維持，夜間掃 7 天兜底（見 rule 協作約束）。
+
 ### Phase 3：建立 CronCreate
 
 呼叫 `CronCreate`：

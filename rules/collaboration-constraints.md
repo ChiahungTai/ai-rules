@@ -86,6 +86,6 @@ harness-scope: neutral
 - **Agent 檔案寫入紀律**（注入義務：agent 不自動載入本 rule，spawn 會寫檔的 agent 時主 session 須將此三條寫入 prompt）：
   1. **禁 /tmp**——產出寫在自己當前工作目錄（repo/worktree）內（易丟、不可追溯、session 中斷即消失）
   2. **寫不進指定路徑（跨 repo / worktree 隔離）→ 回報「環境限制：我寫不進 X」**，不自行妥協到 /tmp；交回主 session 決定
-  3. **暫時產物**（中間分析/草稿/POC 輸出——agent 暫存 `.agent-tmp/`，非 ep-validate poc/ 正式生命週期）→ 集中 repo 內暫存區：互動模式完成時列清單詢問保留/刪除；autonomous / deep-work 集中到 `.agent-tmp/`（repo 內，各專案須加入 `.gitignore`），最終報告列清單使用者事後處理
+  3. **暫時產物**（中間分析/草稿/POC 輸出——agent 暫存 `.agent-tmp/`，非 ep-validate poc/ 正式生命週期）→ 集中 repo 內暫存區；出口兩腿：①`post-build` 預設清（列 `.agent-tmp/` 清單→LLM 判→刪＋報，單 session 清）②夜間掃兜底（`.agent-tmp/` `mtime>7d`、`.at-contexts/` `mtime>7d`、`.review/` `mtime>30d`；時限緩衝非保存承諾）；`.at-contexts/` 僅收 `at-context-*`（handoff 交接走 `backlog --comment`）；新區門檻四條：語義最近區→四問有答→規則承載→掃腿覆蓋
 
 **為什麼**：agent 跑很久才在末端因跨 repo 寫入被擋 → 前面 context 全浪費。回收責任放 spawn 端讓失敗收斂到 spawn 時刻（快失敗）。

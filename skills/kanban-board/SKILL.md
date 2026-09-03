@@ -27,16 +27,23 @@ backlog init "<project>" --agent-instructions none
 backlog task create "<標題>" -l <labels> -d <目標一句> [--ac "<驗收條件>"]
 git add backlog/    # 建卡即 staged（autoCommit=false 下 CLI 不 commit）
 ```
+**建卡 desc gate**（跨 session To Do 卡必過；session 內即辦豁免）：`desc` 須含三必有——①`baseline`（`〔baseline：<repo> <hash>〕`）②`已決策勿重辯`（`〔已決策勿重辯：①…〕`）③`驗收`（`〔驗收：…〕`）；語義在場即可，標記形式不限。軟自查：`rg -c "baseline|已決策|驗收" backlog/tasks/<卡>.md` 應 ≥3（豁免卡除外）。
+
 **建卡前去重**（中）：`backlog search <關鍵詞>` + 查 `ai-analysis/_inbox/pending-decisions.md`（與同域 `open-items.md`；例：mosaic 側 `marking/open-items.md`）待處理段，命中則復用/連結既有指針，不重複承諾（一行指針 ≠ 承諾，`backlog` 卡 = 承諾）。
 
-**開工**（凡要動某卡的 session——implement 階段 1 是標準入口；automation／監控／report 等衍生 session 不走 implement 亦同）：
+**開工——起手式五步**（凡要動某卡的 session——implement 階段 1 是標準入口；automation／監控／report 等衍生 session 不走 implement 亦同）：
 ```bash
-backlog task edit <id> -s "In Progress"   # 🔴 必是動卡的第一個動作——卡掛 To Do 度過工作期間＝平行 session 眼中可清項
+# ① 第一動——平行 session 可見
+backlog task edit <id> -s "In Progress"   # 🔴 必是動卡的第一個動作
+# ② 讀卡三層：frontmatter → desc → notes → references
+# ③ 讀卡知形態：references 有無 EP——承諾時已定（不重判）；scope 遠超 desc → 先升 EP 再動工
+# ④ 新鮮度核對：desc baseline vs `git log --oneline <baseline>..HEAD` 非空→對照 desc 範圍；notes relay 宣稱→機械驗證當前狀態
+# ⑤ 開工雙 ref
 backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 ```
 
 **🔴 雙 ref 內建合約**：references 只對 http(s) 前綴渲染可點連結（`TaskDetailsModal.tsx:1362-1375`）——**相對路徑單獨出現＝board 上不可點＝錯誤形態**。兩值都要掛：
-- `http URL`＝report server 上的 Report Shell／md preview 位址（**repo 慣例**——如 mosaic `http://127.0.0.1:6421/<wt>/<任務路徑>/index.html`；殼未建前的過渡形態指 md viewer `/_md-viewer.html?p=/<route>/<任務路徑>/ep.md`；hook 1 建殼後更新為殼 URL）
+- `http URL`＝report server 上的 Report Shell／md preview 位址（**repo 慣例**——如 mosaic `http://127.0.0.1:6421/<wt>/<任務路徑>/index.html`；殼未建前的過渡形態指中央 md viewer `http://127.0.0.1:6421/viewer/_md-viewer.html?p=/<route>/<任務路徑>/ep.md`——**viewer 單一源**版控於 ai-rules `report-assets/`，`fetch(?p=)` 同源絕對路徑可渲染任一 route 的 md，raw `.md` 直連永遠是原檔；hook 1 建殼後更新為殼 URL）
 - `repo 相對路徑`＝AI session／VSCode 消費形態
 
 **結案兩步**（build 5a / post-build；URL 生命週期隨任務目錄遷 `done/` 變更）：
@@ -67,6 +74,10 @@ bash <skills 根>/kanban-board/scripts/backlog_precheck.sh [卡id ...]   # skill
 - 起手式：`backlog draft list --plain` 巡 `drafts` → `backlog draft view DRAFT-x --plain` 看內容 → `backlog draft promote DRAFT-x` 回 `backlog/tasks`（遠期如 `ECPPE` 可先記 `ai-analysis/_projects/<線>/open-items.md` 一行指針，熬到可開工才 `task create`，避免先佔承諾池）
 
 **註記追加**（消費場景等）：`backlog task edit <id> --append-notes "<文字>"`
+
+## 卡即 handoff（卡拼裝＝self-contained）
+
+卡 `desc`＋`notes`＋`references`＋`EP`（若有）四件拼裝即 handoff——接手 session 讀卡即接手，不重辯已定事。分工：`desc`=決策層（baseline／已決策勿重辯／範圍／驗收，不變共識）／`EP`=規劃層（怎麼做）／`notes`=留言層（接手指針，過程不沉澱）。兩層判定承諾時已定（見 [execution-plan](../execution-plan/SKILL.md) 規模分級，不新造）：small 不建 EP 直行、standard+ 建 EP。決策層變更（scope／驗收校準）→同步回寫卡 `desc`。
 
 ## UI 入口
 

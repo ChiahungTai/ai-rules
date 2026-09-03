@@ -83,7 +83,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
    - **自動建卡**（EP 產出後執行）：
      1. 收集 EP 中所有「新增 UC」（UC 盤點 → 新增 UC 表格中的 📋 項目）
      2. 對照既有卡，篩出**缺少卡的能力**（已含去重命中 → 跳過）
-     3. 逐能力 `backlog task create "<標題>" -l <labels> -d <目標一句>`；為 EP 整體另建一張追蹤卡（命令合約與**開工雙 ref 規則**見 [kanban-board](../kanban-board/SKILL.md)——卡 references 必須同時掛 http URL＋repo 相對路徑，相對路徑單獨出現＝board 上不可點＝錯誤形態）
+     3. 逐能力 `backlog task create "<標題>" -l <labels> -d "<目標一句>（蒸餾自 EP 總覽：baseline／已決策勿重辯／驗收——desc gate 三必有，見 [kanban-board](../kanban-board/SKILL.md)）"`；為 EP 整體另建一張追蹤卡（命令合約與**開工雙 ref 規則**見 [kanban-board](../kanban-board/SKILL.md)——卡 references 必須同時掛 http URL＋repo 相對路徑，相對路徑單獨出現＝board 上不可點＝錯誤形態）
      4. **建卡後即 `git add backlog/`**（卡隨第一顆 commit 帶走——CLI `autoCommit=false` 下只改檔不 commit；add 是 staging 非 commit，不觸 outward-action-consent）
    - 無 `backlog/` 目錄時：提醒 user `backlog init --agent-instructions none`（**禁**再教 `mkdir .kanban/`——`.kanban/` 舊制已退役；`--agent-instructions none` 避免注入與本 repo AGENTS.md 治理衝突的 CRITICAL_INSTRUCTION 區塊）；repo 不採 board 制 → 卡片動作整項跳過
 
@@ -347,7 +347,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 ### 主 LLM — Apply Changes
 
-根據 judge-review 的 ✅ 採納清單修正 EP。**修正必須寫入 EP 段落本身**（加入 EP review 區段表格，格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md) Finding Record），不是只記在審查報告裡。build 可能由不同 LLM session 執行，看不到審查報告。
+根據 judge-review 的 ✅ 採納清單修正 EP。**修正必須寫入 EP 段落本身**（加入 EP review 區段表格，格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md) Finding Record），不是只記在審查報告裡。build 可能由不同 LLM session 執行，看不到審查報告。**F-1 型 findings（scope／驗收校準）屬決策層變更 → 同步回寫追蹤卡 `desc`（見 [kanban-board](../kanban-board/SKILL.md)「卡即 handoff」）。**
 
 ### 定稿交付：生成 task brief（人類 viewport）
 

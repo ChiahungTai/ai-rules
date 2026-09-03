@@ -151,7 +151,7 @@ AIR-13（To Do 等待型，desc 裝裁決＋批次清單、規劃層薄）為 sm
      # http URL＝board 可點連結（ai-rules 形態見下）；相對路徑＝AI/VSCode 消費
 ```
 
-ai-rules report URL 形態（實測 2026-09-03）：`http://127.0.0.1:6421/ai-rules/<相對於 ai-analysis/ 的路徑>`——route root 即 `ai-analysis/` 內容，URL **不含** `ai-analysis/` 段。例：`ai-rules/_tasks/09-03-backlog-governance-design/ep.md` 實測 200；保留 `ai-analysis/` 前綴形態實測 404；`_md-viewer.html` 僅在 mosaic route，ai-rules 直連 raw md。
+ai-rules report URL 形態（實測 2026-09-03；晚間二次修訂）：`http://127.0.0.1:6421/ai-rules/<相對於 ai-analysis/ 的路徑>`——route root 即 `ai-analysis/` 內容，URL **不含** `ai-analysis/` 段。例：`ai-rules/_tasks/09-03-backlog-governance-design/ep.md` 實測 200；保留 `ai-analysis/` 前綴形態實測 404。md preview＝**中央掛載**（2026-09-03 晚定案，選項②）：viewer 單一源版控於 `report-assets/_md-viewer.html`、report server 掛 `viewer=` route——preview URL 形態 `http://127.0.0.1:6421/viewer/_md-viewer.html?p=/<route>/<相對於該 route root 的路徑>`（viewer `fetch(?p=)` 同源絕對路徑，可渲染任一 route 的 md；per-route 副本不新增）。卡的 http ref 過渡形態用此 viewer URL，殼建好後換殼 URL。
 
 ### 2.7 EP 修訂的 desc 同步義務
 
