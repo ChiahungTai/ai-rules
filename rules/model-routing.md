@@ -35,7 +35,7 @@ subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什�
 | 實作（implementation） | muse | implement | 主力 implementation loop 承接 |
 | external second-opinion review | muse | review | 獨立第二意見，與 in-harness 驗收審查職責分離（見下） |
 | in-harness acceptance reviewer | GLM | — | 驗收委派工單的主審（Writer/Reviewer 分離的 in-harness 側） |
-| 診斷 rescue | codex | implement | 環境診斷與救援 |
+| 診斷 rescue | codex | implement | ad-hoc 選項（想到再用、低頻）；context 小＋消耗快禁大工單 |
 | advisory 掃描 | muse | advisory | 唯讀掃描、盤點 |
 | 機械驗證／探索 | GLM | lite | 機械查證、探索（沿用 tier→lite 路由） |
 | 視覺驗收 | GLM | vision | 預設路由；muse 具視覺能力為跨家族備選 |

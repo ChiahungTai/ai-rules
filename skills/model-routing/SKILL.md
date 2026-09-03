@@ -29,7 +29,7 @@ description: Model routing 深層載體 — tier→(model,effort) 解析表（ZC
 | family | model | effort | 容量現值 | 備註 |
 |--------|-------|--------|----------|------|
 | muse | `muse-spark-1.2` | `medium`（implement／`high` 若 advisory 掃描粗） | 長 context（以 provider dashboard 為準） | 具視覺輸入 `--image`，跨家族備選；advisory／implement／review 共用此 family |
-| codex | `gpt-5.3-codex-spark` | `medium` | 約 200K（以 provider 為準，禁大工單；大 context 任務改派 muse） | 診斷 rescue／implement；小容量家族禁派大工單（見 rule） |
+| codex | `gpt-5.3-codex-spark` | `medium` | 約 200K（以 provider 為準，禁大工單；大 context 任務改派 muse） | ad-hoc 選項（想到再用、低頻）；context 小＋消耗快禁大工單（見 rule） |
 | GLM（in-harness） | 見 tier 表 | 見 tier 表 | 高（遠高於 200K 級，見 provider dashboard） | 沿用 tier→lite／vision 路由，不經 external-runtime 派發；in-harness acceptance reviewer 屬此 |
 
 > 容量為「需現況查證」性質，隨 model 世代更新只改本表。

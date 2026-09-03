@@ -43,6 +43,10 @@ harness-scope: neutral
 
 ---
 
+## git pathspec 陷阱
+
+git pathspec 命令（`ls-files`/`log`/`status`/`diff`）一律從 repo root 跑——目錄內執行會 CWD-relative 解析成巢狀不存在路徑**靜默回空**（誤判 untracked／無歷史）；staging 已消失目錄禁 trailing slash（`dir` 可 stage、`dir/` fatal）；`fatal` 短路 `&&` 鏈但 `;` 段照跑——批次 staging 後必看 `git diff --cached --stat` 勿信命令鏈跑完。
+
 ## 盤點執行點：間接層與直呼層雙掃
 
 盤點執行點雙掃（間接層 make target/wrapper 引用＋直呼層 raw command——CI 跑哪些測試、哪些入口呼叫某工具、cutover 影響域的完整性盤點）見 acceptance-evidence skill「盤點執行點雙掃」章。

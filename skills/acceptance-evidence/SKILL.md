@@ -1,6 +1,6 @@
 ---
 name: acceptance-evidence
-description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限、Intent Drift Type A/B、filter trap 重構查證義務、L3 整合測試實例、Runtime Invariant Assurance、B 軸人類驗收層演進、盤點執行點雙掃（間接層＋直呼層）。always-on 核心（L1-L6 階層表、證據獨立性、Claim→Evidence）在 rules/acceptance-evidence.md；審查/規劃/測試策略需要深層論證或失敗案例時載入。觸發詞：證據階層、L3、整合測試、filter trap、runtime invariant、intent drift、B 軸、人類驗收、認知誤差、EP 預見極限、盤點執行點、誰呼叫、影響域、CI 執行點、雙掃。
+description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限、Intent Drift Type A/B、filter trap 重構查證義務、L3 整合測試實例、Runtime Invariant Assurance、B 軸人類驗收層演進、盤點執行點雙掃（間接層＋直呼層）、抽樣推廣與全量對帳。always-on 核心（L1-L6 階層表、證據獨立性、Claim→Evidence）在 rules/acceptance-evidence.md；審查/規劃/測試策略需要深層論證或失敗案例時載入。觸發詞：證據階層、L3、整合測試、filter trap、runtime invariant、intent drift、B 軸、人類驗收、認知誤差、EP 預見極限、盤點執行點、誰呼叫、影響域、CI 執行點、雙掃、抽樣、全量對帳、樣本選擇。
 ---
 
 # Acceptance Evidence — 驗收證據深層理論
@@ -24,6 +24,10 @@ description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限�
 | 直呼層 | X 本體直呼 | `rg -e pytest -e "uv run" Makefile scripts/ deploy/ .github/workflows/` |
 
 **反例（真實案例）**：判定「哪些 gate 擋 merge/release」只掃 CI workflow 的 make 引用——漏掉 build.yml **直呼**的 `uv run pytest`（Python 測試唯一落點、非 make target）；rg 間接層有 hits ≠ 執行點清單完整。同 family：head 截斷（modern-cli-preference 統計禁 head 段）、toplevel-only import 漏 local import（lsp-navigation rule）——pattern coverage blind spot 的不同載體。高風險場景（一次性儀式/稽核）把兩層掃法命令寫死在執行清單，不依賴 session 記得。
+
+## 抽樣推廣與全量對帳（樣本選擇機制）
+
+抽樣結論寫母體假設前自問『樣本怎麼選的？選擇機制會不會正好偏一邊？』；主儲存／退役／範圍類設計判斷先全量機械對帳，不靠抽樣推廣（實例：3 檔樣本恰是全市場僅有的例外擁有者）；user 對系統行為的歷史印象值得查 log 基線（AI 的『一直以來都這樣』常只看近窗）。
 
 ## 認知誤差與 EP 的預見極限
 

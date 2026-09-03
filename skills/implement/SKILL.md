@@ -282,6 +282,8 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 ### 階段 6：完成報告
 
+> **誠實盤點**：效能／成本宣稱分列『上界估計』vs『現行實測』（沒跑過的路徑不得當現況宣稱）；工具／流程投資附退役地圖（取代了什麼、哪些變便宜）；『無優勢』也是要報的結果。
+
 輸出：實作結果（新增/修改檔案）+ 架構決策記錄 + 待確認清單 + 未解決問題 + Agent 統計（平行模式）+ Agent Review 結果摘要 + **EP 對照（宣稱 vs 實際差異歸納，見下段）** + 能力狀態變更摘要 + SYSTEM-MAP 功能狀態變更 + architecture.md 設計變更（若有）+ /consistency 導航文檔結果 + /audit-test 稽核結果 + **全量測試結果（命令 + exit code + 通過計數；階段 3 完成閘門，必填）**
 
 **EP 對照（宣稱 vs 實際差異歸納——主歸納點在此，post-build 只再提醒）**：build 現場是差異最清楚的時點（post-build/debrief 只能事後推導），兩個來源缺一不可——① **偏差記錄歸納（why）**：階段 2「EP 專屬約束」逐段累積的偏差（與 Pseudo Code 出入、疑慮、自癒 ⚠️）統一歸納，差異原因只在 build session 記得；② **機械對照（what）**：弧條件成立（HEAD 越過 EP baseline）時跑 `code-reality delta_tour`（呼叫形態與時點條件真相源見 [code-review](../code-review/SKILL.md) 模式 B；未裝/條件不符 → 標明降級）——session 歸納是 self-report，機械對照反證之（Claim→Evidence→Trust，見 [acceptance-evidence](../../rules/acceptance-evidence.md)）。歸納供 `/post-build` 收尾報告帶入與人類直接判讀；深度渲染（邊集差異+行為 delta）屬 `/debrief`。

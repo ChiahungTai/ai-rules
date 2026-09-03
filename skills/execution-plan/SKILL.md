@@ -167,6 +167,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 3. **類似實作**：LSP `workspaceSymbol` 搜尋相似名稱的 class/function，rg 補充搜尋字串和註解
 4. **風險假設識別**：列出高風險技術假設（外部 API、SDK 行為、架構假設），標注由哪個段落的驗證策略 POC 驗證（吸收舊 `/spec` Phase 3 前期 POC 職責）
    - **致命先驗**：標注為「致命」等級的假設（假設錯了整個 EP 要重寫，等級定義見 [/ep-validate](../ep-validate/SKILL.md)）—— 先跑 `poc/poc_*.py` 驗證可行性再繼續設計段落，避免寫完整 EP 才發現方向死掉；高等級與中等級保留在各段落驗證策略
+   - **框架行為 bug**：渲染／race／client-server 狀態同步類根因假設常錯——規劃層禁寫死修法，根因標『推測，需 L4/POC 驗證』、修法段標『待確認根因』（純邏輯 bug 才可規劃層寫死）
 
 **產出研究摘要**（放在 EP top-level，段落之前）：
 - 可複用基礎設施清單（附 `ClassName`，路徑選用）

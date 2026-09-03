@@ -1,6 +1,6 @@
 ---
 name: arch-thinking
-description: 架構設計、clean architecture、分層依賴、bounded context、use case 驅動、DDD、SOLID、依賴方向、模組邊界、city map、dep weight、Pattern Radar、重用枚舉、Jaccard、domain grounding、結構 viewport、結構查證、LSP 查證、反向耦合、補償邏輯（compensating pair）、挖東牆補西牆、double-count、共用層外溢時使用。提供 Clean Architecture + DDD 設計視角（domain←use case←adapter←infra 分層、bounded context、use case 驅動檢視整體結構）+ 結構機械能力（City Map 資料/dep weight/Pattern Radar 重用枚舉/domain grounding/LSP 查證/lean-heavy），用於 spec/EP/implement/review 的設計決策與結構審查。視角非模板。
+description: 架構設計、clean architecture、分層依賴、bounded context、use case 驅動、DDD、SOLID、依賴方向、模組邊界、city map、dep weight、Pattern Radar、重用枚舉、Jaccard、domain grounding、結構 viewport、結構查證、LSP 查證、反向耦合、補償邏輯（compensating pair）、挖東牆補西牆、double-count、共用層外溢、先查既有、注入先例、自命發明時使用。提供 Clean Architecture + DDD 設計視角（domain←use case←adapter←infra 分層、bounded context、use case 驅動檢視整體結構）+ 結構機械能力（City Map 資料/dep weight/Pattern Radar 重用枚舉/domain grounding/LSP 查證/lean-heavy），用於 spec/EP/implement/review 的設計決策與結構審查。視角非模板。
 ---
 
 # Architecture Thinking — Clean Architecture + DDD 視角 + 結構機械
@@ -181,6 +181,10 @@ code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠beha
 **與 ripple 的差異**：ripple 追「A 變 → 依賴 A 的 B 壞嗎」（單向，`findReferences` 可撈）；補償是「B 依賴 A 的 bug」（非引用關係，需主動反向搜訊號）。
 
 > 真實歷史案例：修「漏算 SHORT proceeds」的 compute 函式（缺陷 A）沒拆上游 sizing 函式裡手動 `+ proceeds` 的補丁（B）→ proceeds 算兩次 → baseline 虛高 → 風控 breaker 永不觸發。`findReferences(A)` 不會帶到 B（B 不引用 A，B 抵消的是 A 的 bug）。
+
+### 先查既有同類機制（防自命發明）
+
+設計任何注入／fallback／provider／reader 機制前，查證廣度＝定義處＋消費端慣例＋模組 AGENTS.md 設計宣稱三查——先查既有同類 reader 與注入先例，只查定義處會精確繞過既有介面（LLM 傾向自命發明新機制）。
 
 ### 變更路徑計數（mutation-path counting）
 

@@ -43,6 +43,8 @@ harness-scope: neutral
 
 - 禁止 `sed` 修改 `.py`/`.md`/`.yaml`/`.json`/`.toml`（sed 不理解程式碼或 Markdown 語法，批次替換常破壞縮排、誤改字串/註解、毀損多行結構）
 - sed 唯一允許用途：過濾日誌輸出、處理純文字資料流（不修改原始檔）
+- **共享檔案 Edit 邊界**：多 session 並行寫入檔 Edit 前先 rg 定位自己行的唯一錨點——old_string 誤包他人行＝靜默刪除他人內容（搬移拆兩個精準 Edit、編後重讀對照行數）；old_string 連續兩次 not found＝context 渲染與實際 bytes 有出入——改以 python repr 讀目標行重組，禁第三盲重試。
+
 - **Edit/Write 前目標檔必須已 Read**（harness 硬規則）：未 Read 直接改 = 工具失敗；Read 後檔案又被外部改（linter/hook/另 session）= 過時失敗 → re-Read 再改。批次修改前把目標檔 Read 放同批前置（真實案例：五天實測 142 次 Edit 失敗，其中 120 次是「未 Read 先改」48 次 + 「Read 過時」72 次）
 
 ## 背景執行（不阻塞對話）
