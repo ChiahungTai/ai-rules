@@ -1,12 +1,24 @@
 #!/usr/bin/env python3
 # MEMORY.md 索引 generator——條目檔 frontmatter 是單一 source，索引是其機械投影。
 # 用法: python3 _generate_index.py [--check]（--check 只驗證不寫入、零檔案系統副作用）
-# Gate: 產物 >18,500 字元、>24,000 bytes 或 >190 行 → fail-loud exit 1（不寫入）。
-# 單位實證：harness 載入限「前 200 行或 25KB」（24.4KiB≈24,985，chars/bytes 兩讀同值），
-# 雙 harness 實證以 chars 計（2026-08-30：42,110 chars/56,604 bytes 檔案報「41KB over
-# 24.4KB」——41K 只能對上 chars；ZCode session 警示 26.4K chars 同口徑）；
-# bytes 維度是對「以 bytes 計」讀法的縱深防禦。寫入用 unique tmp（os.getpid()）
-# ＋只清 aged（>60s）殘檔——並行 process 的 in-flight tmp 不被誤殺。
+# Gate 分級（2026-09-03 裁決「zcode 優先」——ZCode 為主力 harness）：
+#   硬 gate（fail-loud exit 1、不寫入、Stop hook 留 _regen-failed）：>18,500 字元 或 >190 行
+#     ——守兩端共同截斷線（200 行／25,000 字元）
+#   bytes info（照常寫入、exit 0）：>24,000 bytes 印 [INFO] 一行——縱深預警
+#     （非任何 harness 的實際截斷線：兩端皆量 chars；CJK 一字 3B，bytes 提前折射）
+# 載入上限實證（2026-09-03 雙端源碼反組譯、CLI 三版同構；共用池＝ZCode symlink→Claude 實體）：
+#   兩端同語義＝200 行 或 25,000 字元（UTF-16 code units，CJK 一字計 1）：
+#     ZCode zcode.cjs：Vut=200／mre=25e3（Wut()：o=t.length 比較）
+#     Claude versions/<v>：YD=200／GF=25000（mLe() 回傳 byteCount:t.length——
+#       欄位名叫 byteCount、計量是 .length＝chars；TextEncoder 在另一 scope 屬
+#       crypto——欄位名≠計量方式，minified 跨 scope 撞名勿再誤讀）
+#   兩端超限皆截斷＋附 WARNING（非靜默）；「25KB」假象＝警告以 25000/1024 顯示 "24.4KB"
+#   重跑驗證（drift 防護——量詞須彈性：常數前綴不足 100 字元，.{100} 會 0 hits）：
+#     rg -a -o '.{30}mre=[0-9*]+.{30}' /Applications/ZCode.app/Contents/Resources/glm/zcode.cjs
+#     rg -a -o '.{0,100}YD=200,GF=25000.{0,60}' ~/.local/share/claude/versions/<最新版>
+#     計量實作：perl -0777 -ne 'if (/(function mLe\(e\)\{.{0,300})/s){my $x=$1;$x=~s/\n/\\n/g;print "$x\n"}' <該版檔>
+# 寫入用 unique tmp（os.getpid()）＋只清 aged（>60s）殘檔——並行 process 的 in-flight
+# tmp 不被誤殺。
 # 2026-09-01 chars gate 17,000→18,500（harness 線內 ~25% 餘裕）：寫入治理
 # hook 上線（block-memory-index-write.py 擋 desc>120/膨脹>12,000）後流入率
 # 下降，原 17,000 餘裕（~700）只撐一天（08-31 晚 16,308 → 隔晨 17,269 撞線）。
@@ -91,15 +103,22 @@ def main() -> int:
     content = "\n".join(lines).rstrip() + "\n"
     n_chars, n_lines = len(content), content.count("\n")
     n_bytes = len(content.encode("utf-8"))
-    if n_chars > GATE_CHARS or n_lines > GATE_LINES or n_bytes > GATE_BYTES:
+    info = (
+        f"[INFO] bytes {n_bytes} > {GATE_BYTES} — 縱深預警（兩端截斷線皆 25,000 chars；CJK 一字 3B，bytes 提前折射）\n"
+        if n_bytes > GATE_BYTES
+        else ""
+    )
+    if n_chars > GATE_CHARS or n_lines > GATE_LINES:
         print(
-            f"[FAIL] gate 超限: {n_chars} chars (>{GATE_CHARS}) / {n_bytes} bytes"
-            f" (>{GATE_BYTES}) / {n_lines} lines (>{GATE_LINES})——先 cluster merge/收斂再生成"
+            info
+            + f"[FAIL] gate 超限: {n_chars} chars (>{GATE_CHARS}) / {n_lines} lines"
+            f" (>{GATE_LINES})——先 cluster merge/收斂再生成"
         )
         return 1
     if check_only:
         print(
-            f"[OK] {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines（--check 未寫入）"
+            info
+            + f"[OK] {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines（--check 未寫入）"
         )
         return 0
     # 只清 aged 殘檔（>60s）——不碰並行 process 的 in-flight tmp；--check 分支已 return
@@ -114,7 +133,8 @@ def main() -> int:
     tmp.write_text(content, encoding="utf-8")
     tmp.replace(here / "MEMORY.md")
     print(
-        f"[OK] MEMORY.md 已重生成: {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines"
+        info
+        + f"[OK] MEMORY.md 已重生成: {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines"
     )
     return 0
 

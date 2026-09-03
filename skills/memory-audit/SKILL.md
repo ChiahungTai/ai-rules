@@ -7,7 +7,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 # /memory-audit — auto memory 兩級稽核 + 增量核實 + 專案狀態戳
 
-> **適用載體**：Claude Code / ZCode auto memory——per-project memory 目錄（`MEMORY.md` 索引 + 各條目 .md；session 啟動只載索引前「200 行或 25KB 先到為準」，**超限的尾端條目靜默不載入**）。ZCode memory 目錄是 symlink → Claude `projects/<project>/memory`，兩端單一真相。memory 跟專案/repo 走：稽核與狀態戳 per-project，跨 worktree 同一份不重複稽核。
+> **適用載體**：Claude Code / ZCode auto memory——per-project memory 目錄（`MEMORY.md` 索引 + 各條目 .md；session 啟動只載索引，超限截斷——**兩端皆 200 行或 25,000 字元（UTF-16，CJK 一字計 1）** 先到為準，截斷附 WARNING、尾端條目不載；「25KB」是警告訊息以 KB 顯示的假象）。ZCode memory 目錄是 symlink → Claude `projects/<project>/memory`，兩端單一真相。memory 跟專案/repo 走：稽核與狀態戳 per-project，跨 worktree 同一份不重複稽核。
 
 ## 🔴 反模式警示（最前，必讀）
 
@@ -30,11 +30,11 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 ### 層 1：索引機械量測
 
-> **generator 池**（memory dir 有 `_generate_index.py`）：索引是 frontmatter 投影，重複/orphan/missing 由生成保證不存在——層 1 縮為 `python3 memory/_generate_index.py --check`（gate 18,500 字元/24,000 bytes/190 行 fail-loud——雙單位防 harness chars/bytes 兩種上限讀法）＋確認 MEMORY.md 非手寫。寫入端另有 PreToolUse hook 治理（`block-memory-index-write.py`：description >120 chars 或條目膨脹 >12,000 chars 硬擋、收斂方向放行）——hook 是流入節流第一道，audit 是存量收斂；**hook 僅攔主 session——subagent 寫入不觸發**（ZCode 實證），寫入型 subagent 的上限＝prompt 紀律。資產源：ai-rules repo `skills/memory-audit/scripts/generate_index.py`（部署 = 複製進各專案 memory dir；Stop hook 自動重生成、PreToolUse hook 擋手寫）；副本新鮮度＝層 1 先 `cmp` 部署副本與資產源（stale 先 cp＋mv 原子刷新再 `--check`——Stop hook 對不符副本跳過執行）；`memory/_regen-failed` 標記存在＝regen 失敗待修（Stop stdout 不進模型 context 的可見錨點）。下表全量手檢僅適用未裝 generator 的池。數值調和：下表「<25,000 bytes」＝未裝池軟目標；24,000 bytes＝generator 池硬 gate——單一硬數值源在 generator 註解；120/12,000 單一源＝hook `DESC_LIMIT`/`BODY_LIMIT`（generator `TRUNCATE_DESC` 對齊，`tests/test_memory_lifecycle.py` cross-layer 錨）。
+> **generator 池**（memory dir 有 `_generate_index.py`）：索引是 frontmatter 投影，重複/orphan/missing 由生成保證不存在——層 1 縮為 `python3 memory/_generate_index.py --check`（硬 gate 18,500 字元/190 行 fail-loud 守兩端共同截斷線〔200 行／25,000 字元〕；bytes >24,000 降為 `[INFO]` 縱深預警不擋寫入——兩端截斷線皆量 chars，CJK 一字 3B、bytes 提前折射；源碼實證與重跑命令見 generator 註解）＋確認 MEMORY.md 非手寫。寫入端另有 PreToolUse hook 治理（`block-memory-index-write.py`：description >120 chars 或條目膨脹 >12,000 chars 硬擋、收斂方向放行）——hook 是流入節流第一道，audit 是存量收斂；**hook 僅攔主 session——subagent 寫入不觸發**（ZCode 實證），寫入型 subagent 的上限＝prompt 紀律。資產源：ai-rules repo `skills/memory-audit/scripts/generate_index.py`（部署 = 複製進各專案 memory dir；Stop hook 自動重生成、PreToolUse hook 擋手寫）；副本新鮮度＝層 1 先 `cmp` 部署副本與資產源（stale 先 cp＋mv 原子刷新再 `--check`——Stop hook 對不符副本跳過執行）；`memory/_regen-failed` 標記存在＝regen 失敗待修（Stop stdout 不進模型 context 的可見錨點）。下表全量手檢僅適用未裝 generator 的池。數值調和：下表「≤24,000 bytes」＝兩型池共用 bytes 目標（generator 池＝info 縱深預警線、未裝池＝手檢目標）——單一數值源在 generator 註解；120/12,000 單一源＝hook `DESC_LIMIT`/`BODY_LIMIT`（generator `TRUNCATE_DESC` 對齊，`tests/test_memory_lifecycle.py` cross-layer 錨）。
 
 | 檢查 | 命令 | 判準 |
 |------|------|------|
-| 索引預算 | `wc -l MEMORY.md` / `wc -c MEMORY.md` | 載入上限「前 200 行或 25KB 先到為準」；超限=尾端條目靜默不載。**目標 <25,000 bytes**（兩種 KB 解讀都安全）＋ **行數軟上限 150**（逼近=合併建議觸發；預設值可在 `_audit-state.md` per-project 覆寫）。寫入端預算：frontmatter `description` ≤100 chars（hook >120 硬擋）、條目檔（含 frontmatter）≤12,000 chars（膨脹方向 hook 擋、收斂放行） |
+| 索引預算 | `wc -l MEMORY.md` / `wc -c MEMORY.md` | 載入上限＝200 行或 25,000 字元（UTF-16，兩端同語義）先到為準，超限截斷（附 WARNING，尾端條目不載）。**bytes ≤24,000＝縱深預警線（與 generator info 同源）**＋ **行數軟上限 150**（逼近=合併建議觸發；預設值可在 `_audit-state.md` per-project 覆寫）。寫入端預算：frontmatter `description` ≤100 chars（hook >120 硬擋）、條目檔（含 frontmatter）≤12,000 chars（膨脹方向 hook 擋、收斂放行） |
 | 索引重複 | `rg -o '\]\(([^)]+)\)' -r '$1' MEMORY.md \| sort \| uniq -d` | 0 輸出 |
 | orphan（有檔無索引行） | `comm -23 <(ls *.md \| grep -v -e MEMORY.md -e '^_' \| sort) <(rg -o '\]\(([^)]+)\)' -r '$1' MEMORY.md \| sort)` | 0 輸出（`_` 前綴檔不進索引，排除） |
 | missing（索引行無檔） | 同上，`comm -13` 反向 | 0 輸出 |
@@ -62,6 +62,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 - **cluster merge 機械觸發**：同主題散檔 ≥3（rg 主題詞/同前綴判定）→ merge candidate；併入目標優先既有最大 cluster（閾值可在 `_audit-state.md` per-project 覆寫）
 - **蒸餾執行載體**：spawn `mem-distill`（registry `agents/zcode/`、flash pin——registry 是 session 快照，須新建 session 才可解析）；prompt 給檔案清單＋每檔硬上限（預設 11,000 chars）＋desc 一併改寫 ≤100 指示
 - **固化→濃縮同步義務**（user 2026-09-01 定案）：經驗固化成 ai-rules skill/rule 落地後，對應 memory 條目把已承載段**同步壓成指針**（觸發詞→skill 名＋一句精髓）；user 事實/事故實例/commit 錨留——固化與濃縮不同步＝兩處 drift（skill 演進、memory 停舊版）
+- **收斂落點慣例**（與上互補，2026-09-03）：跨 repo 方法論→ai-rules skills/rules；模組知識（project 條目 durable lesson）→對應目錄的模組 AGENTS.md（3-6 行約束形態，非流水帳搬移；root 不動）；user/專案綁定事實→留 memory——三個載體各司其職，收斂時先判條目屬哪類
 - 索引精簡：generator 池＝修條目檔 description（索引行是投影、禁手寫）；未裝池＝一行 = 主題 + 一個鉤子，細節留在條目檔內
 - 每輪結束**重跑層 1**——驗證清理本身沒引入新問題
 

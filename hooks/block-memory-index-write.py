@@ -3,9 +3,9 @@
 PreToolUse hook（matcher Edit|Write|NotebookEdit）: memory 寫入治理（兩層）。
 
 ① MEMORY.md 手寫攔截——索引是 _generate_index.py 的機械投影（條目檔
-   frontmatter = 單一寫入點），手寫必漂移：索引只載前「200 行或 25KB」，
-   超限尾端靜默不載 → cluster 查重漏同主題 → 近重複寫入正回授
-   （2026-08-30 mosaic 56.6KB 實證）。
+   frontmatter = 單一寫入點），手寫必漂移：索引載入＝200 行或 25,000 字元
+   先到為準，超限截斷（附 WARNING，尾端條目不載）→ cluster 查重漏同主題
+   → 近重複寫入正回授（2026-08-30 mosaic 56.6KB 實證）。
 ② 條目檔寫入檢查（2026-09-01 寫入治理）——對應 rules/context-management.md
    寫入四問 Q1/Q2/Q4：
    - frontmatter description >120 chars → 擋（索引行原料；紀律 ≤100，
