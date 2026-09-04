@@ -184,6 +184,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 - **遵守 `outward-action-consent` rule（commit 場景）**：未經確認絕不 commit
 - **ruff + mypy 必須雙通過才 commit**（pre-existing 問題也需在此時處理：加 per-file-ignores / type: ignore 或直接修）
+- **docs 單檔閘門**（任何路徑 `.md`，含 `backlog/` 卡；捷徑／直 commit 路徑皆適用）：本次弧未跑 post-build/consistency → commit 執行前對變更的 `.md` 檔跑 `/consistency`（單檔輕量）——ruff/mypy 對 `.md` 不適用，此為純 docs 直 commit 的唯一品質閘門（實證：孤兒結算收編直 commit 跳過收尾鏈，補跑才發現無閘門）
 - **TEMP diagnostic log 掃描**（防殘留）：commit 前掃描 diff 有無 debug-only log 模式（`Diagnostic:`、`[OK] ...`、症狀導向 debug 變數如 `<debug_var> =` 等 ad-hoc 偵錯輸出）。命中 → flag 給用戶確認移除。未移除的 debug log 不得進 commit（違反 llm-output-convention：print 只用於 state transition）。
 - **description 必須繁體中文**（技術術語保留英文）
 - **基於實際 diff 分析**，不憑猜測
