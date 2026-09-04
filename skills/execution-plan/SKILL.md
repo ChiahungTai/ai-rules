@@ -258,9 +258,9 @@ EP 專屬約束：
 
 ## docs mode（純文檔/rules 改動）
 
-EP 變更全為 `rules/`、`skills/` 下的 `.md`（無 `.py` 邏輯）時進入 docs mode —— 段落元素裁剪程式碼導向部分，驗證改為文檔驗證。
+EP 產物全為 instruction/documentation 檔，或其 static HTML Report Shell（無 executable source 邏輯）時進入 docs mode —— 段落元素裁剪程式碼導向部分，驗證改為文檔與 artifact 驗證。
 
-**觸發判準**：變更全為 `.md` **且** 無新增/修改 `.py` callable 符號（`rg "^def |^class " --type py` 於本 EP 變更範圍為 0）→ docs mode。純 `.py` 搬移（無邏輯改）→ docs mode + 保留 mypy/pytest baseline。
+**觸發判準**：product 變更檔案型別只允許 `.md`，或 `.md`＋static `.html` Report Shell；product scope 出現其他 executable source extension 即退出 docs mode（Python callable 掃描只可作補充證據，不是跨語言 gate）。HTML 內含互動 JS 時，EP 必須保留 browser/DOM runtime 驗證與視覺驗收，不得以 docs mode 跳過行為驗證。任務家內只服務驗收的 verifier 可列為 evidence artifact，不算 product scope，但必須在 EP 顯式列出、實際執行且不得被 production consumer 引用。純 `.py` 搬移（無邏輯改）→ docs mode + 保留 mypy/pytest baseline。
 
 **EP 元素對照**：
 
@@ -355,8 +355,8 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類導讀殼（Report Shell，user 裁決：「EP 我現在很少看了，太難理解」——md 給 AI，殼給人）：
 
 - 產物＝任務家 `MM-DD-<task-name>/index.html`（+ 可選 archify 圖；**任務家探測**見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」）——完整規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「html 報告殼」段（三層結構/內容篩選通則/敘事骨架/雙向一致性/殼生命週期掛點），此處不重述
-- **成本分級**：基礎款（純文字殼，~200 行）**必備**；升級款（+archify workflow/architecture 圖）按 EP 規模（多段/有結構主張）或 user 點名
-- 投影鎖定 EP 當下 hash（殼頭部聲明 **EP 路徑＋baseline hash**——下游 `/post-build`/`/code-review` 弧模式跨 session 可從殼讀，baseline 傳遞不依賴 build session context 存活）；badge 📋——推進時 badge 同步掛 implement 階段 5a，實作章節掛 post-build hook 2（無 post-build 弧 fallback implement 階段 6；詳 [implement](../implement/SKILL.md)）
+- **成本分級**：基礎款（複製 template [`skills/_common/illustrate-report-shell.html`](../_common/illustrate-report-shell.html)＋填 slot）**必備**；升級款（+archify workflow/architecture 圖）按 EP 規模（多段/有結構主張）或 user 點名
+- 投影鎖定 EP 當下狀態（殼頭部聲明 **EP 路徑＋task integration baseline＋projection source**；未 commit 的 EP 用 content SHA——下游 `/post-build`/`code-review` 弧模式跨 session 可從殼讀，任務起點與投影新鮮度不混用）；badge 📋——推進時 badge 同步掛 implement 階段 5a，實作章節掛 post-build hook 2（無 post-build 弧 fallback implement 階段 6；詳 [implement](../implement/SKILL.md)）
 - 交付時引導 user 開殼 review（大方向判讀用殼、批准後進 `/implement`；AI 消費仍以 md 為源）
 
 ---

@@ -47,12 +47,10 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 視圖素材層（archify 圖引擎——每張圖=一個視圖，檔名 diagram-<type>.html）
 ```
 
-- **archify 是單視圖圖表引擎**（pan/zoom/search 是空間探索；`meta.views` guided story 也只在同圖內）——順序性敘事導覽它沒有也不該有；**殼自製**（~200 行 static HTML：sidebar nav＋section 切換＋iframe），入口命名 `index.html`、圖命名 `diagram-<type>.html`
-- **殼按 NB 級視口設計（user 裁決：MBP 14/16"＝1512/1728 CSS px 基準）——圖是主角不是配角**：iframe `height: calc(100vh - 190px)`（min-height 640px）填滿視口剩餘高度、寬度吃滿 main（main `max-width: ≥1400px`，不沿用文件站 980px 窄欄）；實證教訓：首版 640px 固定高＋980px 窄欄在 NB 上圖被壓成小框
-- **殼預設 dark theme**（user 2026-09-01 裁決：golden-pretriage 殼首版淺色被要求改深色）——深底（GitHub `#0d1117` 系）淺字低對比邊框；與 archify viewer 內建 dark 模式一致（visual-check 即 dark/light 雙截），殼嵌圖視覺統一。無 user 明示不用淺色
+- **archify 是單視圖圖表引擎**（pan/zoom/search 是空間探索；`meta.views` guided story 也只在同圖內）——順序性敘事導覽它沒有也不該有；**殼結構/視覺/互動單一源＝template [`skills/_common/illustrate-report-shell.html`](./illustrate-report-shell.html)，建殼＝複製＋填 slot**（slot：title/badge/meta/nav/section-content/diagram/backlinks/source；首屏 active、sidebar 折疊、hash restore 自帶；預設深色，沿 golden-pretriage 裁決），入口命名 `index.html`、圖命名 `diagram-<type>.html`
 - **消費單位是章節不是圖**——多圖並列無導覽＝亂（實證）；每章節只放該章該看的圖
-- **首屏可見性（AIR-14 實證 2026-09-03）**：預設 `active` 須為首個含圖章節（或 `s1` 需含雙圖導覽橫幅＋新分頁直連），`iframe` 不可僅靠 `display:none` 章節承載首屏價值主張——首屏 `rect 0×0` 即失效（Playwright 實錄：`s1 active` 時圖隱藏，改 `s3 active` 後可見（1440×900 實錄 1172×710, svgCount 2））。`?embed=1` 為 iframe 嵌入時的推薦參數
-- **殼不整殼降級**：archify 缺場/壞場時報告殼退**基礎款**（純文字殼，章節敘事完整，diagram 區塊顯示待裝提示）——「降級 MD」規則適用單圖任務，不把殼一起降掉
+- **首屏 active 與嵌入參數由 template 擁有**（首個含圖章節規則＋`?embed=1`＋AIR-14 實證見 template 檔頭註解三條硬約束）——建殼不重推導、不手改首屏指向
+- **殼不整殼降級**：archify 缺場/壞場時用同 template degraded slot（章節敘事完整，diagram 區塊顯示待裝提示）——「降級 MD」規則適用單圖任務，不把殼一起降掉
 
 **內容篩選通則（user 勘正：「缺漏要看是不是人類真的需要知道」）**：殼裝**判斷材料**（意圖/為什麼動機鏈、風險與降級、取捨決策、驗收判準、當前狀態、實物樣本、回源路徑），**不裝執行細節**（治理規則、AI 流程產物如 UC 盤點表、機械完整性逐項覆蓋）——後者留本體層，殼至多一句指路。**實物樣本要進殼**（如 aria baseline 真實 YAML 開頭——人類沒看過實物，機制敘述等於空談）。
 
@@ -76,7 +74,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 | 掛點 | 時機 | 殼 | backlog 卡同步 | 主動顯示 |
 |------|------|-----|---------------|---------|
-| **hook 1** | EP 定稿（[execution-plan](../execution-plan/SKILL.md) 定稿交付） | 建殼＋計畫章節，badge 📋；殼頭部聲明 EP 路徑＋baseline hash（＝EP 整合策略 baseline——post-build/code-review 弧模式跨 session 可從殼讀） | `task edit <id> --ref "<殼URL>,<相對路徑>"`（**開工雙 ref 合約**——殼未建前的過渡 URL 指 md preview，建殼後更新） | **`open <殼URL>`**——殼建好即彈出 |
+| **hook 1** | EP 定稿（[execution-plan](../execution-plan/SKILL.md) 定稿交付） | 建殼＋計畫章節，badge 📋；殼頭部聲明 EP 路徑＋task integration baseline＋projection source（未 commit 用本體 content SHA；post-build/code-review 弧模式跨 session 可從殼讀） | `task edit <id> --ref "<殼URL>,<相對路徑>"`（**開工雙 ref 合約**——殼未建前的過渡 URL 指 md preview，建殼後更新） | **`open <殼URL>`**——殼建好即彈出 |
 | **badge 推進** | [implement](../implement/SKILL.md) 階段 5a 結算 | 情境 A（全項結算）→ ✅；情境 B（中間段）→ 🟡 | 卡不動（仍 In Progress） | 不主動開——board portal 隨時點同一 URL |
 | **hook 2** | **post-build 完成**（commit 前最後穩定點；程序載體＝[post-build](../post-build/SKILL.md) 階段 5） | 同一殼長**實作章節**：做了什麼／驗證證據／delta 前後對照／認知誤差點＋回源連結——反映修正迴圈後**最終態**；badge ✅；並產**持久版 delta tour**（落 `.tours/delta/` 進 git） | **結案兩步**：`-s Done --final-summary` → `--ref` 換 `done/` 新 URL（任務目錄遷 done/ 後；卡留 Done 欄） | **`open <殼URL>`**——終態殼彈出 |
 | **fallback** | 無 post-build 弧（user 直接 `/commit`、弧終止）→ implement 階段 6 | hook 2 同款產出由 implement 階段 6 承接 | 同 hook 2 | 同 hook 2 |
@@ -89,7 +87,7 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
   - **大方向（硬，不可錯）**：目的與動機、範圍邊界（做什麼/不做什麼）、段落劃分與順序、驗收判準的語義（gate 過關條件）、風險的有無與等級、關鍵數字的數量級——判準句：「**拿殼給人看形成的大方向預期，vs 拿本體給 AI 實作產出的結果——兩者對得上嗎**」；對不上＝投影失真（這才是 bug）
   - **細節（軟，容忍理解差異）**：語氣/詳略/例子選擇/口語化改寫——不逐字逐句核對
 - **殼是投影非平行創作**——殼想說本體沒有的東西 → **先改本體再投影**（發現順序顛倒是警訊：本體缺該內容）；禁止殼內出現本體沒有的**大方向級主張**（新決策/新範圍/新風險等級）
-- **投影鎖定與 stale 標記**：殼頭部聲明「投影自本體 @ <baseline hash>」；本體修訂（review 修訂/段落結算/狀態變化）→ 殼**同步重投影**（大方向級變更必同步；純文字潤飾可不動）。同步義務與「測試斷言變更→驗收規格同步」「code 變更→Capabilities 同步」同一模式（single source of truth 的投影紀律）
+- **投影鎖定與 stale 標記**：殼頭部將 task integration baseline 與 projection source **分欄聲明**；projection source 已 commit 時用包含本體的 revision，未 commit 時用本體 content SHA（不可拿早於本體的 integration baseline 冒充）。本體修訂（review 修訂/段落結算/狀態變化）→ 殼**同步重投影**並只更新 projection source（大方向級變更必同步；純文字潤飾可不動）。同步義務與「測試斷言變更→驗收規格同步」「code 變更→Capabilities 同步」同一模式（single source of truth 的投影紀律）
 - **提煉篩選≠語義漂移**：篩選通則（判斷材料 vs 執行細節）授權「刪」不授權「改」——刪掉的內容一個指路連結回本體即可
 - **archify authoring invariants 以其 SKILL.md 為準全文適用**（visual_preset/subtitle 預設省略、labelAt/via 診斷驅動單控制修復——實證：違反前兩條者多花修復輪次）
 

@@ -166,3 +166,4 @@ mode A flag 邊界 / smell 時，給兩條行動路徑 + 取捨，**不替 user 
 | [illustrate-structure-viewport.md](../_common/illustrate-structure-viewport.md) | 結構 viewport / drill / pre-EP checkpoint 時 |
 | [illustrate-artifact-menu.md](../_common/illustrate-artifact-menu.md) | mode B code 解釋 / drift checkpoint（5 SA/SD artifact + drift overlay spec）|
 | [illustrate-html-mode.md](../_common/illustrate-html-mode.md) | html 模式觸發 / mode D 增益判斷 / drift compare / **arch-report 重生**（archify 委派、類型映射、偵測降級、輪數 guard、產物生命週期＋重生程序）|
+| [illustrate-report-shell.html](../_common/illustrate-report-shell.html) | 建報告殼時複製＋填 slot（殼結構/視覺/互動單一源；slot 填法與三條硬約束見檔頭註解）|
