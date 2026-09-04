@@ -104,7 +104,7 @@
 
 ### 開發流程（spec → 交付）
 - `test-driven-development` — TDD 驅動實作（RED → GREEN → 重構；AI 失敗模式反制：反 rationalization、mock 階層、xfail strict）
-- `arch-thinking` — Clean Architecture + DDD 設計視角 + 結構機械（分層依賴/bounded context/use case 驅動[含共用層外溢]；city map/dep weight/Pattern Radar/domain grounding/LSP 查證/補償邏輯盤點/call graph（函數級）/type structure（contract slice）/data-flow（靜態骨架）；視角非模板；受眾中性；與 api-and-interface-design 分工）
+- `arch-thinking` — Clean Architecture + DDD 設計視角 + 結構機械（分層依賴/bounded context/use case 驅動[含共用層外溢]；city map/dep weight/Pattern Radar/domain grounding/LSP 查證/補償邏輯盤點/call graph（函數級）/type structure（contract slice）/data-flow（靜態骨架）；視角非模板；受眾／載體中性——方法論綁角色不綁家族，雙家族互換零改動；與 api-and-interface-design 分工）
 - `deep-thinking` — 深層思考框架深層載體（reference skill：輸出格式模板「深層思考分析」、思維框架圖、關鍵問題清單 0-7 共 8 問、程式碼查證細則、執行自檢清單；rule 端＝design-thinking 兩層思考/決策分級/三視角 always-on 核心——rule+skill 分層控制 bundle 尺寸）
 - `debugging-and-error-recovery` — 系統性根因除錯（非猜測；no-guessing 熔斷、用戶糾正訊號表）
 - `autonomous-execution` — 無人介入自主執行的決策 / 錯誤恢復 / 完成回報 / workspace safety / path invariants / session recovery（false-done 偵測）

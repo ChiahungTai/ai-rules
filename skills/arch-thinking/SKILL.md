@@ -7,11 +7,13 @@ description: 架構設計、clean architecture、分層依賴、bounded context�
 
 用 Clean Architecture + DDD 視角檢視結構（**設計視角**：怎麼判斷），並提供結構查證的**機械能力**（**結構機械**：怎麼撈事實）。單一 skill 承載兩者 — 視角給方向、機械給事實，組合才有湧現價值。**視角非模板** — 注入思考，不強制分層、不過度工程。頂層總綱見 [design-thinking rule](../../rules/design-thinking.md)。
 
-## 受眾中性（適用整個 skill）
+## 受眾／載體中性（適用整個 skill）
 
 本 skill 的能力（視角 + 機械）**不決定受眾** — 渲染心智模型給人判讀（`/illustrate`，人類 viewport / B 軸）、產機器 finding（`/code-review` axis 3，A 軸）、結構審查（`/ep-review` F3）都由**消費命令**決定，本 skill 刻意中性。
 
-> 三層次區隔（合併檔內不重疊）：**受眾中性**（本段）= 對消費命令的中性承諾；**與既有 skill 邊界**（§四）= 對其他 skill 的職責分工；**不適用 / 不做**（§五）= 場景排除（不適用）+ 職責邊界（不做）。
+**載體中性**：方法論**綁角色、不綁家族** — implementer（設計決策）與 reviewer（結構審查）讀同一份，執行家族（in-harness agent／external-runtime 委派工單）只是載體，雙家族互換實作／審查角色時方法論零改動。機械段 fuel 階梯按執行環境取可用層：external runtime 無 LSP／MCP 面 → 取 rg + code-reality CLI 查詢面（在場時；缺場＝rg degraded＋報告標 `[WARN]`）；接線細則由派發工單「工具接線」承載（[work-order](../_common/work-order.md) §7），本 skill 不寫家族版操作教學。
+
+> 三層次區隔（合併檔內不重疊）：**受眾／載體中性**（本段）= 對消費命令與執行家族的中性承諾；**與既有 skill 邊界**（§四）= 對其他 skill 的職責分工；**不適用 / 不做**（§五）= 場景排除（不適用）+ 職責邊界（不做）。
 
 ## 一、設計視角（人類/LLM 思考提示層）
 
@@ -204,7 +206,7 @@ code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠beha
 
 ### core identification for review prioritization
 
-**消費前述機械產出做「審查優先序」判定** — 把 dep weight / 消費者數 / hotspot / ripple 框成 core vs leaf 判定 + 審查深度建議，供 `/illustrate`（人 viewport，B 軸）渲染 selective review matrix 讓人判讀「先審哪、審多深」。**受眾中性**（見本文 §受眾中性）：產判定 + 建議，**不產**機器 finding、不釘嚴重度、不給 file:line 處方（那交 `/code-review`）。
+**消費前述機械產出做「審查優先序」判定** — 把 dep weight / 消費者數 / hotspot / ripple 框成 core vs leaf 判定 + 審查深度建議，供 `/illustrate`（人 viewport，B 軸）渲染 selective review matrix 讓人判讀「先審哪、審多深」。**受眾／載體中性**（見本文 §受眾／載體中性）：產判定 + 建議，**不產**機器 finding、不釘嚴重度、不給 file:line 處方（那交 `/code-review`）。
 
 **定義**（新詞錨定）：
 - **core**（heavy human review）：高 `消費者數`（`imported_by`）+ lean/廣用 + 高 ripple（在 per-repo ripple 語義表——`dependency-graph.md`（若有）或 `architecture.md`）的模組；**或**位於 domain critical path（bug 會 silent-corrupt 全下游）。
@@ -235,6 +237,8 @@ code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠beha
 **反例（真實案例，cross-harness 驗證）**：同一 `_PREV_COUNT` 符號，Claude session `findReferences` 只回 intra-file（誤推論為「LSP 對私有 symbol 固有 false-negative」），ZCode session 卻成功回傳跨檔引用 — 根因是 pyright workspace reindex 時機。**方法論限制段誠實記錄此差異，比「LSP 不可靠」的錯誤結論更有價值** — 它讓下個 session 知道要 reindex 而非換工具。
 
 ## 三、流程注入點（spec/EP/implement/review 各階段）
+
+注入**跟角色走、不跟家族走** — 誰任 implementer／reviewer 誰載入對應階段注入；row 由當下工作所處階段決定（規劃取 spec／EP row、實作取 build row、審查取 review row），非由家族決定（見本文 §受眾／載體中性）。
 
 設計視角三主線在各階段的注入：
 

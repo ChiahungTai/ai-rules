@@ -33,6 +33,8 @@
 4. `.../agents/AGENTS.md`——治理段現況
 5. `.../skills/_common/<template>.md`——層慣例（僅檔頭，無需全文）
 
+> review 工單（external second-opinion）必讀含審查方法論 bundle：`review-engine` + 消費命令 profile（如 code-review 場景的 `code-review-and-quality`、結構軸 `arch-thinking`）——findings 沿用 bundle 既有詞彙（不定義新詞，詞彙單一源在對應 skill），供 in-harness judge 對譯裁決。
+
 ## 5. 已決策（勿重辯）＋矛盾例外
 
 - 逐條列出已定案事項（落點、thin forwarder 維持、兩層契約、模板節名、family 角色拆名等），標「勿重辯」
@@ -48,6 +50,7 @@
 ## 7. 工具接線
 
 - 讀查：`bash`（`cat`／`rg`／`ls`）、`Read`；字串搜尋一律 `rg`
+- external runtime 接線（foreign runtime 無 LSP／MCP 面）：結構查證＝`rg`＋code-reality CLI 查詢面（在場時）；CLI 缺場＝`rg` degraded＋報告標 `[WARN]`
 - 最小可用：不引入非必要工具
 - 三禁令：
   - 禁 code-reality 寫入面（`build`／`snapshot`／`delta_tour`／`project`）；查詢面可用可不用
