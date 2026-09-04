@@ -112,11 +112,10 @@ OpenAI 接口地址填写 Coding 专用端点：https://open.bigmodel.cn/api/cod
 注意：Coding 端点不能替换为通用端点 https://open.bigmodel.cn/api/paas/v4。
 方式 B：模型资源包 / 充值余额
 在 BigModel 供应商页面右上角，将连接方式切换为「API Key」
-任选一种协议：
-Anthropic 协议（默认）：Anthropic 接口地址保持 https://open.bigmodel.cn/api/anthropic
-OpenAI 协议：OpenAI 接口地址填写 https://open.bigmodel.cn/api/paas/v4
+使用 OpenAI 协议，将 OpenAI 接口地址填写为 https://open.bigmodel.cn/api/paas/v4
 填入从智谱开放平台获取的 API Key
 可用模型以账号权限和供应商返回的模型列表为准；也可以点击「添加模型」补充其他可用模型
+资源包 / 充值余额场景不要选择 Anthropic 协议。Anthropic 接口只有在账号从未购买过 Coding Plan且已获得额外加白时才会消耗余额；购买过套餐的账号（无论是否用完、是否到期）不会从余额扣费。因此这里请使用上面的 OpenAI 通用端点。
 连接 Z.ai
 Z.ai 是面向海外用户的接入方式，配置流程与 BigModel 基本一致：
 通过上述任一方式进入 模型设置 面板
@@ -136,11 +135,10 @@ OpenAI 接口地址填写 Coding 专用端点：https://api.z.ai/api/coding/paas
 注意：Coding 端点不能替换为通用端点 https://api.z.ai/api/paas/v4。
 方式 B：模型资源包 / 充值余额
 在 Z.ai 供应商页面右上角，将连接方式切换为「API Key」
-任选一种协议：
-Anthropic 协议（默认）：Anthropic 接口地址保持 https://api.z.ai/api/anthropic
-OpenAI 协议：OpenAI 接口地址填写 https://api.z.ai/api/paas/v4
+使用 OpenAI 协议，将 OpenAI 接口地址填写为 https://api.z.ai/api/paas/v4
 填入从 Z.ai 平台获取的 API Key
 可用模型以账号权限和供应商返回的模型列表为准；也可以点击「添加模型」补充其他可用模型
+资源包 / 充值余额场景不要选择 Anthropic 协议。Anthropic 接口只有在账号从未购买过 Coding Plan且已获得额外加白时才会消耗余额；购买过套餐的账号（无论是否用完、是否到期）不会从余额扣费。因此这里请使用上面的 OpenAI 通用端点。
 Anthropic（Claude API）
 通过上述任一方式进入 模型设置 面板
 在左侧供应商列表底部点击「添加供应商」

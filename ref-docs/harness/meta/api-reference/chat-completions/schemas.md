@@ -1388,8 +1388,9 @@ schema:
     - medium
     - high
     - xhigh
+    - max
     default: medium
-    description: 'Constrains effort on reasoning. Accepted values: `none`, `minimal`, `low`, `medium`, `high`, `xhigh`; `none` disables reasoning. Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning in a response.'
+    description: 'Constrains effort on reasoning. Accepted values: `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max`; `none` disables reasoning. Reducing reasoning effort can result in faster responses and fewer tokens used on reasoning in a response.'
   - type: 'null'
 components:
   schemas: {}

@@ -143,6 +143,8 @@ Plugin hooks respond to the same lifecycle events as [user-defined hooks](/docs/
 | `WorktreeRemove`      | When a worktree is being removed at session exit, when a subagent finishes, or when you delete a background session                                                                                                                                   |
 | `PreCompact`          | Before context compaction                                                                                                                                                                                                                             |
 | `PostCompact`         | After context compaction completes                                                                                                                                                                                                                    |
+| `PreModelSwitch`      | Before Claude Code applies a model switch that you or a client requested. Can block the switch                                                                                                                                                        |
+| `PostModelSwitch`     | After the session's model changes, including changes Claude Code makes on its own, such as restoring the model when you resume a session                                                                                                              |
 | `Elicitation`         | When an MCP server requests user input during a tool call                                                                                                                                                                                             |
 | `ElicitationResult`   | After a user responds to an MCP elicitation, before the response is sent back to the server                                                                                                                                                           |
 | `SessionEnd`          | When a session terminates                                                                                                                                                                                                                             |
@@ -519,11 +521,11 @@ claude plugin validate ./my-plugin --strict
 | `license`        | string  | License identifier                                                                                                                                                                                                                                                                                                                                                                                                   | `"MIT"`, `"Apache-2.0"`                                           |
 | `keywords`       | array   | Discovery tags                                                                                                                                                                                                                                                                                                                                                                                                       | `["deployment", "ci-cd"]`                                         |
 | `metadata`       | object  | Free-form object for your own data, such as entitlement or catalog fields. Claude Code doesn't read it, so the values never affect plugin behavior. Claude Code ignores a non-object value, and `claude plugin validate` reports it as a warning. Before v2.1.222, Claude Code treated the key as an [unrecognized field](#unrecognized-fields).                                                                     | `{"catalogId": "cat-123"}`                                        |
-| `defaultEnabled` | boolean | Whether the plugin starts in an enabled state when the user has not set one. Defaults to `true`. See [Default enablement](#default-enablement). Requires Claude Code v2.1.154 or later.                                                                                                                                                                                                                              | `false`                                                           |
+| `defaultEnabled` | boolean | Whether the plugin starts in an enabled state when the user has not set one. Defaults to `true`. See [Default enablement](#default-enablement).                                                                                                                                                                                                                                                                      | `false`                                                           |
 
 ### Default enablement
 
-Set `defaultEnabled: false` in `plugin.json` to ship a plugin that installs disabled. The user turns it on with `claude plugin enable <plugin>` or the `/plugin` interface. Use this for plugins that add cost or scope a user should opt into, such as one that connects to an external service. This requires Claude Code v2.1.154 or later. Earlier versions ignore the field and enable the plugin on install.
+Set `defaultEnabled: false` in `plugin.json` to ship a plugin that installs disabled. The user turns it on with `claude plugin enable <plugin>` or the `/plugin` interface. Use this for plugins that add cost or scope a user should opt into, such as one that connects to an external service.
 
 `defaultEnabled` is the fallback when nothing else has decided the plugin's state. Two things take precedence over it:
 
@@ -603,7 +605,7 @@ Before v2.1.207, these fields substituted `${user_config.KEY}` values; update pl
 
 Non-sensitive values are stored under the [`pluginConfigs`](/docs/en/settings-reference#pluginconfigs) key in your user `settings.json` as `pluginConfigs[<plugin-id>].options`.
 
-Sensitive values go to the macOS Keychain, or to `~/.claude/.credentials.json` on platforms where no supported keychain is available. Keychain storage is shared with OAuth tokens and has an approximately 2 KB total limit, so keep sensitive values small.
+On macOS, Claude Code stores sensitive values in the macOS Keychain, falling back to `~/.claude/.credentials.json` when the Keychain rejects the write. On platforms without a supported keychain, it stores them in `~/.claude/.credentials.json`. Keychain storage is shared with OAuth tokens and has an approximately 2 KB total limit, so keep sensitive values small.
 
 Claude Code reads all `pluginConfigs` values from only three settings sources:
 
@@ -824,7 +826,9 @@ For dependencies the automatic install can't provide, such as packages that need
 
 ### Path traversal limitations
 
-Copied plugins cannot reference files outside their directory. Paths that traverse outside the plugin root (such as `../shared-utils`) will not work after installation because those external files are not copied to the cache.
+Claude Code doesn't let a plugin reference files outside its own directory. It rejects a component path that resolves outside the plugin root, such as `../shared-utils`, whether the path is declared in `plugin.json` or in a [marketplace entry](/docs/en/plugin-marketplaces#plugin-entries). Claude Code reports a [`path escapes plugin directory`](/docs/en/errors#path-escapes-plugin-directory) error and loads the plugin without that component.
+
+Claude Code also doesn't copy files outside the plugin directory into the cache when it installs the plugin, so when a script inside a copied plugin reads a path above the plugin root, it doesn't find those files either.
 
 ### Share files within a marketplace with symlinks
 
@@ -1201,6 +1205,40 @@ Per-component (rounded)
 ```
 
 The always-on total is computed via the `count_tokens` API for your active model. Per-component numbers are proportionally scaled from that total. If the API is unreachable, the command falls back to a character-based estimate.
+
+### plugin validate
+
+Check a plugin or a marketplace for syntax and schema errors before publishing.
+
+The command exits 0 when validation passes, 1 when it fails, and 2 when the validation run itself fails, such as when the path you pass is unreadable.
+
+```bash theme={null}
+claude plugin validate <path> [options]
+```
+
+**Arguments:**
+
+* `<path>`: Path to a plugin directory or a marketplace directory. See [Validate a plugin or a directory without a manifest](/docs/en/plugin-marketplaces#validate-a-plugin-or-a-directory-without-a-manifest) for which files a plugin run covers.
+
+**Options:**
+
+| Option       | Description                                                                                                                                       | Default |
+| :----------- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :------ |
+| `--strict`   | Treat warnings as errors and exit 1 on them. Use in CI to catch issues the runtime tolerates, such as [unrecognized fields](#unrecognized-fields) |         |
+| `--json`     | Output the validation report as one JSON object with the same exit codes. Requires Claude Code v2.1.259 or later                                  |         |
+| `-h, --help` | Display help for command                                                                                                                          |         |
+
+With `--json`, Claude Code writes the report to stdout as one JSON object with these top-level fields:
+
+* `success`: the same verdict the exit code gives
+* `strict`: whether the run treated warnings as errors
+* `target`: the resolved path Claude Code validated
+* `manifest`: the manifest's own result, or `null` for a [run without a manifest](/docs/en/plugin-marketplaces#validate-a-plugin-or-a-directory-without-a-manifest)
+* `contents`: per-file results, each naming its `file` and carrying `errors`, `warnings`, and `notes` arrays
+
+On exit 2, the command writes nothing to stdout; the error message goes to stderr.
+
+Within an interactive session, `/plugin validate <path>` runs the same checks inline.
 
 ### plugin tag
 

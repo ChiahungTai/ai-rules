@@ -13,7 +13,7 @@ cms:
 Build answers that stay current. Add one tool to your request and return accurate, cited responses grounded in the live web — no custom retrieval pipeline, search index, or RAG infrastructure to build or maintain.
 
 > [!NOTE] Muse Image searches differently
-> This page covers the `web_search` tool for text models such as Muse Spark. [Muse Image](/docs/models#muse-image) does its own web and image search automatically while generating, with no `web_search` tool to add. See [Automatic grounding](/docs/image-generation#grounding).
+> This page covers the `web_search` tool for text models such as [Muse Spark](/docs/models#muse-spark). [Muse Image](/docs/models#muse-image) does its own web and image search automatically while generating, with no `web_search` tool to add. See [Automatic grounding](/docs/image-generation#grounding).
 
 ## How it works {#how-it-works}
 
@@ -40,7 +40,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input="Who won the most recent Formula 1 race?",
     tools=[
         {
@@ -65,7 +65,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: 'Who won the most recent Formula 1 race?',
   tools: [
     {
@@ -89,7 +89,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": "Who won the most recent Formula 1 race?",
         "tools": [
             {
@@ -106,7 +106,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": "Who won the most recent Formula 1 race?",
   "tools": [
     {
@@ -273,7 +273,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input="Summarize recent developments in fusion energy research.",
     tools=[
         {
@@ -299,7 +299,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: 'Summarize recent developments in fusion energy research.',
   tools: [
     {
@@ -324,7 +324,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": "Summarize recent developments in fusion energy research.",
         "tools": [
             {
@@ -342,7 +342,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": "Summarize recent developments in fusion energy research.",
   "tools": [
     {
@@ -377,7 +377,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input="What are the best-rated coffee shops near me?",
     tools=[
         {
@@ -409,7 +409,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: 'What are the best-rated coffee shops near me?',
   tools: [
     {
@@ -440,7 +440,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": "What are the best-rated coffee shops near me?",
         "tools": [
             {
@@ -464,7 +464,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": "What are the best-rated coffee shops near me?",
   "tools": [
     {

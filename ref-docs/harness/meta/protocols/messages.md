@@ -10,7 +10,7 @@ cms:
 
 # Messages API
 
-Build with Muse Spark through an Anthropic-compatible interface. The Messages API lets you run Muse Spark with the Anthropic SDK and Claude-oriented tools: swap the base URL and key and keep the rest of your code. Requests shaped for Anthropic's `/v1/messages` run on Meta Model API unchanged.
+Build with [Muse Spark](/docs/models#muse-spark) through an Anthropic-compatible interface. The Messages API lets you run Muse Spark with the Anthropic SDK and Claude-oriented tools: swap the base URL and key and keep the rest of your code. Requests shaped for Anthropic's `/v1/messages` run on Meta Model API unchanged. The Messages API serves the Muse Spark text models; see [model availability](/docs/models#model-availability) for the full model-to-endpoint list.
 
 ## How it works {#how-it-works}
 
@@ -49,7 +49,7 @@ client = Anthropic(
 )
 
 message = client.messages.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     max_tokens=1024,
     messages=[
         {
@@ -74,7 +74,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "max_tokens": 1024,
         "messages": [
             {
@@ -92,7 +92,7 @@ curl -X POST "https://api.meta.ai/v1/messages" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "max_tokens": 1024,
   "messages": [
     {

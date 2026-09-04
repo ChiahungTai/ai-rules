@@ -10,7 +10,7 @@ cms:
 
 # Agent frameworks
 
-Build your own agent on Muse Spark with the framework you already know. Where [coding agents](/docs/coding-agents) give you a ready-made terminal agent, the frameworks here let you write the agent yourself: you define the prompt, the tools, and the control flow, and drive the model loop from your own code.
+Build your own agent on [Muse Spark](/docs/models#muse-spark) with the framework you already know. Where [coding agents](/docs/coding-agents) give you a ready-made terminal agent, the frameworks here let you write the agent yourself: you define the prompt, the tools, and the control flow, and drive the model loop from your own code.
 
 This guide shows two paths: the [Claude Agent SDK](#claude-agent-sdk), which connects through the [Messages API](/docs/protocols/messages), and the [OpenAI Codex app-server](#codex-app-server), which connects through the OpenAI-compatible [Responses API](/docs/protocols/responses).
 

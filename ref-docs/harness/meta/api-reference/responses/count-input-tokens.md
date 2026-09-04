@@ -128,7 +128,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": "What is the capital of France?",
     },
 )
@@ -140,7 +140,7 @@ curl -X POST "https://api.meta.ai/v1/responses/input_tokens" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": "What is the capital of France?"
 }'
 ```

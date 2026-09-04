@@ -73,7 +73,7 @@ client = Anthropic(
 )
 
 message = client.messages.count_tokens(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     messages=[
         {
             "role": "user",
@@ -97,7 +97,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "messages": [
             {
                 "role": "user",
@@ -114,7 +114,7 @@ curl -X POST "https://api.meta.ai/v1/messages/count_tokens" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "messages": [
     {
       "role": "user",

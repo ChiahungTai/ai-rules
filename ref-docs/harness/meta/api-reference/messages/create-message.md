@@ -78,7 +78,7 @@ client = Anthropic(
 )
 
 message = client.messages.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     max_tokens=1024,
     messages=[
         {
@@ -103,7 +103,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "max_tokens": 1024,
         "messages": [
             {
@@ -121,7 +121,7 @@ curl -X POST "https://api.meta.ai/v1/messages" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "max_tokens": 1024,
   "messages": [
     {

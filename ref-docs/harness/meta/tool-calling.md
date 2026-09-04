@@ -205,7 +205,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     messages=[
         {
             "role": "user",
@@ -251,7 +251,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   messages: [
     {
       role: 'user',
@@ -296,7 +296,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "messages": [
             {
                 "role": "user",
@@ -334,7 +334,7 @@ curl -X POST "https://api.meta.ai/v1/chat/completions" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "messages": [
     {
       "role": "user",

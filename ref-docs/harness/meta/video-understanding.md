@@ -10,7 +10,7 @@ cms:
 
 # Video and audio understanding
 
-Muse Spark reads both moving pictures and sound. Summarize a clip, ask what happened when, extract structured details you can use downstream, or transcribe speech from a recording. Upload the media once (or pass a URL), add a text prompt, and the model returns text. Video and audio both work on the [Responses API](/docs/protocols/responses) and [Chat Completions](/docs/protocols/chat-completions).
+[Muse Spark](/docs/models#muse-spark) reads both moving pictures and sound. Summarize a clip, ask what happened when, extract structured details you can use downstream, or transcribe speech from a recording. Upload the media once (or pass a URL), add a text prompt, and the model returns text. Video and audio both work on the [Responses API](/docs/protocols/responses) and [Chat Completions](/docs/protocols/chat-completions).
 
 ## Video {#video}
 
@@ -46,7 +46,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input=[
         {
             "type": "message",
@@ -81,7 +81,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: [
     {
       type: 'message',
@@ -115,7 +115,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": [
             {
                 "type": "message",
@@ -142,7 +142,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": [
     {
       "type": "message",
@@ -178,7 +178,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input=[
         {
             "type": "message",
@@ -213,7 +213,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: [
     {
       type: 'message',
@@ -247,7 +247,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": [
             {
                 "type": "message",
@@ -274,7 +274,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": [
     {
       "type": "message",
@@ -298,6 +298,9 @@ curl -X POST "https://api.meta.ai/v1/responses" \
 Use `input_file` or `input_video` with `file_id` for videos you upload through the Files API; use `input_video` with `video_url` for a video at a public URL.
 
 ## Audio {#audio}
+
+> [!WARNING]
+> Audio understanding in Muse Spark 1.3 is currently not fully supported, and response quality for requests including audio content may be degraded. These examples use Muse Spark 1.2 instead.
 
 Muse Spark transcribes spoken audio to text, whether it arrives as a standalone file or as the soundtrack of a video.
 

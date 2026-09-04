@@ -42,7 +42,7 @@ description: Model routing 深層載體 — tier→(model,effort) 解析表（ZC
 
 | family | model | effort | 容量現值 | 備註 |
 |--------|-------|--------|----------|------|
-| muse | `muse-spark-1.3` | `xhigh`（user 09-04 定；純機械掃描 advisory 可降 `low`/`medium` 省 quota） | 長 context（以 provider dashboard 為準） | 具視覺輸入 `--image`，跨家族備選；advisory／implement／review 共用此 family；bridge 端預設 pin 與本表對齊（muse-plugin-cc 弧維護），`--model`／`--effort` passthrough 僅供臨時 override |
+| muse | `muse-spark-1.3` | `xhigh`（user 09-04 定；純機械掃描 advisory 可降 `low`/`medium` 省 quota）；深推理可升 `ultra`（CLI alias → provider 最高級＝API `max`，限 1.3 Standard tier；reasoning tokens 佔 output 比例更大，留意輸出上限截斷） | 長 context（以 provider dashboard 為準） | 具視覺輸入 `--image`，跨家族備選；advisory／implement／review 共用此 family；bridge 端預設 pin 與本表對齊（muse-plugin-cc 弧維護），`--model`／`--effort` passthrough 僅供臨時 override |
 | codex | `gpt-5.6-sol` | `high` | 約 200K（以 provider 為準，禁大工單；大 context 任務改派 muse） | ad-hoc 選項（想到再用、低頻）；context 小＋消耗快禁大工單（見上角色映射表）；companion `--model` 可傳（內建 `spark` 別名），不傳落 `~/.codex/config.toml` 預設（本機已 pin 同值） |
 | GLM（in-harness） | 見 tier 表 | 見 tier 表 | 高（遠高於 200K 級，見 provider dashboard） | 沿用 tier→lite／vision 路由，不經 external-runtime 派發；in-harness acceptance reviewer 屬此 |
 

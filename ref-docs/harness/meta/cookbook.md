@@ -13,7 +13,7 @@ cms:
 
 # Meta Model API cookbook
 
-Ship on Muse Spark with recipes that run the first time you copy them. Each recipe solves one focused problem, shows working code, and points to what's next. Start with API fundamentals to nail the primitives, then layer on agent loops and full use cases.
+Ship on [Muse Spark](/docs/models#muse-spark) with recipes that run the first time you copy them. Each recipe solves one focused problem, shows working code, and points to what's next. Start with API fundamentals to nail the primitives, then layer on agent loops and full use cases.
 
 ## API fundamentals {#api-fundamentals}
 
@@ -83,11 +83,20 @@ Build durable, auditable agents with Muse Code — the harness building blocks f
 
 ## Muse Image {#muse-image}
 
-Use Muse Image to generate, edit, or combine images. Choose a recipe based on whether you need web grounding, consistency across a series, or multi-turn editing.
+Use [Muse Image](/docs/models#muse-image) to generate, edit, or combine images. Choose a recipe based on whether you need web grounding, consistency across a series, or multi-turn editing.
 
 <tile-group col="3">
 <tile color="purple" icon="sparkle-diamond" href="/docs/cookbook/image-generation-basics" title="Generate, edit, and compose images"> Generate an image, refine it across turns, or combine it with new reference images.</tile>
 <tile color="purple" icon="sparkle-diamond" href="/docs/cookbook/search-grounded-image-generation" title="Ground image generation with web search"> Use web references when an image should reflect current products, places, or styles. Verify factual details independently.</tile>
 <tile color="purple" icon="sparkle-diamond" href="/docs/cookbook/anchored-image-series" title="Keep an image series consistent"> Use reference images to improve character, style, and setting consistency across a series. Compare each output with the references.</tile>
 <tile color="purple" icon="sparkle-diamond" href="/docs/cookbook/image-editing-with-reasoning" title="Edit image details across turns"> Edit one part of a photo, then refine the result across turns. Check that unchanged areas still match the source.</tile>
+</tile-group>
+
+## Muse Voice Transcribe {#muse-voice-transcribe}
+
+Use [Muse Voice Transcribe](/docs/models#muse-voice-transcribe) to turn speech into text — streaming over a WebSocket while the speaker is still talking, or in one HTTP request for a recording you already have. The model handles punctuation, speech-boundary detection, and speaker attribution itself.
+
+<tile-group col="3">
+<tile color="purple" icon="sparkle-diamond" href="/docs/cookbook/voice-api-fundamentals" title="Speech to text"> Transcribe a recording or a live microphone over the streaming WebSocket, get speaker-attributed turns with diarization, or post a whole recording in one HTTP request.</tile>
+<tile color="purple" icon="sparkle-diamond" href="/docs/cookbook/voice-chess-cua" title="Control Apple Chess with voice"> Turn exact spoken chess moves into locally validated Apple Chess actions with a passive HUD, calibrated grid, dry-run mode, and fail-closed native input.</tile>
 </tile-group>

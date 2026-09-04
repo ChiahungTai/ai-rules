@@ -12,10 +12,6 @@ This page covers self-hosting on your own infrastructure. For deployable Dockerf
 
 If you do not need infrastructure control, custom isolation, or your own data plane, consider [Managed Agents](https://platform.claude.com/docs/en/managed-agents/overview) instead: a hosted REST API where Anthropic runs the agent and the sandbox, so your application sends events and streams back results with no hosting infrastructure to operate.
 
-<Info>
-  For security hardening beyond basic sandboxing, including network controls, credential management, and isolation options, see [Secure Deployment](/docs/en/agent-sdk/secure-deployment).
-</Info>
-
 ## The subprocess model
 
 Every hosting decision on this page follows from how the SDK runs the agent. When your code calls `query()`, the SDK spawns a separate `claude` CLI process and talks to it over stdio. That subprocess owns the shell, the working directory, and the JSONL session transcripts on local disk.
@@ -24,17 +20,39 @@ Every hosting decision on this page follows from how the SDK runs the agent. Whe
 
 <img src="https://mintcdn.com/claude-code/_xqph1dUOslCOwsj/images/agent-sdk/hosting-subprocess-dark.svg?fit=max&auto=format&n=_xqph1dUOslCOwsj&q=85&s=3fdeff3d7f44b2b67762668acfbb25f5" className="hidden dark:block" alt="Request flow: client to your app, which spawns a claude CLI subprocess over stdio inside the container; the subprocess writes to local disk and calls api.anthropic.com over HTTPS" width="920" height="220" data-path="images/agent-sdk/hosting-subprocess-dark.svg" />
 
-One agent session maps to one subprocess. Running N concurrent sessions means N subprocesses, each with its own process tree and transcript file. By default they all inherit your application's working directory, so pass `cwd` on each `query()` call when sessions need separate filesystems:
+One agent session maps to one subprocess. Running N concurrent sessions means N subprocesses, each with its own process tree and transcript file. By default they all inherit your application's working directory. When sessions need separate filesystems, pass a distinct `cwd` in the options of each session's `query()` call:
 
 <CodeGroup>
   ```typescript TypeScript theme={null}
-  query({ prompt, options: { cwd: "/work/session-a" } })
+  import { query } from "@anthropic-ai/claude-agent-sdk";
+
+  for await (const message of query({
+    prompt: "Summarize the files in this directory",
+    options: { cwd: "/work/session-a" },
+  })) {
+    console.log(message);
+  }
   ```
 
   ```python Python theme={null}
-  query(prompt=prompt, options=ClaudeAgentOptions(cwd="/work/session-a"))
+  import asyncio
+
+  from claude_agent_sdk import ClaudeAgentOptions, query
+
+
+  async def main():
+      async for message in query(
+          prompt="Summarize the files in this directory",
+          options=ClaudeAgentOptions(cwd="/work/session-a"),
+      ):
+          print(message)
+
+
+  asyncio.run(main())
   ```
 </CodeGroup>
+
+The TypeScript examples on this page use top-level `await`, so save them as `.mts` files or set `"type": "module"` in `package.json`.
 
 ### State that lives on local disk
 
@@ -60,7 +78,7 @@ Create a container for each user task and destroy it when the task completes. Be
 
 Example workloads include bug investigation and fix, invoice and receipt extraction, document translation, and media transformation.
 
-The container runs a one-shot entrypoint that calls the SDK and exits. In TypeScript, save the file as `entrypoint.mts` or set `"type": "module"` in `package.json` so top-level `await` is available.
+The container runs a one-shot entrypoint that reads the task from the `TASK_PROMPT` environment variable, calls the SDK, and exits.
 
 <CodeGroup>
   ```typescript TypeScript theme={null}
@@ -90,6 +108,8 @@ The container runs a one-shot entrypoint that calls the SDK and exits. In TypeSc
   asyncio.run(main())
   ```
 </CodeGroup>
+
+The script prints each message as it arrives, including a result message whose `subtype` is `success` when the task completes within the turn limit. If the task hits the 20-turn limit instead, the result message's `subtype` is `error_max_turns` and the `query()` call raises an error after yielding it, so wrap the loop in a try block if the container needs to exit cleanly. See [Handle the result](/docs/en/agent-sdk/agent-loop#handle-the-result) for the error subtypes.
 
 ### Long-running sessions
 
@@ -148,8 +168,6 @@ The pattern hinges on resuming a session by ID with a shared store attached:
   asyncio.run(main())
   ```
 </CodeGroup>
-
-See [Session storage](/docs/en/agent-sdk/session-storage) for the full `SessionStore` interface and reference adapters.
 
 ### Multi-agent container
 
@@ -316,18 +334,24 @@ The example below applies the settings, auto memory, config directory, and worki
   ```
 </CodeGroup>
 
-For per-tenant network controls, see [Secure Deployment](/docs/en/agent-sdk/secure-deployment).
-
 ## Known limitations
 
 Plan around these in your deployment design.
 
-| Limitation                                          | What to do                                                                                                                                                                                                                                                                                   |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| No top-level session timeout                        | A session does not time out on its own. Set `maxTurns` in `Options` to bound how many tool-use round trips the agent takes before stopping.                                                                                                                                                  |
-| Memory growth over long sessions                    | Cap session length or recycle subprocesses periodically. See [Scaling and concurrency](#scaling-and-concurrency).                                                                                                                                                                            |
-| Large parallel-subagent fanouts can hit rate limits | Break work into smaller batches rather than issuing one wide dispatch.                                                                                                                                                                                                                       |
-| No per-subagent wall-clock deadline                 | Cap each [subagent](/docs/en/agent-sdk/subagents) with `maxTurns` in its `AgentDefinition`. For background subagents only, `CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS` sets a stall watchdog that fires when a `run_in_background` subagent stops producing output; it is not a total-runtime deadline. |
+| Limitation                                          | What to do                                                                                                                                                                                                                               |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No top-level session timeout                        | A session does not time out on its own. Set `maxTurns` in TypeScript or `max_turns` in Python to bound how many tool-use round trips the agent takes before stopping.                                                                    |
+| Memory growth over long sessions                    | Cap session length or recycle subprocesses periodically. See [Scaling and concurrency](#scaling-and-concurrency).                                                                                                                        |
+| Large parallel-subagent fanouts can hit rate limits | Break work into smaller batches rather than issuing one wide dispatch.                                                                                                                                                                   |
+| No per-subagent wall-clock deadline                 | Cap each [subagent](/docs/en/agent-sdk/subagents) with `maxTurns` in its `AgentDefinition`. `CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS` sets a stall watchdog that fires when a subagent stops producing output; it isn't a total-runtime deadline. |
+
+## Troubleshoot deployment failures
+
+Use this section when an agent that works on your machine fails in a deployed service. Each item below names a failure and links the entry that covers it:
+
+* **CLI not found at service start**: in Python, a container or service manager runs your application with a different `PATH` than your shell, so an install that works locally isn't visible to the process. In TypeScript, the image build skipped the SDK's optional dependencies, or `pathToClaudeCodeExecutable` points at a file that doesn't exist in the image. See [Claude Code not found](/docs/en/agent-sdk/troubleshooting#clinotfounderror-claude-code-not-found).
+* **CLI present in the image but won't launch**: Claude Code can't start from a binary that doesn't match the container's architecture or libc, or from a file that lost its execute permission in the image build. See [Failed to start Claude Code](/docs/en/agent-sdk/troubleshooting#cliconnectionerror-failed-to-start-claude-code).
+* **Claude Code process exits mid-run**: the error your application receives depends on the SDK language and on whether the CLI reported an error result first. The entries under [CLI process exit](/docs/en/agent-sdk/troubleshooting#cli-process-exit) cover each message.
 
 ## Next steps
 

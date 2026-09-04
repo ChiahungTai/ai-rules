@@ -10,7 +10,7 @@ cms:
 
 # Muse Glimmer
 
-Muse Glimmer is Meta's 30-billion-parameter open-source multimodal model, distilled from Muse Spark and built for local agentic workflows. Run it on your own hardware through supported runtimes. It ships with open weights, reads text and images, and reasons step by step before it answers.
+[Muse Glimmer](/docs/models#muse-glimmer) is Meta's 30-billion-parameter open-source multimodal model, distilled from [Muse Spark](/docs/models#muse-spark) and built for local agentic workflows. Run it on your own hardware through supported runtimes. It ships with open weights, reads text and images, and reasons step by step before it answers.
 
 Point your existing tooling at a local Muse Glimmer server and keep building — you own the weights, the runtime, and the data.
 

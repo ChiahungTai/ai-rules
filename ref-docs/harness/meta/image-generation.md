@@ -10,7 +10,7 @@ cms:
 
 # Image generation with Muse Image
 
-Muse Image generates and edits images from a conversation. Send interleaved text and reference images, get an image back, then keep refining it turn by turn, all through the same [Responses API](/docs/protocols/responses) you already use for text. One model handles both generation and editing, and plain text-to-image and one-off edits are just special cases of the same conversational interface.
+[Muse Image](/docs/models#muse-image) generates and edits images from a conversation. Send interleaved text and reference images, get an image back, then keep refining it turn by turn, all through the same [Responses API](/docs/protocols/responses) you already use for text. One model handles both generation and editing, and plain text-to-image and one-off edits are just special cases of the same conversational interface.
 
 ## How it works {#how-it-works}
 

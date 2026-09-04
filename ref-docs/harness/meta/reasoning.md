@@ -10,7 +10,7 @@ cms:
 
 # Reasoning
 
-Solve harder problems by giving the model more time to think. Muse Spark is a reasoning model: it generates internal reasoning tokens before visible output, and you control how much with `reasoning_effort`.
+Solve harder problems by giving the model more time to think. [Muse Spark](/docs/models#muse-spark) is a reasoning model: it generates internal reasoning tokens before visible output, and you control how much with `reasoning_effort`.
 
 ## How it works {#how-it-works}
 
@@ -25,9 +25,13 @@ Set `reasoning_effort` to choose depth:
 | `"low"` | Light reasoning. |
 | `"medium"` | Moderate depth. |
 | `"high"` | Deep reasoning. |
-| `"xhigh"` | Maximum reasoning depth. |
+| `"xhigh"` | Deeper reasoning. |
+| `"max"` | Extended reasoning beyond `"xhigh"`. Standard-tier `muse-spark-1.3` only; not available on Contributor-tier models. |
 
 Higher effort means more reasoning — and more reasoning tokens, latency, and cost. `"none"` disables reasoning entirely, which Muse Spark does not support.
+
+> [!NOTE] Max reasoning
+> The `"max"` level on Standard-tier Muse Spark 1.3 goes beyond `"xhigh"`: the model spends more time reasoning before responding, using more reasoning tokens at the same per-token price as other effort levels. This level is not available on Contributor-tier models.
 
 When you omit the parameter, the model still reasons at a model-determined level.
 
@@ -51,7 +55,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     reasoning_effort="high",
     messages=[
         {
@@ -77,7 +81,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   reasoning_effort: 'high',
   messages: [
     {
@@ -102,7 +106,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "reasoning_effort": "high",
         "messages": [
             {
@@ -120,7 +124,7 @@ curl -X POST "https://api.meta.ai/v1/chat/completions" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "reasoning_effort": "high",
   "messages": [
     {
@@ -147,7 +151,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     reasoning={
         "effort": "high",
     },
@@ -170,7 +174,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   reasoning: {
     effort: 'high',
   },
@@ -192,7 +196,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "reasoning": {
             "effort": "high",
         },
@@ -207,7 +211,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "reasoning": {
     "effort": "high"
   },
@@ -279,7 +283,7 @@ Reasoning tokens count toward both your output-token limit and billed completion
 - **Output-token limit**: `max_tokens` (Chat Completions) and `max_output_tokens` (Responses API) cap reasoning tokens plus visible output tokens combined. If the model spends most of the budget on reasoning, the visible response may be truncated. Set the limit high enough to accommodate both.
 - **Billing**: Reasoning tokens are billed at the same rate as visible output tokens. The `usage` breakdown reports them separately as `completion_tokens_details.reasoning_tokens` (Chat Completions) or `output_tokens_details.reasoning_tokens` (Responses API).
 
-Higher `reasoning_effort` produces more reasoning tokens, which means longer latency and higher cost. Use the lowest level that gives you acceptable results.
+Higher `reasoning_effort` produces more reasoning tokens, which means longer latency and higher cost. Use the lowest level that gives you acceptable results. At `"max"`, reasoning tokens make up a larger share of `output_tokens` than at lower efforts, so set the output-token limit generously.
 
 ## When to reach for reasoning {#when-to-use}
 

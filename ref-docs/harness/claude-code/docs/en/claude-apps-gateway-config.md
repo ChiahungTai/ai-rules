@@ -548,7 +548,7 @@ Before v2.1.232, the gateway started with these values. Each value had this effe
 
 Each `cli` value is a complete Claude Code `managed-settings.json` document, the same schema you would deploy via MDM or `/etc/claude-code/managed-settings.json`, expressed here as YAML. The CLI applies the delivered document at the managed tier, above user and project settings, in place of server-managed settings. It therefore ignores the settings [restricted to OS-level policy sources](/docs/en/server-managed-settings#current-limitations), such as `policyHelper` and `wslInheritsWindowsSettings`.
 
-The gateway validates each document against the CLI's settings schema at boot, so an unrecognized top-level key or a recognized key with a malformed value fails boot with an error naming every offending key. Deliberately open parts of the schema still accept arbitrary values, because newer clients may recognize entries the gateway's schema doesn't. These open keys are `env`, `pluginConfigs`, and keys nested under `permissions`.
+The gateway validates each document against the CLI's settings schema at boot, so an unrecognized top-level key fails boot with an error naming every offending key. Deliberately open parts of the schema still accept arbitrary values, because newer clients may recognize entries the gateway's schema doesn't. These open keys are `env`, `pluginConfigs`, and keys nested under `permissions`.
 
 Because validation uses the schema bundled with the gateway's installed version, putting a top-level settings key introduced by a newer Claude Code release into managed config requires upgrading the gateway first. Smoke-test a new policy on one client before rolling it out.
 
@@ -586,14 +586,14 @@ managed:
                 - { type: command, command: /usr/local/bin/audit-edit.sh }
 ```
 
-| Key                                        | Enforced by   | Effect                                                                                                                                                                                                   |
-| ------------------------------------------ | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `availableModels`                          | Gateway + CLI | Model allowlist. Also checked at `/v1/messages`, so a patched client can't bypass it.                                                                                                                    |
-| `permissions.allow` / `.deny`              | CLI           | Tool and command rules. See [Permissions](/docs/en/permissions).                                                                                                                                              |
-| `permissions.disableBypassPermissionsMode` | CLI           | Set to `disable` to block [`bypassPermissions`](/docs/en/permission-modes#skip-all-checks-with-bypasspermissions-mode), the mode that skips permission prompts, and the `--dangerously-skip-permissions` flag |
-| `allowManagedPermissionRulesOnly`          | CLI           | When `true`, user and project permission rules are ignored; only rules from this document apply                                                                                                          |
-| `env`                                      | CLI           | Environment variables merged into the CLI process. Use for telemetry, auto-update, and model-name overrides.                                                                                             |
-| `hooks`                                    | CLI           | Org-wide [hooks](/docs/en/hooks)                                                                                                                                                                              |
+| Key                                        | Enforced by   | Effect                                                                                                                                                                                                                                |
+| ------------------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `availableModels`                          | Gateway + CLI | Model allowlist. Also checked at `/v1/messages`, so a patched client can't bypass it.                                                                                                                                                 |
+| `permissions.allow` / `.deny`              | CLI           | Tool and command rules. See [Permissions](/docs/en/permissions).                                                                                                                                                                           |
+| `permissions.disableBypassPermissionsMode` | CLI           | Set to `disable` to block [`bypassPermissions`](/docs/en/permission-modes#skip-all-checks-with-bypasspermissions-mode), the mode that skips permission prompts, and the `--dangerously-skip-permissions` flag                              |
+| `allowManagedPermissionRulesOnly`          | CLI           | When `true`, managed settings become the only settings source of permission rules. The [`allowManagedPermissionRulesOnly`](/docs/en/settings-reference#allowmanagedpermissionrulesonly) entry lists every source Claude Code then ignores. |
+| `env`                                      | CLI           | Environment variables merged into the CLI process. Use for telemetry, auto-update, and model-name overrides.                                                                                                                          |
+| `hooks`                                    | CLI           | Org-wide [hooks](/docs/en/hooks)                                                                                                                                                                                                           |
 
 Because these settings arrive over the network, the CLI shows each developer a security approval dialog before applying the settings listed below:
 
@@ -601,7 +601,7 @@ Because these settings arrive over the network, the CLI shows each developer a s
 * `env` variables that require the developer's approval, such as proxy and base-URL variables
 * shell-execution settings such as `apiKeyHelper` and `statusLine`
 * the sandbox binary settings `sandbox.bwrapPath`, `sandbox.socatPath`, and `sandbox.ripgrep`
-* managed CLAUDE.md content
+* Sandbox settings that intercept traffic, inject credentials, or weaken isolation, such as `sandbox.network.tlsTerminate` and the proxy port settings. [Security approval dialogs](/docs/en/server-managed-settings#security-approval-dialogs) lists them all.
 
 [Approval memory](/docs/en/server-managed-settings#approval-memory) covers how long an approval lasts and when the dialog appears again.
 

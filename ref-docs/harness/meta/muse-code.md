@@ -10,7 +10,7 @@ cms:
 
 # Muse Code
 
-Muse Code is Meta's coding agent for the terminal and CI, built on [Muse Spark](/docs/models). Run it in a project and it plans, edits, and runs commands to do a task, with approvals and an OS sandbox on from the first run.
+Muse Code is Meta's coding agent for the terminal and CI, built on [Muse Spark](/docs/models#muse-spark). Run it in a project and it plans, edits, and runs commands to do a task, with approvals and an OS sandbox on from the first run.
 
 Muse Code and the [Model API](/docs/overview) are two ways to use the same model. Call the API directly when you build your own agent or app. Run Muse Code when you want a ready-made coding agent at the command line or in a pipeline.
 

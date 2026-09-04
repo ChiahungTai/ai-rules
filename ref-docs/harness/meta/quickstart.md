@@ -10,7 +10,7 @@ cms:
 
 # Quickstart
 
-Make your first Muse Spark call in minutes. The fastest path is Muse Code, Meta's coding agent for the terminal. Prefer your own stack? Model API is drop-in compatible with the OpenAI SDK, the Anthropic SDK, and OpenAI-compatible agent CLIs, so most stacks work with a base-URL and key change. This page uses the [Responses API](/docs/protocols/responses) for direct calls; if your code already speaks Chat Completions or Anthropic Messages, see [Choosing an API](/docs/protocols).
+Make your first [Muse Spark](/docs/models#muse-spark) call in minutes. The fastest path is Muse Code, Meta's coding agent for the terminal. Prefer your own stack? Model API is drop-in compatible with the OpenAI SDK, the Anthropic SDK, and OpenAI-compatible agent CLIs, so most stacks work with a base-URL and key change. This page uses the [Responses API](/docs/protocols/responses) for direct calls; if your code already speaks Chat Completions or Anthropic Messages, see [Choosing an API](/docs/protocols).
 
 ## Start with Muse Code {#muse-code}
 
@@ -32,7 +32,7 @@ On first run, `muse` prompts you to sign in, so you can skip [Set your API key](
 
 ## Use with your coding agent {#agent-setup}
 
-Any harness that supports an OpenAI-compatible or custom provider plugs into Model API via [Responses](/docs/protocols/responses) or [Chat Completions](/docs/protocols/chat-completions). Anthropic-format harnesses like Claude Code plug in via the [Messages API](/docs/protocols/messages) instead, pointed at `https://api.meta.ai` with your `MODEL_API_KEY`. Most tools ask for three values: the base URL `https://api.meta.ai/v1`, your `MODEL_API_KEY`, and the model ID `muse-spark-1.2`.
+Any harness that supports an OpenAI-compatible or custom provider plugs into Model API via [Responses](/docs/protocols/responses) or [Chat Completions](/docs/protocols/chat-completions). Anthropic-format harnesses like Claude Code plug in via the [Messages API](/docs/protocols/messages) instead, pointed at `https://api.meta.ai` with your `MODEL_API_KEY`. Most tools ask for three values: the base URL `https://api.meta.ai/v1`, your `MODEL_API_KEY`, and the model ID `muse-spark-1.3`.
 
 ### Two-step setup {#two-step-setup}
 
@@ -45,18 +45,18 @@ Add a new provider to my config for Meta Model API:
 - Provider key: "meta", display name "Meta Model API"
 - npm adapter: "@ai-sdk/openai" (targets the Responses API)
 - Base URL: https://api.meta.ai/v1
-- Model: "muse-spark-1.2"
+- Model: "muse-spark-1.3"
 - Reasoning: true, with reasoningEffort "high", reasoningSummary "auto", and include ["reasoning.encrypted_content"]
 - Limits: context 1048576, output 131072
 - Modalities: input ["text", "image", "pdf", "video"], output ["text"]
 - Read the key from the MODEL_API_KEY environment variable
 ```
 
-Select `muse-spark-1.2` and start coding. That's it. For Codex, Claude Code, or hand-written config, see the [full coding agents guide](/docs/coding-agents).
+Select `muse-spark-1.3` and start coding. That's it. For Codex, Claude Code, or hand-written config, see the [full coding agents guide](/docs/coding-agents).
 
 ### OpenCode config {#opencode}
 
-Prefer to edit the config yourself? Manual setup follows the same shape everywhere: register a provider, point it at the base URL, and select `muse-spark-1.2`. Here's the complete block for OpenCode, a popular coding CLI.
+Prefer to edit the config yourself? Manual setup follows the same shape everywhere: register a provider, point it at the base URL, and select `muse-spark-1.3`. Here's the complete block for OpenCode, a popular coding CLI.
 
 Add to your `opencode.json` (global at `~/.config/opencode/opencode.json` or per-project). Use the `@ai-sdk/openai` adapter, which drives Muse Spark over the Responses API — this enables native multimodal input (images and PDFs) and replays encrypted reasoning across turns, so the model retains its prior reasoning during tool loops:
 
@@ -70,8 +70,8 @@ Add to your `opencode.json` (global at `~/.config/opencode/opencode.json` or per
         "baseURL": "https://api.meta.ai/v1"
       },
       "models": {
-        "muse-spark-1.2": {
-          "name": "muse-spark-1.2",
+        "muse-spark-1.3": {
+          "name": "muse-spark-1.3",
           "reasoning": true,
           "limit": {
             "context": 1048576,
@@ -100,7 +100,7 @@ Run `/connect`, select the `meta` provider, and enter your API key when prompted
 
 ### Any OpenAI-compatible tool {#any-tool}
 
-If your tool has a "base URL" or "API base" field, set it to `https://api.meta.ai/v1` and use `muse-spark-1.2` as the model. This works for LangChain, LlamaIndex, Vercel AI SDK, Continue, and most agentic frameworks.
+If your tool has a "base URL" or "API base" field, set it to `https://api.meta.ai/v1` and use `muse-spark-1.3` as the model. This works for LangChain, LlamaIndex, Vercel AI SDK, Continue, and most agentic frameworks.
 
 ## Make your first API call {#first-call}
 
@@ -138,7 +138,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": "What is the capital of France?"
 }'
 ```
@@ -163,7 +163,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input="What is the capital of France?",
 )
 
@@ -190,7 +190,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: 'What is the capital of France?',
 });
 
@@ -205,7 +205,7 @@ A successful call returns generated text plus usage, status, and other response 
 ## Troubleshooting {#troubleshooting}
 
 - **`401` `authentication_error`**: your key isn't set or isn't valid. Check `echo $MODEL_API_KEY` and confirm it matches a key in the dashboard.
-- **`404` `model_not_found`**: use a valid model ID such as `muse-spark-1.2` (the default in these examples) or `muse-spark-1.1` exactly.
+- **`404` `model_not_found`**: use a valid model ID such as `muse-spark-1.3` (the default in these examples) or `muse-spark-1.1` exactly.
 
 For other status codes, retries, and error shapes, see the [error handling guide](/docs/error-handling).
 

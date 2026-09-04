@@ -106,6 +106,11 @@ How does agentic coding handle project-specific requirements?
 Claude Code uses CLAUDE.md configuration files that document your coding standards, architectural decisions, and project-specific requirements. These files persist across your sessions, ensuring consistent implementations that follow your established practices.
 Related posts
 Explore more product news and best practices for teams building with Claude.
+Aug 20, 2026
+The Claude Code guide for startups
+Claude Code
+The Claude Code guide for startupsThe Claude Code guide for startups
+The Claude Code guide for startupsThe Claude Code guide for startups
 Aug 21, 2026
 The AI-Native SDLC playbook
 Enterprise AI
@@ -121,11 +126,6 @@ Self-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-ho
 Agents
 Self-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-hoc questionsSelf-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-hoc questions
 Self-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-hoc questionsSelf-service data analytics in Slack: how Anthropic deploys Claude Tag for ad-hoc questions
-Jul 24, 2026
-The new rules of context engineering for Claude 5 generation models
-Claude Code
-The new rules of context engineering for Claude 5 generation models The new rules of context engineering for Claude 5 generation models
-The new rules of context engineering for Claude 5 generation models The new rules of context engineering for Claude 5 generation models
 Transform how your organization operates with Claude
 See pricing
 See pricingSee pricing

@@ -24,7 +24,9 @@ Claude Code includes a set of bundled skills, such as `/doctor`, `/code-review`,
 
 You invoke a bundled skill the same way as any other skill, by typing `/` followed by the skill name. Claude invokes some bundled skills automatically when relevant; others, including `/verify`, run only when you invoke them, which keeps you in control of when these longer-running checks spend time and tokens.
 
-Bundled skills are available in every session. To turn them off, use the [`disableBundledSkills`](/docs/en/settings-reference#disablebundledskills) setting, which disables every bundled skill except `/doctor`.
+Most bundled skills are available in every session. A few depend on a specific feature: `/workflow-authoring`, for example, is available only when [dynamic workflows](/docs/en/workflows) are enabled.
+
+To turn bundled skills off, use the [`disableBundledSkills`](/docs/en/settings-reference#disablebundledskills) setting, which disables every bundled skill except `/doctor`.
 
 <Note>
   The [`/doctor`](/docs/en/commands#all-commands) setup checkup stays typable when `disableBundledSkills` is on, in Claude Code v2.1.205 and later. To hide it, set the `DISABLE_DOCTOR_COMMAND` environment variable or a [`skillOverrides`](#override-skill-visibility-from-settings) entry of `"doctor": "off"`. Before v2.1.205, `/doctor` was a built-in command rather than a bundled skill.
@@ -325,6 +327,8 @@ Your skill instructions here...
 
 All fields are optional. Only `description` is recommended so Claude knows when to use the skill.
 
+Claude Code reads the frontmatter only when the opening `---` is the file's first line. Otherwise it treats the whole file, `---` markers included, as skill content.
+
 Boolean fields accept `yes`, `no`, `on`, `off`, `1`, and `0` in any letter case, in addition to `true` and `false`. Before v2.1.218, Claude Code recognized only `true` and `false`.
 
 | Field                      | Required    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
@@ -385,7 +389,7 @@ The table below shows where the command name comes from for each layout:
 
 In a plugin skill, the frontmatter `name` replaces the directory name in the last segment of the command, so `my-plugin/skills/review/SKILL.md` with `name: fancy` becomes `/my-plugin:fancy`. The bare `/fancy` also invokes the skill unless another command already uses that name. If the `name` you write already starts with the plugin's own prefix, Claude Code doesn't add the prefix again on v2.1.246 or later. For example, `name: my-plugin:fancy` still becomes `/my-plugin:fancy`. From v2.1.216 through v2.1.245, Claude Code doubled the prefix when the `name` already carried it.
 
-In [non-interactive sessions](/docs/en/headless), Claude Code doesn't reserve the names `help` and `feedback` for their terminal-only built-in commands, so a plugin skill with one of those names keeps its bare command there. Claude Code still reserves the name of every other terminal-only built-in, such as `/login`, even though the command can't run in those sessions. In those sessions Claude Code also skips a synced skill named `help` or `feedback`, because it [skips a synced skill](#when-a-synced-skill-name-matches-another-command) whose name matches any built-in command whether or not that command can run. From v2.1.216 through v2.1.220, `help` and `feedback` were reserved too, so a plugin skill with one of those names was invocable only by its namespaced command in non-interactive sessions.
+In [non-interactive sessions](/docs/en/headless), the names `help` and `feedback` aren't reserved for their terminal-only built-in commands, so a plugin skill with one of those names keeps its bare command there. Every other terminal-only built-in's name, such as `/login`, stays reserved even though the command can't run in those sessions. A synced skill named `help` or `feedback` is still skipped there, because Claude Code [skips a synced skill](#when-a-synced-skill-name-matches-another-command) whose name matches any built-in command whether or not that command can run.
 
 For a plugin-root `SKILL.md`, there is no skill directory to take the name from, so `name` supplies the whole final segment. Without a `name` field, Claude Code falls back to the plugin's directory name.
 
@@ -625,7 +629,6 @@ For multi-line commands, use a fenced code block opened with ` ```! ` instead of
 ## Environment
 ```!
 node --version
-npm --version
 git status --short
 ```
 ````
@@ -764,7 +767,7 @@ Permission syntax: `Skill(name)` for exact match, `Skill(name *)` for prefix mat
 
 ### Override skill visibility from settings
 
-The `skillOverrides` setting controls skill visibility from your [settings](/docs/en/settings) instead of the skill's own frontmatter. Use it for skills whose SKILL.md you don't want to edit, such as ones checked into a shared project repo. The `/skills` menu writes it for you: highlight a skill and press `Space` to cycle states, then `Enter` to save to `.claude/settings.local.json`.
+The `skillOverrides` setting controls skill visibility from your [settings](/docs/en/settings) instead of the skill's own frontmatter. Use it for skills whose SKILL.md you don't want to edit, such as ones checked into a shared project repo. The `/skills` menu writes it for you: highlight a skill and press `Space` to cycle states, then `Esc` to save to `.claude/settings.local.json`.
 
 Each key is a skill name and each value is one of four states:
 
@@ -833,7 +836,7 @@ Skills can be distributed at different scopes depending on your audience:
 
 ### Generate visual output
 
-Skills can bundle and run scripts in any language, giving Claude capabilities beyond what's possible in a single prompt. One powerful pattern is generating visual output: interactive HTML files that open in your browser for exploring data, debugging, or creating reports.
+Skills can bundle and run scripts in any language, giving Claude capabilities beyond what's possible in a single prompt. One pattern is generating visual output: interactive HTML files that open in your browser for exploring data, debugging, or creating reports.
 
 This example creates a codebase explorer: an interactive tree view where you can expand and collapse directories, see file sizes at a glance, and identify file types by color.
 

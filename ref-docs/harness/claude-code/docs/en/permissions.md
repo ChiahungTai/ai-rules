@@ -34,10 +34,6 @@ When the directory you started Claude Code in is what makes the option's label t
 
 Approve the action once, or add the rule yourself in [`/permissions`](#manage-permissions).
 
-On a Bash or PowerShell permission prompt, press `Ctrl+E` to show an explanation of the command: what it does, why Claude is running it, and what could go wrong, labeled **Low risk**, **Med risk**, or **High risk**. Claude Code sends the command and Claude's own description of the call to the model to generate the explanation only when you press `Ctrl+E`, not on every prompt. Showing the explanation doesn't run the command; press `Ctrl+E` again to hide it.
-
-To turn the shortcut off, set [`permissionExplainerEnabled`](/docs/en/settings-reference#permissionexplainerenabled) to `false` in `~/.claude.json`.
-
 ### Add a comment when you answer a permission prompt
 
 You can attach a note to Claude when you approve or deny a single action. On most permission prompts, including Bash, PowerShell, file, and MCP tool prompts, move to **Yes** or **No** and press `Tab` to open a comment field on that option. WebFetch and browser prompts don't offer the field. The options that allow the action for the rest of the session or save a rule don't take one either.
@@ -222,6 +218,8 @@ Bash rules match the whole command text, with `*` standing in for any text. [Wil
   Claude Code is aware of shell operators, so a rule like `Bash(safe-cmd *)` won't give it permission to run the command `safe-cmd && other-cmd`. The recognized command separators are `&&`, `||`, `;`, `|`, `|&`, `&`, and newlines. A rule must match each subcommand independently.
 </Tip>
 
+When `&&` or `||` has nothing after it, such as in `npm test &&`, Claude Code treats the command as unparseable and doesn't split it into subcommands for allow-rule matching, so a rule such as `Bash(npm *)` doesn't approve it.
+
 When you approve a compound command with "Yes, and don't ask again", Claude Code saves a separate rule for each subcommand that requires approval, rather than a single rule for the full compound string. For example, approving `git status && npm test` saves a rule for `npm test`, so future `npm test` invocations are recognized regardless of what precedes the `&&`. Subcommands like `cd` into a subdirectory generate their own Read rule for that path. Up to 5 rules may be saved for a single compound command.
 
 <h4 id="process-wrappers">
@@ -240,7 +238,7 @@ Exec wrappers such as `watch`, `setsid`, `ionice`, and `flock` can't be auto-app
 
 #### Read-only commands
 
-Claude Code recognizes a built-in set of Bash commands as read-only and runs them without a permission prompt in every mode. These include `ls`, `cat`, `echo`, `pwd`, `head`, `tail`, `grep`, `find`, `wc`, `which`, `diff`, `stat`, `du`, `cd`, and read-only forms of `git`. The set is not configurable; to require a prompt for one of these commands, add an `ask` or `deny` rule for it.
+Claude Code recognizes a built-in set of Bash commands as read-only and runs them without a permission prompt in every mode, except for a path that [`permissions.blockReadsOutsideWorkingDirectories`](/docs/en/settings-reference#permissions-blockreadsoutsideworkingdirectories) fences. The set includes `ls`, `cat`, `echo`, `pwd`, `head`, `tail`, `grep`, `find`, `wc`, `which`, `diff`, `stat`, `du`, `cd`, and read-only forms of `git`. The set is not configurable; to require a prompt for one of these commands, add an `ask` or `deny` rule for it.
 
 A redirect such as `ls > out.txt` adds a check on the target. See [Redirections](#redirections).
 
@@ -401,6 +399,10 @@ When Claude accesses a symlink, permission rules check two paths: the symlink it
 
 For example, with `Read(./project/**)` allowed and `Read(~/.ssh/**)` denied, a symlink at `./project/key` pointing to `~/.ssh/id_rsa` is blocked: the target fails the allow rule and matches the deny rule.
 
+When a tool opens an approved file, Claude Code [confirms the path still resolves to the location the permission check approved](/docs/en/errors#refusing-after-a-symlink-changed).
+
+Grep and Glob search the directory the `path` argument resolves to. Claude Code applies `Read` deny rules to that directory.
+
 ### WebFetch
 
 WebFetch rules use a `domain:` prefix and match against the hostname of the requested URL. Matching is case-insensitive, supports `*` wildcards, and strips a trailing `.` from both the rule and the hostname so `example.com.` and `example.com` are treated the same.
@@ -502,6 +504,8 @@ By default, Claude has access to files in the directory where you launched it. T
 
 Files in additional directories follow the same permission rules as the original working directory: they become readable without prompts, and file editing permissions follow the current permission mode.
 
+Set [`permissions.blockReadsOutsideWorkingDirectories`](/docs/en/settings-reference#permissions-blockreadsoutsideworkingdirectories) to make the file tools refuse the paths it fences in every permission mode. In auto mode, Claude Code offers to turn it on the first time Claude [reads outside the working directories](/docs/en/permission-modes#first-read-outside-the-working-directories).
+
 In background sessions on macOS, the session host requests access to protected folders such as `~/Desktop`, `~/Documents`, and `~/Downloads` separately from your terminal when Claude needs to read or write files there; if reads there fail with `Operation not permitted`, see [how to grant folder access to background sessions](/docs/en/agent-view#background-sessions-can’t-read-desktop-documents-or-downloads-on-macos).
 
 ### Move the session to another directory
@@ -563,7 +567,7 @@ Use both for defense-in-depth:
 
 When you enable sandboxing and leave `autoAllowBashIfSandboxed` at its default of `true`, sandboxed Bash commands run without prompting even if your permissions include a bare `Bash` ask rule, or the [equivalent `Bash(*)` form](#match-all-uses-of-a-tool): the sandbox boundary substitutes for that whole-tool prompt.
 
-In [plan mode](/docs/en/permission-modes#analyze-before-you-edit-with-plan-mode), Claude Code skips this substitution. Without an ask rule, the built-in read-only commands still run without prompting, and any other shell command goes through the regular permission flow while you are still planning; see [plan mode](/docs/en/permission-modes#analyze-before-you-edit-with-plan-mode) for how Claude Code gates commands there. With a bare `Bash` ask rule, every Bash command prompts, including sandboxed read-only commands, the same as outside sandboxing. Before v2.1.212, the substitution applied in plan mode as well.
+In [plan mode](/docs/en/permission-modes#analyze-before-you-edit-with-plan-mode), Claude Code skips this substitution. Without an ask rule, the [built-in read-only commands](#read-only-commands) still run without prompting, and any other shell command goes through the regular permission flow while you are still planning; see [plan mode](/docs/en/permission-modes#analyze-before-you-edit-with-plan-mode) for how Claude Code gates commands there. With a bare `Bash` ask rule, every Bash command prompts, including sandboxed read-only commands, the same as outside sandboxing. Before v2.1.212, the substitution applied in plan mode as well.
 
 These checks still apply:
 
@@ -577,7 +581,9 @@ Commands that won't run sandboxed, such as excluded commands, respect the bare `
 
 ## Managed settings
 
-For organizations that need centralized control, administrators deploy managed settings that user and project settings can't override, apart from a few [security-sensitive keys](/docs/en/settings#exceptions-to-managed-settings-precedence). [Deploy managed settings](/docs/en/managed-settings) covers the delivery mechanisms, precedence within the managed tier, and the [keys only managed settings can set](/docs/en/managed-settings#managed-only-settings), such as `allowManagedPermissionRulesOnly`, which limits permission rules to the managed source.
+For organizations that need centralized control, administrators deploy managed settings that user and project settings can't override, apart from a few [security-sensitive keys](/docs/en/settings#exceptions-to-managed-settings-precedence). [Deploy managed settings](/docs/en/managed-settings) covers the delivery mechanisms, precedence within the managed tier, and the [keys that only managed settings can set](/docs/en/managed-settings#managed-only-settings).
+
+One of those keys, [`allowManagedPermissionRulesOnly`](/docs/en/settings-reference#allowmanagedpermissionrulesonly), makes managed settings the only settings source of permission rules. Its entry lists every source Claude Code then ignores.
 
 `disableBypassPermissionsMode` is typically placed in managed settings to enforce organizational policy, but it works from any scope. A user can set it in their own settings to lock themselves out of bypass mode.
 

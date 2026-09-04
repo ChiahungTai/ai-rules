@@ -23,7 +23,7 @@ The SDK is available as a library for Python and TypeScript only. To drive the s
 
 ## Capabilities
 
-Everything that makes Claude Code powerful is available in the SDK.
+These Claude Code capabilities are available in the SDK:
 
 | Capability                   | What it does                                                                                 | Learn more                                                                                                                                                                                                     |
 | ---------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -84,8 +84,9 @@ Use of the Claude Agent SDK is governed by [Anthropic's Commercial Terms of Serv
 These resources cover deeper technical detail and example projects for building with the Agent SDK.
 
 * [Quickstart](/docs/en/agent-sdk/quickstart): build your first agent that finds and fixes bugs
+* [Migration guide](/docs/en/agent-sdk/migration-guide): migrate from the Claude Code SDK packages to the Agent SDK
 * [Agent loop](/docs/en/agent-sdk/agent-loop): how Claude plans, calls tools, and decides when a task is done
 * [Example agents](https://github.com/anthropics/claude-agent-sdk-demos): demo apps for local development
 * [TypeScript SDK](/docs/en/agent-sdk/typescript): full TypeScript API reference and examples
 * [Python SDK](/docs/en/agent-sdk/python): full Python API reference and examples
-* [Agent harness design](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code): how the Claude Code team uses dynamic workflows to orchestrate subagents at scale
+* [Agent harness design](https://claude.com/blog/a-harness-for-every-task-dynamic-workflows-in-claude-code): how the Claude Code team uses dynamic workflows to orchestrate many subagents at once

@@ -81,7 +81,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input="List open orders for customer CUST-12345.",
     parallel_tool_calls=False,
     tools=[
@@ -149,7 +149,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: 'List open orders for customer CUST-12345.',
   parallel_tool_calls: false,
   tools: [
@@ -216,7 +216,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": "List open orders for customer CUST-12345.",
         "parallel_tool_calls": False,
         "tools": [
@@ -276,7 +276,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": "List open orders for customer CUST-12345.",
   "parallel_tool_calls": false,
   "tools": [

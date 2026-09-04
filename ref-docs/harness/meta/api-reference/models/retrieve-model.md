@@ -51,7 +51,7 @@ client = OpenAI(
     api_key=os.environ["MODEL_API_KEY"],
 )
 
-response = client.models.retrieve("muse-spark-1.2")
+response = client.models.retrieve("muse-spark-1.3")
 
 print(response.model_dump_json(indent=2))
 ```
@@ -62,14 +62,14 @@ import os
 import requests
 
 response = requests.get(
-    "https://api.meta.ai/v1/models/muse-spark-1.2",
+    "https://api.meta.ai/v1/models/muse-spark-1.3",
     headers={"Authorization": f"Bearer {os.environ['MODEL_API_KEY']}"},
 )
 response.raise_for_status()
 print(json.dumps(response.json(), indent=2))
 ```
 ```shell title="curl"
-curl -X GET "https://api.meta.ai/v1/models/muse-spark-1.2" \
+curl -X GET "https://api.meta.ai/v1/models/muse-spark-1.3" \
   -H "Authorization: Bearer $MODEL_API_KEY"
 ```
 

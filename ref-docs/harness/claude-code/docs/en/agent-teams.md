@@ -144,19 +144,23 @@ each teammate.
 
 Claude Code picks each teammate's model from the first of these that applies:
 
-1. [`CLAUDE_CODE_SUBAGENT_MODEL`](/docs/en/model-config#environment-variables), when it's set to anything other than `inherit`.
-2. The model your spawn prompt names for that teammate.
-3. For an in-process teammate spawned from a [subagent definition](#use-subagent-definitions-for-teammates), the definition's `model`.
+1. The model your spawn prompt names for that teammate.
+2. For a teammate spawned from a [subagent definition](#use-subagent-definitions-for-teammates), the definition's `model`, where `inherit` selects the lead's model.
+3. [`CLAUDE_CODE_SUBAGENT_MODEL`](/docs/en/model-config#environment-variables), when it's set to anything other than `inherit`.
 4. The lead's current model.
 
+[`CLAUDE_CODE_SUBAGENT_MODEL_FORCE`](/docs/en/sub-agents#run-every-subagent-on-one-model) applies to teammates as well as to subagents.
+
+Before v2.1.251, `CLAUDE_CODE_SUBAGENT_MODEL` came first in this order.
+
 <Note>
-  `teammateDefaultModel` was removed in v2.1.234; Claude Code ignores a leftover value. Name the model in your prompt or set `CLAUDE_CODE_SUBAGENT_MODEL` instead.
+  `teammateDefaultModel` was removed in v2.1.234; Claude Code ignores a leftover value. Name the model in your prompt instead.
 </Note>
 
-Claude Code checks the model your prompt requests for a teammate, or the one `CLAUDE_CODE_SUBAGENT_MODEL` supplies, against your organization's [`availableModels`](/docs/en/model-config#restrict-model-selection) allowlist. When the allowlist blocks a value, Claude Code substitutes another model:
+Claude Code checks the model it selects for a teammate against your organization's [`availableModels`](/docs/en/model-config#restrict-model-selection) allowlist. When the allowlist blocks a value, Claude Code substitutes another model:
 
 * **Family alias such as `opus`**: On the Anthropic API and Claude Platform on AWS, Claude Code runs the teammate on the newest version of that family the allowlist permits. On providers with provider-specific model IDs, where the [substitution doesn't operate](/docs/en/model-config#restrict-model-selection), a blocked alias falls back like any other blocked value per the next bullet
-* **Any other blocked value, including a family alias on providers where the substitution doesn't operate or whose family has no permitted version**: Claude Code runs the teammate on the lead's model
+* **Any other blocked value, including a family alias on providers where the substitution doesn't operate, or one whose family has no permitted version**: Claude Code runs the teammate on the lead's model instead. If you set `CLAUDE_CODE_SUBAGENT_MODEL`, Claude Code tries that model first, under these same rules
 
 Teammates inherit the lead's [effort level](/docs/en/model-config#adjust-effort-level). In split-pane mode this applies from v2.1.186; earlier versions did not pass the lead's session effort to split-pane teammates.
 
@@ -269,7 +273,7 @@ Spawn a teammate using the security-reviewer agent type to audit the auth module
 Claude Code reads the subagent definition you named and applies these parts of it to the teammate. Where a part depends on the teammate's [display mode](#choose-a-display-mode), the entry says so:
 
 * **`tools`**: Claude Code limits the teammate to the tools in the definition's `tools` list. For an in-process teammate, Claude Code adds `SendMessage` to that list, and in a [session that has the Task tools](/docs/en/tools-reference#task-tool-availability) it adds `TaskCreate`, `TaskGet`, `TaskList`, and `TaskUpdate` too.
-* **`model`**: for an in-process teammate, Claude Code uses the definition's `model` when neither `CLAUDE_CODE_SUBAGENT_MODEL` nor your spawn prompt names a model. A split-pane teammate doesn't use the definition's `model`. See [how Claude Code picks a teammate's model](#specify-teammates-and-models).
+* **`model`**: Claude Code uses the definition's `model` in either display mode when your spawn prompt doesn't name one. See [how Claude Code picks a teammate's model](#specify-teammates-and-models).
 * **Body**: for an in-process teammate, Claude Code appends the definition's body to its default system prompt as additional instructions. For a split-pane teammate, Claude Code uses the body in place of its default system prompt.
 * **`skills`**: Claude Code doesn't apply the definition's `skills` to a teammate in either display mode. The teammate loads skills from your project and user settings.
 * **`mcpServers`**: for a split-pane teammate, Claude Code applies the definition's `mcpServers` under the [rules for that field](/docs/en/sub-agents#scope-mcp-servers-to-a-subagent), which cover a session started with `--agent` as well. An in-process teammate ignores the field and loads MCP servers from your project and user settings.
@@ -296,7 +300,7 @@ Each teammate has its own context window. When spawned, a teammate loads the sam
 **How teammates share information:**
 
 * **Automatic message delivery**: when teammates send messages, they're delivered automatically to recipients. The lead doesn't need to poll for updates.
-* **Idle notifications**: when a teammate finishes and stops, it automatically notifies the lead. The notification doesn't carry the teammate's output; a teammate shares results by messaging the lead or updating the shared task list. As of v2.1.198, a teammate whose turn ends on an API error notifies the lead that it failed and includes the error text, instead of appearing to finish normally.
+* **Idle notifications**: when a teammate finishes and stops, it automatically notifies the lead and includes its final answer in the notification. A teammate whose turn ends on an API error notifies the lead that it failed and includes the error text.
 * **Shared task list**: [agents that have the Task tools](/docs/en/tools-reference#task-tool-availability) can see task status and claim available work.
 * **Teammate messaging**: send a message to one specific teammate by name. To reach everyone, send one message per recipient.
 
@@ -364,7 +368,7 @@ There's no hard limit on the number of teammates, but practical constraints appl
 
 Start with 3-5 teammates for most workflows. This balances parallel work with manageable coordination. If you have 15 independent tasks, 3 teammates is a good starting point.
 
-Scale up only when the work genuinely benefits from having teammates work simultaneously. Three focused teammates often outperform five scattered ones.
+Scale up only when the work benefits from having teammates work simultaneously. Three focused teammates often outperform five scattered ones.
 
 ### Size tasks appropriately
 
@@ -413,12 +417,9 @@ If teammates aren't appearing after you ask Claude to spawn them:
 
 ### Claude spawns teammates instead of subagents
 
-While agent teams are enabled, a subagent that Claude names in the lead's session launches as a teammate. Claude [can name subagents on its own](#how-claude-starts-agent-teams), so this can happen during delegation you never framed as team work. Subagents and teammates report back differently:
+While agent teams are enabled, a subagent that Claude names in the lead's session launches as a teammate. Claude [can name subagents on its own](#how-claude-starts-agent-teams), so this can happen during delegation you never framed as team work.
 
-* **Subagents**: Claude receives the subagent's result when it completes.
-* **Teammates**: the [idle notification](#context-and-communication) reports that the teammate stopped, without its output.
-
-An orchestration flow that waits on subagent results can stall. To make named subagents launch as subagents again, turn agent teams off by setting `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to `0`:
+To make named subagents launch as subagents again, turn agent teams off by setting `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to `0`:
 
 ```json settings.json theme={null}
 {

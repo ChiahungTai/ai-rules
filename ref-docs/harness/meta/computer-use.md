@@ -10,7 +10,7 @@ cms:
 
 # Build a computer-use agent
 
-Give Muse Spark a screen and let it drive. A computer-use agent (CUA) looks at a screenshot, decides where to click and what to type, and works a browser or desktop toward a goal one action at a time. You expose the environment as a developer-defined [function tool](/docs/tool-calling): the model proposes actions, your harness executes them, and you hand back the next screenshot.
+Give [Muse Spark](/docs/models#muse-spark) a screen and let it drive. A computer-use agent (CUA) looks at a screenshot, decides where to click and what to type, and works a browser or desktop toward a goal one action at a time. You expose the environment as a developer-defined [function tool](/docs/tool-calling): the model proposes actions, your harness executes them, and you hand back the next screenshot.
 
 This guide shows the loop, the tool contract, and the harness responsibilities that make CUA reliable — coordinates, batching, context budgeting, and knowing when to stop.
 

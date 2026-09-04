@@ -32,8 +32,8 @@ Everything you need to make your first call.
 |  |  |
 | --- | --- |
 | **Base URL** | `https://api.meta.ai/v1` |
-| **[Standard tier](/docs/pricing-rate-limits#standard-tier) models** | `muse-spark-1.1`, `muse-spark-1.2` |
-| **[Contributor tier](/docs/pricing-rate-limits#contributor-tier) models** | `muse-spark-1.2-contributor` |
+| **[Standard tier](/docs/pricing-rate-limits#standard-tier) models** | `muse-spark-1.3`, `muse-spark-1.2`, `muse-spark-1.1` |
+| **[Contributor tier](/docs/pricing-rate-limits#contributor-tier) models** | `muse-spark-1.3-contributor`, `muse-spark-1.2-contributor` |
 | **Context window** | 1,048,576 tokens |
 | **Auth** | Bearer token (`MODEL_API_KEY`) |
 | **Pricing** | Pay-as-you-go; see [Pricing and rate limits](/docs/pricing-rate-limits) |

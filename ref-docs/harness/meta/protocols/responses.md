@@ -14,6 +14,8 @@ Build multi-step agents that keep reasoning intact across turns. The Responses A
 
 Choose how context travels. Use [stateless encrypted reasoning replay](#reasoning-items) when you want full control and no server state. Use `previous_response_id` when you want the server to manage history. For single-shot or straightforward turns that plug into existing OpenAI code without reasoning continuity, [Chat Completions](/docs/protocols/chat-completions) is simpler.
 
+The Responses API serves [Muse Spark](/docs/models#muse-spark) (text) and [Muse Image](/docs/models#muse-image) for image generation. For which models run on which endpoint, see [model availability](/docs/models#model-availability).
+
 ## How it works {#how-it-works}
 
 With [chat completion](/docs/protocols/chat-completions), you manage history client-side: you resend the full `messages` array each turn and the payload grows as the conversation grows.
@@ -48,7 +50,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input="What is the capital of France?",
 )
 
@@ -68,7 +70,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: 'What is the capital of France?',
 });
 
@@ -87,7 +89,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": "What is the capital of France?",
     },
 )
@@ -99,7 +101,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": "What is the capital of France?"
 }'
 ```
@@ -256,7 +258,7 @@ Replay reasoning items in multi-step or agentic workflows. Without replay, the m
 
 ### Compacting conversations with reasoning {#compacting}
 
-Long agent loops can approach the context window. `truncation: "auto"` is accepted only for enabled models. For ordinary Responses requests it is an echoed compatibility no-op, so you still compact history yourself. For admitted private-preview native-computer requests it enables API-managed screenshot-history truncation with a fixed 30-screenshot trigger that drops the oldest 20. `"disabled"` (the default) and omission preserve history and return `HTTP 400` when context or replay safety limits are exceeded.
+Long agent loops can approach the context window. Model API does not trim for you: `truncation: "auto"` is rejected (`HTTP 400`, only the default `"disabled"` is accepted) and an over-context request fails with `HTTP 400`. You compact history yourself, and encrypted reasoning items shape how you do it.
 
 Encrypted reasoning items are opaque: you cannot summarize or rewrite one, only keep it whole or drop it. Compact at the level of whole turns.
 
@@ -374,7 +376,7 @@ client = OpenAI(
 )
 
 with client.responses.stream(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input="Explain how neural networks learn.",
 ) as stream:
     for event in stream:
@@ -396,7 +398,7 @@ const client = new OpenAI({
 });
 
 const stream = client.responses.stream({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: 'Explain how neural networks learn.',
 });
 
@@ -421,7 +423,7 @@ response = requests.post(
         "Accept": "text/event-stream",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": "Explain how neural networks learn.",
         "stream": True,
     },
@@ -451,7 +453,7 @@ curl -N -X POST "https://api.meta.ai/v1/responses" \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": "Explain how neural networks learn.",
   "stream": true
 }'
@@ -574,7 +576,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input="Who won the most recent Formula 1 race?",
     tools=[
         {

@@ -66,7 +66,7 @@ In bare mode Claude has access to the Bash, file read, and file edit tools. Pass
 
 If Claude starts a [background Bash task](/docs/en/tools-reference#bash-tool-behavior) during a `claude -p` run, for example a dev server or a watch build, that shell is terminated about five seconds after Claude has returned its final result and stdin has closed. The grace period lets a task that finishes right after the result still deliver its output. Before v2.1.163, a never-exiting background process would hold the `claude -p` invocation open indefinitely.
 
-Background [subagents](/docs/en/sub-agents) and workflows are exempt from the five-second grace because their result is part of the final output, so `claude -p` waits for them to complete. From v2.1.182, that wait is capped at ten minutes by default so a stuck background agent cannot hold the process open indefinitely. Adjust the cap with [`CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS`](/docs/en/env-vars), or set it to `0` to wait without a limit.
+Background [subagents](/docs/en/sub-agents) and workflows are exempt from the five-second grace because their result is part of the final output, so `claude -p` waits for them to complete. From v2.1.182, that wait is capped at ten minutes of continuous idle waiting by default, so a stuck background agent can't hold the process open indefinitely. Adjust the cap with [`CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS`](/docs/en/env-vars), or set it to `0` to wait without a limit.
 
 ### Stop a run with SIGTERM
 
@@ -189,7 +189,7 @@ When you enable either option, Claude Code forwards messages from [subagents at 
 
 #### Handle API retries
 
-When an API request fails with a retryable error, Claude Code emits a `system/api_retry` event before retrying. You can use this to surface retry progress or implement custom backoff logic.
+When an API request fails with a retryable error, Claude Code emits a `system/api_retry` event before retrying. On v2.1.246 or later, when a `401` or `403` rejects an [`apiKeyHelper`](/docs/en/settings-reference#apikeyhelper) credential, Claude Code makes the first two retries quietly with no event, then emits the event as usual from the third consecutive retry onward. The quiet retries still count toward `attempt`. You can use the event to show retry progress in your own interface.
 
 | Field            | Type            | Description                                                                                                                                                                                            |
 | ---------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -266,6 +266,26 @@ This example applies lint fixes with `acceptEdits` as the baseline:
 ```bash theme={null}
 claude -p "Apply the lint fixes" --permission-mode acceptEdits
 ```
+
+### Turn off permission prompts in unattended runs
+
+Pass `--permission-prompts none` when nobody is available to answer permission prompts, for example in a scheduled job. The flag matters most when your run has a permission host: an Agent SDK app with a [`canUseTool` callback](/docs/en/agent-sdk/user-input), or an MCP tool you pass with [`--permission-prompt-tool`](/docs/en/cli-reference#cli-flags). Without the flag, your run waits for that host to answer each permission request.
+
+With the flag, your run doesn't consult the host or wait on it. Anything that would prompt is denied unless a `PermissionRequest` hook allows it, Claude is told that nobody can approve the request and not to retry it, and the run continues. In a `-p` run with no host, these requests are denied either way, and the flag also tells Claude not to retry them. Permission rules, [`PermissionRequest` hooks](/docs/en/hooks#permissionrequest), and the permission mode you set still decide every call first; Claude Code denies only the requests that nothing else resolves.
+
+This example runs an unattended task in [auto mode](/docs/en/permission-modes#eliminate-prompts-with-auto-mode). The classifier reviews each action as usual, and Claude Code denies anything that would have fallen back to a prompt:
+
+```bash theme={null}
+claude -p "Update the dependency pins and run the tests" --permission-mode auto --permission-prompts none
+```
+
+With `--permission-prompts none`, Claude Code removes the tools that need an answer from a person, such as [`AskUserQuestion`](/docs/en/tools-reference#askuserquestion-tool-behavior), so Claude can't call them. Any [MCP elicitation request](/docs/en/mcp#respond-to-mcp-elicitation-requests) that no [`Elicitation` hook](/docs/en/hooks#elicitation) answers is cancelled.
+
+With `--output-format stream-json`, denials appear as `permission_denied` system messages, and the final result message lists them in `permission_denials`.
+
+<Note>
+  The `--permission-prompts` flag requires Claude Code v2.1.259 or later. Earlier versions reject it with an unknown-option error.
+</Note>
 
 ### Create a commit
 

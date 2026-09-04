@@ -18,24 +18,23 @@ There are 3 subscription plans available for Muse Code:
 
 **Everyday Usage**:
 
-- Access to Muse Spark 1.2
-- Send 10-50 requests every 5 hours, including image and video uploads
+- Access to the latest Muse models
+- Send 10-50 prompts every 5 hours, including image and video uploads
 - Use voice mode
 - Get access to web search
 
 **High Usage**:
 
+- Everything from the Everyday Usage plan
 - 3x more usage than the Everyday Usage plan
-- More Muse Spark 1.2 usage
-- More user requests
-- More multimodel inputs
-- Access to the latest models
+- More prompts with the latest Muse models
+- More multimodal inputs
 
 **Power Usage**:
 
+- Everything from the High Usage plan
 - 10x more usage than the Everyday Usage plan
-- Expanded Muse Spark 1.2 usage
-- Expanded user requests
+- Expanded prompts with the latest Muse models
 - Early access to new features
 - Higher file uploads
 

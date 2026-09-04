@@ -16,7 +16,9 @@ You pay only for what you use. Meta Model API bills text models per token, image
 
 ### Standard tier {#standard-tier}
 
-Models: `muse-spark-1.1`, `muse-spark-1.2`. Standard pricing; your prompts and completions are not used to train Meta models. Both checkpoints share the same standard pricing:
+Models: `muse-spark-1.3`, `muse-spark-1.2`, `muse-spark-1.1`.
+
+Standard pricing; your prompts and completions are not used to train Meta models. These versions share the same standard pricing:
 
 | Usage | Price per 1M tokens |
 | :---- | :---- |
@@ -26,7 +28,9 @@ Models: `muse-spark-1.1`, `muse-spark-1.2`. Standard pricing; your prompts and c
 
 ### Contributor tier {#contributor-tier}
 
-Model: `muse-spark-1.2-contributor`. Heavily discounted token pricing in exchange for permission to use your prompts and completions to train future Meta models. It lowers the barrier to entry for prototyping, testing integrations, and scaling experiments where training on your data is acceptable.
+Models: `muse-spark-1.3-contributor`, `muse-spark-1.2-contributor`.
+
+Heavily discounted token pricing in exchange for permission to use your prompts and completions to train future Meta models. It lowers the barrier to entry for prototyping, testing integrations, and scaling experiments where training on your data is acceptable.
 
 | Usage | Price per 1M tokens |
 | :---- | :---- |
@@ -48,7 +52,7 @@ Streaming and non-streaming transcription are priced the same. ZDR is priced at 
 
 Cached input costs less. When part of your prompt matches a [cached prefix](/docs/prompt-caching), you pay the cached-input rate for those tokens. Check `cached_tokens` in the response to see how many were served from cache.
 
-**Web search grounding** costs **$2.50 per 1,000 search queries**, in addition to the request's token cost. This applies to the [`web_search` tool](/docs/search-grounding) on text models such as Muse Spark.
+**Web search grounding** costs **$2.50 per 1,000 search queries**, in addition to the request's token cost. This applies to the [`web_search` tool](/docs/search-grounding) on text models such as [Muse Spark](/docs/models#muse-spark).
 
 > [!NOTE] Muse Image search is included
 > [Muse Image](/docs/models#muse-image)'s built-in web and image search is part of its per-image price and isn't charged separately. See [Image generation](#image-generation).
@@ -63,7 +67,7 @@ There is **no long-context premium**: you pay the same rate whether your context
 
 Rate limits control usage for your team and are set by pricing tier or model family.
 
-For token-based models, the Standard tier covers `muse-spark-1.1` and `muse-spark-1.2`; the Contributor tier covers `muse-spark-1.2-contributor`.
+For token-based models, the Standard tier covers `muse-spark-1.3`, `muse-spark-1.2`, and `muse-spark-1.1`; the Contributor tier covers `muse-spark-1.3-contributor` and `muse-spark-1.2-contributor`.
 
 | Tier | Requests per minute (RPM) | Tokens per minute (TPM) |
 | :---- | :---- | :---- |

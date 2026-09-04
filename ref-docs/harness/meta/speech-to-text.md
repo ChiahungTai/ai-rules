@@ -10,7 +10,7 @@ cms:
 
 # Speech to text
 
-Muse Voice Transcribe is Meta's speech-to-text model on Meta Model API. Transcribe live audio or an existing recording, with speech-turn detection, speaker labels, and vocabulary biasing.
+[Muse Voice Transcribe](/docs/models#muse-voice-transcribe) is Meta's speech-to-text model on Meta Model API. Transcribe live audio or an existing recording, with speech-turn detection, speaker labels, and vocabulary biasing.
 
 ## Available endpoints {#endpoints}
 

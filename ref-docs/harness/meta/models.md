@@ -14,36 +14,32 @@ Meta ships four model families. **Muse Spark**, **Muse Image**, and **Muse Voice
 
 ## Muse Spark {#muse-spark}
 
-Muse Spark is Meta's model for agentic and coding work — multi-step tool loops, software engineering assistants, and long-context reasoning. Three model IDs serve the family:
+Muse Spark is Meta's model for agentic and coding work — multi-step tool loops, software engineering assistants, and long-context reasoning. Use it for [chat completion](/docs/protocols/chat-completions), [image understanding](/docs/image-understanding), [video and audio understanding](/docs/video-understanding), [tool calling](/docs/tool-calling), [structured output](/docs/structured-output), and [search grounding](/docs/search-grounding).
+
+Muse Spark comes in three versions, each sharing the same modalities and context window, and differing only by capability:
+
+- **Muse Spark 1.3** (`muse-spark-1.3`): the latest version, tuned for agentic workflows (multi-step tool, browser, and long-horizon tasks) with improved coding over 1.2. Supports all [reasoning effort](/docs/reasoning) levels, including the `"max"` level for extended reasoning (available on Standard tier only). **Recommended for new work.**
+- **Muse Spark 1.2** (`muse-spark-1.2`): the previous version.
+- **Muse Spark 1.1** (`muse-spark-1.1`): the original version.
+
+`muse-spark-1.3` is the default model in the code examples throughout these docs.
+
+### Available Muse Spark models
 
 | Model ID | Tier | Input modalities | Output modalities | Context window |
 | :---- | :---- | :---- | :---- | :---- |
-| `muse-spark-1.1` | [Standard](/docs/pricing-rate-limits#standard-tier) | Text, image, video, PDF | Text | 1,048,576 tokens |
-| `muse-spark-1.2` | [Standard](/docs/pricing-rate-limits#standard-tier) | Text, image, video, PDF | Text | 1,048,576 tokens |
-| `muse-spark-1.2-contributor` | [Contributor](/docs/pricing-rate-limits#contributor-tier) | Text, image, video, PDF | Text | 1,048,576 tokens |
+| `muse-spark-1.3` | [Standard](/docs/pricing-rate-limits#standard-tier) | Text, image, video, audio\*, PDF | Text | 1,048,576 tokens |
+| `muse-spark-1.3-contributor` | [Contributor](/docs/pricing-rate-limits#contributor-tier) | Text, image, video, audio\*, PDF | Text | 1,048,576 tokens |
+| `muse-spark-1.2` | [Standard](/docs/pricing-rate-limits#standard-tier) | Text, image, video, audio, PDF | Text | 1,048,576 tokens |
+| `muse-spark-1.2-contributor` | [Contributor](/docs/pricing-rate-limits#contributor-tier) | Text, image, video, audio, PDF | Text | 1,048,576 tokens |
+| `muse-spark-1.1` | [Standard](/docs/pricing-rate-limits#standard-tier) | Text, image, video, audio, PDF | Text | 1,048,576 tokens |
 
-All three IDs serve the Muse Spark family and share modalities and a 1,048,576-token context window. They differ by checkpoint and **tier**:
-
-- **`muse-spark-1.1`** — the earlier checkpoint, on the **[Standard](/docs/pricing-rate-limits#standard-tier)** tier.
-- **`muse-spark-1.2`** — an updated checkpoint with slightly higher performance, also on the **[Standard](/docs/pricing-rate-limits#standard-tier)** tier.
-- **`muse-spark-1.2-contributor`** — the `muse-spark-1.2` checkpoint on the discounted **[Contributor](/docs/pricing-rate-limits#contributor-tier)** tier, where your prompts and completions may be used to train future Meta models.
-
-`muse-spark-1.2` is the default model in the code examples throughout these docs.
-
-Muse Spark is multimodal: it takes text, image, video, audio, and PDF as input and generates text. Use it for [chat completion](/docs/protocols/chat-completions), [image understanding](/docs/image-understanding), [video and audio understanding](/docs/video-understanding), [tool calling](/docs/tool-calling), [structured output](/docs/structured-output), and [search grounding](/docs/search-grounding).
-
-Use [Muse Voice Transcribe](#muse-voice-transcribe) instead when you need a dedicated speech-to-text API for live or file transcription.
+> [!NOTE]
+> \* Audio understanding in Muse Spark 1.3 is currently not fully supported, and response quality for requests including audio content may be degraded. For audio, use Muse Spark 1.2, or [Muse Voice Transcribe](#muse-voice-transcribe) for dedicated speech-to-text.
 
 ### Tiers {#tiers}
 
-Tier is a model attribute: it sets the price you pay and whether your data may be used to train future Meta models.
-
-- **[Standard](/docs/pricing-rate-limits#standard-tier)** (`muse-spark-1.1`, `muse-spark-1.2`) — standard pricing; your prompts and completions are not used to train Meta models.
-- **[Contributor](/docs/pricing-rate-limits#contributor-tier)** (`muse-spark-1.2-contributor`) — heavily discounted pricing in exchange for permission to use your prompts and completions to train future Meta models.
-
-The [contributor tier](/docs/pricing-rate-limits#contributor-tier) lowers the barrier to entry: it gives you room to prototype, test integrations, and scale experiments without the usual cost overhead, in return for permission to train on your data.
-
-See [Pricing and rate limits](/docs/pricing-rate-limits) for per-tier pricing and model availability.
+Every version is offered on the **Standard** tier (standard pricing; your data is never used for training). Versions 1.3 and 1.2 also offer a discounted **[Contributor](/docs/pricing-rate-limits#contributor-tier)** variant (`muse-spark-1.3-contributor`, `muse-spark-1.2-contributor`) that trades a lower price for permission to train on your prompts and completions — room to prototype and scale experiments where that's acceptable. See [Pricing and rate limits](/docs/pricing-rate-limits) for per-tier rates.
 
 ## Muse Image {#muse-image}
 
@@ -75,15 +71,27 @@ Start with the [Muse Voice Transcribe guide](/docs/speech-to-text). See [Pricing
 
 Muse Glimmer is Meta's open-weight multimodal model, distilled from Muse Spark and built to run on your own hardware. Unlike Muse Spark, Muse Image, and Muse Voice Transcribe, you don't call it over Model API — you download the weights and serve it through a runtime such as vLLM, SGLang, llama.cpp, or ExecuTorch.
 
-Because it's self-hosted, Muse Glimmer has its own documentation section covering how to get the model, prompt it, deploy it, and customize it — rather than the API tiers and specs listed above.
+Muse Glimmer has its own documentation section covering how to get, prompt, deploy, and customize the model:
 
 - **[Muse Glimmer overview](/docs/muse-glimmer)**: variants, architecture, license, and launch partners.
 - **[Get the model](/docs/muse-glimmer/get-the-model)**: download the weights and verify your setup.
 - **[Run inference](/docs/muse-glimmer/deploy)**: pick a runtime and serve it locally.
 
+## Model availability {#model-availability}
+
+Each model is served on a specific set of Meta Model API endpoints. Find where to call the one you want:
+
+| Model | Available on |
+| :---- | :---- |
+| [Muse Spark](#muse-spark) | [Responses](/docs/protocols/responses), [Chat Completions](/docs/protocols/chat-completions), [Messages](/docs/protocols/messages) |
+| [Muse Image](#muse-image) | [Responses](/docs/protocols/responses), [Image generation](/docs/image-generation) |
+| [Muse Voice Transcribe](#muse-voice-transcribe) | [Transcribe](/docs/speech-to-text) |
+
+[Muse Glimmer](#muse-glimmer) is self-hosted and isn't served on any Meta Model API endpoint.
+
 ## List models via the API {#list-models}
 
-Query the catalog programmatically when you need to check what's enabled for your team. This returns the API-hosted models (Muse Spark and Muse Image); Muse Glimmer is open-weight and isn't served through this endpoint.
+Query the catalog programmatically when you need to check what's enabled for your team. This returns the API-hosted models; self-hosted Muse Glimmer isn't included.
 
 ```python title="Python (OpenAI SDK)"
 import os

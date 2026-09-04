@@ -10,7 +10,7 @@ cms:
 
 # Use Model API with coding agents
 
-Meta Model API works with the coding agents you already use. OpenAI-compatible agents connect to the endpoint at `https://api.meta.ai/v1` (Responses or Chat Completions); Anthropic-format agents like Claude Code connect through the [Messages API](/docs/protocols/messages) at `https://api.meta.ai`. Either way, Muse Spark drives your agentic workflows — file edits, shell commands, tool calls, and multi-step coding loops.
+Meta Model API works with the coding agents you already use. OpenAI-compatible agents connect to the endpoint at `https://api.meta.ai/v1` (Responses or Chat Completions); Anthropic-format agents like Claude Code connect through the [Messages API](/docs/protocols/messages) at `https://api.meta.ai`. Either way, [Muse Spark](/docs/models#muse-spark) drives your agentic workflows — file edits, shell commands, tool calls, and multi-step coding loops.
 
 This guide covers the general setup pattern and then shows concrete configuration for three popular terminal agents: [OpenCode](#setup-opencode) (OpenAI-compatible), [Codex](#setup-codex) (Responses API), and [Claude Code](#setup-claude-code) (Anthropic Messages).
 
@@ -37,14 +37,14 @@ Add a new provider to my config for Meta Model API:
 - Provider key: "meta", display name "Meta Model API"
 - npm adapter: "@ai-sdk/openai" (targets the Responses API)
 - Base URL: https://api.meta.ai/v1
-- Model: "muse-spark-1.2"
+- Model: "muse-spark-1.3"
 - Reasoning: true, with reasoningEffort "high", reasoningSummary "auto", and include ["reasoning.encrypted_content"]
 - Limits: context 1048576, output 131072
 - Modalities: input ["text", "image", "pdf", "video"], output ["text"]
 - Read the key from the MODEL_API_KEY environment variable
 ```
 
-Select `muse-spark-1.2` and start coding. That's it.
+Select `muse-spark-1.3` and start coding. That's it.
 
 Driving [Codex](#setup-codex) or [Claude Code](#setup-claude-code), or prefer to write the config yourself? The per-agent setup below has copy-paste configs and notes for each.
 
@@ -56,7 +56,7 @@ The connection requires three things:
 
 1. **Base URL**: `https://api.meta.ai/v1`
 2. **API key**: your Model API key (generate one at [dashboard](/))
-3. **Model ID**: `muse-spark-1.2`
+3. **Model ID**: `muse-spark-1.3`
 
 Most OpenAI-compatible agents surface these as "custom provider" or "OpenAI-compatible" settings. Anthropic-format agents like Claude Code connect through the [Messages API](/docs/protocols/messages) at `https://api.meta.ai` instead; see [Set up Claude Code](#setup-claude-code).
 
@@ -121,7 +121,7 @@ Add a new provider to my opencode.json config with the following details:
 - Provider name: "Meta Model API"
 - npm adapter: "@ai-sdk/openai"
 - Base URL in options: "https://api.meta.ai/v1"
-- Model key: "muse-spark-1.2" with name "muse-spark-1.2"
+- Model key: "muse-spark-1.3" with name "muse-spark-1.3"
 - Capabilities: reasoning = true
 - Limits: context = 1048576, output = 131072
 - Modalities: input = ["text", "image", "pdf", "video"], output = ["text"]
@@ -144,8 +144,8 @@ Add this block to your `opencode.json`:
         "baseURL": "https://api.meta.ai/v1"
       },
       "models": {
-        "muse-spark-1.2": {
-          "name": "muse-spark-1.2",
+        "muse-spark-1.3": {
+          "name": "muse-spark-1.3",
           "reasoning": true,
           "limit": {
             "context": 1048576,
@@ -181,8 +181,8 @@ If you don't need reasoning continuity or native PDF input, the simpler `@ai-sdk
         "baseURL": "https://api.meta.ai/v1"
       },
       "models": {
-        "muse-spark-1.2": {
-          "name": "muse-spark-1.2",
+        "muse-spark-1.3": {
+          "name": "muse-spark-1.3",
           "limit": {
             "context": 1048576,
             "output": 131072
@@ -232,9 +232,9 @@ After editing, restart OpenCode for the new provider to take effect.
 Register Model API as a provider in your `config.toml` and point the default model at it:
 
 ```toml title="~/.codex/config.toml"
-model = "muse-spark-1.2"
+model = "muse-spark-1.3"
 model_provider = "meta"
-model_reasoning_effort = "high"           # none | minimal | low | medium | high | xhigh
+model_reasoning_effort = "high"           # none | minimal | low | medium | high | xhigh | max
 model_reasoning_summary = "auto"
 model_context_window = 1048576            # Muse Spark: 1M-token context
 model_supports_reasoning_summaries = true
@@ -247,11 +247,11 @@ env_key = "MODEL_API_KEY"
 wire_api = "responses"
 ```
 
-- **`model` / `model_provider`**: select `muse-spark-1.2`, served by the `meta` provider block below.
+- **`model` / `model_provider`**: select `muse-spark-1.3`, served by the `meta` provider block below.
 - **`base_url`**: the Model API base (`https://api.meta.ai/v1`, no trailing slash).
 - **`env_key`**: the environment variable Codex reads your key from. Codex sends it as `Authorization: Bearer <key>`.
 - **`wire_api = "responses"`**: drives Muse Spark over the Responses API, which replays reasoning across turns.
-- **`model_reasoning_effort`**: `high` is a strong default; `xhigh` is the maximum reasoning depth. See [Reasoning](/docs/reasoning).
+- **`model_reasoning_effort`**: `high` is a strong default; `xhigh` and `max` offer deeper reasoning (the `max` level is available on Standard-tier `muse-spark-1.3` only, not available on the Contributor variant). See [Reasoning](/docs/reasoning).
 
 Export your key and launch:
 
@@ -270,7 +270,7 @@ export MODEL_API_KEY="<your-model-api-key>"
 mkdir -p /tmp/codex-modelapi
 
 CODEX_HOME=/tmp/codex-modelapi codex \
-  -m muse-spark-1.2 \
+  -m muse-spark-1.3 \
   -c 'model_provider="meta"' \
   -c 'model_providers.meta.name="Meta Model API"' \
   -c 'model_providers.meta.base_url="https://api.meta.ai/v1"' \
@@ -292,7 +292,7 @@ Because `CODEX_HOME` holds all of Codex's config, auth, and history, this run st
 | File read/edit/create | ✓ | Via `apply_patch` |
 | Shell commands | ✓ | Via `exec_command` |
 | Tool calling | ✓ | Function tools over the Responses `tools` interface |
-| Reasoning effort | ✓ | `model_reasoning_effort`, including `xhigh` |
+| Reasoning effort | ✓ | `model_reasoning_effort`, including `xhigh` and `max` |
 | Image input | ✓ | Attach with `-i` (see usage above) |
 | 1M context | ✓ | `model_context_window = 1048576` |
 
@@ -315,19 +315,19 @@ Claude Code reads its provider settings from environment variables. Set these, t
 ```shell
 export ANTHROPIC_BASE_URL="https://api.meta.ai"
 export ANTHROPIC_AUTH_TOKEN="$MODEL_API_KEY"
-export ANTHROPIC_MODEL="muse-spark-1.2"
-export ANTHROPIC_DEFAULT_OPUS_MODEL="muse-spark-1.2"
-export ANTHROPIC_DEFAULT_SONNET_MODEL="muse-spark-1.2"
-export ANTHROPIC_DEFAULT_HAIKU_MODEL="muse-spark-1.2"
-export CLAUDE_CODE_SUBAGENT_MODEL="muse-spark-1.2"
+export ANTHROPIC_MODEL="muse-spark-1.3"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="muse-spark-1.3"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="muse-spark-1.3"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="muse-spark-1.3"
+export CLAUDE_CODE_SUBAGENT_MODEL="muse-spark-1.3"
 export ENABLE_TOOL_SEARCH="true"
 ```
 
 - **`ANTHROPIC_BASE_URL`**: the Model API base host. Claude Code appends `/v1/messages`.
 - **`ANTHROPIC_AUTH_TOKEN`**: your Model API key. Claude Code sends it as `Authorization: Bearer <key>`, which is how Model API authenticates. Use this rather than `ANTHROPIC_API_KEY`, which sends an `x-api-key` header instead.
 - **`ANTHROPIC_MODEL`**: the model for the main agent loop.
-- **`ANTHROPIC_DEFAULT_OPUS_MODEL`, `ANTHROPIC_DEFAULT_SONNET_MODEL`, `ANTHROPIC_DEFAULT_HAIKU_MODEL`**: the models Claude Code uses when work routes through the `opus`, `sonnet`, or `haiku` alias instead of `ANTHROPIC_MODEL`. Claude Code resolves a model this way in several situations — Plan Mode and multi-agent (subagent) workflows lean on the `opus`/`sonnet` tiers, and `haiku` backs lightweight background tasks such as commit messages and summaries. Point all three at `muse-spark-1.2`; otherwise those paths try to reach a Claude model Model API doesn't serve. (Older Claude Code versions read the deprecated `ANTHROPIC_SMALL_FAST_MODEL` for the background model.)
-- **`CLAUDE_CODE_SUBAGENT_MODEL`**: the model Claude Code runs subagents with. Pin it to `muse-spark-1.2` so subagent and orchestration workflows stay on Model API instead of falling back to a Claude model.
+- **`ANTHROPIC_DEFAULT_OPUS_MODEL`, `ANTHROPIC_DEFAULT_SONNET_MODEL`, `ANTHROPIC_DEFAULT_HAIKU_MODEL`**: the models Claude Code uses when work routes through the `opus`, `sonnet`, or `haiku` alias instead of `ANTHROPIC_MODEL`. Claude Code resolves a model this way in several situations — Plan Mode and multi-agent (subagent) workflows lean on the `opus`/`sonnet` tiers, and `haiku` backs lightweight background tasks such as commit messages and summaries. Point all three at `muse-spark-1.3`; otherwise those paths try to reach a Claude model Model API doesn't serve. (Older Claude Code versions read the deprecated `ANTHROPIC_SMALL_FAST_MODEL` for the background model.)
+- **`CLAUDE_CODE_SUBAGENT_MODEL`**: the model Claude Code runs subagents with. Pin it to `muse-spark-1.3` so subagent and orchestration workflows stay on Model API instead of falling back to a Claude model.
 - **`ENABLE_TOOL_SEARCH`**: Claude Code disables MCP tool search for non-first-party hosts by default. Set it to `true` to keep tool search on.
 
 To persist the configuration, add the exports to your shell profile (`~/.bashrc` or `~/.zshrc`).
@@ -348,7 +348,7 @@ To persist the configuration, add the exports to your shell profile (`~/.bashrc`
 
 - **Anthropic surface, not OpenAI.** Claude Code connects through the [Messages API](/docs/protocols/messages); it does not use the Chat Completions or Responses surfaces. The base host is `https://api.meta.ai` with no `/v1` suffix — the client appends `/v1/messages`.
 - **Use bearer auth.** Set `ANTHROPIC_AUTH_TOKEN` (bearer), not `ANTHROPIC_API_KEY` (`x-api-key`).
-- **Pin every model alias.** Model API serves Meta's Muse Spark models (not Claude models), but Claude Code selects a model through `ANTHROPIC_MODEL`, the `opus`/`sonnet`/`haiku` aliases, and `CLAUDE_CODE_SUBAGENT_MODEL` depending on the task. Set them all to `muse-spark-1.2` so no path — background tasks, Plan Mode, or subagents — falls back to a Claude model Model API doesn't serve.
+- **Pin every model alias.** Model API serves Meta's Muse Spark models (not Claude models), but Claude Code selects a model through `ANTHROPIC_MODEL`, the `opus`/`sonnet`/`haiku` aliases, and `CLAUDE_CODE_SUBAGENT_MODEL` depending on the task. Set them all to `muse-spark-1.3` so no path — background tasks, Plan Mode, or subagents — falls back to a Claude model Model API doesn't serve.
 - **Stateless history.** The Messages adapter runs stateless (no server-managed conversation state); Claude Code keeps history on the client, so multi-turn sessions work normally.
 
 ---
@@ -368,7 +368,7 @@ Most coding agents display token spend, but custom providers often lack pricing 
 
 | Symptom | Likely cause | Fix |
 |---------|-------------|-----|
-| "Model not found" or 404 | Wrong model ID or trailing slash in base URL | Use `muse-spark-1.2` as model ID; base URL should be `https://api.meta.ai/v1` (no trailing slash) |
+| "Model not found" or 404 | Wrong model ID or trailing slash in base URL | Use `muse-spark-1.3` as model ID; base URL should be `https://api.meta.ai/v1` (no trailing slash) |
 | Agent says "I can't view images" | Media stripped before reaching the API | Check that your agent passes image content parts; enable modality declarations if available |
 | Duplicate tool calls | Transient streaming glitch | Restart with fresh context; not a systematic bug |
 | Tools not invoked | Agent doesn't know about tools | Verify tool definitions are registered (MCP server running, local tool files present) |

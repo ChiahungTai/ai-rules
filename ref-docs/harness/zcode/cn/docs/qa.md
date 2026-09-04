@@ -64,7 +64,7 @@ BigModel（国内）与 Z.ai（海外）在 API Key 模式下提供 三类端点
 端点典型地址（BigModel）何时使用
 Coding Plan 专用https://open.bigmodel.cn/api/coding/paas/v4已购 GLM Coding Plan，用 API Key 接入 Coding 场景
 OpenAI 通用https://open.bigmodel.cn/api/paas/v4开放平台模型资源包 / 充值余额，走 OpenAI 兼容协议
-Anthropichttps://open.bigmodel.cn/api/anthropic同上资源包 / 余额，走 Anthropic 协议（ZCode 默认）
+Anthropichttps://open.bigmodel.cn/api/anthropic仅限从未购买过 Coding Plan 且已额外加白的账号；普通资源包 / 余额场景请使用 OpenAI 通用端点
 常见误区：
 买了 Coding Plan，却把 OpenAI 地址填成通用端点 /api/paas/v4 → 无法正常消耗编程套餐额度。
 只有资源包 / 余额，却填了 Coding 端点 /api/coding/paas/v4 → Coding 端点仅限 Coding 场景，不适用于通用 API。

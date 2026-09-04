@@ -40,9 +40,11 @@ On macOS, there is nothing to install: sandboxing uses the built-in Seatbelt fra
   </Step>
 
   <Step title="Run a Bash command">
-    Ask Claude to run a command, such as a build or a test suite. By default, commands inside the sandbox can write only to the working directory and the session temp directory. The first time a command needs a new network domain, Claude Code prompts for approval, or in [auto mode](/docs/en/permission-modes#eliminate-prompts-with-auto-mode) sends the request to the classifier.
+    Ask Claude to run a command, such as a build or a test suite. By default, commands inside the sandbox can write to the working directory, the session temp directory, and any [directories you've added](/docs/en/permissions#additional-directories-grant-file-access-not-configuration) with `--add-dir`, `/add-dir`, or `permissions.additionalDirectories`. The first time a command needs a new network domain, Claude Code prompts for approval, or in [auto mode](/docs/en/permission-modes#eliminate-prompts-with-auto-mode) sends the request to the classifier.
 
-    Commands that cannot run sandboxed fall back to the regular permission flow. To widen or narrow these boundaries, see [Configure sandboxing](#configure-sandboxing).
+    Commands that can't run sandboxed fall back to the regular permission flow. Claude Code titles their permission prompt "Bash command (unsandboxed)" instead of "Bash command", so you can tell which commands ran outside the sandbox. To widen or narrow what the sandbox allows, see [Configure sandboxing](#configure-sandboxing).
+
+    If sandboxed commands fail with `Operation not permitted` inside a container, see the Bubblewrap entry under [Troubleshooting](#troubleshooting).
   </Step>
 </Steps>
 
@@ -119,7 +121,7 @@ Claude Code offers two sandbox modes. In both, the sandbox enforces the same fil
 
 #### Auto-allow mode
 
-When a command can be sandboxed, Claude Code runs it inside the sandbox and approves it automatically, without asking your permission. Commands that cannot be sandboxed, such as those needing network access to non-allowed hosts, fall back to the regular permission flow, where Claude Code checks your [permission rules](/docs/en/permissions) and gates any command those rules do not already allow, with a prompt in Manual mode or the classifier in [auto mode](/docs/en/permission-modes#eliminate-prompts-with-auto-mode).
+When a command can be sandboxed, Claude Code runs it inside the sandbox and approves it automatically, without asking your permission. Commands that cannot be sandboxed, such as those needing network access to non-allowed hosts, fall back to the regular permission flow, where Claude Code checks your [permission rules](/docs/en/permissions) and gates any command those rules do not already allow, with a prompt in Manual mode.
 
 Even in auto-allow mode, the following still apply:
 
@@ -140,9 +142,9 @@ All Bash commands go through the regular permission flow, even when sandboxed. T
 
 #### The unsandboxed retry escape hatch
 
-Some commands can't run inside the sandbox at all, such as tools that are incompatible with it or that need a host you haven't allowed. When a command fails after the sandbox denied it access, Claude Code appends the violation details to the failed command's output, so Claude sees which file path or network host the sandbox blocked. Rather than failing the task or requiring you to turn sandboxing off, Claude Code includes an escape hatch: when a command fails because of sandbox restrictions, Claude analyzes the failure and may retry the command with the `dangerouslyDisableSandbox` parameter.
+Some commands can't run inside the sandbox at all, such as tools that are incompatible with it or that need a host you haven't allowed. Claude Code reports sandbox violations in the blocked command's result, naming the path or host the sandbox denied, so Claude sees what the sandbox blocked. Rather than failing the task or requiring you to turn sandboxing off, Claude Code includes an escape hatch: Claude analyzes the violation and may retry the command with the `dangerouslyDisableSandbox` parameter.
 
-The retried command runs outside the sandbox, so it goes through the regular permission flow: in Manual mode you get a confirmation prompt; in [auto mode](/docs/en/permission-modes#eliminate-prompts-with-auto-mode) the classifier evaluates the underlying command instead of prompting you. To be prompted on every unsandboxed retry even in auto mode, add an [ask rule](/docs/en/permissions#match-by-input-parameter) for `Bash(dangerouslyDisableSandbox:true)`.
+The retried command runs outside the sandbox, so it goes through the regular permission flow. In Manual mode you get a confirmation prompt. In [auto mode](/docs/en/permission-modes#eliminate-prompts-with-auto-mode), the classifier evaluates the underlying command. While [`permissions.blockReadsOutsideWorkingDirectories`](/docs/en/settings-reference#permissions-blockreadsoutsideworkingdirectories) is on, a retry that needs approval to run outside the sandbox prompts you instead. To be prompted on every unsandboxed retry even in auto mode, add an [ask rule](/docs/en/permissions#match-by-input-parameter) for `Bash(dangerouslyDisableSandbox:true)`.
 
 You can disable this escape hatch by setting `"allowUnsandboxedCommands": false` in your [sandbox settings](/docs/en/settings-reference#sandbox-settings). When disabled, which the `/sandbox` Overrides tab shows as **Strict sandbox mode**, the `dangerouslyDisableSandbox` parameter is completely ignored and all commands must run sandboxed or be explicitly listed in `excludedCommands`.
 
@@ -154,7 +156,7 @@ The session temp directory is writable inside the sandbox by default, alongside 
 
 Customize sandbox behavior through your `settings.json` file. See [Settings](/docs/en/settings-reference#sandbox-settings) for the complete configuration reference.
 
-By default, sandboxed commands can write only to the current working directory and the session temp directory. If subprocess commands like `kubectl`, `terraform`, or `npm` need to write outside those directories, use `sandbox.filesystem.allowWrite` to grant access to specific paths:
+By default, sandboxed commands can write to the current working directory, the session temp directory, and any [directories you've added](/docs/en/permissions#additional-directories-grant-file-access-not-configuration) with `--add-dir`, `/add-dir`, or `permissions.additionalDirectories`. If subprocess commands like `kubectl`, `terraform`, or `npm` need to write outside those directories, use `sandbox.filesystem.allowWrite` to grant access to specific paths:
 
 ```json theme={null}
 {
@@ -169,7 +171,9 @@ By default, sandboxed commands can write only to the current working directory a
 
 These paths are enforced at the OS level, so all commands running inside the sandbox, including their child processes, respect them. This is the recommended approach when a tool needs write access to a specific location, rather than excluding the tool from the sandbox entirely with `excludedCommands`.
 
-When you define the same filesystem array in multiple [settings scopes](/docs/en/settings#settings-precedence), Claude Code merges them, combining paths from every scope rather than replacing one scope's array with another's. If you exclude a source with [`--setting-sources`](/docs/en/cli-reference) on the CLI or [`settingSources`](/docs/en/agent-sdk/claude-code-features#control-filesystem-settings-with-settingsources) in the Agent SDK, Claude Code ignores its `sandbox.filesystem` entries, its `Edit` permission rules, and its `Read` deny rules when building the sandbox configuration. Requires Claude Code v2.1.246 or later.
+When you define the same filesystem array in multiple [settings scopes](/docs/en/settings#settings-precedence), Claude Code merges them, combining paths from every scope rather than replacing one scope's array with another's.
+
+If you exclude a source with [`--setting-sources`](/docs/en/cli-reference) on the CLI or [`settingSources`](/docs/en/agent-sdk/claude-code-features#control-filesystem-settings-with-settingsources) in the Agent SDK, Claude Code ignores its `sandbox.filesystem` entries, its `Edit` permission rules, and its `Read` deny rules when building the sandbox configuration. Requires Claude Code v2.1.246 or later.
 
 When you edit these filesystem lists during a session, Claude Code [applies the change to the running session](/docs/en/settings#when-edits-take-effect), so the next sandboxed command runs under the new paths.
 
@@ -206,6 +210,8 @@ The example below blocks reading from the entire home directory while still allo
 ```
 
 If you placed the same configuration in `~/.claude/settings.json`, `.` would resolve to `~/.claude` instead, and project files would remain blocked by the `denyRead` rule.
+
+To deny sandboxed commands read access to home directories and mounted volumes while keeping the working directories readable, set [`permissions.blockReadsOutsideWorkingDirectories`](/docs/en/settings-reference#permissions-blockreadsoutsideworkingdirectories) instead of writing path rules.
 
 ### Disable filesystem isolation
 
@@ -264,7 +270,9 @@ Setting `filesystem.disabled` lifts the protections the filesystem layer itself 
 
 Two other things change:
 
-* Sandboxed commands inherit your shell's `$TMPDIR` instead of the session temp directory, because every temp directory is writable and Claude Code no longer redirects commands to the session one. On Linux the variable is often unset in the parent shell, so it can expand empty inside sandboxed commands; Claude Code tells Claude through its Bash tool guidance to create scratch directories with `mktemp -d` instead of relying on `$TMPDIR`.
+* Sandboxed commands inherit your shell's `$TMPDIR` instead of the session temp directory, because every temp directory is writable and Claude Code no longer redirects commands to the session one.
+
+  On Linux the variable is often unset in the parent shell, so it can expand empty inside sandboxed commands; Claude Code tells Claude through its Bash tool guidance to create scratch directories with `mktemp -d` instead of relying on `$TMPDIR`.
 * [`autoAllowBashIfSandboxed`](/docs/en/settings-reference#sandbox-autoallowbashifsandboxed) still defaults to `true`, so sandboxed commands keep running without prompts. Set it to `false` to prompt for sandboxed commands.
 
 ### Protect credentials
@@ -295,14 +303,18 @@ The example below blocks reads of the AWS credentials file and the SSH directory
 
 Environment variable entries and file entries also accept `"mode": "mask"`, described under [Mask credentials](#mask-credentials).
 
-File paths follow the same [prefix rules](/docs/en/settings-reference#sandbox-path-prefixes) as `sandbox.filesystem.*` settings. Claude Code merges the `deny` entries from every [settings scope](/docs/en/settings#settings-precedence) the session loads. A `deny` entry only ever narrows access, so any scope can add one, but no scope can remove one that another scope added.
+File paths follow the same [prefix rules](/docs/en/settings-reference#sandbox-path-prefixes) as `sandbox.filesystem.*` settings.
+
+Claude Code merges the `deny` entries from every [settings scope](/docs/en/settings#settings-precedence) the session loads. A `deny` entry only ever narrows access, so any scope can add one, but no scope can remove one that another scope added.
 
 When you [exclude a settings source](#configure-sandboxing):
 
 * **Project or local settings**: Claude Code applies none of their `credentials` entries. Requires Claude Code v2.1.246 or later.
 * **User settings**: Claude Code still applies the `deny` entries in `~/.claude/settings.json` and keeps its [file `mask` entries](#mask-credential-files) as restrictions, but drops its [environment variable `mask` entries](#mask-environment-variables).
 
-There is no built-in credential deny list, so only the files and variables you list are restricted. The setting affects sandboxed Bash commands only. To strip Anthropic and cloud provider credentials from all subprocesses regardless of sandboxing, set [`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`](/docs/en/env-vars).
+There is no built-in credential deny list, so only the files and variables you list are restricted.
+
+`sandbox.credentials` affects sandboxed Bash commands only. To strip credentials from all subprocesses regardless of sandboxing, set [`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`](/docs/en/env-vars).
 
 ### Mask credentials
 
@@ -314,11 +326,15 @@ Masking goes further than a `deny` entry under [Protect credentials](#protect-cr
 
 With `mask`, the sandboxed command sees a per-session sentinel value instead of the real one. Each `mask` entry can list `injectHosts`, the hosts the real value is allowed to reach. When a request leaves the sandbox for one of them, the [sandbox proxy](#network-isolation) replaces the sentinel with the real value. The command and anything it logs never hold the real credential, but its requests still authenticate.
 
-The proxy substitutes the credential inside request contents, so it has to see them. Set [`network.tlsTerminate`](/docs/en/settings-reference#sandbox-network-tlsterminate) so the proxy terminates TLS itself. Without it, masking fails without exposing anything: the command still sees only the sentinel, but the sentinel reaches the server unchanged and authentication fails. Claude Code reports this misconfiguration at startup.
+The proxy substitutes the credential inside request contents, so it has to see them. Set [`network.tlsTerminate`](/docs/en/settings-reference#sandbox-network-tlsterminate) so the proxy terminates TLS itself.
+
+Without it, masking fails without exposing anything: the command still sees only the sentinel, but the sentinel reaches the server unchanged and authentication fails. Claude Code reports this misconfiguration at startup.
 
 Substitution covers headers and request bodies. Requests that authenticate with a signature derived from the credential, rather than the credential itself, need re-signing at the proxy; [Re-sign AWS requests](#re-sign-aws-requests) covers how that works for AWS.
 
-The example below masks two tokens. `GH_TOKEN` is substituted only on requests to `api.github.com`, while `NPM_TOKEN` has no `injectHosts` and is substituted on requests to every host in `network.allowedDomains`. The proxy injects only on connections the [domain allowlist](#network-isolation) admits, so each `injectHosts` destination must also be reachable through `network.allowedDomains`.
+The proxy injects only on connections the [domain allowlist](#network-isolation) admits, so each `injectHosts` destination must also be reachable through `network.allowedDomains`.
+
+The example below masks two tokens. `GH_TOKEN` is substituted only on requests to `api.github.com`, while `NPM_TOKEN` has no `injectHosts` and is substituted on requests to every host in `network.allowedDomains`.
 
 ```json theme={null}
 {
@@ -343,9 +359,11 @@ The example below masks two tokens. `GH_TOKEN` is substituted only on requests t
 * **`network.allowedDomains`**: the [bracketed form domain lists use](#ipv6-addresses-in-domain-lists), such as `"[::1]"`. The proxy checks this list to admit the connection.
 * **`injectHosts`**: the bare address in its canonical compressed form, such as `"::1"` or `"2001:db8::1"`. The proxy matches each entry against the connection's bare destination address, ignoring ports, so a bracketed, zone-ID, or differently compressed spelling never matches and the proxy never injects the credential there.
 
-`/doctor` flags `injectHosts` entries that can never match with the warning `Sandbox credential injectHosts entries can never match their destination`.
+`claude doctor` flags `injectHosts` entries that can never match with the warning `Sandbox credential injectHosts entries can never match their destination`. This check requires Claude Code v2.1.229 or later.
 
 Unlike `deny`, masking authorizes the proxy to send your real credential to the listed hosts, so Claude Code honors it only from settings you or your administrator control: user settings, managed settings, and the `--settings` CLI flag. Claude Code ignores `mask` entries in a repository's `.claude/settings.json` or `.claude/settings.local.json`. In those files it also ignores `network.tlsTerminate` and [`credentials.allowPlaintextInject`](/docs/en/settings-reference#sandbox-credentials-allowplaintextinject), the setting that lets the proxy inject credentials into unencrypted requests. If you [exclude user settings](#configure-sandboxing), Claude Code drops the environment variable `mask` entries in `~/.claude/settings.json` too.
+
+When your administrator delivers `mask` entries, `network.tlsTerminate`, or `credentials.allowPlaintextInject` through server-managed settings, they count as [settings that need approval](/docs/en/server-managed-settings#security-approval-dialogs).
 
 When the same variable is listed with `deny` in any scope, `deny` takes precedence.
 
@@ -457,9 +475,9 @@ Two optional fields refine how matching behaves. Both apply only when `mode` is 
 
 The sandboxed Bash tool restricts file system access to specific directories:
 
-* **Default write behavior**: read and write access to the current working directory and its subdirectories, plus the session temp directory that `$TMPDIR` points to
+* **Default write behavior**: read and write access to the current working directory and its subdirectories, any directories you've added with `--add-dir`, `/add-dir`, or [`permissions.additionalDirectories`](/docs/en/settings-reference#permissions-additionaldirectories), plus the session temp directory that `$TMPDIR` points to
 * **Default read behavior**: read access to the entire computer, except certain denied directories. Note that this default still allows reading credential files such as `~/.aws/credentials` and `~/.ssh/`. Use [`sandbox.credentials`](#protect-credentials) to block reads of these files and unset secret environment variables, or add the paths to `denyRead`.
-* **Blocked access**: cannot modify files outside the current working directory and session temp directory without explicit permission, including shell configuration files such as `~/.bashrc` and system binaries in `/bin/`
+* **Blocked access**: cannot modify files outside the working directory, added directories, and session temp directory without explicit permission, including shell configuration files such as `~/.bashrc` and system binaries in `/bin/`
 * **Git worktrees**: when the working directory is a [linked git worktree](/docs/en/worktrees), the sandbox also allows writes to the main repository's shared `.git` directory so commands such as `git commit` can update refs and the index. Writes to `hooks/` and `config` inside that directory remain denied.
 * **Configurable**: define custom allowed and denied paths through settings
 
@@ -508,11 +526,11 @@ An unbracketed entry with two or more colons is ambiguous: `::1:443` is both a c
 * **Deny lists**: Claude Code denies every reading the entry parses as, so whichever reading you meant is blocked. For an entry with no parseable reading, Claude Code blocks nothing.
 * **Allow lists**: Claude Code never allows more than you wrote. It rewrites an ambiguous entry to its host-and-port reading when that reading parses cleanly, and may drop the entry entirely rather than widen the allowlist.
 
-Run `/doctor` to list the affected entries. The `Sandbox network domain entries have unreliable spellings` warning names each one. Rewrite them in the bracketed form to clear it. The warning also names entries whose spelling is unreliable for other reasons, such as `@`, path or query characters, or wildcards inside brackets.
+Run `claude doctor` in your terminal to find the affected entries: the `Sandbox network domain entries have unreliable spellings` warning names up to three of them and counts the rest. Rewrite each one in the bracketed form to clear the warning. The warning also names entries whose spelling is unreliable for other reasons, such as `@`, path or query characters, or wildcards inside brackets.
 
 ### OS-level enforcement
 
-The sandboxed Bash tool leverages operating system security primitives:
+The sandboxed Bash tool uses operating system security primitives:
 
 * **macOS**: uses Seatbelt for sandbox enforcement
 * **Linux**: uses [bubblewrap](https://github.com/containers/bubblewrap) for isolation
@@ -636,7 +654,7 @@ Some commands fail inside the sandbox even though they work outside it. The fixe
 * **`open`, `osascript`, or browser-based auth flows fail with error `-600` on macOS**: the sandbox blocks Apple Events by default. Set [`allowAppleEvents`](/docs/en/settings-reference#sandbox-allowappleevents) to `true` in your user, managed, or CLI settings to allow them. Project settings are ignored for this key. Enabling it removes code-execution isolation, since sandboxed commands can then launch other applications unsandboxed with no user prompt and send AppleScript commands to running applications, subject to the macOS automation-consent prompt (TCC). Alternatively, add the command to `excludedCommands` to run it outside the sandbox.
 * **`docker` commands fail**: `docker` is incompatible with the sandbox. Add `docker *` to `excludedCommands` to run it outside the sandbox.
 * **A git command fails with `unable to unlink old`**: `git merge`, `git checkout`, and similar commands fail this way when they need to replace a file the sandbox denies writes to, whether that file is under a [protected path](#protected-paths) such as `.claude/skills`, under one of your `denyWrite` entries, or outside the directories the sandbox lets commands write to at all. On Linux and WSL2 the error ends with `Read-only file system`. After the failure, Claude may [offer to rerun the command outside the sandbox](#sandbox-modes); approve that retry, or run the git command yourself in another terminal. If you've set `allowUnsandboxedCommands` to `false`, Claude can't offer the retry, so run the command yourself or, if the same git command fails often, add that command to [`excludedCommands`](/docs/en/settings-reference#sandbox-excludedcommands).
-* **Bubblewrap fails to start inside a container**: in an unprivileged container, bubblewrap cannot mount a fresh `/proc` filesystem. Set [`enableWeakerNestedSandbox`](/docs/en/settings-reference#sandbox-enableweakernestedsandbox) to `true` so the inner sandbox bind-mounts the container's existing `/proc` instead. Only use this setting when the outer container already provides the isolation boundary you need, since it exposes process information to sandboxed commands that a fresh `/proc` mount would hide.
+* **Bubblewrap fails to start inside a container**: in an unprivileged container, bubblewrap can't mount a fresh `/proc` filesystem, so sandboxed commands fail with a `bwrap` error such as `Can't mount proc on /newroot/proc: Operation not permitted`. Set [`enableWeakerNestedSandbox`](/docs/en/settings-reference#sandbox-enableweakernestedsandbox) to `true` so the inner sandbox bind-mounts the container's existing `/proc` instead. Only use this setting when the outer container already provides the isolation boundary you need, since it exposes process information to sandboxed commands that a fresh `/proc` mount would hide.
 * **`--dangerously-skip-permissions` fails as root**: this flag is blocked when running as root or via sudo on Linux and macOS, because root access combined with no permission prompts can modify any file or service on the system. The check is skipped automatically inside a recognized sandbox. To run autonomously in a container, use the [dev container](/docs/en/devcontainer) configuration, which runs Claude Code as a non-root user.
 
 ## Limitations
@@ -651,7 +669,7 @@ Sandboxing reduces risk but is not a complete isolation boundary. Review the lim
   Allowing broad domains such as `github.com` can create paths for data exfiltration. Because the proxy makes its allow decision from the client-supplied hostname without inspecting TLS, code running inside the sandbox can potentially use [domain fronting](https://en.wikipedia.org/wiki/Domain_fronting) or similar techniques to reach hosts outside the allowlist. If your threat model requires stronger guarantees, configure a [custom proxy](#custom-proxy-configuration) that terminates TLS and inspects traffic, and install its CA certificate inside the sandbox. Stronger TLS-aware network isolation is an active area of development.
 </Warning>
 
-* **Privilege escalation via Unix sockets**: the `allowUnixSockets` configuration can inadvertently grant access to powerful system services that could lead to sandbox bypasses. For example, allowing access to `/var/run/docker.sock` effectively grants access to the host system through the Docker socket. Consider carefully any Unix sockets that you allow through the sandbox.
+* **Privilege escalation via Unix sockets**: the `allowUnixSockets` configuration can inadvertently grant access to system services that could lead to sandbox bypasses. For example, allowing access to `/var/run/docker.sock` effectively grants access to the host system through the Docker socket. Consider carefully any Unix sockets that you allow through the sandbox.
 * **Filesystem permission escalation**: overly broad filesystem write permissions can enable privilege escalation attacks. Allowing writes to directories containing executables in `$PATH`, system configuration directories, or user shell configuration files such as `.bashrc` or `.zshrc` can lead to code execution in different security contexts when other users or system processes access these files.
 * **Linux sandbox strength**: the Linux implementation provides strong filesystem and network isolation but includes an `enableWeakerNestedSandbox` mode that enables it to work inside Docker environments without privileged namespaces, or on Linux hosts where unprivileged user namespaces are disabled by sysctl. This option considerably weakens security and should only be used when additional isolation is otherwise enforced.
 * **Apple Events on macOS**: the macOS sandbox blocks Apple Events by default. The `allowAppleEvents` setting lifts this restriction so tools such as `open` and `osascript` work, but it removes code-execution isolation: sandboxed commands can launch other applications unsandboxed with no user prompt, and can send AppleScript commands to running applications, subject to the per-app macOS automation-consent prompt (TCC). It is only honored from user, managed, or CLI settings. Project settings cannot enable it.
@@ -668,7 +686,7 @@ The sandbox isolates Bash subprocesses. Other tools operate under different boun
 
 * **Built-in file tools**: Read, Edit, and Write use the permission system directly rather than running through the sandbox. See [permissions](/docs/en/permissions).
 * **Computer use**: when Claude opens apps and controls your screen, it runs on your actual desktop rather than in an isolated environment. Per-app permission prompts gate each application. See [computer use in the CLI](/docs/en/computer-use) or [computer use in Desktop](/docs/en/desktop#let-claude-use-your-computer).
-* **Environment variables**: sandboxed Bash commands inherit the parent process environment by default, including any credentials set there. Use [`sandbox.credentials`](#protect-credentials) to unset or mask specific variables for sandboxed commands, or set [`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`](/docs/en/env-vars) to strip Anthropic and cloud provider credentials from all subprocesses.
+* **Environment variables**: sandboxed Bash commands inherit the parent process environment by default, including any credentials set there. Use [`sandbox.credentials`](#protect-credentials) to unset or mask specific variables for sandboxed commands, or set [`CLAUDE_CODE_SUBPROCESS_ENV_SCRUB`](/docs/en/env-vars) to strip credentials from all subprocesses.
 * **Subagents**: [subagents](/docs/en/sub-agents) run in the same process as the parent session and use the same sandbox configuration. Bash commands inside a subagent are sandboxed when sandboxing is enabled in the parent session.
 
 <Warning>

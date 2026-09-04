@@ -132,7 +132,7 @@ Learn more: [Sessions from Dispatch](/docs/en/desktop#sessions-from-dispatch)
 
 ### Effort level
 
-A setting that controls how much of the adaptive-reasoning thinking budget Claude uses on each turn. Higher effort means more thinking tokens and deeper reasoning; lower effort is faster and cheaper. Effort is supported on Fable 5, on Opus 4.6 and later, and on Sonnet 4.6 and later.
+A setting that controls how much of the adaptive-reasoning thinking budget Claude uses on each turn. Higher effort means more thinking tokens and deeper reasoning; lower effort is faster and cheaper. Effort is supported on Fable 5.1 and Fable 5, on Opus 4.6 and later, and on Sonnet 4.6 and later.
 
 Learn more: [Adjust effort level](/docs/en/model-config#adjust-effort-level)
 
@@ -194,7 +194,7 @@ Learn more: [Run Claude Code programmatically](/docs/en/headless)
 
 ### Output style
 
-A configuration that modifies Claude's system prompt to change response behavior, tone, or format. Unlike [CLAUDE.md](#claude-md), which Claude Code delivers as a user message after the system prompt, an output style changes the system prompt itself. Custom styles leave out Claude Code's built-in software engineering instructions unless you set `keep-coding-instructions` to `true`, and the built-in Default, Proactive, Concise, Explanatory, and Learning styles keep them.
+A configuration that modifies Claude's system prompt to change response behavior, tone, or format. Unlike [CLAUDE.md](#claude-md), which Claude Code delivers as a user message after the system prompt, an output style changes the system prompt itself.
 
 Learn more: [Output styles](/docs/en/output-styles)
 

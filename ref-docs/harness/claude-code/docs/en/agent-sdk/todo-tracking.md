@@ -13,7 +13,9 @@ In a session that has the task-tracking tools, Claude keeps a written todo list,
 ## Model availability
 
 <Note>
-  On TypeScript Agent SDK 0.3.233 and later, or Python Agent SDK 0.2.139 and later, the following tools aren't available on Opus 4.8, Sonnet 5, Fable 5, Mythos 5, or later versions of those families unless you opt in:
+  On TypeScript Agent SDK 0.3.233 and later, or Python Agent SDK 0.2.139 and later, the following restriction applies.
+
+  The following tools aren't available on Opus 4.8, Sonnet 5, Fable 5, Mythos 5, or later versions of those families unless you opt in:
 
   * `TodoWrite`
   * `TaskCreate`
@@ -74,7 +76,7 @@ The streamed `tool_use` input is the raw shape the model emitted. Claude Code re
 
   try {
     for await (const message of query({
-      prompt: "Optimize my React app performance and track progress with todos",
+      prompt: "Create a static website with a home page, an about page, and a shared stylesheet, and track progress with todos",
       // Keeps the Task tools on models where Claude Code otherwise doesn't provide them.
       options: { maxTurns: 15, permissionMode: "acceptEdits", env: { ...process.env, CLAUDE_CODE_ENABLE_TODO_TOOLS: "1" } },
     })) {
@@ -110,7 +112,7 @@ The streamed `tool_use` input is the raw shape the model emitted. Claude Code re
   async def main():
       try:
           async for message in query(
-              prompt="Optimize my React app performance and track progress with todos",
+              prompt="Create a static website with a home page, an about page, and a shared stylesheet, and track progress with todos",
               # Keeps the Task tools on models where Claude Code otherwise doesn't provide them.
               options=ClaudeAgentOptions(max_turns=15, permission_mode="acceptEdits", env={"CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"}),
           ):

@@ -17,7 +17,7 @@ Add vision to your workflow. Send images alongside a text prompt and get grounde
 
 ## How it works {#how-it-works}
 
-Send one or more images alongside text in a [Responses API](/docs/protocols/responses) or [chat completion](/docs/protocols/chat-completions) request. Muse Spark reads the visuals and returns text. Provide each image one of three ways:
+Send one or more images alongside text in a [Responses API](/docs/protocols/responses) or [chat completion](/docs/protocols/chat-completions) request. [Muse Spark](/docs/models#muse-spark) reads the visuals and returns text. Provide each image one of three ways:
 
 - **Public URL** — a fully qualified `http`/`https` image link.
 - **Base64 data URL** — the image bytes inline, no hosting required.
@@ -49,7 +49,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     input=[
         {
             "type": "message",
@@ -84,7 +84,7 @@ const client = new OpenAI({
 });
 
 const response = await client.responses.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   input: [
     {
       type: 'message',
@@ -118,7 +118,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "input": [
             {
                 "type": "message",
@@ -145,7 +145,7 @@ curl -X POST "https://api.meta.ai/v1/responses" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "input": [
     {
       "type": "message",
@@ -229,7 +229,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     messages=[
         {
             "role": "user",
@@ -265,7 +265,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   messages: [
     {
       role: 'user',
@@ -300,7 +300,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "messages": [
             {
                 "role": "user",
@@ -328,7 +328,7 @@ curl -X POST "https://api.meta.ai/v1/chat/completions" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "messages": [
     {
       "role": "user",
@@ -430,7 +430,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     messages=[
         {
             "role": "user",

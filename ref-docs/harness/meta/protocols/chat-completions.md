@@ -14,6 +14,8 @@ Ship conversational features with the core Meta Model API endpoint. You send a s
 
 Use Chat Completions for single-turn prompts or simple multi-turn exchanges that drop into existing OpenAI code. When you need reasoning to carry across turns for tool loops, coding assistants, search grounding, or file inputs, use the [Responses API](/docs/protocols/responses).
 
+Chat Completions serves the [Muse Spark](/docs/models#muse-spark) text models. For which models run on which endpoint, see [model availability](/docs/models#model-availability).
+
 > [!NOTE] Muse Spark always reasons
 > Muse Spark is a reasoning model that thinks internally to improve response quality. Control how much it thinks with `reasoning_effort`. Muse Spark always reasons, so `reasoning_effort: "none"` returns `HTTP 400`. Chat Completions does not carry reasoning across turns. For agentic and multi-step workflows that need continuity, use the [Responses API](/docs/protocols/responses).
 
@@ -48,7 +50,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     messages=[
         {
             "role": "developer",
@@ -81,7 +83,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     messages=[
         {
             "role": "user",
@@ -106,7 +108,7 @@ const client = new OpenAI({
 });
 
 const response = await client.chat.completions.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   messages: [
     {
       role: 'user',
@@ -130,7 +132,7 @@ response = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "messages": [
             {
                 "role": "user",
@@ -147,7 +149,7 @@ curl -X POST "https://api.meta.ai/v1/chat/completions" \
   -H "Authorization: Bearer $MODEL_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "messages": [
     {
       "role": "user",
@@ -203,7 +205,7 @@ client = OpenAI(
 )
 
 stream = client.chat.completions.create(
-    model="muse-spark-1.2",
+    model="muse-spark-1.3",
     messages=[
         {
             "role": "user",
@@ -233,7 +235,7 @@ const client = new OpenAI({
 });
 
 const stream = await client.chat.completions.create({
-  model: 'muse-spark-1.2',
+  model: 'muse-spark-1.3',
   messages: [
     {
       role: 'user',
@@ -265,7 +267,7 @@ response = requests.post(
         "Accept": "text/event-stream",
     },
     json={
-        "model": "muse-spark-1.2",
+        "model": "muse-spark-1.3",
         "messages": [
             {
                 "role": "user",
@@ -299,7 +301,7 @@ curl -N -X POST "https://api.meta.ai/v1/chat/completions" \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{
-  "model": "muse-spark-1.2",
+  "model": "muse-spark-1.3",
   "messages": [
     {
       "role": "user",
