@@ -1,10 +1,10 @@
 ---
 id: AIR-17
 title: 夜間收斂 cron 首跑驗證
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-03 04:34'
-updated_date: '2026-09-04 05:51'
+updated_date: '2026-09-04 16:13'
 labels:
   - cron
   - memory-audit
@@ -30,6 +30,8 @@ mosaic 側整併落地（09-03 午後）：收斂波節併入 nightly-watch auto
 09-04 09:00 首跑驗證（mosaic workspace one-shot 驗證腿）——B PASS／A FAIL，未關卡。B（mosaic nightly-watch 23:50）PASS：報告 ai-analysis/_inbox/nightly-watch-20260903.md（23:55 生成、commit 31b3084b）含收斂波三節——①desc>100 修剪 6 條（索引 13,926→13,851 chars）、②弧線軟預警 31 條（頭號 disposition-marking-campaign 145KB）、③波段未觸發🟢；_regen-failed 不存在；_audit-state last_lite_audit=20260903＋last_index_chars 已更新。A（ai-rules 23:40 automation-751ecce2）FAIL＝未觸發（零產物）：①池 _audit-state.md mtime=09-03 08:13（白天治理輪所寫，last_index_chars 17769 非夜跑更新）；②昨夜 23:30-00:59 時窗池零檔案變動（find 空）；③repo fd 12h 掃描無收斂報告、_inbox 空；④睡眠假說排除——host 在線（mosaic 23:50 十分鐘後正常觸發落地）。歸因（open，mosaic workspace 看不到對方 automation 狀態，不猜）：dispatch 撞並行 session 被吞（ai-rules 昨夜～今晨活躍——bundle 減量弧 ae3bc28/e2c302f 正是對 mosaic 23:55 報告 95.1% 警戒的反應，09-04-rules-bundle-diet ep.md mtime 06:28）／automation 已停用或刪除／觸發即靜默失敗。建議：ai-rules 側自查 automation-751ecce2 在場與否（CronList）；卡等 23:40 首次成功跑過再關（通過即關卡不變）。
 
 勘正（09-04 09:0x，mosaic 驗證腿讀卡後撤回前則）：前則「A FAIL＝未觸發」判定撤回——本卡 08:15 路徑 B 註記已證 runCount=1＝09-03 23:40 舊版有觸發；零產物與修訂版前無報告腿一致（nightly-convergence.log 係修訂版首寫），非 dispatch 被吞/停用。09-03 23:40 舊版跑不在本卡驗證範圍（卡上驗證項按修訂版行為定義）；真正首跑＝09-04 23:40 修訂版，驗證腿＝ai-rules 側 automation-8d9c2fea（09-05 00:05，五腿清單自足）。mosaic workspace one-shot（automation-d348ea38，已 fire 完成退場）任務結束：B（mosaic 23:50）PASS 證據保留於前則；卡維持 In Progress 等 09-05 00:05 驗證。另：本 one-shot prompt 原載「結案前跑 backlog_precheck.sh」有死鎖陷阱（In Progress 卡固定 exit 1，08:15 註記已證）——幸未走到該路徑，勘正後以 git log --all --not HEAD --grep AIR-17 等價檢查為準。
+
+【驗證 09-05 00:12 全過，證據鏈】①報告落盤 PASS：log birthtime=mtime=09-04 23:45:26，cron lastRunAt=23:40:07（runCount 1→2）、池內 8 動作檔 mtime 23:42:04-23:44:22、_audit-state 23:45:05、MEMORY.md regen 23:45:53——五訊號互證報告為 23:40 排程跑產出。②marker 零命中 PASS。③gate PASS：138 條目/22,337 chars（餘量 163）/150 行；bytes 30,394 僅 INFO。④記帳 PASS：last_index_chars=22337 與 log 後值一致（跑前基線 17,769）。⑤L5 PASS：.agent-tmp 空、.at-contexts 僅 1 檔 4d 新鮮、.review 空，>7d/>30d 零命中＝刪 0 檔宣稱一致。⑥Claim→Evidence：merge 驗證（truncation-rule-skill-split/bundle-diet-wave2-ep 已刪、merged_from 在場、tri-track+cr-adoption 反引已改指）；desc 實測 at-skill 88✓/muse-cli-facts 83✓/air-20 82（報告寫 79，+3 誤差，皆≤100）。⑦mosaic PASS：nightly-watch-20260904（第五跑）含收斂波節、波段未觸發如實列報、三池零 marker。跨線掃描 git log --all --not HEAD --grep AIR-17 零命中。兩缺陷記錄（不擋結案）：D1 報告標頭自我歸因錯誤——寫「09:15 session 內手動觸發」，機械證據證實實為 23:40 cron 排程跑（建議：cron prompt 加「標頭時間用 date '+%Y-%m-%d %H:%M' 實際執行時間」）；D2 報告數字偶有不精確（air-20 desc 79→實測 82）。附帶觀察：lastRunAt/runCount 本晚正確推進（與 fs 軌跡互證）——at-skill-zcode-cron-gaps 開放項「runCount/lastRunAt 不可推斷」可增此反例證據，由 owning session 收編。
 <!-- SECTION:NOTES:END -->
 
 ## Comments
@@ -40,3 +42,9 @@ created: 2026-09-03 22:45
 【handoff 09-04】任務＝AIR-17 夜間收斂修訂版首跑驗證。接手方式二選一：(A) 已過 09-05 00:05 → 直接執行下方清單；(B) 未到 → CronCreate one-shot（cron='5 0 5 9 *', recurring=false, title='AIR-17 夜間收斂首跑驗證'）prompt 用下方清單全文（排程 session 自足）。背景：23:40 收斂 cron 五腿（①輕掃 24h-mtime desc>100 trim ②弧線軟預警 >8,000chars×7d report-only ③波段收斂 gate FAIL/_regen-failed/chars>21,000→sweep+成功後 rm marker ④L5 清淤 .agent-tmp/.at-contexts>7d、.review>30d ⑤報告 append ai-analysis/nightly-convergence.log self-trim 300K→200K），今晚 09-04 23:40 是修訂版首跑。清單（每項附命令+輸出證據）：1. tail -80 ai-analysis/nightly-convergence.log→09-04 深夜標頭+報告在場 2. fd -H _regen-failed <memory池>/→零命中 3. wc -l/-c MEMORY.md→記錄現值（上限 200 行/25,000 chars，超限紅燈）4. ls -lt .agent-tmp/ | head -20→只清點不刪 5. ls -lt .review/→同 6. log 宣稱的 trim/merge 抽查 2-3 條目 desc 長度對帳（Claim→Evidence）。產出：全過→bash skills/kanban-board/scripts/backlog_precheck.sh（exit 1=停）→過才結案兩步（-s Done --final-summary '夜間收斂修訂版首跑驗證全過——五腿證據齊、marker 零殘留、log 落盤'）；有不過→--append-notes 記錄不結案。紅線：禁 git commit/push/stage；禁改 memory 條目內容（收斂是 cron 的事你只驗證）；禁改 rules/skills/EP；禁刪 .agent-tmp。〔平台事實：本任務原擬由 09-04 session 直接 CronCreate，被擋——隸屬排程的 session 不能巢狀建排程，須乾淨 session 建〕
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+夜間收斂修訂版首跑驗證全過——五腿證據齊（機械鏈證實 23:40 cron 產出）、marker 零殘留、log 落盤；缺陷僅報告標頭歸因誤植（09:15 手動 vs 實際 23:40 排程）已記錄 notes 待 prompt 修正
+<!-- SECTION:FINAL_SUMMARY:END -->
