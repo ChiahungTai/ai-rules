@@ -1,9 +1,9 @@
 ---
 name: rebase
 
-description: "Trunk-based worktree rebase：trunk 永不被 rebase，其餘方向（feature onto trunk / feature 互 rebase）由呼叫者決定；all 批次同步/吸收所有 feature"
+description: "Trunk-based worktree rebase：trunk 永不被 rebase，其餘方向（feature onto trunk / feature 互 rebase）由呼叫者決定；all 批次同步/吸收所有 feature；all ff＝收斂鏈全員同 tip"
 when_to_use: "Rebase a feature branch onto another (trunk or another feature); trunk is never rebased. `/rebase all` batch-syncs all features onto trunk (from a feature wt) or batch-absorbs all ff-able features into trunk (from trunk) — for multi-worktree sync, 同步所有 feature, sync all worktrees. Normal single-branch mode reports laggards and prompts manual sync (never auto-rebase); batch is explicit opt-in via `all`."
-argument-hint: "<branch|all>（branch 慣例 main） [--autostash]"
+argument-hint: "<branch|all>（branch 慣例 main） [ff] [--autostash|--stash]"
 allowed-tools:
   - Bash
   - Read
@@ -51,7 +51,7 @@ git branch --show-current
 
 **當前 = trunk（吸收步）**：**不 rebase**（鐵律 2）。前置檢查：
 - arg 須是 feature（≠ trunk；arg = trunk 本身 → 拒絕）。
-- 工作目錄須 clean —— dirty → 停下，提示先 commit/stash（merge 路徑不適用 `--autostash`，旗標忽略；吸收步在整合線上，不 smooth over trunk dirt）。
+- 工作目錄須 clean —— dirty → 停下，提示先 commit/stash（merge 路徑不適用 `--autostash`，旗標忽略；吸收步在整合線上，不 smooth over trunk dirt）。例外：WIP 與 incoming diff 路徑**不相交**時可 ff（判準見 all 批次模式「ff 後綴」節）。
 
 先驗 ff —— trunk 須是 arg 祖先才能快轉：
 
@@ -140,6 +140,7 @@ Git index stages: `:1:` = 共同祖先, `:2:` = HEAD（base branch = `<branch>`�
 | **刪除 vs 修改** | 一方刪除，另一方修改同處 | 需用戶判斷（刪除是否過時？）；機械遷移 vs **較新 user 裁決**衝突＝較新裁決勝出 |
 | **同名 drift**（cherry-pick／跨 wt 雙寫） | 同名同目的、不同結局（兩邊各自改了同一檔） | **取 incoming**（replay 語義忠實——保留 feature branch 已 commit 的意圖；取 HEAD 會吃掉 feature 獨有內容） |
 | **核銷 replay**（`[ ]`→`[x]`） | commit message 明言核銷意圖的 checklist replay | **採 incoming**（零判斷機械保留使用者自己的 commit 內容；同型續解不需再確認） |
+| **同一行新舊版** | 同名行衝突兩側非等價——一側含後續批次更新、另一側為舊版 | **比對內容保較新語義**（非按 ours/theirs 慣例機械取側） |
 
 比對表格式：
 
@@ -248,7 +249,7 @@ Rebase 成功後（無衝突或衝突已解決），檢查**非衝突區域**的
 
 > **user 慣用泛化（超出「永遠 onto trunk」文法）**：「all rebase on `<branch>`」＝非 trunk base 批次（user 實證用法）——全員 ff-able 時：main 側走**吸收步**（wt clean 前置＋`git -C <main-wt> merge --ff-only <branch>`，鐵律不 rebase trunk）、有 wt feature `git -C <wt> rebase <branch>`（=ff）、無 wt `git fetch . <branch>:<feature>`——零 replay 零風險，終態同 tip。
 
-> **雙 feature 同內容收斂**：feature 互 rebase 後兩條攜帶「同內容、不同 hash」——收斂順序＝main 吸收**超集**那條（`merge --ff-only`），另一條 `git rebase --empty=drop <tip>`：patch-identical commits 全變空自動 drop（replay 原版 patch-id 與已解衝突副本不同，`--skip` 手動逐個不等效；rerere 已啟用時同款衝突自動套前次解）。
+> **雙 feature 同內容收斂**：feature 互 rebase 後兩條攜帶「同內容、不同 hash」——收斂順序＝main 吸收**超集**那條（`merge --ff-only`），另一條 `git rebase --empty=drop <tip>`：patch-identical commits 全變空自動 drop（replay 原版 patch-id 與已解衝突副本不同，`--skip` 手動逐個不等效；rerere 已啟用時同款衝突自動套前次解）。另有淨零對齊法：replay 後 `git diff <base> <branch>` 零實質差（僅空行位置）且主題已承載於 base → `git -C <wt> reset --hard <base>`（wt clean 前置）——比留空 commits 乾淨。
 
 > ⚠️ **同步語義改寫其他 worktree HEAD**：`git -C <wt> rebase` 會改寫其他 feature wt 的 HEAD/index。執行前確認其他 feature wt 無並行 session（否則該 session 的 git 假設失效）。dirty 檢查擋住資料遺失，但 clean wt 的進行中 session 仍受影響。
 
@@ -294,7 +295,7 @@ git worktree list                            # branch → worktree 對應（同�
 |---|---|---|---|
 | 1 | feature dirty | 該 feature wt 有 uncommit | ① 去 wt commit/stash 後重跑這個 ② `--autostash` 重跑（pop 可能衝突）③ **跳過這個，繼續其他** ④ abort all |
 | 2 | feature 衝突 | rebase 撞衝突 | 既有衝突流程（Step 1-4 比對表+建議）：① 接受建議 ② 改方案 ③ `--skip` 該 commit ④ abort 該 rebase ⑤ abort all |
-| 3 | main dirty | trunk wt 有 uncommit | ① 去 trunk commit/stash 後重跑 ② **跳過，繼續其他** ③ abort all（merge 路徑**不** autostash；trunk 的 uncommit 不自動動） |
+| 3 | main dirty | trunk wt 有 uncommit | ① 去 trunk commit/stash 後重跑 ② **跳過，繼續其他** ③ abort all（merge 路徑**不** autostash；trunk 的 uncommit 不自動動；WIP×incoming 不相交的 ff 例外見「ff 後綴」節） |
 | 4 | 吸收 ff 不符 | trunk 上 all，feature 落後/diverged 不能 ff | ① 提示「切到該 wt 跑 `/rebase main` 先同步再吸收」② 跳過 ③ abort all |
 | 5 | 空 commit | 變更已含在 base | ① `--skip`（建議）② 保留 ③ abort all |
 
@@ -319,6 +320,23 @@ git worktree list                            # branch → worktree 對應（同�
 
 跳過/失敗的 feature 不能默默丟下——報告列遺留，你一眼看到哪些還沒同步。
 
+### `ff` 後綴（`/rebase all ff`）：收斂鏈交付語義
+
+**語義**：把目標集合（Step A0 全集，含無 wt 衛星）收斂到**同一 tip**。收斂鏈是交付物不是報告——結束時全員同 tip，不留「跳過＋建議指令」菜單。`ff` 後綴擋的是**無謂 replay**（patch-identical／空 commit），**不是 diverged 停等**：diverged feature 的自有 commits 屬必要 replay，照做跑完。
+
+**標準動線**（有 diverged 時的收斂鏈；全員 ff-able 即退化為「user 慣用泛化」形）：
+
+1. **Survey（每次重新）**：`git branch -v` + `git rev-list --left-right --count` 分類——並行 session 隨時移動 branch（含整鏈 rebase 重寫、hash 全數過期），同 session 早前快照（含自己剛跑的 rebase 結果）不可信
+2. **Feature 鏈對齊**：diverged feature `git -C <wt> rebase <base>` replay 自有 commits（patch-identical 的 git 自動 skip）
+3. **trunk 吸收**：`git -C <trunk-wt> merge --ff-only <superset-tip>`（trunk wt clean 前置；吸收前先算 count——`<trunk>...<feature>` = 0/0 表示終態已達，不需執行 merge）
+4. **其餘 branch ff 對齊 tip**：wt-backed `git -C <wt> merge --ff-only <tip>`（clean 時 `rebase` 同效）；無 wt 衛星 `git fetch . <tip>:<branch>`（ref 層 ff）
+
+**dirty wt 的 ff 例外**（吸收步與衛星 ff 同適用）：ff 型操作（`merge --ff-only`）允許 dirty wt——前檢「WIP 檔 × incoming diff 路徑」`comm -12` 交集（untracked 路徑同查）：**不相交 → 執行**（git 內建 overwrite 保護為欄杆，WIP 原樣保留；並行 session 的 WIP 不代為收尾）；**相交 → 停止點 #1/#3**。rebase 型操作（含必要 replay）仍須 clean 或 `--autostash`。
+
+**傳播紀律**：跨 worktree 的變更傳播一律走 rebase/ff 鏈，不手動鏡射/寫入其他 wt（含 trunk wt——生產 checkout，命令外的任何寫入都越權）；本命令吸收步寫入 trunk wt 屬命令授權範圍。
+
+**Upstream 慣例**：工作 branch 純本地（不設 upstream、不 push），只有 trunk 追蹤 origin——收斂後「trunk 領先 origin N commits 未 push」是標準遺留項，push 恆待 user AUTH。
+
 ---
 
 ## 參數
@@ -327,7 +345,8 @@ git worktree list                            # branch → worktree 對應（同�
 |------|------|
 | **\<branch\>** | 「另一端」分支，**角色由當前 branch 決定**（見 Phase 0）：當前 = trunk → `<branch>` 是 feature（被吸收）；當前 = feature → `<branch>` 是 rebase base（trunk 或另個 feature） |
 | **all** | 批次模式：把 Phase 0 動作套用到所有 feature。語義仍由當前 worktree 決定——trunk 上 = 批次吸收（`merge --ff-only`）、feature 上 = 批次同步（`rebase <trunk>`）；見 [all 批次模式](#all-批次模式) |
-| **--autostash** | dirty 工作目錄時自動 stash→rebase→pop（預設停下問；**僅 rebase 路徑**）。帶旗標 = 你知道有 WIP、要保留、且準備好處理 pop 衝突 |
+| **ff 後綴**（搭配 `all`）| 收斂鏈交付語義：全集收斂同 tip——必要 replay（diverged 自有 commits）照做、擋無謂 replay；標準動線與 dirty wt 例外見 all 批次模式「ff 後綴」節 |
+| **--autostash** | dirty 工作目錄時自動 stash→rebase→pop（預設停下問；**僅 rebase 路徑**；`--stash` 為 user 慣用同義詞）。帶旗標 = 你知道有 WIP、要保留、且準備好處理 pop 衝突 |
 
 **對比例子**：
 - 在 `main`（trunk）上 `/rebase replay` → `<branch>` = `replay`（feature）→ `git merge --ff-only replay`（吸收步）
@@ -335,6 +354,7 @@ git worktree list                            # branch → worktree 對應（同�
 - 在 `replay`（feature）上 `/rebase backbone` → `<branch>` = `backbone`（另個 feature）→ `git rebase backbone`（feature 互 rebase，依賴鏈由呼叫者自負）
 - 在 `replay`（feature）上 `/rebase all` → 批次同步：當前 `rebase main` + 對每個其他 feature（`git branch` 動態列舉，見 Step A0）`git -C <wt> rebase main`（無 wt 且純祖先 → `git fetch . main:<feature>`，見 Step A0）
 - 在 `main`（trunk）上 `/rebase all` → 批次吸收：對每個 feature（`git branch` 動態列舉，見 Step A0）逐一 `merge --ff-only`（只 ff-able）
+- 在 `replay`（feature）上 `/rebase all ff` → 收斂鏈：survey → diverged 必要 replay → main `merge --ff-only` 吸收 superset → 其餘 ff 對齊同 tip（見 all 批次模式「ff 後綴」節）
 
 ---
 

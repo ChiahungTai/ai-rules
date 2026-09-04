@@ -91,7 +91,7 @@
 ### 工作流 skills — 日常工具
 
 - `/doc-health` — Capabilities + Kanban 健康檢查（12 角度驗證文件準確性）；`--report` 產出完整能力地圖；`--sync-system-map` 用 Capabilities 狀態同步 SYSTEM-MAP.md
-- `/rebase <branch|all> [--autostash]` — Trunk-based rebase。**原則：trunk 永不被 rebase**，故已對齊的 feature 由 trunk 上 `merge --ff-only` 吸收（非 rebase）；feature 可 rebase onto trunk 或另個 feature；Phase 3 報告其他 feature 落後狀況 + 提示自行同步，不自動 rebase／ff。`all` 批次：feature 上 = 同步所有 feature onto trunk、trunk 上 = 吸收所有 ff-able feature（5 停止點菜單，不自動跳過；目標集合 = `git branch` 動態列舉 − trunk，禁寫死）
+- `/rebase <branch|all> [ff] [--autostash|--stash]` — Trunk-based rebase。**原則：trunk 永不被 rebase**，故已對齊的 feature 由 trunk 上 `merge --ff-only` 吸收（非 rebase）；feature 可 rebase onto trunk 或另個 feature；Phase 3 報告其他 feature 落後狀況 + 提示自行同步，不自動 rebase／ff。`all` 批次：feature 上 = 同步所有 feature onto trunk、trunk 上 = 吸收所有 ff-able feature（5 停止點菜單，不自動跳過；目標集合 = `git branch` 動態列舉 − trunk，禁寫死）。`all ff` 後綴＝收斂鏈交付語義：全集收斂同 tip——必要 replay 照做、擋無謂 replay，dirty wt 的 ff 例外（WIP×incoming 不相交可 ff）
 
 ### 工作流 skills — 依賴升級（收盤後執行）
 
