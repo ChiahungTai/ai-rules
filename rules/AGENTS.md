@@ -26,7 +26,7 @@ uv run python scripts/deploy_agents.py
 非 Claude 端單檔 AGENTS.md 受 harness **截斷線**約束——超線內容**靜默失效**（不報錯，直接截掉）：
 
 - **ZCode 實測**：截斷線 **102,400 bytes（100KiB）**，硬編碼於 `zcode.cjs`（`hIn=100*1024`，讀前 100KiB bytes 再 UTF-8 decode），**無任何 config 可調**（官方文檔亦未記載）。載入模型：只讀 user 全域（`~/.zcode/AGENTS.md`）+ workspace（cwd 往上至 project root 第一個 `AGENTS.md`）**兩檔**，各檔獨立 100KiB 預算；**不展開 `@import/@include`、不掃子目錄、不依任務類型選規則檔**。
-- `deploy_agents.py` 內建 **90KiB 硬 fail gate**（常數 `BUNDLE_MAX_BYTES`，此處為描述非真相源）：bundle 超過即拒絕部署。撞線時先精簡 rules/（encoder-philosophy：砍可推導與敘事），或把 on-demand 級內容**下沉 skills/**（reference skill 分層模式：rule 留 always-on 核心＋pointer，深層內容住 `skills/<name>/SKILL.md`——skills/ 經全域 symlink 四 harness 按需可讀。先例：acceptance-evidence / lsp-navigation / instruction-writing / context7 / deep-thinking / model-routing / llm-output-convention 七組 rule+skill 分層）。
+- `deploy_agents.py` 內建 **90KiB 硬 fail gate**（常數 `BUNDLE_MAX_BYTES`，此處為描述非真相源）：bundle 超過即拒絕部署。撞線時先精簡 rules/（encoder-philosophy：砍可推導與敘事），或把 on-demand 級內容**下沉 skills/**（reference skill 分層模式：rule 留 always-on 核心＋pointer，深層內容住 `skills/<name>/SKILL.md`——skills/ 經全域 symlink 四 harness 按需可讀。先例：acceptance-evidence / lsp-navigation / instruction-writing / context7 / deep-thinking / model-routing / llm-output-convention / modern-cli-preference 等 rule+skill 分層）。
 - 歷史教訓：部署版 141KB 時代，尾部 8 條 rules（含 tool-discipline、quality-constraints）落在截斷區靜默失效（2026-08-20 實證事故：spawn 背景規範沒載入 → 前景 spawn 被 user 插話殺掉）。**規範存在 ≠ 規範載入**。
 
 ### 部署驗證義務（deploy 跑通 ≠ 部署完成）
@@ -65,7 +65,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `code-edit-constraints` | 🔴 claude-specific | Claude Edit/Write 工具 API（old_string 精確匹配 / 多位元組降級）|
 | `model-routing` | 🟢 neutral | 跨 harness subagent 模型分層骨架（角色→tier 表＋兩跳原則＋詞彙定義；映射/閘門/契約/套用與解析表在 model-routing skill） |
 
-**default = neutral**：通用知識預設跨 harness — 新 rule 不標 scope 即進 bundle。Claude 專屬 rule 需顯式標 `harness-scope: claude-specific` 才被排除。`deploy_agents.py` 的斷 ref 檢測會阻塞任何 neutral rule 引用 claude-specific rule 的 deploy（強制修 ref 或重劃 scope）。目前 neutral 16 條、claude-specific 2 條（bash-hard-rules / code-edit-constraints）。已下沉 skill 的 rule（self-consistency 五維檢查、context7 MCP 查詢——內容在 instruction-writing skill／context7 skill；design-thinking 輸出格式、model-routing 解析表、llm-output-convention 細則三組同模式分層）。
+**default = neutral**：通用知識預設跨 harness — 新 rule 不標 scope 即進 bundle。Claude 專屬 rule 需顯式標 `harness-scope: claude-specific` 才被排除。`deploy_agents.py` 的斷 ref 檢測會阻塞任何 neutral rule 引用 claude-specific rule 的 deploy（強制修 ref 或重劃 scope）。目前 neutral 16 條、claude-specific 2 條（bash-hard-rules / code-edit-constraints）。已下沉 skill 的 rule（self-consistency 五維檢查、context7 MCP 查詢——內容在 instruction-writing skill／context7 skill；design-thinking 輸出格式、model-routing 解析表、llm-output-convention 細則、modern-cli 陷阱目錄等同模式分層）。
 
 ## Rule 寫作原則
 
