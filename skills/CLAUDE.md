@@ -66,7 +66,7 @@
 ### 工作流 skills — 品質工具
 
 - `/lint-fix` — ruff + mypy 自動修正
-- `/fix-test` — 測試失敗分類修復（先分類 A/B/C/D/E 再修復，防止盲目讓測試通過）+ 階段 4.5 TWINS 同類缺陷 sweep
+- `/fix-test` — 測試失敗分類修復（先 triage 哨兵＋病歷＋仲裁，再分類 A/B/C/D/E；防止盲目讓測試通過）+ 階段 4.5 TWINS 同類缺陷 sweep
 - `/audit-test` — 測試品質稽核（反模式偵測、覆蓋對稱性、mock 健康度，只讀不寫）
 - `/smell-detector` — 壞味道偵測（layer 3，行動前/審既有）：架構審查＋重構前期研究＋測試優化盤點；兩 mode——`<dir|files>` zoom 變焦批判（質疑存在：6 判準+查證誠信+Domain 層判準 4/5）/ `--baseline <dir>` 廣角盤點（per-directory 4 檔+invariants+--status/--stale/--arch）；測試 smell 三類（資源/怪獸/結構，與 /audit-test 正交）；read-only 偵測器，修復走 /implement、/fix-test
 - `/corpus-recall` — 行動前敘事脈絡檢索（topic→前因後果卡片，與 smell-detector 對仗＝行動前偵察雙軸）：symbol/模組/關鍵詞→callstack-plan 錨點＋tour 景點＋manifest 交叉＋md 內文＋hub_refs 影響域的機械求全，LLM 判讀 confidence 三級；輸出相關鏈（職責一句＋為何相關＋走讀/深讀雙入口）——corpus 超過瀏覽閾值後的檢索前門；無語料誠實停不硬湊

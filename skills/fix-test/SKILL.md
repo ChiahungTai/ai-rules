@@ -42,17 +42,44 @@ LLM 遇到測試失敗時的預設偏誤是「讓測試通過」。本命令強�
 3. 輸出推斷結果，詢問用戶：
    - 推斷的測試範圍是否正確？
    - 是否要加減測試檔案？
-   - 確認後進入階段 1
+   - 確認後進入階段 0.5（無哨兵無病歷的冷啟動會自然落到階段 1）
 
-### 階段 1：Run Tests
+### 階段 0.5：Triage（哨兵＋病歷＋仲裁）
 
-```bash
-uv run pytest <targets> -v --tb=short
+全重跑一遍才分類是浪費，lastfailed 照單全收是誤判。先 triage，再決定跑什麼。模式 A（用戶已貼 log）跳過本階段，直接階段 2。
+
+**三層分工**：
+
+| 層 | 角色 | 給什麼 | 不給什麼 |
+|----|------|--------|----------|
+| 哨兵（sentinel） | 只決定「看哪裡」 | 待查 node ID 清單 | 失敗理由、是否仍紅 |
+| 病歷（record） | 給失敗理由和歷史 | 理由＋歷史＋baseline 比對（先讀它） | — |
+| 重跑 | 只做兩件事 | ① 修完驗證 ② 哨兵和病歷對不上時仲裁 | 平時不跑 |
+
+- **哨兵**：`.pytest_cache/v/cache/lastfailed` 或 IDE 紅單（如 VSCode TestResults）。限制：每次 run 蓋寫；改名／刪除後舊 node ID 變殭屍（指向空氣）；不代表仍紅。
+- **病歷**：project 的持久化失敗記錄（含 failures[]＋baseline 比對）。**路徑是 project 慣例，本 skill 不寫死**——project 在自己的 AGENTS.md 聲明路徑與格式（如 mosaic：`~/.mosaic/logs/ops/test-regression-<date>-findings.json`）。無病歷慣例的 project 跳過此步，只做哨兵＋仲裁。
+- **IDE 結果無檔案落地時**（如 VSCode TestResults 住 extension host 記憶體）：人機想看同一份結果，在同一 run 加 `--junitxml=<path>` 落一檔，把路徑給 AI。junitxml 只給共享視圖（ID＋pass/fail＋耗時），分類仍要 `--tb=short` 的 traceback；opt-in，非必備。
+
+**步驟**：
+1. 讀哨兵 → N 個候選 ID。
+2. 讀病歷（若有）→ 每個 ID 的理由＋歷史。
+3. 對照分三種命運：
+   - 確認紅 → 進入階段 2 分類（A/B/C/D/E）。
+   - 已自癒 flaky（病歷顯示間歇／歷史曾過）→ 不修，記一筆；病歷模糊才仲裁。
+   - 殭屍（該 ID 已 collect 不到：改名／刪除）→ 用 `pytest --collect-only -q` 或查檔確認，直接丟棄，不重跑。
+4. 哨兵和病歷對不上（哨兵有而病歷無理由、病歷有而哨兵無、flaky 反覆上榜）→ 只重跑這 M 個仲裁：`uv run pytest <node IDs> -v --tb=short`。其餘不跑。
+
+**強制輸出 line**（triage 結束必須先報這行，再進階段 1/2）：
+
+```
+TRIAGE: sentinel N, record <各ID理由一句>, arbitration M: <node IDs or "none">
 ```
 
-- 捕獲完整輸出（含 traceback）
-- 識別所有 FAILED 項目
-- 無失敗 → 報告通過，結束
+### 階段 1：Run Tests（只跑 triage 沒覆蓋的）
+
+- 階段 0.5 已仲裁 → 直接用仲裁結果，不再重跑。
+- 無哨兵無病歷（如模式 B 從 git 推斷的冷啟動）→ 才跑 `uv run pytest <targets> -v --tb=short`。
+- 捕獲完整輸出（含 traceback）；識別所有 FAILED；無失敗 → 報告通過，結束
 
 ### 階段 2：Failure Classification（核心）
 
@@ -140,6 +167,7 @@ uv run pytest <targets> -v --tb=short
 - **Type A**：修程式碼，不改測試。修完跑測試確認通過。
 - **Type B/C**：重寫測試。必須先說明新測試的意圖，再撰寫。跑測試確認通過。
 - **Type D**：修基礎設施（conftest、fixture、import）。跑測試確認通過。
+- **Type E**：刪除或標記 deprecated（先確認無仍有價值的斷言可拆出保留）。跑受影響測試確認無殘留引用。
 
 每個修復完成後立即驗證該測試。全部完成後跑一次受影響的完整測試套件（背景跑）。
 
@@ -181,6 +209,8 @@ TWINS: searched <pattern> - found <N> other sites: <files, or "none">
 - ❌ 改 test setup 繞過失敗路徑（改 fixture 只為了避開報錯的 code path）
 - ❌ 只改測試碼但不理解契約為什麼變了
 - ❌ 跳過分類直接修復
+- ❌ 拿到紅單（lastfailed／IDE TestResults）就全量重跑一遍才分類（先走階段 0.5 triage）
+- ❌ 把 lastfailed 照單全收當失敗理由（它是哨兵，不是病歷）
 
 ---
 
@@ -195,6 +225,7 @@ TWINS: searched <pattern> - found <N> other sites: <files, or "none">
 
 ## 品質檢查清單
 
+- [ ] triage 先報 `TRIAGE:` line（哨兵 N、病歷理由、仲裁 M），無全量重跑
 - [ ] 每個失敗測試都已分類（A/B/C/D/E）
 - [ ] Type B/C 有說明新契約或正確行為
 - [ ] 用戶確認後才開始修復
