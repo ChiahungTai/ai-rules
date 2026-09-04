@@ -55,6 +55,7 @@ findings 全空 → 報告並直接進 docs 鏈。
 1. 實作所有 ✅ 採納項（反拖延原則：合理就當下落地；**先規劃整批再批次套用**——目標檔先 Read、多個 Edit 同 block 發、鄰近一行式小修合併、真依賴才序列，見 [tool-discipline](../../rules/tool-discipline.md)「獨立呼叫批次化」+「檔案修改禁令」（Read 紀律））
 2. 執行 `followup-review`（[skills/followup-review/SKILL.md](../followup-review/SKILL.md)；讀 `.review/<branch>.md`）驗收
 3. 未通過 → 再修 → 再驗收（**上限 3 輪**；超過 = 停下，殘留項列入收尾報告標「未收斂」——連續失敗比乾淨報告更糟，不硬撐）
+4. EP 在場（uncommitted 或弧模式皆）→ spawn lite-verify 核對 **EP 驗證策略覆蓋率**（逐情境：入庫測試或跳過理由；agent 定義自帶此項）——機械對帳，不靠 judge 自覺回頭看
 
 修正迴圈或收尾期間 diff 增量擴至 ≥3 檔時，補一輪審查視角（不需全鏈重跑、但不得零審）——與 code-review 模式 B 的 dual-context ≥3 files 升級門檻對齊，已觸發則不重複。
 

@@ -92,7 +92,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 |---------|---------|------|
 | Context | 開始前讀取 | 理解背景 |
 | §1b Invariant Impact（條件 — 段有此元素時） | RED 強化 | §1b「驗證對齊」映射的 invariant test 須在 RED 寫入、GREEN 後通過——producer 在 EP 宣告「動到哪些 invariant + 用哪個 test 守」，builder 機械確認該 test 存在且通過（producer 自證 → builder 驗收，非留 reviewer 推） |
-| 驗證策略 | RED | 讀 EP 測試類型 → 分類情境 → 寫對應測試（測試類型選擇紀律見 [validation-strategy](../validation-strategy/SKILL.md)：e2e 優先 / 交易 replay >>> live / 放 scripts/ / 不重驗 pkg；詳 TDD skill EP Integration） |
+| 驗證策略 | RED | 讀 EP 測試類型 → 分類情境 → 寫對應測試（測試類型選擇紀律見 [validation-strategy](../validation-strategy/SKILL.md)：e2e 優先 / 交易 replay >>> live / 放 scripts/ / 不重驗 pkg；詳 TDD skill EP Integration）；**每情境二擇一顯式結算**——入庫測試或記錄跳過理由（EP 段記錄），段落收斂時逐情境核對：「寫了測試」≠「每情境有去處」（post-build 側 lite-verify 終端對帳） |
 | Pseudo Code | GREEN | 照設計實作 |
 | 核心要點 | REFACTOR | 對 EP 完成檢查逐項驗證 |
 
