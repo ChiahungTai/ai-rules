@@ -82,6 +82,7 @@ findings 全空 → 報告並直接進 docs 鏈。
 ```markdown
 ## Post-Build 收尾報告
 - code 鏈：findings N（✅N/❌N/⚠️N）、修正 N 項、followup <通過|未收斂(殘留清單)>
+- muse 委派（鏈內有派 muse 時才列）：jobId＋status 清單（經 bridge 入口）；ledger 查無的 muse 產出標「未經 bridge，副作用側考古」
 - EP 對照：delta_tour=<機械底稿|LLM 對照|無（原因：uncommitted 模式/小變更）>——宣稱觸及 vs 實際變動模組、unexplained 差異項
 - 殼 refresh（hook 2）：<完成（badge ✅＋持久 delta tour 落點＝任務家殼）|跳過（原因：無殼/條件不符）>
 - docs 鏈：consistency N 檔（pass N / fail-fixed N）、metadata-sync <跑/跳過>
@@ -101,6 +102,7 @@ dual-family 第二審查者因訂閱窗口／額度不足跳過時，必須顯�
 
 - **新工具／新流程的首個真實消費者＝自己的 build 弧**：消費對照寫進收尾報告（工具驗收與弧審查合同一件事，不另造驗收場景）——適用全鏈（含 docs-mode 弧）
 - **止步於 commit 之前**：commit 需人類確認（硬規則，自主模式亦然）
+- **鏈內委派 muse 必經 bridge**：任何階段把工作派給 muse（dual-family 第二審查者、docs 鏈分擔等）一律走 bridge task 入口，收尾報告記 ledger jobId——入口約束單一源見 [model-routing](../model-routing/SKILL.md)「bridge 必經」；ledger 查無的 muse 產出＝收尾不可考，標「未經 bridge，副作用側考古」
 - **不重抄被編排命令的方法論**：審查軸、judge 準則、consistency 六維都在各命令/skill 內，本檔只編排
 - 修正迴圈上限 3 輪，超過即停（不硬撐原則）
 

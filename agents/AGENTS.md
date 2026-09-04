@@ -38,7 +38,7 @@ agents/
 
 ### dispatch face 與收法
 
-- **muse 委派預設＝主 session 直呼 bridge CLI**：背景 Bash＋`.muse-bridge/jobs.json` 輪詢（`rg .muse-bridge/jobs.json`＋`ps` 進程核對），繞開 wrapper 生命週期錯位；wrapper agent 形態為別名（alias），續用時收法＝resume-to-poll。理由：wrapper 在 runtime 未終局時提前 complete 是系統性常態（生命週期錯位，本弧實證：muse×2＋codex×2 均需介入），直呼橋接層不經 wrapper 轉發、終局以 jobs.json 與 working tree 為準
+- **muse 委派必經 bridge——預設形態＝主 session 直呼 bridge CLI**：背景 Bash＋`.muse-bridge/jobs.json` 輪詢（`rg .muse-bridge/jobs.json`＋`ps` 進程核對），繞開 wrapper 生命週期錯位；wrapper agent 形態為別名（alias），續用時收法＝resume-to-poll。理由：wrapper 在 runtime 未終局時提前 complete 是系統性常態（生命週期錯位，本弧實證：muse×2＋codex×2 均需介入），直呼橋接層不經 wrapper 轉發、終局以 jobs.json 與 working tree 為準。「必經」＝禁繞過 bridge 直呼 `muse exec` 等（ledger 可考性——規範單一源見 `skills/model-routing/SKILL.md`「bridge 必經」）
 - **codex 委派＝wrapper＋標準收法 resume-to-poll＋prompt 內預寫 env fallback**：prompt 內預寫 plugin root 路徑的 env 兜底（`CLAUDE_PLUGIN_ROOT` 缺失時 `MODULE_NOT_FOUND` 形態），wrapper 標準收法同為 resume-to-poll
 
 ### 三態判定（症狀→證據→處置）
