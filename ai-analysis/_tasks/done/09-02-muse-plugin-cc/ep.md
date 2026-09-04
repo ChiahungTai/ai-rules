@@ -48,7 +48,7 @@
 | R4 | `--json` 事件 schema 跨版本 churn（Muse Code 產品新、changelog 活躍） | 高 | bridge 鬆剖析（unknown type **與不可解析行**均跳過計數，不炸）+ S2 版本偵測 |
 | R5 | ~~`--model` 假想 flag~~ → **已證實**（`configuration.md:76` 文檔化「Common to both」，POC 實用）；`--effort` 為 bridge 層縮寫，映射 `--reasoning-effort` | 低（已解） | POC 實測 |
 | R6 | ZCode directory marketplace 載入自寫 plugin（code-reality 先例已證） | 低 | S6 安裝即驗 |
-| R7 | **CLI 預設模型不穩定**（POC 4 runs：contributor×2、standard×2，catalog/rollout 決定） | 高 | bridge 預設顯式 `--model muse-spark-1.2`（standard：數據不用於訓練，隱私保守）；caller 可覆寫 |
+| R7 | **CLI 預設模型不穩定**（POC 4 runs：contributor×2、standard×2，catalog/rollout 決定） | 高 | bridge 預設顯式 `--model muse-spark-1.3`（standard：數據不用於訓練，隱私保守；2026-09-04 由 1.2 升級）；caller 可覆寫 |
 
 **R2 判別步驟（可操作化，EP review C-P1-11 採納）**：4 個帳務錨點（見 `poc-results.md` 末表，含 standard 與 contributor 模型各 2）——(a) dev.meta.ai `/usage` API dashboard 前後對照：**全數不出現**＝走訂閱（出現＝PAYG，R2 敗）；(b) Accounts Center 訂閱用量窗口計數應 +4；(c) 特別注意 standard 模型 runs（#2/#3）是否例外進 API dashboard——若是，代表訂閱僅涵蓋 contributor tier，bridge 預設模型改 pin contributor（計費必要性凌駕隱私偏好，屆時 README 警告雙模型差異）。截圖為必要產物。
 
@@ -86,7 +86,7 @@ ai-rules 為 meta repo（無模組 Capabilities 表格）——本 EP 變更不�
 
 | # | 場景 | 觸發 | 預期行為 | Checkpoint | 對應能力 |
 |---|---|---|---|---|---|
-| SM-1 | 委派修復任務 | `/muse 修這個 failing test` | bridge spawn `muse exec --json --disable-approval --model muse-spark-1.2 --max-model-steps 200`，stdout 原樣回 | 無 | 任務委派 |
+| SM-1 | 委派修復任務 | `/muse 修這個 failing test` | bridge spawn `muse exec --json --disable-approval --model muse-spark-1.3 --reasoning-effort xhigh --max-model-steps 200`，stdout 原樣回 | 無 | 任務委派 |
 | SM-2 | muse 未安裝 | 任務委派時 `command -v muse` 失敗 | 明確錯誤訊息引導 `muse-setup`，非 stack trace | 無 | 環境健檢 |
 | SM-3 | 未登入/訂閱失效 | muse exec 回 auth 錯誤 | 錯誤分類為「認證」（JSONL 錯誤事件關鍵字，分類失敗=原文透傳），指引 `/muse-setup`；不建議設 API key（違反設計裁定） | 無 | 環境健檢 |
 | SM-4 | parent env 帶 `META_API_KEY` | shell profile 設過 | setup 警告「將剝除以保訂閱計費」；bridge spawn 前剝除 | 無 | 環境健檢 |
@@ -126,7 +126,7 @@ ai-rules 為 meta repo（無模組 Capabilities 表格）——本 EP 變更不�
 
 ### 語義約束（S1 是唯一 flag 契約源——旗標面擴充一律回歸本段，S3/S4 只消費不擴充）
 - env 剝除清單：`META_API_KEY`（唯一強制項）
-- 預設 flags：`--json`、`--disable-approval`、`--model muse-spark-1.2`（R7：CLI 預設模型不穩定，顯式 pin；standard tier＝數據不用於訓練）、`--max-model-steps 200`
+- 預設 flags：`--json`、`--disable-approval`、`--model muse-spark-1.3`（R7：CLI 預設模型不穩定，顯式 pin；standard tier＝數據不用於訓練；2026-09-04 由 1.2 升級——ai-rules 解析表同步，L4 探針實證 1.3 在服）、`--reasoning-effort xhigh`（2026-09-04 user 裁定：原不帶 flag 落 muse CLI 預設 high；caller `--effort` 可覆寫）、`--max-model-steps 200`
 - caller flag 面（S3/S4 消費）：`--yolo`（opt-in，取代 disable-approval）、`--trust-workspace`、`--resume`→bridge 解析 last session、`--steps N`、`--effort <v>`→`--reasoning-effort <v>`、`--model <id>`、`--network <v>`→`--sandbox-network <v>`、`--allow-workspace-switch`
 - **硬前提（2026-09-02 修訂）**：`task` 拒跑條件＝binary 缺失。原「setup 綠燈未取得即拒跑」條款**移除**——user 裁定：auth.json 實證為 oauth/device_code 訂閱載體（無 stored API key），stored-key 向量由使用紀律承擔（不執行 `muse auth set`）；發佈公開前重評 spawn 時即時檢查方案。setup 降為診斷工具（綠燈仍計算顯示，不再作為 task 前提）；auth 類失敗仍由錯誤分類 `auth-failed` 攔截＋指引
 - exit code 映射表：`0`→completed、`1`→failed-or-capped、`2`→usage-error、`130/143`→interrupted；verdict 永不由 exit code 推導；**細分狀態（capped/failed-usage/auth-failed/workspace-mismatch）由 JSONL 錯誤事件關鍵字剖析**（事件樣本以 POC 記錄為規格源；分類失敗＝原文透傳，不猜）
@@ -150,7 +150,8 @@ muse-bridge.mjs
 │   ├── assertBinary()          // spawnSync("muse", ["--version"])；缺 → exit 2 + 引導訊息
 │   ├── env = { ...process.env }; delete env.META_API_KEY   // 設計裁定 #1
 │   ├── args = ["exec", "--json", "--disable-approval",
-│   │          "--model", flags.model ?? "muse-spark-1.2",   // R7：顯式 pin
+│   │          "--model", flags.model ?? "muse-spark-1.3",   // R7：顯式 pin
+│   │          "--reasoning-effort", flags.effort ?? "xhigh", // 2026-09-04 user 裁定
 │   │          `--max-model-steps`, flags.steps ?? 200]
 │   │   + (flags.yolo ? ["--yolo"] : [])                    // 裁定 #2：caller opt-in
 │   │   + (flags.trustWorkspace ? ["--trust-workspace"] : [])
@@ -271,7 +272,7 @@ review(baseRef)   [bridge 子命令]
 - 整合：fake-muse 回 fixture verdict JSON（合法/非法各一）驗 schema 閘
 - E2E：對本 repo 一個小 commit 真跑 review，verdict + trajectory 落檔
 - 未覆蓋：finding 品質（模型面）；大 diff 1M context 消化（模型賣點，記錄不測）
-- **CR 紅利實驗（可選，單變數設計）**：同 diff、`--model muse-spark-1.2` pin（防 R7 漂移）、只切「prompt 明示 CR CLI」一項——量 findings 差異。注意：`--trust-workspace` 是另一個實驗（規則載入混合效應，非純 CR），勿混組
+- **CR 紅利實驗（可選，單變數設計）**：同 diff、`--model muse-spark-1.3` pin（防 R7 漂移）、只切「prompt 明示 CR CLI」一項——量 findings 差異。注意：`--trust-workspace` 是另一個實驗（規則載入混合效應，非純 CR），勿混組
 
 ---
 
@@ -283,6 +284,7 @@ review(baseRef)   [bridge 子命令]
 ### 語義約束（ledger 格式與 S1 共享：JSONL + job index；runs 表欄位固定）
 ### 核心實作要點
 - bridge `runs`/`show`/`stop`/`export` 子命令：job ledger（背景 runs、狀態、exit 映射、capped 標記 SM-6）
+- bridge `wait <jobId> [--timeout <ms>] [--json]`（AIR-21 延伸，2026-09-04）：`task --background` 的輪詢機械化——500ms 輪詢 ledger 至終態、每輪 stale-running reconcile（dead pid 即時收斂 interrupted 不掛死）、終態渲染同 `show`；`--timeout` 預設 300000（0＝無限）逾時 exit 1 附當前狀態；exit 隨終態（completed→0／failed 家族→1／unknown job 或 usage error→2）；純 ledger 消費、零 muse spawn
 - **capped/failed-usage 偵測來源（EP review S-P1 採納）＝JSONL 錯誤/步數事件剖析**（事件 type 清單以 POC-3 記錄為規格來源），非 exit code 推導
 - `commands/muse-runs.md`（表格渲染，grok runs.md 同契約）+ `muse-show`/`muse-stop`
 - `hooks/hooks.json` + `session-lifecycle-hook.mjs`（grok 搬）：**SessionEnd 對 still-running job ＝ cancel ＋ terminate process tree（照 grok 原行為，EP review C-P2 採納——非僅「提醒」，否則孤兒 muse 行程續燒訂閱額度）**；bridge 自身被殺時的 stale running reconciler（pid liveness 檢查）
