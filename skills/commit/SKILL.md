@@ -136,7 +136,8 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 | 判定 | 處置 |
 |------|------|
 | 本任務 build 階段 5a 結算物（卡／EP 歸檔／instruction 檔／`.tours/delta/`／flow-feedback 歸檔） | 納入本次 add |
-| 並行 session 遺留（非本任務範圍） | 顯式排除＋報告記錄 |
+| 並行 session **活躍中**（非本任務範圍） | 顯式排除＋報告記錄 |
+| 並行弧**已終結**但結算未 commit（孤兒結算：卡 Done／結算物在場、owning session 已結束） | **收編進本 commit 或另開補 commit**，不排除（實證：AIR-17 結算懸掛半日、前 commit 假結算） |
 
 **半套歸檔偵測**（隱形漏失主形態）：` D` 舊路徑與 `??` 新路徑（`done/` 等）成對＝歸檔搬移只搬未 add——搬移必須雙側同 commit，否則卡 refs 指向 git 不存在的路徑。
 
