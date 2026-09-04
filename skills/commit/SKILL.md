@@ -60,7 +60,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 **並行 session 防護（四條）**：
 
-- **staged 範圍核對**：commit 前 `git diff --cached --name-only` 必須 == 本次清單——staging area 是**單一共享狀態**，並行 session 的 staged 檔會混入（隔離式 add 對 active race 無效）；多餘 staged → `git restore --staged <他檔>` 後再 commit（補救四步：reset → add 正確集合 → commit → `git show --stat` 驗）
+- **staged 範圍核對**：commit 前 `git diff --cached --name-only` 必須 == 本次清單——staging area 是**單一共享狀態**，並行 session 的 staged 檔會混入（隔離式 add 對 active race 無效）；多餘 staged → `git restore --staged <他檔>` 後再 commit（補救四步：reset → add 正確集合 → commit → `git show --stat` 驗）。此核對只防「多」——finalization「少」由 [2.8 對帳閘門](#階段-28-finalization-對帳閘門)守
 - **git mv 順序陷阱**：`git mv` 搬的是 **HEAD 內容**——先 Edit 後 mv 會把未 commit 改動留在原地（舊路徑冒出殘檔）。順序＝先 mv 再 Edit 新路徑；commit 後 `git show --stat` 驗搬家完整
 - **同根因同 commit**：同一邏輯改動的多檔一個 commit（寧晚不拆散——拆散的中繼 commit 語義不完整）
 - **外來產物對帳**：commit 非本 session 產生的檔案前，對可機械驗證宣稱（路徑存在／入口有效／狀態宣稱）跑 rg/ls 對帳——他 session 的自述不可信
@@ -129,6 +129,19 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 > **demo 雙重**：「檔案去處三選一」是互斥分類（檔案層）。demo 驗證的「行為」是獨立層面 —— 若值得測，build 時另提煉 `test_<feature>.py`（不在 2.7 範圍）。2.7 掃 `demo_*.py` 只管檔案去處（預設 scripts / delete）。
 
+### 階段 2.8：Finalization 對帳閘門
+
+**commit 前檢查閘門**（與 2.7 同系列，**捷徑模式保留**）。機械掃 `git status --porcelain` 對 finalization 路徑面（路徑集**與階段 6 納入清單同源**）——階段 6 的 finalization 清單是散文列舉，漏 add 時安靜失敗（真實案例：MOS-28 結案卡＋EP 歸檔搬移懸掛 working tree，卡 refs 指向 git 未落地路徑）。
+
+| 判定 | 處置 |
+|------|------|
+| 本任務 build 階段 5a 結算物（卡／EP 歸檔／instruction 檔／`.tours/delta/`／flow-feedback 歸檔） | 納入本次 add |
+| 並行 session 遺留（非本任務範圍） | 顯式排除＋報告記錄 |
+
+**半套歸檔偵測**（隱形漏失主形態）：` D` 舊路徑與 `??` 新路徑（`done/` 等）成對＝歸檔搬移只搬未 add——搬移必須雙側同 commit，否則卡 refs 指向 git 不存在的路徑。
+
+報告附 `git status --porcelain` 原始輸出（機械事實不可靜默跳過）。歸屬判斷是語義的（本任務 vs 並行遺留），故為 skill 步驟而非 hook——機械掃描列命中、LLM/user 判歸屬（同 2.7「機械掃描＋逐項處置」模式）。
+
 ### 階段 4：生成 Commit Message
 
 **格式**：`<type>(<scope>): <description>`
@@ -151,6 +164,8 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 **遵守 `outward-action-consent` rule（commit 場景）**：未收到確認絕不執行 git commit。
 
 ### 階段 6：執行 Commit
+
+**「commit 確認」結算（pre-commit、無 hash）**：若本任務在拍板池（`ai-analysis/_inbox/pending-decisions.md`——各 repo 依對應路徑）有「commit 確認」PENDING 條目——user 於階段 5 確認後、git add 前：條目搬已結案段（一行：日期＋user 確認，**不含 hash**——hash 屬 git log 可推導）；結算敘事寫卡/EP final summary（同樣 commit 前、不含 hash）；殘餘驗收項（如 L6 驗收）拆獨立未勾條目留 queue。全部 commit 前完成 → 隨本 commit 落地。**禁止 post-commit 回寫拍板池**——記錄 commit 的文字進不了它記錄的那個 commit（雞生蛋懸掛）。
 
 確認後 `git add`（**納入本次開發的完整產物**：主變更 + build 階段 5a 結算的 finalization 檔 —— instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）/ `backlog/`（卡＋drafts——CLI `autoCommit=false` 下只改檔，整目錄隨 finalization add）/ 任務家（EP＋spec＋Report Shell，含歸檔搬移——`ai-analysis/{_tasks,_projects}` 或 `00-tasks/`）/ `.tours/delta/`（持久 delta tour——post-build hook 2 產）/ flow-feedback 歸檔）+ `git commit`（含 attribution footer：`Co-Authored-By: <當前 harness 名>`——ZCode session 寫 `Co-Authored-By: ZCode`）。
 
@@ -185,4 +200,4 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 前置：`/lint-fix`（lint 不通過時）、`/code-review`
 
-**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描），直接進入階段 1（Lint）→ **階段 2.7（POC/Demo 處置閘門）** → 階段 5（確認）→ 階段 6（提交）。2.7 屬 commit 前檢查閘門（非被跳過的階段 2），捷徑保留；2.6 為 optional 提醒，捷徑不強制。
+**捷徑模式**：當 `/code-review` 已產生 commit message 時，跳過階段 2（Git 狀態分析，含 2.5 引用同步掃描），直接進入階段 1（Lint）→ **階段 2.7（POC/Demo 處置閘門）** → **階段 2.8（Finalization 對帳閘門）** → 階段 5（確認）→ 階段 6（提交）。2.7/2.8 屬 commit 前檢查閘門（非被跳過的階段 2），捷徑保留；2.6 為 optional 提醒，捷徑不強制。
