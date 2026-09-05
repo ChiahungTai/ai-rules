@@ -111,6 +111,7 @@ description: Model routing 深層載體 — tier→(model,effort) 解析表（ZC
 
 ### 套用（三路徑都從解析表取值，不寫死絕對 model）
 
+- **external-runtime 派發前重讀本檔「完成回報收法」節**——收法演進快，禁用 session 記憶／memory desc 派發（真實案例 09-05 過期派發事故：看到改版 commit 標題 ≠ 重讀條文，舊詞 resume-to-poll 被 wrapper 契約拒絕）
 - **CC Workflow path**（ultracode）：script `agent({model})` 填 literal —— review command agent = inherit（full 為基準；保護面厚度條件成立時降 lite）；lite 類填 lite tier 對應值（查本檔解析表）
 - **CC Agent Tool path**（fallback）：spawn `model` param 同上
 - **ZCode path**：pins 釘在 `agents/zcode/` 定義檔 frontmatter（治理見 agents/AGENTS.md registry 段）
