@@ -1,22 +1,54 @@
 ---
 name: model-routing
-description: Model routing 深層載體 — tier→(model,effort) 解析表（ZCode×GLM flash、CC×GLM haiku、CC×Anthropic）＋flash 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法。
+description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/隨意〕×五公司，model 值單一源）＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋flash 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法。
 ---
 
 # Model Routing — 解析表與 provider 事實
 
 > 本 skill 是 `rules/model-routing.md` 的 on-demand 深層載體：rule 端保留 always-on 骨架（角色→tier 表、兩跳解析原則、tier 詞彙句、external-runtime routing 段頭＋pointer——內容在本檔）；本檔承載 tier→(model, effort) 解析表、external-runtime family→(model, effort, 容量) 解析表、eligibility gate、reviewer 交接契約、套用三路徑、rate limit 與並發上限表、thoughtLevel 但書與 classifier 處置。model id 與容量數字單一源在此（rule／registry／模板僅 family／profile 詞彙）。
 
-## tier → (model, effort) 解析表
+## tier → (model, effort) 解析表（requirement × provider 權威表——model 值單一源）
 
-| tier | harness × provider | agent 定義填法 | 備註 |
-|------|-------------------|---------------|------|
-| lite | ZCode × GLM | `model: glm-5.3-flash`＋`thoughtLevel: high※` | flash＝5.3 世代輕量層（多模）；effort 配 high——max 耗時耗 token 增益有限 |
-| lite | CC × GLM | spawn-time `model: haiku`（＋`effort: high`） | CC enum 是 tier 別名——GLM provider 的對應表直達 flash |
-| lite | CC × Anthropic | `model: haiku`＋`effort: high` | 原生 haiku |
-| lite | ccr 模式（未啟用） | `Fusion/lite` | direct-first 常態（ccr 會斷 ZCode usage 顯示）；啟用時 pins 只換值、角色/tier 不動 |
-| full | 任何 | `model` 省略（inherit） | — |
-| vision | ZCode × GLM | `model: glm-5.3-flash`＋`thoughtLevel: high※` | 原生多模已實戰驗證（逐字忠實度高＋像素取樣驗證行為；與 4.6V 對比大致平手——判斷面需更強時升 full） |
+> **tier 詞＝requirement 正式 token**（AIR-24 同源，一個詞彙兩個語義面，不另造第三套）：full＝旗艦需求（judge／EP 規劃／批判）、vision＝影像需求（視覺類任務）、lite＝隨意需求（實作／驗證／挖掘／渲染——標準款省成本）。本表是 model/effort 值的**唯一源**（`sync_agents.py` pin dict 與生成物以本表為 parity 對象）；role 的 requirement 分配見下方 role→requirement 表；dispatch 兩跳＝role→requirement(tier)→本表列。
+
+| tier（requirement） | zai | Anthropic | OpenAI | xai | meta |
+|---|---|---|---|---|---|
+| **full**（旗艦） | GLM 5.3＝主 session inherit（不釘 id）〔repo-observed〕 | opus〔**未訂閱禁派**〕 | sol high／max〔**預設不派**——額度最少〕 | fabel〔**未訂閱禁派**〕 | muse-spark-1.3（effort xhigh 起） |
+| **vision**（影像） | glm-5.3-flash（多模✓ 已實戰）〔repo-observed〕 | 〔未訂閱禁派〕 | 〔預設不派〕 | 〔未訂閱＋本機未安裝〕 | muse-spark-1.3 `--image`✓〔repo-observed〕 |
+| **lite**（隨意） | glm-5.3-flash〔repo-observed〕 | 〔未訂閱禁派；能力對照 sonnet 級——haiku 基本不用〕 | terra high+（**luna 排除，基本不用**）〔**預設不派**〕 | 〔未訂閱禁派〕 | —（與旗艦同體；額度貴，非省成本預設） |
+
+> 證據狀態標註：repo-observed（本機實測）＞official-doc（官方文檔，非本機 L4）＞first-real-usage-pending（首例實戰待補）。
+
+### dispatch 預設（user 2026-09-05 裁定；訂閱現值變更只改本段＋上表格標註）
+
+**harness 主軸（user 的開發入口決定主力 model——與下方 external-runtime「角色 → family → profile 映射」同源）：**
+
+- **ZCode 開發（日常主力）**：主 session＝**GLM 5.3**（判斷/規劃/EP/judge）；lite subagent 執行檔＝glm-5.3-flash（省成本層）
+- **muse code 開發（user 直用時＝該弧主力 harness）**：muse-spark-1.3 全棧——實作/審查都在該 harness 內；repo 層 AGENTS.md muse 會載入（bridge log 實證；全域 guide 的 muse 部署點未查證）
+- **跨家族審查（任一 harness 發起需要第二意見）→ 對側家族優先 muse**——跨家族的價值在非 GLM 視角，muse 額度足為首選；in-harness 驗收側仍是 GLM
+- **ZCode→muse bridge 委派**（implement profile）：user 指定時派（AIR-13 慣例，單批指示）——與「user 直在 muse code 開發」是兩種形態，前者是委派後者是 harness 切換
+- **codex（OpenAI）→ 預設不派**（額度最少）——僅 user 顯式指定（例：「codex sol max」）
+- **Anthropic／xai → 未訂閱禁派**（含影像格——上表保留能力對照）；Anthropic 之後**視性價比評估**再決定訂閱（CC 原生家，訂了可重配 backend），訂閱後解除標註並補查證
+
+**額度 failover（僅撞牆時）**：GLM 撞 1308（錯誤訊息含重置時間戳）→ muse 承接執行段；muse 亦乾 → 等 reset（`/at`）或 user 裁定硬跑；任何降級必顯式記錄（AIR-13）
+
+### harness 部署填法（pins＝部署預設；值抄上表）
+
+| tier | harness 填法 |
+|---|---|
+| lite／vision | ZCode：`model: glm-5.3-flash`＋`thoughtLevel: high※`（pins 由 sync_agents 生成，非 authoring）；CC：**用 CC 自己的模型詞彙**——預設 inherit（主 session）、lite 點名 `sonnet` 別名（env 映射層直達 GLM flash，見 settings.json `ANTHROPIC_DEFAULT_*`）——dispatch 不綁實體 backend id；**地板＝sonnet/terra 級（haiku／luna 基本不用，user 09-05）** |
+| full | `model` 省略（inherit）——任何 harness |
+| ccr 模式（未啟用） | `Fusion/<tier>`；啟用時 pins 只換值、角色/tier 不動 |
+
+## role → requirement（tier）分配表
+
+| requirement | roles |
+|---|---|
+| full | code-reviewer, code-reviewer-primed |
+| vision | vision-review |
+| lite | archify-gen, cr-research, cross-verify-investigator, impl-flash, lite-verify, mem-distill, spec-miner |
+
+> 判斷密集位（judge 裁決／EP 規劃／post-build 編排）不是 role——**主 session 直做**（AIR-24 分工律）；「非 full＋max effort 補償＝未驗證路徑」。新 role 須在此表登記 requirement——缺登記＝`sync_agents.py` fail loud（防靜默 unpinned 上線）。
 
 > ZCode 注意：`thoughtLevel` 綁具體 model（inherit 時不生效）；欄位名**不是** `reasoningEffort`——未知欄位靜默忽略。**※ thoughtLevel 但書**：sticky user reasoningLevel 在場時（user-scope `local_setting`），定義的 thoughtLevel **不達 wire**——telemetry `variant` 記 user 層級而非定義值（08-29 兩數據點：lite-verify＋vision-review 定義 `high` 皆記 `max`，sticky `max` 在場、主 session rows 同 max）。**model pin 不受影響**（frontmatter model 字串逐字到 wire——vision-review 首筆遙測實證）。sticky override 與 silent no-op 尚未分辨（flip 實驗待跑：改 user level≠定義值再 spawn 看 variant 是否跟隨）——對應**已知 open bug 家族**（zai-org/feedback #339「thought-level changes silently discarded after first selection」＋#306 reasoning effort injection 缺陷；EN/cn 文檔一致、用法無誤）。CC 注意：enum 別名（sonnet/haiku/opus）在 GLM provider 由 provider 別名表解析到對應 GLM 模型。
 
@@ -67,7 +99,7 @@ description: Model routing 深層載體 — tier→(model,effort) 解析表（ZC
 | family | model | effort | 容量現值 | 備註 |
 |--------|-------|--------|----------|------|
 | muse | `muse-spark-1.3` | `xhigh`（user 09-04 定；純機械掃描 advisory 可降 `low`/`medium` 省 quota）；深推理可升 `ultra`（CLI alias → provider 最高級＝API `max`，限 1.3 Standard tier；reasoning tokens 佔 output 比例更大，留意輸出上限截斷） | 長 context（以 provider dashboard 為準） | 具視覺輸入 `--image`，跨家族備選；advisory／implement／review 共用此 family；bridge 端預設 pin 與本表對齊（muse-plugin-cc 弧維護），`--model`／`--effort` passthrough 僅供臨時 override |
-| codex | `gpt-5.6-sol` | `high` | 約 200K（以 provider 為準，禁大工單；大 context 任務改派 muse） | ad-hoc 選項（想到再用、低頻）；context 小＋消耗快禁大工單（見上角色映射表）；companion `--model` 可傳（內建 `spark` 別名），不傳落 `~/.codex/config.toml` 預設（本機已 pin 同值） |
+| codex | `gpt-5.6-sol` | `high` | 約 258K（user 09-05 實值；以 provider 為準）——額度最少故預設不派（見 dispatch 預設段）；大 context 任務仍優先 muse | ad-hoc 選項（僅 user 顯式指定）；companion `--model` 可傳（內建 `spark` 別名），不傳落 `~/.codex/config.toml` 預設（本機已 pin 同值） |
 | GLM（in-harness） | 見 tier 表 | 見 tier 表 | 高（遠高於 200K 級，見 provider dashboard） | 沿用 tier→lite／vision 路由，不經 external-runtime 派發；in-harness acceptance reviewer 屬此 |
 
 > 容量為「需現況查證」性質，隨 model 世代更新只改本表。

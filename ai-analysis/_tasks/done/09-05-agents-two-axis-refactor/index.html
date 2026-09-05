@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIR-29 Agents Registry 兩軸重構 — 任務簡報</title>
+<style>
+  :root{--bg:#0d1117;--panel:#161b22;--panel2:#1c2129;--border:#30363d;--fg:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--amber:#d29922;--rose:#f85149;--violet:#bc8cff}
+  *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+  body{background:var(--bg);color:var(--fg);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;display:flex}
+  nav#sidebar{width:264px;min-width:264px;background:var(--panel);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transition:width .18s ease,min-width .18s ease,padding .18s ease}
+  nav#sidebar .brand{padding:0 20px 16px;border-bottom:1px solid var(--border);white-space:normal}
+  .badge{display:inline-block;border-radius:12px;padding:2px 10px;font-size:13px;font-weight:600;white-space:nowrap;background:#1f6f3c33;border:1px solid #2ea04366;color:var(--green)}
+  nav#sidebar h1{font-size:15.5px;margin-top:8px;line-height:1.45}
+  .meta{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.7;font-family:ui-monospace,Menlo,monospace}
+  nav#sidebar ul{list-style:none;padding:10px 0;flex:1}
+  nav#sidebar li a{display:flex;align-items:center;gap:10px;padding:9px 20px;color:var(--muted);text-decoration:none;font-size:13.5px;border-left:2px solid transparent;white-space:nowrap}
+  nav#sidebar li a .num{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--fg);background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;min-width:26px;text-align:center}
+  nav#sidebar li a:hover,nav#sidebar li a.active{color:var(--fg);background:#1f242c;border-left-color:var(--accent)}
+  .backlinks{padding:14px 20px;border-top:1px solid var(--border);font-size:12px;line-height:2;white-space:nowrap}.backlinks a{color:var(--accent);text-decoration:none}
+  body.sidebar-collapsed nav#sidebar{width:0;min-width:0;padding-left:0;padding-right:0;border-right:0}body.sidebar-collapsed main{max-width:none}
+  main{flex:1;min-width:0;max-width:1480px;padding:26px 34px;overflow-y:auto}section{display:none}section.active{display:block}
+  section h2{font-size:20px;margin-bottom:4px}.sub{color:var(--muted);font-size:13px;margin-bottom:18px}section h3{font-size:14.5px;color:var(--accent);margin:18px 0 8px}
+  p,li{font-size:14px;line-height:1.75}.dots{list-style:none;margin:6px 0}.dots li{padding-left:18px;position:relative;margin:4px 0}.dots li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .cardrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:14px 0}.card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px}.card .t{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:6px}.card p{font-size:12.5px;color:var(--muted);line-height:1.65}
+  .tag-plan{display:inline-block;font-size:11.5px;color:var(--violet);border:1px solid #6e40c966;background:#6e40c622;border-radius:10px;padding:1px 8px;margin-left:8px;white-space:nowrap;vertical-align:middle}
+  .frame-wrap{margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--panel)}.frame-wrap .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}.frame-wrap .bar a{color:var(--accent);text-decoration:none}iframe{width:100%;height:calc(100vh - 190px);min-height:640px;border:0;display:block;background:#fff}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}th,td{border:1px solid var(--border);padding:7px 11px;text-align:left;vertical-align:top;line-height:1.6}th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px}code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);background:#1b222c;border-radius:4px;padding:1px 5px}
+  .note{border-left:3px solid var(--amber);background:#2d220066;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;line-height:1.7;margin:12px 0}.src{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;line-height:1.9}.src a{color:var(--accent);text-decoration:none}
+  .collapse-tab{position:fixed;top:50%;z-index:30;width:26px;height:64px;padding:0;cursor:pointer;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-size:13px;line-height:1;border-radius:0 8px 8px 0}.collapse-tab:hover{color:var(--fg);border-color:var(--accent)}#collapse-btn{left:264px;transform:translateY(-50%)}body.sidebar-collapsed #collapse-btn{display:none}#expand-btn{left:0;top:20px;transform:none;display:none}body.sidebar-collapsed #expand-btn{display:block}
+  @media(max-width:720px){body{display:block}nav#sidebar{position:fixed;left:0;top:0;z-index:40;width:min(86vw,320px);min-width:min(86vw,320px);box-shadow:14px 0 32px #0009}main{width:100%;max-width:none;padding:18px 16px}.cardrow{grid-template-columns:1fr}table{display:block;overflow-x:auto}#collapse-btn{left:min(86vw,320px);z-index:41}iframe{height:68vh;min-height:520px}body.sidebar-collapsed nav#sidebar{width:0;min-width:0;box-shadow:none}}
+</style>
+</head>
+<body>
+<button type="button" id="expand-btn" class="collapse-tab" aria-expanded="false" aria-controls="sidebar" aria-label="展開章節導覽" onclick="return setCollapsed(false,true)">›</button>
+<nav id="sidebar" aria-label="章節導覽">
+  <div class="brand"><span class="badge done">✅ 完成 · 已結案</span><h1>AIR-29 Agents Registry 兩軸重構</h1><div class="meta">baseline 40f47e8<br>projection plan 22b1f22a2f6e<br>projection source 9063f34b712c</div></div>
+  <ul>
+    <li><a href="#s1" onclick="return go('s1',this)"><span class="num">01</span>為什麼要改</a></li>
+    <li><a href="#s2" onclick="return go('s2',this)"><span class="num">02</span>目標結構</a></li>
+    <li><a href="#s3" onclick="return go('s3',this)"><span class="num">03</span>實作路徑</a></li>
+    <li><a href="#s4" onclick="return go('s4',this)"><span class="num">04</span>風險與驗收</a></li>
+    <li><a href="#s5" onclick="return go('s5',this)"><span class="num">05</span>回源</a></li>
+  
+    <li><a href="#s6" onclick="return go('s6',this)"><span class="num">06</span>實作結果</a></li></ul>
+  <div class="backlinks"><a href="http://127.0.0.1:6420">← backlog board</a><br><a href="ep.md">EP 全文</a></div>
+</nav>
+<button type="button" id="collapse-btn" class="collapse-tab" aria-expanded="true" aria-controls="sidebar" aria-label="收合章節導覽" onclick="return setCollapsed(true,true)">‹</button>
+<main>
+<section id="s1">
+  <h2>同一角色，不該綁死執行環境</h2><div class="sub">問題不是少八個 Claude agent，而是 role、harness、model 三個決策混成一層</div>
+  <div class="cardrow">
+    <div class="card"><div class="t">目前</div><p>2 個 reviewer 有 shared source；8 個角色只存在 ZCode registry。模型 pin、工具差異與角色正文一起演化。</p></div>
+    <div class="card"><div class="t">目標</div><p>10 個 role 共用 neutral source；兩個 harness registry 都是可重建投影；模型由 requirement × provider 表解析。</p></div>
+    <div class="card"><div class="t">不改</div><p>role names、AIR-24 主 session 裁決、real-file registry、Luna 排除與 external bridge redlines。</p></div>
+  </div>
+</section>
+<section id="s2">
+  <h2>三層正交結構</h2><div class="sub">ownership 單向：role source → projector → registries；dispatch 先 harness，再 provider/model</div>
+  <div class="frame-wrap"><div class="bar"><span>Agents role × harness × provider architecture</span><a href="diagram-architecture.html" target="_blank">↗ 全屏</a></div><iframe src="diagram-architecture.html?embed=1" title="Agents Registry 兩軸重構架構圖"></iframe></div>
+</section>
+<section id="s3">
+  <h2>四個可結算段落</h2><div class="sub">先立權威語義，再搬 ownership；consumer 最後切換，runtime acceptance 單獨收尾</div>
+  <table><thead><tr><th>段落</th><th>產物</th><th>主要 gate</th></tr></thead><tbody>
+    <tr><td>S1 <span class="tag-plan">計畫中</span></td><td>routing tables＋harness matrix＋work-order role contract</td><td>3×5 provider cells、AIR-24、Luna／vision constraints</td></tr>
+    <tr><td>S2 <span class="tag-plan">計畫中</span></td><td><code>roles/</code>＋pure projector＋兩 registry</td><td>atomic 10/2/2→10/10/0、check zero-write、legacy adoption</td></tr>
+    <tr><td>S3 <span class="tag-plan">計畫中</span></td><td>consumer cutover＋single-source invariant</td><td>active ref manifest、projector parity、bundle freshness</td></tr>
+    <tr><td>S4 <span class="tag-plan">計畫中</span></td><td>runtime evidence＋closeout</td><td>ZCode 3-role sample、Claude 10+1 named-agent L4</td></tr>
+  </tbody></table>
+</section>
+<section id="s4">
+  <h2>最容易出錯的地方</h2><div class="sub">EP review 已抓出並回寫 migration collision、frontmatter 失效與 Scenario traceability</div>
+  <ul class="dots">
+    <li><b>首次 adoption：</b>現存四個 reviewer copies 無 marker；只能在 exact-bytes 等價時收編，不能直接覆寫。</li>
+    <li><b>可載入格式：</b>第一行必須是 YAML fence，target fields 留在 frontmatter，marker 放 closing fence 後。</li>
+    <li><b>清除 blast radius：</b>只刪 marker-owned stale outputs；unmarked fork 保留，同名衝突 loud failure。</li>
+    <li><b>證據分級：</b>Claude 10+1 是本機 L4；CC Agent tool 與 external runtimes 是 docs＋first-real-usage，不高報。</li>
+  </ul>
+  <div class="note">code-reality projection 目前仍有 baseline stamp mismatch；所有 projected edges 都是提案宣告，實作後須重建 index 才能升格為現況證據。</div>
+</section>
+<section id="s6">
+  <h2>實作結果（build＋post-build 收斂態）</h2><div class="sub">做了什麼／驗證證據／認知誤差點——反映兩輪 review 修正後最終態</div>
+  <ul class="dots">
+    <li><b>做了什麼</b>：roles/ 單一源×10（git mv＋canonical 化）＋<code>sync_agents.py</code> 生成式投影（compute-then-apply／原子寫／ownership marker／fork 碰撞 fail-loud）→ 兩 registry 10+10；dispatch matrix 兩軸（harness 軸五行＋tier×provider 權威表五公司欄）；work-order §2 Role contract；六檔舊教義清零＋<code>agents-projection-sync</code> invariant 上線；bundle deploy 3/3</li>
+    <li><b>驗證證據</b>：pytest <b>124 passed</b>（24 sync＋14 invariant＋86 既有）／ruff 全綠／<code>sync_agents --check</code> exit 0／checker critical 0；<b>CC L4 10/10 named PASS＋unknown-name 反向守衛</b>（session id 逐一 registry 驗證）；lite-verify 收斂對帳 16/16</li>
+    <li><b>review 收斂</b>：build 3-perspective 24 findings（✅22＋⚠️2）＋post-build muse 5 findings 全採納（exit 語義分離／effort parity／parser 對稱錨定等）——Role contract 形態首消費（requirement=full→查表→muse-spark-1.3 xhigh）</li>
+    <li><b>認知誤差點</b>：EP 的 adopt-legacy exact-bytes 與 canonical 化互斥（內部張力，二輪 review 才見）→等效審計替代；8 檔 git mv 溯源被 sync 重建配對到生成物側（接受＋記錄）；muse sandbox 的 uv cache EACCES 使其以 .venv python 代跑（語義等價，宿主重跑原字命令）</li>
+    <li><b>pending</b>：zcode DEPTH-SAMPLE 需新 session（快照制）——首次 registry spawn 時驗；影像三格 alias 首例實戰回填；grok-build 列未安裝未驗證</li>
+  </ul>
+  <h3>分組檔案地圖</h3>
+  <table>
+    <tr><th>層</th><th>檔案</th><th>角色</th></tr>
+    <tr><td>role 源</td><td><code>agents/roles/*.md</code> ×10</td><td>authoring 單一源（git mv 自 zcode/shared＋canonical 化）</td></tr>
+    <tr><td>生成物</td><td><code>agents/zcode/*.md</code> ×10＋<code>agents/claude/*.md</code> ×10</td><td>sync 投影（pins／剝除差異／ownership marker）</td></tr>
+    <tr><td>生成器</td><td><code>scripts/sync_agents.py</code>＋<code>tests/test_sync_agents.py</code></td><td>compute-then-apply／原子寫／parity 雙層／碰撞防線</td></tr>
+    <tr><td>權威表</td><td><code>skills/model-routing/SKILL.md</code></td><td>tier×provider＋role→requirement＋dispatch 預設——model 值唯一源</td></tr>
+    <tr><td>consumer</td><td>agents/AGENTS.md＋六 skill 檔＋root AGENTS.md＋work-order</td><td>舊教義清零；harness 軸＋Role contract</td></tr>
+    <tr><td>閘門</td><td><code>check_single_source.py</code>（agents-projection-sync invariant）</td><td>drift→critical／fatal→important（exit 語義分離）</td></tr>
+  </table>
+  <h3>實作圖解（工具分流：調用序＝mermaid sequence→SVG inline；層次/對照＝HTML 塊圖；全景互動＝archify）</h3>
+  <div style="font-size:12.5px;color:var(--muted);margin:6px 0">圖 A｜投影機制（sequenceDiagram——調用序剛性無交錯，mermaid 強項；mmdc 渲染 inline，離線可開）</div>
+  <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:10px"><svg id="my-svg" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="max-width: 1685.5px; background-color: transparent;" viewBox="-50 -10 1685.5 985" role="graphics-document document" aria-roledescription="sequence"><g><rect x="1435.5" y="899" fill="#eaeaea" stroke="#666" width="150" height="65" name="C" rx="3" ry="3" class="actor actor-bottom"/><text x="1510.5" y="931.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1510.5" dy="0">agents/claude/ ×10</tspan></text></g><g><rect x="1235.5" y="899" fill="#eaeaea" stroke="#666" width="150" height="65" name="Z" rx="3" ry="3" class="actor actor-bottom"/><text x="1310.5" y="931.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1310.5" dy="0">agents/zcode/ ×10</tspan></text></g><g><rect x="1035.5" y="899" fill="#eaeaea" stroke="#666" width="150" height="65" name="R" rx="3" ry="3" class="actor actor-bottom"/><text x="1110.5" y="931.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1110.5" dy="0">agents/roles/ ×10</tspan></text></g><g><rect x="762.5" y="899" fill="#eaeaea" stroke="#666" width="223" height="65" name="K" rx="3" ry="3" class="actor actor-bottom"/><text x="874" y="931.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="874" dy="0">model-routing skill（權威表）</tspan></text></g><g><rect x="399" y="899" fill="#eaeaea" stroke="#666" width="164" height="65" name="S" rx="3" ry="3" class="actor actor-bottom"/><text x="481" y="931.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="481" dy="0">scripts/sync_agents.py</tspan></text></g><g><rect x="0" y="899" fill="#eaeaea" stroke="#666" width="172" height="65" name="M" rx="3" ry="3" class="actor actor-bottom"/><text x="86" y="931.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="86" dy="0">主 session（dispatch）</tspan></text></g><g><line id="actor5" x1="1510.5" y1="65" x2="1510.5" y2="899" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="C" data-et="life-line" data-id="C"/><g id="root-5" data-et="participant" data-type="participant" data-id="C"><rect x="1435.5" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" name="C" rx="3" ry="3" class="actor actor-top"/><text x="1510.5" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1510.5" dy="0">agents/claude/ ×10</tspan></text></g></g><g><line id="actor4" x1="1310.5" y1="65" x2="1310.5" y2="899" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="Z" data-et="life-line" data-id="Z"/><g id="root-4" data-et="participant" data-type="participant" data-id="Z"><rect x="1235.5" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" name="Z" rx="3" ry="3" class="actor actor-top"/><text x="1310.5" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1310.5" dy="0">agents/zcode/ ×10</tspan></text></g></g><g><line id="actor3" x1="1110.5" y1="65" x2="1110.5" y2="899" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="R" data-et="life-line" data-id="R"/><g id="root-3" data-et="participant" data-type="participant" data-id="R"><rect x="1035.5" y="0" fill="#eaeaea" stroke="#666" width="150" height="65" name="R" rx="3" ry="3" class="actor actor-top"/><text x="1110.5" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="1110.5" dy="0">agents/roles/ ×10</tspan></text></g></g><g><line id="actor2" x1="874" y1="65" x2="874" y2="899" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="K" data-et="life-line" data-id="K"/><g id="root-2" data-et="participant" data-type="participant" data-id="K"><rect x="762.5" y="0" fill="#eaeaea" stroke="#666" width="223" height="65" name="K" rx="3" ry="3" class="actor actor-top"/><text x="874" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="874" dy="0">model-routing skill（權威表）</tspan></text></g></g><g><line id="actor1" x1="481" y1="65" x2="481" y2="899" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="S" data-et="life-line" data-id="S"/><g id="root-1" data-et="participant" data-type="participant" data-id="S"><rect x="399" y="0" fill="#eaeaea" stroke="#666" width="164" height="65" name="S" rx="3" ry="3" class="actor actor-top"/><text x="481" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="481" dy="0">scripts/sync_agents.py</tspan></text></g></g><g><line id="actor0" x1="86" y1="65" x2="86" y2="899" class="actor-line 200" stroke-width="0.5px" stroke="#999" name="M" data-et="life-line" data-id="M"/><g id="root-0" data-et="participant" data-type="participant" data-id="M"><rect x="0" y="0" fill="#eaeaea" stroke="#666" width="172" height="65" name="M" rx="3" ry="3" class="actor actor-top"/><text x="86" y="32.5" dominant-baseline="central" alignment-baseline="central" class="actor actor-box" style="text-anchor: middle; font-size: 16px; font-weight: 400;"><tspan x="86" dy="0">主 session（dispatch）</tspan></text></g></g><g data-et="control-structure" data-id="i11"><line x1="470" y1="385" x2="1521.5" y2="385" class="loopLine"/><line x1="1521.5" y1="385" x2="1521.5" y2="518" class="loopLine"/><line x1="470" y1="518" x2="1521.5" y2="518" class="loopLine"/><line x1="470" y1="385" x2="470" y2="518" class="loopLine"/><polygon points="470,385 520,385 520,398 511.6,405 470,405" class="labelBox"/><text x="495" y="398" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="labelText" style="font-size: 16px; font-weight: 400;">par</text><text x="1020.75" y="403" text-anchor="middle" class="loopText" style="font-size: 16px; font-weight: 400;"><tspan x="1020.75">[雙投影]</tspan></text></g><g data-et="control-structure" data-id="i19"><line x1="75" y1="528" x2="708" y2="528" class="loopLine"/><line x1="708" y1="528" x2="708" y2="869" class="loopLine"/><line x1="75" y1="869" x2="708" y2="869" class="loopLine"/><line x1="75" y1="528" x2="75" y2="869" class="loopLine"/><line x1="75" y1="622" x2="708" y2="622" class="loopLine" style="stroke-dasharray: 3, 3;"/><line x1="75" y1="711" x2="708" y2="711" class="loopLine" style="stroke-dasharray: 3, 3;"/><polygon points="75,528 125,528 125,541 116.6,548 75,548" class="labelBox"/><text x="100" y="541" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="labelText" style="font-size: 16px; font-weight: 400;">alt</text><text x="416.5" y="546" text-anchor="middle" class="loopText" style="font-size: 16px; font-weight: 400;"><tspan x="416.5">[mode=--check]</tspan></text><text x="391.5" y="640" text-anchor="middle" class="sectionTitle" style="font-size: 16px; font-weight: 400;">[mode=--map]</text><text x="391.5" y="729" text-anchor="middle" class="sectionTitle" style="font-size: 16px; font-weight: 400;">[mode=sync]</text></g><g data-et="control-structure" data-id="i20"><line x1="65" y1="163" x2="1531.5" y2="163" class="loopLine"/><line x1="1531.5" y1="163" x2="1531.5" y2="879" class="loopLine"/><line x1="65" y1="879" x2="1531.5" y2="879" class="loopLine"/><line x1="65" y1="163" x2="65" y2="879" class="loopLine"/><line x1="65" y1="257" x2="1531.5" y2="257" class="loopLine" style="stroke-dasharray: 3, 3;"/><polygon points="65,163 115,163 115,176 106.6,183 65,183" class="labelBox"/><text x="90" y="176" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="labelText" style="font-size: 16px; font-weight: 400;">alt</text><text x="823.25" y="181" text-anchor="middle" class="loopText" style="font-size: 16px; font-weight: 400;"><tspan x="823.25">[parity drift（改表沒跟）]</tspan></text><text x="798.25" y="275" text-anchor="middle" class="sectionTitle" style="font-size: 16px; font-weight: 400;">[parity 綠]</text></g><text x="282" y="80" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">sync｜--check｜--map</text><line x1="93" y1="109" x2="477" y2="109" class="messageLine0" data-et="message" data-id="i1" data-from="M" data-to="S" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="fill: none;"/><text x="86" y="113" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">1</text><text x="676" y="124" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">check_parity（requirement 分配＋pins 值雙層）</text><line x1="488" y1="153" x2="870" y2="153" class="messageLine0" data-et="message" data-id="i2" data-from="S" data-to="K" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="fill: none;"/><text x="481" y="157" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">2</text><text x="285" y="213" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">exit 2 fatal（修 policy／表，重跑 sync 無效）</text><line x1="486" y1="242" x2="90" y2="242" class="messageLine1" data-et="message" data-id="i4" data-from="S" data-to="M" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"/><text x="481" y="246" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">3</text><text x="794" y="302" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">load（frontmatter 白名單驗證）</text><line x1="488" y1="331" x2="1106.5" y2="331" class="messageLine0" data-et="message" data-id="i6" data-from="S" data-to="R" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="fill: none;"/><text x="481" y="335" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">4</text><text x="797" y="346" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">role body ×10（①目標 ②做法 ③角色節）</text><line x1="1115.5" y1="375" x2="485" y2="375" class="messageLine1" data-et="message" data-id="i7" data-from="R" data-to="S" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"/><text x="1110.5" y="379" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">5</text><text x="894" y="435" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">＋model/thoughtLevel＋marker（原子寫）</text><line x1="488" y1="464" x2="1306.5" y2="464" class="messageLine0" data-et="message" data-id="i9" data-from="S" data-to="Z" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="fill: none;"/><text x="481" y="468" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">6</text><text x="994" y="479" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">－pins－CR MCP＋marker</text><line x1="488" y1="508" x2="1506.5" y2="508" class="messageLine0" data-et="message" data-id="i10" data-from="S" data-to="C" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="fill: none;"/><text x="481" y="512" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">7</text><text x="285" y="578" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">純比對零寫入，drift→exit 1 列清單</text><line x1="486" y1="607" x2="90" y2="607" class="messageLine1" data-et="message" data-id="i13" data-from="S" data-to="M" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"/><text x="481" y="611" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">8</text><text x="285" y="667" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">role／requirement／zcode／claude（磁碟現況）</text><line x1="486" y1="696" x2="90" y2="696" class="messageLine1" data-et="message" data-id="i15" data-from="S" data-to="M" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"/><text x="481" y="700" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">9</text><text x="482" y="756" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">碰撞驗證（unmarked 同名 fail loud）＋stale 只清 marker-owned</text><path d="M 482,785 C 542,775 542,815 482,805" class="messageLine0" data-et="message" data-id="i17" data-from="S" data-to="S" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" x1="488" style="fill: none;"/><text x="481" y="789" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">10</text><text x="285" y="830" text-anchor="middle" dominant-baseline="middle" alignment-baseline="middle" class="messageText" dy="1em" style="font-size: 16px; font-weight: 400;">exit 0（兩 registry 10+10）</text><line x1="486" y1="859" x2="90" y2="859" class="messageLine1" data-et="message" data-id="i18" data-from="S" data-to="M" stroke-width="2" stroke="none" marker-end="url(#my-svg-arrowhead)" style="stroke-dasharray: 3, 3; fill: none;"/><text x="481" y="863" font-family="sans-serif" font-size="12px" text-anchor="middle" class="sequenceNumber">11</text><style>#my-svg{font-family:"trebuchet ms",verdana,arial,sans-serif;font-size:16px;fill:#333;}#my-svg .actor{stroke:#9370DB;fill:#ECECFF;stroke-width:1;}#my-svg text.actor>tspan{fill:black;stroke:none;}#my-svg .actor-line{stroke:#9370DB;}#my-svg .messageLine0{stroke-width:1.5;stroke-dasharray:none;stroke:#333;}#my-svg .messageLine1{stroke-width:1.5;stroke-dasharray:2,2;stroke:#333;}#my-svg [id$="-arrowhead"] path{fill:#333;stroke:#333;}#my-svg .sequenceNumber{fill:white;}#my-svg [id$="-sequencenumber"]{fill:#333;}#my-svg .messageText{fill:#333;stroke:none;}#my-svg .labelBox{stroke:#9370DB;fill:#ECECFF;}#my-svg .labelText,#my-svg .labelText>tspan{fill:black;stroke:none;}#my-svg .loopText,#my-svg .loopText>tspan{fill:black;stroke:none;}#my-svg .sectionTitle,#my-svg .sectionTitle>tspan{fill:black;stroke:none;}#my-svg .loopLine{stroke-width:2px;stroke-dasharray:2,2;stroke:#9370DB;fill:#9370DB;}</style><defs><marker id="my-svg-arrowhead" refX="7.9" refY="5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto-start-reverse"><path d="M -1 0 L 10 5 L 0 10 z"/></marker></defs><defs><marker id="my-svg-sequencenumber" refX="15" refY="15" markerWidth="60" markerHeight="40" orient="auto"><circle cx="15" cy="15" r="6"/></marker></defs></svg></div>
+  <div style="font-size:12.5px;color:var(--muted);margin:12px 0 4px">圖 B｜dispatch 兩跳（層次剛性——HTML 塊圖；flowchart 畫分層是錯用）</div>
+  <div style="display:grid;gap:6px;margin:10px 0">
+    <div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;background:var(--panel2)">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">第一跳｜harness 主軸（開發入口決定主力）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px">
+        <span style="border:1px solid var(--accent);border-radius:6px;padding:4px 10px">ZCode（日常）→ GLM 5.3 主 session＋flash 執行檔</span>
+        <span style="border:1px solid var(--accent);border-radius:6px;padding:4px 10px">muse code（直用＝該弧主力）→ muse-spark-1.3 全棧</span>
+        <span style="border:1px solid var(--accent);border-radius:6px;padding:4px 10px">CC（掛 GLM backend）→ inherit／sonnet 別名</span>
+      </div>
+    </div>
+    <div style="text-align:center;color:var(--muted)">▼</div>
+    <div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;background:var(--panel2)">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">第二跳｜requirement（任務性質——tier 詞）</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px">
+        <span style="border:1px solid #2ea04366;border-radius:6px;padding:4px 10px">full（旗艦：judge／EP／批判）</span>
+        <span style="border:1px solid #6e40c966;border-radius:6px;padding:4px 10px">vision（影像）</span>
+        <span style="border:1px solid #d2992266;border-radius:6px;padding:4px 10px">lite（隨意：地板 sonnet/terra 級）</span>
+      </div>
+    </div>
+    <div style="text-align:center;color:var(--muted)">▼</div>
+    <div style="border:1px solid var(--border);border-radius:8px;padding:10px 14px;background:var(--panel2)">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">落地｜tier×provider 權威表（GLM/muse 可用；codex 預設不派；Anthropic/xai 未訂閱禁派）</div>
+      <table style="margin:6px 0">
+        <tr><th>tier</th><th>zai</th><th>meta</th><th>OpenAI</th><th>Anthropic/xai</th></tr>
+        <tr><td>full</td><td>GLM 5.3 inherit</td><td>muse-spark-1.3 xhigh</td><td>sol（指定才派）</td><td>禁派</td></tr>
+        <tr><td>vision</td><td>flash 多模</td><td>muse --image</td><td>—</td><td>禁派</td></tr>
+        <tr><td>lite</td><td>flash</td><td>—（額度貴）</td><td>terra high+（指定才派）</td><td>禁派</td></tr>
+      </table>
+    </div>
+  </div>
+  <div style="font-size:12.5px;color:var(--muted);margin:12px 0 4px">圖 C｜重構前後對照（左右欄——對照型圖不用 flowchart）</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0">
+    <div style="border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--panel2)">
+      <div style="font-weight:700;font-size:13px;margin-bottom:8px">Before（AIR-28 態）</div>
+      <ul style="font-size:12.5px;line-height:1.8;color:var(--muted);list-style:none;padding:0">
+        <li>▸ shared/ ×2＝手動 cp 源</li>
+        <li>▸ zcode/ ×10（8 檔 authoring 落此、帶 pins）</li>
+        <li>▸ claude/ ×2（只有 reviewer）</li>
+        <li style="color:var(--rose)">▸ 8 個 role 在 CC 引用即死</li>
+        <li style="color:var(--rose)">▸ 同步靠人眼＋無 drift gate</li>
+      </ul>
+    </div>
+    <div style="border:1px solid #2ea04366;border-radius:8px;padding:12px;background:var(--panel2)">
+      <div style="font-weight:700;font-size:13px;margin-bottom:8px">After（AIR-29 態）</div>
+      <ul style="font-size:12.5px;line-height:1.8;color:var(--muted);list-style:none;padding:0">
+        <li>▸ roles/ ×10＝authoring 單一源（零 model/harness 字樣）</li>
+        <li>▸ sync_agents.py 生成 zcode ×10（＋pins）＋claude ×10</li>
+        <li style="color:var(--green)">▸ CC 全 10 名可用（L4 10/10 實測）</li>
+        <li style="color:var(--green)">▸ --check drift gate＋invariant 常駐＋parity 雙層</li>
+      </ul>
+    </div>
+  </div>
+  <div style="font-size:12.5px;color:var(--muted);margin:12px 0 4px">圖 D｜「muse post-build」逐階段模型分佈（sequence——user 問過的場景直接成圖）</div>
+  <div class="frame-wrap">
+    <div class="bar"><span>muse post-build 模型分佈（mermaid sequence→SVG；GLM 判斷／muse 外審／flash 對帳）</span><a href="diagram-pb-sequence.svg" target="_blank">↗ 全屏</a></div>
+    <iframe src="diagram-pb-sequence.svg" title="post-build 模型分佈" style="min-height:620px;background:#fff"></iframe>
+  </div>
+  <div style="font-size:12.5px;color:var(--muted);margin:12px 0 4px">圖 E｜registry 檔案生命週期（stateDiagram——規律狀態機，mermaid 適用型）</div>
+  <div class="frame-wrap">
+    <div class="bar"><span>生成物狀態機：owned／unmarked／drift／collision→fork|removed／stale（mermaid stateDiagram→SVG）</span><a href="diagram-lifecycle.svg" target="_blank">↗ 全屏</a></div>
+    <iframe src="diagram-lifecycle.svg" title="registry 檔案生命週期" style="min-height:680px;background:#fff"></iframe>
+  </div>
+  <div class="frame-wrap">
+    <div class="bar"><span>架構全景——實作終態（archify-gen 產線：9/9 checks／0 errors／5 輪收斂；spec SHA 69f3b976）</span><a href="diagram-architecture-impl.html" target="_blank">↗ 全屏</a>｜<a href="diagram-architecture.html" target="_blank">規劃態對照（14:48）</a></div>
+    <iframe src="diagram-architecture-impl.html?embed=1" title="架構全景（實作終態）"></iframe>
+  </div>
+</section>
+<section id="s5">
+  <h2>回源</h2><div class="sub">簡報殼只承載判斷材料；規格、EP 與投影證據都留在 task 目錄</div>
+  <p class="src">EP：<a href="ep.md">ai-analysis/_tasks/09-05-agents-two-axis-refactor/ep.md</a><br>Spec：<a href="spec.md">spec.md</a><br>架構 source：<a href="architecture.json">architecture.json</a><br>task baseline：40f47e8797a69f9a3d455742962df8330421efc5<br>projection plan SHA：22b1f22a2f6e015be974f84e6d61add5bc46f24e09bc07726a2b8309da7d7da8<br>projection source SHA：9063f34b712c6c0383039c8f90df902bd119ae3ee5eef67146d09d08cd13081a<br>卡：AIR-29</p>
+</section>
+</main>
+<script>
+function go(id,el){var section=document.getElementById(id);if(!section||!section.matches('main section'))return false;document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));section.classList.add('active');document.querySelectorAll('#sidebar li a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');history.replaceState(null,'','#'+id);return false}
+var SIDEBAR_KEY='illustrate-shell-sidebar-collapsed';
+function setCollapsed(c,moveFocus){document.body.classList.toggle('sidebar-collapsed',!!c);try{localStorage.setItem(SIDEBAR_KEY,c?'1':'0')}catch(e){}var sidebar=document.getElementById('sidebar');sidebar.toggleAttribute('inert',!!c);if(c)sidebar.setAttribute('aria-hidden','true');else sidebar.removeAttribute('aria-hidden');document.querySelectorAll('#collapse-btn,#expand-btn').forEach(function(b){b.setAttribute('aria-expanded',String(!c))});if(moveFocus)document.getElementById(c?'expand-btn':'collapse-btn').focus();return false}
+(function init(){var c=false;try{c=localStorage.getItem(SIDEBAR_KEY)==='1'}catch(e){}if(c)setCollapsed(true);var h=location.hash.slice(1);var candidate=h&&document.getElementById(h);var target=(candidate&&candidate.matches('main section'))?h:null;if(!target){var framed=document.querySelector('main section .frame-wrap');target=framed?framed.closest('section').id:document.querySelector('main section').id}var link=document.querySelector('#sidebar li a[href="#'+target+'"]');go(target,link)})();
+</script>
+</body>
+</html>

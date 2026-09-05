@@ -1,0 +1,237 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Agents 雙軸：唯一來源到執行驗收",
+    "quality_profile": "showcase",
+    "viewBox": [1370, 780],
+    "views": [
+      {
+        "id": "ownership",
+        "label": "來源與投影",
+        "focus": ["roles", "projector", "zcode", "claude"],
+        "note": "角色語義只從 agents/roles 單向投影到真實 registry。"
+      },
+      {
+        "id": "routing",
+        "label": "執行路由",
+        "focus": ["dispatcher", "harness", "resolution", "workorder"],
+        "note": "先選 harness/transport，再解析 provider、model、effort。"
+      },
+      {
+        "id": "acceptance",
+        "label": "不變量與驗收",
+        "focus": ["projector", "invariant", "acceptance"],
+        "note": "--check 把投影一致性接到 runtime acceptance。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "roles",
+      "type": "database",
+      "label": "agents/roles",
+      "sublabel": "10 個既有 role 名稱",
+      "tag": "Canonical source",
+      "pos": [62, 185],
+      "size": [170, 76]
+    },
+    {
+      "id": "projector",
+      "type": "backend",
+      "label": "sync_agents.py",
+      "sublabel": "S2 原子遷移 + 投影",
+      "tag": "唯一 projector",
+      "pos": [338, 185],
+      "size": [188, 76]
+    },
+    {
+      "id": "zcode",
+      "type": "cloud",
+      "label": "agents/zcode",
+      "sublabel": "ZCode registry",
+      "tag": "projected",
+      "pos": [650, 92],
+      "size": [176, 72]
+    },
+    {
+      "id": "claude",
+      "type": "cloud",
+      "label": "agents/claude",
+      "sublabel": "Claude named agent",
+      "tag": "projected",
+      "pos": [650, 286],
+      "size": [176, 72]
+    },
+    {
+      "id": "dispatcher",
+      "type": "frontend",
+      "label": "agents/AGENTS.md",
+      "sublabel": "S1 先選 harness / transport",
+      "tag": "dispatcher",
+      "pos": [62, 498],
+      "size": [214, 76]
+    },
+    {
+      "id": "harness",
+      "type": "messagebus",
+      "label": "Harness / transport",
+      "sublabel": "ZCode · Claude · Muse · Codex · Grok",
+      "tag": "selected first",
+      "pos": [390, 498],
+      "size": [236, 76]
+    },
+    {
+      "id": "resolution",
+      "type": "backend",
+      "label": "model-routing/SKILL.md",
+      "sublabel": "flagship / vision / any → provider · model · effort",
+      "tag": "resolved second",
+      "pos": [742, 498],
+      "size": [284, 76]
+    },
+    {
+      "id": "workorder",
+      "type": "external",
+      "label": "External work-order §2",
+      "sublabel": "role contract",
+      "tag": "S3 consumer",
+      "pos": [1018, 116],
+      "size": [202, 72]
+    },
+    {
+      "id": "invariant",
+      "type": "security",
+      "label": "check_single_source",
+      "sublabel": "S3 consumes projector --check",
+      "tag": "invariant",
+      "pos": [1018, 300],
+      "size": [222, 76]
+    },
+    {
+      "id": "acceptance",
+      "type": "external",
+      "label": "Runtime acceptance",
+      "sublabel": "S4 實際 registry 與 dispatch",
+      "tag": "evidence",
+      "pos": [1080, 498],
+      "size": [210, 76]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "S2 · canonical role → atomic projector → real registries",
+      "wraps": ["roles", "projector", "zcode", "claude"],
+      "pad": 28
+    },
+    {
+      "kind": "region",
+      "label": "S1 · dispatcher routes before provider resolution",
+      "wraps": ["dispatcher", "harness", "resolution"],
+      "pad": 28
+    },
+    {
+      "kind": "security-group",
+      "label": "S3 · consumers and single-source invariant",
+      "wraps": ["workorder", "invariant"],
+      "pad": 24
+    },
+    {
+      "kind": "region",
+      "label": "S4 · runtime acceptance",
+      "wraps": ["acceptance"],
+      "pad": 24
+    }
+  ],
+  "connections": [
+    {
+      "from": "roles",
+      "to": "projector",
+      "label": "唯一來源",
+      "variant": "emphasis"
+    },
+    {
+      "from": "projector",
+      "to": "zcode",
+      "label": "投影真實檔案",
+      "variant": "emphasis"
+    },
+    {
+      "from": "projector",
+      "to": "claude",
+      "label": "投影真實檔案",
+      "variant": "emphasis"
+    },
+    {
+      "from": "roles",
+      "to": "workorder",
+      "label": "§2 role contract",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "right",
+      "via": [[30, 223], [30, 640], [1340, 640], [1340, 152]]
+    },
+    {
+      "from": "dispatcher",
+      "to": "harness",
+      "label": "選 transport",
+      "variant": "emphasis"
+    },
+    {
+      "from": "harness",
+      "to": "resolution",
+      "label": "再解析",
+      "variant": "emphasis"
+    },
+    {
+      "from": "projector",
+      "to": "invariant",
+      "label": "projector --check",
+      "variant": "security",
+      "fromSide": "right",
+      "toSide": "top"
+    },
+    {
+      "from": "invariant",
+      "to": "acceptance",
+      "label": "一致性 gate",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "resolution",
+      "to": "acceptance",
+      "label": "實際 dispatch",
+      "variant": "dashed",
+      "labelAt": [1053, 588]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Ownership direction",
+      "items": [
+        "role source → projector → registries",
+        "model / harness prose 不回寫 agents/roles"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "兩軸分工",
+      "items": [
+        "語義：10 unchanged role names",
+        "執行：harness/transport → provider/model/effort"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Acceptance",
+      "items": [
+        "S3: work-order + --check",
+        "S4: runtime 行為驗收"
+      ]
+    }
+  ]
+}

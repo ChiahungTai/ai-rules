@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "AIR-29 實作終態：agents 單一源投影到雙 harness",
+    "quality_profile": "showcase",
+    "viewBox": [1376, 700],
+    "views": [
+      {
+        "id": "pipeline",
+        "label": "投影主線",
+        "focus": ["roles", "routing", "sync", "zcode", "claude", "zdeploy", "cdeploy"],
+        "note": "roles＋權威表 → sync_agents → 雙 registry → 雙部署點"
+      },
+      {
+        "id": "gate",
+        "label": "drift 閘門",
+        "focus": ["sync", "invariant", "failloud"],
+        "note": "--check 委派：生成物與 roles 不一致即 fail loud"
+      },
+      {
+        "id": "consumers",
+        "label": "消費端",
+        "focus": ["roles", "workorder", "dispatch", "zdeploy", "cdeploy"],
+        "note": "工單吃 role contract；dispatch 查 harness 軸後 spawn"
+      }
+    ]
+  },
+  "components": [
+    { "id": "roles", "type": "database", "label": "agents/roles/", "sublabel": "×10 role authoring 單一源", "tag": "單一源", "pos": [56, 140], "size": [186, 76] },
+    { "id": "routing", "type": "backend", "label": "model-routing/SKILL.md", "sublabel": "tier×provider 權威表 + role→requirement", "tag": "權威表", "pos": [56, 330], "size": [218, 76] },
+    { "id": "sync", "type": "backend", "label": "sync_agents.py", "sublabel": "parity guard → render → 雙投影", "tag": "生成器", "pos": [316, 226], "size": [212, 80] },
+    { "id": "zcode", "type": "cloud", "label": "agents/zcode/", "sublabel": "×10 + pins + marker", "tag": "生成物", "pos": [610, 104], "size": [192, 72] },
+    { "id": "claude", "type": "cloud", "label": "agents/claude/", "sublabel": "×10 + marker（剝 pins/CR MCP）", "tag": "生成物", "pos": [610, 352], "size": [192, 72] },
+    { "id": "zdeploy", "type": "external", "label": "~/.zcode/agents", "sublabel": "registry spawn", "tag": "部署點", "pos": [888, 104], "size": [196, 72] },
+    { "id": "cdeploy", "type": "external", "label": "~/.claude/agents", "sublabel": "--agent named-agent", "tag": "部署點", "pos": [888, 352], "size": [196, 72] },
+    { "id": "dispatch", "type": "frontend", "label": "agents/AGENTS.md", "sublabel": "harness 軸 dispatch 查表", "tag": "消費端", "pos": [1148, 228], "size": [182, 72] },
+    { "id": "invariant", "type": "security", "label": "check_single_source.py", "sublabel": "agents-projection-sync invariant", "tag": "閘門", "pos": [306, 496], "size": [232, 76] },
+    { "id": "failloud", "type": "security", "label": "fail loud", "sublabel": "exit 1 + 差異清單", "tag": "drift 時", "pos": [622, 498], "size": [184, 72] },
+    { "id": "workorder", "type": "external", "label": "work-order §2", "sublabel": "Role contract（external 工單）", "tag": "消費端", "pos": [1148, 474], "size": [182, 72] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "ai-rules repo · 單一源 → 生成器 → 雙投影", "wraps": ["roles", "routing", "sync", "zcode", "claude"], "pad": 20 },
+    { "kind": "region", "label": "部署目標（harness 載入點）", "wraps": ["zdeploy", "cdeploy"], "pad": 24 },
+    { "kind": "security-group", "label": "drift 閘門", "wraps": ["invariant", "failloud"], "pad": 22 },
+    { "kind": "region", "label": "消費端", "wraps": ["dispatch", "workorder"], "pad": 22 }
+  ],
+  "connections": [
+    { "from": "roles", "to": "sync", "label": "role 語義", "variant": "emphasis" },
+    { "from": "routing", "to": "sync", "label": "tier×provider 表", "variant": "emphasis", "labelAt": [295, 318] },
+    { "from": "sync", "to": "zcode", "label": "投影 + pins + marker", "variant": "emphasis" },
+    { "from": "sync", "to": "claude", "label": "投影（剝 pins/CR MCP）", "variant": "emphasis" },
+    { "from": "zcode", "to": "zdeploy", "label": "symlink", "variant": "emphasis" },
+    { "from": "claude", "to": "cdeploy", "label": "symlink", "variant": "emphasis" },
+    { "from": "sync", "to": "invariant", "label": "委派 --check", "variant": "security", "fromSide": "bottom", "toSide": "top", "labelAt": [422, 320] },
+    { "from": "invariant", "to": "failloud", "label": "drift", "variant": "security" },
+    { "from": "roles", "to": "workorder", "label": "工單 §2 Role contract", "variant": "dashed", "fromSide": "left", "toSide": "right", "via": [[28, 178], [28, 640], [1360, 640], [1360, 510]], "labelSegment": 2 },
+    { "from": "dispatch", "to": "zdeploy", "label": "registry spawn", "variant": "dashed" },
+    { "from": "dispatch", "to": "cdeploy", "label": "--agent 指名", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "單一源紀律", "items": ["只改 agents/roles/，改完重跑 sync_agents.py", "zcode/、claude/ 是生成物：UI 編輯會被下次 sync 覆蓋"] },
+    { "dot": "violet", "title": "雙投影差異（生成器承載）", "items": ["zcode：+ pins（model+thoughtLevel）+ marker", "claude：剝 pins、tools 減 CR MCP 行 + marker"] },
+    { "dot": "emerald", "title": "Drift 防護", "items": ["--check：生成物 vs roles 不一致 → exit 1 列清單", "check_single_source invariant 接線；unmarked 同名檔 fail loud"] }
+  ]
+}

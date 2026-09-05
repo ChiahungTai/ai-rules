@@ -47,7 +47,7 @@ deep-work 前提是用戶已離開 —— 權限提示會卡死無人 flow。**�
 
 ### `--agent <name> --bg` named-agent 形態（CC 端）與 ownership state machine
 
-agent-view 的 named-agent 形態：`claude --agent <name> --bg "<task>"`——registry agent 定義檔（claude/ registry）成為 session 主體，worktree 自動隔離（基於 **committed state**）。名稱可用性查 [agents/AGENTS.md](../../agents/AGENTS.md) projection map——**ZCode-only 名稱引用會立即退出**（`--agent '<name>' not found`，session 報 backgrounded 但即刻死亡）。
+agent-view 的 named-agent 形態：`claude --agent <name> --bg "<task>"`——registry agent 定義檔（claude/ registry，生成物）成為 session 主體，worktree 自動隔離（基於 **committed state**）。全 role 名在兩 registry 生成在場（可用性機械對帳＝`scripts/sync_agents.py --map`）；引用不存在的名稱仍立即退出（`--agent '<name>' not found`，session 報 backgrounded 但即刻死亡）。
 
 **ownership state machine（閉環——變更不滯留失蹤）**：
 

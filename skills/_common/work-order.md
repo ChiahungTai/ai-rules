@@ -16,6 +16,15 @@
 
 - 例句型：「把 X 制度化為 Y，達成 Z」（填寫時替換為本次任務的具體目標）
 
+### Role contract（派發 registry role 時必填子段）
+
+> 派發對象是 ai-rules registry role 時（muse/codex/grok 皆同），role 紀律核心**引用不重寫**——單一源在 `agents/roles/<name>.md`：
+
+- **role name**＋**requirement**（tier token：full/vision/lite——分配表見 `skills/model-routing/SKILL.md` role→requirement 表）
+- **role body 交接**：貼入 `agents/roles/<name>.md` 全文（附 body hash）或給絕對路徑令 runtime 自讀；與 §4 必讀的分工——§4 列 repo 材料路徑，本段承載 role 選擇依據
+- **model/effort**：按 requirement 查 `skills/model-routing/SKILL.md` tier×provider 權威表（本 harness 綁定哪家 provider 見 `agents/AGENTS.md` harness 軸表）；vision 不得降非影像款、lite 禁 luna
+- 非 role 派發（ad-hoc 任務）本子段留空
+
 ## 3. Baseline identity
 
 - repo root：絕對路徑（如 `/Users/ctai/Github/ai-rules`）＋是主 working tree 還是 worktree
@@ -44,7 +53,7 @@
 ## 6. 範圍限定
 
 - 動：檔案級列舉（如 `rules/model-routing.md`、`skills/model-routing/SKILL.md`、`agents/AGENTS.md`、`skills/_common/work-order.md`）
-- 不動：其他一切（尤其 `agents/zcode/*.md` 定義檔、`rules/tool-discipline.md`、`skills/CLAUDE.md` 以外的索引檔等）
+- 不動：其他一切（尤其 `agents/zcode/*.md`／`agents/claude/*.md` **生成檔**——勿手改，sync 會覆蓋；`rules/tool-discipline.md`、`skills/CLAUDE.md` 以外的索引檔等）
 - 違反範圍＝失敗；不動檔需在交付報告中舉證 `git diff --name-only` 未改
 
 ## 7. 工具接線

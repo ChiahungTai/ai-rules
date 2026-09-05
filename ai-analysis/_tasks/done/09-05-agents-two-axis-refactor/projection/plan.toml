@@ -1,0 +1,166 @@
+[meta]
+name = "agents-two-axis-refactor"
+graph_rev = "40f47e8797a69f9a3d455742962df8330421efc5"
+project = "ai-rules"
+version = "0.1.0"
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "load_role_specs"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "project_tools"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "render_registry"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "is_owned"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "without_marker"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "expected_projections"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "inventory_owned_outputs"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "compare_projection"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "validate_collisions"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "apply_projection"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "render_map"
+scope = []
+
+[[symbols]]
+rel_path = "scripts/sync_agents.py"
+kind = "function"
+name = "main"
+scope = []
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "roles = load_role_specs(repo)"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "load_role_specs"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "frontmatter = project_tools(frontmatter, target)"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "project_tools"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "rendered = render_registry(name, body, target, requirement)"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "render_registry"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "expected = expected_projections(repo)"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "expected_projections"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "if is_owned(file_text)"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "is_owned"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "owned = inventory_owned_outputs(repo)"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "inventory_owned_outputs"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "drift = compare_projection(expected, owned)"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "compare_projection"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "validate_collisions(expected, adopt_legacy=adopt_legacy)"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "validate_collisions"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "or without_marker(expected[path]) != path.read_text(encoding=\"utf-8\")"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "without_marker"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "apply_projection(expected, owned, adopt_legacy=mode == \"adopt-legacy\")"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "apply_projection"
+
+[[edges]]
+file = "scripts/sync_agents.py"
+needle = "table = render_map(expected)"
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "render_map"
+
+[[claims]]
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "load_role_specs"
+note = "Projection assembly reads canonical role sources before rendering either harness registry."
+
+[[claims]]
+to_module = "scripts.sync_agents"
+to_kind = "function"
+to_name = "compare_projection"
+note = "Check mode compares expected outputs and returns before any write path is reached."

@@ -38,7 +38,7 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 > 表主體單一源：[agents/AGENTS.md](../../agents/AGENTS.md)「全生命週期 execution contract」（每段一行，欄位 schema 以該表為準）。本節是**怎麼查表 dispatch** 的消費規範；各生命週期命令（deep-work／execution-plan／implement／post-build／commit）的一行形態註記指向本節，不重抄表。
 
 1. **開段先查表**：當前 stage 的執行主體＝「主 session 直做」→ 不 spawn（判斷密集段——EP 規劃／judge 裁決／post-build 編排／commit consent，AIR-24 分工律）；spawn 類 → 取 registry name＋tier 欄
-2. **spawn 形態按 harness**：ZCode＝registry spawn（tier-pinned 定義檔生效，model/thoughtLevel 自帶）；CC＝named agent（`--agent <name>`／Workflow `agentType`）**僅限 claude/ registry 在場名稱**（查同檔 projection map——引用 ZCode-only 名稱 session 立即退出），其餘角色以 spawn-time model/effort 派發（值查 [model-routing](../model-routing/SKILL.md) 解析表）
+2. **spawn 形態按 harness**：ZCode＝registry spawn（生成檔 pins 生效）；CC＝named agent（`--agent <name>`／Workflow `agentType`）——全 role 名在 claude/ registry 生成在場（未知名稱仍立即退出）；model/effort 的選擇查 [model-routing](../model-routing/SKILL.md) tier×provider 權威表（requirement→provider 格）
 3. **failure fallback 照表走**：重試 ≤2（classifier unavailable／1302）→ 顯式降級記錄（見下「spawn 失敗階梯」）；commit consent 行的 fallback 恆為「等用戶」，不可降級繞過
 4. **模型歸因抽查**（tier 欄落地驗證）：registry pin 是否真達 wire 用 per-message modelID 對帳（ZCode db.sqlite），不信 session 自述（[model-routing](../model-routing/SKILL.md) 歸因紀律）
 
@@ -203,6 +203,8 @@ spawn 失敗處理依失敗類型分階梯 —— classifier unavailable retry �
 非 429 失敗（crash / timeout）→ retry ≤ 2（同 classifier 模式）
 全失敗（serialization 仍 429，少見）→ 降級主 LLM 自審 + 顯式標記 fallback（警示獨立 review 丟失，非靜默）
 ```
+
+**usage limit（1308）不是降並發信號**（user 09-05 裁定）：1308 是窗口制——能用＝窗口已重置，並發數量與之無關；處置只有「等 reset 再派原並發」（窗口時間戳在錯誤訊息內，見 model-routing spawn 失敗態表）。**只有 429 持續才降並發**，且降並發時 dual-context（fresh＋primed）不砍成單側——複雜任務的審查結構用序列化保（一次跑一個但兩側都跑），不用降低 lens 數換速度。
 
 **關鍵區分**：serialization 是**降並發的一步，不是降級**。降級（丟獨立性）只在 concurrency=1 還持續 429 才發生。deep-work（無人、無時間壓力）甚至可**預設低並發** —— 不急，何必冒 429 平行；用時間換獨立性，保所有 lens。
 

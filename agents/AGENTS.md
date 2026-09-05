@@ -6,15 +6,17 @@
 
 ```
 agents/
-  shared/   # 內容切片（authoring 單一源）：跨 harness 角色定義（model 省略＝inherit、零 harness 專屬欄位）
-  zcode/    # ZCode registry（~/.zcode/agents → 此）：shared 檔的實檔拷貝（sync 產物）＋ ZCode 專屬實體檔（tier-pinned）
-  claude/   # CC registry（~/.claude/agents → 此）：shared 檔的實檔拷貝（sync 產物）＋ CC 專屬實體檔（暫空——CC 分層走 spawn-time）
+  roles/    # role authoring 單一源（frontmatter 白名單 name/description/tools/background＋零 model/
+            #   thoughtLevel 鍵——正文 prose 豁免；body：①目標 ②做法 ③角色特定節〔紀律/方法論等，
+            #   skills 引用 inline 散在 body〕）
+  zcode/    # 生成物（~/.zcode/agents → 此）：roles 投影＋部署預設 pins（lite/vision 帶 model+thoughtLevel）
+  claude/   # 生成物（~/.claude/agents → 此）：roles 投影（省略 model/thoughtLevel；tools 減 CR MCP 行）
 ```
 
-- **「指定哪個 harness 用哪些 agent」＝哪個檔出現在哪個 registry**（機制，非命名紀律）。**registry 內是實檔拷貝非 symlink**——ZCode registry 不載入 file-level symlink（2026-08-29 對照實驗定案：目錄 symlink 可穿透〔頂層 ~/.zcode/agents → agents/zcode 生效〕、檔案 symlink 靜默不載；hardlink 被 clone 破壞不可用）
-- **同步紀律**：shared/ 是 authoring 單一源——**只改 shared/**，改完 `cp` 到 zcode/＋claude/（三份一起 commit）。**已知刻意分歧（2026-08-30 T2-3）**：ZCode 專屬 CR MCP 白名單行（`mcp__plugin_code-reality_code-reality__*` 四顆，只加在 frontmatter tools）——zcode 拷貝＝shared 全文；**claude 拷貝＝shared 減 MCP 行**（CC 接線未確認是前置，確認後同步補）。sync 檢查＝`cmp shared/<f> zcode/<f>` ＋ claude 差異僅限 MCP 行（`diff shared/<f> claude/<f>` 只出 tools 行的 `mcp__plugin_code-reality_*` 片段）
-- **pin 單一源紀律**：zcode/ 檔的 `model:`／`thoughtLevel:` 值以 model-routing skill（`skills/model-routing/SKILL.md`）tier 解析表為單一源——改表 → `rg` 同步 zcode/ pins（角色→tier 表與 tier 詞彙仍在 `rules/model-routing.md`）
-- **UI 防護規則**：shared 角色不在 ZCode 設定 UI 編輯（model／思考強度／正文皆然）——UI 編輯落在**拷貝**上，shared/ 不變，下次同步 `cp` 會**無預警覆蓋** UI 編輯；要釘模型 → 在 zcode/ 建 fork（tier-pinned 實檔，不經同步）
+- **「指定哪個 harness 用哪些 agent」＝role 出現在哪些 registry**（機制，非命名紀律）。**registry 內是實檔拷貝非 symlink**——ZCode registry 不載入 file-level symlink（2026-08-29 對照實驗定案：目錄 symlink 可穿透〔頂層 ~/.zcode/agents → agents/zcode 生效〕、檔案 symlink 靜默不載；hardlink 被 clone 破壞不可用）
+- **同步紀律（生成式）**：**只改 `roles/`**，改完 `uv run python scripts/sync_agents.py` 重建兩 registry；`--check`＝唯讀 drift gate（生成物 vs roles 不一致→exit 1 列清單，check_single_source 有 invariant 接線）；`--map`＝role→registry 可用性表（文字表機械對帳源）；stale cleanup 只刪 marker-owned 生成物——**unmarked 檔是人工檔，永不自動刪**，與 expected 同名的 unmarked 檔＝fail loud（防 fork 被靜默收編）。**已知刻意分歧（2026-08-30 T2-3，由生成器承載）**：claude 拷貝 tools 減 CR MCP 白名單行（`mcp__plugin_code-reality_code-reality__*` 四顆）
+- **pin 單一源紀律**：zcode/ 生成檔的 pins 由 `sync_agents.py` 部署預設表給出（requirement 分類〔tier 詞 full/vision/lite〕由 `--map` 表承載），值抄 model-routing skill tier×provider 權威表（zai 欄＋部署填法 effort），runtime parity guard 對該表校驗（model＋effort 雙層）——改表 → 改 sync_agents dict → 重跑 sync
+- **UI 防護規則**：不在 ZCode 設定 UI 編輯 registry 檔（model／思考強度／正文皆然）——zcode/claude/ 是**生成物**（檔頭 ownership marker 標記），UI 編輯會被下次 sync **無預警覆蓋**；要改角色 → 改 `roles/` 源；要改 pins → 改 sync_agents 部署預設表（**在 zcode/ 建 fork 已非合法形態**——同名 unmarked 檔會擋 sync）
 - **tier 命名**：能力語義命名（lite-verify／spec-miner，非具體模型名-*——model 每代換名，改名級聯）；例外＝rescue 類（引擎在本質內，如 codex-rescue）。tier 詞彙定義在 `rules/model-routing.md`，此處引用不自帶
 - **生效時機**：ZCode 改動需新建 session（快照制；app 重啟續接同對話亦刷新）；CC 定義檔即時監聽。翻轉頂層 symlink／更新 registry 拷貝後以首個新 session 驗證
 - **external-runtime 職責**：本 registry 亦承載 external-runtime 委派的入口指派（family／profile 映射見 `skills/model-routing/SKILL.md`，詞彙定義見 `rules/model-routing.md` tier 詞彙句）；詳見下節 thin forwarder 與 flag profile。
@@ -62,9 +64,9 @@ agents/
 | 開卡（backlog 建卡＋建卡 commit） | 主 session 直做 | — | full | — | 任務敘述→卡檔＋commit | —（機械命令，kanban-board skill） |
 | 研究（EP 段落 0／規格挖掘） | spawn | cr-research／spec-miner | lite | zcode | 問題→file:line 錨點＋逐字引用 | 重試≤2（1302）→主 session 自做 |
 | EP 規劃 | 主 session 直做（判斷密集） | — | full | — | 需求→ep.md（含 EP review 迴圈） | — |
-| EP review（雙家族） | spawn＋external-runtime | code-reviewer（fresh）＋code-reviewer-primed（primed）；muse review（bridge） | full（省略 model）為基準；條件式降 lite（保護面厚度，model-routing skill） | shared→zcode＋claude；muse 經 bridge | diff＋EP→findings→judge 處置表 | classifier／1302 重試≤2→顯式降級記錄；muse 額度不足→in-harness 雙 context（顯式記錄） |
+| EP review（雙家族） | 主 session 編排：GLM 側 spawn code-reviewer×2；muse 側**背景 Bash 直呼 bridge（不佔 agent 並發）** | code-reviewer（fresh）＋code-reviewer-primed（primed）；muse review（bridge 工單） | full（省略 model）為基準；條件式降 lite（保護面厚度，model-routing skill） | zcode＋claude（生成）；muse 經 bridge | diff＋EP→findings→judge 處置表 | classifier／1302 重試≤2→顯式降級記錄；muse 額度不足→in-harness 雙 context（顯式記錄） |
 | build 實作段 | 主 session 編排；機械可規格化段 spawn | impl-flash | lite | zcode | EP 段→code＋測試＋驗證證據 | 失敗家系處置（註 a）→主 session 直做該段；lite 測試＝規格陳述→驗收證據 full 複驗 |
-| build 內 Agent Review | spawn（3-perspective） | code-reviewer（fresh）＋code-reviewer-primed（primed）；Important+ 錨點驗證＝lite-verify | reviewers＝full（省略 model）為基準；錨點驗證＝lite | reviewers＝shared→zcode＋claude；lite-verify＝zcode | diff→findings（錨點驗證後浮出） | 失敗家系處置（註 a）→主 session 自審＋fallback 標記 |
+| build 內 Agent Review | spawn（3-perspective） | code-reviewer（fresh）＋code-reviewer-primed（primed）；Important+ 錨點驗證＝lite-verify | reviewers＝full（省略 model）為基準；錨點驗證＝lite | 全 zcode＋claude（生成） | diff→findings（錨點驗證後浮出） | 失敗家系處置（註 a）→主 session 自審＋fallback 標記 |
 | judge 裁決 | 主 session 直做（判斷密集；不派 agent） | — | full | — | findings→✅/❌/⚠️ 處置表 | — |
 | post-build 編排 | 主 session 直做（判斷密集） | — | full | — | 收尾鏈：code-review（dual-context）→judge-review→修正→consistency→metadata-sync→殼 refresh | — |
 | 機械驗證／consistency gate | spawn | lite-verify | lite | zcode | 查證清單→逐項機械證據（rg 命中／exit code／file:line） | 失敗家系處置（註 a）→主 session 跑組合命令 |
@@ -77,24 +79,36 @@ agents/
 
 - **commit 拆兩半**：preparation（finalization 對帳、訊息草擬——agent 可做）＋consent gate（主 session 互動——永遠，contract 表其他行不覆蓋此行）
 - **註 a（spawn 失敗態家系——重試語義單一源）**：見 model-routing skill「spawn 失敗態辨識」——1302／classifier unavailable 重試≤2；1301 禁同 prompt 重試；1308 等窗口重置（重置前重派無效）；429 走 backoff／降並發。**禁把「重試≤2」泛化到全失敗類**（實例：1308 重派只會再敗）
-- **CC dispatch 限制**：本表 registry name 欄引用前先查下方 projection map——**CC 端不得引用 ZCode-only 名稱**（CC `--agent <未知名稱>` session 立即退出）；CC 端同角色走 spawn-time model/effort（查 model-routing skill 解析表）或 claude/ 在場名稱
+- **CC dispatch**：本表 registry name 欄的全名在兩 registry 皆生成在場——CC `--agent <name>` 全 10 名可用；未知名稱仍立即退出（反向守衛）
 
 ### registry projection map
 
-> authoring source 與跨 harness 可用性單一源（配合上表 harness registry 欄）。同步紀律（只改 shared/、cp 到兩 registry、claude 減 MCP 行）見上方「registry 結構」節。tier-pinned 檔帶 `thoughtLevel`（ZCode 專屬欄位、禁寫進共用檔）→ 必然 ZCode-only；CC 端同角色由 spawn 端按 model-routing skill 解析表填 spawn-time model/effort。
+> 跨 harness 可用性的**機械對帳源＝`uv run python scripts/sync_agents.py --map`**（輸出 role／requirement／zcode／claude 四欄表）；本節文字表是導覽副本，drift 以 --map 為準。生成後全 10 role 在兩 registry 皆在場（roles/ 單一源→雙投影）。
 
-| agent | authoring source | zcode | claude | 備註 |
-|-------|------------------|-------|--------|------|
-| code-reviewer | shared/ | ✅ | ✅ | claude 拷貝＝shared 減 CR MCP 行（已知刻意分歧） |
-| code-reviewer-primed | shared/ | ✅ | ✅ | 同上 |
-| cross-verify-investigator | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | 軸＝prompt 參數（AIR-28 S3）；**去 MCP 化**（tools 不掛 CR MCP 全名——cr 軸走 CLI，避免 spawn 綁死「CR plugin 在啟動快照在場」，見下方 tools 清單陷阱；多軸 agent 多數任務不含 CR，綁死代價不成比例） |
-| archify-gen | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
-| cr-research | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
-| impl-flash | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | **範式但書**：其 tools 行含 `Grep`/`Glob`——ZCode 靜默忽略死欄（見「tools 清單陷阱」），新定義不照抄，文字/檔案搜尋走 Bash rg/fd |
-| lite-verify | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
-| mem-distill | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
-| spec-miner | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
-| vision-review | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
+| agent | requirement | zcode | claude | 備註 |
+|-------|-------------|-------|--------|------|
+| code-reviewer | full | ✅ | ✅ | claude 拷貝 tools 減 CR MCP 行（生成器承載的已知分歧） |
+| code-reviewer-primed | full | ✅ | ✅ | 同上 |
+| cross-verify-investigator | lite | ✅ | ✅ | 軸＝prompt 參數（AIR-28 S3）；**去 MCP 化**（tools 不掛 CR MCP 全名——cr 軸走 CLI，避免 spawn 綁死「CR plugin 在啟動快照在場」，見下方 tools 清單陷阱） |
+| archify-gen | lite | ✅ | ✅ | — |
+| cr-research | lite | ✅ | ✅ | — |
+| impl-flash | lite | ✅ | ✅ | **範式但書**：其 tools 行含 `Grep`/`Glob`——ZCode 靜默忽略死欄（見「tools 清單陷阱」），新定義不照抄，文字/檔案搜尋走 Bash rg/fd |
+| lite-verify | lite | ✅ | ✅ | — |
+| mem-distill | lite | ✅ | ✅ | — |
+| spec-miner | lite | ✅ | ✅ | — |
+| vision-review | vision | ✅ | ✅ | 影像需求——pin 禁降非影像款（生成期防線） |
+
+## harness 軸（dispatch matrix——每家怎樣調用 role）
+
+> dispatch 兩跳：先選 harness（本表），再在該 harness 綁定的 provider 內按 requirement 查 [model-routing](../skills/model-routing/SKILL.md) tier×provider 權威表取 model+effort。role 定義單一源＝`roles/`（見 registry 結構節）。
+
+| harness | provider 綁定 | 調用形態 | role 來源 | evidence status |
+|---------|--------------|---------|-----------|----------------|
+| zcode | zai | registry spawn（背景；快照制——新 session 載入） | `agents/zcode/` 生成檔（pins＝部署預設） | repo-observed |
+| cc（Claude Code） | zai（**本機配置**——CC 當前掛 GLM backend；原生家 Anthropic 未訂閱，訂閱後視性價比重配） | `--agent <name> --bg` named-agent＋Agent tool（spawn-time model/effort） | `agents/claude/` 生成檔 | repo-observed（2.1.261 實測：named-agent 可用、未知名稱即退出；session 跑 glm-5.3） |
+| muse code | meta | **雙身分**：user 直用開發 harness（該弧主力，muse-spark-1.3 全棧）＋ ZCode 端 bridge 工單委派（`task`／`review`，必經） | 直用＝repo AGENTS.md 載入（全域部署點未查證）；委派＝roles/ body 填工單 Role contract（work-order §2） | repo-observed |
+| codex（companion） | OpenAI | companion `task` 工單（`--model`/`--effort` passthrough） | 同上 | repo-observed |
+| grok-build | xai | 工單（同族委派 plugin 形態） | 同上 | **未安裝**·dispatch contract 未證實〔hooks/AGENTS.md〕——引用前先查證，不得假設可用 |
 
 ## 定義檔慣例
 

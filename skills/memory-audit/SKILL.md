@@ -62,7 +62,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 - **多池殘留掃描**：雙 harness 共用腳本跨多池部署後，清理/驗證掃描以「檔名 × 池」為維度——每個 pool 都要 rg（2026-08-30 實例：清理清單漏了 mosaic 池的同名測試條目）
 - 合併檔帶 `merged_from` 標記（保留追溯）
 - **cluster merge 機械觸發**：同主題散檔 ≥3（rg 主題詞/同前綴判定）→ merge candidate；併入目標優先既有最大 cluster（閾值可在 `_audit-state.md` per-project 覆寫）
-- **蒸餾執行載體**：spawn `mem-distill`（registry `agents/zcode/`、flash pin——registry 是 session 快照，須新建 session 才可解析）；prompt 給檔案清單＋每檔硬上限（預設 11,000 chars）＋desc 一併改寫 ≤100 指示
+- **蒸餾執行載體**：spawn `mem-distill`（role 定義＝`agents/roles/`、lite pin 生成於 zcode/ registry——registry 是 session 快照，須新建 session 才可解析）；prompt 給檔案清單＋每檔硬上限（預設 11,000 chars）＋desc 一併改寫 ≤100 指示
 - **固化→濃縮同步義務**（user 2026-09-01 定案）：經驗固化成 ai-rules skill/rule 落地後，對應 memory 條目把已承載段**同步壓成指針**（觸發詞→skill 名＋一句精髓）；user 事實/事故實例/commit 錨留——固化與濃縮不同步＝兩處 drift（skill 演進、memory 停舊版）
 - **收斂落點慣例**（與上互補，2026-09-03）：跨 repo 方法論→ai-rules skills/rules；模組知識（project 條目 durable lesson）→對應目錄的模組 AGENTS.md（3-6 行約束形態，非流水帳搬移；root 不動）；user/專案綁定事實→留 memory——三個載體各司其職，收斂時先判條目屬哪類
 - **夜間收斂＝流出腿**（user 2026-09-03 定案「有進有出」，gate 22,500 配套）：每日夜間 cron（ZCode automation、owning workspace）跑本層收斂波，輕量形態**隨 cron 預先授權**（heavier 清理仍走「用戶核可後」）。波次：①`--check` 盤點＋弧線軟預警（列單檔 >8,000 chars 且近 7 天活躍的條目——掃描形態 `wc -m *.md` 排序交叉 `fd --changed-within 7d`；僅報告不擋，「禁加段」的軟執行）②觸發（gate FAIL、`_regen-failed` 在場、或逼近線）→ desc>100 掃尾＋同主題 cluster merge ③regen 至過、清 marker。掃尾紀律：**壓縮改寫非截斷**——被刪細節若有價值先落 body（desc 是索引摘要層）；不確定的條目跳過，禁大規模語義重寫（那是 full audit 的事）。週日治理 cron 跑 lite audit（健檢腿）——兩 cron 分工：每日流出、週日健檢

@@ -259,3 +259,73 @@ def test_parity_hook_disabled_in_live_critical(tmp_path, monkeypatch):
     findings = css.check_zcode_live_parity(_parity_inv(), live_path=live)
     assert len(findings) == 1
     assert findings[0][1] == "critical"
+
+
+# --- agents_projection_sync（AIR-29）：subprocess 委派四路 ---
+
+
+class _Proc:
+    def __init__(self, returncode=0, stdout="", stderr=""):
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
+
+
+def _projection_inv():
+    css = load_module("skills/scan-project/scripts/check_single_source.py")
+    return next(i for i in css.INVARIANTS if i["id"] == "agents_projection_sync")
+
+
+def _stub_generator(css, tmp_path, inv):
+    gen = tmp_path / inv["generator"]
+    gen.parent.mkdir(parents=True, exist_ok=True)
+    gen.write_text("#!/usr/bin/env python3\n", encoding="utf-8")
+
+
+def test_projection_sync_green(tmp_path, monkeypatch):
+    css = load_module("skills/scan-project/scripts/check_single_source.py")
+    inv = _projection_inv()
+    _stub_generator(css, tmp_path, inv)
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(css.subprocess, "run", lambda *a, **k: _Proc())
+    assert css.check_agents_projection_sync(inv) == []
+
+
+def test_projection_sync_drift_critical(tmp_path, monkeypatch):
+    css = load_module("skills/scan-project/scripts/check_single_source.py")
+    inv = _projection_inv()
+    _stub_generator(css, tmp_path, inv)
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(
+        css.subprocess,
+        "run",
+        lambda *a, **k: _Proc(returncode=1, stdout="agents/zcode/foo.md\n"),
+    )
+    findings = css.check_agents_projection_sync(inv)
+    assert len(findings) == 1
+    assert findings[0][1] == "critical"
+    assert "foo.md" in findings[0][2]
+
+
+def test_projection_sync_uv_missing_important(tmp_path, monkeypatch):
+    css = load_module("skills/scan-project/scripts/check_single_source.py")
+    inv = _projection_inv()
+    _stub_generator(css, tmp_path, inv)
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+
+    def boom(*a, **k):
+        raise FileNotFoundError("uv not in PATH")
+
+    monkeypatch.setattr(css.subprocess, "run", boom)
+    findings = css.check_agents_projection_sync(inv)
+    assert len(findings) == 1
+    assert findings[0][1] == "important"
+
+
+def test_projection_sync_generator_missing_important(tmp_path, monkeypatch):
+    css = load_module("skills/scan-project/scripts/check_single_source.py")
+    inv = _projection_inv()
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)  # generator 不存在
+    findings = css.check_agents_projection_sync(inv)
+    assert len(findings) == 1
+    assert findings[0][1] == "important"

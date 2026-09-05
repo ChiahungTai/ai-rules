@@ -15,6 +15,8 @@ Exit: non-zero if any critical/important finding（未來可掛 commit gate）�
 import importlib.util
 import json
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -124,6 +126,17 @@ INVARIANTS = [
         "（非 ZCode 機器）→ skip 不 false positive。單向 template→live：live 端 "
         "UI 手加的 hook 不誤報（coverage 語義同 skill_allowlist_coverage）；"
         "結構比對（event/matcher/檔名三元組）——掛錯 matcher 或 .bak 殘字樣不算已部署",
+    },
+    {
+        "id": "agents_projection_sync",
+        "type": "agents_projection_sync",
+        "generator": "scripts/sync_agents.py",
+        "source_dir": "agents/roles/",
+        "targets": ["agents/zcode/", "agents/claude/"],
+        "note": "roles/ 是 role authoring 單一源；zcode/claude/ 是生成物（ownership "
+        "marker）。委派 sync_agents --check（純比對、零寫入）：drift＝critical"
+        "（生成物與源不一致——手改生成物或漏跑 sync）；generator 缺席＝important"
+        "（單一源宣稱欠了機械閘門）。",
     },
 ]
 
@@ -445,6 +458,67 @@ def check_zcode_live_parity(
     return out
 
 
+def check_agents_projection_sync(inv: dict) -> list[tuple[str, str, str]]:
+    """agents/roles/ 單一源 ↔ 生成 registry 的 drift gate（委派 sync_agents --check）。
+
+    --check 是純比對（零寫入，測試有 tripwire 釘住）。rc==1＝drift（critical）；
+    其他非零（parity assert／roles-mismatch traceback）＝診斷分流的 important；
+    uv 缺席／呼叫失敗＝important（不誤導為 drift、不炸整個 checker）。
+    """
+    if inv.get("type") != "agents_projection_sync":
+        return []
+    generator = REPO_ROOT / inv["generator"]
+    if not generator.exists():
+        return [(inv["id"], "important", f"sync generator 不存在: {generator}")]
+    if shutil.which("uv") is None:
+        return [
+            (inv["id"], "important", "uv 不在 PATH——無法執行 projection sync gate"),
+        ]
+    try:
+        proc = subprocess.run(
+            ["uv", "run", "--no-sync", "python", str(generator), "--check"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            cwd=REPO_ROOT,
+            check=False,
+        )
+    except OSError as exc:
+        return [(inv["id"], "important", f"projection gate 呼叫失敗: {exc}")]
+    if proc.returncode == 1:
+        drift = (proc.stdout + proc.stderr).strip().splitlines()
+        head = "; ".join(drift[:5]) + ("…" if len(drift) > 5 else "")
+        return [
+            (
+                inv["id"],
+                "critical",
+                f"生成 registry 與 roles/ 源 drift（{head}）——手改生成物或編輯 roles/ 後未跑 sync",
+            )
+        ]
+    if proc.returncode == 2:
+        tail = (proc.stdout + proc.stderr).strip().splitlines()[-3:]
+        return [
+            (
+                inv["id"],
+                "important",
+                f"projection gate fatal（parity drift 或 roles/policy mismatch——修 policy/"
+                f"skill 表非重跑 sync）：{' | '.join(tail)}",
+            )
+        ]
+    if proc.returncode != 0:
+        tail = (proc.stdout + proc.stderr).strip().splitlines()[-3:]
+        return [
+            (
+                inv["id"],
+                "important",
+                f"projection gate 非預期退出 rc={proc.returncode}"
+                f"（parity drift 或 roles/policy mismatch？）：{' | '.join(tail)}",
+            )
+        ]
+    return []
+
+
 def main() -> int:
     findings: list[tuple[str, str, str]] = []
     for inv in INVARIANTS:
@@ -455,6 +529,7 @@ def main() -> int:
         findings += check_deploy_freshness(inv)
         findings += check_hook_registration(inv)
         findings += check_zcode_live_parity(inv)
+        findings += check_agents_projection_sync(inv)
 
     crit = [f for f in findings if f[1] == "critical"]
     imp = [f for f in findings if f[1] == "important"]

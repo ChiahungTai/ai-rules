@@ -51,8 +51,10 @@ arch-report/**/*.visual-check.*.png
 # 任務家 archify 產物（_tasks/_projects——illustrate html mode「產物位置分流」）：殼 index.html 手寫進 git；
 # 進 git：JSON IR（*.workflow.json 等）＋ visual-check receipt（.visual-check.json）；不進：diagram-*.html（渲染產物）＋截圖＋contact sheet
 ai-analysis/_tasks/**/diagram-*.html
+ai-analysis/_tasks/**/diagram-*.svg
 ai-analysis/_tasks/**/diagram-*.visual-check.*.png
 ai-analysis/_projects/**/diagram-*.html
+ai-analysis/_projects/**/diagram-*.svg
 ai-analysis/_projects/**/diagram-*.visual-check.*.png
 .muse-bridge/
 

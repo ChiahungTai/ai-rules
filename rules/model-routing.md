@@ -8,8 +8,8 @@ harness-scope: neutral
 
 subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什麼模型無關），經兩跳解析：
 
-1. **角色 → tier**（通用表——本檔單一源）
-2. **tier → (model, effort)**（依 harness × 當前 provider 查解析表——在 model-routing skill；ZCode 端材料化為 `agents/zcode/` 定義檔 frontmatter pins，pin 值以 model-routing skill 解析表為單一源）
+1. **角色 → tier**（通用表——本檔單一源；tier 詞＝requirement 正式 token：full＝旗艦需求／vision＝影像需求／lite＝隨意需求，中文語義標籤，與 skill 權威表對齊行同詞彙）
+2. **tier → (model, effort)**（依 harness × 當前 provider 查解析表——在 model-routing skill 的 tier×provider 權威表，model 值唯一源；ZCode 端材料化為 `agents/zcode/` 定義檔 frontmatter pins〔部署預設，由 sync_agents 生成〕，pin 值以該表為單一源）
 
 > **tier 是能力檔語義，非模型綁定**——哪個具體模型夠格坐哪個 tier，單一源在 skill 解析表（provider 演進只改該表）；本檔只錄角色需要的能力檔與升降級條件（分工律證據與條款見 skill「flash 分工律」）。
 
