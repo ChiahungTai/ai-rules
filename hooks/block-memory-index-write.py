@@ -44,7 +44,9 @@ from pathlib import Path
 GENERATOR_NAME = "_generate_index.py"
 DESC_LIMIT = 100  # frontmatter description 硬上限（＝寫入紀律值；09-03 P1 對齊）
 BODY_LIMIT = 12_000  # 條目檔總長上限（chars）
-HASH_RE = re.compile(r"\bcommit[s]?\s+(?=[0-9a-fA-F]*[0-9])[0-9a-fA-F]{7,}")  # desc 禁 commit hash（09-05 S2；digit-lookdown 排除純字母 hex 形態——實戰偽陽性「commit feedback」〔feedbac 恰 7 hex〕，真 hash 7+ 碼全字母機率≈0.01%）
+HASH_RE = re.compile(
+    r"\bcommit[s]?\s+(?=[0-9a-fA-F]*[0-9])[0-9a-fA-F]{7,}"
+)  # desc 禁 commit hash（09-05 S2；digit-lookdown 排除純字母 hex 形態——實戰偽陽性「commit feedback」〔feedbac 恰 7 hex〕，真 hash 7+ 碼全字母機率≈0.01%）
 
 
 def is_index_violation(file_path: str, has_generator: bool) -> bool:
