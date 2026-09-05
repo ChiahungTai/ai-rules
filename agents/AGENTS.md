@@ -38,15 +38,19 @@ agents/
 
 ### dispatch face 與收法
 
-- **muse 委派必經 bridge——預設形態＝主 session 直呼 bridge CLI**：背景 Bash＋`.muse-bridge/jobs.json` 輪詢（`rg .muse-bridge/jobs.json`＋`ps` 進程核對），繞開 wrapper 生命週期錯位；wrapper agent 形態為別名（alias），續用時收法＝resume-to-poll。理由：wrapper 在 runtime 未終局時提前 complete 是系統性常態（生命週期錯位，本弧實證：muse×2＋codex×2 均需介入），直呼橋接層不經 wrapper 轉發、終局以 jobs.json 與 working tree 為準。「必經」＝禁繞過 bridge 直呼 `muse exec` 等（ledger 可考性——規範單一源見 `skills/model-routing/SKILL.md`「bridge 必經」）
-- **codex 委派＝wrapper＋標準收法 resume-to-poll＋prompt 內預寫 env fallback**：prompt 內預寫 plugin root 路徑的 env 兜底（`CLAUDE_PLUGIN_ROOT` 缺失時 `MODULE_NOT_FOUND` 形態），wrapper 標準收法同為 resume-to-poll
+- **muse 委派必經 bridge——預設形態＝主 session 直呼 bridge CLI**：背景 Bash 掛 bridge 阻塞呼叫（`task` 阻塞形或 `wait <jobId>`）→ process exit 喚醒主 session、stdout 即終局輸出；`.muse-bridge/jobs.json`／`ps` 核對降級為**診斷手段**（非收法）。繞開 wrapper 生命週期錯位——wrapper 在 runtime 未終局時提前 complete 是系統性常態（本弧實證：muse×2＋codex×2 均需介入），直呼橋接層不經 wrapper 轉發；wrapper agent 形態為別名（alias）。「必經」＝禁繞過 bridge 直呼 `muse exec` 等（ledger 可考性——規範單一源見 `skills/model-routing/SKILL.md`「bridge 必經」）
+- **codex 委派＝主 session 背景 Bash 直呼 `codex-companion task`（阻塞形）＋prompt 內預寫 env fallback**：prompt 內預寫 plugin root 路徑的 env 兜底（`CLAUDE_PLUGIN_ROOT` 缺失時 `MODULE_NOT_FOUND` 形態）不變；wrapper 保留 prompt 工程場景（wrapper 內單次阻塞 `task`）——wrapper Bash 10min 上限是約束事實、wrapper≠job 錯位是獨立實證、兩者因果未驗證，預期超時的工單改走直呼
+- **LLM 層 fallback 紀律（罕見——原始派發無背景 Bash 掛載時；前景短 arm 仍可用）**：ETA-gate——推估完成時刻前零檢查（一段 `--timeout <eta>` arm）；屆時單次檢查；未終局 → 重掛遞減 timeout 的阻塞 wait arm（起點＝bridge 預設 5min／4min，按 ETA 緊化至 ~30s 級；每 arm 到期＝1 request）——永不做 LLM 層定時輪詢
+- **收法經濟學**：LLM 層輪詢每輪＝1+ request 且全 context 重送；push 收法等待期間 0 request、完成時恰好 1 request
+
+> 長跑兩段式（`--background` 拿 jobId → 掛 `wait`）與 timeout 到期訊號拆家系（muse 5min＝exit 124；codex 4min＝正常 exit 0＋`waitTimedOut` 旗標、無 0=forever）見 `skills/model-routing/SKILL.md`「完成回報收法」決策樹。
 
 ### 三態判定（症狀→證據→處置）
 
 | 症狀 | 證據 | 處置 |
 |------|------|------|
 | transport 未啟動 | env/module 錯誤、log `MODULE_NOT_FOUND`、exit 1、jobs.json 無該 job | 可安全重派 |
-| transport 在跑、wrapper 已收 | jobs.json 狀態 running、ps 進程在 | poll 收集，禁重派（雙跑） |
+| transport 在跑、wrapper 已收 | jobs.json 狀態 running、ps 進程在 | 背景 Bash 掛阻塞 `wait` 收，禁重派（雙跑） |
 | transport 死中途、wrapper 空轉 | 進程已亡、jobs.json 停滯、無新輸出 | 機械驗收（working tree＋jobs.json 終局）＋TaskStop wrapper |
 
 ## 定義檔慣例

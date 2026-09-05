@@ -31,6 +31,6 @@ subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什�
 
 > **定位**：external-runtime routing policy（family 軸），非 tier→model 映射擴充、非 registry pin。
 
-角色→family→profile 映射、eligibility gate 五條、reviewer 交接契約、bridge 必經（muse 委派唯一入口）、套用（三路徑）——見 model-routing skill（`skills/model-routing/SKILL.md` on-demand；觸發詞：external-runtime、eligibility、reviewer 交接、bridge 必經、委派）。
+角色→family→profile 映射、eligibility gate 五條、reviewer 交接契約、bridge 必經（muse 委派唯一入口）、完成回報收法（push 化決策樹）、套用（三路徑）——見 model-routing skill（`skills/model-routing/SKILL.md` on-demand；觸發詞：external-runtime、eligibility、reviewer 交接、bridge 必經、委派、收法）。
 
 > tier→(model, effort) 解析表、flash 分工律（執行層降級條件＋風險面＋歸因紀律）、external-runtime family 解析表、thoughtLevel 但書、rate limit 與並發上限表、classifier 處置＋spawn 失敗態辨識——見 model-routing skill。
