@@ -21,6 +21,9 @@
 #     rg -a -o '.{30}mre=[0-9*]+.{30}' /Applications/ZCode.app/Contents/Resources/glm/zcode.cjs
 #     rg -a -o '.{0,100}YD=200,GF=25000.{0,60}' ~/.local/share/claude/versions/<最新版>
 #     計量實作：perl -0777 -ne 'if (/(function mLe\(e\)\{.{0,300})/s){my $x=$1;$x=~s/\n/\\n/g;print "$x\n"}' <該版檔>
+# 2026-09-06 輸出行附 gate 值（OK 兩路徑＋size FAIL 附超限比值）：nightly-watch 假警——
+#   輸出不含 gate 值時，消費 session 轉引 _audit-state.md prose 舊值（18,500 vs 真值
+#   22,500）＝輸出真空由 prose 填補（09-02 同型第二次）。輸出自足＝就地校驗。
 # 寫入用 unique tmp（os.getpid()）＋只清 aged（>60s）殘檔——並行 process 的 in-flight
 # tmp 不被誤殺。
 # 2026-09-01 chars gate 17,000→18,500（harness 線內 ~25% 餘裕）：寫入治理
@@ -142,21 +145,23 @@ def main() -> int:
             wrote = "——索引已寫出（不停滯）"
         print(
             info
-            + f"[FAIL] gate 超限: {n_chars} chars (>{GATE_CHARS}) / {n_lines} lines"
-            f" (>{GATE_LINES}){wrote}。當下 session 需縮：merge or drop stale 條目"
+            + f"[FAIL] gate 超限: {n_chars} chars (>{GATE_CHARS}, {n_chars / GATE_CHARS:.1%})"
+            f" / {n_lines} lines (>{GATE_LINES}, {n_lines / GATE_LINES:.1%}){wrote}。當下 session 需縮：merge or drop stale 條目"
             "（可推導內容歸 repo/git——skip-derivable），縮後重跑"
         )
         return 1
     if check_only:
         print(
             info
-            + f"[OK] {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines（--check 未寫入）"
+            + f"[OK] {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines"
+            f"（gate: {GATE_CHARS} chars／{GATE_BYTES} bytes／{GATE_LINES} 行；--check 未寫入）"
         )
         return 0
     write_index(here, content)
     print(
         info
         + f"[OK] MEMORY.md 已重生成: {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines"
+        f"（gate: {GATE_CHARS} chars／{GATE_BYTES} bytes／{GATE_LINES} 行）"
     )
     return 0
 
