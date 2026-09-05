@@ -37,7 +37,7 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 |------|------|--------|
 | **Capabilities 寫入** | A | 對應模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）`## Capabilities` 表格新增 ✅ 行(格式 `\| 能力 \| 入口 \| 狀態 \|`,入口含 CLI + 函式路徑;見 [ai-development-guide](../../ai-development-guide.md)) |
 | **消費場景寫入** | A | 從 EP Scenario Matrix 提煅引用該 UC 的場景為自包含一句話(不引用 EP/SM 編號),寫入 Capabilities 備註或 backlog 卡(`backlog task edit <id> --append-notes`) |
-| **backlog 結案** | A | 已完成 UC 的卡結案兩步：`task edit <id> -s Done --final-summary` → `--ref` 換 `done/` 新 URL，卡留 Done 欄（命令合約見 [kanban-board](../kanban-board/SKILL.md)） |
+| **backlog 結案** | A | 已完成 UC 的卡結案兩步＋弧結案蒸餾第三動（本弧 memory 條目終態化）：`task edit <id> -s Done --final-summary` → `--ref` 換 `done/` 新 URL，卡留 Done 欄（命令合約見 [kanban-board](../kanban-board/SKILL.md)） |
 | **SYSTEM-MAP 結算** | A | 受影響功能生命週期升級(`✅ Built → ✅🔍 Verified`,若有整合驗證);移除已修復 ⚠️;更新全域統計(若有) |
 | **SYSTEM-MAP 預覽** | B | 中間段:生命週期 `📋→✅ Built`(全 UC ✅ + 測試通過 + build loop 收斂);**不升級 Verified**;loop 未收斂 → 阻止升級 + 標 ⚠️;**全域統計由情境 A 結算,預覽不動** |
 | **architecture.md** | A(條件) | 本次涉及設計決策 / 原則 / 模組結構 / 新抽象層 → 同步更新對應段落;純 feature(不改設計)跳過 |

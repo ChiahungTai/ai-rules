@@ -86,8 +86,9 @@ def run_for_cwd(cwd: str, home: Path) -> list[str]:
             -1
         ]
         notes.append(f"[memory-index-regen] {d}: {last}")
-        # Stop 的 stdout 不進模型 context（ZCode 文檔）——regen 失敗需實體可見錨點；
-        # `_` 前綴不進索引，下次成功清除
+        # Stop 的 stdout 不進模型 context（ZCode 文檔）——exit 1＝gate 失敗（09-05 S1：
+        # 池超限〔索引已照寫出，縮池後 regen 成功即清〕或 frontmatter 違規〔未寫出，
+        # 修該條目〕），需實體可見錨點；`_` 前綴不進索引
         try:
             marker = d / "_regen-failed"
             if r.returncode != 0:

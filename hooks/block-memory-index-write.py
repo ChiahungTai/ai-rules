@@ -7,9 +7,14 @@ PreToolUse hook（matcher Edit|Write|NotebookEdit）: memory 寫入治理（兩�
    先到為準，超限截斷（附 WARNING，尾端條目不載）→ cluster 查重漏同主題
    → 近重複寫入正回授（2026-08-30 mosaic 56.6KB 實證）。
 ② 條目檔寫入檢查（2026-09-01 寫入治理）——對應 rules/context-management.md
-   寫入四問 Q1/Q2/Q4：
+   寫入五問 Q1/Q2/Q4：
    - frontmatter description >100 chars → 擋（索引行原料＝寫入紀律值，
      name×2 重複已佔索引行 40% 開銷，desc 是主要槓桿）
+   - desc 含 commit hash 形態（`\bcommit[s]?\s+[0-9a-fA-F]{7,}`，09-05 S2/AIR-25）→ 擋：
+     hash 屬 git log 可推導（官方 skip-derivable），desc＝觸發詞＋一句鉤子。
+     邊界：\b 擋 "recommit" 誤傷；複數/大寫 hex 涵蓋；字元集含純十進位形態
+     （「commit 1234567」會誤擋）——池內實測零誤傷；
+     只查 desc 不查 body（body 引 hash 是歷史合法引用，另有 12K 膨脹治理）。
    - 條目檔膨脹 >12,000 chars → 擋（Write 看 content 全長；Edit 只擋
      「變大且超限」方向——收斂型編輯放行，不卡 audit 收縮既有肥檔）。
      超額內容多屬 repo 可推導（EP 進度/git log），該住 EP 檔而非 memory。
@@ -31,12 +36,14 @@ Write 收斂豁免：content 比既有檔短即放行（與 Edit delta 豁免對
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
 GENERATOR_NAME = "_generate_index.py"
 DESC_LIMIT = 100  # frontmatter description 硬上限（＝寫入紀律值；09-03 P1 對齊）
 BODY_LIMIT = 12_000  # 條目檔總長上限（chars）
+HASH_RE = re.compile(r"\bcommit[s]?\s+[0-9a-fA-F]{7,}")  # desc 禁 commit hash（09-05 S2）——git log 可推導；邊界：\b 擋 recom(re)mit 誤傷、大小寫與複數涵蓋
 
 
 def is_index_violation(file_path: str, has_generator: bool) -> bool:
@@ -55,8 +62,8 @@ def is_entry_file(file_path: str, has_generator: bool) -> bool:
     )
 
 
-def extract_desc_len(text: str) -> int:
-    """從 Write content 抽 frontmatter description 長度（單行值＋縮排續行近似）。"""
+def extract_desc(text: str) -> str:
+    """從 Write content 抽 frontmatter description 值（單行值＋縮排續行近似）。"""
     lines = text.splitlines()
     in_fm = False
     for i, line in enumerate(lines):
@@ -75,16 +82,16 @@ def extract_desc_len(text: str) -> int:
             ):
                 val += lines[j].strip().strip("'\"")
                 j += 1
-            return len(val)
-    return 0
+            return val
+    return ""
 
 
-def desc_from_edit(new_string: str) -> int:
-    """Edit 的 new_string 含 description: 行時，回傳該（新）值長度；否則 0。"""
+def desc_from_edit(new_string: str) -> str:
+    """Edit 的 new_string 含 description: 行時，回傳該（新）值；否則空字串。"""
     for line in new_string.splitlines():
         if line.startswith("description:"):
-            return len(line.partition(":")[2].strip().strip("'\""))
-    return 0
+            return line.partition(":")[2].strip().strip("'\"")
+    return ""
 
 
 def main() -> None:
@@ -120,12 +127,20 @@ def main() -> None:
     target = Path(file_path)
     if tool == "Write":
         content = tool_input.get("content", "") or ""
-        dlen = extract_desc_len(content)
-        if dlen > DESC_LIMIT:
+        desc = extract_desc(content)
+        if len(desc) > DESC_LIMIT:
             print(
-                f"[Hook Blocked] 條目 description {dlen} chars > {DESC_LIMIT}。\n"
+                f"[Hook Blocked] 條目 description {len(desc)} chars > {DESC_LIMIT}。\n"
                 "description 是索引行的投影原料（索引行 = name×2 重複 + desc，desc 佔一半 chars）。\n"
                 "修正方式：精簡到主題＋一個鉤子（紀律 ≤100 chars），細節寫進 body。",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        if HASH_RE.search(desc):
+            print(
+                "[Hook Blocked] 條目 description 含 commit hash——desc＝觸發詞＋一句鉤子。\n"
+                "hash 屬 git log 可推導（官方 skip-derivable），不進索引行。\n"
+                "修正方式：desc 去掉 hash（收案錨點留 body 或指向 repo 檔案）。",
                 file=sys.stderr,
             )
             sys.exit(2)
@@ -141,11 +156,18 @@ def main() -> None:
     elif tool == "Edit":
         new_string = tool_input.get("new_string", "") or ""
         old_string = tool_input.get("old_string", "") or ""
-        dlen = desc_from_edit(new_string)
-        if dlen > DESC_LIMIT:
+        desc = desc_from_edit(new_string)
+        if len(desc) > DESC_LIMIT:
             print(
-                f"[Hook Blocked] 新 description {dlen} chars > {DESC_LIMIT}。\n"
+                f"[Hook Blocked] 新 description {len(desc)} chars > {DESC_LIMIT}。\n"
                 "修正方式：精簡到主題＋一個鉤子（紀律 ≤100 chars），細節寫進 body。",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        if desc and HASH_RE.search(desc):
+            print(
+                "[Hook Blocked] 新 description 含 commit hash——desc＝觸發詞＋一句鉤子，\n"
+                "hash 屬 git log 可推導。修正方式：desc 去掉 hash。",
                 file=sys.stderr,
             )
             sys.exit(2)

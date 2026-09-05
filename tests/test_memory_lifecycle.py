@@ -1,7 +1,9 @@
 """Memory 生命周期工具鏈測試（generator 投影 / MEMORY.md 手寫 gate / Stop 重生成推導）。
 
-三件套行為錨點：索引生成 gate 分級（22,500 字元/190 行 fail-loud 守兩端共同截斷線〔200 行／
-25,000 字元〕；24,000 bytes 降 info 縱深預警）與 frontmatter 解析、手寫攔截
+三件套行為錨點：索引生成 gate 分級（22,500 字元/190 行 fail-loud——09-05 S1（AIR-25）
+CC 式：超限**索引照寫出**＋exit 1＋行動訊息（官方 memory.md:401-403「write still
+succeeds + error telling Claude to rewrite」——拒寫會停滯索引＝新條目不可見＝召回斷裂；
+`--check` 仍不寫）與 frontmatter 解析、手寫攔截
 ＋條目寫入治理（desc>100/body 膨脹>12,000 硬擋、收斂放行）的 self-gating 條件、
 跨 harness memory 目錄推導——Claude 端底線也轉 dash 的專案名
 編碼陷阱與 ZCode 端 basename-sha256 命名皆以本機真實目錄名為錨（hash 是路徑字串的
@@ -106,10 +108,37 @@ def test_generator_e2e_check_does_not_write(tmp_path):
 
 
 def test_generator_e2e_gate_fail_loud(tmp_path):
-    # 200 條目 → 產物 >190 行 → gate fail-loud：不寫入、exit 1
+    """SM-1：超限（n=200 > 190 行 gate）→ 索引**照寫出**＋exit 1＋行動訊息。
+
+    09-05 S1（AIR-25）gate 失敗模式改 CC 式：拒寫會讓索引停滯、新條目對未來
+    session 不可見（召回斷裂，flash-forensic 條目實證）——寫出（投影新鮮）＋
+    fail-loud 行動訊息（命令當下 session 縮池）才是正確失敗模式。
+    """
     pool = make_pool(tmp_path, n=200)
     r = subprocess.run(
         [sys.executable, str(pool / "_generate_index.py")],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 1
+    assert "[FAIL]" in r.stdout
+    assert "merge or drop" in r.stdout  # 行動訊息（官方 error telling to rewrite）
+    idx_path = pool / "MEMORY.md"
+    assert idx_path.exists()  # 照寫出——不停滯
+    assert "proj-199" in idx_path.read_text(encoding="utf-8")  # 完整索引（尾條目在場）
+
+
+def test_generator_e2e_over_limit_check_does_not_write(tmp_path):
+    """SM-2：超限時 --check 仍不寫入——寫出動作須 `if not check_only` guard。
+
+    超限 gate 分支在 check_only 分支之前（共用 return 1 路徑），無 guard 照字面
+    實作會讓 --check 也寫入＝違反其零副作用語義（既有 check_does_not_write
+    是未超限 case，此處釘超限邊界）。
+    """
+    pool = make_pool(tmp_path, n=200)
+    r = subprocess.run(
+        [sys.executable, str(pool / "_generate_index.py"), "--check"],
         capture_output=True,
         text=True,
         check=False,
@@ -156,7 +185,7 @@ def test_generator_e2e_chars_gate(tmp_path):
     assert r.returncode == 1
     assert "[FAIL]" in r.stdout
     assert "chars" in r.stdout
-    assert not (pool / "MEMORY.md").exists()
+    assert (pool / "MEMORY.md").exists()  # S1：chars-only 超限同樣照寫出（不停滯）
 
 
 def test_generator_stale_tmp_aged_removed(tmp_path):
@@ -319,6 +348,81 @@ def test_entry_write_within_limits_allowed(tmp_path):
             "Write",
             target,
             content="---\nname: ok-entry\ndescription: 合規短述\nmetadata:\n  type: project\n---\nbody\n",
+        )
+    )
+    assert r.returncode == 0
+
+
+def test_entry_write_desc_commit_hash_blocked(tmp_path):
+    """SM-3/SM-4（09-05 S2/AIR-25）：desc 含 commit hash（≤100 chars）→ exit 2
+    ——內容契約獨立於長度契約；hash 屬 git log 可推導（官方 skip-derivable）。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "hash-desc.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: hash-desc\ndescription: 全弧完結含 commit 47aa89d 收案\n"
+                "metadata:\n  type: project\n---\nbody\n"
+            ),
+        )
+    )
+    assert r.returncode == 2
+    assert "hash" in r.stderr
+
+
+def test_entry_write_body_hash_allowed(tmp_path):
+    """反向：desc 合規、body 引 hash（歷史合法引用）→ exit 0——契約只約束 desc。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "body-hash.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: body-hash\ndescription: 合規短述\nmetadata:\n  type: project\n"
+                "---\n落地於 commit 47aa89d，細節見 EP。\n"
+            ),
+        )
+    )
+    assert r.returncode == 0
+
+
+def test_entry_edit_desc_commit_hash_blocked(tmp_path):
+    """Edit 分支 desc hash 檢查（review F2）——new_string 含 description: 行帶
+    commit hash → exit 2（與 Write 分支同契約；釘住 `desc and` guard 不被誤刪）。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "edit-hash.md"
+    target.write_text(
+        "---\nname: edit-hash\ndescription: 原始合規\nmetadata:\n  type: project\n---\nbody\n",
+        encoding="utf-8",
+    )
+    r = run_hook(
+        hook_payload(
+            "Edit",
+            target,
+            old_string="description: 原始合規",
+            new_string="description: 全弧完結含 commit 47aa89d 收案",
+        )
+    )
+    assert r.returncode == 2
+    assert "hash" in r.stderr
+
+
+def test_entry_write_folded_desc_hash_passthrough(tmp_path):
+    """F7 反例（EP review）：folded（>-）desc 含 hash → 放行——釘住「與長度檢查
+    同界」承諾（folded 量到摺疊符號本身、desc 值抽取不到——既有品質洞邊界不擴大）。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "folded.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: folded\ndescription: >-\n"
+                "  commit 47aa89d hidden in folded\nmetadata:\n  type: project\n---\nbody\n"
+            ),
         )
     )
     assert r.returncode == 0

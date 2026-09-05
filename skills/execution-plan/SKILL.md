@@ -370,7 +370,7 @@ EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類�
 ### 1. 模組 instruction 檔 Capabilities + Kanban 更新
 
 - 已完成 UC：在對應模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）Capabilities 表格新增一行（能力 + 入口 + ✅）
-- 卡結案（repo 有 `backlog/` 時）——**結案兩步**（命令合約見 [kanban-board](../kanban-board/SKILL.md)）：`backlog task edit <id> -s Done --final-summary "<一句>"` → `task edit <id> --ref "<done/ 新URL>,<相對路徑>"`（任務目錄遷 done/ 後 URL 更新），卡留 Done 欄；無 `backlog/` → 跳過
+- 卡結案（repo 有 `backlog/` 時）——**結案兩步＋弧結案蒸餾第三動**（命令合約見 [kanban-board](../kanban-board/SKILL.md)）：`backlog task edit <id> -s Done --final-summary "<一句>"` → `task edit <id> --ref "<done/ 新URL>,<相對路徑>"`（任務目錄遷 done/ 後 URL 更新），卡留 Done 欄；第三動＝本弧 memory 條目蒸餾為終態 facts；無 `backlog/` → 跳過
 - **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成
 - **從 EP Scenario Matrix 提煉「消費場景」**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），寫入 Capabilities 表格備註或 backlog 卡（`backlog task edit <id> --append-notes`）
 

@@ -2,8 +2,12 @@
 # MEMORY.md 索引 generator——條目檔 frontmatter 是單一 source，索引是其機械投影。
 # 用法: python3 _generate_index.py [--check]（--check 只驗證不寫入、零檔案系統副作用）
 # Gate 分級（2026-09-03 裁決「zcode 優先」——ZCode 為主力 harness）：
-#   硬 gate（fail-loud exit 1、不寫入、Stop hook 留 _regen-failed）：>22,500 字元 或 >190 行
-#     ——守兩端共同截斷線（200 行／25,000 字元）
+#   硬 gate（fail-loud exit 1＋行動訊息；超限時**索引照寫出**〔--check 除外〕——
+#     2026-09-05 S1/AIR-25 改 CC 式，官方 memory.md:401-403「write still succeeds +
+#     error telling Claude to rewrite」；size gate 拒寫會停滯索引＝新條目不可見＝
+#     召回斷裂。**frontmatter 違規 errs 路徑維持拒寫**——該路徑 CC 化〔跳過壞條目
+#     照寫＋列名〕列 AIR-25 後議，見 EP 處置表）：
+#     >22,500 字元 或 >190 行——守兩端共同截斷線（200 行／25,000 字元）
 #   bytes info（照常寫入、exit 0）：>24,000 bytes 印 [INFO] 一行——縱深預警
 #     （非任何 harness 的實際截斷線：兩端皆量 chars；CJK 一字 3B，bytes 提前折射）
 # 載入上限實證（2026-09-03 雙端源碼反組譯、CLI 三版同構；共用池＝ZCode symlink→Claude 實體）：
@@ -69,6 +73,20 @@ def parse_frontmatter(text: str) -> dict:
     return out
 
 
+def write_index(here: pathlib.Path, content: str) -> None:
+    """aged 殘檔清理＋tmp+replace 原子寫（只清 >60s 殘檔——並行 in-flight tmp 不誤殺）。"""
+    now = time.time()
+    for stale in here.glob("MEMORY.md.*.tmp"):
+        try:
+            if now - stale.stat().st_mtime > 60:
+                stale.unlink()
+        except OSError:
+            pass
+    tmp = here / f"MEMORY.md.{os.getpid()}.tmp"
+    tmp.write_text(content, encoding="utf-8")
+    tmp.replace(here / "MEMORY.md")
+
+
 def main() -> int:
     here = pathlib.Path(__file__).resolve().parent
     check_only = "--check" in sys.argv
@@ -113,10 +131,15 @@ def main() -> int:
         else ""
     )
     if n_chars > GATE_CHARS or n_lines > GATE_LINES:
+        wrote = ""
+        if not check_only:  # --check 零副作用語義不變（SM-2 guard）
+            write_index(here, content)
+            wrote = "——索引已寫出（不停滯）"
         print(
             info
             + f"[FAIL] gate 超限: {n_chars} chars (>{GATE_CHARS}) / {n_lines} lines"
-            f" (>{GATE_LINES})——先 cluster merge/收斂再生成"
+            f" (>{GATE_LINES}){wrote}。當下 session 需縮：merge or drop stale 條目"
+            "（可推導內容歸 repo/git——skip-derivable），縮後重跑"
         )
         return 1
     if check_only:
@@ -125,17 +148,7 @@ def main() -> int:
             + f"[OK] {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines（--check 未寫入）"
         )
         return 0
-    # 只清 aged 殘檔（>60s）——不碰並行 process 的 in-flight tmp；--check 分支已 return
-    now = time.time()
-    for stale in here.glob("MEMORY.md.*.tmp"):
-        try:
-            if now - stale.stat().st_mtime > 60:
-                stale.unlink()
-        except OSError:
-            pass
-    tmp = here / f"MEMORY.md.{os.getpid()}.tmp"
-    tmp.write_text(content, encoding="utf-8")
-    tmp.replace(here / "MEMORY.md")
+    write_index(here, content)
     print(
         info
         + f"[OK] MEMORY.md 已重生成: {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines"

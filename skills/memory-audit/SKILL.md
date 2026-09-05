@@ -1,6 +1,6 @@
 ---
 name: memory-audit
-description: "memory 清理/稽核/過時/記憶健康檢查＋寫入端紀律（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。寫 memory 前的寫入四問（repo 可推導就不寫/同主題加段/cluster-first）、單一寫入點（條目檔 frontmatter 唯一、MEMORY.md 機械投影）、desc/條目尺寸預算見「寫入端紀律」段。觸發詞：寫入四問、cluster-first、單一寫入點、索引投影、desc 上限、寫 memory。"
+description: "memory 清理/稽核/過時/記憶健康檢查＋寫入端紀律（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。寫 memory 前的寫入五問（repo 可推導就不寫/同主題加段/cluster-first/載體判定）、單一寫入點（條目檔 frontmatter 唯一、MEMORY.md 機械投影）、desc/條目尺寸預算＋desc 三不＋弧結案蒸餾見「寫入端紀律」段。觸發詞：寫入五問、cluster-first、單一寫入點、索引投影、desc 上限、結案蒸餾、載體判定、寫 memory。"
 argument-hint: "full | lite | 無參數（讀狀態戳後建議）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 ---
@@ -32,7 +32,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 ### 層 1：索引機械量測
 
-> **generator 池**（memory dir 有 `_generate_index.py`）：索引是 frontmatter 投影，重複/orphan/missing 由生成保證不存在——層 1 縮為 `python3 memory/_generate_index.py --check`（硬 gate 22,500 字元〔真線 90%〕/190 行 fail-loud 守兩端共同截斷線〔200 行／25,000 字元〕；bytes >24,000 降為 `[INFO]` 縱深預警不擋寫入——兩端截斷線皆量 chars，CJK 一字 3B、bytes 提前折射；源碼實證與重跑命令見 generator 註解）＋確認 MEMORY.md 非手寫。寫入端另有 PreToolUse hook 治理（`block-memory-index-write.py`：description >100 chars 或條目膨脹 >12,000 chars 硬擋、收斂方向放行）——hook 是流入節流第一道，audit 是存量收斂；**hook 僅攔主 session——subagent 寫入不觸發**（ZCode 實證），寫入型 subagent 的上限＝prompt 紀律。資產源：ai-rules repo `skills/memory-audit/scripts/generate_index.py`（部署 = 複製進各專案 memory dir；Stop hook 自動重生成、PreToolUse hook 擋手寫）；副本新鮮度＝層 1 先 `cmp` 部署副本與資產源（stale 先 cp＋mv 原子刷新再 `--check`——Stop hook 對不符副本跳過執行）；`memory/_regen-failed` 標記存在＝regen 失敗待修（Stop stdout 不進模型 context 的可見錨點）。下表全量手檢僅適用未裝 generator 的池。數值調和：下表「≤24,000 bytes」＝兩型池共用 bytes 目標（generator 池＝info 縱深預警線、未裝池＝手檢目標）——單一數值源在 generator 註解；100/12,000 單一源＝hook `DESC_LIMIT`/`BODY_LIMIT`（generator `TRUNCATE_DESC` 對齊，`tests/test_memory_lifecycle.py` cross-layer 錨）。
+> **generator 池**（memory dir 有 `_generate_index.py`）：索引是 frontmatter 投影，重複/orphan/missing 由生成保證不存在——層 1 縮為 `python3 memory/_generate_index.py --check`（硬 gate 22,500 字元〔真線 90%〕/190 行 fail-loud 守兩端共同截斷線〔200 行／25,000 字元〕；bytes >24,000 降為 `[INFO]` 縱深預警不擋寫入——兩端截斷線皆量 chars，CJK 一字 3B、bytes 提前折射；源碼實證與重跑命令見 generator 註解）＋確認 MEMORY.md 非手寫。寫入端另有 PreToolUse hook 治理（`block-memory-index-write.py`：description >100 chars、desc 含 commit hash 形態（09-05 S2）、或條目膨脹 >12,000 chars 硬擋、收斂方向放行）——hook 是流入節流第一道，audit 是存量收斂；**hook 僅攔主 session——subagent 寫入不觸發**（ZCode 實證），寫入型 subagent 的上限＝prompt 紀律。資產源：ai-rules repo `skills/memory-audit/scripts/generate_index.py`（部署 = 複製進各專案 memory dir；Stop hook 自動重生成、PreToolUse hook 擋手寫）；副本新鮮度＝層 1 先 `cmp` 部署副本與資產源（stale 先 cp＋mv 原子刷新再 `--check`——Stop hook 對不符副本跳過執行）；`memory/_regen-failed` 標記存在＝gate 失敗（池超限〔09-05 S1：索引已照寫出、非停滯——縮池債訊號〕或 frontmatter 違規〔未寫出——修該條目〕）。下表全量手檢僅適用未裝 generator 的池。數值調和：下表「≤24,000 bytes」＝兩型池共用 bytes 目標（generator 池＝info 縱深預警線、未裝池＝手檢目標）——單一數值源在 generator 註解；100/12,000 單一源＝hook `DESC_LIMIT`/`BODY_LIMIT`（generator `TRUNCATE_DESC` 對齊，`tests/test_memory_lifecycle.py` cross-layer 錨）。
 
 | 檢查 | 命令 | 判準 |
 |------|------|------|
@@ -107,7 +107,7 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 
 **advisory 報告 → 用戶核可 → 執行**。稽核不得自行刪改用戶想留的條目；報告每項附機械證據（file:line / 命令輸出）。驗證紀律（Claim→Evidence、self-report discount 理論基礎）見 [acceptance-evidence](../../rules/acceptance-evidence.md)，不重抄。
 
-## 寫入端紀律：寫入四問與單一寫入點（寫 memory 前必查）
+## 寫入端紀律：寫入五問與單一寫入點（寫 memory 前必查）
 
 > 本段是 `rules/context-management.md`「Memory 生命周期規範」的承載體（rule 留 pointer）——寫入側紀律與稽核側同檔，記憶治理單一源。
 
@@ -120,11 +120,12 @@ harness auto memory 預設「one file = one fact」的「fact」操作定義 = *
 - 裝有 generator（`memory/_generate_index.py`）的專案：寫/改條目檔後跑 `python3 <memory-dir>/_generate_index.py`（Stop hook 亦自動重生成；手寫 MEMORY.md 被 PreToolUse hook 擋）。資產源與部署操作見本 skill generator 段
 - 未裝 generator 的專案：手維護索引，cluster-first 沿用
 
-### 寫入四問（新教訓產生時依序）
+### 寫入五問（新教訓產生時依序）
 
 1. **repo 可推導 or 通用原則？** → git log / instruction 檔 / 程式碼 / **進行中 EP 的進度與狀態（住 EP 檔）**可推導 → 不寫；**LLM 通用做事原則/方法論**（與 user 個人化無關、任何 session 都適用）屬 rules/skills 知識——rule 缺就補 rule，不開 memory 條目。memory 收與 user／專案綁定的事實（偏好、糾正、專案約束、外部資源參照）——通用工程原則不收
 2. **同主題已有？** → `rg -i <關鍵詞> <memory-dir>/` 全檔掃（**不信 MEMORY.md 索引**——載入截斷下尾部條目不可見）；命中 → 既有檔加段（段標題保留原始 name、標 original type）；**進行中弧線條目禁加段**——弧線進度每 session 追加是膨脹主因（實證：單檔 98 次 Edit 養到 84KB），等弧線收案一次性蒸餾；無 → 才開新檔
 3. **project-\* 已完結？** → 任務閉環先收斂既有 project 條目（刪現況細節、留決策教訓）再開新檔
 4. **尺寸預算？** → frontmatter `description` ≤100 chars（索引行原料；>100 被 PreToolUse hook 硬擋——hook 僅攔主 session，subagent 寫入不觸發）；條目檔（含 frontmatter）≤12,000 chars（膨脹超限被 hook 擋；收斂方向＝改後比原檔短，放行）——超額 = 內容該住 EP 檔/repo 的訊號；索引軟上限 150 行，逼近 = cluster merge／收斂觸發
+5. **載體對嗎？** → 每次都要的紀律→rule／on-demand 方法論→skill／跨 session 事實→memory（手冊形內容不住 memory——它該住 skill）；**承諾/待辦→backlog 卡**（memory 只收事實與教訓，不收承諾）
 
-量化清理（同主題散檔合併、收斂執行、audit）由本 skill 兩級稽核承載，寫入端只管四問。
+量化清理（同主題散檔合併、收斂執行、audit）由本 skill 兩級稽核承載，寫入端只管五問。**弧結案蒸餾**（掛點＝[kanban-board](../kanban-board/SKILL.md) 結案兩步第三動）：弧收案時 owning session 將本弧 project_/feedback_ 條目一次性重寫為終態 facts——narrative 歸 repo（EP/卡/git），memory 留教訓；弧中「禁加段」的積累正是在此時收斂。**desc 三不**：不 commit hash／不日期流水／不 session id（皆 git/DB 可推導；hash 形態被 PreToolUse hook 硬擋）。
