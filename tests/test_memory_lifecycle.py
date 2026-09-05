@@ -410,6 +410,25 @@ def test_entry_edit_desc_commit_hash_blocked(tmp_path):
     assert "hash" in r.stderr
 
 
+def test_entry_write_desc_commit_word_false_positive_allowed(tmp_path):
+    """digit-lookahead 補強（mosaic 實戰案例）：desc 含「commit feedback」——
+    "feedbac" 恰 7 個純字母 hex 字元，但無數字 → 放行（真 hash 7+ 碼全字母
+    機率≈0.01%，誤擋合法 desc 的代價更高）。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "commit-word.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: commit-word\ndescription: git commit feedback 群——staging 陷阱與 mixed-tree 紀律\n"
+                "metadata:\n  type: feedback\n---\nbody\n"
+            ),
+        )
+    )
+    assert r.returncode == 0
+
+
 def test_entry_write_folded_desc_hash_passthrough(tmp_path):
     """F7 反例（EP review）：folded（>-）desc 含 hash → 放行——釘住「與長度檢查
     同界」承諾（folded 量到摺疊符號本身、desc 值抽取不到——既有品質洞邊界不擴大）。"""
