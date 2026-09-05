@@ -288,7 +288,7 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 **EP 對照（宣稱 vs 實際差異歸納——主歸納點在此，post-build 只再提醒）**：build 現場是差異最清楚的時點（post-build/debrief 只能事後推導），兩個來源缺一不可——① **偏差記錄歸納（why）**：階段 2「EP 專屬約束」逐段累積的偏差（與 Pseudo Code 出入、疑慮、自癒 ⚠️）統一歸納，差異原因只在 build session 記得；② **機械對照（what）**：弧條件成立（HEAD 越過 EP baseline）時跑 `code-reality delta_tour`（呼叫形態與時點條件真相源見 [code-review](../code-review/SKILL.md) 模式 B；未裝/條件不符 → 標明降級）——session 歸納是 self-report，機械對照反證之（Claim→Evidence→Trust，見 [acceptance-evidence](../../rules/acceptance-evidence.md)）。歸納供 `/post-build` 收尾報告帶入與人類直接判讀；深度渲染（邊集差異+行為 delta）屬 `/debrief`。
 
-**Report Shell 實作章節 fallback（hook 2 由本階段承接——僅無 post-build 弧時）**：本弧不會跑 `/post-build`（user 直接 `/commit`、或弧在此終止）→ 實作章節＋badge ✅＋**持久版 delta tour**（弧條件成立時產、落 `.tours/delta/` 進 git）在本階段產出，內容與掛點規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」；會跑 post-build → 跳過（hook 2 掛 post-build 完成點——實作章節須反映修正迴圈後**最終態**，本階段早於修正迴圈）。
+**Report Shell 實作章節 fallback（hook 2 由本階段承接——僅無 post-build 弧時）**：本弧不會跑 `/post-build`（user 直接 `/commit`、或弧在此終止）→ 實作章節＋**產圖一次**（依 [diagram-selection](../diagram-selection/SKILL.md) 選型補 degraded 槽）＋badge ✅＋**持久版 delta tour**（弧條件成立時產、落 `.tours/delta/` 進 git）在本階段產出，內容與掛點規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」；會跑 post-build → 跳過（hook 2 掛 post-build 完成點——實作章節須反映修正迴圈後**最終態**，本階段早於修正迴圈）。
 
 **layer 旗標（硬性 — commit 前方向提示）**：偵測本 EP 變更是否觸及**跨模組**（`git diff --name-only` top-level 模組目錄計數 ≥2；模組目錄 = 專案 bounded context 根目錄，各專案自訂）、**公開簽名變更**（階段 2 路徑覆蓋觸發）、**整合器段落**（階段 0 標記）、或 **build loop 未收斂**（階段 4 達 3 輪上限）。命中 → 完成報告必含：
 

@@ -4,7 +4,7 @@
 
 ## 觸發條件
 
-- **明示**：`/illustrate html <主題或 @dir/@file>`（mode D 主題 → archify；mode B @dir → artifact 類型映射；mode A/C 明示 html → city map 走 architecture 映射）；`@ep`／實作報告／`@module`／`@dir` + html 明示報告導讀 → **Report Shell**（見「html 報告殼」段）
+- **明示**：`/illustrate html <主題或 @dir/@file>`（mode D 主題 → archify；mode B @dir → artifact 概念→載體映射；mode A/C 明示 html → city map 走 architecture 映射）；`@ep`／實作報告／`@module`／`@dir` + html 明示報告導讀 → **Report Shell**（見「html 報告殼」段）
 - **增益建議**（不自動切換）：mode D 分享情境——互動搜尋 / focus / reach 追蹤 / Present 導覽對位人類 viewport 消費方式時，建議 html 並由 user 決定
 - **drift compare**（opt-in）：post-build drift 審查明示要比對圖時（見下「drift compare」段）
 - **永不**：Console 語境不 inline 渲染（明示 html = 切換輸出模式，檔案交付＋路徑回報）
@@ -20,18 +20,20 @@
 - **在場但壞**：首次偵測到後跑 `node <archify>/bin/archify.mjs doctor` 一次——doctor 失敗（node 缺 / 版本 <18 / 上游 breaking）→ 同缺場降級＋回報 doctor 診斷
 - **安裝建議 clone 優先**（`git clone https://github.com/tt-a1i/archify ~/Github/archify`）；`npx skills add -g` 在本部署架構（skills 根 symlink 到 ai-rules repo）會穿 symlink 寫進 ai-rules 版本控管目錄——除非使用者明知，不建議
 
-## 類型映射（illustrate 概念 → archify 圖型）
+## 概念→載體映射（illustrate 概念軸；圖型軸判準在 diagram-selection）
 
-mode B artifact 與 mode A/C city map 共用此映射（單一源）：
+mode B artifact 與 mode A/C city map 共用此映射（概念軸單一源；「sequence/stateDiagram 這類圖型用哪個載體」的判準與量化邊界見 [diagram-selection](../diagram-selection/SKILL.md)——兩軸互補不重疊）：
 
-| illustrate 概念 | archify 圖型 | 備註 |
-|----------------|-------------|------|
-| boundary / city map | `architecture` | 自由排版型，authoring 成本高 |
-| data-flow | `dataflow` | stage/row 語意排版 |
-| sequence | `sequence` | y 排序，authoring 成本最低 |
-| call graph | `workflow` 或 `sequence` | **優先語意排版型** |
-| class slice | **無對應** | 維持 md，不硬映射 |
+| illustrate 概念 | 首選載體 | 備註 |
+|----------------|---------|------|
+| boundary / city map | archify `architecture` 或 **HTML 塊**（層次型） | 自由排版型，authoring 成本高——層次/對照內容優先 HTML 塊 |
+| data-flow | archify `dataflow` 或 mermaid `flowchart LR`（管線型） | stage/row 語意排版 vs 線性管線按複雜度選 |
+| sequence | mermaid `sequenceDiagram`（殼內）或 archify `sequence` | 有通道——mermaid 一輪可成，成本最低 |
+| call graph | archify `workflow`／`sequence` 或 mermaid（小圖） | **優先語意排版型** |
+| class slice | **無對應** | 維持 md／表格（diagram-selection 兩層判準），不硬映射 |
 | **報告殼（`@任務家/<task>/ep.md`／實作報告／@module／@dir + html）** | 按報告類型選型（見下節變體表） | Report Shell——人類 viewport 通用模式 |
+
+> **archify 是最後手段**（user 裁示「非必要不用」——判準源見 [diagram-selection](../diagram-selection/SKILL.md)）：只有命中 archify 獨有價值（互動導航／大規模依賴網／無通道大圖的防交錯結構容器＋validate gate）才走 archify-gen 產線；規律型/小圖走 mermaid 或 HTML 塊——硬用 archify＝浪費 validate 迴圈。
 
 ## html 報告殼（Report Shell——人類 viewport 的通用模式）
 
@@ -51,16 +53,20 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 - **消費單位是章節不是圖**——多圖並列無導覽＝亂（實證）；每章節只放該章該看的圖
 - **首屏 active 與嵌入參數由 template 擁有**（首個含圖章節規則＋`?embed=1`＋AIR-14 實證見 template 檔頭註解三條硬約束）——建殼不重推導、不手改首屏指向
 - **殼不整殼降級**：archify 缺場/壞場時用同 template degraded slot（章節敘事完整，diagram 區塊顯示待裝提示）——「降級 MD」規則適用單圖任務，不把殼一起降掉
+- **殼嵌圖四形態**（同殼可混用，按圖選載體——判準見 [diagram-selection](../diagram-selection/SKILL.md)）：inline SVG（預設產物 **≤1/頁**——mmdc id 碰撞；**帶唯一 `-I <svgId>` 可多張**，見 [mermaid](../mermaid/SKILL.md) 陷阱 5）／iframe＋`diagram-*.svg` 檔（其餘 mermaid）／iframe＋`?embed=1`（archify）／HTML 塊直寫殼內（層次/對照，零渲染管線）；外框統一 frame-wrap（標題列＋↗ 全屏連結）。**無縫一體準則**：同主題（殼 dark → 圖 dark chrome）、透明底、同字體、尺寸自適應、無 iframe 痕跡（border/scrollbar/白底不出現）——mermaid 配方（mmdc `-t dark -b transparent`／CDN lazy render）見 [mermaid](../mermaid/SKILL.md) 殼內嵌段
+- **md 死鏈禁例**：殼連結 `.md` 的 mermaid code block 在 file:// 不渲染＝死內容——未渲染 .md 圖集不進殼，**圖要真的出現在頁面上**（渲染產物嵌殼），不是「原始碼在另一檔」
 
 **內容篩選通則（user 勘正：「缺漏要看是不是人類真的需要知道」）**：殼裝**判斷材料**（意圖/為什麼動機鏈、風險與降級、取捨決策、驗收判準、當前狀態、實物樣本、回源路徑），**不裝執行細節**（治理規則、AI 流程產物如 UC 盤點表、機械完整性逐項覆蓋）——後者留本體層，殼至多一句指路。**實物樣本要進殼**（如 aria baseline 真實 YAML 開頭——人類沒看過實物，機制敘述等於空談）。
 
 **殼生成分工（三 tier——AIR-28；registry 對號查 agents/AGENTS.md execution contract 表）**：
 
-1. **archify-gen（lite 產線）**：JSON IR 撰寫＋archify validate showcase 迴圈＋diagram 渲染——機械產線，**事實由呼叫端給定**（agent 不自產宣稱）
+1. **archify-gen（lite 產線）**：JSON IR 撰寫＋archify validate showcase 迴圈＋diagram 渲染——機械產線，**事實由呼叫端給定**（agent 不自產宣稱）。**只接 archify 圖**——mermaid（mmdc 機械 CLI）與 HTML 塊由主 session/lite 直接產，不經 archify-gen
 2. **篩選敘事（full 主 session）**：殼的章節篩選與敘事＝判斷密集（「缺漏是不是人類真的需要知道」是判斷題）——不派 lite
-3. **vision-review（vision 驗收）**：渲染 PNG 逐張 verdict（圖互 clip／CJK 誤讀／美感底線）——驗收收法見該 agent 定義
+3. **vision-review（vision 驗收）**：渲染 PNG 逐張 verdict（圖互 clip／CJK 誤讀／美感底線）——驗收收法見該 agent 定義；契約（三段式/分批上限/全樣本錨定）見 [diagram-selection](../diagram-selection/SKILL.md) 共性段
 
-**機械底稿（數據宣稱唯一來源）**：殼中一切**數據宣稱**（數字、狀態、覆蓋率、時間）只從機械底稿帶入、禁止敘事層自填——底稿＝**delta_tour 輸出／archify JSON IR／命令輸出原文**（防 lite 產線的文檔宣稱漂移弱面——flash 分工律，model-routing skill）。
+**caller 端事實清單義務（archify 委派前）**：清單自帶**幾何分類**（主線/分支/消費＋標註哪些邊跨圖、哪些垂直相鄰——agent 才能守「single main path + side branches from nearest node」）；起手規格一句（3 lanes 起手×零堆疊×5-6 節點/lane、短 sublabel（code identifiers 保留、去 CJK 裝飾詞）、fromCol/toCol 按 phase 帶切乾淨禁重疊）——**事前預防 spec 過重**，非只靠 >4 輪止損；archify-gen 無權刪 caller 給的事實，長文案由 caller 自己收進 cards。
+
+**機械底稿（數據宣稱唯一來源）**：殼中一切**數據宣稱**（數字、狀態、覆蓋率、時間）只從機械底稿帶入、禁止敘事層自填——底稿＝**delta_tour 輸出／archify JSON IR／validate rounds ledger／命令輸出原文**（防 lite 產線的文檔宣稱漂移弱面——flash 分工律，model-routing skill）。
 
 **確定性再生 diff**：同一底稿重跑 archify-gen → JSON IR diff 應為空——再生等價被 diff 釘住（測試保護的等價物）；diff 非空＝底稿或產線漂移，先查因再交付。
 
@@ -84,9 +90,9 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 | 掛點 | 時機 | 殼 | backlog 卡同步 | 主動顯示 |
 |------|------|-----|---------------|---------|
-| **hook 1** | EP 定稿（[execution-plan](../execution-plan/SKILL.md) 定稿交付） | 建殼＋計畫章節，badge 📋；殼頭部聲明 EP 路徑＋task integration baseline＋projection source（未 commit 用本體 content SHA；post-build/code-review 弧模式跨 session 可從殼讀） | `task edit <id> --ref "<殼URL>,<相對路徑>"`（**開工雙 ref 合約**——殼未建前的過渡 URL 指 md preview，建殼後更新） | **`open <殼URL>`**——殼建好即彈出 |
+| **hook 1** | EP 定稿（[execution-plan](../execution-plan/SKILL.md) 定稿交付） | **建殼骨架**＋計畫章節，badge 📋——骨架＝零渲染管線內容（HTML 塊/表格可），**mermaid/archify 圖不於 hook 1 產**，diagram 槽留 degraded 待裝＋殼頭標「圖待 hook 2 裝」（砍掉 hook 1 計畫圖在 hook 2 實作大改後的重投影成本）；殼頭部聲明 EP 路徑＋task integration baseline＋projection source（未 commit 用本體 content SHA；post-build/code-review 弧模式跨 session 可從殼讀） | `task edit <id> --ref "<殼URL>,<相對路徑>"`（**開工雙 ref 合約**——殼未建前的過渡 URL 指 md preview，建殼後更新） | **`open <殼URL>`**——殼建好即彈出（提前預覽骨架） |
 | **badge 推進** | [implement](../implement/SKILL.md) 階段 5a 結算 | 情境 A（全項結算）→ ✅；情境 B（中間段）→ 🟡 | 卡不動（仍 In Progress） | 不主動開——board portal 隨時點同一 URL |
-| **hook 2** | **post-build 完成**（commit 前最後穩定點；程序載體＝[post-build](../post-build/SKILL.md) 階段 5） | 同一殼長**實作章節**：做了什麼／驗證證據／delta 前後對照／認知誤差點＋回源連結——反映修正迴圈後**最終態**；badge ✅；並產**持久版 delta tour**（落 `.tours/delta/` 進 git） | **結案兩步＋弧結案蒸餾第三動**：`-s Done --final-summary` → `--ref` 換 `done/` 新 URL（任務目錄遷 done/ 後；卡留 Done 欄）；本弧 memory 條目蒸餾終態 facts | **`open <殼URL>`**——終態殼彈出 |
+| **hook 2** | **post-build 完成**（commit 前最後穩定點；程序載體＝[post-build](../post-build/SKILL.md) 階段 5） | 同一殼長**實作章節**：做了什麼／驗證證據／delta 前後對照／認知誤差點＋回源連結——反映修正迴圈後**最終態**；**並產圖一次**——依 [diagram-selection](../diagram-selection/SKILL.md) 選型補 degraded 槽（hook 1 未產的渲染管線圖在此一次產）；badge ✅；並產**持久版 delta tour**（落 `.tours/delta/` 進 git） | **結案兩步＋弧結案蒸餾第三動**：`-s Done --final-summary` → `--ref` 換 `done/` 新 URL（任務目錄遷 done/ 後；卡留 Done 欄）；本弧 memory 條目蒸餾終態 facts | **`open <殼URL>`**——終態殼彈出 |
 | **fallback** | 無 post-build 弧（user 直接 `/commit`、弧終止）→ implement 階段 6 | hook 2 同款產出由 implement 階段 6 承接 | 同 hook 2 | 同 hook 2 |
 
 **共通必備**：狀態 badge（📋 計畫／🟡 進行中／✅ 完成——與全域 UC 狀態標記同符號語義）；計畫 vs 既有顯式區分（計畫物 tag「S<N> 計畫中」——並列無區分＝誤導）；回源連結（本體檔案路徑＋baseline commit）；**board 反向連結**（repo 有 backlog board 時，殼頭部 nav 加 `http://127.0.0.1:6420`——best-effort）；狀態隨本體結算更新、本體歸檔殼隨之（殼服務本體生命期）
@@ -109,19 +115,20 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 - **證據附著**：節點帶 `sources`（repo 相對路徑 + line）；私有 repo 帶 `meta.repository`（GitHub origin + 當下 revision SHA），render 時以 `--repo-root` 本地 git 驗證
 - **與 archify standalone 的分工**（觸發詞重疊的裁決）：illustrate 是「讀 code → grounding 結構事實 → 受眾/生命週期管理」的入口，archify skill 在場時 illustrate 仍走自己的委派流程；archify standalone 適合 raw 渲染請求（既有 JSON 渲染、Mermaid beautify、無 grounding 需求的 plain-language 圖）——不競爭，分流
 
-## 輪數 guard
+## 輪數 guard（止損分層——本段為閾值與 ledger 規格單一源，archify-gen role 以 pointer 引用）
 
 口徑＝**validate 呼叫輪數**（每次 candidate 修改後的 validate 記 1 輪，含 containment 修復）：
 
-- **單圖止損 12 輪** / **session 總預算 18 輪**（多圖請求合併計）
+- **>4 輪不收斂＝caller spec 過重**——停手回報 caller 改 spec 重跑（減 lanes/去堆疊/砍 sublabel/次要事實沉 cards），不是 agent 不努力（實證：spec 瘦身後首輪收斂全綠 vs 過重 spec 十數輪空轉）
+- **單圖止損 12 輪** / **session 總預算 18 輪**（多圖請求合併計）——超限 → **降級輸出 MD Mermaid 版**＋回報殘留診斷（subject/evidence）——不接受半成品 HTML 交付（正當出口不是失敗）
 - 「兩連續輪無改善即停」引用 archify 自帶止損
-- 超限 → **降級輸出 MD Mermaid 版**＋回報殘留診斷（subject/evidence）——不接受半成品 HTML 交付
+- **validate rounds ledger**：archify-gen 每輪 validate 把摘要（輪次/checks/errors/warnings/變更處）append `<主題>.rounds.md`——與 candidate 同目錄、隨 JSON IR 進 git、屬機械底稿源。成本觀測面：沒有 ledger，逐輪數字只能靠 db session 鑑識事後撈（git 只有終態 receipt）
 
 ## 產物生命週期
 
 - **輸出位置**：`arch-report/<主題>/`（**repo root 層級**——結構理解視覺產物是人類瀏覽優先的渲染產物，與任務家（`ai-analysis/` 下的活躍工作面——收**流程**產物 ep/spec/殼）角色不同，故維持 root 不進 `ai-analysis/`；html 報告殼的分流放置見上「產物位置分流」）——**每次 html 任務（主題）一個子目錄**，入口 HTML 命名 **`index.html`**（靜態伺服器慣例——`python -m http.server`/GitHub Pages 開目錄即入圖）；JSON IR 用自描述名 `<主題>.<type>.json` 並存（每圖約 8 檔）；`--output <path>` 自訂路徑尊崇（track 與否使用者決定）
 - **目錄即索引**：不建 index——kebab 檔名＋JSON `meta.title` 自描述；手維護 index 是 drift-prone 清單（同 skills/CLAUDE.md 索引教訓），量大再考慮機械投影生成（YAGNI）
-- **git 分工**：**JSON IR＋visual-check receipt 進 git**（JSON=機器可讀結構快照＋HTML 再生源頭）；**HTML/截圖/contact sheet 不進**（每顆 ~720KB 內嵌 viewer runtime，git 比例 175:1——本地在盤、分享時複製出檔、fresh clone 用 JSON＋archify `deliver` 一命令再生）；排除規則 scope 在 `arch-report/`（`.gitignore`：`arch-report/**/*.html`、`arch-report/**/*.visual-check.*.png`）
+- **git 分工（⚖️ 源進 git、產物不進、一命令再生——單一源，per-repo 可覆蓋）**：**JSON IR＋`.mmd` 源＋visual-check receipt 進 git**（源=機器可讀結構快照＋再生源頭——`.mmd` 與 JSON IR 對位，任務家與 `arch-report/` 兩場景同規）；**渲染產物不進**（archify HTML 每顆 ~720KB 內嵌 viewer runtime，git 比例 175:1；mermaid `diagram-*.svg` 同理）——本地在盤、分享時複製出檔、fresh clone 用源＋一命令再生；排除規則（`.gitignore` 條目）：`arch-report/` 下 `**/*.html`、`**/*.svg`、`**/*.visual-check.*.png`；任務家（`ai-analysis/_tasks/` 與 `_projects/` 同款）`**/diagram-*.html`、`**/diagram-*.svg`、`**/diagram-*.png`、`**/diagram-*.visual-check.*.png`——`.mmd` 源不受任何條目影響（進 git）
 - **html→md 雙輸出**：同主題先 html 後要 md 沉澱 → 從同一 grounding 事實再渲染 Mermaid（非 JSON 機械轉譯）；md 是 source of record
 
 ## 重生（regeneration）
@@ -130,10 +137,10 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 **程序**（對每個含 JSON IR 的報告目錄——`arch-report/<主題>/` 與任務家 `*/` 殼目錄〔`ai-analysis/_tasks/`、`ai-analysis/_projects/*/tasks/`、`00-tasks/`——存在者〕）：
 
-1. 圖型 = JSON 檔名後綴（`.architecture` / `.workflow` / `.sequence` / `.dataflow` / `.lifecycle`）
-2. `deliver <type> <主題>.<type>.json <目錄>/index.html`——JSON 含 `meta.repository`（證據圖）者加 `--repo-root <repo根>`；archify 路徑依上方存在性偵測
+1. 圖型 = JSON 檔名後綴（`.architecture` / `.workflow` / `.sequence` / `.dataflow` / `.lifecycle`）；mermaid 圖 = `.mmd` 源
+2. `deliver <type> <主題>.<type>.json <目錄>/index.html`——JSON 含 `meta.repository`（證據圖）者加 `--repo-root <repo根>`；mermaid：`npx -y @mermaid-js/mermaid-cli -i diagram-<name>.mmd -o diagram-<name>.svg -t dark -b transparent`；archify 路徑依上方存在性偵測
 3. 驗收態（可選）：`visual-check <目錄>/index.html`（需要 Chrome；產 receipt＋截圖＋contact sheet）
-4. 確定性保證：同 JSON → 逐位元組相同 HTML（sha256 可驗）；重生後指紋對不上 = JSON 或 archify 版本變了，如實回報
+4. 確定性保證：同源 → 逐位元組相同產物（sha256 可驗）；重生後指紋對不上 = 源或工具版本變了，如實回報
 
 缺場/壞場：報告哪些目錄待裝 archify，不靜默跳過。
 
@@ -148,10 +155,11 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 - **viewBox 縮放物理**：1440px viewport 下 viewer 給圖 ~930px；字級投影 = 930/viewBox寬 × 原字級，最小字級需 ≥6px——**viewBox 寧窄勿寬**（scale 大 → 字大 → 全部文字過門檻）；高度受頁高預算限制
 - **CJK sublabel 是字級殺手**：中文每字 2× 寬，sublabel 帶 CJK 易縮到字級下限——優先縮文字（去 CJK/去裝飾詞），再縮 viewBox 寬
-- **低價值邊先砍再繞**：backward 邊/交叉邊引發穿點與 label 衝突——依 archify 紀律移除並沉到卡片，比硬繞 via 便宜且語意更清楚
+- **低價值邊先砍再繞**：backward 邊/交叉邊引發穿點與 label 衝突——依 archify 紀律移除並沉到卡片，比硬繞 via 便宜且語意更清楚；**刪邊取捨顯式記錄**在圖備註/cards（事實不丟、圖不爛——平面性與語義完整性衝突時，「降級為文字記載」是第三選項，不是只有硬塞/換工具二選一）
 - **卡片行高參與頁高預算**：cards item 過長 wrap 推高頁面——item 單行為原則
 - **dataflow 座標系先讀 renderer 常數再 author**：stage/row 座標是 renderer 固定值（`render-dataflow.mjs` layout 常數段：stageX=leftX+k×colGap、rowYs/nodeW/nodeH 寫死）——via/labelAt 是絕對座標，盲猜座標每輪 validate 都在錯地方修（真實案例：2026-09-01 golden-data-pipeline 作者未讀常數，多輪修復耗在錯座標系，含一次整圖按錯誤欄寬重排全廢）
 - **dataflow viewBox 寬 930 是 readability 分水嶺**：寬 >930 → scale <1 → sublabel/tag 的 preferred 7px 投影 <7px；而 stages 有最小寬（5 stages＝1068）**超過 930**——此約束下 sublabel/tag 必須短到 fitted=preferred（7px→6.09px 壓線過）；任何被壓到 minimum 6px 的字即 readability fail。CJK sublabel 縮文字是首要手段
 - **via 首尾段必須垂直於節點邊**：fromSide bottom → 首段 vertical 向下；via[0] 直接放側向座標會連環觸發 diagonal-segment 與 endpoint-side-direction——正確形態從錨點同軸出發再轉走廊（`[[315,230],[395,230],...]` 而非 `[[395,186],...]`）
 - **跨 ≥3 stage 的長邊在 stage 佈局幾乎必死結**：起訖欄中間的橫向走廊（他邊的底部/頂部繞行）與長邊的垂直穿越段不可調和（真實案例：mosaic `arch-report/golden-data-pipeline/`——csv→rebuild2 長邊砍掉、語義沉到 rebuild2 sublabel「同源 CSV 重算」——一次解掉 5 條連鎖 constraint）
-- **visual-check containment（viewport-overflow）對 dataflow 頁面是基線 fail**：官方 example 同樣 fail（header＋圖＋cards 在 1440×900 必垂直滾）——**交付標準＝validate showcase 全綠＋deliver pass**；containment fail 如實回報為 viewer 基線行為，非 authoring 缺陷。連帶：viewBox 高度有下限（最後 row 底 + stageBottomPad）——為頁高壓高度會觸發 readable-area fail
+- **visual-check containment（viewport-overflow）對 dataflow 頁面是基線 fail**：官方 example 同樣 fail（header＋圖＋cards 在 1440×900 必垂直滾）——**交付標準＝validate showcase 全綠＋readability（最小投影字 ≥6px）**；containment fail 如實回報為 viewer 基線行為，非 authoring 缺陷。連帶：viewBox 高度有下限（最後 row 底 + stageBottomPad）——為頁高壓高度會觸發 readable-area fail
+- **containment ≠ readability，readability 是底線**：縱向組成超一屏是組成事實（多節點＋cards 本來就垂直滾；殼內 iframe 可捲，containment 只在獨立全屏無捲動預期場景致命）；**禁為 containment 硬壓字級**——layout 緊緻重構設停手線（兩輪無改善即停）；回報紀律：validate/deliver exit 0＋containment fail 如實並列，不宣稱視覺全過

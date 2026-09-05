@@ -100,7 +100,7 @@ MD 模式與 Console 模式的關鍵差異：
 ## 範例 4: HTML 展示級輸出（archify，opt-in）
 
 ```bash
-/illustrate html @src/components/     # mode B：artifact 選型 → archify 類型映射
+/illustrate html @src/components/     # mode B：artifact 選型 → 概念→載體映射（判準見 diagram-selection）
 /illustrate html 微服務架構            # mode D：主題 → archify 渲染
 /illustrate html @ai-analysis/_tasks/<task>/ep.md  # Report Shell：EP 導讀殼（@任務家/<task>/ep.md——repo 任務家探測見「html 報告殼」段）
 ```

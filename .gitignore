@@ -44,17 +44,20 @@ ref-docs/*.pdf
 .code-review-graph/
 .code-reality/
 
-# archify 生成產物（illustrate html 模式）——專屬目錄 arch-report/<主題>/（repo root）
-# 進 git：JSON IR（機器可讀結構快照，~4KB，可再生 HTML）＋ visual-check receipt；不進：HTML（~720KB/顆，內嵌 viewer runtime，git 比例 175:1）＋截圖
+# archify/mermaid 生成產物（illustrate html 模式）——專屬目錄 arch-report/<主題>/（repo root）
+# 進 git：JSON IR＋.mmd 源（機器可讀結構快照，可再生產物）＋ visual-check receipt；不進：HTML/SVG（渲染產物）＋截圖
 arch-report/**/*.html
+arch-report/**/*.svg
 arch-report/**/*.visual-check.*.png
 # 任務家 archify 產物（_tasks/_projects——illustrate html mode「產物位置分流」）：殼 index.html 手寫進 git；
 # 進 git：JSON IR（*.workflow.json 等）＋ visual-check receipt（.visual-check.json）；不進：diagram-*.html（渲染產物）＋截圖＋contact sheet
 ai-analysis/_tasks/**/diagram-*.html
 ai-analysis/_tasks/**/diagram-*.svg
+ai-analysis/_tasks/**/diagram-*.png
 ai-analysis/_tasks/**/diagram-*.visual-check.*.png
 ai-analysis/_projects/**/diagram-*.html
 ai-analysis/_projects/**/diagram-*.svg
+ai-analysis/_projects/**/diagram-*.png
 ai-analysis/_projects/**/diagram-*.visual-check.*.png
 .muse-bridge/
 

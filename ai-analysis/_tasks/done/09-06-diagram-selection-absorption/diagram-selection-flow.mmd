@@ -1,0 +1,15 @@
+flowchart LR
+    A["📝 畫圖請求"] --> Q1{"❶ 邊有結構化通道？"}
+    Q1 -->|"時間軸／管線／狀態／層次"| M["⚡ mermaid 宣告式（1 輪）<br/>sequence 最強｜state ≤5 態 8 邊<br/>ER ≤6 實體｜LR 線性"]
+    Q1 -->|"無通道·自由交錯"| Q2{"❷ 是圖論問題？"}
+    Q2 -->|"層次／對照／分類"| H["📄 HTML 塊／表格<br/>（零渲染管線——不是圖的東西別硬畫）"]
+    Q2 -->|"是·node-link"| Q3{"❸ archify 獨有價值？<br/>互動導航／大依賴網／防交錯容器"}
+    Q3 -->|"命中"| AR["🏔 archify 產線（最後手段）<br/>>4 輪不收斂＝回頭改 spec｜12 輪降級"]
+    Q3 -->|"未命中"| X["🔄 換形態：組件→sequence<br/>自由→分層｜class→表格｜刪邊記錄"]
+    M --> V["👁 vision 驗收（三段式契約）→ ✅ 交付"]
+    H --> V
+    AR --> V
+    X -->|"重選載體後交付"| V
+    style M fill:#10b981,color:#ffffff
+    style AR fill:#f59e0b,color:#000000
+    style H fill:#3b82f6,color:#ffffff

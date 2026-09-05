@@ -1,0 +1,16 @@
+flowchart LR
+    A["🚀 外部 runtime 委派"] --> B{"🧭 任務形態？"}
+    B -->|"簡單轉發"| C["💤 背景 Bash 阻塞 task<br/>exit 喚醒＝stdout 即 finalText"]
+    B -->|"長跑 >10min"| D["🧩 直呼（背景 Bash 無 10min 限）<br/>或兩段式：--background 拿 jobId<br/>＋背景 Bash 掛 wait"]
+    B -->|"prompt 工程"| E["🧱 wrapper 保留<br/>（超時工單改走長跑）"]
+    B -->|"無背景 Bash（罕見）"| F["🎯 ETA-gate<br/>屆時單檢→遞減 arm<br/>永不做 LLM 定時輪詢"]
+    D --> G{"⏰ timeout 家系"}
+    G -->|"muse"| H["🔁 exit 124＋仍 running<br/>→重掛；長跑帶 --timeout 0"]
+    G -->|"codex"| I["🔁 exit 0＋waitTimedOut<br/>→重掛；顯式大值 timeout"]
+    H --> J{"✅ 終態？"}
+    I --> J
+    C --> J
+    J -->|"非 completed"| K["📁 jobs/&lt;id&gt;.jsonl＋working tree 對照再判"]
+    style C fill:#10b981,color:#ffffff
+    style F fill:#3b82f6,color:#ffffff
+    style K fill:#f59e0b,color:#000000

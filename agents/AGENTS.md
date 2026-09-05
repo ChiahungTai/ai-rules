@@ -71,7 +71,7 @@ agents/
 | post-build 編排 | 主 session 直做（判斷密集） | — | full | — | 收尾鏈：code-review（dual-context）→judge-review→修正→consistency→metadata-sync→殼 refresh | — |
 | 機械驗證／consistency gate | spawn | lite-verify | lite | zcode | 查證清單→逐項機械證據（rg 命中／exit code／file:line） | 失敗家系處置（註 a）→主 session 跑組合命令 |
 | 視覺驗收 | spawn | vision-review | vision | zcode | 圖檔→逐張 verdict | 失敗家系處置（註 a）→標「未驗證」（禁主 session 直讀圖） |
-| 殼／圖渲染 | spawn | archify-gen | lite | zcode | 機械底稿→workflow/architecture/sequence 圖＋HTML | 失敗家系處置（註 a）→主 session 手產＋vision 驗收照跑 |
+| archify 圖渲染 | spawn | archify-gen | lite | zcode | 機械底稿→workflow/architecture/sequence 圖＋HTML＋殼槽位換裝（**只接 archify 圖**——mermaid/HTML 塊不派此 agent，由主 session 產，mmdc 是機械 CLI；選型判準 diagram-selection skill） | 失敗家系處置（註 a）→主 session 手產＋vision 驗收照跑 |
 | 多源查證 | spawn | cross-verify-investigator | lite | zcode | 問題＋軸清單→交叉對帳 verdict＋unverified | 軸源缺場→該軸 unverified 不阻斷（skills/cross-verify） |
 | commit preparation | 主 session（對帳可 spawn） | lite-verify（finalization 對帳） | lite | zcode | working tree→對帳清單＋訊息草稿 | 主 session 直做 |
 | **commit consent＋執行** | **主 session 互動（永遠；任何 dispatch 不覆蓋）** | — | full | — | 草稿＋變更摘要→用戶確認→git commit | —（outward-action-consent rule；autonomous 紅線清單例外見該 rule） |

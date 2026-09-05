@@ -17,7 +17,7 @@ when_to_use: "Illustrate technical concepts, architecture, or processes. Also st
 |------|------|------|------|
 | **Console**（預設） | ASCII | 精簡（3-5 章，每章 3-5 點） | 即時討論、快速查詢 |
 | **MD** | Mermaid（`skill: "mermaid"`） | 詳盡（多級標題、完整展開） | 深度分析、知識沉澱 |
-| **HTML**（opt-in） | archify 互動圖＋報告殼（委派 [illustrate-html-mode.md](../_common/illustrate-html-mode.md)；殼生成分工三 tier〔archify-gen lite 產線→full 篩選敘事→vision 驗收〕＋機械底稿規則見該檔「殼生成分工」） | 展示級（互動搜尋/focus/Present；報告殼＝sidebar 順序敘事） | 分享 / demo / re-onboard / drift 審查／**報告殼**——AI 文檔產物（EP 計畫、實作完成報告、module 現況、目錄導覽）的人類 viewport（`@ep`／實作報告／`@module`／`@dir` + html） |
+| **HTML**（opt-in） | archify 互動圖＋報告殼（委派 [illustrate-html-mode.md](../_common/illustrate-html-mode.md)；殼生成分工三 tier〔archify-gen lite 產線→full 篩選敘事→vision 驗收〕＋機械底稿規則見該檔「殼生成分工」） | 展示級（互動搜尋/focus/Present；報告殼＝sidebar 順序敘事） | 分享 / demo / re-onboard / drift 審查／**報告殼**——AI 文檔產物（EP 計畫、實作完成報告、module 現況、目錄導覽）的人類 viewport（`@ep`／實作報告／`@module`／`@dir` + html）。殼內圖**按圖選載體**（mermaid／HTML 塊／archify——判準見 [diagram-selection](../diagram-selection/SKILL.md)，archify 是最後手段） |
 
 **執行鐵律**：Console 禁止 Mermaid 語法。MD 禁止 ASCII 圖表。HTML 是**寫檔模式**——僅明示 `html` 或增益判斷時觸發；Console 語境明示 html = 切換輸出模式（檔案交付＋路徑回報），永不 inline 渲染；archify 缺場/壞場或 guard 超限 → 降級 MD Mermaid 並回報（細節見 illustrate-html-mode.md）。違反 = 指令執行失敗。
 
@@ -111,7 +111,7 @@ use cases + 情境矩陣分析（服務 mode A/C 的**步驟**）見 [illustrate
     → 讀 code → city map + 流程 + 重用枚舉（調 skill）→ 邊界案例列 2-3 設計替代 + tradeoff → 渲染 → 人判讀
   B 理解既有（@模組 / 概念 / 除錯 / 學習套件）
     → 讀 code → 依方向問題從 artifact menu 選 artifact（default boundary）→ grounded 渲染 → 人理解
-    → html：artifact 選型後走 html 類型映射（class slice 除外，見 illustrate-html-mode.md）
+    → html：artifact 選型後走概念→載體映射（class slice 除外，見 illustrate-html-mode.md；載體判準見 diagram-selection）
   C 審查驗證（@ep / 重造偵測 / commit 前）
     → 讀 code → 語義 diff / 假設驗證矩陣 / city map → 渲染 → 人判讀
   D 溝通傳達（文檔 / demo / 主題）
@@ -165,5 +165,6 @@ mode A flag 邊界 / smell 時，給兩條行動路徑 + 取捨，**不替 user 
 | [illustrate-examples.md](../_common/illustrate-examples.md) | 需理解各模式實際輸出時 |
 | [illustrate-structure-viewport.md](../_common/illustrate-structure-viewport.md) | 結構 viewport / drill / pre-EP checkpoint 時 |
 | [illustrate-artifact-menu.md](../_common/illustrate-artifact-menu.md) | mode B code 解釋 / drift checkpoint（5 SA/SD artifact + drift overlay spec）|
-| [illustrate-html-mode.md](../_common/illustrate-html-mode.md) | html 模式觸發 / mode D 增益判斷 / drift compare / **arch-report 重生**（archify 委派、類型映射、偵測降級、輪數 guard、產物生命週期＋重生程序）|
+| [illustrate-html-mode.md](../_common/illustrate-html-mode.md) | html 模式觸發 / mode D 增益判斷 / drift compare / **arch-report 重生**（archify 委派、概念→載體映射、偵測降級、輪數 guard、產物生命週期＋重生程序）|
+| [diagram-selection](../diagram-selection/SKILL.md) | 畫圖前選載體（判準四問＋對照表＋跨載體共性——vision 契約/渲染判讀分離）時 |
 | [illustrate-report-shell.html](../_common/illustrate-report-shell.html) | 建報告殼時複製＋填 slot（殼結構/視覺/互動單一源；slot 填法與三條硬約束見檔頭註解）|

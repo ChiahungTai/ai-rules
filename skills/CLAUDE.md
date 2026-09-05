@@ -31,7 +31,7 @@
 /spec（純輔助·需求釐清，可選）→ /execution-plan（自足：段落0全域研究 + UC盤點 + EP Review, LLM 自判；引用 UC ID + SYSTEM-MAP；定稿生 Report Shell〔hook 1〕＋EP 落任務家 <task>/ep.md〔探測：ai-analysis/_tasks | _projects/<線>/tasks | 00-tasks〕）→ [/ep-validate（可選）]
           ↓ post-EP checkpoint: 方向確認 = 人讀 Report Shell（任務家殼，定稿已建）+ /ep-review
   → /implement（含 Agent Review + /audit-test + 階段 5a metadata-sync 結算 [UC 狀態+SYSTEM-MAP+EP 歸檔+殼 badge 同步]，LLM 鏈）
-          ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport，漂移/重造檢查）/ /debrief（深度選配：模組/檔案級深挖——日常判斷材料由殼實作章節吸收）→ /post-build（收尾鏈編排：/code-review [dual-context] → /judge-review → 修正迴圈 → /consistency → /metadata-sync → 殼 refresh [hook 2：實作章節＋badge ✅＋持久 delta tour]）→ /commit（純 git 提交；post-build 可拆開手動單跑各命令）
+          ↓ post-build checkpoint（看狀況呼叫，不硬定先後）: /illustrate（layer 3 結構 viewport，漂移/重造檢查）/ /debrief（深度選配：模組/檔案級深挖——日常判斷材料由殼實作章節吸收）→ /post-build（收尾鏈編排：/code-review [dual-context] → /judge-review → 修正迴圈 → /consistency → /metadata-sync → 殼 refresh [hook 2：實作章節＋產圖一次（diagram-selection 選型補 degraded 槽）＋badge ✅＋持久 delta tour]）→ /commit（純 git 提交；post-build 可拆開手動單跑各命令）
 ```
 
 **review-pipeline recipe**（變更類型 → review 序列）：
@@ -47,7 +47,7 @@
 - `/ep-validate` — POC 驅動的 EP 技術假設驗證（高技術風險 EP 的動態驗證）
 - `/judge-review` — 評估其他 AI 的審查建議，基於深層思考框架決定是否採納
 - `/implement` — 基於 Execution Plan 逐段實作（TDD + 階段 5a metadata-sync 結算：UC 狀態 + SYSTEM-MAP + EP 歸檔 + 殼 badge 同步；階段 6＝無 post-build 弧的殼 fallback）（原 `/build`，ZCode 保留名改名；文內「build 階段」即本 skill 階段）
-- `/post-build` — build 後收尾鏈編排（diff triage → code 鏈 [dual-context code-review → judge-review → 修正迴圈] → docs 鏈 [consistency → metadata-sync] → 殼 refresh [hook 2：實作章節＋badge ✅＋持久 delta tour] → 收尾報告；止步於 /commit 前）
+- `/post-build` — build 後收尾鏈編排（diff triage → code 鏈 [dual-context code-review → judge-review → 修正迴圈] → docs 鏈 [consistency → metadata-sync] → 殼 refresh [hook 2：實作章節＋產圖一次＋badge ✅＋持久 delta tour] → 收尾報告；止步於 /commit 前）
 - `/code-review` — 深層思考六軸代碼審查（含 axis 3 結構 = arch 吸收，top-down；UC 覆蓋度；中型以上 dual-context 雙審查者：fresh-eyes + primed）
 - `/debrief` — AI 改動理解簡報（layer 3，行動後，**深度選配**——日常判斷材料由任務家殼實作章節吸收〔post-build hook 2〕，本命令＝模組/檔案級深挖）：七段倒金字塔——意圖／行為黑盒子（行為 vs 純結構判定；docs 變更渲染 behavior delta）／前後差異／分組檔案地圖／波及缺口／驗證證據（demo-checklist，NONE 逼問+清單完整性）／認知誤差點；無參數=uncommitted（fallback：EP baseline 任務弧，無則 HEAD~1）；`--ep` 方向確認已移除（改人讀 Report Shell + /ep-review）
 - `/illustrate` — 結構 viewport + 技術圖解（SA/SD artifact menu：call graph / sequence / class slice / data-flow / boundary；city map / drill / drift detection；console / md / html〔archify 展示級，opt-in〕）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build drift detection，見上圖），結構能力調 arch-thinking skill
@@ -140,7 +140,8 @@
 - `code-reality` — code_reality 工具鏈程序層（meta 層工具，Rust carrier `code-reality <tool> --repo`、住獨立 repo `~/Github/code-reality`：build（數據面一鍵傘形——偵測→producer→graph_db build，mixed repo 雙語言合一；手動鏈＝除錯用）／snapshot／hub_refs（含 hazard 分層安全網——防「0 refs 可刪」誤判）／runtime_edges／boundary／boundary_build／delta_tour（snapshot diff＋EP 宣稱對照——transition CLI 已於 v0.3.0 退役）／chain_tour／graph_audit（Rust 完整度稽核）／scip_refs（SCIP 索引 refs 真相源——graph_audit 缺差對照）／tour_validate／tour_upgrade／tour_manifest——graph 面讀 `.code-reality/graph.db` 自有格式（2026-08-27 cutover；純 producer graph 為常態——`import_legacy` 已完全移除〔W5〕）；repo profile `.code-reality.toml` 生態示例、存在性偵測單一真相源、claims 口徑生態語義；**工具事實/坑 standalone 真相源＝CR plugin skill ≥0.1.6（雙源分治：本檔＝接線/紀律層）**；與 cr-query 分工：cr-query 管查詢紀律、本 skill 管工具鏈程序與 EP 對照）
 - `tour-bootstrap` — repo 導覽建置程序（Chain 場景／Delta 時間層，地圖層 Overview 視重複度盤點退役；優先序裁定＝corpus 前門與動線；`.tour` 語言契約——CodeTour 消費端正則決定的 line/pattern/tour link/file link 規則；機械驗證清單＋AI 不代終審停點；建在 code-reality 工具層之上，斷點③已解——callstack 生成走 blueprint-bootstrap）
 - `blueprint-bootstrap` — blueprint 知識庫建置程序（人讀合成視角 scaffold：骨架＋半滿＋🤖/👤 狀態標記＋誘導問題＋治理模板；**callstack 場景敘事生成＝斷點③解法**——重複度盤點前置→鏈枚舉→逐幀實證→coverage 稽核→findings，產出餵 tour-bootstrap 場景層；既有 blueprint 走 audit 模式不重建；位置＝instruction-init 之上、tour-bootstrap 之下）
-- `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀）
+- `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀；殼內嵌配方：mmdc 管線＋CDN lazy render＋無縫一體）
+- `diagram-selection` — 畫圖前選載體的判準與跨載體共性（判準四問：通道/交錯/是否圖論問題/成本軸；載體對照 mermaid/HTML 塊/archify/表格/domain 渲染器；archify=最後手段；vision 三段式契約＋分批上限＋全樣本錨定；渲染/判讀分離）
 - `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
 - `llm-output-convention` — 雙通道輸出細則載體（reference skill：print tag 全表〔[OK]/[WARN]/[FAIL]/[LOG]/[ACTION]/[progress]〕、print/Logger 慣例細則與閉環、stdlib logging 與框架 Logger 並存、遷移注意；rule 端留核心原則＋Namespace——rule+skill 分層控制 bundle 尺寸）
 - `lsp-navigation` — LSP 深層參考（reference skill：LSP operation 速查表、驗證 workflow/輸出格式、rg 陷阱案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness/reindex 處置；rule 留 cr-first 路由/任務啟動 gate 核心——rule+skill 分層控制 bundle 尺寸）

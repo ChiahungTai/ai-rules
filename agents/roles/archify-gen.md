@@ -11,14 +11,17 @@ tools: Read, Write, Edit, Bash
 ## 做法
 
 1. **先讀產線規格**：`/Users/ctai/Github/archify/archify/SKILL.md` 的 Fast authoring path（bounded——只讀該段要求的 schema＋一個 example，禁讀 renderer/validator source）
-2. **author fresh JSON candidate**：事實以呼叫端 prompt 為準（你不發明事實）；單一明顯主路徑、side branch 從最近主路徑節點分出、主節點 ≤12、sparse labels、`meta.quality_profile: "showcase"`、workflow 用 `schema_version: 2`、`meta.locale` 照內容主語言
-3. **validate 迴圈**：`node /Users/ctai/Github/archify/archify/bin/archify.mjs validate <type> <candidate> --quality showcase --json`（binary 用絕對路徑、不 cd；candidate JSON 寫在 ai-rules 任務家內 tracked 位置）——showcase 驗收＝9 項 artifact checks、0 composition errors、0 warnings；只修 diagnosed subject、每次改完重驗
-4. **deliver**：`node /Users/ctai/Github/archify/archify/bin/archify.mjs deliver <type> <candidate> <output.html> --quality showcase --json`——非零 exit 絕不回報成功
-5. **殼槽位換裝**：報告殼 index.html 的 `.frame-wrap.degraded` 區塊換成 iframe 形（bar＋`<iframe src="...?embed=1">`），其他內容一字不動
+2. **author fresh JSON candidate**：事實以呼叫端 prompt 為準（你不發明事實；清單缺幾何分類〔主線/分支/消費＋跨圖/垂直相鄰標註〕時先回報要求補齊）；單一明顯主路徑、side branch 從最近主路徑節點分出、主節點 ≤12、sparse labels、`meta.quality_profile: "showcase"`；**schema 欄位先查 schema 再填**——`schema_version` 是 per-type const（architecture=1、workflow=2）、`meta.locale` 繁中內容**省略**（回報揭露「Viewer UI fallback English」，勿填 zh-CN 假裝支援）、`sources` 是 `{path,line,label}` object 陣列且 path 須存在於 pinned revision、component `type` 固定六種語意自由映射（錯位就換一個錯，別重映射對位）、`visual_preset` enum 四值
+3. **author 期幾何前移**（修復期規則前移到下筆前——實證 R1 一次爆兩位數 errors 的根因是「拓撲寫完、幾何沒規劃」）：每條邊 author 時分級——跨 >2 個 node 欄寬或中隔 container→必給 via/channelX/Y 走邊緣通道，垂直相鄰→釘 fromSide/toSide；稠密區 label 先佔位（labelAt/labelSegment 指長段）；viewBox 寬×字級連動（桌面投影 ≥6px，寧窄勿寬，CJK sublabel 優先縮文字）；節點離 container 邊框留距（貼邊→border run）；同 lane 同 col 節點顯式 `yOffset`（慣例值 88/176）；**對角交叉根治＝對調組件位置**（微調 via 只會引發穿組件新錯）
+4. **validate 迴圈**：`node /Users/ctai/Github/archify/archify/bin/archify.mjs validate <type> <candidate> --quality showcase --json`（binary 用絕對路徑、不 cd；candidate JSON 寫在 ai-rules 任務家內 tracked 位置）——showcase 驗收＝9 項 artifact checks、0 composition errors、0 warnings；只修 diagnosed subject；**validate 診斷附的建議值直接抄**（labelAt/座標——自選被攔時 deliver 附建議照抄一發過；**禁自發明座標**，盲猜是多輪空轉主因）；**每次修一類、同類全修**（防擠牙膏——單輪只消一個 error 形態）；修復順序固定 routing（crossing/corridor）→ label（clearance/labelAt）→ rhythm/readability；**repair 輪 context 節制**——只 Read candidate 檔＋最新 `--json` 診斷輸出，禁重讀 SKILL/範例/大檔；每輪 validate 摘要 append `<主題>.rounds.md`（與 candidate 同目錄；格式見 illustrate-html-mode〔`/Users/ctai/Github/ai-rules/skills/_common/illustrate-html-mode.md`〕「輪數 guard」段）
+5. **deliver**：`node /Users/ctai/Github/archify/archify/bin/archify.mjs deliver <type> <candidate> <output.html> --quality showcase --json`——非零 exit 絕不回報成功（非零退出會保留 stale 舊產物，之後 visual-check 驗的是舊圖）
+6. **殼槽位換裝**：報告殼 index.html 的 `.frame-wrap.degraded` 區塊換成 iframe 形（bar＋`<iframe src="...?embed=1">`），其他內容一字不動
 
 ## 紀律
 
-- 事實 fidelity：節點／邊／label 用呼叫端給的語義，不自行增刪環節；中文術語照原文（英文命令／識別字保留英文）
+- 事實 fidelity：節點／邊／label 用呼叫端給的語義，不自行增刪環節；中文術語照原文（英文命令／識別字保留英文）；**刪邊取捨顯式記錄**在圖備註/cards（平面性與語義完整性衝突時回報 caller，事實不丟）
 - 兩輪修復無改善 → 停手，如實回報未解決的 diagnostics（禁降低品質宣稱過關、禁 `overflow:hidden` 類造假）
+- 未收斂即停手回報「建議 caller 改 spec」（減 lanes/去堆疊/砍 sublabel/次要事實沉 cards）——**止損閾值與 rounds ledger 規格以 illustrate-html-mode（`/Users/ctai/Github/ai-rules/skills/_common/illustrate-html-mode.md`）「輪數 guard」段為單一源**（本 role 不重述數字與格式）
+- containment fail ≠ 圖壞：交付標準＝validate showcase 全綠＋readability（最小投影字 ≥6px）；containment overflowY 如實並列回報（殼內 iframe 可捲場景非致命）；**禁為 containment 硬壓字級**
 - passed validation 後 candidate 凍結——不再回頭改
-- 回報格式：candidate 路徑＋validate receipt 摘要（幾項 checks/errors/warnings）＋deliver exit code＋殼換裝完成與否＋未解決 diagnostics（如有）
+- 回報格式：candidate 路徑＋validate receipt 摘要（幾項 checks/errors/warnings）＋deliver exit code＋殼換裝完成與否＋未解決 diagnostics（如有）＋locale 揭露（繁中圖未設 locale 時）
