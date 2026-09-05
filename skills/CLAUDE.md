@@ -155,7 +155,7 @@
 - `ui-visual-verify` — UI 開發/健檢**驗收**編排（啟動就緒判定 → playwright 截圖＋shadow DOM 量測 → vision-review 盲判讀 → findings 合流 → 契約沉澱 pytest；與 ui-collab 分工＝驗收期 vs 互動期）
 
 ### 領域特定
-- `trading-analysis` — 股票 / 市場走勢三層分析（經典 TA → 量化 → 第二層思考）
+- `trading-analysis` — 股票 / 市場走勢三層分析（經典 TA → 量化 → 第二層思考）＋事件研究與回測量測紀律
 - `broker-flow-analysis` — 台股券商分點進出（BSR）盤底接手 playbook + 單分點角色診斷（反散槍 focal-point 紀律）
 - `kbar-form-analysis` — K 線形態獨立判讀 pipeline（focus/background 雙視圖＋數值包三證據層、vision agent 盲判合約、fail-visible 分層保證——標記輔助/誤判歸因/批量掃描）
 

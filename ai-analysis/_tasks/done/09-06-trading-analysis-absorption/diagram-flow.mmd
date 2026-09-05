@@ -1,0 +1,10 @@
+%% AIR-31 吸收分流圖——MOS-42 方法論 → ai-rules 落點
+flowchart TD
+    SRC["📜 MOS-42 現增事件弧<br/>交易方法論心得稿"] --> D{"📦 吸收分流"}
+    D -->|"①⑤ 圖×視覺共性"| DS["🗺️ diagram-selection<br/>跨載體共性慣例池<br/>（AIR-30 已收）"]
+    D -->|"②③④⑥ 分析紀律"| TA["📈 trading-analysis<br/>事件研究與回測量測紀律<br/>（本弧 AIR-31）"]
+    D -->|"⑤ raw/adjusted 漏網"| F4["③ 單位單一源<br/>併入一行（F4）"]
+    KBAR["🕯️ kbar-form-analysis<br/>判讀 pipeline"] -.->|"邊界 pointer"| TA
+    DS -.->|"pointer 交叉引用"| TA
+    style TA fill:#10b981,color:#ffffff
+    style F4 fill:#f59e0b,color:#000000
