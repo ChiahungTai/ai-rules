@@ -62,7 +62,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 | Workflow Phase | 說明 | Agent 數量 |
 |----------------|------|-----------|
 | Review | 平行 spawn 軸 agents（最多 6） | ≤ max-agents |
-| Verify | Critical findings → 3 verifier + ≥2/3 quorum | 3 × critical |
+| Verify | 分級 verify node：Important+ 錨點批次（單一 lite agent）→ Critical 3 verifier + ≥2/3 quorum（配置單一源見 [workflow-review-pattern](../_common/workflow-review-pattern.md)） | 1 批 + 3 × critical |
 
 **啟用軸**：
 
@@ -106,6 +106,8 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 - **delta_tour 對照（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：**僅弧模式（code 已 commit、HEAD 越過 EP baseline）產出**——spawn primed 前對當下 HEAD 跑 `code-reality snapshot --repo <repo>`（呼叫形態：`code-reality <tool> --repo <repo>`），與 EP baseline snapshot（implement 階段 1 落下；定位＝EP baseline hash8 → `<repo>-<sha8>.json`，`--label` 僅入 `_meta`）對跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo> --out-dir .agent-tmp/`（**臨時自產不持久**——不寫 `.tours/delta/`：持久版單一產點＝post-build 完成〔hook 2〕、無 post-build 弧＝implement 階段 6 fallback；`.tours/delta/` 進 git），其 `.tour` description（宣稱對照三態＋實際變動模組＋退化/跨面 pair 自動警示；json 中間產物不落盤）併入 primed 餵料——intent drift（Type A）從 LLM 推導升級為機械底稿（宣稱抽取只認特定模組路徑前綴，宣稱欄 NONE ≠ EP 無宣稱——範圍見真相源）。**HEAD == baseline（uncommitted 審查）→ 不跑**：同 sha 對跑＝零差異假陰性，且此時對 baseline sha 跑 graph 刷新＋snapshot 會以 working-tree 修改覆寫 baseline sidecar；印 `[WARN]` 退回純 LLM 對照。snapshot 報 stale WARN → 視同缺報告跳過（stale snapshot 照寫、基於舊原料）。缺 baseline snapshot 或未裝 → 跳過不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill
 - **無 EP 時降級規則**（dual 情境）：EP 是 primed 側的意圖合約核心；無 EP（跨 session resume、非 build 場景）→ 降級單 fresh-eyes agent 並印 `[WARN] no EP for primed context`（primed 缺 EP 仍跑 = 架構契合/完整度光譜可審、意圖對齊空轉，findings 噪音可能多於信號）
 - **findings 合併**：同 file:line 去重；**矛盾不裁決**——標 `conflict` 欄（兩方意點並列）交 `/judge-review` 裁決層；合併/衝突規則真相源見 [review-engine](../review-engine/SKILL.md)「dual-context 編排」
+- **Important+ 錨點驗證（浮出前）**：合併後的 Important+ findings 先交 lite-verify **批次**錨點驗證（file:line 存在、符號存在、引用原文屬實——清單式一次 spawn，非 per-issue）；錨點不實的 finding 退回不浮出。**驗證≠裁決**：屬實性（機械/lite）與成立性裁決（judge-review/full）分離——本模式 B 不 spawn per-issue 對抗 verifier（成本爆炸；Workflow 模式的 Critical quorum 走 [workflow-review-pattern](../_common/workflow-review-pattern.md) 分級 verify node）
+- **primed instruction 檔適用範圍**：primed 側審 instruction 檔合規時，某檔只適用**同路徑或祖先路徑**的 instruction 檔（AGENTS.md 為主）；**最近者優先、子層覆寫上層**（本弧新決策——源方法論無此語義，與既有 per-layer instruction 階層慣例對齊）——防拿上層泛用規則審下層已覆寫慣例的系統性誤報
 - 小型變更（< 3 files）單 agent（fresh-eyes 即可——方向審查對小 diff 報酬低）
 
 印出確認：`[Code Review Mode] effort=<ultracode|standard>, workflow=false, agent=dual|single`

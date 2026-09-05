@@ -20,6 +20,19 @@ description: Model routing 深層載體 — tier→(model,effort) 解析表（ZC
 
 > ZCode 注意：`thoughtLevel` 綁具體 model（inherit 時不生效）；欄位名**不是** `reasoningEffort`——未知欄位靜默忽略。**※ thoughtLevel 但書**：sticky user reasoningLevel 在場時（user-scope `local_setting`），定義的 thoughtLevel **不達 wire**——telemetry `variant` 記 user 層級而非定義值（08-29 兩數據點：lite-verify＋vision-review 定義 `high` 皆記 `max`，sticky `max` 在場、主 session rows 同 max）。**model pin 不受影響**（frontmatter model 字串逐字到 wire——vision-review 首筆遙測實證）。sticky override 與 silent no-op 尚未分辨（flip 實驗待跑：改 user level≠定義值再 spawn 看 variant 是否跟隨）——對應**已知 open bug 家族**（zai-org/feedback #339「thought-level changes silently discarded after first selection」＋#306 reasoning effort injection 缺陷；EN/cn 文檔一致、用法無誤）。CC 注意：enum 別名（sonnet/haiku/opus）在 GLM provider 由 provider 別名表解析到對應 GLM 模型。
 
+## effort 家族對譯表（跨 runtime 詞彙對照）
+
+> 同一思考投入檔位在四家 runtime 的詞彙對照（AIR-28 補；execution contract tier 欄與跨家族工單 effort 欄對話時用）。**單一源在本表**——registry pins／工單模板／contract 表引用不自带數值；muse/codex 現值權威見下方 external-runtime family 表。對譯是語義對應非等價保證——實現機制不同（ZCode `thoughtLevel` 綁具體 model＋sticky 不達 wire 家族〔見上方但書〕、CC spawn-time enum、muse/codex runtime 參數）。
+
+| 檔位語義 | ZCode thoughtLevel | CC effort（spawn-time） | muse effort | codex `--effort` | repo 慣用位 |
+|---------|--------------------|------------------------|-------------|------------------|------------|
+| 純機械（渲染／掃描） | low | low | `low` | `minimal`～`low` | advisory 掃描降檔（省 quota） |
+| 執行層（lite tier 預設） | `high`（registry pins 標配） | `high` | `medium` | `medium` | lite tier pins |
+| 審查／判斷（review 委派） | `high` | `high` | `high` | `high` | review 工單 |
+| 深推理（判斷密集／深挖） | `max`（user 層級；定義檔設值 sticky 不達 wire——見上方但書） | `high` | `xhigh`～`ultra` | `xhigh` | muse 委派預設（09-04 定）；深推理升 `ultra` |
+
+> 可考值域：codex 接受 `none`/`minimal`/`low`/`medium`/`high`/`xhigh`（**codex plugin** 的 codex-cli-runtime skill——plugin cache 面，非本 repo 檔；repo 內鏡像 `ref-docs/harness/codex/config-sample.md` 的 config-level enum 無 `none`——companion flag 值域與 config 值域是兩個面）；muse 用 `low`/`medium`/`high`/`xhigh`/`ultra`（`ultra`＝CLI alias → provider 最高級＝API `max`）；ZCode 欄位名是 `thoughtLevel`（非 `reasoningEffort`——未知欄位靜默忽略）、user reasoningLevel 層級含 `max`；CC effort enum 以 CC runtime 為準（repo 慣用 `high`）。跨家族委派時 effort 值以**各家族解析表**為準（muse/codex 見 external-runtime family 表、in-harness 見 tier 解析表），本表只對詞彙。
+
 ## flash 分工律（執行層降級條件）
 
 > 09-04/05 夜 GLM-5.3-Flash 全切換的三軸鑑識（對話行為／git 產出／建議查證）定版；rule 端只錄 tier 語義與升降級條件，證據與細節在此。

@@ -61,6 +61,7 @@ workflow-review-pattern 的 schema、各命令的輸出分類，皆引用此。
 - **claim 必須查證**：聲稱檔案存在 → Read 它；聲稱命名衝突 → LSP `findReferences` 查 import 鏈；聲稱依賴順序有問題 → LSP `incomingCalls`/`outgoingCalls` 追蹤；聲稱 dead code → LSP `findReferences`（zero hits = 確認）
 - **無法查證標 `unverified`**：不得當成事實陳述
 - **對外部行為判斷必須實證**（通用原則）：對套件/演算法/數值特性的判斷，不能只靠推理 — 寫最小 demo 跑一次、或引用套件 source（`.venv/lib/...`）具體行號佐證，否則標 inferred + 降級
+- **歸因紀律（mixed-tree）**：審查範圍含非本次變更引入的既有問題時，**不報為 diff 新引入**（標 `pre-existing` 或不報；判準＝baseline 態已存在）。finding 訊噪比政策（HIGH SIGNAL／DO-NOT-FLAG 六條）屬 profile 層——單一源見 [code-review-and-quality](../code-review-and-quality/SKILL.md)「HIGH SIGNAL filter」，本 skill 不收（非全命令適用，見「收進判準」）
 
 **不收**（留各命令）：audit-test 的「偵測器非判官 + read-only」stance（只產 findings 不下判）、audit-test「套件行為 → 寫 demo 跑一次」的 test 特化方法。本 skill 只放通用「對外部行為判斷必須實證」原則。
 
@@ -158,6 +159,15 @@ review finding 可經多層驗證，**各層都可能錯**：
    - **另開 session**（user 手動、最強獨立、抓 spawn 漏的）—— 高風險建議補跑
    - **另開 handoff 套件** = 持久化 finding（EP review 區段 / kanban，tracked）+ git diff + 標的 / EP / UC 路徑 —— 讓新 session 不靠記憶還原審查標的
    - **跨 session 鏈**（另開 session 時，persistence 串起每步；不靠對話記憶 —— 跨 session 不在）：`review` 寫 finding → `judge-review` 寫決策（✅ / ❌ / ⚠️）→ apply（主 agent / impl LLM 改）→ `followup-review` 讀持久化逐項驗收（verified / closed / open）。findings 交接格式見 [workflow-review-pattern](../_common/workflow-review-pattern.md) Finding Record。
+
+### spawn prompt 工具紀律（review agent 通用）
+
+spawn review agent 時，prompt 內的工具使用紀律（源方法論「token 紀律」的**限縮吸收**——原版「All tools are functional and will work without error」宣稱與本 repo 的 degraded contract 衝突，不吸收該宣稱）：
+
+- **不做無目的 capability probe**：每個 tool call 有明確證據目的（查什麼、佐證哪條 finding／claim）
+- **工具實際失敗走既有 `[WARN]`＋fallback 路徑**（degraded contract）——**不把「工具皆可用」當 runtime fact** 寫進 prompt，也不要求 agent 先測試工具可用性
+
+> **quorum／verify node 配置單一源**：verify 階段的分級（lite 錨點批次 vs Critical 3-verifier quorum）與 compliance/judgment 分流在 [workflow-review-pattern](../_common/workflow-review-pattern.md)「兩階段模式」（Workflow 模式）與 [code-review](../code-review/SKILL.md) 模式 B 錨點驗證——本 skill 無 quorum 配置節，只有「quorum 對共同盲點無效」原則（見 [acceptance-evidence](../../rules/acceptance-evidence.md) A/B 軸）。
 
 ---
 

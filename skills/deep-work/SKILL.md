@@ -21,7 +21,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 委託 Skills：
 - [autonomous-execution](../autonomous-execution/SKILL.md) — 自主決策、錯誤自癒、完成報告、**紅線/黃線分級**（半夜自主跑時的危險操作安全網）
-- [agent-workflow](../agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 覄範
+- [agent-workflow](../agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 規範；**各段形態（哪段主 session 直做／哪段 spawn 哪個 agent）查表**見其「全生命週期 execution contract（消費側）」
 
 ---
 
@@ -44,6 +44,25 @@ deep-work 前提是用戶已離開 —— 權限提示會卡死無人 flow。**�
 - **`/handoff`** = 跨 session / repo / provider 交接（換手給另一個 session）
 
 組合例：`--bg` 派發長程 loop → usage 用盡 → `/at` reset 接續 → 必要時 `/handoff` 換 provider。
+
+### `--agent <name> --bg` named-agent 形態（CC 端）與 ownership state machine
+
+agent-view 的 named-agent 形態：`claude --agent <name> --bg "<task>"`——registry agent 定義檔（claude/ registry）成為 session 主體，worktree 自動隔離（基於 **committed state**）。名稱可用性查 [agents/AGENTS.md](../../agents/AGENTS.md) projection map——**ZCode-only 名稱引用會立即退出**（`--agent '<name>' not found`，session 報 backgrounded 但即刻死亡）。
+
+**ownership state machine（閉環——變更不滯留失蹤）**：
+
+```
+dispatch（從 committed ref；agent 依賴 uncommitted → 先 commit〔該預派 commit 走尋常 commit consent gate——不因本分支豁免〕，或主 session attach 餵料）
+  → agent 在隔離 worktree 產出（可能無 commit）
+  → owning session attach 驗收（無 commit 時 attach 讀 worktree diff＋產物檔）
+  → consent gate（主 session 互動——commit-consent 唯一 override 源，見下）
+  → commit（agent worktree 的 branch 上）
+  → rebase 回主線（trunk+多 WT 慣例：單向 rebase onto trunk、不交互 rebase、trunk 永不被 rebase）
+```
+
+- **worktree isolation 與 trunk+多 WT 線模型對齊**：agent worktree 是暫時支線，產出回主線只走 rebase 慣例（同消費端 git 多軌模型）
+- **auto-commit override**：agent-view 文檔列「git instructions take precedence」的來源為 task／CLAUDE.md／memory——**rules/ 檔（outward-action-consent）路徑是否同樣覆蓋＝待實測點**；規範立場：rules/ 檔為唯一 override 源；實測未過前此條款標〔未驗證〕，且 L4 驗收雙面照跑：**不 outward**（無 auto-commit/push）**且可回收**（變更可被 owning session 找到→驗收→進既定 branch）
+- agent-view 為 research preview——行為可能隨版本變，L4 結果記入當次完成報告
 
 ### 誠實處理
 

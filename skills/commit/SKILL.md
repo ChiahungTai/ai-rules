@@ -13,6 +13,7 @@ Git Commit 工作流入口，從 lint 閘門到提交完成。
 
 委託 Skills：
 - [rules-reminder](../rules-reminder/SKILL.md) — Bash 規則
+- [agent-workflow](../agent-workflow/SKILL.md) — 「全生命週期 execution contract（消費側）」：commit 拆兩半——preparation（finalization 對帳、訊息草擬）可派 agent，**consent gate 永遠主 session 互動**（表主體在 agents/AGENTS.md）
 
 ---
 

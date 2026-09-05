@@ -21,6 +21,10 @@ Six-axis review with quality gates. Every change gets reviewed before merge — 
 - Edge cases handled (null, empty, boundary values)?
 - Error paths handled (not just happy path)?
 - **Loud→silent regression**（diff 改 error handling 時必查）：diff 含 `raise`→`return None`、新增/拓寬 `try/except`、crash→filter、validation 緩步化時，flag 為**潛在 silent-corruption 引入**。「error paths handled」檢查的是**有無**錯誤路徑；本項檢查的是 diff 是否**把原本大聲的錯誤靜默化**——loud→silent 危險（會炸卻靜默腐敗下游），silent→loud 安全（虛驚、測試推翻）。不限交易 critical path，任何 error-path 改動都套用。見 [acceptance-evidence](../../rules/acceptance-evidence.md)「silent vs loud 不對稱風險」。
+- **錯誤處理點系統化枚舉**（diff 語義觸及錯誤處理時啟動——新增/修改任一類點）：**六類點** × **五維**逐點過：
+  - 六類點：try/except（含 Result 型）；error callback／error event handler；error-state 條件分支；fallback logic／failure default value；log-and-continue（記 log 後執行續行）；optional chaining／null coalescing 可能吞錯
+  - 五維：① logging 品質（context 足夠六個月後 debug？）② 使用者回饋（具體、可行動？）③ catch 具體性（只抓預期型別？會吞哪些非預期錯誤——枚舉出來）④ fallback 行為（spec/用戶明確請求？是否掩蓋底層問題？production fallback 到 mock/stub ＝ 架構問題）⑤ 錯誤傳播（該上拋卻就地吞？吞掉是否阻斷 cleanup／resource 管理）
+  - 通則：silent failure 不可接受、fallback 必須顯式且 justified、catch 必須具體。與上方 loud→silent 檢查互補——該項抓「把大聲改小聲」的 diff 語義，本枚舉抓「每個錯誤處理點的處理品質」
 - Tests cover the change and actually test the right things?
 - Off-by-one errors, race conditions, state inconsistencies?
   - 多 writer / state mutation invariant 破壞的判定（ownership vs write-site 粒度）見 [arch-thinking](../arch-thinking/SKILL.md)「變更路徑計數（mutation-path counting）」step —— 條件必填（觸及 mutable state 時）
@@ -83,6 +87,27 @@ Walk through code with the six axes.
 ### Step 5: Verify Verification
 - What tests were run? Did the build pass?
 - Manual testing done? Screenshots for UI changes?
+
+## HIGH SIGNAL filter（finding 訊噪比政策 — code-review profile）
+
+> 源：Anthropic plugin review 方法論吸收（通則化重寫，AIR-28）。**適用邊界**：本 filter 是 code-review 軌（change review 產 findings）的訊噪比政策，**非全域**——ep-review 的結構／覆蓋類 Important/Suggestion、audit-test 的偵測報告（recall 導向）不受此限（全域化會壓掉合法 findings）。單一源於本節；review-engine 只收全命令適用的歸因條款（見其「審查者自證」），不收本 filter。
+
+**只 flag HIGH SIGNAL**（審 diff 找 bug／違規時）：
+
+- code 會編譯／解析失敗（syntax error、type error、missing import、unresolved reference）
+- 不論輸入為何**必然**產生錯誤結果（明確邏輯錯誤）
+- 明確無歧義的 instruction 檔違反，且能**逐字引用**被違反的規則原文
+
+**DO NOT flag**（六條）：
+
+1. **Pre-existing issues**（mixed-tree 歸因）：非「永不提」——是不報為**本次 diff 新引入**；baseline 態已存在的問題標 `pre-existing` 或不報，不計入回歸
+2. **看似 bug 實為正確**：刻意行為、guard 條件、呼叫端契約（flag 前先查呼叫端是否已保證前提）
+3. **Pedantic nitpicks**：senior engineer 不會 flag 的
+4. **Linter 會抓的**（禁為驗證而跑 linter——lint 預檢見 [code-review](../code-review/SKILL.md)「Lint 預檢」節，是該命令的獨立步驟）
+5. **通用 code quality 顧慮**（測試覆蓋率、一般性安全建議）——**僅 instruction 檔明示要求時才報**（本 repo load-bearing：Capabilities／測試規範明示者為契約，非泛化偏好）
+6. **instruction 檔提及但 code 已顯式靜默的**（如 lint ignore comment）——已記錄的決策事實，非新違規
+
+**不確定是否真實 → 不 flag**：false positive 侵蝕信任、消耗 judge 注意力——訊噪比是 findings 的品質單位。
 
 ## Dead Code Hygiene
 

@@ -33,6 +33,17 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 
 ---
 
+## 全生命週期 execution contract（消費側）
+
+> 表主體單一源：[agents/AGENTS.md](../../agents/AGENTS.md)「全生命週期 execution contract」（每段一行，欄位 schema 以該表為準）。本節是**怎麼查表 dispatch** 的消費規範；各生命週期命令（deep-work／execution-plan／implement／post-build／commit）的一行形態註記指向本節，不重抄表。
+
+1. **開段先查表**：當前 stage 的執行主體＝「主 session 直做」→ 不 spawn（判斷密集段——EP 規劃／judge 裁決／post-build 編排／commit consent，AIR-24 分工律）；spawn 類 → 取 registry name＋tier 欄
+2. **spawn 形態按 harness**：ZCode＝registry spawn（tier-pinned 定義檔生效，model/thoughtLevel 自帶）；CC＝named agent（`--agent <name>`／Workflow `agentType`）**僅限 claude/ registry 在場名稱**（查同檔 projection map——引用 ZCode-only 名稱 session 立即退出），其餘角色以 spawn-time model/effort 派發（值查 [model-routing](../model-routing/SKILL.md) 解析表）
+3. **failure fallback 照表走**：重試 ≤2（classifier unavailable／1302）→ 顯式降級記錄（見下「spawn 失敗階梯」）；commit consent 行的 fallback 恆為「等用戶」，不可降級繞過
+4. **模型歸因抽查**（tier 欄落地驗證）：registry pin 是否真達 wire 用 per-message modelID 對帳（ZCode db.sqlite），不信 session 自述（[model-routing](../model-routing/SKILL.md) 歸因紀律）
+
+---
+
 ## Agent Tool + Worktree（互動式）
 
 ### 並發控制：自適應模型偵測

@@ -54,6 +54,16 @@ mode B artifact 與 mode A/C city map 共用此映射（單一源）：
 
 **內容篩選通則（user 勘正：「缺漏要看是不是人類真的需要知道」）**：殼裝**判斷材料**（意圖/為什麼動機鏈、風險與降級、取捨決策、驗收判準、當前狀態、實物樣本、回源路徑），**不裝執行細節**（治理規則、AI 流程產物如 UC 盤點表、機械完整性逐項覆蓋）——後者留本體層，殼至多一句指路。**實物樣本要進殼**（如 aria baseline 真實 YAML 開頭——人類沒看過實物，機制敘述等於空談）。
 
+**殼生成分工（三 tier——AIR-28；registry 對號查 agents/AGENTS.md execution contract 表）**：
+
+1. **archify-gen（lite 產線）**：JSON IR 撰寫＋archify validate showcase 迴圈＋diagram 渲染——機械產線，**事實由呼叫端給定**（agent 不自產宣稱）
+2. **篩選敘事（full 主 session）**：殼的章節篩選與敘事＝判斷密集（「缺漏是不是人類真的需要知道」是判斷題）——不派 lite
+3. **vision-review（vision 驗收）**：渲染 PNG 逐張 verdict（圖互 clip／CJK 誤讀／美感底線）——驗收收法見該 agent 定義
+
+**機械底稿（數據宣稱唯一來源）**：殼中一切**數據宣稱**（數字、狀態、覆蓋率、時間）只從機械底稿帶入、禁止敘事層自填——底稿＝**delta_tour 輸出／archify JSON IR／命令輸出原文**（防 lite 產線的文檔宣稱漂移弱面——flash 分工律，model-routing skill）。
+
+**確定性再生 diff**：同一底稿重跑 archify-gen → JSON IR diff 應為空——再生等價被 diff 釘住（測試保護的等價物）；diff 非空＝底稿或產線漂移，先查因再交付。
+
 **報告類型的敘事骨架變體**（殼固定、骨架變）：
 
 | 報告類型 | 敘事骨架 | archify 視圖選型 |

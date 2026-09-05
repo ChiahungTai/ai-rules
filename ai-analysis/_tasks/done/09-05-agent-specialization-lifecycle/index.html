@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIR-28 任務特化 agent 體系＋全生命週期 agent 化 — 任務簡報殼</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2129; --border:#30363d;
+    --fg:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --green:#3fb950;
+    --amber:#d29922; --rose:#f85149; --violet:#bc8cff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--fg);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;display:flex}
+  nav#sidebar{width:264px;min-width:264px;background:var(--panel);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transition:width .18s ease,min-width .18s ease,padding .18s ease}
+  nav#sidebar .brand{padding:0 20px 16px;border-bottom:1px solid var(--border);white-space:normal}
+  nav#sidebar .brand .badge{display:inline-block;border-radius:12px;padding:2px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+  nav#sidebar .brand .badge.plan{background:#1f6f3c33;border:1px solid #2ea04366;color:var(--green)}
+  nav#sidebar .brand .badge.progress{background:#2d220066;border:1px solid #d2992266;color:var(--amber)}
+  nav#sidebar .brand .badge.done{background:#1f6f3c33;border:1px solid #2ea04366;color:var(--green)}
+  nav#sidebar .brand h1{font-size:15.5px;margin-top:8px;line-height:1.45}
+  nav#sidebar .brand .meta{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.7;font-family:ui-monospace,Menlo,monospace}
+  nav#sidebar ul{list-style:none;padding:10px 0;flex:1}
+  nav#sidebar li a{display:flex;align-items:center;gap:10px;padding:9px 20px;color:var(--muted);text-decoration:none;font-size:13.5px;border-left:2px solid transparent;white-space:nowrap}
+  nav#sidebar li a .num{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--fg);background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;min-width:26px;text-align:center}
+  nav#sidebar li a:hover{color:var(--fg);background:#1f242c}
+  nav#sidebar li a.active{color:var(--fg);background:#1f242c;border-left-color:var(--accent)}
+  nav#sidebar .backlinks{padding:14px 20px;border-top:1px solid var(--border);font-size:12px;line-height:2;white-space:nowrap}
+  nav#sidebar .backlinks a{color:var(--accent);text-decoration:none}
+  body.sidebar-collapsed nav#sidebar{width:0;min-width:0;padding-left:0;padding-right:0;border-right:0}
+  body.sidebar-collapsed main{max-width:none}
+  main{flex:1;min-width:0;max-width:1480px;padding:26px 34px;overflow-y:auto}
+  section{display:none}
+  section.active{display:block}
+  section h2{font-size:20px;margin-bottom:4px}
+  section .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  section h3{font-size:14.5px;color:var(--accent);margin:18px 0 8px}
+  p,li{font-size:14px;line-height:1.75;color:var(--fg)}
+  ul.dots{list-style:none;margin:6px 0}
+  ul.dots li{padding-left:18px;position:relative;margin:4px 0}
+  ul.dots li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .cardrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:14px 0}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+  .card .t{font-size:13px;font-weight:700;margin-bottom:6px}
+  .card .t.c{color:var(--accent)}.card .t.r{color:var(--rose)}.card .t.g{color:var(--green)}.card .t.v{color:var(--violet)}.card .t.a{color:var(--amber)}
+  .card p{font-size:12.5px;color:var(--muted);line-height:1.65}
+  .num-big{font-size:26px;font-weight:800;font-family:ui-monospace,Menlo,monospace}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--border);padding:7px 11px;text-align:left;vertical-align:top;line-height:1.6}
+  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px}
+  td code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);background:#1b222c;border-radius:4px;padding:1px 5px}
+  .note{border-left:3px solid var(--amber);background:#2d220066;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;line-height:1.7;margin:12px 0}
+  .src{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;line-height:1.9}
+  .src a{color:var(--accent);text-decoration:none}
+  .collapse-tab{position:fixed;top:50%;z-index:30;width:26px;height:64px;padding:0;cursor:pointer;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-size:13px;line-height:1;border-radius:0 8px 8px 0}
+  .collapse-tab:hover{color:var(--fg);border-color:var(--accent)}
+  #collapse-btn{left:264px;transform:translateY(-50%)}
+  body.sidebar-collapsed #collapse-btn{display:none}
+  #expand-btn{left:0;top:20px;transform:none;border-radius:0 8px 8px 0;display:none}
+  body.sidebar-collapsed #expand-btn{display:block}
+</style>
+</head>
+<body>
+<button type="button" id="expand-btn" class="collapse-tab" aria-expanded="false" aria-controls="sidebar" aria-label="展開章節導覽" onclick="return setCollapsed(false,true)">›</button>
+<nav id="sidebar" aria-label="章節導覽">
+  <div class="brand">
+    <span class="badge progress">🟡 實作完成 · review 循環收斂、結案前</span>
+    <h1>AIR-28 任務特化 agent 體系＋全生命週期 agent 化＋workflow 形態</h1>
+    <div class="meta">baseline: 9cebabd<br>EP @ 9aa852b（blob edef9e12）<br>2026-09-05</div>
+  </div>
+  <ul>
+    <li><a href="#s1" onclick="return go('s1',this)"><span class="num">01</span>為什麼（本弧賭注）</a></li>
+    <li><a href="#s2" onclick="return go('s2',this)"><span class="num">02</span>落地面</a></li>
+    <li><a href="#s3" onclick="return go('s3',this)"><span class="num">03</span>驗證證據</a></li>
+    <li><a href="#s4" onclick="return go('s4',this)"><span class="num">04</span>回源</a></li>
+  </ul>
+  <div class="backlinks">
+    <a href="http://127.0.0.1:6420">← backlog board</a><br>
+    <a href="ep.md">EP 全文（ep.md）</a>
+  </div>
+</nav>
+<button type="button" id="collapse-btn" class="collapse-tab" aria-expanded="true" aria-controls="sidebar" aria-label="收合章節導覽" onclick="return setCollapsed(true,true)">‹</button>
+<main>
+
+<section id="s1">
+  <h2>為什麼（本弧賭注）</h2>
+  <div class="sub">EP 真正賭注不是 agent 數量而是分發紀律</div>
+  <ul class="dots">
+    <li><b>全生命週期 execution contract</b>——開卡→EP 規劃→build→review→post-build→commit 每段必有一行可解析、可啟動、可回收、可驗收的 contract（stage→owning orchestrator→registry name→tier→harness registry→artifact→failure fallback）；「dispatch 給適合的執行者」<b>含主 session</b>——判斷密集段（EP 規劃／judge／post-build 編排／commit consent）不 agent 化（AIR-24 分工律）</li>
+    <li><b>review 體系吸收 Anthropic plugin 方法論 P1-P6</b>——依 profile 邊界分流：全命令適用條款進 review-engine，HIGH SIGNAL filter 屬 code-review profile（全域化會壓掉 ep-review/audit 的合法 findings）</li>
+    <li><b>多源交叉查證</b>——deep-research 教訓吸收為源枚舉制 skill；flash 鑑識弧的三軸對帳為原型</li>
+    <li><b>CC 端閉環</b>——`--agent --bg` named-agent 分發＋ownership state machine（dispatch→attach 驗收→consent→commit→rebase 回收，變更不滯留失蹤）</li>
+  </ul>
+</section>
+
+<section id="s2">
+  <h2>落地面</h2>
+  <div class="sub">四個面：contract 表／review 吸收／cross-verify／CC 端接線</div>
+  <div class="cardrow">
+    <div class="card"><div class="t c">S1 contract＋registry</div><p>agents/AGENTS.md 治理段新增 15 行 execution contract 表（commit 拆 preparation/consent 兩半）＋registry projection map（10 agent authoring source 與跨 harness 可用性）＋model-routing skill effort 家族對譯表（四 runtime 詞彙對照）；新 agent cross-verify-investigator（lite 參數化單檔）</p></div>
+    <div class="card"><div class="t v">S2 review 吸收 P1-P6</div><p>P2 拆分流——HIGH SIGNAL filter 六條＋pre-existing mixed-tree 歸因落 code-review-and-quality；P3 限縮版工具紀律＋P5 quorum 落點指明進 review-engine；分級 verify node（lite 錨點批次→Critical 3-verifier quorum）落 workflow-review-pattern；P1 錨點驗證併 lite-verify；P4 適用範圍＋P6 六類點×五維落 code-review</p></div>
+    <div class="card"><div class="t g">S3 cross-verify</div><p>skills/cross-verify/SKILL.md——軸群（db/git/log/memory/cr/web）源枚舉制、平行取證落檔、交叉對帳、verdict＋unverified 不阻斷；執行載體＝單一參數化 investigator agent（軸＝prompt 參數）</p></div>
+    <div class="card"><div class="t a">S4/S5 接線</div><p>agent-workflow 消費側節（怎麼查表 dispatch）＋五命令一行形態註記（互指單源）；illustrate 殼生成分工三 tier＋機械底稿＋確定性再生 diff；deep-work `--agent --bg` 形態＋ownership state machine</p></div>
+  </div>
+  <div class="note">archify 不拆——archify-gen 為 canonical 殼 owner；impl-flash 範式加但書（Grep/Glob 是 ZCode 死欄，新定義不照抄）。</div>
+</section>
+
+<section id="s3">
+  <h2>驗證證據</h2>
+  <div class="sub">L4 實測＋機械驗證——全數當場執行</div>
+  <ul class="dots">
+    <li><b>cross-verify L4 三試跑</b>：git＋memory 兩軸對「impl-flash 納管狀態」交叉對帳 <b>corroborated</b>（untracked、零 commit 紀錄、待 S1 併入——兩軸獨立一致）；log 軸意外命中證據（.muse-bridge job log 內嵌建立 diff，blob hash 逐字一致＝零修改機械證明）；<b>源缺場試跑 PASS</b>——db 軸拔源後 investigator 回報 <code>[WARN] 源缺場：軸 unverified</code>、不換源不腦補（SM-9 端到端）</li>
+    <li><b>CC 端 L4 雙面</b>：SM-10 unknown-name 實測——warning＋報 backgrounded＋session 即刻消失（registry 查無、control socket ENOENT），行為與文檔一致；named-agent（code-reviewer）載入實測——`@code-reviewer` 成為 session 主體、讀檔回答正確、唯讀零 commit、可回收（stop 乾淨）。auto-commit override 對 rules/ 檔的覆蓋性＝<b>未驗證</b>（需寫入型工單，標〔未驗證〕）</li>
+    <li><b>機械驗證 7/7</b>：五詞殘留零命中、HIGH SIGNAL 單源、projection map 與 registry 十檔集合相等、contract 表引用全存在、新檔 schema 合規、effort 對譯表在場、表列零外流（持久底稿＝<a href="verify-evidence.md">verify-evidence.md</a>；首輪第 7 項 FAIL〔agent-workflow schema 外流〕→ 修驗證合約後同命令重跑轉 PASS——judge 採納 codex R5 處方）</li>
+    <li><b>雙家族 review 循環（post-build，user 指定）</b>：muse（bridge job-mtnw1xgm-13tzyp）9 findings＋codex（gpt-5.6-sol/xhigh）9 findings 合併去重 18 條——judge：<b>✅ 採納 15（全落地、followup rg 驗收 11/11 PASS）＋已執行 3（殼底稿矛盾×2＋ghost hash）＋⚠️ 部分採納 1</b>（muse lint 指針——前提被反證：Lint 預檢節存在，採節名指針改善）。三個 critical 修復：investigator 去 MCP 化（spawn 不綁死 CR plugin 在場）、anchor join 鍵 namespace 化、殼 false-green 底稿刷新</li>
+    <li><b>spawn 降級記錄</b>：lite-verify spawn 撞 1308（usage 窗口未重置）——依 model-routing 失敗家系「1308 重派無效」不重試，主 session 以同命令面機械複驗顯式降級（上項 7/7 即其產出）；GLM in-harness 3-perspective 同窗口擋、由雙外部 runtime（muse＋codex）替補（user 指定派發）。runtime modelID 抽查已補跑：model 面 <b>GLM-5.3-Flash 逐字達 wire ✓</b>（db.sqlite model_usage 多筆 subagent rows）；effort 面 variant=<code>max</code>＝sticky user reasoningLevel 蓋過定義值 high（已知 open bug 家族 #339/#306，今日新數據點入檔、flip 實驗仍 open）</li>
+  </ul>
+</section>
+
+<section id="s4">
+  <h2>回源</h2>
+  <div class="sub">殼是展示層——本體（source of record）與證據鏈全在 repo</div>
+  <p class="src">
+    EP：<a href="ep.md">ai-analysis/_tasks/09-05-agent-specialization-lifecycle/ep.md</a>（雙家族 review 24 findings judge 處置表在文末）<br>
+task baseline：9cebabd · projection source：9aa852b（EP 定稿 commit；blob edef9e12） · 卡：AIR-28<br>
+    驗證底稿（tracked）：<a href="verify-evidence.md">verify-evidence.md</a>——命令＋exit code＋關鍵輸出（ephemeral 詳情在 .agent-tmp/，post-build 清理後以本檔為準）
+  </p>
+</section>
+
+</main>
+<script>
+function go(id,el){
+  var section=document.getElementById(id);
+  if(!section||!section.matches('main section'))return false;
+  document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
+  section.classList.add('active');
+  document.querySelectorAll('#sidebar li a').forEach(a=>a.classList.remove('active'));
+  if(el)el.classList.add('active');
+  history.replaceState(null,'','#'+id);
+  return false;
+}
+var SIDEBAR_KEY='illustrate-shell-sidebar-collapsed';
+function setCollapsed(c,moveFocus){
+  document.body.classList.toggle('sidebar-collapsed',!!c);
+  try{localStorage.setItem(SIDEBAR_KEY,c?'1':'0');}catch(e){}
+  var sidebar=document.getElementById('sidebar');
+  sidebar.toggleAttribute('inert',!!c);
+  if(c)sidebar.setAttribute('aria-hidden','true');else sidebar.removeAttribute('aria-hidden');
+  document.querySelectorAll('#collapse-btn,#expand-btn').forEach(function(b){
+    b.setAttribute('aria-expanded',String(!c));
+  });
+  if(moveFocus)document.getElementById(c?'expand-btn':'collapse-btn').focus();
+  return false;
+}
+(function init(){
+  var c=false;
+  try{c=localStorage.getItem(SIDEBAR_KEY)==='1';}catch(e){}
+  if(c)setCollapsed(true);
+  var h=location.hash.slice(1);
+  var candidate=h&&document.getElementById(h);
+  var target=(candidate&&candidate.matches('main section'))?h:null;
+  if(!target){
+    var framed=document.querySelector('main section .frame-wrap');
+    target=framed?framed.closest('section').id:document.querySelector('main section').id;
+  }
+  var link=document.querySelector('#sidebar li a[href="#'+target+'"]');
+  go(target,link);
+})();
+</script>
+</body>
+</html>

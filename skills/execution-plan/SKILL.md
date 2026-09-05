@@ -12,7 +12,7 @@ EP 自足生成段落式實作計畫書（`/spec` 為純輔助需求釐清，有
 
 委託 Skills：
 - [rules-reminder](../rules-reminder/SKILL.md) — Bash 規則
-- [agent-workflow](../agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 規範
+- [agent-workflow](../agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 規範；EP review／段落 0 研究的 dispatch 形態查其「全生命週期 execution contract（消費側）」
 
 ---
 

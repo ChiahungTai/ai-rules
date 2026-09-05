@@ -33,13 +33,13 @@ Workflow tool 的優勢：
 - agent 類型一律 `Explore`（read-only by design）
 - agent 看不到主對話歷史、其他 agent 結果 — prompt 是唯一 context 來源
 
-### Phase 2: Verify — Adversarial 驗證
+### Phase 2: Verify — 分級驗證
 
-- 對 Critical / must-fix severity 的 findings spawn 驗證 agent
-- 驗證 agent 嘗試**推翻（refute）** finding
-- **預設強度**：1 verifier/finding
-- **Critical 升級**：3 verifier + ≥2/3 確認 → finding 保留
-- 非 Critical findings 直接保留（交由 Main LLM judge-review 最終判斷）
+兩級 verify node（分級＝成本對齊風險；錨點屬實性與成立性裁決分離）：
+
+- **第一級：錨點批次驗證（Important+ 全 findings，浮出前）**：合併各維度 findings 後，**單一 lite agent 批次**驗證錨點屬實性（file:line 存在、符號存在、引用原文屬實）——非 per-issue spawn（成本爆炸）。錨點不實的 finding 退回不浮出。**驗證≠裁決**：屬實性（機械/lite）與成立性（judge-review 層）分離
+- **第二級：Critical 對抗 quorum**：對錨點屬實的 Critical findings spawn 驗證 agent 嘗試**推翻（refute）**——**3 verifier + ≥2/3 確認** → finding 保留；非 Critical 不跑對抗 verifier（直接保留，交 Main LLM judge-review 最終判斷）
+- **compliance vs judgment 分流**：compliance 類維度（機械規則對照，如 instruction 檔合規）是 recall 問題——冗餘 agent 有益；judgment 類維度是 bias 問題——需 context 差異（dual-context 變體，見 review-engine 執行預設點 6），quorum 對共同盲點無效（[acceptance-evidence](../../rules/acceptance-evidence.md) A/B 軸）。兩者不互斥，按維度性質配
 
 ---
 
@@ -61,8 +61,8 @@ Workflow tool 的優勢：
           "title": { "type": "string" },
           "severity": { "type": "string", "enum": ["critical", "important", "suggestion"] },
           "confidence": { "type": "string", "enum": ["confirmed", "evidence-based", "inferred"], "description": "信心水準（見 review-engine）；與 VerifyVerdict.confidence（verify 把握度）不同概念" },
-          "file": { "type": "string", "description": "專案相對路徑" },
-          "line": { "type": "number" },
+          "file": { "type": "string", "description": "專案相對路徑（Important+ 必填——錨點驗證閘的 join 鍵；Suggestion 可省）" },
+          "line": { "type": "number", "description": "同上" },
           "description": { "type": "string" },
           "suggestion": { "type": "string" }
         },
@@ -188,12 +188,30 @@ const reviews = await parallel(
 //   預設：Critical → 3 verifier + 2/3 quorum
 //   輕量（如 /ep-review）：must-fix → 1 verifier/finding
 //   在此修改 verifier 數量：Array.from({length: N}, ...)
+// Phase 2a: 錨點批次驗證（Important+ 浮出前；單一 lite agent，非 per-issue）
 phase('Verify')
-const allFindings = reviews.filter(Boolean).flatMap(r => r.findings)
-const criticalFindings = allFindings.filter(f => f.severity === 'critical')
+// 全域唯一鍵：各 dimension agent 各自回 F1/F2…，flatten 後以 `${dimension}:${id}` join（防同名 id 錯配）
+const allFindings = reviews.flatMap((r, di) =>
+  (r?.findings ?? []).map(f => ({ ...f, key: `${(dimensions[di] && dimensions[di].key) || 'd' + di}:${f.id}` }))
+)
+const suggestions = allFindings.filter(f => f.severity === 'suggestion') // 不進錨點閘，直接保留（schema 允許無 file/line）
+const importantPlus = allFindings.filter(f => f.severity !== 'suggestion')
+const anchorable = importantPlus.filter(f => f.file != null && f.line != null) // 缺錨點＝閘未過，退回不浮出
+const ANCHOR_MODEL = 'haiku' // lite tier（值查 model-routing skill 解析表）
+const ANCHOR_SCHEMA = { /* { results: [{ key, anchorReal: boolean, evidence }] } */ }
+const anchorReport = await agent(
+  `批次驗證下列 findings 的錨點屬實性（file:line 存在、符號存在、引用原文屬實）。逐項附機械證據，不判斷成立性。\n` +
+  anchorable.map(f => `${f.key}: ${f.file}:${f.line} — ${f.title}\n  主張：${f.description}`).join('\n'),
+  { label: 'verify:anchor-batch', phase: 'Verify', schema: ANCHOR_SCHEMA, agentType: 'Explore', model: ANCHOR_MODEL }
+)
+const anchored = anchorable.filter(f => {
+  const r = anchorReport?.results?.find(x => x.key === f.key)
+  return r?.anchorReal === true
+})
 
-// 非 Critical 直接保留
-const normalFindings = allFindings.filter(f => f.severity !== 'critical')
+// Phase 2b: Critical 對抗 quorum（僅錨點屬實的 Critical）
+const criticalFindings = anchored.filter(f => f.severity === 'critical')
+const normalFindings = anchored.filter(f => f.severity !== 'critical')
 
 // Critical → 3 verifier + 2/3 quorum
 const verified = await parallel(
@@ -217,8 +235,13 @@ const confirmedCritical = criticalFindings.filter((f, i) => {
 })
 
 return {
-  confirmed: [...normalFindings, ...confirmedCritical],
-  stats: { total: allFindings.length, confirmed: normalFindings.length + confirmedCritical.length }
+  confirmed: [...suggestions, ...normalFindings, ...confirmedCritical], // suggestion 不進錨點閘但也不得丟失
+  stats: {
+    total: allFindings.length,
+    suggestions: suggestions.length,
+    anchorFailed: importantPlus.length - anchored.length, // 缺錨點或錨點不實＝退回不浮出
+    confirmed: suggestions.length + normalFindings.length + confirmedCritical.length
+  }
 }
 ```
 

@@ -10,6 +10,8 @@ description: build 後收尾鏈編排 — code-review → judge-review → 修�
 
 把「build 完手動跑 code-review → judge-review → consistency（→ metadata-sync）」的固定收尾序列編排成一次觸發。本 skill **只做編排與 triage**，各步驟的方法論真相源在被編排命令本身，不重抄（防 single-source drift）。
 
+> dispatch 形態：編排者（本命令）＝主 session full（判斷密集，不 agent 化）；鏈上機械驗證／視覺驗收段 spawn 哪個 agent，查 [agent-workflow](../agent-workflow/SKILL.md)「全生命週期 execution contract（消費側）」（表主體在 agents/AGENTS.md）。
+
 **受眾**：軌道 ①（LLM 執行鏈）——機器自讀自判自修；終點輸出收尾報告給人類判讀是否 commit。
 
 被編排項目全為 skills（`code-review` / `judge-review` / `followup-review` / `consistency` / `metadata-sync`）：Claude 端以 slash（`/code-review`）或 Skill tool 調用，ZCode 端以 Skill tool 調用——跨 harness 統一。

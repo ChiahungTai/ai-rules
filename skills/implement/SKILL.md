@@ -21,7 +21,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "Workf
 - [debugging-and-error-recovery](../debugging-and-error-recovery/SKILL.md) — 系統化除錯
 - [autonomous-execution](../autonomous-execution/SKILL.md) — 自主決策框架
 - [python-type-gap](../python-type-gap/SKILL.md) — 第三方套件 type gap（mypy 失敗時）
-- [agent-workflow](../agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 規範
+- [agent-workflow](../agent-workflow/SKILL.md) — 並發控制、模型偵測、Agent spawn 規範；**各段 dispatch 查表**見其「全生命週期 execution contract（消費側）」（表主體在 agents/AGENTS.md）
 
 Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-pattern.md)（Ultracode 下 Phase 4 使用）
 
@@ -185,7 +185,7 @@ review 執行預設（force 獨立 / max-agents 預設 3 / model inherit / 3-per
 | Workflow Phase | 說明 | Agent 數量 |
 |----------------|------|-----------|
 | Review | 平行 spawn 3 perspective agents（max-agents<3 時依 [agent-review-cycle](../_common/agent-review-cycle.md) 降級序：Correctness > clean > UC） | ≤ max-agents |
-| Verify | Critical findings → 3 verifier + ≥2/3 quorum | 3 × critical findings |
+| Verify | 分級 verify node：Important+ 錨點批次（單一 lite agent）→ Critical 3 verifier + ≥2/3 quorum（配置單一源見 [workflow-review-pattern](../_common/workflow-review-pattern.md)） | 1 批 + 3 × critical findings |
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 進入「/judge-review」步驟（現有流程不變）。
 

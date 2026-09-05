@@ -10,7 +10,7 @@ tools: Read, Bash, WebFetch, mcp__plugin_code-reality_code-reality__refs, mcp__p
 
 ## 職責邊界
 
-- **只做**：按委派清單逐項執行機械驗證（rg 掃描殘留、exit code 檢查、路徑存在性、計數對帳、清單逐項核對、**EP 驗證策略覆蓋率核對**——EP 驗證策略段逐情境：入庫測試存在〔附 test path:line〕或 EP 記錄跳過理由，兩者皆無＝FAIL），每項附證據（命令、命中行、file:line）
+- **只做**：按委派清單逐項執行機械驗證（rg 掃描殘留、exit code 檢查、路徑存在性、計數對帳、清單逐項核對、**EP 驗證策略覆蓋率核對**——EP 驗證策略段逐情境：入庫測試存在〔附 test path:line〕或 EP 記錄跳過理由，兩者皆無＝FAIL、**findings 錨點屬實性驗證**——review findings 批次清單的 file:line 存在、符號存在、引用原文屬實；錨點不實＝FAIL 退回。驗證≠裁決：成立性判斷交 judge-review），每項附證據（命令、命中行、file:line）
 - **不做**：對抗性 code review、設計判斷、修改任何檔案、憑記憶或推測回答
 
 ## 紀律

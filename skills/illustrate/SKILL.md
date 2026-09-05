@@ -17,7 +17,7 @@ when_to_use: "Illustrate technical concepts, architecture, or processes. Also st
 |------|------|------|------|
 | **Console**（預設） | ASCII | 精簡（3-5 章，每章 3-5 點） | 即時討論、快速查詢 |
 | **MD** | Mermaid（`skill: "mermaid"`） | 詳盡（多級標題、完整展開） | 深度分析、知識沉澱 |
-| **HTML**（opt-in） | archify 互動圖＋報告殼（委派 [illustrate-html-mode.md](../_common/illustrate-html-mode.md)） | 展示級（互動搜尋/focus/Present；報告殼＝sidebar 順序敘事） | 分享 / demo / re-onboard / drift 審查／**報告殼**——AI 文檔產物（EP 計畫、實作完成報告、module 現況、目錄導覽）的人類 viewport（`@ep`／實作報告／`@module`／`@dir` + html） |
+| **HTML**（opt-in） | archify 互動圖＋報告殼（委派 [illustrate-html-mode.md](../_common/illustrate-html-mode.md)；殼生成分工三 tier〔archify-gen lite 產線→full 篩選敘事→vision 驗收〕＋機械底稿規則見該檔「殼生成分工」） | 展示級（互動搜尋/focus/Present；報告殼＝sidebar 順序敘事） | 分享 / demo / re-onboard / drift 審查／**報告殼**——AI 文檔產物（EP 計畫、實作完成報告、module 現況、目錄導覽）的人類 viewport（`@ep`／實作報告／`@module`／`@dir` + html） |
 
 **執行鐵律**：Console 禁止 Mermaid 語法。MD 禁止 ASCII 圖表。HTML 是**寫檔模式**——僅明示 `html` 或增益判斷時觸發；Console 語境明示 html = 切換輸出模式（檔案交付＋路徑回報），永不 inline 渲染；archify 缺場/壞場或 guard 超限 → 降級 MD Mermaid 並回報（細節見 illustrate-html-mode.md）。違反 = 指令執行失敗。
 

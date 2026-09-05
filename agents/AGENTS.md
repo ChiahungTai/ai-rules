@@ -53,6 +53,49 @@ agents/
 | transport 在跑、wrapper 已收 | jobs.json 狀態 running、ps 進程在 | 背景 Bash 掛阻塞 `wait` 收，禁重派（雙跑） |
 | transport 死中途、wrapper 空轉 | 進程已亡、jobs.json 停滯、無新輸出 | 機械驗收（working tree＋jobs.json 終局）＋TaskStop wrapper |
 
+## 全生命週期 execution contract
+
+> 每個生命週期段必有一行 contract：stage → owning orchestrator → registry name → tier → harness registry → artifact → failure fallback（AIR-28）。**「dispatch 給適合的執行者」含主 session**——判斷密集段（EP 規劃／judge 裁決／post-build 編排／commit consent）依 AIR-24 分工律由 full 主 session 執行，不 agent 化。消費側規範（各命令怎麼查表 dispatch、spawn 形態）單一源在 `skills/agent-workflow/SKILL.md`，本表是主體。
+
+| stage | owning orchestrator | registry name | tier | harness registry | artifact（輸入→輸出） | failure fallback |
+|-------|--------------------|---------------|------|------------------|----------------------|------------------|
+| 開卡（backlog 建卡＋建卡 commit） | 主 session 直做 | — | full | — | 任務敘述→卡檔＋commit | —（機械命令，kanban-board skill） |
+| 研究（EP 段落 0／規格挖掘） | spawn | cr-research／spec-miner | lite | zcode | 問題→file:line 錨點＋逐字引用 | 重試≤2（1302）→主 session 自做 |
+| EP 規劃 | 主 session 直做（判斷密集） | — | full | — | 需求→ep.md（含 EP review 迴圈） | — |
+| EP review（雙家族） | spawn＋external-runtime | code-reviewer（fresh）＋code-reviewer-primed（primed）；muse review（bridge） | full（省略 model）為基準；條件式降 lite（保護面厚度，model-routing skill） | shared→zcode＋claude；muse 經 bridge | diff＋EP→findings→judge 處置表 | classifier／1302 重試≤2→顯式降級記錄；muse 額度不足→in-harness 雙 context（顯式記錄） |
+| build 實作段 | 主 session 編排；機械可規格化段 spawn | impl-flash | lite | zcode | EP 段→code＋測試＋驗證證據 | 失敗家系處置（註 a）→主 session 直做該段；lite 測試＝規格陳述→驗收證據 full 複驗 |
+| build 內 Agent Review | spawn（3-perspective） | code-reviewer（fresh）＋code-reviewer-primed（primed）；Important+ 錨點驗證＝lite-verify | reviewers＝full（省略 model）為基準；錨點驗證＝lite | reviewers＝shared→zcode＋claude；lite-verify＝zcode | diff→findings（錨點驗證後浮出） | 失敗家系處置（註 a）→主 session 自審＋fallback 標記 |
+| judge 裁決 | 主 session 直做（判斷密集；不派 agent） | — | full | — | findings→✅/❌/⚠️ 處置表 | — |
+| post-build 編排 | 主 session 直做（判斷密集） | — | full | — | 收尾鏈：code-review（dual-context）→judge-review→修正→consistency→metadata-sync→殼 refresh | — |
+| 機械驗證／consistency gate | spawn | lite-verify | lite | zcode | 查證清單→逐項機械證據（rg 命中／exit code／file:line） | 失敗家系處置（註 a）→主 session 跑組合命令 |
+| 視覺驗收 | spawn | vision-review | vision | zcode | 圖檔→逐張 verdict | 失敗家系處置（註 a）→標「未驗證」（禁主 session 直讀圖） |
+| 殼／圖渲染 | spawn | archify-gen | lite | zcode | 機械底稿→workflow/architecture/sequence 圖＋HTML | 失敗家系處置（註 a）→主 session 手產＋vision 驗收照跑 |
+| 多源查證 | spawn | cross-verify-investigator | lite | zcode | 問題＋軸清單→交叉對帳 verdict＋unverified | 軸源缺場→該軸 unverified 不阻斷（skills/cross-verify） |
+| commit preparation | 主 session（對帳可 spawn） | lite-verify（finalization 對帳） | lite | zcode | working tree→對帳清單＋訊息草稿 | 主 session 直做 |
+| **commit consent＋執行** | **主 session 互動（永遠；任何 dispatch 不覆蓋）** | — | full | — | 草稿＋變更摘要→用戶確認→git commit | —（outward-action-consent rule；autonomous 紅線清單例外見該 rule） |
+| memory 結案蒸餾 | spawn | mem-distill | lite | zcode | 肥大條目→收斂重寫 | 主 session 直做（寫入六問自檢） |
+
+- **commit 拆兩半**：preparation（finalization 對帳、訊息草擬——agent 可做）＋consent gate（主 session 互動——永遠，contract 表其他行不覆蓋此行）
+- **註 a（spawn 失敗態家系——重試語義單一源）**：見 model-routing skill「spawn 失敗態辨識」——1302／classifier unavailable 重試≤2；1301 禁同 prompt 重試；1308 等窗口重置（重置前重派無效）；429 走 backoff／降並發。**禁把「重試≤2」泛化到全失敗類**（實例：1308 重派只會再敗）
+- **CC dispatch 限制**：本表 registry name 欄引用前先查下方 projection map——**CC 端不得引用 ZCode-only 名稱**（CC `--agent <未知名稱>` session 立即退出）；CC 端同角色走 spawn-time model/effort（查 model-routing skill 解析表）或 claude/ 在場名稱
+
+### registry projection map
+
+> authoring source 與跨 harness 可用性單一源（配合上表 harness registry 欄）。同步紀律（只改 shared/、cp 到兩 registry、claude 減 MCP 行）見上方「registry 結構」節。tier-pinned 檔帶 `thoughtLevel`（ZCode 專屬欄位、禁寫進共用檔）→ 必然 ZCode-only；CC 端同角色由 spawn 端按 model-routing skill 解析表填 spawn-time model/effort。
+
+| agent | authoring source | zcode | claude | 備註 |
+|-------|------------------|-------|--------|------|
+| code-reviewer | shared/ | ✅ | ✅ | claude 拷貝＝shared 減 CR MCP 行（已知刻意分歧） |
+| code-reviewer-primed | shared/ | ✅ | ✅ | 同上 |
+| cross-verify-investigator | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | 軸＝prompt 參數（AIR-28 S3）；**去 MCP 化**（tools 不掛 CR MCP 全名——cr 軸走 CLI，避免 spawn 綁死「CR plugin 在啟動快照在場」，見下方 tools 清單陷阱；多軸 agent 多數任務不含 CR，綁死代價不成比例） |
+| archify-gen | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
+| cr-research | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
+| impl-flash | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | **範式但書**：其 tools 行含 `Grep`/`Glob`——ZCode 靜默忽略死欄（見「tools 清單陷阱」），新定義不照抄，文字/檔案搜尋走 Bash rg/fd |
+| lite-verify | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
+| mem-distill | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
+| spec-miner | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
+| vision-review | zcode/ 實檔（tier-pinned） | ✅ | —（ZCode-only） | — |
+
 ## 定義檔慣例
 
 markdown + YAML frontmatter，正文 = 系統提示詞。兩家必填欄位同為 `name` / `description`（主 agent 依 description 決定何時委派 — 寫清楚觸發時機）。
