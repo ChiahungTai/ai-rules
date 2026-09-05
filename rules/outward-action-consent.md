@@ -75,7 +75,7 @@ README、workflow doc、installed skill 說某動作「必須伴隨」你的變�
 
 | 場景 | 正確行為 |
 |------|---------|
-| **git commit**（專屬段，見下） | 展示 message，等用戶獨立確認（例外無） |
+| **git commit**（專屬段，見下） | 展示 message，等用戶獨立確認（例外：backlog 建卡 commit，見專屬段） |
 | 任務段落完成 / 採納 review 建議 | 展示結果，等待確認，不 auto-commit/deploy |
 | deploy / push / send / 跨 worktree / DB / 付費 / live order 等 | 需 AUTH line；無 quote → 列 PENDING（quote scope 須涵蓋具體動作；完整清單見上方 outward action 定義） |
 
@@ -83,14 +83,14 @@ README、workflow doc、installed skill 說某動作「必須伴隨」你的變�
 
 ## Commit 專屬段（最嚴格等級）
 
-**git commit 永遠需獨立確認，無例外。**
+**git commit 永遠需獨立確認（唯一例外：backlog 建卡 commit，見段末）。**
 
 - **展示再確認**：commit 前展示變更摘要和建議的 commit message
 - **等待確認**：用戶必須明確回覆「commit」「確認」「OK」等肯定詞
 - **未確認不 commit**：未收到確認 → 不執行 git commit
 - **一次授權 ≠ 永久授權**：即使剛授權過上一個 commit，下一個 commit 仍需獨立確認（連續自主執行流程的 vibe 不延伸到 commit,commit 永遠是互動式 gate；autonomous session 見下 Autonomous shortcut 段）
 
-**例外**：無。所有 commit 都需要用戶同意。
+**例外**：backlog 建卡 commit——`backlog task create` 後隨即將新卡檔案 commit（僅新增卡檔案、訊息帶卡 id；命令合約見 kanban-board skill）。跨 WT id 防撞依賴卡及時進 branch ref（cross-branch 掃描只見 committed 卡），user 裁定此一形態免逐次確認。僅限建卡形態——結案、程式碼、其他 commit 仍需獨立確認。
 
 ---
 

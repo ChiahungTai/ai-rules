@@ -84,7 +84,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
      1. 收集 EP 中所有「新增 UC」（UC 盤點 → 新增 UC 表格中的 📋 項目）
      2. 對照既有卡，篩出**缺少卡的能力**（已含去重命中 → 跳過）
      3. 逐能力 `backlog task create "<標題>" -l <labels> -d "<目標一句>（蒸餾自 EP 總覽：baseline／已決策勿重辯／驗收——desc gate 三必有，見 [kanban-board](../kanban-board/SKILL.md)）"`；為 EP 整體另建一張追蹤卡（命令合約與**開工雙 ref 規則**見 [kanban-board](../kanban-board/SKILL.md)——卡 references 必須同時掛 http URL＋repo 相對路徑，相對路徑單獨出現＝board 上不可點＝錯誤形態）
-     4. **建卡後即 `git add backlog/`**（卡隨第一顆 commit 帶走——CLI `autoCommit=false` 下只改檔不 commit；add 是 staging 非 commit，不觸 outward-action-consent）
+     4. **建卡（批次）即 commit**：`git add backlog/ && git commit -m "chore(backlog): <卡id…>"`——跨 WT id 防撞靠卡及時進 branch ref；此形態 user 已裁定免逐次確認（例外條款見 [outward-action-consent](../../rules/outward-action-consent.md)「Commit 專屬段」；命令合約見 [kanban-board](../kanban-board/SKILL.md)）
    - 無 `backlog/` 目錄時：提醒 user `backlog init --agent-instructions none`（**禁**再教 `mkdir .kanban/`——`.kanban/` 舊制已退役；`--agent-instructions none` 避免注入與本 repo AGENTS.md 治理衝突的 CRITICAL_INSTRUCTION 區塊）；repo 不採 board 制 → 卡片動作整項跳過
 
 4. **掃描 SYSTEM-MAP.md 關聯**（如果存在）：
@@ -241,7 +241,7 @@ EP 專屬約束：
 ## 段落設計檢查清單
 
 - [ ] UC 盤點已完成（大型/中型變更：掃描 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）Capabilities + backlog 卡、列出新增/更新 UC、卡關聯）
-- [ ] Backlog 自動建卡已完成（新增 UC 已有對應卡 + EP 整體追蹤卡；`git add backlog/` 已跑）
+- [ ] Backlog 自動建卡已完成（新增 UC 已有對應卡 + EP 整體追蹤卡；建卡已 commit——`chore(backlog)` 顆粒）
 - [ ] Scenario Matrix 已填寫（大型/中型變更；涵蓋 happy path、錯誤操作、邊界、效能期待差異）
 - [ ] 標題明確且獨立
 - [ ] Context 包含所有必要背景

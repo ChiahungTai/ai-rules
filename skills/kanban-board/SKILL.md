@@ -18,15 +18,18 @@ backlog init "<project>" --agent-instructions none
 ```
 
 - `--agent-instructions none`：不注入 CRITICAL_INSTRUCTION 區塊（與本 repo AGENTS.md 治理／元資訊禁令衝突）
-- config.yml 關鍵鍵：`statuses`（建議三欄 To Do/In Progress/Done）、`task_prefix`（repo 識別前綴，如 mosaic=`mos`、ai-rules=`air`）、`auto_commit: false`（外部 git 紀律——CLI 只改檔）
+- config.yml 關鍵鍵：`statuses`（建議三欄 To Do/In Progress/Done）、`task_prefix`（repo 識別前綴，如 mosaic=`mos`、ai-rules=`air`）、`auto_commit: false`（外部 git 紀律——CLI 只改檔）、`check_active_branches: true`（多 WT repo 必開——board 唯讀顯示他 branch 已 commit 卡＋next-id 掃描跨 branch 卡防撞；untracked/staged 卡不在 branch ref 上，git 掃描天生看不見，殘餘防撞靠建卡預掃〔見命令合約建卡段〕）
 
 ## 命令合約（消費端引用本段）
 
 **建卡**（execution-plan UC 盤點）：
 ```bash
-backlog task create "<標題>" -l <labels> -d <目標一句> [--ac "<驗收條件>"]
-git add backlog/    # 建卡即 staged（autoCommit=false 下 CLI 不 commit）
+# 多 WT id 防撞預掃（單 WT repo 跳過）：跨 WT 檔案系統全域 max id——涵蓋 git 掃描盲區（他 WT untracked/staged 卡）
+for wt in $(git worktree list --porcelain | rg "^worktree " | cut -d" " -f2); do ls "$wt/backlog/tasks/" 2>/dev/null; done | rg -o '^[a-zA-Z]+-[0-9.]+' | sort -V | tail -1
+backlog task create "<標題>" -l <labels> -d <目標一句> [--ac "<驗收條件>"]   # CLI id=本 WT max+1，無 --id 可指定
+git add backlog/ && git commit -m "chore(backlog): <卡id> <標題>"   # 建卡即 commit（批次建卡併一顆）——跨 WT id 防撞靠卡及時進 branch ref；user 裁定此形態免逐次確認（例外條款見 [outward-action-consent](../../rules/outward-action-consent.md)「Commit 專屬段」）
 ```
+**預掃衝突處置**：預掃輸出的全域最高 id 高於本 WT 所見最高 id → 他 WT 有未進版控的更高卡，CLI 自動配 id 會撞號 → **停下協調**（他 WT 卡 commit 進 branch 後 cross-branch 掃描接手，再建卡），不得就地建。
 **建卡 desc gate**（跨 session To Do 卡必過；session 內即辦豁免）：`desc` 須含三必有——①`baseline`（`〔baseline：<repo> <hash>〕`）②`已決策勿重辯`（`〔已決策勿重辯：①…〕`）③`驗收`（`〔驗收：…〕`）；語義在場即可，標記形式不限。軟自查：`rg -c "baseline|已決策|驗收" backlog/tasks/<卡>.md` 應 ≥3（豁免卡除外）。
 
 **建卡前去重**（中）：`backlog search <關鍵詞>` + 查 `ai-analysis/_inbox/pending-decisions.md`（與同域 `open-items.md`；例：mosaic 側 `marking/open-items.md`）待處理段，命中則復用/連結既有指針，不重複承諾（一行指針 ≠ 承諾，`backlog` 卡 = 承諾）。
@@ -87,6 +90,13 @@ bash <skills 根>/kanban-board/scripts/backlog_precheck.sh [卡id ...]   # skill
 |------|------|------|
 | Web board | `backlog browser` | `127.0.0.1:6420`（config `default_port`）；WebSocket 雙向 live——CLI/AI 改檔→瀏覽器秒更、拖卡→frontmatter 變更 |
 | TUI | `backlog board` | 終端互動板（fs.watch live）；CJK 寬度有測試釘住，邊角字形留意 |
+
+**Web board port 慣例**：per-repo 固定 port（config `default_port` 各 repo 全域唯一——例 mosaic=6420、ai-rules=6422；**6421 保留給 report server／md viewer**）。`backlog browser` 對 port 衝突**不報錯——靜默跳下一個可用 port**（明確帶 `--port` 亦同，警告只印 stdout；無參數啟動＋default port 被佔即產生冗餘 server）。啟動三步：
+```bash
+lsof -iTCP:<port> -sTCP:LISTEN -P                 # ① 先查：佔用者（lsof -p <PID> | rg cwd）cwd=同 repo → 沿用既有 server 不重啟；異 repo/異程式 → 配置衝突，停手回報
+backlog browser --no-open --port <port> &         # ② 起服務永遠帶 --port
+lsof -iTCP:<port> -sTCP:LISTEN -P | rg backlog    # ③ 驗證實際綁的 port——靜默 fallback 下 exit 0 ≠ 綁對 port
+```
 
 ## 與官方工作流的差異宣告（兩條）
 
