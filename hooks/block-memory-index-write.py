@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+r"""
 PreToolUse hook（matcher Edit|Write|NotebookEdit）: memory 寫入治理（兩層）。
 
 ① MEMORY.md 手寫攔截——索引是 _generate_index.py 的機械投影（條目檔
