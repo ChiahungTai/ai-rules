@@ -605,9 +605,9 @@ def test_regen_skips_pool_without_generator(tmp_path):
 
 
 def test_generator_frontmatter_violation_fail_loud(tmp_path):
-    """F-1②：frontmatter 違規（缺 type）→ exit 1＋[FAIL] 含檔名＋不寫入。
-
-    fail-loud 硬 gate 路徑之一（frontmatter 違規；chars 邊界由 SM-9、lines 由 gate_fail_loud 錨定——bytes 已降 info，另由 SM-3 錨定）。
+    """F-1②／AIR-27 CC 式：frontmatter 違規（缺 type）→ exit 1＋[FAIL] 含檔名
+    ＋**壞條目跳過、合法條目照常寫出**——一個壞檔不再擋全部條目的投影
+    （原拒寫＝停滯面比 size gate 更大，與「拒寫＝召回斷裂」原則自相矛盾）。
     """
     pool = make_pool(tmp_path, n=1)
     (tmp_path / "bad-entry.md").write_text(
@@ -615,6 +615,27 @@ def test_generator_frontmatter_violation_fail_loud(tmp_path):
     )
     r = subprocess.run(
         [sys.executable, str(pool / "_generate_index.py")],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 1
+    assert "bad-entry.md" in r.stdout
+    idx_path = pool / "MEMORY.md"
+    assert idx_path.exists()  # CC 式：合法條目照常投影
+    idx = idx_path.read_text(encoding="utf-8")
+    assert "proj-000" in idx  # 合法條目在場
+    assert "bad-entry" not in idx  # 壞條目被跳過
+
+
+def test_generator_frontmatter_violation_check_does_not_write(tmp_path):
+    """AIR-27 對稱邊界：errs＋--check → 不寫入（--check 零副作用對兩種 gate 一致）。"""
+    pool = make_pool(tmp_path, n=1)
+    (tmp_path / "bad-entry.md").write_text(
+        "---\nname: bad-entry\ndescription: 缺 type\n---\nbody\n", encoding="utf-8"
+    )
+    r = subprocess.run(
+        [sys.executable, str(pool / "_generate_index.py"), "--check"],
         capture_output=True,
         text=True,
         check=False,

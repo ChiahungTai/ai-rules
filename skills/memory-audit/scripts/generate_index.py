@@ -5,8 +5,8 @@
 #   硬 gate（fail-loud exit 1＋行動訊息；超限時**索引照寫出**〔--check 除外〕——
 #     2026-09-05 S1/AIR-25 改 CC 式，官方 memory.md:401-403「write still succeeds +
 #     error telling Claude to rewrite」；size gate 拒寫會停滯索引＝新條目不可見＝
-#     召回斷裂。**frontmatter 違規 errs 路徑維持拒寫**——該路徑 CC 化〔跳過壞條目
-#     照寫＋列名〕列 AIR-25 後議，見 EP 處置表）：
+#     召回斷裂。**errs 路徑（frontmatter 違規）同 CC 式（AIR-27）**：壞條目跳過、
+#     合法條目照常寫出＋exit 1 列名壞檔——一個壞檔不擋全部條目投影：
 #     >22,500 字元 或 >190 行——守兩端共同截斷線（200 行／25,000 字元）
 #   bytes info（照常寫入、exit 0）：>24,000 bytes 印 [INFO] 一行——縱深預警
 #     （非任何 harness 的實際截斷線：兩端皆量 chars；CJK 一字 3B，bytes 提前折射）
@@ -102,12 +102,6 @@ def main() -> int:
             continue
         hook = desc if len(desc) <= TRUNCATE_DESC else desc[: TRUNCATE_DESC - 1] + "…"
         entries.append((typ, f.stem, f.name, hook))
-    if errs:
-        print(
-            "[FAIL] frontmatter 違規（需 name/description/type∈user|feedback|project|reference）:"
-        )
-        print("\n".join(errs))
-        return 1
     lines = [
         "# Memory Index",
         "",
@@ -130,6 +124,17 @@ def main() -> int:
         if n_bytes > GATE_BYTES
         else ""
     )
+    if errs:
+        print(
+            info
+            + "[FAIL] frontmatter 違規（需 name/description/type∈user|feedback|project|reference）"
+            f"——{len(errs)} 檔跳過、未進索引：\n"
+            + "\n".join(errs)
+            + "\n[提示] 索引已以合法條目照常寫出（CC 式——壞條目不擋投影，AIR-27）；修好後重跑"
+        )
+        if not check_only:  # --check 零副作用（與 size gate 同 guard）
+            write_index(here, content)
+        return 1
     if n_chars > GATE_CHARS or n_lines > GATE_LINES:
         wrote = ""
         if not check_only:  # --check 零副作用語義不變（SM-2 guard）
