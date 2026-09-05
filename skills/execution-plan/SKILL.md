@@ -163,7 +163,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
    - 刪碼/退役場景 → `code-reality hub_refs <sym> --hazard --repo <repo>`（動態派發盲區安全網）
    - **字串鍵互補腿**：觸碰欄位名 / config key 類 literal → `rg "<literal>"` 掃非符號消費者（測試常以字串鍵驅動 meta 比對——符號查詢與 CR 圖皆不可見）
    - **誠實界線**：CR 查詢是 ripple 宣稱的必要證據、非充分證據——字串鍵/meta 耦合、registry 動態派發、runtime 行為是 CR 盲區（清單見 cr-query anti-over-reliance），靠上列互補腿覆蓋；**「CR 全綠」≠ 無 ripple**
-   - **投影圖（僅整合器型/跨模組 EP；觸發條件與 scope 升級同套）**：全域研究後寫 projection plan——EP 同層 `projection/plan.toml`＋假想碼放同層 `sources/`（格式真相源 `code-reality project --help`）→ 跑 `code-reality project --repo <repo> --plan <plan.toml>` → 報告的 graft surface（規劃新符號的投影 callers 反向鏈）與 claims 判定**帶 `[projected]` 標籤**寫進「依賴關係」產出（與本組 CLI 查詢並列）；`[projected]`＝宣告非證據（洗衣陷阱防護，判讀語義見 [cr-query](../cr-query/SKILL.md)）
+   - **投影圖（僅整合器型/跨模組 EP；觸發條件與 scope 升級同套）**：全域研究後寫 projection plan——EP 同層 `projection/plan.toml`＋假想碼放同層 `sources/`（格式真相源 `code-reality project --help`）；**plan `[meta]` 的 project/version 必須等於目標 repo 的 pyproject identity**（symbol ID 是 join 鍵，不符則投影邊全部靜默不歸因——fail-loud 驗證會擋）→ 跑 `code-reality project --repo <repo> --plan <plan.toml>` → 報告的 graft surface（規劃新符號的投影 callers 反向鏈）與 claims 判定**帶 `[projected]` 標籤**寫進「依賴關係」產出（與本組 CLI 查詢並列）；`[projected]`＝宣告非證據（洗衣陷阱防護，判讀語義見 [cr-query](../cr-query/SKILL.md)）
 3. **類似實作**：LSP `workspaceSymbol` 搜尋相似名稱的 class/function，rg 補充搜尋字串和註解
 4. **風險假設識別**：列出高風險技術假設（外部 API、SDK 行為、架構假設），標注由哪個段落的驗證策略 POC 驗證（吸收舊 `/spec` Phase 3 前期 POC 職責）
    - **致命先驗**：標注為「致命」等級的假設（假設錯了整個 EP 要重寫，等級定義見 [/ep-validate](../ep-validate/SKILL.md)）—— 先跑 `poc/poc_*.py` 驗證可行性再繼續設計段落，避免寫完整 EP 才發現方向死掉；高等級與中等級保留在各段落驗證策略
@@ -354,8 +354,8 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類導讀殼（Report Shell，user 裁決：「EP 我現在很少看了，太難理解」——md 給 AI，殼給人）：
 
-- 產物＝任務家 `MM-DD-<task-name>/index.html`（+ 可選 archify 圖；**任務家探測**見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」）——完整規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「html 報告殼」段（三層結構/內容篩選通則/敘事骨架/雙向一致性/殼生命週期掛點），此處不重述
-- **成本分級**：基礎款（複製 template [`skills/_common/illustrate-report-shell.html`](../_common/illustrate-report-shell.html)＋填 slot）**必備**；升級款（+archify workflow/architecture 圖）按 EP 規模（多段/有結構主張）或 user 點名
+- 產物＝任務家 `MM-DD-<task-name>/index.html` **骨架**（零渲染管線內容——HTML 塊/表格可寫進敘事；mermaid/archify 圖**延 hook 2 一次產**，diagram 槽留 degraded 待裝；**任務家探測**見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」）——完整規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「html 報告殼」段（三層結構/內容篩選通則/敘事骨架/雙向一致性/殼生命週期掛點），此處不重述
+- **成本分級**：基礎款（複製 template [`skills/_common/illustrate-report-shell.html`](../_common/illustrate-report-shell.html)＋填 slot）**必備**；升級款（+圖）於 **hook 2** 依 [diagram-selection](../diagram-selection/SKILL.md) 選型補——按 EP 規模（多段/有結構主張）或 user 點名
 - 投影鎖定 EP 當下狀態（殼頭部聲明 **EP 路徑＋task integration baseline＋projection source**；未 commit 的 EP 用 content SHA——下游 `/post-build`/`code-review` 弧模式跨 session 可從殼讀，任務起點與投影新鮮度不混用）；badge 📋——推進時 badge 同步掛 implement 階段 5a，實作章節掛 post-build hook 2（無 post-build 弧 fallback implement 階段 6；詳 [implement](../implement/SKILL.md)）
 - 交付時引導 user 開殼 review（大方向判讀用殼、批准後進 `/implement`；AI 消費仍以 md 為源）
 
