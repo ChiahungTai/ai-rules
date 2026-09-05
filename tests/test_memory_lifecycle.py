@@ -324,9 +324,15 @@ def test_entry_write_desc_overlong_blocked(tmp_path):
 
 
 def test_entry_write_body_overlimit_blocked(tmp_path):
-    """Write content 13,000 chars（>12,000，desc 合規）→ exit 2——EP 流水該住 EP 檔。"""
+    """既有條目 Write 覆寫 13,000 chars（>12,000，desc 合規）→ exit 2——膨脹治理管既有檔；
+    新建檔的等價場景由新建閘（3,000）先攔，見 test_entry_write_new_entry_overlimit_blocked。"""
     pool = make_pool(tmp_path, n=1)
     target = pool / "fat-body.md"
+    target.write_text(
+        "---\nname: fat-body\ndescription: 合規短述\nmetadata:\n  type: project\n---\n"
+        + "x" * 11_000,
+        encoding="utf-8",
+    )
     r = run_hook(
         hook_payload(
             "Write",
@@ -348,6 +354,46 @@ def test_entry_write_within_limits_allowed(tmp_path):
             "Write",
             target,
             content="---\nname: ok-entry\ndescription: 合規短述\nmetadata:\n  type: project\n---\nbody\n",
+        )
+    )
+    assert r.returncode == 0
+
+
+def test_entry_write_new_entry_overlimit_blocked(tmp_path):
+    """新建條目（target 不存在）content >3,000 → exit 2——寫入當下即蒸後形。
+
+    09-06 user 拍板「不要寫一堆廢話後來再 audit」：新條目直寫敘事流水
+    （timeline/過程/commit 清單）是池膨脹主入口——12K 膨脹治理對 cur=0 的
+    新建檔案無約束力，此閘補真空。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "new-fat-entry.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content="---\nname: new-fat-entry\ndescription: 合規短述\nmetadata:\n  type: project\n---\n"
+            + "y" * 3_500,
+        )
+    )
+    assert r.returncode == 2
+    assert "3,000" in r.stderr
+
+
+def test_entry_rewrite_existing_not_new_entry_gate(tmp_path):
+    """既有條目 Write 覆寫（cluster merge 收斂/維護場景，cur>0）不走新建閘——仍走 12K 膨脹治理。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "existing-entry.md"
+    target.write_text(
+        "---\nname: existing-entry\ndescription: 合規短述\nmetadata:\n  type: project\n---\n"
+        + "z" * 4_500,
+        encoding="utf-8",
+    )
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content="---\nname: existing-entry\ndescription: 合規短述\nmetadata:\n  type: project\n---\n"
+            + "z" * 5_000,
         )
     )
     assert r.returncode == 0
@@ -621,6 +667,33 @@ def test_regen_runs_generator_once_with_symlink_dedupe(tmp_path):
 def test_regen_skips_pool_without_generator(tmp_path):
     regen.zcode_memory_dir("/x/p", tmp_path).parent.mkdir(parents=True)
     assert regen.run_for_cwd("/x/p", tmp_path) == []
+
+
+def test_regen_stale_copy_writes_skip_marker(tmp_path):
+    """副本與資產源不符 → 跳過執行＋寫 _regen-skipped-stale。
+
+    09-06 pending-decisions ③查證產出：byte 比對跳過是 by-design（信任邊界），
+    但跳過路徑 stdout 不進 context＝靜默停滯——marker 讓停滯 fail-visible。"""
+    zdir = regen.zcode_memory_dir("/Users/ctai/Github/ai-rules", tmp_path)
+    zdir.mkdir(parents=True)
+    make_pool(zdir, n=1)
+    g = zdir / "_generate_index.py"
+    g.write_text(g.read_text(encoding="utf-8") + "# stale\n", encoding="utf-8")
+    notes = regen.run_for_cwd("/Users/ctai/Github/ai-rules", tmp_path)
+    assert any("不符" in n for n in notes)
+    assert not (zdir / "MEMORY.md").exists()  # 未執行 generator
+    assert (zdir / "_regen-skipped-stale").exists()  # 停滯可見
+
+
+def test_regen_fresh_run_clears_skip_marker(tmp_path):
+    """副本相符成功執行 → 清 _regen-skipped-stale（殘留標記隨修復消失）。"""
+    zdir = regen.zcode_memory_dir("/Users/ctai/Github/ai-rules", tmp_path)
+    zdir.mkdir(parents=True)
+    make_pool(zdir, n=1)
+    (zdir / "_regen-skipped-stale").write_text("殘留\n", encoding="utf-8")
+    regen.run_for_cwd("/Users/ctai/Github/ai-rules", tmp_path)
+    assert (zdir / "MEMORY.md").exists()  # generator 有跑
+    assert not (zdir / "_regen-skipped-stale").exists()
 
 
 def test_generator_frontmatter_violation_fail_loud(tmp_path):

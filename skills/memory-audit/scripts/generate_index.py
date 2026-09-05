@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # MEMORY.md 索引 generator——條目檔 frontmatter 是單一 source，索引是其機械投影。
 # 用法: python3 _generate_index.py [--check]（--check 只驗證不寫入、零檔案系統副作用）
+# 部署形態：本檔是資產源 ai-rules repo skills/memory-audit/scripts/generate_index.py
+#   的副本（複製進各專案 memory dir、更名 _generate_index.py）。副本與資產源 bytes
+#   不符時 Stop hook（hooks/memory-index-regen.py 信任邊界）跳過重生成並留
+#   _regen-skipped-stale 標記——刷新：cp <資產源> ./_generate_index.py.new
+#   && mv ./_generate_index.py.new ./_generate_index.py（原子）；詳情 memory-audit skill 層 1。
 # Gate 分級（2026-09-03 裁決「zcode 優先」——ZCode 為主力 harness）：
 #   硬 gate（fail-loud exit 1＋行動訊息；超限時**索引照寫出**〔--check 除外〕——
 #     2026-09-05 S1/AIR-25 改 CC 式，官方 memory.md:401-403「write still succeeds +

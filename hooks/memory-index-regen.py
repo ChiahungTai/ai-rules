@@ -78,6 +78,16 @@ def run_for_cwd(cwd: str, home: Path) -> list[str]:
                 f"[memory-index-regen] {d}: generator 與資產源不符——跳過執行"
                 "（cp 刷新部署副本或移除）"
             )
+            # 跳過是 by-design（信任邊界），但 stdout 不進 context＝靜默停滯——
+            # marker 讓「索引不再自動重生成」fail-visible（09-06 pending-decisions ③）
+            try:
+                (d / "_regen-skipped-stale").write_text(
+                    "generator 與資產源不符——Stop hook 跳過重生成；"
+                    "cp 資產源刷新本副本後，下次成功 regen 自動移除本標記\n",
+                    encoding="utf-8",
+                )
+            except OSError:
+                pass
             continue
         r = subprocess.run(
             [sys.executable, str(gen)], capture_output=True, text=True, check=False
@@ -95,6 +105,9 @@ def run_for_cwd(cwd: str, home: Path) -> list[str]:
                 marker.write_text(last + "\n", encoding="utf-8")
             elif marker.exists():
                 marker.unlink()
+            stale_marker = d / "_regen-skipped-stale"
+            if r.returncode == 0 and stale_marker.exists():
+                stale_marker.unlink()
         except OSError:
             pass
     return notes

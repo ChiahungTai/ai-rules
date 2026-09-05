@@ -44,6 +44,7 @@ from pathlib import Path
 GENERATOR_NAME = "_generate_index.py"
 DESC_LIMIT = 100  # frontmatter description 硬上限（＝寫入紀律值；09-03 P1 對齊）
 BODY_LIMIT = 12_000  # 條目檔總長上限（chars）
+NEW_ENTRY_LIMIT = 3_000  # 新建條目上限——寫入當下即蒸後形（cur=0 時 12K 膨脹治理無約束力，此閘補真空）
 HASH_RE = re.compile(
     r"\bcommit[s]?\s+(?=[0-9a-fA-F]*[0-9])[0-9a-fA-F]{7,}"
 )  # desc 禁 commit hash（09-05 S2；digit-lookdown 排除純字母 hex 形態——實戰偽陽性「commit feedback」〔feedbac 恰 7 hex〕，真 hash 7+ 碼全字母機率≈0.01%）
@@ -148,6 +149,16 @@ def main() -> None:
             )
             sys.exit(2)
         cur = len(target.read_text(encoding="utf-8")) if target.exists() else 0
+        if cur == 0 and len(content) > NEW_ENTRY_LIMIT:
+            print(
+                f"[Hook Blocked] 新建條目 {len(content):,} chars > {NEW_ENTRY_LIMIT:,}——寫入當下就該是蒸後形。\n"
+                "新條目直寫敘事流水（timeline 過程/commit 清單/findings 計數）是池膨脹主入口——\n"
+                "超額內容住 EP/卡/repo，不是「先寫再等 audit 壓」（09-06 user 拍板）。\n"
+                "修正方式：lesson-first 一行一事實（教訓＋實證錨一行），壓縮後重寫；\n"
+                "既有條目覆寫（cluster merge 收斂）不受此閘，走 12K 膨脹治理。",
+                file=sys.stderr,
+            )
+            sys.exit(2)
         if len(content) > BODY_LIMIT and len(content) >= cur:
             print(
                 f"[Hook Blocked] 條目檔 {len(content):,} chars > {BODY_LIMIT:,}。\n"
