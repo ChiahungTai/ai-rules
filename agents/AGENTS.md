@@ -13,47 +13,21 @@ agents/
   claude/   # 生成物（~/.claude/agents → 此）：roles 投影（省略 model/thoughtLevel；tools 減 CR MCP 行）
 ```
 
-- **「指定哪個 harness 用哪些 agent」＝role 出現在哪些 registry**（機制，非命名紀律）。**registry 內是實檔拷貝非 symlink**——ZCode registry 不載入 file-level symlink（2026-08-29 對照實驗定案：目錄 symlink 可穿透〔頂層 ~/.zcode/agents → agents/zcode 生效〕、檔案 symlink 靜默不載；hardlink 被 clone 破壞不可用）
+- **「指定哪個 harness 用哪些 agent」＝role 出現在哪些 registry**（機制，非命名紀律）。**registry 內是實檔拷貝**——理由＝per-harness frontmatter 差異需整檔分歧（zcode pins／claude 減 CR MCP 行），symlink 是整檔單位無法承載差異。ZCode loader 可載入 file-level symlink（2026-09-06 新 session 對照實驗：symlink／實檔探針皆載入，推翻 08-29「檔案 symlink 靜默不載」舊判決——舊判決疑為快照過期混淆）；hardlink 被 clone 破壞不可用，symlink 為 git 原生追蹤
 - **同步紀律（生成式）**：**只改 `roles/`**，改完 `uv run python scripts/sync_agents.py` 重建兩 registry；`--check`＝唯讀 drift gate（生成物 vs roles 不一致→exit 1 列清單，check_single_source 有 invariant 接線）；`--map`＝role→registry 可用性表（文字表機械對帳源）；stale cleanup 只刪 marker-owned 生成物——**unmarked 檔是人工檔，永不自動刪**，與 expected 同名的 unmarked 檔＝fail loud（防 fork 被靜默收編）。**已知刻意分歧（2026-08-30 T2-3，由生成器承載）**：claude 拷貝 tools 減 CR MCP 白名單行（`mcp__plugin_code-reality_code-reality__*` 四顆）
 - **pin 單一源紀律**：zcode/ 生成檔的 pins 由 `sync_agents.py` 部署預設表給出（requirement 分類〔tier 詞 full/vision/lite〕由 `--map` 表承載），值抄 model-routing skill tier×provider 權威表（zai 欄＋部署填法 effort），runtime parity guard 對該表校驗（model＋effort 雙層）——改表 → 改 sync_agents dict → 重跑 sync
 - **UI 防護規則**：不在 ZCode 設定 UI 編輯 registry 檔（model／思考強度／正文皆然）——zcode/claude/ 是**生成物**（檔頭 ownership marker 標記），UI 編輯會被下次 sync **無預警覆蓋**；要改角色 → 改 `roles/` 源；要改 pins → 改 sync_agents 部署預設表（**在 zcode/ 建 fork 已非合法形態**——同名 unmarked 檔會擋 sync）
 - **tier 命名**：能力語義命名（lite-verify／spec-miner，非具體模型名-*——model 每代換名，改名級聯）；例外＝rescue 類（引擎在本質內，如 codex-rescue）。tier 詞彙定義在 `rules/model-routing.md`，此處引用不自帶
 - **生效時機**：ZCode 改動需新建 session（快照制；app 重啟續接同對話亦刷新）；CC 定義檔即時監聽。翻轉頂層 symlink／更新 registry 拷貝後以首個新 session 驗證
-- **external-runtime 職責**：本 registry 亦承載 external-runtime 委派的入口指派（family／profile 映射見 `skills/model-routing/SKILL.md`，詞彙定義見 `rules/model-routing.md` tier 詞彙句）；詳見下節 thin forwarder 與 flag profile。
+- **external-runtime 職責**：本 registry 亦承載 external-runtime 委派的入口指派（family／profile 映射見 `skills/model-routing/SKILL.md`，詞彙定義見 `rules/model-routing.md` tier 詞彙句）；詳見下節 thin forwarder。
 
-## Thin forwarder 與 flag profile
+## Thin forwarder（external-runtime 家族入口）
 
-> 治理原則：external-runtime 家族入口＝單一 thin forwarder（工單即介面），**不長特化 agent**——routing 混入 transport agent 的前車之鑑（`~/Github/muse-plugin-cc/FIX-S3-R2.md:49`）。跨 harness agent 定義保持 thin，路由決策與解析表在 `skills/model-routing/SKILL.md`（詞彙定義在 `rules/model-routing.md`），flag 具體值見同 skill 解析表，工單協議在 `skills/_common/work-order.md`。
+> 治理原則：external-runtime 家族入口＝單一 thin forwarder（工單即介面），**不長特化 agent**——routing 混入 transport agent 的前車之鑑（`~/Github/muse-plugin-cc/FIX-S3-R2.md:49`）。跨 harness agent 定義保持 thin，路由決策與解析表在 `skills/model-routing/SKILL.md`（詞彙定義見 `rules/model-routing.md` tier 詞彙句），工單協議在 `skills/_common/work-order.md`。
 
-- **原則**：muse／codex 家族不新增特化 agent 定義檔；任務以工單為介面派發（派發形態見下方 dispatch face 與收法——muse 預設直呼 bridge CLI，wrapper 為別名），profile 決定 spawn 形態。
-- **flag profile 表（形態）**：具體值見 `skills/model-routing/SKILL.md` external-runtime 解析表，本表只寫形態。
-
-| profile | family | spawn 形態 | 說明 |
-|---------|--------|------------|------|
-| advisory | muse | read-only（bridge 暴露 `--disable-write` 前由工單紅線承載，暴露後改 flag） | 唯讀掃描，禁寫入 |
-| implement | muse | `trust-workspace` | 實作寫入型，背景跑 |
-| implement | codex | `workspace-write` | 診斷／救援寫入型 |
-| review | muse | bridge `review` 子命令（schema verdict） | 產出 accept／reject／needs-fix |
-| review | codex | `--output-schema` | 同上，codex 形態 |
-
-> 外部 runtime flag 未暴露項的對策：以工單紅線替代（見 `skills/_common/work-order.md` 紅線首段），flag 暴露列 muse-plugin-cc 側 bridge roadmap（本 repo 不動跨 repo，僅記錄）。
-
-### dispatch face 與收法
-
-- **muse 委派必經 bridge——預設形態＝主 session 直呼 bridge CLI**：背景 Bash 掛 bridge 阻塞呼叫（`task` 阻塞形或 `wait <jobId>`）→ process exit 喚醒主 session、stdout 即終局輸出；`.muse-bridge/jobs.json`／`ps` 核對降級為**診斷手段**（非收法）。繞開 wrapper 生命週期錯位——wrapper 在 runtime 未終局時提前 complete 是系統性常態（本弧實證：muse×2＋codex×2 均需介入），直呼橋接層不經 wrapper 轉發；wrapper agent 形態為別名（alias）。「必經」＝禁繞過 bridge 直呼 `muse exec` 等（ledger 可考性——規範單一源見 `skills/model-routing/SKILL.md`「bridge 必經」）
-- **codex 委派＝主 session 背景 Bash 直呼 `codex-companion task`（阻塞形）＋prompt 內預寫 env fallback**：prompt 內預寫 plugin root 路徑的 env 兜底（`CLAUDE_PLUGIN_ROOT` 缺失時 `MODULE_NOT_FOUND` 形態）不變；wrapper 保留 prompt 工程場景（wrapper 內單次阻塞 `task`）——wrapper Bash 10min 上限是約束事實、wrapper≠job 錯位是獨立實證、兩者因果未驗證，預期超時的工單改走直呼
-- **LLM 層 fallback 紀律（罕見——原始派發無背景 Bash 掛載時；前景短 arm 仍可用）**：ETA-gate——推估完成時刻前零檢查（一段 `--timeout <eta>` arm）；屆時單次檢查；未終局 → 重掛遞減 timeout 的阻塞 wait arm（起點＝bridge 預設 5min／4min，按 ETA 緊化至 ~30s 級；每 arm 到期＝1 request）——永不做 LLM 層定時輪詢
-- **收法經濟學**：LLM 層輪詢每輪＝1+ request 且全 context 重送；push 收法等待期間 0 request、完成時恰好 1 request
-
-> 長跑兩段式（`--background` 拿 jobId → 掛 `wait`）與 timeout 到期訊號拆家系（muse 5min＝exit 124；codex 4min＝正常 exit 0＋`waitTimedOut` 旗標、無 0=forever）見 `skills/model-routing/SKILL.md`「完成回報收法」決策樹。
-
-### 三態判定（症狀→證據→處置）
-
-| 症狀 | 證據 | 處置 |
-|------|------|------|
-| transport 未啟動 | env/module 錯誤、log `MODULE_NOT_FOUND`、exit 1、jobs.json 無該 job | 可安全重派 |
-| transport 在跑、wrapper 已收 | jobs.json 狀態 running、ps 進程在 | 背景 Bash 掛阻塞 `wait` 收，禁重派（雙跑） |
-| transport 死中途、wrapper 空轉 | 進程已亡、jobs.json 停滯、無新輸出 | 機械驗收（working tree＋jobs.json 終局）＋TaskStop wrapper |
+- **原則**：muse／codex 家族不新增特化 agent 定義檔；任務以工單為介面派發，profile 決定 spawn 參數。
+- **派發與收法單一源**：flag 具體值（flag profile → spawn 參數表）、dispatch 形態（bridge 必經、直呼 bridge CLI）、收法（push 決策樹／ETA-gate）、transport 三態判定（未啟動／在跑／死中途）——單一源在 `skills/model-routing/SKILL.md`，本檔不複載。
+- **flag 未暴露項對策**：以工單紅線替代（見 `skills/_common/work-order.md` 紅線首段），flag 暴露列 muse-plugin-cc 側 bridge roadmap（本 repo 不動跨 repo，僅記錄）。
 
 ## 全生命週期 execution contract
 

@@ -1,6 +1,6 @@
 ---
 name: model-routing
-description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/隨意〕×五公司，model 值單一源）＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋flash 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法。
+description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/隨意〕×五公司，model 值單一源）＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋flash 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定。
 ---
 
 # Model Routing — 解析表與 provider 事實
@@ -124,7 +124,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 ### flag profile → spawn 參數（external-runtime）
 
-> 本表為 flag 具體值單一源；`agents/AGENTS.md` 的 flag profile 表只寫形態並引用此處。bridge 未暴露的 flag 以工單紅線承載（見 `skills/_common/work-order.md`），暴露後改 flag；roadmap 記錄在 muse-plugin-cc 側。
+> 本表為 flag 具體值單一源（registry 側只留 thin forwarder 治理原則，見 `agents/AGENTS.md`）。bridge 未暴露的 flag 以工單紅線承載（見 `skills/_common/work-order.md`），暴露後改 flag；roadmap 記錄在 muse-plugin-cc 側。
 
 | profile | family | spawn 參數 | 說明 |
 |---------|--------|------------|------|
@@ -147,12 +147,22 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
    - **muse `wait <jobId>`**：裸 wait 撞預設 5min＝`process.exit(124)`——exit 124＋status 仍 running＝重掛；`--timeout 0`＝forever（長跑必帶）
    - **codex `status --wait <jobId> --json`**：timeout 到期（預設 4min）＝**正常 exit 0**、JSON 帶 `waitTimedOut: true`——以此旗標判讀重掛（124 偵測對 codex 永不觸發）；**codex 無 0=forever**——`--timeout-ms 0` 靜默回落 4min 預設（`codex-companion.mjs:319` `Number(timeoutMs)||DEFAULT`），只能顯式大值
    - 任一家回非 completed 終態 → `jobs/<id>.jsonl`＋working tree 對照再判（reconcileStaleRunning 可能過早標 interrupted）
-3. **prompt 工程（codex gpt-5-4-prompting 改寫）**：wrapper 保留——wrapper 內單次阻塞 `task`＋env fallback 預寫不變；wrapper Bash 10min 上限是**約束事實**、wrapper≠job 錯位是**獨立實證**、兩者因果未驗證——預期超時的工單改走 2
+3. **prompt 工程（codex gpt-5-4-prompting 改寫）**：wrapper 保留——wrapper 內單次阻塞 `task`＋env fallback 預寫不變（`CLAUDE_PLUGIN_ROOT` 缺失時 `MODULE_NOT_FOUND` 形態）；wrapper Bash 10min 上限是**約束事實**、wrapper≠job 錯位是**獨立實證**（wrapper 在 runtime 未終局時提前 complete 是系統性常態——muse×2＋codex×2 均需介入實證；wrapper agent 形態＝別名 alias）、兩者因果未驗證——預期超時的工單改走 2
 4. **LLM 層 fallback（罕見——原始派發無背景 Bash 掛載；前景短 arm 仍可用）**：ETA-gate 紀律——推估完成時刻前零檢查（一段 `--timeout <eta>` arm）→ 屆時單次檢查 → 未終局重掛遞減 timeout 的阻塞 wait arm（起點＝bridge 預設 5min／4min，按 ETA 緊化至 ~30s 級；每 arm 到期＝1 request）——**永不做 LLM 層定時輪詢**
 
 > **診斷手段（非收法）**：`.muse-bridge/jobs.json`／`show <jobId> --json`／`ps` 進程核對——懷疑 job 狀態時用它們查證，不當等待機制。
 
 > 工單模板見 `skills/_common/work-order.md`（foreign runtime 共用；prompt 為任務本文，禁含委派語言）。
+
+#### transport 三態判定（症狀→證據→處置）
+
+> 收法執行中懷疑 job 卡死時的處置分流；證據以上方診斷手段採集。
+
+| 症狀 | 證據 | 處置 |
+|------|------|------|
+| transport 未啟動 | env/module 錯誤、log `MODULE_NOT_FOUND`、exit 1、jobs.json 無該 job | 可安全重派 |
+| transport 在跑、wrapper 已收 | jobs.json 狀態 running、ps 進程在 | 背景 Bash 掛阻塞 `wait` 收，禁重派（雙跑） |
+| transport 死中途、wrapper 空轉 | 進程已亡、jobs.json 停滯、無新輸出 | 機械驗收（working tree＋jobs.json 終局）＋TaskStop wrapper |
 
 ### 套用（三路徑都從解析表取值，不寫死絕對 model）
 
