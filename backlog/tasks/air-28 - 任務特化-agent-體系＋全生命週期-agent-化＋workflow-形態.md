@@ -1,9 +1,10 @@
 ---
 id: AIR-28
-title: 任務特化 agent 體系＋全生命週期 agent 化＋workflow 形態（AIR-26）
-status: To Do
+title: 任務特化 agent 體系＋全生命週期 agent 化＋workflow 形態
+status: In Progress
 assignee: []
 created_date: '2026-09-05 03:19'
+updated_date: '2026-09-05 03:37'
 labels:
   - agents
   - model-routing
