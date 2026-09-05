@@ -129,7 +129,7 @@
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / spawn 預設背景 / 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）
 - `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表＋flash 分工律〔執行層條件式降級＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律〕＋external-runtime family→(model,effort,容量) 解析表＋eligibility gate／reviewer 交接契約／完成回報收法（push 化決策樹：背景 Bash exit 喚醒、timeout 訊號家系拆分、ETA-gate fallback）／套用三路徑、rate limit 並發表、thoughtLevel 但書；rule 端留角色→tier 表＋詞彙定義＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
-- `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離；generator 池層 1 縮為 `--check` 投影驗證——資產 `scripts/generate_index.py`；寫入端紀律＝五問＋desc 三不＋弧結案蒸餾）
+- `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離；generator 池層 1 縮為 `--check` 投影驗證——資產 `scripts/generate_index.py`；寫入端紀律＝六問〔首問任務終態→卡〕＋desc 三不＋弧結案蒸餾〔mem-distill 執行形態〕）
 - `zcode-session-query` —（ZCode 專用）跨 session 查詢與參考：查 session id / 讀指定 session 尾部真人互動（scripts/zcode_tail_chat.py）/ ReadSessionContext（handoff 策略；relevant 大 session 逾時）；handoff / relay 的「讀進來」側；id 禁手打、sqlite3 CLI 無聲空輸出改 python ro uri
 
 ### 工具與查詢

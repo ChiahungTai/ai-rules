@@ -1,6 +1,6 @@
 ---
 name: memory-audit
-description: "memory 清理/稽核/過時/記憶健康檢查＋寫入端紀律（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。寫 memory 前的寫入五問（repo 可推導就不寫/同主題加段/cluster-first/載體判定）、單一寫入點（條目檔 frontmatter 唯一、MEMORY.md 機械投影）、desc/條目尺寸預算＋desc 三不＋弧結案蒸餾見「寫入端紀律」段。觸發詞：寫入五問、cluster-first、單一寫入點、索引投影、desc 上限、結案蒸餾、載體判定、寫 memory。"
+description: "memory 清理/稽核/過時/記憶健康檢查＋寫入端紀律（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。寫 memory 前的寫入六問（任務終態→卡/repo 可推導就不寫/同主題加段/cluster-first/尺寸/載體判定）、單一寫入點（條目檔 frontmatter 唯一、MEMORY.md 機械投影）、desc/條目尺寸預算＋desc 三不＋弧結案蒸餾（含 mem-distill 執行形態）見「寫入端紀律」段。觸發詞：寫入六問、任務終態、cluster-first、單一寫入點、索引投影、desc 上限、結案蒸餾、載體判定、寫 memory。"
 argument-hint: "full | lite | 無參數（讀狀態戳後建議）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 ---
@@ -107,7 +107,7 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 
 **advisory 報告 → 用戶核可 → 執行**。稽核不得自行刪改用戶想留的條目；報告每項附機械證據（file:line / 命令輸出）。驗證紀律（Claim→Evidence、self-report discount 理論基礎）見 [acceptance-evidence](../../rules/acceptance-evidence.md)，不重抄。
 
-## 寫入端紀律：寫入五問與單一寫入點（寫 memory 前必查）
+## 寫入端紀律：寫入六問與單一寫入點（寫 memory 前必查）
 
 > 本段是 `rules/context-management.md`「Memory 生命周期規範」的承載體（rule 留 pointer）——寫入側紀律與稽核側同檔，記憶治理單一源。
 
@@ -120,12 +120,13 @@ harness auto memory 預設「one file = one fact」的「fact」操作定義 = *
 - 裝有 generator（`memory/_generate_index.py`）的專案：寫/改條目檔後跑 `python3 <memory-dir>/_generate_index.py`（Stop hook 亦自動重生成；手寫 MEMORY.md 被 PreToolUse hook 擋）。資產源與部署操作見本 skill generator 段
 - 未裝 generator 的專案：手維護索引，cluster-first 沿用
 
-### 寫入五問（新教訓產生時依序）
+### 寫入六問（新教訓產生時依序）
 
-1. **repo 可推導 or 通用原則？** → git log / instruction 檔 / 程式碼 / **進行中 EP 的進度與狀態（住 EP 檔）**可推導 → 不寫；**LLM 通用做事原則/方法論**（與 user 個人化無關、任何 session 都適用）屬 rules/skills 知識——rule 缺就補 rule，不開 memory 條目。memory 收與 user／專案綁定的事實（偏好、糾正、專案約束、外部資源參照）——通用工程原則不收
-2. **同主題已有？** → `rg -i <關鍵詞> <memory-dir>/` 全檔掃（**不信 MEMORY.md 索引**——載入截斷下尾部條目不可見）；命中 → 既有檔加段（段標題保留原始 name、標 original type）；**進行中弧線條目禁加段**——弧線進度每 session 追加是膨脹主因（實證：單檔 98 次 Edit 養到 84KB），等弧線收案一次性蒸餾；無 → 才開新檔
-3. **project-\* 已完結？** → 任務閉環先收斂既有 project 條目（刪現況細節、留決策教訓）再開新檔
-4. **尺寸預算？** → frontmatter `description` ≤100 chars（索引行原料；>100 被 PreToolUse hook 硬擋——hook 僅攔主 session，subagent 寫入不觸發）；條目檔（含 frontmatter）≤12,000 chars（膨脹超限被 hook 擋；收斂方向＝改後比原檔短，放行）——超額 = 內容該住 EP 檔/repo 的訊號；索引軟上限 150 行，逼近 = cluster merge／收斂觸發
-5. **載體對嗎？** → 每次都要的紀律→rule／on-demand 方法論→skill／跨 session 事實→memory（手冊形內容不住 memory——它該住 skill）；**承諾/待辦→backlog 卡**（memory 只收事實與教訓，不收承諾）
+1. **任務終態 or 活知識？**（09-05 user 拍板，MOS-36 實證）→ 知識生命週期跟不跟任務綁：**任務終態**（弧歷程、session 流水、處理軌跡、已結案任務過程細節）→ 卡/report，**不進 memory**；**跨任務活知識**（行為教訓、活躍線 blocker、入口指針）→ 才繼續往下問。**此問先於「repo 可推導」**——它是分類判準（該不該進 memory），非來源判準（哪裡可查）
+2. **repo 可推導 or 通用原則？** → git log / instruction 檔 / 程式碼 / **進行中 EP 的進度與狀態（住 EP 檔）**可推導 → 不寫；**LLM 通用做事原則/方法論**（與 user 個人化無關、任何 session 都適用）屬 rules/skills 知識——rule 缺就補 rule，不開 memory 條目。memory 收與 user／專案綁定的事實（偏好、糾正、專案約束、外部資源參照）——通用工程原則不收
+3. **同主題已有？** → `rg -i <關鍵詞> <memory-dir>/` 全檔掃（**不信 MEMORY.md 索引**——載入截斷下尾部條目不可見）；命中 → 既有檔加段（段標題保留原始 name、標 original type）；**進行中弧線條目禁加段**——弧線進度每 session 追加是膨脹主因（實證：單檔 98 次 Edit 養到 84KB），等弧線收案一次性蒸餾；無 → 才開新檔
+4. **project-\* 已完結？** → 任務閉環先收斂既有 project 條目（刪現況細節、留決策教訓）再開新檔
+5. **尺寸預算？** → frontmatter `description` ≤100 chars（索引行原料；>100 被 PreToolUse hook 硬擋——hook 僅攔主 session，subagent 寫入不觸發）；條目檔（含 frontmatter）≤12,000 chars（膨脹超限被 hook 擋；收斂方向＝改後比原檔短，放行）——超額 = 內容該住 EP 檔/repo 的訊號；索引軟上限 150 行，逼近 = cluster merge／收斂觸發
+6. **載體對嗎？** → 每次都要的紀律→rule／on-demand 方法論→skill／跨 session 事實→memory（手冊形內容不住 memory——它該住 skill）；**承諾/待辦→backlog 卡**（memory 只收事實與教訓，不收承諾）
 
-量化清理（同主題散檔合併、收斂執行、audit）由本 skill 兩級稽核承載，寫入端只管五問。**弧結案蒸餾**（掛點＝[kanban-board](../kanban-board/SKILL.md) 結案兩步第三動）：弧收案時 owning session 將本弧 project_/feedback_ 條目一次性重寫為終態 facts——narrative 歸 repo（EP/卡/git），memory 留教訓；弧中「禁加段」的積累正是在此時收斂。**desc 三不**：不 commit hash／不日期流水／不 session id（皆 git/DB 可推導；hash 形態被 PreToolUse hook 硬擋）。
+量化清理（同主題散檔合併、收斂執行、audit）由本 skill 兩級稽核承載，寫入端只管六問。**弧結案蒸餾**（掛點＝[kanban-board](../kanban-board/SKILL.md) 結案兩步第三動）：弧收案時 owning session 將本弧 project_/feedback_ 條目一次性重寫為終態 facts——narrative 歸 repo（EP/卡/git），memory 留教訓；弧中「禁加段」的積累正是在此時收斂。**蒸餾形態定案**（MOS-36 實證，09-05）：蒸餾＝刪 repo 已承載（宣稱「repo 已承載」須逐項附 rg 驗證路徑——找不到證據的保守留）＋軌跡記卡（final-summary），**不新建歸檔檔**。**執行形態**：肥條目（>30K）派 mem-distill agent 隔離消化（context 不進主 session；prompt 必帶 repo 證據義務）；backref 修復與索引 regen 留主 session（清單外檔案 agent 禁碰）。實證：149K+37K+17K 三條歸線→5.1K（−96%）＋45K/36K 兩條→~5.9K（−86%），教訓帳 49 案流水壓六類一行後教訓模式零損失。**desc 三不**：不 commit hash／不日期流水／不 session id（皆 git/DB 可推導；hash 形態被 PreToolUse hook 硬擋）。

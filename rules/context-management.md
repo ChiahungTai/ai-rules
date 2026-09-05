@@ -25,4 +25,4 @@ STATE.md 定義（定位 / 觀察層 vs 事實層邊界 / 職責矩陣 / 生命�
 
 ## Memory 生命周期規範（pointer）
 
-寫 memory **前**必跑寫入五問（repo 可推導就不寫／同主題加段／project 條目先收斂／尺寸預算／**載體判定**——紀律→rule、方法論→skill、跨 session 事實→memory、承諾/待辦→backlog 卡）＋單一寫入點紀律（條目檔 frontmatter 是唯一寫入點、`MEMORY.md` 索引是其機械投影禁手寫；desc 禁 commit hash／流水；弧結案時同步蒸餾條目為終態 facts——結案兩步第三動）——完整規範見 memory-audit skill「寫入端紀律」段（觸發詞：寫入五問、cluster-first、索引投影、desc 上限、結案蒸餾）。
+寫 memory **前**必跑寫入六問（**任務終態→卡/report 不進 memory**〔user 09-05 拍板——弧歷程/流水/軌跡屬任務，活知識才進 memory〕／repo 可推導就不寫／同主題加段／project 條目先收斂／尺寸預算／載體判定——紀律→rule、方法論→skill、跨 session 事實→memory、承諾/待辦→backlog 卡）＋單一寫入點紀律（條目檔 frontmatter 是唯一寫入點、`MEMORY.md` 索引是其機械投影禁手寫；desc 禁 commit hash／流水；弧結案時同步蒸餾條目為終態 facts——結案兩步第三動）——完整規範見 memory-audit skill「寫入端紀律」段（觸發詞：寫入六問、任務終態、cluster-first、索引投影、desc 上限、結案蒸餾）。
