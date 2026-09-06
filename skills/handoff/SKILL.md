@@ -47,6 +47,7 @@ git rev-parse HEAD            # baseline commit hash
 
 + 從當前對話摘「已交代的決策（為何選 X 不選 Y）+ 下一步 + 待決項」（用戶交代過的才帶，見 skill「決策脈絡原則」）。
 + 識別當前 EP（有 → 引用段落）。
++ EP 弧交接且 build 未完（repo 可跑 code_reality 時）：交接 prompt「下一步」含 `code-reality snapshot --repo <repo> --label <弧id>`（[implement](../implement/SKILL.md) 階段 1 對應物——接力 session 依 handoff 行動、不重讀 skill 階段，不寫就漏；實測 09-06 handoff 續跑弧 4/4 跳過 snapshot）。
 
 ### Phase 1：套標準 schema
 

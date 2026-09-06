@@ -87,6 +87,7 @@ review 執行預設（force 獨立 / max-agents / model inherit）見 [review-en
 - 相關檔案路徑（必讀）
 - 方法論引用（code-review-and-quality；Architecture 軸引用 arch-thinking（視角+機械））
 - rules-reminder 規則摘要（Agent 看不到 auto-loaded rules）
+- CR 接線查證段（硬性；[review-engine](../review-engine/SKILL.md)「spawn prompt 工具紀律」——Explore＝CLI 形態）
 - schema: DimensionVerdict（定義在 workflow-review-pattern.md）
 
 Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → 分三級（Critical/Important/Suggestion）→ 消費端影響檢查 → label-vs-diff 驗證 → commit message 產生。
@@ -103,6 +104,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 | primed | `agents/roles/code-reviewer-primed.md` | diff + EP + delta_tour 對照（若有，見下）+ 模組 AGENTS.md Capabilities + `dependency-graph.md`（若有） | Type A intent drift：意圖對齊、架構契合、測試精簡且完整、YAGNI↔過度工程光譜 |
 
 - **context 差異在 spawn prompt，非 agent 定義**（ZCode subagent 自動注入 AGENTS.md，「空 context」不可能全空；可控制的是不餵 EP/架構文檔）
+- **spawn prompt 必含 CR 接線查證段（硬性）**：fresh-eyes 與 primed 皆含（registry agents＝MCP 形態；逐字照 [review-engine](../review-engine/SKILL.md)「spawn prompt 工具紀律」CR 段）
 - **delta_tour 對照（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：**僅弧模式（code 已 commit、HEAD 越過 EP baseline）產出**——spawn primed 前對當下 HEAD 跑 `code-reality snapshot --repo <repo>`（呼叫形態：`code-reality <tool> --repo <repo>`），與 EP baseline snapshot（implement 階段 1 落下；定位＝EP baseline hash8 → `<repo>-<sha8>.json`，`--label` 僅入 `_meta`）對跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo> --out-dir .agent-tmp/`（**臨時自產不持久**——不寫 `.tours/delta/`：持久版單一產點＝post-build 完成〔hook 2〕、無 post-build 弧＝implement 階段 6 fallback；`.tours/delta/` 進 git），其 `.tour` description（宣稱對照三態＋實際變動模組＋退化/跨面 pair 自動警示；json 中間產物不落盤）併入 primed 餵料——intent drift（Type A）從 LLM 推導升級為機械底稿（宣稱抽取只認特定模組路徑前綴，宣稱欄 NONE ≠ EP 無宣稱——範圍見真相源）。**HEAD == baseline（uncommitted 審查）→ 不跑**：同 sha 對跑＝零差異假陰性，且此時對 baseline sha 跑 graph 刷新＋snapshot 會以 working-tree 修改覆寫 baseline sidecar；印 `[WARN]` 退回純 LLM 對照。snapshot 報 stale WARN → 視同缺報告跳過（stale snapshot 照寫、基於舊原料）。缺 baseline snapshot 或未裝 → 跳過不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill
 - **無 EP 時降級規則**（dual 情境）：EP 是 primed 側的意圖合約核心；無 EP（跨 session resume、非 build 場景）→ 降級單 fresh-eyes agent 並印 `[WARN] no EP for primed context`（primed 缺 EP 仍跑 = 架構契合/完整度光譜可審、意圖對齊空轉，findings 噪音可能多於信號）
 - **findings 合併**：同 file:line 去重；**矛盾不裁決**——標 `conflict` 欄（兩方意點並列）交 `/judge-review` 裁決層；合併/衝突規則真相源見 [review-engine](../review-engine/SKILL.md)「dual-context 編排」
@@ -126,7 +128,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 ### axis 3：Architecture — 調用 [arch-thinking](../arch-thinking/SKILL.md) skill
 - **機器產 finding（A 軸）**：city map / dep weight / 重用枚舉 / LSP 查證 / call graph（函數級）/ type structure（contract slice）/ data-flow（靜態骨架），調用 skill 取結構資料 → 產 finding（變更融入既有結構？在重造？）
-  - **code-reality（若在場）**：axis 3 的 impact radius / 跨檔 callers / affected flows 用 `impact_radius` / `callers` / `affected_flows` 機械產（取代手動 LSP 逐層追蹤）；change scoping 用 `detect_changes` + `get_minimal_context`（只讀 impacted nodes）。**CR 查詢分層**：主 session 與 spawned registry agents（code-reviewer 族——CR MCP 白名單已掛）**MCP 優先**（MCP `callers`／`impact_radius`／`affected_flows`／`detect_changes`／`get_minimal_context`）；spawn generic agent（無白名單）才把 CLI 形態寫進 spawn prompt（callers＝`code-reality scip_refs <sym> --callers --repo <repo>`；impact/flows/scoping＝`code-reality graph_query <op> --repo <repo>`）。分工 + GATE 見 [cr-query](../cr-query/SKILL.md)。
+  - **code-reality（若在場）**：axis 3 的 impact radius / 跨檔 callers / affected flows 用 `impact_radius` / `callers` / `affected_flows` 機械產（取代手動 LSP 逐層追蹤）；change scoping 用 `detect_changes` + `get_minimal_context`（只讀 impacted nodes）。**CR 查詢分層**：主 session 與 spawned registry agents（code-reviewer 族——CR MCP 白名單已掛）**MCP 優先**（MCP `callers`／`impact_radius`／`affected_flows`／`detect_changes`／`get_minimal_context`）；spawn generic agent（無白名單）的 CLI 形態與硬性必含規則＝[review-engine](../review-engine/SKILL.md)「spawn prompt 工具紀律」CR 段（單一源）。分工 + GATE 見 [cr-query](../cr-query/SKILL.md)。
 - **條件機制 activation（刪除/refactor 必觸發）**：diff 含刪除整檔/整 class、或 refactor 遷移 logic 時，**必須**調用 arch-thinking 的「補償邏輯盤點」+「變更路徑計數」——兩者預設條件觸發（修缺陷 / 觸及 mutable state），但刪除/refactor 同樣該觸發：刪除可能拆掉補償 pair 另一側（double-count / zero-out），refactor 可能改變 mutation-path ownership。未觸發 = axis 3 漏抓 over-deletion 與補償迴歸（清理日實證：這些機制沒被刪除 diff 觸發 → over-deletion 漏到事後審計才抓）。
 - **受眾明文**：axis 3 與 `/illustrate` 用同一 skill，但 axis 3 產**機器 finding**（A 軸）、illustrate **渲染給人判讀**（B 軸）
 

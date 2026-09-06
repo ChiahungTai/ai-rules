@@ -166,6 +166,8 @@ spawn review agent 時，prompt 內的工具使用紀律（源方法論「token 
 
 - **不做無目的 capability probe**：每個 tool call 有明確證據目的（查什麼、佐證哪條 finding／claim）
 - **工具實際失敗走既有 `[WARN]`＋fallback 路徑**（degraded contract）——**不把「工具皆可用」當 runtime fact** 寫進 prompt，也不要求 agent 先測試工具可用性
+- **CR 接線查證段（硬性必含；本段＝單一源，各審查範本引用此處、不重抄命令）**：diff 含 callable 新增/修改時，spawn prompt 必含接線查證指令——registry agents（code-reviewer 族，MCP 白名單）寫「對 diff 中每個新增/修改的 callable 至少跑一次 MCP `callers`（帶 `repo_root`）；跨模組變更加 `impact_radius`」；generic／Explore（無白名單）寫 CLI 形態「`code-reality scip_refs <sym> --callers --repo <repo-root>`；跨模組加 `code-reality graph_query impact_radius --repo <repo-root> --files <絕對路徑>`」。**callers 為空是嫌疑不是乾淨**——prompt 同時要求互補腿 `rg` 字串引用（anti-over-reliance 見 [cr-query](../cr-query/SKILL.md)）；engine 缺場 → prompt 內建 `[WARN]`＋rg fallback（cr-query GATE，不靜默降級）。diff 無 callable 變更（純文檔/config）→ 跳過並要求 findings summary 註明「CR 接線查證 N/A（無 callable 變更）」
+  > 為什麼在 spawn prompt 層不在 agent 定義層：實測（2026-09-04～06）registry 定義檔已寫 MCP-first 指引，spawn prompt 未明示時 reviewer 幾乎不觸發（rg-only）；spawn prompt 明示 CR 步驟的 agent（cr-research）則穩定重度使用——**prompt 明示是唯一被實證的觸發形態**
 
 > **quorum／verify node 配置單一源**：verify 階段的分級（lite 錨點批次 vs Critical 3-verifier quorum）與 compliance/judgment 分流在 [workflow-review-pattern](../_common/workflow-review-pattern.md)「兩階段模式」（Workflow 模式）與 [code-review](../code-review/SKILL.md) 模式 B 錨點驗證——本 skill 無 quorum 配置節，只有「quorum 對共同盲點無效」原則（見 [acceptance-evidence](../../rules/acceptance-evidence.md) A/B 軸）。
 

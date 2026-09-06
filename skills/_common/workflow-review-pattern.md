@@ -253,6 +253,7 @@ return {
 3. 相關檔案路徑（必讀）
 4. 方法論引用（code-review-and-quality / 對應 skill）
 5. rules-reminder 規則摘要（agent 看不到 auto-loaded rules）
+6. CR 接線查證段（硬性——diff 含 callable 變更時；逐字照 [review-engine](../review-engine/SKILL.md)「spawn prompt 工具紀律」CR 段貼入，Explore＝CLI 形態）
 
 ---
 
