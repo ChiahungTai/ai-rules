@@ -1,15 +1,15 @@
 ---
 name: deep-work
 
-description: "深度工作模式 - 用戶離開時的自主實作引擎，AI 全力發揮、慢慢思考、完整交付"
-when_to_use: "Autonomous implementation mode for when the user is away. Full-power, self-directed execution with deep thinking, error self-healing, and complete delivery."
+description: "深度工作模式 - 自主開發流程引擎：一整套開發流程直接跑（execution-plan → implement → post-build），AI 全力發揮、慢慢思考、完整交付"
+when_to_use: "Autonomous full development pipeline (CC-workflow concept). Three trigger scenarios: 睡前下 UC 級任務 / 外出離開 / 任務不難但想整套開發流程自主跑。Chain runs unattended: plan→build→post-build→report, ending at commit consent."
 argument-hint: "任務描述 | Execution Plan 檔案路徑"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 ---
 
 # /deep-work — 深度工作模式
 
-自主實作引擎。用戶已離開，**全力發揮，完整交付。**
+自主開發流程引擎。觸發三型——**睡前下 UC 級任務、外出離開、任務不難想整套直接跑**（CC workflow 概念：一條命令推完整個開發流程，規模判定在流程內做、不靠進場時預判）。用戶不在場或選擇放手，**全力發揮，完整交付。**
 
 ## 核心原則
 
@@ -27,7 +27,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 ## 前置：進入無人值守模式
 
-deep-work 前提是用戶已離開 —— 權限提示會卡死無人 flow。**必須在 auto-mode 下執行**（流程 dispatch 前先確認）。auto-mode（詳見 [agent-workflow](../agent-workflow/SKILL.md)「Auto Mode」）：classifier model 在命令執行前把關（阻擋 scope 升級 / 未知基礎設施 / 惡意操作），取代人工權限提示。
+deep-work 前提是用戶不在鍵盤前（離開／放手不盯）—— 權限提示會卡死無人 flow。**必須在 auto-mode 下執行**（流程 dispatch 前先確認）。auto-mode（詳見 [agent-workflow](../agent-workflow/SKILL.md)「Auto Mode」）：classifier model 在命令執行前把關（阻擋 scope 升級 / 未知基礎設施 / 惡意操作），取代人工權限提示。
 
 ### substrate 入口（三選一）
 
@@ -83,10 +83,13 @@ permission mode 是 CLI 啟動旗標 / dir 設定，**命令本身無法中途�
   │                /followup-review（驗收）、/metadata-sync（commit 前更新 + 補漏）、
   │                /handoff（跨 provider）
   │
-  ├─ ARG = 任務描述 → deep-work 自選程序：
-  │   • 複雜（需規劃）→ /execution-plan 產 EP →（可選 /ep-validate、/ep-review）→ /implement
-  │   • fix/debug/研究 → 自身階段 1-5（complex；可自癒接 /fix-test、/lint-fix）
-  │   • 完成後自主品質閘門 → /audit-test、/code-review
+  ├─ ARG = 任務描述（開發任務：feature/fix/refactor）→ **預設＝完整開發流程**：
+  │   /execution-plan（UC 盤點＋EP；流程規模分級在此裁定——simple 邊界不寫 EP 直接 build、
+  │   大型自動建 backlog 卡）→（可選 /ep-validate、/ep-review）→ /implement → /post-build
+  │   （收尾鏈：code-review→judge-review→修正迴圈→consistency→metadata-sync→殼 refresh）
+  │   → 收尾報告；變更留 working tree，commit 等 user 確認（自主紅線不 override）
+  │   例外＝非開發流程任務（純研究/調查、環境修復、一次性維護操作）→ 自身階段 1-5（complex；
+  │   可自癒接 /fix-test、/lint-fix；完成後自主品質閘門 → /audit-test、/code-review）
   │
   └─ ARG 內含接續/substrate 指令：
       • /at <time> → 跨 session 接續修飾詞（reset 後 resume；inline，非獨立分支）
@@ -94,7 +97,7 @@ permission mode 是 CLI 啟動旗標 / dir 設定，**命令本身無法中途�
 ```
 
 - **ARGUMENTS = `/implement <EP>`**（observed 主路徑）：流程骨架**委派 [build.md](../implement/SKILL.md)**（階段 0-6 全跑），deep-work 自身階段 1-5 **不執行**。**不得省略的 build 步驟**（無人在場時唯一機械防線）：階段 0「EP 快檢」強制輸出、階段 1「POC + demo 盤點」映射表、**階段 2「整合路徑覆蓋硬閘門」**（`rg "<新參數>=" tests/`）、**階段 3「全量測試 exit 0 完成閘門」**、階段 5c `/audit-test` —— 絕不靜默跳過（`/deep-work /implement` 時硬閘門在最需要它的無人路徑必須生效）。
-- **ARGUMENTS = 任務描述**（無 EP）：用 deep-work 自己的階段結構（下方）；複雜者自主升級到 /execution-plan 產 EP 再 build。
+- **ARGUMENTS = 任務描述**：預設完整開發流程（execution-plan → implement → post-build；自身階段 1-5 不執行——同 /implement 委派路徑）；僅非開發流程任務（研究/調查/環境修復）用 deep-work 自己的階段結構（下方）。
 
 ## 執行流程
 
@@ -218,8 +221,8 @@ Agent prompt 開頭加上 /rules-reminder 規則摘要：
 
 ## 與其他命令的協作
 
-**自主可調度**：`/execution-plan`（無 EP 時 deep-work 任務中自主產，非 user 前置）、`/implement`、`/code-review`、`/ep-review`、`/ep-validate`、`/audit-test`
-**後續**：`/commit` → `/instruction-sync`
+**自主可調度**：`/execution-plan`（無 EP 時 deep-work 任務中自主產，非 user 前置）、`/implement`、`/post-build`（pipeline 預設終段——收尾鏈編排）、`/code-review`、`/ep-review`、`/ep-validate`、`/audit-test`
+**後續**：`/commit`（等 user 確認——自主模式不豁免 commit consent）→ `/instruction-sync`
 **接續/換手**：`/at`（跨 session reset 接續）、`/handoff`（跨 provider 交接）
 
 > **Agent Review Cycle 已完成。** 可直接 `/commit`；如需額外審查可跑獨立 `/code-review`。
