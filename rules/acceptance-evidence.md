@@ -8,13 +8,13 @@ harness-scope: neutral
 
 ## 核心原則:證據獨立性
 
-傳統 TDD 的權威性建立在一個從未被明說的前提:測試的「意圖」與實作的「理解」分屬不同認知主體。**AI 同時寫實作與測試時,這個獨立性塌縮。** 測試從「人類意圖的權威表達」降級為「AI 對自己理解的描述」,綠燈只證明「AI 自洽地重複了自己的錯」。最危險的不是測試太弱,而是測試與實作共享同一個錯誤前提 — AI 誤解問題時,它寫的測試忠實反映誤解,實作忠實滿足誤解。
+傳統 TDD 的權威性建立在一個從未被明說的前提:測試的「意圖」與實作的「理解」分屬不同認知主體。**AI 同時寫實作與測試時,這個獨立性塌縮**——綠燈只證明「AI 自洽地重複了自己的錯」。最危險的不是測試太弱,而是測試與實作共享同一個錯誤前提——AI 誤解問題時,測試忠實反映誤解、實作忠實滿足誤解。
 
 **判斷準則**:驗收證據的強度,取決於「證據來源是否獨立於被驗證物」。AI 同寫 test + impl = 零獨立性 = 證據強度低。
 
 ### Claim→Evidence→Trust(no-impact claim 校驗)
 
-當 AI/producer 宣稱「不影響 X」(accounting/risk/invariant)時,這個 claim 須有**獨立機械證據**反證(git diff / rg 殘留 / LSP findReferences),否則 claim 退化為 self-report — AI 同時產 code 與 claim,受同一 mental model drift 污染。**AI 誠實說「沒影響」時最危險** — 獨立性塌縮點。任何「沒影響 X」的 claim 都須獨立證據,不接受自述。
+當 AI/producer 宣稱「不影響 X」(accounting/risk/invariant)時,這個 claim 須有**獨立機械證據**反證(git diff / rg 殘留 / LSP findReferences),否則 claim 退化為 self-report — AI 同時產 code 與 claim,受同一 mental model drift 污染。**AI 誠實說「沒影響」時最危險** — 獨立性塌縮點。
 
 同型 claim 群（均須獨立機械證據，詳案例見 acceptance-evidence skill）：
 

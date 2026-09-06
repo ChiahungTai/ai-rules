@@ -34,7 +34,7 @@ harness-scope: neutral
 
 > **核心原則**：crash-only 是 defense-in-depth 的**後備保證**（graceful shutdown 意外失敗時系統仍正確），**不是**「graceful 可預期地壞掉也不修」的合理化——整合 bug、配置錯誤、合約違反是可修 bug，該修，不可用 crash-only 跳過。披著「設計哲學」外衣的跳過比一般 bug 更危險，code review 難抓。
 
-**實例**：mosaic ReplayHost SIGTERM 在 daemon-thread 下 graceful shutdown 失敗（NT loop signal handler 衝突），曾錯誤主張「crash-only 接受不 work」跳過可修 bug——正解是 TDD red（xfail strict 釘住 graceful 目標，見 test-driven-development skill）+ 另開 EP 修復。
+**實例**：ReplayHost SIGTERM graceful shutdown 失敗，曾被錯誤以「crash-only 接受」跳過——正解：TDD red（xfail strict）釘住 graceful 目標＋另開 EP 修復（test-driven-development skill）。
 
 ---
 
@@ -64,7 +64,7 @@ harness-scope: neutral
 
 理論基礎見 [acceptance-evidence](./acceptance-evidence.md) 證據階層 L3。**符號覆蓋**（symbol 出現在 tests）≠ **整合路徑覆蓋**（新參數 / 新接線 / 多組件組合被實際驅動）：
 
-- **新 public 參數 / 注入點**：既有符號 + 新參數組合必須被測試。例：把 guard 注入既有 Strategy 的 `submit_order()` 點 — Strategy 有多個 `on_bar()` 測試但全是 `guard=None` 回測路徑，新注入路徑零測試。機械檢查：`rg "<param>=" tests/` → 0 hits = 路徑未覆蓋。
+- **新 public 參數 / 注入點**：既有符號 + 新參數組合必須被測試。例：guard 注入既有 Strategy——`on_bar()` 測試全走 `guard=None`，新注入路徑零測試。機械檢查：`rg "<param>=" tests/` → 0 hits = 路徑未覆蓋。
 - **新增 registry 成員**：auto-discovery 接線必須被斷言。per-class 單元測試只證明邏輯正確，不證明接上 registry。機械檢查：在 test files 搜尋 `list_*_classes()` membership 斷言。
 
 ### 整合器型變更判定
@@ -83,7 +83,7 @@ harness-scope: neutral
 
 - **最小集合選擇原則**：優先覆蓋多種邏輯分支（如除權息、減資、零股），數量 3-5 個即足，必須包含至少一個已知易錯案例。
 - **禁止行為**：❌ 未通過 DEPTH-MIN 直跑 DEPTH-FULL；❌ 修改後直跑全量；❌ DEPTH-FULL 失敗不分析即重跑（先回 DEPTH-MIN 確認）。
-- **為什麼**：全量驗證耗時數十分鐘到數小時，基本邏輯有錯時全跑完才發現是浪費；漸進把發現時間從全量壓到秒級~分鐘級。
+- **為什麼**：全量耗時長，基本邏輯錯時全跑完才發現＝浪費；漸進把發現時間壓到秒級~分鐘級。
 - **與風險分級的關係**：風險分級定「驗到多深」，漸進驗證定「用何順序到達」——兩者互補，定義見 ai-development-guide「驗證約束 → 風險分級標準」；高風險以 DEPTH-FULL 為標準、起點仍是 DEPTH-MIN（順序不因風險跳級）。
 
 ---

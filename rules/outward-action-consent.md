@@ -19,24 +19,12 @@ outward action 是「另一個人或系統能在你 undo 前觀察到」的動�
 ## Reversibility test（判定 outward）
 
 ```
-即將執行動作
-  │
-  ▼
-另一個人/系統能在你 undo 前觀察到嗎？
-  │
+即將執行動作 → 另一人/系統能在你 undo 前觀察到嗎？
   ├─ 否（純 local working tree）→ 可逆 → 自主執行
-  │
-  └─ 是 → outward action
-       │
-       ▼
-     用戶有明確授權嗎？（AUTH line: user said "<verbatim quote>"）
-       │
+  └─ 是 → outward action → 用戶有明確授權嗎？（AUTH line: user said "<verbatim quote>"）
        ├─ 有 quote 且涵蓋該動作（quote scope 判準見下節）→ 執行 + 報告附 AUTH line
-       │
-       └─ 無 quote / quote 不涵蓋
-            │
-            └─ → 列 PENDING: <action> - awaiting your authorization
-                 (若 documentation 教做該動作: 加註 documentation ≠ authorization)
+       └─ 無 quote / quote 不涵蓋 → 列 PENDING: <action> - awaiting your authorization
+            （documentation 教做該動作 ≠ authorization）
 ```
 
 ---
@@ -88,7 +76,7 @@ README、workflow doc、installed skill 說某動作「必須伴隨」你的變�
 - **展示再確認**：commit 前展示變更摘要和建議的 commit message
 - **等待確認**：用戶必須明確回覆「commit」「確認」「OK」等肯定詞
 - **未確認不 commit**：未收到確認 → 不執行 git commit
-- **一次授權 ≠ 永久授權**：即使剛授權過上一個 commit，下一個 commit 仍需獨立確認（連續自主執行流程的 vibe 不延伸到 commit,commit 永遠是互動式 gate；autonomous session 見下 Autonomous shortcut 段）
+- **一次授權 ≠ 永久授權**：即使剛授權過上一個 commit，下一個 commit 仍需獨立確認（vibe 不延伸到 commit——commit 永遠是互動式 gate；autonomous 例外見下段）
 
 **例外**：backlog 建卡 commit——`backlog task create` 後隨即將新卡檔案 commit（僅新增卡檔案、訊息帶卡 id；命令合約見 kanban-board skill）。跨 WT id 防撞依賴卡及時進 branch ref（cross-branch 掃描只見 committed 卡），user 裁定此一形態免逐次確認。僅限建卡形態——結案、程式碼、其他 commit 仍需獨立確認。
 
@@ -96,11 +84,7 @@ README、workflow doc、installed skill 說某動作「必須伴隨」你的變�
 
 ## Autonomous shortcut（deep-work / 排程場景）
 
-autonomous shortcut:autonomous session（deep-work、排程執行、半夜自主跑）走 **autonomous-execution 紅線清單行為枚舉優先**，不跑 reversibility test：
-
-- 紅線清單已枚舉 outward action（`git push --force` / DB DROP / 付費操作 / 等）→ autonomous session 跳過 + 記錄 completion report
-- reversibility test 是**互動 session** 的判定機制；autonomous session 靠紅線清單（已枚舉）+ 黃線清單（可逆自主執行）
-- 詳見 autonomous-execution skill（Claude: `skills/autonomous-execution/SKILL.md`）紅線/黃線分級
+autonomous session（deep-work、排程、半夜自主跑）走 **autonomous-execution 紅線清單行為枚舉優先**，不跑 reversibility test——紅線已枚舉 outward action（`git push --force` / DB DROP / 付費操作等）→ 跳過＋記錄 completion report；紅線（枚舉）＋黃線（可逆自主執行）分級詳見 autonomous-execution skill。reversibility test 是**互動 session** 的判定機制。
 
 ## Source of truth 邊界
 
