@@ -81,7 +81,7 @@ README、workflow doc、installed skill 說某動作「必須伴隨」你的變�
 **例外**（user 逐項裁定免逐次確認，均為機械可驗證形態）：
 
 - **backlog 建卡 commit**：`backlog task create` 後隨即將新卡檔案 commit（僅新增卡檔案、訊息帶卡 id；命令合約見 kanban-board skill）。跨 WT id 防撞依賴卡及時進 branch ref（cross-branch 掃描只見 committed 卡）。僅限建卡形態——結案、程式碼、其他 commit 仍需獨立確認。
-- **ruff 自動修改 commit**：`ruff format` / `ruff check --fix` 產生的機械改動直接 commit，免確認（message 用 `style:` 前綴）。**邊界＝commit 僅含 ruff 產生的改動**（驗：ruff 執行後無手動編輯夾入、重跑 ruff 無新 diff）——同批夾其他語義改動 → 語義部分仍走確認 gate（style 段先單獨 commit，或整批走確認）。
+- **ruff 自動修改 commit**：`ruff format` / `ruff check --fix` 產生的機械改動——純 ruff 批直接 `style:` commit 免確認；混其他改動時不拆分，隨所在 commit 一起走（該 commit 的 gate 由語義內容決定，ruff 部分不單獨處理）。
 
 例外僅限互動 session——autonomous session 的 commit 處置走紅線清單（見下段），不繼承此二例外。
 
