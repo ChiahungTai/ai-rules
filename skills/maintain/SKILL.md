@@ -1,16 +1,15 @@
 ---
 name: maintain
 description: >
-  Core daily maintenance procedure consumed by /daily-maintain (auto) and /project-review (interactive).
+  Core daily maintenance procedure consumed by /daily-maintain.
   4-phase flow, findings risk matrix, auto-fix procedures, kanban hygiene.
 when_to_use: >
-  Do not invoke directly. Use /daily-maintain for autonomous cron mode
-  or /project-review for interactive human mode.
+  Do not invoke directly. Use /daily-maintain.
 ---
 
 # maintain Skill — 核心維護程序
 
-被 `/daily-maintain`（自動）和 `/project-review`（互動）共用的核心程序。
+`/daily-maintain` 的核心程序。
 
 ---
 
@@ -65,11 +64,11 @@ binary 不存在或 build 失敗 → 記 `[WARN]` 後續行 Phase 2——graph �
 
 > X-\* 機械 findings 由 `/scan-project`（on-demand）產出的 `.project-snapshot.json` 供應——夜間鏈已不產 snapshot（Phase 1 退役），無 snapshot 時 doc-health 降級純 LLM、X-\* 缺席屬預期；需要機械 findings 時手動補跑 `/scan-project`。
 
-| check_id | 風險 | 自動模式 | 互動模式 | 修正程序 |
-|----------|------|---------|---------|---------|
-| X-cap-path | 🟢 Low | 自動修正 | 呈現待確認 | 見下方 |
-| X-ep-ready | 🟡 Medium | 只報告 | 呈現待確認 | EP 可能未建立 |
-| X6 | 🟡 Medium | 只報告 | 呈現待確認 | 需人類決定是否建 instruction 檔 |
+| check_id | 風險 | 自動模式 | 修正程序 |
+|----------|------|---------|---------|
+| X-cap-path | 🟢 Low | 自動修正 | 見下方 |
+| X-ep-ready | 🟡 Medium | 只報告 | EP 可能未建立 |
+| X6 | 🟡 Medium | 只報告 | 需人類決定是否建 instruction 檔 |
 
 **分級原則**：修正結果可機械驗證（路徑存在、tag 對應目錄）→ 🟢。需語義判斷 → 🟡。
 
@@ -125,7 +124,7 @@ Phase 3 額外執行的 kanban hygiene 檢查：
 | Lane 限額 | To Do > 100 張 | 🟡 | 不修正（只報告） |
 ### backlog 卡處置（2026-09-02 起單制）
 
-`backlog/` 制：**completed/ 是歷史檔案庫，不套年齡 stale heuristic**（價值正是歷史追溯——決策脈絡、驗收紀錄；過大由人類在 `/project-review` 留意）。**Done 欄卡清場＝`backlog task complete <id>` 搬 `completed/`**——結案兩步延後的批次執行點（命令合約見 [kanban-board](../kanban-board/SKILL.md)）。活躍卡年齡檢查（To Do/In Progress）＝ doc-health 步驟 4（讀 frontmatter `updated_date`）。無 `backlog/` 的 repo 無卡層清理面。`.kanban/` 四 lane 舊制已退役。
+`backlog/` 制：**completed/ 是歷史檔案庫，不套年齡 stale heuristic**（價值正是歷史追溯——決策脈絡、驗收紀錄；過大由人類留意）。**Done 欄卡清場＝`backlog task complete <id>` 搬 `completed/`**——結案兩步延後的批次執行點（命令合約見 [kanban-board](../kanban-board/SKILL.md)）。活躍卡年齡檢查（To Do/In Progress）＝ doc-health 步驟 4（讀 frontmatter `updated_date`）。無 `backlog/` 的 repo 無卡層清理面。`.kanban/` 四 lane 舊制已退役。
 
 ---
 
@@ -240,11 +239,7 @@ Reported: X6(N)
 Morning report: ai-analysis/daily-report/YYYY-MM-DD.md
 ```
 
-**outward-action-consent 豁免**：調用 `/daily-maintain`（自動模式）即隱含同意 🟢 低風險修正的 commit。🟡 中風險不 commit。
-
-### 互動模式（/project-review）
-
-遵循 outward-action-consent 規則（commit 場景）：展示 diff，等待用戶確認後 commit。
+**outward-action-consent 豁免**：調用 `/daily-maintain`（自動模式）即隱含同意 🟢 低風險修正的 commit。🟡 中風險不 commit。手動補跑時 commit 依 outward-action-consent 規則（展示 diff、等待確認）。
 
 ---
 

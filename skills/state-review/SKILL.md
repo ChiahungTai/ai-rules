@@ -1,7 +1,7 @@
 ---
 name: state-review
 description: "全 repo 狀態對抗審查——抓 diff-review 的結構盲區（state-rot：跨弧累積漂移，每個 diff 各自乾淨但累積錯誤）。迴路＝環境凍結（clean-tree 預設＋scope manifest）→ external family 單發深審（work-order review variant）→ in-family judge-review → gate 候選提案。read-only 全程：產出報告與提案，落檔/建卡由 user 拍板。週期盤點／懷疑累積漂移／多 worktree 權威面審計用。"
-when_to_use: "週期性（大弧收尾後）或觸發性（懷疑累積 drift、部署面疑似腐爛）的全 repo 狀態審查。NOT for: 任務弧 diff 審查（/code-review——diff-anchored）、人類 viewport 壞味道（/smell-detector——B 軸）、互動式 findings/kanban/doc-health 維護總覽（/project-review——聚合既有檢查的人工確認流程，非對抗深審）、doc 連結健康（/doc-health）、單一修復驗收（/followup-review）。"
+when_to_use: "週期性（大弧收尾後）或觸發性（懷疑累積 drift、部署面疑似腐爛）的全 repo 狀態審查。NOT for: 任務弧 diff 審查（/code-review——diff-anchored）、人類 viewport 壞味道（/smell-detector——B 軸）、doc 連結健康（/doc-health）、單一修復驗收（/followup-review）。"
 argument-hint: "[--family muse|codex]（顯式指定深審家族；未指定＝依 caller 解析**相異**家族——GLM/ZCode 與 codex caller→muse、muse caller→fail-loud 要求顯式指定；解析表單一源在 model-routing review/advisory 條款）"
 allowed-tools: ["Read", "Bash", "Glob", "Grep", "Agent"]
 ---
@@ -12,7 +12,7 @@ allowed-tools: ["Read", "Bash", "Glob", "Grep", "Agent"]
 
 ## 為什麼 diff-review 抓不到
 
-[/code-review](../code-review/SKILL.md) 全鏈錨在任務弧邊界（baseline＋delta_tour＋EP 對照）——它驗證「這次變更對不對」，不驗證「現在的整體狀態對不對」；狀態腐爛的每一筆都發生在各自的綠燈裡。與近鄰的邊界：[/smell-detector](../smell-detector/SKILL.md) `--baseline` 是 B 軸人類 viewport（壞味道直覺、per-directory）；[/project-review](../project-review/SKILL.md) 是人類互動的維護總覽（聚合既有機械檢查）；本 skill 是 A 軸機器 findings 進 judge 鏈（[受眾模型](../../AGENTS.md)）。
+[/code-review](../code-review/SKILL.md) 全鏈錨在任務弧邊界（baseline＋delta_tour＋EP 對照）——它驗證「這次變更對不對」，不驗證「現在的整體狀態對不對」；狀態腐爛的每一筆都發生在各自的綠燈裡。與近鄰的邊界：[/smell-detector](../smell-detector/SKILL.md) `--baseline` 是 B 軸人類 viewport（壞味道直覺、per-directory）；本 skill 是 A 軸機器 findings 進 judge 鏈（[受眾模型](../../AGENTS.md)）。
 
 ## 迴路
 

@@ -87,7 +87,7 @@ uv run python ${CLAUDE_SKILL_DIR}/scripts/scan_project.py --project-root /path/t
 
 ## 與其他命令整合
 
-維護流程（`/daily-maintain` 自動、`/project-review` 互動）已不產出 snapshot（快照鏈退役，結構新鮮度歸 code-reality——見 [maintain](../maintain/SKILL.md) Phase 1）；本 skill 為 on-demand 工具。
+維護流程（`/daily-maintain`）已不產出 snapshot（快照鏈退役，結構新鮮度歸 code-reality——見 [maintain](../maintain/SKILL.md) Phase 1）；本 skill 為 on-demand 工具。
 
 | 命令 | 如何使用本 skill |
 |------|-----------------|

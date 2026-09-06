@@ -80,4 +80,3 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash"]
 
 - ← [`/flow-feedback`](../flow-feedback/SKILL.md)：素材源（每筆 feedback）
 - → `/execution-plan`（必要時先 `/spec` 釐清需求）/ kanban card / `/implement`：改善落地
-- 相關：`/project-review`（專案健康）；本命令聚焦 **session 摩擦驅動的系統演化**

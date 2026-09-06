@@ -2,14 +2,14 @@
 name: daily-maintain
 
 description: "每日自動維護（排程用）— 掃描 + 自動修正低風險問題 + commit + morning report"
-when_to_use: "Automated daily maintenance run by scheduled agent (ZCode 23:20 定時任務, 2026-08 起; 舊 nightly claude -p 載體已退役). Auto-fixes low-risk findings, commits, and generates a morning report. Do NOT use interactively — use /project-review instead."
+when_to_use: "Automated daily maintenance run by scheduled agent (ZCode 23:20 定時任務, 2026-08 起; 舊 nightly claude -p 載體已退役). Auto-fixes low-risk findings, commits, and generates a morning report. Do NOT use interactively — run /doc-health or individual --only phases instead."
 argument-hint: "/daily-maintain — 全部執行 | --only graph | sync | doc-health"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 ---
 
 # /daily-maintain — 自動維護模式
 
-> **cron 自動執行用。** 人類手動維護請用 `/project-review`。
+> **cron 自動執行用。** 人類手動檢查用 `/doc-health`；專案狀態看 `backlog/`。
 
 執行 [daily-maintain skill](../maintain/SKILL.md) 的自動版本。
 
