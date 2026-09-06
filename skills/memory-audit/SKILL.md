@@ -1,6 +1,6 @@
 ---
 name: memory-audit
-description: "memory 清理/稽核/過時/記憶健康檢查＋寫入端紀律（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。寫 memory 前的寫前一步（一句話測試——核心事實提煉不出一句話＝還沒想清楚＝不寫）＋寫入六問（任務終態→卡/repo 可推導就不寫/同主題加段/cluster-first/尺寸/載體判定）、單一寫入點（條目檔 frontmatter 唯一、MEMORY.md 機械投影）、desc/條目尺寸預算（新建 3,000/膨脹 12,000 hook 硬擋）＋body 形態＋desc 三不＋弧結案蒸餾（含 mem-distill 執行形態）見「寫入端紀律」段。觸發詞：一句話測試、寫入六問、任務終態、cluster-first、單一寫入點、索引投影、desc 上限、結案蒸餾、body 形態、載體判定、寫 memory。"
+description: "memory 清理/稽核/過時/記憶健康檢查＋寫入端紀律（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。寫 memory 前的寫前一步（一句話測試——核心事實提煉不出一句話＝還沒想清楚＝不寫）＋寫入六問（任務終態→卡/repo 可推導就不寫/同主題加段/cluster-first/尺寸/載體判定）、單一寫入點（條目檔 frontmatter 唯一、MEMORY.md 機械投影）、desc/條目尺寸預算（新建 3,000/膨脹 12,000 hook 硬擋）＋body 形態＋desc 三不＋弧結案蒸餾（含 mem-distill 執行形態）見「寫入端紀律」段。觸發詞：一句話測試、寫入六問、任務終態、cluster-first、單一寫入點、索引投影、desc 上限、結案蒸餾、body 形態、載體判定、寫 memory、確定才寫、歸因未定。"
 argument-hint: "full | lite | 無參數（讀狀態戳後建議）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 ---
@@ -123,6 +123,8 @@ harness auto memory 預設「one file = one fact」的「fact」操作定義 = *
 ### 寫前一步：一句話測試（先想，再寫——09-06 user 拍板「寫入前想一下要寫啥，不要無腦寫」）
 
 動筆前先用一句話寫下這條的**核心事實**——不是主題（「關於 X 的心得」），是事實本身（「X 的 Y 行為是 Z，因為 W」）。**提煉不出這句話＝還沒想清楚＝不寫**（回 session 繼續消化，或它本來就該住 EP/卡）。這句是 desc 的種子；body 只寫它的展開（Why／How to apply／實證錨）——一句話之外的過程敘述、聯想堆料、「順便記一下」都不屬於這條。
+
+**真值軸（提煉得出，那句話為真嗎——09-06 user 拍板「確定的東西再放」）**：提煉得出但屬**未定案歸因/推測**＝還沒確定＝不寫，定案後再放。為什麼：memory 條目沒有信心欄位，recall 時整句注入當背景事實——未定案歸因入池，日後被 recall 就是偽事實。邊界：**已確認的 gap 事實可寫**（寫「有此落差」本身）；不可寫的是對 gap 的歸因推測（「可能是 A 或 B」皆無證據）——單一觀測＋內容只剩歸因＝整條不寫。
 
 ### 寫入六問（新教訓產生時依序）
 
