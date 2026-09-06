@@ -4,9 +4,9 @@
 >
 > **維護規則**：動排程的 session（`CronCreate`／`CronUpdate`／`CronDelete`）順手同步本檔——慣例層；比對腿兜底見週日 23:00 治理看照（[design.md §4](_tasks/done/09-03-backlog-governance-design/design.md#§4-排程單一真相源)）。
 >
-> **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）。
+> **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser`／`backlog-cleanup` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）。
 >
-> **更新時點**：2026-09-03（baseline `d121837`，CronList 實錄；R-8）；下次改動排程時同步更新本表。
+> **更新時點**：2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。
 
 ## ZCode Cron（3 條，ai-rules workspace）
 
@@ -18,11 +18,12 @@
 
 > 全名照錄 `CronList` 輸出 `automationId`（非前綴），逐字比對通過。
 
-## 本 repo 相關常駐服務
+## 本 repo 相關 launchd（服務＋排程）
 
 | 服務 | 形態 | 說明 |
 |------|------|------|
 | `com.ai-rules.backlog-browser` | `launchd` plist（`~/Library/LaunchAgents/com.ai-rules.backlog-browser.plist`） | `deploy/scripts/run-backlog-browser.sh`（`KeepAlive`），供 board Report Shell（`http://127.0.0.1:6421`） |
+| `com.ai-rules.backlog-cleanup` | `launchd` plist（`~/Library/LaunchAgents/com.ai-rules.backlog-cleanup.plist`） | `deploy/scripts/run-backlog-cleanup.sh`（`StartCalendarInterval` 每日 23:50）——Done 欄清場批次：`Done` 且 `updated_date`>30d 的卡逐卡 `backlog_precheck.sh` → `backlog task complete` → commit（`BACKLOG_CLEANUP_AGE_DAYS` 可覆寫；跨 worktree 全展開）。twin＝mosaic `com.mosaic.backlog-cleanup`（23:55，`mosaic_alpha/deploy/scripts/` 同邏輯副本） |
 
 ## 跨 repo 指針
 
