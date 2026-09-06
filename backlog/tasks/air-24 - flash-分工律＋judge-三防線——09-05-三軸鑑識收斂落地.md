@@ -10,7 +10,7 @@ labels:
   - agents
 dependencies: []
 references:
-  - 'http://127.0.0.1:6421/ai-rules/skills/model-routing/SKILL.md'
+  - 'http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/skills/model-routing/SKILL.md'
   - skills/model-routing/SKILL.md
 ordinal: 16000
 ---
