@@ -227,4 +227,4 @@ build 可能由不同 LLM session 執行，無法存取審查報告。因此：
 ```
 
 前置：`/execution-plan`
-後續：`/implement`（→ `/code-review` → `/judge-review` → `/commit`；canonical review flow 見 [code-review.md](../code-review/SKILL.md)）
+後續：`/implement`（→ `/post-build`（編排 `/code-review` → `/judge-review` → docs 鏈）→ `/commit`；canonical review flow 見 [code-review.md](../code-review/SKILL.md)）

@@ -101,6 +101,16 @@ INVARIANTS = [
         "紀律變機械閘門",
     },
     {
+        "id": "report_shell_provenance",
+        "type": "shell_provenance",
+        "generator": "scripts/check_report_shells.py",
+        "note": "任務家殼（tracked ai-analysis/**/index.html）是 source 的 "
+        "projection——互斥 SHA／stale projection／file:// 絕對路徑／raw .md "
+        "route（viewer-only 合約）都是已發生的失真形態（codex 09-06 全 repo "
+        "審查 I-7；followup 補 raw-route 規則與本接線）。委派 generator 腳本，"
+        "rc1＝violation 逐行轉 important。",
+    },
+    {
         "id": "hook_registration",
         "type": "hook_registration",
         "registrations": ["settings.json", "hooks/zcode-registration.json"],
@@ -280,12 +290,54 @@ def check_source_contains(inv: dict) -> list[tuple[str, str, str]]:
     return []
 
 
+def _main_worktree() -> Path | None:
+    """git 主 worktree 路徑（`worktree list` 首條＝main）；無法判定回 None。
+
+    部署 authority 顯式化：bundle 只該從 main worktree 部署出去；linked
+    worktree（feature/audit 用）與部署目標的差異不代表 stale。
+    """
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "worktree", "list", "--porcelain"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    for line in proc.stdout.splitlines():
+        if line.startswith("worktree "):
+            return Path(line.split(" ", 1)[1])
+    return None
+
+
+def _is_detached_head() -> bool | None:
+    """HEAD 是否 detached；無法判定回 None（detached＝checkout 的是任意修訂，非部署權威）。"""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    return proc.stdout.strip() == "HEAD"
+
+
 def check_deploy_freshness(inv: dict) -> list[tuple[str, str, str]]:
     """非 Claude 三端的部署 AGENTS.md 必須 == 當前 source 重建的 bundle（byte 比對）。
 
     單一源是 repo 內 rules/ + guide；部署檔是衍生 snapshot。skip 條件（不 false
     positive）：目標不存在（該機器未用該 harness）、無 generator header marker
-    （非 deploy_agents.py 產出，用戶自管檔）。
+    （非 deploy_agents.py 產出，用戶自管檔）。差異僅在 main worktree（非 detached）
+    才判 critical＋開 deploy 處方——非 main worktree / detached / 無法判定 worktree
+    時降 important：差異可能只是版本不同，照 deploy 處方執行會用非權威版本覆寫
+    三個 harness 的 always-on policy。
     """
     if inv.get("type") != "deploy_freshness":
         return []
@@ -310,15 +362,50 @@ def check_deploy_freshness(inv: dict) -> list[tuple[str, str, str]]:
         data = target.read_bytes() if target.exists() else None
         if data is None or marker not in data:
             continue
-        if data != bundle:
+        if data == bundle:
+            continue
+        main_wt = _main_worktree()
+        if main_wt is None:
             out.append(
                 (
                     inv["id"],
-                    "critical",
-                    f"{target} 與 source 重建 bundle 不一致（stale 部署）——非 Claude "
-                    f"session 正在讀舊規則；跑 `uv run python scripts/deploy_agents.py` 同步",
+                    "important",
+                    f"{target} 與本 checkout 重建 bundle 不一致，但無法判定 main "
+                    "worktree（git 失敗？）——不排除版本差異，至 main checkout 重跑"
+                    "確認後才考慮 deploy",
                 )
             )
+            continue
+        if main_wt.resolve() != REPO_ROOT.resolve():
+            out.append(
+                (
+                    inv["id"],
+                    "important",
+                    f"{target} 與本 checkout 重建 bundle 不一致，但本 checkout 非 main "
+                    f"worktree（main＝{main_wt}）——差異可能僅是版本不同，不代表部署 "
+                    "stale；至 main checkout 重跑本檢查確認，勿在非 main worktree 跑 "
+                    "deploy（會把非權威版本覆寫三個 harness）",
+                )
+            )
+            continue
+        if _is_detached_head():
+            out.append(
+                (
+                    inv["id"],
+                    "important",
+                    f"{target} 與 source 重建 bundle 不一致，但 HEAD detached——無法"
+                    "判定部署 authority；回到 branch 上重跑確認",
+                )
+            )
+            continue
+        out.append(
+            (
+                inv["id"],
+                "critical",
+                f"{target} 與 source 重建 bundle 不一致（stale 部署）——非 Claude "
+                f"session 正在讀舊規則；跑 `uv run python scripts/deploy_agents.py` 同步",
+            )
+        )
     return out
 
 
@@ -462,8 +549,10 @@ def check_agents_projection_sync(inv: dict) -> list[tuple[str, str, str]]:
     """agents/roles/ 單一源 ↔ 生成 registry 的 drift gate（委派 sync_agents --check）。
 
     --check 是純比對（零寫入，測試有 tripwire 釘住）。rc==1＝drift（critical）；
-    其他非零（parity assert／roles-mismatch traceback）＝診斷分流的 important；
-    uv 缺席／呼叫失敗＝important（不誤導為 drift、不炸整個 checker）。
+    rc==2＝診斷分流的 important（parity drift／roles-mismatch——修 policy 或 skill 表，
+    重跑 sync 修不了）；rc==3＝parity 未驗證（PARITY_SOURCE 缺席——registry bytes
+    一致但 policy parity 無從校驗，不得當綠）；其他非零＝important（uv 缺席／
+    呼叫失敗等，不誤導為 drift、不炸整個 checker）。
     """
     if inv.get("type") != "agents_projection_sync":
         return []
@@ -506,6 +595,15 @@ def check_agents_projection_sync(inv: dict) -> list[tuple[str, str, str]]:
                 f"skill 表非重跑 sync）：{' | '.join(tail)}",
             )
         ]
+    if proc.returncode == 3:
+        return [
+            (
+                inv["id"],
+                "important",
+                "projection gate parity 未驗證（skills/model-routing/SKILL.md 缺席）"
+                "——registry bytes 一致但 policy parity 無從校驗（checkout 不完整？）",
+            )
+        ]
     if proc.returncode != 0:
         tail = (proc.stdout + proc.stderr).strip().splitlines()[-3:]
         return [
@@ -519,6 +617,46 @@ def check_agents_projection_sync(inv: dict) -> list[tuple[str, str, str]]:
     return []
 
 
+def check_shell_provenance(inv: dict) -> list[tuple[str, str, str]]:
+    """Report Shell provenance gate（委派 scripts/check_report_shells.py）。
+
+    rc==1＝violation（[FAIL] 行逐行轉 important）；rc==2＝無法列舉
+    （git 失敗）；uv 缺席／呼叫失敗＝important（不炸整個 checker）。
+    """
+    if inv.get("type") != "shell_provenance":
+        return []
+    script = REPO_ROOT / inv["generator"]
+    if not script.exists():
+        return [(inv["id"], "important", f"shell lint 不存在: {script}")]
+    if shutil.which("uv") is None:
+        return [(inv["id"], "important", "uv 不在 PATH——無法執行 shell provenance gate")]
+    try:
+        proc = subprocess.run(
+            ["uv", "run", "--no-sync", "python", str(script)],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            cwd=REPO_ROOT,
+            check=False,
+        )
+    except OSError as exc:
+        return [(inv["id"], "important", f"shell provenance gate 呼叫失敗: {exc}")]
+    if proc.returncode == 0:
+        return []
+    out = (proc.stdout + proc.stderr).strip().splitlines()
+    fails = [ln.removeprefix("[FAIL] ").strip() for ln in out if ln.startswith("[FAIL]")]
+    if fails:
+        return [(inv["id"], "important", msg) for msg in fails]
+    return [
+        (
+            inv["id"],
+            "important",
+            f"shell provenance gate rc={proc.returncode}: {' | '.join(out[-3:])}",
+        )
+    ]
+
+
 def main() -> int:
     findings: list[tuple[str, str, str]] = []
     for inv in INVARIANTS:
@@ -530,6 +668,7 @@ def main() -> int:
         findings += check_hook_registration(inv)
         findings += check_zcode_live_parity(inv)
         findings += check_agents_projection_sync(inv)
+        findings += check_shell_provenance(inv)
 
     crit = [f for f in findings if f[1] == "critical"]
     imp = [f for f in findings if f[1] == "important"]

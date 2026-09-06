@@ -22,9 +22,9 @@ from pathlib import Path
 
 GENERATOR_NAME = "_generate_index.py"
 # 信任邊界：Stop hook 每 turn 自動執行 memory 目錄內發現的 generator——執行前與
-# 資產源 byte 比對，不符即跳過（防記憶目錄被植入篡改版的持久化執行鏈；資產缺場
-# 無從比對，照舊執行）。__file__-relative 推導——本 hook 由 repo 路徑註冊執行，
-# 資產恆在本 repo 內，跨機器 clone 不失準。
+# 資產源 byte 比對，不符即跳過；資產源缺席同樣跳過（fail-closed——信任邊界不能
+# 在無從驗證時蒸發成照舊執行）。__file__-relative 推導——本 hook 由 repo 路徑
+# 註冊執行，資產恆在本 repo 內，跨機器 clone 不失準。
 ASSET_SOURCE = (
     Path(__file__).resolve().parents[1]
     / "skills"
@@ -73,7 +73,21 @@ def run_for_cwd(cwd: str, home: Path) -> list[str]:
         if resolved in seen:
             continue
         seen.add(resolved)
-        if ASSET_SOURCE.exists() and gen.read_bytes() != ASSET_SOURCE.read_bytes():
+        if not ASSET_SOURCE.exists():
+            notes.append(
+                f"[memory-index-regen] {d}: 資產源缺席（{ASSET_SOURCE}）——跳過執行"
+                "（fail-closed；hook repo 的 memory-audit generator 資產不在場）"
+            )
+            try:
+                (d / "_regen-skipped-stale").write_text(
+                    "資產源缺席——Stop hook fail-closed 跳過重生成；"
+                    "確認 repo 完整後下次成功 regen 自動移除本標記\n",
+                    encoding="utf-8",
+                )
+            except OSError:
+                pass
+            continue
+        if gen.read_bytes() != ASSET_SOURCE.read_bytes():
             notes.append(
                 f"[memory-index-regen] {d}: generator 與資產源不符——跳過執行"
                 "（cp 刷新部署副本或移除）"

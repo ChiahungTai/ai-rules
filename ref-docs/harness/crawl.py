@@ -357,8 +357,11 @@ def run_source(name: str, base: str, discover, fetch, limit: int) -> dict:
                 status, content = "fail", b""
             sha = ""
             if content and status in ("ok", "extracted-html"):
-                dest = BASE_DIR / name / page.relpath
-                write_if_changed(dest, content)
+                # smoke（--limit）零寫入：寫了磁碟不寫 manifest＝integrity split
+                # （hash ledger 落後磁碟內容）——smoke 只驗 discover+fetch 連通
+                if not limit:
+                    dest = BASE_DIR / name / page.relpath
+                    write_if_changed(dest, content)
                 sha = hashlib.sha256(content).hexdigest()
             results.append(
                 PageResult(page.url, page.relpath, status, sha, len(content))
@@ -367,6 +370,8 @@ def run_source(name: str, base: str, discover, fetch, limit: int) -> dict:
     _print_source_summary(name, results)
     return {
         "base": base,
+        # 新鮮度 per-source：單源刷新只更新本源時間，不得讓他源共用新時間戳
+        "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "page_count": len(results),
         "pages": [
             {
@@ -413,19 +418,43 @@ def load_existing_sources() -> dict:
         return {}
 
 
-def main() -> int:
+def _report_orphans(name: str, entry: dict) -> None:
+    """磁碟上有、本次 discovery 沒有的鏡像檔——上游下架或 discovery 變動的帳目。
+
+    只列帳不刪（本地無法判別是 upstream 下架還是漏抓，去留人工裁定）。
+    """
+    src_dir = BASE_DIR / name
+    if not src_dir.is_dir():
+        return
+    known = {p["path"] for p in entry.get("pages", [])}
+    for f in sorted(src_dir.rglob("*")):
+        if f.is_file() and f.relative_to(src_dir).as_posix() not in known:
+            print(
+                f"[WARN] {name}: 磁碟孤兒（本次未發現——上游下架或 discovery 變動，"
+                f"人工裁定去留）: {f.relative_to(src_dir)}"
+            )
+
+
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Mirror multi-harness docs.")
     ap.add_argument("--source", choices=list(SOURCES) + ["all"], default="all")
     ap.add_argument(
         "--limit", type=int, default=0, help="pages per source (smoke test)"
     )
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
     names = list(SOURCES) if args.source == "all" else [args.source]
     sources = load_existing_sources()
     for name in names:
         base, discover, fetch = SOURCES[name]
         sources[name] = run_source(name, base, discover, fetch, args.limit)
+    if args.limit:
+        # smoke 不寫 manifest：抽樣結果覆寫 source entry 會縮小 coverage、
+        # 磁碟頁失去 URL/hash/status ledger（provenance 破壞）
+        print("[SMOKE] --limit：不寫 manifest（smoke 不變動 provenance ledger）")
+        return 0
+    for name in names:
+        _report_orphans(name, sources[name])
     manifest = {
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "sources": dict(sorted(sources.items())),

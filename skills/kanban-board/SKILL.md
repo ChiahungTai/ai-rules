@@ -69,7 +69,7 @@ bash <skills 根>/kanban-board/scripts/backlog_precheck.sh [卡id ...]   # skill
 - 機械消費：`--json`（**僅 list/view/task/search 四指令支援**）
 - 想法池：`backlog draft create "<想法>"` → Drafts 頁累積 → 拍板 `backlog draft promote <id>`（想法→承諾）
 
-**遠期卡治理（draft vs archive vs Icebox）**（實證 2026-09-03，例：mosaic `MOS-2/3/7 → DRAFT-1/2/3` 後 `To Do: MOS-10/16 + Done 7`；決策見 [Backlog.md 治理設計](../../ai-analysis/_tasks/09-03-backlog-governance-design/design.md)）：
+**遠期卡治理（draft vs archive vs Icebox）**（實證 2026-09-03，例：mosaic `MOS-2/3/7 → DRAFT-1/2/3` 後 `To Do: MOS-10/16 + Done 7`；決策見 [Backlog.md 治理設計](../../ai-analysis/_tasks/done/09-03-backlog-governance-design/design.md)）：
 | 情境 | 動作 | 命令 | 版面效果 |
 |------|------|------|----------|
 | 遠期研究/暫緩（`To Do` 噪音） | **demote → draft**（官方停車場） | `backlog task demote <id>` → `backlog/drafts/draft-*.md` | board 完全隱形；`backlog draft list --plain`/`view DRAFT-x --plain`/`browser /drafts` 可見；`search`/`board` 不撈 |

@@ -1,6 +1,6 @@
 # Harness 契約對照
 
-各 harness（Claude Code / OpenCode / ZCode / Muse Code）的契約維度對照，**萃取自本地鏡像**（`claude-code/`、`opencode/`、`zcode/`、`meta/muse-code/`，見 [`manifest.json`](manifest.json) 的 `generated_at` 為新鮮度基準）。
+各 harness（Claude Code / OpenCode / ZCode / Muse Code）的契約維度對照，**萃取自本地鏡像**（`claude-code/`、`opencode/`、`zcode/`、`meta/muse-code/`，見 [`manifest.json`](manifest.json) **各 source 條目的 `generated_at`** 為該源新鮮度基準——頂層 `generated_at` 僅是 manifest 產出時間；source 條目無此欄＝該源尚未在新制下刷新過）。
 
 > 過時以原站為準；每格附鏡像內的 `檔:行` 佐證以便查證，未載者標「--help 實機，鏡像未載」並說明查證過程。「（鏡像未提及）」= 該維度在所讀頁面沒寫，非保證不存在（可能在未鏡像的頁面）。
 

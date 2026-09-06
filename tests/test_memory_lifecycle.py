@@ -766,3 +766,18 @@ def test_regen_failure_marker_written_and_cleared(tmp_path):
     regen.run_for_cwd("/x/proj", tmp_path)
     assert not (zdir / "_regen-failed").exists()
     assert (zdir / "MEMORY.md").exists()
+
+
+def test_regen_skips_when_asset_source_missing(tmp_path, monkeypatch):
+    """資產源缺席 → fail-closed：不執行池內 generator＋寫停滯 marker。
+
+    信任邊界不該在無從驗證時蒸發（codex 09-06 審查 I-3：原設計資產缺場
+    照舊執行＝把不可驗證狀態當可信訊號）。"""
+    zdir = regen.zcode_memory_dir("/Users/ctai/Github/ai-rules", tmp_path)
+    zdir.mkdir(parents=True)
+    make_pool(zdir, n=1)
+    monkeypatch.setattr(regen, "ASSET_SOURCE", tmp_path / "no-such-asset.py")
+    notes = regen.run_for_cwd("/Users/ctai/Github/ai-rules", tmp_path)
+    assert any("資產源缺席" in n for n in notes)
+    assert not (zdir / "MEMORY.md").exists()  # 未執行 generator
+    assert (zdir / "_regen-skipped-stale").exists()  # 停滯可見

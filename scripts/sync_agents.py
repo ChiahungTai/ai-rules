@@ -364,8 +364,11 @@ def main(
     legacy_paths: set[str] | None = None,
 ) -> int:
     """exit 語義：0=綠、1=drift（生成物 vs 源，重跑 sync 可修）、2=fatal
-    （parity/mismatch——policy 或 skill 表要改，sync 修不了；checker 端據此分級）。"""
+    （parity/mismatch——policy 或 skill 表要改，sync 修不了）、3=parity 未驗證
+    （PARITY_SOURCE 缺席＋投影一致——checkout 不完整；非綠：registry bytes
+    一致但 policy parity 無從校驗，checker 端據此分級）。"""
     assert mode in _MODES, f"unknown mode: {mode}（合法：{sorted(_MODES)}）"
+    parity_unverified = False
     if requirements is None:
         if (repo / PARITY_SOURCE).exists():
             parity_drift = check_parity(repo)
@@ -375,7 +378,8 @@ def main(
                     print(f"  {line}", file=sys.stderr)
                 return 2
         else:
-            print(f"[WARN] parity source 缺席（{PARITY_SOURCE}）——parity gate 跳過")
+            parity_unverified = True
+            print(f"[WARN] parity source 缺席（{PARITY_SOURCE}）——parity 未驗證")
     try:
         expected = expected_projections(repo, requirements)
     except AssertionError as exc:
@@ -386,7 +390,9 @@ def main(
     if mode == "check":
         for path in drift:
             print(path)
-        return int(bool(drift))
+        if drift:
+            return 1
+        return 3 if parity_unverified else 0
     if mode == "map":
         print(render_map(expected, requirements, owned))
         return 0

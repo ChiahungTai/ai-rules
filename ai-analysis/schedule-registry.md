@@ -1,8 +1,11 @@
 # Schedule Registry（排程職責總覽）
 
-> **定位**：人／AI 可讀的**職責總覽**；**機械真相源仍是 `CronList`**（`registry` drift 的後果限縮為認知過時，不是行為錯誤）。  
-> **維護規則**：動排程的 session（`CronCreate`／`CronUpdate`／`CronDelete`）順手同步本檔——慣例層；比對腿兜底見週日 23:00 治理看照（[design.md §4](_tasks/09-03-backlog-governance-design/design.md#§4-排程單一真相源)）。  
-> **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）。  
+> **定位**：人／AI 可讀的**職責總覽**；**機械真相源仍是 `CronList`**（`registry` drift 的後果限縮為認知過時，不是行為錯誤）。
+>
+> **維護規則**：動排程的 session（`CronCreate`／`CronUpdate`／`CronDelete`）順手同步本檔——慣例層；比對腿兜底見週日 23:00 治理看照（[design.md §4](_tasks/done/09-03-backlog-governance-design/design.md#§4-排程單一真相源)）。
+>
+> **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）。
+>
 > **更新時點**：2026-09-03（baseline `d121837`，CronList 實錄；R-8）；下次改動排程時同步更新本表。
 
 ## ZCode Cron（3 條，ai-rules workspace）

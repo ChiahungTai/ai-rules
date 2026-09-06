@@ -40,7 +40,9 @@ uv run python ref-docs/harness/crawl.py --source zcode --limit 3   # smoke test
 ```
 
 - **Deterministic**：只在 sha256 改變時才寫檔 → refresh 只動真的變的頁，diff 最小。
-- **manifest merge**：`--source X` 只更新 X，保留其他 source 條目；頂層 `generated_at` 每次刷新。
+- **manifest merge**：`--source X` 只更新 X（含該源條目自帶的 `generated_at`），保留其他 source 條目與其時間戳——單源刷新不會讓他源共用新時間戳；頂層 `generated_at` 僅代表 manifest 產出時間，**各源新鮮度以 source 條目內的 `generated_at` 為準**。
+- **smoke 零寫入**：`--limit` 不寫 manifest **也不寫磁碟鏡像**——抽樣結果覆寫 source entry 會縮小 coverage；只寫磁碟不寫 manifest 則是 integrity split（hash ledger 落後磁碟內容）。smoke 只驗 discover＋fetch 連通。
+- **孤兒帳**：refresh 時列出磁碟上有、本次 discovery 沒有的鏡像檔（`[WARN]`）——上游下架或 discovery 變動，去留人工裁定（crawler 不刪）。
 - zcode 若日後改版導致 nav 抽不到連結，會印 `[WARN] zcode: seed ... unreachable`——屆時檢查 nav 結構是否變動。
 
 ## Provenance / 版權
