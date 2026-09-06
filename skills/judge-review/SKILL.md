@@ -42,6 +42,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Edit"]
 
 - **closed 宣稱 → 命令輸出比對**：「已修／已落地」類宣稱用 rg／exit code 對帳，非 docstring 讀過即算
 - **✅ 清單＝下輪驗收輸入**：採納清單逐項交 followup-review 驗收（編排已固化於 post-build 階段 3；此處顯性化——✅ 不只是決策，也是驗收清單）
+- **✅ 清單＝閘門候選**：出口加一問「同類 finding 是否第二次出現？」——是 → 列入 **gate 候選清單**供 user 拍板（有進有出：findings 是流入、gates 是流出；judge 只提案不建卡——mutation 交 user/後續弧，backlog 建卡即 commit 屬 outward action；真實案例：allow-list 反覆 miss → `skill_allowlist_coverage` invariant、殼 provenance 失真 → `check_report_shells` lint＋single-source 接線）
 - **長弧後段防疲勞**：多段／跨 session 長弧的後段裁決，每項明列「我查了什麼」——後段滑過是結構性風險非個案
 
 ---

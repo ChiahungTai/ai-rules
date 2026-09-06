@@ -27,7 +27,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 - **muse code 開發（user 直用時＝該弧主力 harness）**：muse-spark-1.3 全棧——實作/審查都在該 harness 內；repo 層 AGENTS.md muse 會載入（bridge log 實證；全域 guide 的 muse 部署點未查證）
 - **跨家族審查（任一 harness 發起需要第二意見）→ 對側家族優先 muse**——跨家族的價值在非 GLM 視角，muse 額度足為首選；in-harness 驗收側仍是 GLM
 - **ZCode→muse bridge 委派**（implement profile）：user 指定時派（AIR-13 慣例，單批指示）——與「user 直在 muse code 開發」是兩種形態，前者是委派後者是 harness 切換
-- **codex（OpenAI）→ 預設不派**（額度最少）——僅 user 顯式指定（例：「codex sol max」）
+- **codex（OpenAI）→ 預設不派**（額度最少）——僅 user 顯式指定（例：「codex sol max」）。定性甜蜜點實證：control-plane／docs 形態 repo 的全 repo 狀態對抗深審（[/state-review](../state-review/SKILL.md) 的候選家族之一）——產出與 in-family 盲點正交（權威模型／事務完整性／provenance 類問題）；本行是能力備註，不構成取消顯式指定授權
 - **Anthropic／xai → 未訂閱禁派**（含影像格——上表保留能力對照）；Anthropic 之後**視性價比評估**再決定訂閱（CC 原生家，訂了可重配 backend），訂閱後解除標註並補查證
 
 **額度 failover（僅撞牆時）**：GLM 撞 1308（錯誤訊息含重置時間戳）→ muse 承接執行段；muse 亦乾 → 等 reset（`/at`）或 user 裁定硬跑；任何降級必顯式記錄（AIR-13）
@@ -113,6 +113,10 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 3. **單一 writer 無待決**：單一 writer 可獨立完成，無需主 session 中途決策或協調多 writer
 4. **主價值＝承接 implementation loop**：主價值在承接完整實作迴圈，而非零碎問答或探測
 5. **環境可啟動**：目標 runtime 環境可啟動（bridge setup 綠、binary 在場），非環境阻塞
+
+> **review／advisory 形態條款**（read-only 委派——external second-opinion review、[state-review](../state-review/SKILL.md) 深審腿、advisory 掃描）：以 ①②⑤＋三條專屬判定——**read-only transport**（flag 或工單紅線承載，產出＝findings/報告）、**跨家族成立**（委派對象與 caller 相異家族——external 視角是派發理由本身）、**可重現輸出**（findings 附錨點＋驗收設計，in-family judge 可機械重現）。條件③④（單一 writer／implementation loop 主價值）是 **implement 形態專屬**，不得用以擋 review 形態——否則跨家族審查腿結構性不可達（真實案例：state-review 深審腿依原條文④被擋）。
+>
+> **跨家族解析表**（未指定 family 時；顯式指定與 caller 同 family → fail-loud）：GLM／ZCode caller → muse；codex caller → muse；**muse caller → fail-loud**——相異家族僅剩 codex 可選，而 codex explicit-only 不因解析繞過：**停下要求 user 選擇**——顯式 `--family codex`，或明示接受同家族 degraded review（caller-harness full dual-context 承接＋記錄）；禁解析層自選降級。
 
 > sandbox-error 禁以 `--yolo` 賭重試（父層沙箱不可越權重試）；分類走 auth-failed／environment，修因後重派。
 

@@ -1,8 +1,8 @@
 ---
 name: project-review
 
-description: "專案狀態總覽（互動模式）— findings + kanban + doc health 一眼看完，人工確認修正"
-when_to_use: "Human-initiated project review. Presents findings, kanban health, and doc quality for manual confirmation. Use when you want to review project status interactively. Predecessor was an interactive daily-maintain variant."
+description: "專案狀態總覽（互動模式）— findings + kanban + doc health 一眼看完，人工確認修正。聚合既有機械檢查的維護總覽；不做全 repo 對抗深審（那走 /state-review）"
+when_to_use: "Human-initiated project review. Presents findings, kanban health, and doc quality for manual confirmation. Use when you want to review project status interactively. NOT for adversarial full-repo state-rot review with an external-family reviewer (use /state-review). Predecessor was an interactive daily-maintain variant."
 argument-hint: "/project-review — 核心檢查 | --quality 加品質層 | --all 全部"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 ---

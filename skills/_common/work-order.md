@@ -99,6 +99,16 @@
 
 > 附加：jobId／thread id、改檔清單、實跑命令與輸出、未驗證項、建議 reviewer 聚焦點（completion-check 話術承載節）；無對應項標「無」勿留空。
 
+## Review／advisory variant（唯讀深審工單的欄位替換語義）
+
+> 十節結構不變；review/advisory 形態（read-only、無 EP、無 writer、無預期改檔——external second-opinion、[/state-review](../state-review/SKILL.md) 深審腿）以下欄位**替換**而非豁免，缺替換欄位一樣＝未就緒。implementation 形態缺 §4 EP／§10 落實說明仍為未就緒（兩形態互不冒充）。
+
+- **§3 Baseline identity** 增：環境凍結證據——clean tree 聲明，或 dirty 模式的 tracked diff hash＋untracked 清單/content hash（審查端前後比對，不一致標 stale）
+- **§4 必讀**：EP 段落項替換為 **scope manifest**——審查範圍逐 path 分類（core 逐檔讀／leaf 機械掃＋異常深讀／generated 驗投影不當源／mirror 驗 manifest 帳），每 path 恰屬一 bucket、exclusions 明列；方法論 bundle 照舊（§4 既有 review 注記）
+- **§6 範圍限定**：動＝零（read-only）；不動＝全部（含 backlog 卡狀態）——交付以 `git diff --name-only` 空 + `git status` 前後一致舉證
+- **§8 驗收**：逐條「查證命令＋預期證據形態」（錨點存在性、hash 對帳、coverage 分類帳完備性）
+- **§10 交付報告**：逐段落落實說明替換為 **findings schema**——每 finding 附 file:line 錨點、嚴重度（review-engine 三級）、信心水準、**remedy 三分類**（bug＝行為違反意圖且無文檔宣稱刻意／drift＝兩處宣稱或實作不一致／design-reversal＝文檔化的刻意設計但設計本身該反轉——反轉需 user 拍板）、Important 以上附**可機械化驗收設計**（failure-injection 形態最佳）；另附環境前提自曝（worktree identity／HEAD／工具新鮮度）與方法論限制段（用了什麼、什麼無法驗證）
+
 ---
 
 > 消費形態：skill 間以 `../_common/work-order.md` link 引用，或主 session 直接依本模板填寫新工單本文後經 bridge `task`／codex 派發。`rules/model-routing.md` tier 詞彙句與 `skills/model-routing/SKILL.md` 解析表為 family／profile 詞彙與映射單一源，本模板不自帶定義。

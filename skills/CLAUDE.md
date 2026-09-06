@@ -38,6 +38,7 @@
 - **討論/規劃期**：`/illustrate`（結構，人 viewport，pre-EP 軟 gate 提醒，可多次）
 - **review 期**：post-build 可選 `/illustrate`（漂移/重造檢查，B 軸）→ `/code-review`（六軸含 axis 3 結構 = arch 吸收，top-down，A 軸機器）→ `/judge-review`（**一次**）
 - **既有 core 審查（無 change，純審穩固度）**：P1 識別 → selective review matrix（[arch-thinking](arch-thinking/SKILL.md)「core identification」lens）→ 依風險排序逐個 core 跑 `/illustrate` mode B（artifact menu：call graph / sequence / class slice / data-flow / boundary，B 軸人 viewport）+ **人讀 code**（VS Code Cmd+Click 跳轉）→（可選）P2 邊界驗證。B 軸；不排 `/code-review`（正確性靠人讀，非機器 finding）；Console / MD 模式（html opt-in 另見 illustrate html 模式）。Anthropic selective-review：core = heavy human review、leaf = 放過。
+- **全 repo 狀態審查（無 change，A 軸機器——state-rot 盤點）**：`/state-review`——external family 單發深審＋in-family judge，read-only 產報告與 gate 候選；抓 diff-review 結構盲區（跨弧累積漂移）。
 
 ### 工作流 skills — 核心開發流程
 
@@ -72,6 +73,7 @@
 - `/corpus-recall` — 行動前敘事脈絡檢索（topic→前因後果卡片，與 smell-detector 對仗＝行動前偵察雙軸）：symbol/模組/關鍵詞→callstack-plan 錨點＋tour 景點＋manifest 交叉＋md 內文＋hub_refs 影響域的機械求全，LLM 判讀 confidence 三級；輸出相關鏈（職責一句＋為何相關＋走讀/深讀雙入口）——corpus 超過瀏覽閾值後的檢索前門；無語料誠實停不硬湊
 - `/consistency` — 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度、Signal/Noise）
 - `/sync-sources` — 跨檔 single-source invariant 機械檢查（含非 Claude 部署 bundle 新鮮度）
+- `/state-review` — 全 repo 狀態對抗審查（A 軸機器，抓 diff-review 盲區的 state-rot：跨弧累積漂移）：環境凍結（clean-tree 預設＋前後比對 fail-loud）＋scope manifest（core/leaf/generated/mirror 分類帳）→ external family 單發深審（work-order review variant；family 與 caller 相異、依 dispatch 慣例解析）→ in-family judge-review → gate 候選提案；read-only 全程（報告對話輸出，落檔/建卡＝user 拍板後續動作），修復走 /implement
 
 ### 工作流 skills — instruction file 維護
 

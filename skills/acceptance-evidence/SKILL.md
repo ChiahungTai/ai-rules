@@ -1,6 +1,6 @@
 ---
 name: acceptance-evidence
-description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限、Intent Drift Type A/B、filter trap 重構查證義務、L3 整合測試實例、Runtime Invariant Assurance、B 軸人類驗收層演進、盤點執行點雙掃（間接層＋直呼層）、抽樣推廣與全量對帳。always-on 核心（L1-L6 階層表、證據獨立性、Claim→Evidence）在 rules/acceptance-evidence.md；審查/規劃/測試策略需要深層論證或失敗案例時載入。觸發詞：證據階層、L3、整合測試、filter trap、runtime invariant、intent drift、B 軸、人類驗收、認知誤差、EP 預見極限、盤點執行點、誰呼叫、影響域、CI 執行點、雙掃、抽樣、全量對帳、樣本選擇。
+description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限、Intent Drift Type A/B、filter trap 重構查證義務、L3 整合測試實例、Runtime Invariant Assurance、B 軸人類驗收層演進、盤點執行點雙掃（間接層＋直呼層）、抽樣推廣與全量對帳、機械閘門的環境前提（gate 輸出也是 claim）。always-on 核心（L1-L6 階層表、證據獨立性、Claim→Evidence）在 rules/acceptance-evidence.md；審查/規劃/測試策略需要深層論證或失敗案例時載入。觸發詞：證據階層、L3、整合測試、filter trap、runtime invariant、intent drift、B 軸、人類驗收、認知誤差、EP 預見極限、盤點執行點、誰呼叫、影響域、CI 執行點、雙掃、抽樣、全量對帳、樣本選擇、false-red、false-green、gate 前提。
 ---
 
 # Acceptance Evidence — 驗收證據深層理論
@@ -28,6 +28,16 @@ description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限�
 ## 抽樣推廣與全量對帳（樣本選擇機制）
 
 抽樣結論寫母體假設前自問『樣本怎麼選的？選擇機制會不會正好偏一邊？』；主儲存／退役／範圍類設計判斷先全量機械對帳，不靠抽樣推廣（實例：3 檔樣本恰是全市場僅有的例外擁有者）；user 對系統行為的歷史印象值得查 log 基線（AI 的『一直以來都這樣』常只看近窗）。
+
+## 機械閘門的環境前提（gate 輸出也是 claim）
+
+機械 gate（checker／linter／LSP／自建腳本）的輸出繼承 Claim→Evidence→Trust 義務：**gate 的前提錯了，輸出就是自信的錯誤**——獨立性問題不限於 LLM self-report。收到 gate 紅燈（或綠燈）的第一動是「驗前提」而非「信結果」，把 gate 當被審對象：
+
+- **執行主體的 identity**：誰在跑 gate、它把誰當 authority？（真實案例：在舊 worktree 跑部署 freshness checker → 滿屏 false Critical——checker 把「執行它的任意 checkout」當部署權威；reviewer 第一反射信 gate，查證後才撤銷並反推為結構性 finding）
+- **exit code 的傳遞路徑**：pipe 會遮蔽退出碼（`cmd | tail` 回報的是 tail 的 0——規則明載仍會犯：同弧內 ruff 實際 errors 曾被 `tail` 吃掉）
+- **索引/快照新鮮度**：LSP workspace staleness（見 [lsp-navigation](../lsp-navigation/SKILL.md)）、cr index 過期——回報可疑少時先重建再下結論
+
+false-red 與 false-green 同危險——後者讓 coverage 型 gate 靜默放行（真實案例：殼 provenance lint 只被自身 unit test 引用、未接進任何閘門，實跑「全過」實為 coverage false-green）。
 
 ## 認知誤差與 EP 的預見極限
 
