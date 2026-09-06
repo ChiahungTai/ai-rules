@@ -3,12 +3,12 @@ name: post-build
 when_to_use: "After /implement (or any substantial change set) to orchestrate the review chain automatically: diff triage decides which sub-chains run."
 argument-hint: "無參數；自動 triage（uncommitted 或 EP baseline 任務弧）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Edit", "Write", "Agent"]
-description: build 後收尾鏈編排 — code-review → judge-review → 修正迴圈 → consistency → metadata-sync → Report Shell refresh（hook 2：實作章節＋產圖一次＋badge ✅＋持久 delta tour）一次觸發。只做編排與 diff triage，方法論真相源在各被編排命令/skill。觸發詞：build 後收尾、post-build、收尾鏈、review chain 自動化、commit 前收尾。
+description: build 後收尾鏈編排 — code-review → judge-review → 修正迴圈 → consistency → metadata-sync → tour corpus 修復閉環 → Report Shell refresh（hook 2：實作章節＋產圖一次＋badge ✅＋持久 delta tour）一次觸發。只做編排與 diff triage，方法論真相源在各被編排命令/skill。觸發詞：build 後收尾、post-build、收尾鏈、review chain 自動化、commit 前收尾。
 ---
 
 # post-build — build 後收尾鏈編排
 
-把「build 完手動跑 code-review → judge-review → consistency（→ metadata-sync）」的固定收尾序列編排成一次觸發。本 skill **只做編排與 triage**，各步驟的方法論真相源在被編排命令本身，不重抄（防 single-source drift）。
+把「build 完手動跑 code-review → judge-review → consistency（→ metadata-sync → tour corpus 修復閉環）」的固定收尾序列編排成一次觸發。本 skill **只做編排與 triage**，各步驟的方法論真相源在被編排命令本身，不重抄（防 single-source drift）。
 
 > dispatch 形態：編排者（本命令）＝主 session full（判斷密集，不 agent 化）；鏈上機械驗證／視覺驗收段 spawn 哪個 agent，查 [agent-workflow](../agent-workflow/SKILL.md)「全生命週期 execution contract（消費側）」（表主體在 agents/AGENTS.md）。
 
@@ -65,7 +65,12 @@ findings 全空 → 報告並直接進 docs 鏈。
 
 1. 對每個變更的 `.md` 執行 `consistency`（[skills/consistency/SKILL.md](../consistency/SKILL.md)）；fail 項當場修再驗（**重驗範圍 = 修正觸及的檔**，非整個 docs 鏈重跑；上限同階段 3 的 3 輪）
 2. diff 觸及 Capabilities / `SYSTEM-MAP.md` / `dependency-graph.md` / `backlog/` → 執行 `metadata-sync`（[skills/metadata-sync](../metadata-sync/SKILL.md)）
-3. repo 有 `.tours/manifest.toml` → 跑 `code-reality tour_validate --manifest --repo .`，FAIL 列入收尾報告（tour corpus audit 接線——工具語義見 [code-reality](../code-reality/SKILL.md)）
+3. repo 有 `.tours/manifest.toml` → 跑 `code-reality tour_validate --manifest --repo .`；FAIL>0 走**修復閉環**（上限 3 輪，同階段 3 慣例），不只列入報告——只報不修讓 corpus 債滾雪球，存量 FAIL 反覆佔據後續每個收尾報告（mosaic 09-07 實證 77 FAIL 積債）：
+   - **graph 新鮮度前置**：重產前先 `code-reality build --repo .`——stale graph 帶重錨會寫出舊簽名壞錨（09-07 實證殘留 4 條根因；rebuild 冪等分鐘級，FAIL=0 時零成本）
+   - **觸及族重產一律經 `chain_tour`**（LLM 不手改 `.tour`）；帶 isPrimary 前門的族重產必再帶 `--primary`（漏帶＝旗標靜默掉落）
+   - **curated（manifest `generator=manual`）族不覆蓋**——其 FAIL 逕落應修清單（兩鐵律單一源見 [tour-bootstrap](../tour-bootstrap/SKILL.md)「重跑語義」）
+   - 重產後仍 FAIL → callstack md 幀手術（dead symbol／簽名漂移；rg 現場驗證行號與簽名）→ 再重產
+   - 最終殘留列收尾報告「tour corpus 應修清單」＋閉環統計（重產 N 族／手術 N 檔）；工具語義見 [code-reality](../code-reality/SKILL.md)
 
 ## 階段 5 — Report Shell refresh（hook 2——commit 前最後穩定點）
 
@@ -89,7 +94,7 @@ findings 全空 → 報告並直接進 docs 鏈。
 - muse 委派（鏈內有派 muse 時才列）：jobId＋status 清單（經 bridge 入口）；ledger 查無的 muse 產出標「未經 bridge，副作用側考古」
 - EP 對照：delta_tour=<機械底稿|LLM 對照|無（原因：uncommitted 模式/小變更）>——宣稱觸及 vs 實際變動模組、unexplained 差異項
 - 殼 refresh（hook 2）：<完成（badge ✅＋持久 delta tour 落點＝任務家殼）|跳過（原因：無殼/條件不符）>
-- docs 鏈：consistency N 檔（pass N / fail-fixed N）、metadata-sync <跑/跳過>
+- docs 鏈：consistency N 檔（pass N / fail-fixed N）、metadata-sync <跑/跳過>、tour corpus <PASS|閉環後 PASS（重產 N 族/手術 N 檔）|應修清單 N 條>
 - callstack 菜單（repo 有 `ai-analysis/blueprint/callstack-plan.md` 時）：積壓 N 條待生成（機械＝plan **成鏈行數**（①-③ 軌行；④ scripts/索引行不計）− `callstack/` 既有 md 數）——報庫存不催行動，生成＝獨立觸發＋報價（blueprint-bootstrap）
 - smell=<建議 zoom 的 dir|無>——訊號源＝階段 1/2 findings 中「疑似 AI 亂加／junk／scope creep」類 finding 所指目錄。**triage 訊號非鏈內調用**：人類看到再決定開 viewport session 跑 [smell-detector](../smell-detector/SKILL.md) zoom（受眾分離——smell-detector 是軌道②人類 viewport，不進本鏈自動跑；baseline/onboarding 盤點屬週期需求，不掛 post-build）
 - ⚠️ 待用戶確認：<決策清單>
@@ -115,5 +120,5 @@ dual-family 第二審查者因訂閱窗口／額度不足跳過時，必須顯�
 canonical review flow 以 [code-review](../code-review/SKILL.md)「流程位置」為單一源。本 skill 是該 flow 中 code-review → judge-review 段 + docs 鏈（consistency → metadata-sync）的**執行載體**：
 
 ```
-/implement → post-build（本 skill：編排 code-review→judge-review→修正迴圈→consistency→metadata-sync→殼 refresh〔hook 2〕）→ /commit
+/implement → post-build（本 skill：編排 code-review→judge-review→修正迴圈→consistency→metadata-sync→tour corpus 修復閉環→殼 refresh〔hook 2〕）→ /commit
 ```

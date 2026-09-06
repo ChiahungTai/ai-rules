@@ -55,7 +55,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 | 模式 | 觸發 | 行為 |
 |---|---|---|
 | **fresh** | 無 corpus／用戶明示重建 | 走五步程序 |
-| **audit** | 有 corpus（**預設**） | 跑 `tour_validate --manifest` 產報告，**不改任何檔** |
+| **audit** | 有 corpus（**預設**） | 跑 `tour_validate --manifest` 產報告，**不改任何檔**（bootstrap/audit 恆唯讀——FAIL 修復閉環程序單一源＝[post-build](../post-build/SKILL.md) 階段 4 步驟 3） |
 | **migrate** | 格式舊（line-only 錨／純文字 cross-ref） | `tour_upgrade --dry-run` 先看報告，用戶點頭才 `--apply` |
 
 判定：`.tours/` 無 tour→fresh；有 corpus 無 manifest→audit（提示 migrate 若格式舊）；有 manifest→audit 為預設。
