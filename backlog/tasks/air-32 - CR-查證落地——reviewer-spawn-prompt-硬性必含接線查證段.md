@@ -1,13 +1,18 @@
 ---
 id: AIR-32
 title: CR 查證落地——reviewer spawn prompt 硬性必含接線查證段
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-06 05:45'
+updated_date: '2026-09-06 05:46'
 labels:
   - governance
   - skills
 dependencies: []
+references:
+  - >-
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/skills/review-engine/SKILL.md
+  - skills/review-engine/SKILL.md
 ordinal: 23000
 ---
 
