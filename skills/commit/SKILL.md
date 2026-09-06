@@ -163,7 +163,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 **留審時必附檢視指令**：user 要求「先不要 commit 我看一下」→ 變更留 working tree，報告附逐檔檢視指令（`git diff <path>`）與行號定位——user 要能一鍵看到改了什麼，不自行猜路徑。
 
-**遵守 `outward-action-consent` rule（commit 場景）**：未收到確認絕不執行 git commit。
+**遵守 `outward-action-consent` rule（commit 場景）**：未收到確認絕不執行 git commit（例外形態——backlog 建卡、純 ruff 自動修改——見該 rule「Commit 專屬段」）。
 
 ### 階段 6：執行 Commit
 
@@ -183,7 +183,7 @@ Ruff 或 MyPy 有錯誤 → **嘗試手動修正**（不直接放棄）：
 
 ## 執行約束
 
-- **遵守 `outward-action-consent` rule（commit 場景）**：未經確認絕不 commit
+- **遵守 `outward-action-consent` rule（commit 場景）**：未經確認絕不 commit（例外形態見該 rule「Commit 專屬段」——backlog 建卡、純 ruff 自動修改）
 - **ruff + mypy 必須雙通過才 commit**（pre-existing 問題也需在此時處理：加 per-file-ignores / type: ignore 或直接修）
 - **docs 單檔閘門**（任何路徑 `.md`，含 `backlog/` 卡；捷徑／直 commit 路徑皆適用）：本次弧未跑 post-build/consistency → commit 執行前對變更的 `.md` 檔跑 `/consistency`（單檔輕量）——ruff/mypy 對 `.md` 不適用，此為純 docs 直 commit 的唯一品質閘門（實證：孤兒結算收編直 commit 跳過收尾鏈，補跑才發現無閘門）
 - **TEMP diagnostic log 掃描**（防殘留）：commit 前掃描 diff 有無 debug-only log 模式（`Diagnostic:`、`[OK] ...`、症狀導向 debug 變數如 `<debug_var> =` 等 ad-hoc 偵錯輸出）。命中 → flag 給用戶確認移除。未移除的 debug log 不得進 commit（違反 llm-output-convention：print 只用於 state transition）。
