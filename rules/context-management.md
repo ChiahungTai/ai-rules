@@ -19,6 +19,17 @@ harness-scope: neutral
 - 同一問題連續糾正 2 次仍失敗 → 重置 context（Claude: `/clear`），用更好的 prompt 重來（累積的失敗嘗試比乾淨 context 更糟）
 - 糾正超過 2 次 → 說明 prompt 不夠好，不是 AI 不夠努力
 
+## 想法即時落盤（durable checkpoint）
+
+> **核心原則**：context 是揮發性記憶，quota 死亡無預警——值得留下的東西在**產生當下**寫入檔案，不等段落結算或 session 結束。只活在對話裡的思考，恢復時靠 transcript 考古（成本極高；真實案例：codex 連續多日多個 session 死於 usage limit，某審查弧 findings 寫到「中間檢查點」後死亡，最終合成只活在 transcript）。
+
+- **落盤時機**（事件驅動）：關鍵發現、方向決策與其理由、被排除的路徑與原因、下一步意圖——出現即寫
+- **落盤位置**（既有載體分流，不新發明）：有 EP → EP 檔進度節即時 append（不等段落完成）；有 backlog 卡 → `task edit --append-notes`；探索期（兩者皆無）→ `.agent-tmp/session-journal.md`（repo 內，夜間清掃兜底）
+- **落盤內容自帶完成度狀態**：標明「中間檢查點／最終」＋尚待什麼——死亡後接手者才知道可信邊界，不會把未驗收宣稱當完成
+- **與 memory 邊界**：journal 是工作記憶外化（未定案也寫）；memory 仍守一句話測試＋確定才寫——journal 不觸發 memory 寫入
+- **spawn 長任務 agent**：prompt 注入「中間發現即時落盤 `.agent-tmp/`」——agent 死於 quota 時 findings 不陪葬
+- **quota 死亡接手第一動**：先讀 journal／EP 進度／卡 notes 再續行——現況以檔案為準，非對話記憶
+
 ## STATE.md（Last session 觀察層）
 
 STATE.md 定義（定位 / 觀察層 vs 事實層邊界 / 職責矩陣 / 生命週期 / 路徑 / 觸發）與寫入步驟見 state-md-write 共用子範本（Claude: `../skills/_common/state-md-write.md`）（寫入由 at/deep-work 觸發；Open failures 走 kanban 不進 STATE）。
