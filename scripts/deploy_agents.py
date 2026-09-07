@@ -4,7 +4,9 @@ Deploy bundled AGENTS.md to non-Claude harnesses.
 
 Bundles ai-development-guide.md (guide) + rules with matching harness-scope
 frontmatter -> writes to ~/.zcode/AGENTS.md, ~/.config/opencode/AGENTS.md,
-~/.codex/AGENTS.md.
+~/.codex/AGENTS.md, ~/.config/muse/AGENTS.md (muse machine-wide user rules
+path — probe-verified 2026-09-07; loads unconditionally, project AGENTS.md
+wins on conflict).
 
 Claude (~/.claude/CLAUDE.md) is NOT touched -- it stays symlink to the
 slim guide; Claude gets rules via ~/.claude/rules/ auto-load.
@@ -58,6 +60,7 @@ TARGETS = [
     pathlib.Path.home() / ".zcode" / "AGENTS.md",
     pathlib.Path.home() / ".config" / "opencode" / "AGENTS.md",
     pathlib.Path.home() / ".codex" / "AGENTS.md",
+    pathlib.Path.home() / ".config" / "muse" / "AGENTS.md",
 ]
 
 # ZCode truncates a single instruction file at 100KiB (102,400 bytes,

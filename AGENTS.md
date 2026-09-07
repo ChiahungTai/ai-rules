@@ -1,6 +1,6 @@
 # ai-rules 專案
 
-> 本檔是 **ai-rules 專案指令**（開本 repo 時讀）。**全域開發指南**（演化/驗證/UC-Driven/架構/量化鐵律）是另一份獨立檔 `ai-development-guide.md`，經各 harness 全域位置載入——非 Claude 端：`~/.zcode/AGENTS.md` 等三家 → guide bundle；Claude 端：`~/.claude/CLAUDE.md` symlink → guide + `~/.claude/rules/` auto-load（不走 bundle）——非本檔。
+> 本檔是 **ai-rules 專案指令**（開本 repo 時讀）。**全域開發指南**（演化/驗證/UC-Driven/架構/量化鐵律）是另一份獨立檔 `ai-development-guide.md`，經各 harness 全域位置載入——非 Claude 端：`~/.zcode/AGENTS.md` 等四家 → guide bundle；Claude 端：`~/.claude/CLAUDE.md` symlink → guide + `~/.claude/rules/` auto-load（不走 bundle）——非本檔。
 
 本專案管理 AI coding agent 的 rules、skills、commands（跨 harness：Claude Code / ZCode / OpenCode / Codex）。
 
