@@ -21,7 +21,7 @@ def _shell(tmp_path, body: str, ep: bytes | None = b"# ep\n") -> tuple:
 def test_good_shell_passes(tmp_path):
     shell, root = _shell(
         tmp_path,
-        'meta projection {SHA}（EP content SHA）\n'
+        "meta projection {SHA}（EP content SHA）\n"
         '<a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/t/ep.md">EP</a>',
     )
     assert lint.lint_shell(shell, root) == []
@@ -38,9 +38,7 @@ def test_dual_projection_sha_flagged(tmp_path):
 
 
 def test_stale_projection_sha_flagged(tmp_path):
-    shell, root = _shell(
-        tmp_path, "projection deadbeefdeadbeef（EP content SHA）"
-    )
+    shell, root = _shell(tmp_path, "projection deadbeefdeadbeef（EP content SHA）")
     issues = lint.lint_shell(shell, root)
     assert any("不符" in i for i in issues)
 

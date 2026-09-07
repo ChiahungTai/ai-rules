@@ -123,3 +123,20 @@ AIR-40之後順序build，同script衝突先re-read。更新skills描述、索�
 自查（反 sycophancy）：否證重查 F5——改名確實要 churn S3 剛加的模板消費行，維持 ❌；否證 I1——mirror＋hash 漂移偵測比 import 更適合 per-pool generator 拓撲（import 需 sys.path 接線 CLI 單檔執行），維持 ✅。35 tests＋ruff 重跑全綠為本輪實測（非轉述 commit 數）。
 
 **Judge 處置（主 session，2026-09-07）**：F6（uninstrumented 靜態性註解）當下落地；F4（resolve OSError 揭露）不做——觸發前提 near-impossible（工具實錄路徑不 resolve 失敗），與 drafts YAGNI 同型，不開卡攢批。
+
+## Codex 整弧審查 judge 裁決（2026-09-07）
+
+codex dual-context 整弧審查（`35b8ab9..115227d`，findings `memory-governance-35b8ab9-115227d.md`——中間檢查點：核心重現完成、fresh 側最終驗證因 usage limit 中斷）。Judge 逐項獨立查證（非轉述重現；R1 親重現）後 **6/6 採納**：
+
+| 項 | 決策 | 查證證據 | 修復 |
+|----|------|---------|------|
+| R1 報告可覆寫來源 | ✅ | 親重現：relative 同檔 `[OK]`＋SQLite 檔頭變 JSON；protection 比較 resolved vs raw | source 清單統一 resolve＋symlink alias 攔截；`--baseline-dir` 納入保護（池/source 內拒絕）——test_r1/r1b |
+| R2 record 預篩誤窗 | ✅ | SQL 純 `time_created` 窗讀碼＋codex 真 DB 抽查（1420 筆 op≠record） | SQL 撈寬一個窗長 margin；事件納入=operation 優先且排他（op 窗外排除、無 op 才 record fallback）——test_r2 兩向 |
+| R3 unreadable/malformed 不抬 partial | ✅ | partial 判定零消費該二鍵（讀碼） | `unreadable`/`malformed` 併入 partial（R3）——test_r3 |
+| R4 多池 basename 混合 | ✅ 最小修 | by_entry key=basename 讀碼；上輪「多池上線再開」被正確反駁（不能接受輸入並產錯誤觀察） | 跨池同名 entry fail-loud（不擴 schema）——test_r4 |
+| R5 用途判讀未接線 | ✅ | SKILL 無消費步驟；EP S2 兩表設計（第二表）無載體 | skill 補「用途判讀帳」段（event/source_ref 三值帳＋第二表，全 HOLD 合法） |
+| R6 baseline 指舊路徑 | ✅ | skill :39 舊路徑 `test -d` 不存在（歸檔搬移造成） | 常態目錄 `ai-analysis/memory-telemetry/baselines/`＋既有 baseline 遷入＋承接驗收（delta 非 null） |
+
+否證重查：R1 親重現（不轉述 codex fixture）；R4「既有 judge 曾拒」反駁成立性複查（拒的理由=改 schema 成本，最小修不動 schema——維持 ✅）。修正輪 195 passed＋ruff clean。codex 屍體考古：fresh agent 撞 usage limit 於「獨立錨點驗證」步——本輪 judge 查證即補上該步。
+
+**Followup review（muse job-mtra5khf，2026-09-07）：通過——R1-R6 全 closed（6/6）**，每項實跑證據（40 passed 全集＋定向 5 passed＋/tmp 承接重跑 run2 delta 非 null＋lint 全綠）；兩條 ℹ️ 選項（O1 margin limitation 註解、O2 unreadable 專屬測例）記錄不擋。工單 `followup-workorder-r1r6.md` 可重放。

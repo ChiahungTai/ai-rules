@@ -35,9 +35,11 @@ allowed-tools: ["Read", "Bash", "Write", "Edit"]
      --pool ~/.claude/projects/-Users-ctai-Github-ai-rules/memory \
      --zcode-db ~/.zcode/cli/db/db.sqlite \
      --cc-root ~/.claude/projects/-Users-ctai-Github-ai-rules \
-     --output ai-analysis/_tasks/09-07-memory-governance/evidence/weekly-<YYYYMMDD>.json \
-     --baseline-dir ai-analysis/_tasks/09-07-memory-governance/evidence/baselines
+     --output ai-analysis/memory-telemetry/weekly-<YYYYMMDD>.json \
+     --baseline-dir ai-analysis/memory-telemetry/baselines
    ```
+
+   > 輸出與 baseline 住常態目錄 `ai-analysis/memory-telemetry/`（不隨任務家歸檔移動——R6 教訓：baseline 指向已歸檔任務家會斷承接）。既有 baseline 已自 `done/09-07-memory-governance/evidence/baselines/` 遷入。
 
    輸出 report：counts（successful／errors／copies_folded）、top_actors／top_entries（寫入次數×payload chars）、index_delta（baseline 對比；首輪建 baseline）。判讀：top 寫入者（subagent session 大戶＝抽驗線索——追 source_ref 到原始事件看上下文）；errors>0 如實報（失敗不冒充無寫入）；**寫入量是流量非品質/存量**——違規判斷留 LLM 抽驗，不按 chars 自動判。路徑陷阱：ZCode db＝`~/.zcode/cli/db/db.sqlite`（`~/.zcode/cli/db.sqlite` 頂層 0-byte 殘檔勿用）。
 

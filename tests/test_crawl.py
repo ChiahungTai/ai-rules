@@ -21,9 +21,7 @@ def _install_fake_source(monkeypatch, tmp_path, n_pages: int = 5):
         return "ok", f"# page {page.relpath}\n".encode()
 
     monkeypatch.setattr(crawl, "BASE_DIR", tmp_path)
-    monkeypatch.setattr(
-        crawl, "SOURCES", {"fake": ("https://x.test", discover, fetch)}
-    )
+    monkeypatch.setattr(crawl, "SOURCES", {"fake": ("https://x.test", discover, fetch)})
     return tmp_path / "manifest.json"
 
 
@@ -40,7 +38,9 @@ def test_limit_smoke_does_not_clobber_manifest_or_disk(monkeypatch, tmp_path):
     manifest = _install_fake_source(monkeypatch, tmp_path)
     assert crawl.main(["--source", "fake"]) == 0  # 全量跑，建立 5 頁 ledger
     before_manifest = manifest.read_bytes()
-    before_disk = {p.name: p.read_bytes() for p in sorted((tmp_path / "fake").iterdir())}
+    before_disk = {
+        p.name: p.read_bytes() for p in sorted((tmp_path / "fake").iterdir())
+    }
     assert crawl.main(["--source", "fake", "--limit", "2"]) == 0  # smoke
     assert manifest.read_bytes() == before_manifest  # manifest 零寫入
     after_disk = {p.name: p.read_bytes() for p in sorted((tmp_path / "fake").iterdir())}

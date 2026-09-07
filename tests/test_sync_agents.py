@@ -319,7 +319,9 @@ def test_main_fatal_exits_2_not_1(repo: Path):
 
 def test_main_check_parity_source_missing_exits_3(repo: Path, monkeypatch):
     """codex 09-06 審查 S-4：parity source 缺席＋投影一致 → exit 3（未驗證），非假綠 0。"""
-    assert run(repo, "sync") == 0  # 先投影（fixture requirements 注入，不走 parity 路徑）
+    assert (
+        run(repo, "sync") == 0
+    )  # 先投影（fixture requirements 注入，不走 parity 路徑）
     monkeypatch.setattr(sync, "ROLE_REQUIREMENTS", FIXTURE_REQ)
     rc = sync.main(repo, mode="check")  # requirements=None 且 tmp repo 無 PARITY_SOURCE
     assert rc == 3

@@ -10,6 +10,7 @@ import json
 import sqlite3
 import subprocess
 import sys
+from datetime import UTC
 from pathlib import Path
 
 SCRIPT = (
@@ -758,3 +759,171 @@ def test_s2_f8_corrupt_baseline_incomparable(tmp_path):
     idx = _report_of(out)["index_delta"]
     assert idx["value"] is None
     assert idx["incomparable"]
+
+
+def test_r1_output_protection_relative_and_symlink(tmp_path):
+    """R1: source protection must compare canonical paths, not raw strings."""
+    import sqlite3 as sq
+
+    db = tmp_path / "src.sqlite"
+    con = sq.connect(db)
+    con.execute(
+        "CREATE TABLE session (id TEXT PRIMARY KEY, parent_id TEXT, task_type TEXT)"
+    )
+    con.execute(
+        "CREATE TABLE part (id TEXT PRIMARY KEY, session_id TEXT, time_created INTEGER, data TEXT)"
+    )
+    con.commit()
+    con.close()
+    before = db.read_bytes()
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    (pool / "e.md").write_text("---\nname: e.md\n---\nbody\n", encoding="utf-8")
+
+    # relative path pointing at the same file as a source db
+    rel = db.relative_to(tmp_path)
+    r, _ = run_writes(pool, tmp_path, zdb=rel, extra=["--output", str(rel)])
+    assert r.returncode == 2, "relative same-file output must be refused"
+    assert db.read_bytes() == before, "refusal must leave the source untouched"
+
+    # symlink alias pointing at the same file
+    link = tmp_path / "alias.sqlite"
+    link.symlink_to(db)
+    r2, _ = run_writes(pool, tmp_path, zdb=db, extra=["--output", str(link)])
+    assert r2.returncode == 2, "symlink alias output must be refused"
+    assert db.read_bytes() == before
+
+
+def test_r1b_baseline_dir_inside_pool_refused(tmp_path):
+    """R1: --baseline-dir inside a pool/source must be refused."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    (pool / "b.md").write_text("---\nname: b.md\n---\nbody\n", encoding="utf-8")
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, _ = run_writes(
+        pool,
+        tmp_path,
+        zdb=zdb,
+        extra=["--baseline-dir", str(pool / "baselines")],
+    )
+    assert r.returncode == 2, "baseline dir inside the pool must be refused"
+    assert not (pool / "baselines").exists(), "no snapshot written into the pool"
+
+
+def test_r2_operation_window_filters_events(tmp_path):
+    """R2: events enter by operation time when present, record as fallback."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "w.md")
+    inside = tool_part(
+        "Edit",
+        str(pool / "w.md"),
+        op_start="2026-09-01T10:00:00+00:00",
+        op_end="2026-09-01T10:00:05+00:00",
+        call_id="op_in",
+    )
+    # record 08-20 (inside SINCE..UNTIL) but operation 2026-07-15 (outside)
+    outside = tool_part(
+        "Edit",
+        str(pool / "w.md"),
+        op_start="2026-07-15T10:00:00+00:00",
+        op_end="2026-07-15T10:00:05+00:00",
+        call_id="op_out",
+    )
+    from datetime import datetime
+
+    ts_in = int(datetime(2026, 8, 20, tzinfo=UTC).timestamp() * 1000)
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("s1", None, None)],
+        parts=[
+            ("p_out", "s1", ts_in, outside),
+            # record far before window; operation inside window
+            ("p_in", "s1", 1783000000000, inside),
+        ],
+    )
+    r, out = run_writes(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    rep = json.loads(out.read_text())
+    ids = {e["id"] for e in rep["events"]}
+    assert "p_in" in ids, (
+        "operation inside window must be included even if record is outside"
+    )
+    assert "p_out" not in ids, (
+        "record inside window but operation outside must be excluded"
+    )
+
+
+def test_r3_malformed_partial(tmp_path):
+    """R3: unreadable/malformed CC data must raise coverage_limited."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "m.md")
+    cc_root = tmp_path / "cc"
+    cc_root.mkdir()
+    (cc_root / "bad.jsonl").write_text("{not json}\n", encoding="utf-8")
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb, sessions=[], parts=[])
+    out = tmp_path / "reads.json"
+    cmd = [
+        sys.executable,
+        str(SCRIPT),
+        "reads",
+        "--pool",
+        str(pool),
+        "--zcode-db",
+        str(zdb),
+        "--cc-root",
+        str(cc_root),
+        "--since",
+        SINCE,
+        "--until",
+        UNTIL,
+        "--output",
+        str(out),
+    ]
+    r = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    assert r.returncode == 0
+    rep = json.loads(out.read_text())
+    assert rep["coverage"]["claude"]["malformed"] >= 1
+    assert rep["coverage"]["partial"] is True, (
+        "malformed lines mean incomplete observation"
+    )
+    assert rep["candidates"]["coverage_limited"] is True
+
+
+def test_r4_cross_pool_basename_collision_fails(tmp_path):
+    """R4: two pools sharing an entry basename must fail loud, not blend."""
+    p1 = tmp_path / "p1"
+    p2 = tmp_path / "p2"
+    for p in (p1, p2):
+        p.mkdir()
+        (p / "note.md").write_text("---\nname: note.md\n---\nbody\n", encoding="utf-8")
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb, sessions=[], parts=[])
+    out = tmp_path / "reads.json"
+    r = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "reads",
+            "--pool",
+            str(p1),
+            "--pool",
+            str(p2),
+            "--zcode-db",
+            str(zdb),
+            "--since",
+            SINCE,
+            "--until",
+            UNTIL,
+            "--output",
+            str(out),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 2, "cross-pool basename collision must fail"

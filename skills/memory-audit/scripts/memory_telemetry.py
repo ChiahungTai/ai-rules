@@ -124,7 +124,16 @@ def read_zcode(db_path, pools, since, until):
             from part p where p.time_created >= ? and p.time_created < ?
             and json_extract(p.data, '$.type') = 'tool'
             order by p.time_created, p.id""",
-            (int(since.timestamp() * 1000), int(until.timestamp() * 1000)),
+            # fetch one window-length margin on both sides: events enter by
+            # operation time (record as fallback), and record/op clocks drift
+            # apart in real data — pre-filtering tightly on record time would
+            # drop or admit events on the wrong side of the window (R2)
+            (
+                int(since.timestamp() * 1000)
+                - int((until - since).total_seconds() * 1000),
+                int(until.timestamp() * 1000)
+                + int((until - since).total_seconds() * 1000),
+            ),
         ).fetchall()
     finally:
         con.close()
@@ -152,10 +161,16 @@ def read_zcode(db_path, pools, since, until):
         op_start = parse_ts(op.get("start")) if isinstance(op, dict) else None
         op_end = parse_ts(op.get("end")) if isinstance(op, dict) else None
         record = parse_ts(ts_ms)
-        if op_start is not None and in_window(op_start, since, until):
+        if op_start is not None:
+            # operation time is authoritative when present: outside window
+            # means excluded — no record fallback (R2)
+            if not in_window(op_start, since, until):
+                continue
             flag = "operation"
-        else:
+        elif in_window(record, since, until):
             flag = "record_fallback"
+        else:
+            continue  # no operation time and record clock outside window
         status = state.get("status")
         status = status if status in ("completed", "error") else "unknown"
         parent, task = sessions.get(sid, (None, None))
@@ -629,12 +644,14 @@ def project_reads(canonical, inventory, coverages, since, until):
     # there are coverage-limited, not evidence of disuse.
     coverages["window_shortfall"] = any(first > since for first in firsts)
     coverages["unpaired_reads"] = unpaired
+    c_cov = coverages.get("claude", {})
     partial = (
-        not (
-            coverages.get("zcode", {}).get("readable")
-            and coverages.get("claude", {}).get("requested")
-        )
+        not (coverages.get("zcode", {}).get("readable") and c_cov.get("requested"))
         or coverages["window_shortfall"]
+        # unreadable files / malformed lines mean part of the source was
+        # never parsed — coverage is limited, never "fully observed" (R3)
+        or bool(c_cov.get("unreadable"))
+        or bool(c_cov.get("malformed"))
     )
     coverages["partial"] = partial
     coverages["read_errors"] = read_errors
@@ -701,19 +718,46 @@ def main(argv=None):
         if not p.is_dir():
             return fail(f"pool not a directory: {raw}")
         pools.append(p.resolve())
+    if len(pools) > 1:
+        # projections key by entry basename; two pools sharing a basename
+        # would blend evidence across pools — refuse instead (R4)
+        owner = {}
+        for pool in pools:
+            for p in pool.glob("*.md"):
+                if p.name == "MEMORY.md" or p.name.startswith("_"):
+                    continue
+                if p.name in owner and owner[p.name] != pool:
+                    return fail(
+                        f"cross-pool basename collision: {p.name} in "
+                        f"{owner[p.name]} and {pool} — run one pool per report"
+                    )
+                owner[p.name] = pool
     out = Path(args.output).expanduser()
     try:
         out_resolved = out.resolve()
     except OSError:
         out_resolved = out.absolute()
-    for protected in pools + [
-        Path(p).expanduser() for p in args.zcode_db + args.cc_root
-    ]:
+
+    def _resolved(raw):
+        try:
+            return Path(raw).expanduser().resolve()
+        except OSError:
+            return Path(raw).expanduser().absolute()
+
+    # sources must be canonicalized the same way as the output, otherwise a
+    # relative path or symlink alias defeats the equality check (R1)
+    source_paths = [_resolved(p) for p in args.zcode_db + args.cc_root]
+    for protected in pools + source_paths:
         try:
             if out_resolved == protected or protected in out_resolved.parents:
                 return fail(f"output inside sources refused: {args.output}")
         except OSError:
             continue
+    if getattr(args, "baseline_dir", None):
+        baseline_resolved = _resolved(args.baseline_dir)
+        for protected in pools + source_paths:
+            if baseline_resolved == protected or protected in baseline_resolved.parents:
+                return fail(f"baseline dir inside sources refused: {args.baseline_dir}")
     until = (
         parse_ts(args.until) if args.until else datetime.now(UTC).replace(microsecond=0)
     )
