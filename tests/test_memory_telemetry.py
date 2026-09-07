@@ -402,3 +402,233 @@ def test_rerun_deterministic_sources_intact(tmp_path):
         pool, tmp_path, zdb=zdb, extra=["--output", str(pool / "report.json")]
     )
     assert r.returncode != 0, "output inside sources must be refused"
+
+
+def _report_of(out: Path):
+    return json.loads(out.read_text())["report"]
+
+
+def test_s2_projection_counts_top_and_alias_merge(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "alpha.md")
+    write_entry(pool, "beta.md")
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("s1", None, None)],
+        parts=[
+            (
+                "p1",
+                "s1",
+                1787000000000,
+                tool_part(
+                    "Write", str(pool / "alpha.md"), call_id="c1", content="x" * 10
+                ),
+            ),
+            (
+                "p2",
+                "s1",
+                1787000001000,
+                tool_part(
+                    "Edit", str(pool / "alpha.md"), call_id="c2", content="y" * 5
+                ),
+            ),
+            (
+                "p3",
+                "s1",
+                1787000002000,
+                tool_part("Write", str(pool / "beta.md"), call_id="c3", status="error"),
+            ),
+        ],
+    )
+    r, out = run_writes(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    rep = _report_of(out)
+    assert rep["counts"]["successful"] == 2
+    assert rep["counts"]["errors"] == 1
+    top_e = {e["entry"]: e for e in rep["top_entries"]}
+    assert "alpha.md" in top_e
+    assert top_e["alpha.md"]["successful_writes"] == 2, "same-entry events merge"
+    assert top_e["alpha.md"]["payload_chars"] == 15
+    top_a = {a["actor"]: a for a in rep["top_actors"]}
+    assert top_a["s1"]["successful_writes"] == 2
+    assert rep["net_file_delta"]["value"] is None
+    assert rep["net_file_delta"]["reason"]
+
+
+def test_s2_reads_excluded_from_write_projection(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "r.md")
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("s7", None, None)],
+        parts=[
+            (
+                "p1",
+                "s7",
+                1787000000000,
+                tool_part("Read", str(pool / "r.md"), call_id="c1"),
+            ),
+            (
+                "p2",
+                "s7",
+                1787000001000,
+                tool_part("Write", str(pool / "r.md"), call_id="c2"),
+            ),
+        ],
+    )
+    r, out = run_writes(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0
+    rep = _report_of(out)
+    assert rep["counts"]["successful"] == 1, "Read events are AIR-41 scope, not writes"
+    assert rep["top_entries"] == [
+        {
+            "entry": "r.md",
+            "successful_writes": 1,
+            "payload_chars": len("hello world"),
+        }
+    ]
+
+
+def test_s2_large_payload_flow_not_stock(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "big.md")
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("s2", None, None)],
+        parts=[
+            (
+                "p1",
+                "s2",
+                1787000000000,
+                tool_part(
+                    "Edit", str(pool / "big.md"), call_id="c9", content="z" * 900
+                ),
+            ),
+        ],
+    )
+    r, out = run_writes(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0
+    rep = _report_of(out)
+    assert rep["top_entries"][0]["payload_chars"] == 900
+    assert rep["net_file_delta"]["value"] is None
+
+
+def test_s2_index_delta_first_run_baseline_created(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "one.md")
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("s3", None, None)],
+        parts=[
+            (
+                "p1",
+                "s3",
+                1787000000000,
+                tool_part("Write", str(pool / "one.md"), call_id="c1"),
+            )
+        ],
+    )
+    bdir = tmp_path / "base"
+    r, out = run_writes(pool, tmp_path, zdb=zdb, extra=["--baseline-dir", str(bdir)])
+    assert r.returncode == 0
+    rep = _report_of(out)
+    idx = rep["index_delta"]
+    assert idx["value"] is None
+    assert idx["reason"]
+    assert idx.get("baseline_written")
+    assert Path(idx["baseline_written"][0]).is_file()
+
+
+def test_s2_index_delta_second_run_body_only_zero(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "one.md")
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("s4", None, None)],
+        parts=[
+            (
+                "p1",
+                "s4",
+                1787000000000,
+                tool_part("Write", str(pool / "one.md"), call_id="c1"),
+            )
+        ],
+    )
+    bdir = tmp_path / "base"
+    r, out = run_writes(pool, tmp_path, zdb=zdb, extra=["--baseline-dir", str(bdir)])
+    assert r.returncode == 0
+    (pool / "one.md").write_text(
+        "---\nname: one.md\n---\n\nmuch longer body only\n", encoding="utf-8"
+    )
+    r2, out2 = run_writes(pool, tmp_path, zdb=zdb, extra=["--baseline-dir", str(bdir)])
+    assert r2.returncode == 0
+    idx = _report_of(out2)["index_delta"]
+    assert idx["value"] is not None
+    assert idx["value"]["index_chars"] == 0
+    assert idx["value"]["index_lines"] == 0
+
+
+def test_s2_index_delta_generator_mismatch_incomparable(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "one.md")
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("s5", None, None)],
+        parts=[
+            (
+                "p1",
+                "s5",
+                1787000000000,
+                tool_part("Write", str(pool / "one.md"), call_id="c1"),
+            )
+        ],
+    )
+    bdir = tmp_path / "base"
+    bdir.mkdir()
+    key = str(pool.resolve()).replace("/", "_")
+    (bdir / f"{key}.json").write_text(
+        json.dumps({"generator_schema": 999, "index_chars": 5, "index_lines": 1}),
+        encoding="utf-8",
+    )
+    r, out = run_writes(pool, tmp_path, zdb=zdb, extra=["--baseline-dir", str(bdir)])
+    assert r.returncode == 0
+    idx = _report_of(out)["index_delta"]
+    assert idx["value"] is None
+    assert "incomparable" in (idx["reason"] or "")
+
+
+def test_s2_deleted_entry_history_kept_separate_from_inventory(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    gone = pool / "gone.md"
+    gone.write_text("---\nname: gone.md\n---\nbody", encoding="utf-8")
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("s6", None, None)],
+        parts=[
+            ("p1", "s6", 1787000000000, tool_part("Write", str(gone), call_id="c1"))
+        ],
+    )
+    gone.unlink()
+    r, out = run_writes(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0
+    rep = _report_of(out)
+    names = {e["entry"] for e in rep["top_entries"]}
+    assert "gone.md" in names, "history events kept in ranking"
+    inv = rep.get("current_inventory") or {}
+    assert "gone.md" not in {
+        p.get("entry") for p in inv.get("entries", []) if isinstance(p, dict)
+    }

@@ -3,7 +3,7 @@
 > **ep_type**: implementation
 > **parent**: ai-analysis/_tasks/09-07-memory-governance/ep.md
 > **baseline**: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
-> **status**: 計畫；前期 POC 完成，production 尚未實作
+> **status**: S1 已實作（4b20db8：collector＋11 tests，TDD＋muse 跨家族 EP review 回寫）；S2/S3 待作
 
 ## 實作總覽與已決策
 

@@ -334,6 +334,148 @@ def resolve_lineage(events, sessions):
     return canonical, aliases, ambiguous
 
 
+def generator_identity(pool: Path) -> str:
+    g = pool / "_generate_index.py"
+    if not g.is_file():
+        return "absent"
+    return hashlib.sha256(g.read_bytes()).hexdigest()[:12]
+
+
+def snapshot_index(pools) -> dict:
+    snaps = {}
+    for pool in pools:
+        mem = pool / "MEMORY.md"
+        text = mem.read_text(encoding="utf-8") if mem.is_file() else ""
+        entry_names = sorted(
+            p.name
+            for p in pool.glob("*.md")
+            if p.name != "MEMORY.md" and not p.name.startswith("_")
+        )
+        snaps[str(pool)] = {
+            "generator_schema": generator_identity(pool),
+            "index_chars": len(text),
+            "index_lines": text.count("\n"),
+            "entry_count": len(entry_names),
+            "entries": entry_names,
+        }
+    return snaps
+
+
+def index_delta_with_baseline(pools, baseline_dir: Path):
+    if baseline_dir is None:
+        return {
+            "value": None,
+            "reason": "index baseline disabled (pass --baseline-dir to enable)",
+            "baseline_written": [],
+            "incomparable": None,
+        }
+    written, reasons, pool_deltas, incomparable = [], [], {}, []
+    now = snapshot_index(pools)
+    for pool_key, snap in now.items():
+        key = pool_key.replace("/", "_")
+        bfile = baseline_dir / f"{key}.json"
+        if not bfile.is_file():
+            reasons.append(f"no prior baseline for {pool_key}; baseline created")
+        else:
+            try:
+                prev = json.loads(bfile.read_text(encoding="utf-8"))
+            except (ValueError, OSError):
+                reasons.append(f"unreadable baseline for {pool_key}")
+                incomparable.append(pool_key)
+                prev = None
+            if prev is not None:
+                if prev.get("generator_schema") != snap["generator_schema"]:
+                    reasons.append(f"incomparable generator identity for {pool_key}")
+                    incomparable.append(pool_key)
+                else:
+                    pool_deltas[pool_key] = {
+                        k: snap[k] - prev.get(k, 0)
+                        for k in ("index_chars", "index_lines", "entry_count")
+                    }
+        baseline_dir.mkdir(parents=True, exist_ok=True)
+        bfile.write_text(
+            json.dumps(snap, ensure_ascii=False, sort_keys=True), encoding="utf-8"
+        )
+        written.append(str(bfile))
+    if pool_deltas and not reasons or pool_deltas:
+        value = {
+            k: sum(d[k] for d in pool_deltas.values())
+            for k in ("index_chars", "index_lines", "entry_count")
+        }
+        value["pools"] = pool_deltas
+    else:
+        value = None
+    return {
+        "value": value,
+        "reason": "; ".join(reasons) or None,
+        "baseline_written": written,
+        "incomparable": incomparable or None,
+    }
+
+
+def project_writes(canonical, aliases, ambiguous, pools, baseline_dir, out_path):
+    successful = [
+        e for e in canonical if e.status == "completed" and e.tool in ("Write", "Edit")
+    ]
+    errors = [e for e in canonical if e.status not in ("completed", "unknown")]
+    by_entry, by_actor = {}, {}
+    for e in successful:
+        ent = by_entry.setdefault(
+            e.entry, {"entry": e.entry, "successful_writes": 0, "payload_chars": 0}
+        )
+        ent["successful_writes"] += 1
+        ent["payload_chars"] += e.payload_chars
+        act = by_actor.setdefault(
+            e.actor, {"actor": e.actor, "successful_writes": 0, "payload_chars": 0}
+        )
+        act["successful_writes"] += 1
+        act["payload_chars"] += e.payload_chars
+    for table in (by_entry, by_actor):
+        for row in table.values():
+            row["actors" if "entry" in row else "entries"] = None
+    top_entries = sorted(
+        by_entry.values(), key=lambda r: (-r["payload_chars"], r["entry"])
+    )
+    for row in top_entries:
+        row.pop("actors", None)
+    top_actors = sorted(
+        by_actor.values(), key=lambda r: (-r["payload_chars"], r["actor"])
+    )
+    for row in top_actors:
+        row.pop("entries", None)
+    snaps = snapshot_index(pools)
+    inventory_entries = [
+        {"entry": name, "pool": pk}
+        for pk, snap in snaps.items()
+        for name in snap["entries"]
+    ]
+    return {
+        "schema": SCHEMA,
+        "inventory_timestamp": max(
+            (e.record_time for e in successful if e.record_time),
+            default=None,
+        ),
+        "counts": {
+            "events_total": len(canonical),
+            "successful": len(successful),
+            "errors": len(errors),
+            "copies_folded": len(aliases),
+            "ambiguous": len(ambiguous),
+        },
+        "top_actors": top_actors,
+        "top_entries": top_entries,
+        "net_file_delta": {
+            "value": None,
+            "reason": (
+                "no proven before-image for Write/Edit; payload_chars is flow, "
+                "not stock"
+            ),
+        },
+        "index_delta": index_delta_with_baseline(pools, baseline_dir),
+        "current_inventory": {"entries": inventory_entries},
+    }
+
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(
         description="Read-only memory telemetry (AIR-40 S1)"
@@ -346,6 +488,11 @@ def parse_args(argv):
     w.add_argument("--since", default=None)
     w.add_argument("--until", default=None)
     w.add_argument("--output", required=True)
+    w.add_argument(
+        "--baseline-dir",
+        default=None,
+        help="directory for index snapshots (default: <output>/../baselines)",
+    )
     return parser.parse_args(argv)
 
 
@@ -428,6 +575,8 @@ def main(argv=None):
         {e.session for e in events if e.actor == "unknown" and e.session != "unknown"}
     )
     events.sort(key=lambda e: (e.record_time or "", e.id))
+    baseline_dir = Path(args.baseline_dir).expanduser() if args.baseline_dir else None
+    projection = project_writes(canonical, aliases, ambiguous, pools, baseline_dir, out)
     report = {
         "schema": SCHEMA,
         "window": {"start": iso(since), "end": iso(until)},
@@ -437,11 +586,14 @@ def main(argv=None):
         "aliases": aliases,
         "ambiguous": ambiguous,
         "unknown": unknown,
+        "report": projection,
     }
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
     print(
         f"[OK] events={len(report['events'])} aliases={len(aliases)} "
-        f"ambiguous={len(ambiguous)} unknown_actors={len(unknown)}"
+        f"ambiguous={len(ambiguous)} unknown_actors={len(unknown)} "
+        f"successful={projection['counts']['successful']} "
+        f"errors={projection['counts']['errors']}"
     )
     return 0
 
