@@ -51,7 +51,9 @@ git rev-parse HEAD            # baseline commit hash
 
 ### Phase 1：套標準 schema
 
-依 [self-contained-prompt](../self-contained-prompt/SKILL.md)「標準 schema」八欄（任務一句話 / baseline commit / 來源 EP / 已完成清單 / 已決策 / 下一步 / 驗收 / 承接 commit 不重做）。
+依 [self-contained-prompt](../self-contained-prompt/SKILL.md)「標準 schema」十欄（任務一句話 / baseline commit / 來源 EP / 已完成清單 / 已決策 / 下一步 / 驗收 / 承接 commit 不重做／建議執行 tier／workspace／卡歸屬）。
+
+其中「建議執行 tier」是 user 開新 session 的路由輸入（條件式，條款見 model-routing skill），「workspace／卡歸屬」為強制欄。
 
 有 EP → 引用段落 + 補這次對話剛定的決策；無 EP → 現擠 brief（完整 schema）。
 
@@ -61,7 +63,7 @@ git rev-parse HEAD            # baseline commit hash
 
 ### Phase 3：跨 provider 機密檢查（僅跨 provider）
 
-依 skill「跨 provider 機密檢查」，flag 敏感內容（帳號/金鑰/真實持倉/未公開策略/客戶資料）並提醒 redact（代稱/抽象化）。
+依 skill「跨 provider 機密檢查」，flag 敏感內容（帳號/金鑰/真實持倉/未公開策略/客戶資料）並提醒 redact（代稱/抽象化）。workspace／卡歸屬欄＝內部拓撲資訊——跨 provider 時判定抽象化／省略（repo／WT 路徑不直出）；「建議執行 tier」欄條件式自足、無模型名，逕用。
 
 ### Phase 4：產出
 

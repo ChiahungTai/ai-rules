@@ -47,6 +47,8 @@ description: 把工作交給另一個 LLM/session/repo 時，打包成對方讀�
 | 下一步 / 待決項 | 接手者起手 |
 | 驗收標準 | 怎樣算完成 |
 | 承接 commit 不重做 | 明示「做到 commit X，別重做」|
+| 建議執行 tier | 條件式路由建議（非斷言、無模型名）：一般（lite）需三條件全滿（保護面厚＋EP 條款機械可判＋審查鏈全開）；旗艦 only 五項不可讓（全文見 model-routing skill「旗艦資格條款」） |
+| workspace／卡歸屬 | 強制欄：repo／WT 路徑＋卡 id 歸屬（runtime workspace 不自管卡歸屬） |
 
 ## 決策脈絡原則
 

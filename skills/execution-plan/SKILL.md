@@ -84,8 +84,11 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
      1. 收集 EP 中所有「新增 UC」（UC 盤點 → 新增 UC 表格中的 📋 項目）
      2. 對照既有卡，篩出**缺少卡的能力**（已含去重命中 → 跳過）
      3. 逐能力 `backlog task create "<標題>" -l <labels> -d "<目標一句>（蒸餾自 EP 總覽：baseline／已決策勿重辯／驗收——desc gate 三必有，見 [kanban-board](../kanban-board/SKILL.md)）"`；為 EP 整體另建一張追蹤卡（命令合約與**開工雙 ref 規則**見 [kanban-board](../kanban-board/SKILL.md)——卡 references 必須同時掛 http URL＋repo 相對路徑，相對路徑單獨出現＝board 上不可點＝錯誤形態）
+     - desc「已決策」段可含風險面屬性標註（「寫入契約首改」「跨文件交叉推導」「無保護面新能力」）——後續 handoff「建議執行 tier」的輸入
      4. **建卡（批次）即 commit**：`git add backlog/ && git commit -m "chore(backlog): <卡id…>"`——跨 WT id 防撞靠卡及時進 branch ref；此形態 user 已裁定免逐次確認（例外條款見 [outward-action-consent](../../rules/outward-action-consent.md)「Commit 專屬段」；命令合約見 [kanban-board](../kanban-board/SKILL.md)）
    - 無 `backlog/` 目錄時：提醒 user `backlog init --agent-instructions none`（**禁**再教 `mkdir .kanban/`——`.kanban/` 舊制已退役；`--agent-instructions none` 避免注入與本 repo AGENTS.md 治理衝突的 CRITICAL_INSTRUCTION 區塊）；repo 不採 board 制 → 卡片動作整項跳過
+
+**同主題 memory 條目盤點**（步驟 3 外的獨立子步——不受步驟 3「repo 有 `backlog/` 時」分支限制，memory 池與 backlog 制正交）：`rg` 主題詞掃本專案 memory 池（desc 投影＋條目檔；無池 → 標跳過），命中即列入 EP「UC 盤點」輸出「同主題 memory 條目（結案蒸餾範圍）」行；含弧流水形態（過期狀態詞）者標記。本弧結案蒸餾（[kanban-board](../kanban-board/SKILL.md)弧結案蒸餾第三動）範圍含登記條目——存量債隨弧消化，不等波段。清單級（條目名＋一行形態判讀），不做內容審（那是 [memory-audit](../memory-audit/SKILL.md)層 2 的事）。
 
 4. **掃描 SYSTEM-MAP.md 關聯**（如果存在）：
    - 搜尋專案根目錄的 `SYSTEM-MAP.md`
@@ -108,6 +111,9 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 
 ### 掃描範圍
 - [列出掃描的 instruction 檔 Capabilities 路徑 + backlog 卡（`backlog task list --plain` 輸出）]
+
+### 同主題 memory 條目（結案蒸餾範圍）
+- [命中條目名＋一行形態判讀；零命中寫「零命中」；無池寫「無 memory 池，跳過」]
 
 ### 既有 UC 狀態
 | 能力 | 狀態 | 來源 | 影響 | 說明 |

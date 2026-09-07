@@ -274,7 +274,7 @@ def test_parity_pin_value_layer_fails_on_model_change(tmp_path: Path):
     real = (REPO_ROOT / sync.PARITY_SOURCE).read_text(encoding="utf-8")
     skill.write_text(
         real.replace(
-            "| **lite**（隨意） | glm-5.3-flash", "| **lite**（隨意） | glm-6.0-flash"
+            "| **lite**（一般） | glm-5.3-flash", "| **lite**（一般） | glm-6.0-flash"
         ),
         encoding="utf-8",
     )
@@ -303,7 +303,7 @@ def test_zai_pin_parser_ignores_lines_outside_tier_section(tmp_path: Path):
         "|---|---|---|\n"
         "| **full**（旗艦） | GLM 5.3＝主 session inherit（不釘 id） | opus |\n"
         "| **vision**（影像） | glm-5.3-flash（多模✓） | x |\n"
-        "| **lite**（隨意） | glm-5.3-flash〔repo-observed〕 | x |\n"
+        "| **lite**（一般） | glm-5.3-flash〔repo-observed〕 | x |\n"
         "\n## 後記\n| **vision**（誘餌） | phantom-model |\n"
     )
     pins = sync.parse_skill_zai_pins(text)

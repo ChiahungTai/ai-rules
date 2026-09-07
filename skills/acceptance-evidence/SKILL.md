@@ -13,6 +13,7 @@ description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限�
 
 - **數字/清單類 claim**（真實案例）：features leaf 清單把 VolumeFeature 寫成 KeyCandleFeature，與 `list_feature_classes` 實際輸出不符，自審抓不到——AI 寫盤點清單易憑印象混入/漏掉成員（同型：consumers 數 41 誤寫 20，`rg | head -20` 截斷；此簡版 rule 端保留）。
 - **silent-failure claim**（真實案例）：smell-detector baseline（原 codebase-sweep）state.yaml 把 Interval 自創名稱（如 `"1M"`）標「silent drift」——靜態推論「1M 撞 1m」沒跑 `Interval("1M")`，實證 StrEnum 精確比對 + raise → loud crash 非 silent。同類：tilde bug 靜態推論「消費端 inline 沒問題」沒執行 → 實證推翻。教訓通用（silent-claim 須執行證據），不依賴特定符號現狀。
+- **自報元資料不可信**（真實案例）：vision 判讀 111 案中模型自報 contradicts 漏報 44——模型給了不同 label 卻自報未推翻；正解＝llm_label vs 標準答案逐案機械比對，禁用自報欄位做統計。Review 雙向應用觸發形態：審查時看到以自報分類／判讀欄位彙算的統計（通過率／推翻率）→ 視為須逐案機械比對的觸發信號，不得直接採信。
 
 ## 盤點執行點雙掃（間接層＋直呼層）
 

@@ -8,7 +8,9 @@ harness-scope: neutral
 
 subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什麼模型無關），經兩跳解析：
 
-1. **角色 → tier**（通用表——本檔單一源；tier 詞＝requirement 正式 token：full＝旗艦需求／vision＝影像需求／lite＝隨意需求，中文語義標籤，與 skill 權威表對齊行同詞彙）
+1. **角色 → tier**（通用表——本檔單一源；tier 詞＝requirement 正式 token：full＝旗艦需求／vision＝影像需求／lite＝一般需求，中文語義標籤，與 skill 權威表對齊行同詞彙）
+
+> **旗艦資格條款（五項）與坐位註記**見 model-routing skill（`skills/model-routing/SKILL.md`；rule 留骨架）。
 2. **tier → (model, effort)**（依 harness × 當前 provider 查解析表——在 model-routing skill 的 tier×provider 權威表，model 值唯一源；ZCode 端材料化為 `agents/zcode/` 定義檔 frontmatter pins〔部署預設，由 sync_agents 生成〕，pin 值以該表為單一源）
 
 > **tier 是能力檔語義，非模型綁定**——哪個具體模型夠格坐哪個 tier，單一源在 skill 解析表（provider 演進只改該表）；本檔只錄角色需要的能力檔與升降級條件（分工律證據與條款見 skill「flash 分工律」）。
@@ -31,6 +33,6 @@ subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什�
 
 > **定位**：external-runtime routing policy（family 軸），非 tier→model 映射擴充、非 registry pin。
 
-角色→family→profile 映射、eligibility gate 五條、reviewer 交接契約、bridge 必經（muse 委派唯一入口）、完成回報收法（收法決策樹）、套用（三路徑）——見 model-routing skill（`skills/model-routing/SKILL.md` on-demand；觸發詞：external-runtime、eligibility、reviewer 交接、bridge 必經、委派、收法）。
+角色→family→profile 映射、eligibility gate 六條、reviewer 交接契約、bridge 必經（muse 委派唯一入口）、完成回報收法（收法決策樹）、套用（三路徑）——見 model-routing skill（`skills/model-routing/SKILL.md` on-demand；觸發詞：external-runtime、eligibility、reviewer 交接、bridge 必經、委派、收法）。
 
 > tier→(model, effort) 解析表、flash 分工律（執行層降級條件＋風險面＋歸因紀律）、external-runtime family 解析表、thoughtLevel 但書、rate limit 與並發上限表、classifier 處置＋spawn 失敗態辨識——見 model-routing skill。

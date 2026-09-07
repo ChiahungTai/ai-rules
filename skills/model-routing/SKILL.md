@@ -1,6 +1,6 @@
 ---
 name: model-routing
-description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/隨意〕×五公司，model 值單一源）＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse+flash/影像 flash/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋flash 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定。
+description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/一般〕×五公司，model 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse+flash/影像 flash/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋flash 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定。
 ---
 
 # Model Routing — 解析表與 provider 事實
@@ -9,15 +9,27 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 ## tier → (model, effort) 解析表（requirement × provider 權威表——model 值單一源）
 
-> **tier 詞＝requirement 正式 token**（AIR-24 同源，一個詞彙兩個語義面，不另造第三套）：full＝旗艦需求（judge／EP 規劃／批判）、vision＝影像需求（視覺類任務）、lite＝隨意需求（實作／驗證／挖掘／渲染——標準款省成本）。本表是 model/effort 值的**唯一源**（`sync_agents.py` pin dict 與生成物以本表為 parity 對象）；role 的 requirement 分配見下方 role→requirement 表；dispatch 兩跳＝role→requirement(tier)→本表列。
+> **tier 詞＝requirement 正式 token**（AIR-24 同源，一個詞彙兩個語義面，不另造第三套）：full＝旗艦需求（judge／EP 規劃／批判）、vision＝影像需求（視覺類任務）、lite＝一般需求（實作／驗證／挖掘／渲染——標準款省成本）。本表是 model/effort 值的**唯一源**（`sync_agents.py` pin dict 與生成物以本表為 parity 對象）；role 的 requirement 分配見下方 role→requirement 表；dispatch 兩跳＝role→requirement(tier)→本表列。
 
 | tier（requirement） | zai | Anthropic | OpenAI | xai | meta |
 |---|---|---|---|---|---|
 | **full**（旗艦） | GLM 5.3＝主 session inherit（不釘 id）〔repo-observed〕 | opus〔**未訂閱禁派**〕 | sol high／max〔**預設不派**——額度最少〕 | fabel〔**未訂閱禁派**〕 | muse-spark-1.3（effort xhigh 起） |
 | **vision**（影像） | glm-5.3-flash（多模✓ 已實戰）〔repo-observed〕 | 〔未訂閱禁派〕 | 〔預設不派〕 | 〔未訂閱＋本機未安裝〕 | muse-spark-1.3 `--image`✓〔repo-observed〕 |
-| **lite**（隨意） | glm-5.3-flash〔repo-observed〕 | 〔未訂閱禁派；能力對照 sonnet 級——haiku 基本不用〕 | terra high+（**luna 排除，基本不用**）〔**預設不派**〕 | 〔未訂閱禁派〕 | —（與旗艦同體；額度貴，非省成本預設） |
+| **lite**（一般） | glm-5.3-flash〔repo-observed〕 | 〔未訂閱禁派；能力對照 sonnet 級——haiku 基本不用〕 | terra high+（**luna 排除，基本不用**）〔**預設不派**〕 | 〔未訂閱禁派〕 | —（與旗艦同體；額度貴，非省成本預設） |
 
 > 證據狀態標註：repo-observed（本機實測）＞official-doc（官方文檔，非本機 L4）＞first-real-usage-pending（首例實戰待補）。
+
+### 旗艦資格條款（五項）
+
+> 定義「有資格被解析為旗艦（full）」的模型能力條款——資格線穩定（大綱層）；同 tier 內強弱排行不進條款（另見下行坐位註記）。候選模型須全部滿足：
+
+1. **跨文件交叉推導力**：docstring↔斷言、EP↔code、caller↔callee 型不一致能抓；證據指針＝四家同尺比較中五項跨文件案唯終審層抓到。
+2. **judge 否決力**：對高信心措辭 finding 有否決傾向而非順勢採納；證據指針＝同尺比較首輪全採納傾向反例。
+3. **規劃的契約查證力**：把既有測試契約當設計約束、會推導決策前提失效；證據指針＝同尺比較 wrapper parity 約束與前提失效推導案。
+4. **長弧查證紀律**：查證密度不隨 session 長度衰減；證據指針＝同尺比較後段淺驗反例。
+5. **寫入邊界首改的邊界意識**：首次改動寫入契約／human truth 層時主動設唯一入口與 crash-only 防線；證據指針＝同尺比較唯一刪改入口案。
+
+> **坐位註記**（換代只改此行；現值坐位見上表 full 行，不重複記載）：候選觀察：無；升坐位法：既有比較尺（四軸＋旗艦不可讓五項任務）跑一弧實測。
 
 ### dispatch 預設（user 2026-09-05 裁定、09-07 修訂；訂閱現值變更只改本段＋上表格標註）
 
@@ -78,6 +90,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 - 已知風險面（降級時主動防）：跨單位語義換算錯＋靜默失效＋斷點汙染（西元↔民國 P0×2/P1）；測試合法化 bug（mock 假設即 bug——lite 模型測試僅規格陳述，驗收證據另補 full 複驗）；inferred findings（報「機制可能」非「實測確認」——judge 遇 inferred 必重跑實測，見 judge-review 三防線）；機械掃描漏變體（rg pattern 需含空格/等號形）；Edit 前未 Read 偏高（20 vs 3——spawn prompt 注入 Read 紀律）
 - **判斷密集位不可降**：judge 裁決／EP 規劃／post-build 編排＝full 能力檔——judge 自證塌陷＋sycophancy（錯信心 finding＋順勢採納＝最危險組合）是能力剖面問題。**lite＋max effort 補償＝未驗證路徑**：欲採用先小規模實證（舊 findings 重裁對照 full 裁決），結果記回本節
 - **歸因紀律**：模型歸因結論必須 per-message modelID 機械對帳（ZCode db.sqlite；unpinned subagent 跟 spawning session 模型走、registry pin 不受手動切換影響），不接受 session 自述——09-05 三例自述歸因錯（full 亦被 priming 帶偏）
+- **管轄對照（兩套降級條件邊界）**：本段三件（既有測試釘住＋驗證閉環＋非跨邊界語義面）＝**spawn 執行層降級**判定；handoff「建議執行 tier」三條件（保護面厚＋EP 條款機械可判＋審查鏈全開）＝**handoff 路由建議**判定——兩套條件管轄面各異，詞形差異非 drift
 
 ## External-runtime（family 軸）解析表
 
@@ -94,6 +107,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 | advisory 掃描 | muse | advisory | 唯讀掃描、盤點 |
 | 機械驗證／探索 | GLM | lite | 機械查證、探索（沿用 tier→lite 路由） |
 | 視覺驗收 | GLM | vision | 預設路由；muse 具視覺能力為跨家族備選 |
+| 架構級 EP（blueprint） | muse | implement | 使用者會話在場裁決為 eligibility 前提（gate 第六條）；無 user 在場不放行 |
 
 > 兩種 review 邊界：external second-opinion review（跨家族獨立視角）與 in-harness acceptance reviewer（GLM 主審、把關工單結案）職責分離，前者補視角、後者定結論。容量不足的家族禁派大工單——現值見下表，rule 不寫數字與型號。重大架構／風控／會計 diff 的跨家族 review＝**軟提醒非硬閘**（額度現實：muse/codex 額度吃緊時派不動）——額度允許時至少一側跨家族；不足時顯式記錄降級（in-harness full 雙 context 承接），禁靜默略過。
 
@@ -107,7 +121,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 > 容量為「需現況查證」性質，隨 model 世代更新只改本表。
 
-### eligibility gate（五條，逐條判）
+### eligibility gate（六條，逐條判）
 
 > 任一不過 → 主 session 直做；「≥30 分鐘」僅提醒信號非機械判準。
 
@@ -116,6 +130,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 3. **單一 writer 無待決**：單一 writer 可獨立完成，無需主 session 中途決策或協調多 writer
 4. **主價值＝承接 implementation loop**：主價值在承接完整實作迴圈，而非零碎問答或探測
 5. **環境可啟動**：目標 runtime 環境可啟動（bridge setup 綠、binary 在場），非環境阻塞
+6. **使用者會話在場裁決**：架構級 EP（blueprint）委派須有使用者會話在場裁決——無在場證據面為零，不放行
 
 > **review／advisory 形態條款**（read-only 委派——external second-opinion review、[state-review](../state-review/SKILL.md) 深審腿、advisory 掃描）：以 ①②⑤＋三條專屬判定——**read-only transport**（flag 或工單紅線承載，產出＝findings/報告）、**跨家族成立**（委派對象與 caller 相異家族——external 視角是派發理由本身）、**可重現輸出**（findings 附錨點＋驗收設計，in-family judge 可機械重現）。條件③④（單一 writer／implementation loop 主價值）是 **implement 形態專屬**，不得用以擋 review 形態——否則跨家族審查腿結構性不可達（真實案例：state-review 深審腿依原條文④被擋）。
 >
@@ -150,7 +165,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 **決策樹**（未載入背景的 session 單讀可執行）：
 
 1. **簡單轉發（review／critique／diagnosis）**：主 session 背景 Bash 直呼 bridge 阻塞形（muse `task`／codex `task`）→ process exit 自動喚醒 → stdout 即 finalText；jobId 記錄不變（reviewer 交接契約欄位照舊）
-2. **長跑（>10min，xhigh 委派）＝fire-and-forget 優先**：`muse task --background "<prompt>"`（長 prompt 改 `--prompt-file <path>` 形態）提交 → jobId 即回 → caller 結束 turn 釋放（不掛前景、不綁 session）；收＝事後 `wait <jobId>`（有界 timeout 迴圈，起點＝bridge 預設 5min）或 `show <jobId>` 認領（finalText 由 per-job jsonl 重導出，ledger entry 只存 status／exitCode／summary）。不想跨 session 時的便利形態＝背景 Bash 掛 `wait`（session 仍被佔用）。**timeout 到期訊號兩家相反（拆家系判讀——晚收同樣需要的語義，非殘留）**：
+2. **長跑（>10min，xhigh 委派）＝fire-and-forget 優先**：`muse task --background "<prompt>"`（長 prompt 改 `--prompt-file <path>` 形態）提交 → jobId 即回 → caller 結束 turn 釋放（不掛前景、不綁 session）。**收法分流（session 是否需接續）**：session 活著且完成後要接續做事 → **背景 Bash 掛 `wait <jobId>`（首選兩段式）**——零 model request，wait exit 觸發 harness notification **自動喚醒 session 接續**；session 將結束或不在乎即時收 → 純認領制（事後任何時刻 `show <jobId>`——**完成無推送、不會自己回來**，須主動查）。finalText 由 per-job jsonl 重導出，ledger entry 只存 status／exitCode／summary。**timeout 到期訊號兩家相反（拆家系判讀——晚收同樣需要的語義，非殘留）**：
    - **muse `wait <jobId>`**：裸 wait 撞預設 5min＝`process.exit(124)`——exit 124＋status 仍 running＝重掛；`--timeout 0`＝forever（長跑必帶）
    - **codex `status --wait <jobId> --json`**：timeout 到期（預設 4min）＝**正常 exit 0**、JSON 帶 `waitTimedOut: true`——以此旗標判讀重掛（124 偵測對 codex 永不觸發）；**codex 無 0=forever**——`--timeout-ms 0` 靜默回落 4min 預設（`codex-companion.mjs:319` `Number(timeoutMs)||DEFAULT`），只能顯式大值
    - 任一家回非 completed 終態 → `jobs/<id>.jsonl`＋working tree 對照再判（reconcileStaleRunning 可能過早標 interrupted）

@@ -53,7 +53,7 @@
 - `/debrief` — AI 改動理解簡報（layer 3，行動後，**深度選配**——日常判斷材料由任務家殼實作章節吸收〔post-build hook 2〕，本命令＝模組/檔案級深挖）：七段倒金字塔——意圖／行為黑盒子（行為 vs 純結構判定；docs 變更渲染 behavior delta）／前後差異／分組檔案地圖／波及缺口／驗證證據（demo-checklist，NONE 逼問+清單完整性）／認知誤差點；無參數=uncommitted（fallback：EP baseline 任務弧，無則 HEAD~1）；`--ep` 方向確認已移除（改人讀 Report Shell + /ep-review）
 - `/illustrate` — 結構 viewport + 技術圖解（SA/SD artifact menu：call graph / sequence / class slice / data-flow / boundary；city map / drill / drift detection；console / md / html〔archify 展示級，opt-in〕）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build drift detection，見上圖），結構能力調 arch-thinking skill
 - `/followup-review` — 審查者回頭驗收實作結果
-- `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置＋finalization 對帳〔2.8：半套歸檔偵測、「commit 確認」pre-commit 無 hash 結算〕 → message → 確認）；finalization 已在 build 階段 5a 結算，commit 前可跑 `/metadata-sync` 更新
+- `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置＋finalization 對帳〔2.8：半套歸檔偵測、memory 池對帳腿、「commit 確認」pre-commit 無 hash 結算〕 → message → 確認）；finalization 已在 build 階段 5a 結算，commit 前可跑 `/metadata-sync` 更新
 - `/metadata-sync` — metadata finalization（兩 mode：build 階段 5a 結算 / standalone 補漏——commit 前更新或事後補漏，偵測漏掉的 Capabilities/Kanban/SYSTEM-MAP/arch/EP 歸檔/flow-feedback，確認後修補；`--check` 僅報告不執行）
 
 ### 工作流 skills — 自主實作
@@ -129,7 +129,7 @@
 - `standup` — 每日晨間簡報昨日活動 digest（跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition；ZCode 23:20 定時任務整合）
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / spawn 預設背景 / 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）/ **全生命週期 execution contract 消費側**（各段 dispatch 查表；表主體在 agents/AGENTS.md）
 - `cross-verify` — 多源交叉查證（db/git/log/memory/cr/web 軸群平行取證→交叉對帳→verdict＋unverified；源枚舉制——web 軸須顯式點名；源缺場該軸 unverified 不阻斷；產出軌道①可餵 judge-review；執行載體＝`agents/roles/cross-verify-investigator.md` 單一參數化 agent）
-- `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表＋flash 分工律〔執行層條件式降級＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律〕＋external-runtime family→(model,effort,容量) 解析表＋eligibility gate／reviewer 交接契約／完成回報收法（fire-and-forget 決策樹：--background 提交＋跨 session 認領＋wait/show 晚收、timeout 訊號家系拆分、ETA-gate fallback）／套用三路徑、rate limit 並發表、thoughtLevel 但書；rule 端留角色→tier 表＋詞彙定義＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
+- `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表〔中文標籤旗艦/一般〕＋旗艦資格條款（五項）／坐位註記＋flash 分工律〔執行層條件式降級＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律〕＋external-runtime family→(model,effort,容量) 解析表＋eligibility gate／reviewer 交接契約／完成回報收法（fire-and-forget 決策樹：--background 提交＋跨 session 認領＋wait/show 晚收、timeout 訊號家系拆分、ETA-gate fallback）／套用三路徑、rate limit 並發表、thoughtLevel 但書；rule 端留角色→tier 表＋詞彙定義＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
 - `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離；generator 池層 1 縮為 `--check` 投影驗證——資產 `scripts/generate_index.py`；寫入端紀律＝六問〔首問任務終態→卡〕＋desc 三不＋弧結案蒸餾〔mem-distill 執行形態〕）
 - `zcode-session-query` —（ZCode 專用）跨 session 查詢與參考：查 session id / 讀指定 session 尾部真人互動（scripts/zcode_tail_chat.py）/ ReadSessionContext（handoff 策略；relevant 大 session 逾時）；handoff / relay 的「讀進來」側；id 禁手打、sqlite3 CLI 無聲空輸出改 python ro uri

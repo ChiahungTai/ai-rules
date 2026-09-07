@@ -22,6 +22,7 @@ harness-scope: neutral
 - **刪除/死碼自述**（zero caller /「沒人用」）:證據須涵蓋**全消費端**——靜態 import（LSP `findReferences`）+ 字串引用（rg 跨 .py/.yaml/.json）+ **非函式庫消費者**（scripts/、lab/、demo、saved config）+ 動態派發（getattr/importlib/registry auto-discovery/StrEnum 字串值）。只跑 LSP 宣稱「zero hits = 確認」**不足**。最低門檻：刪整檔/整 class 前，rg 符號名跨全專案 + 實際執行 import 測試（L4）受影響消費者——靜態 zero-hit ≠ runtime 無消費者（真實案例：自述「雙工具驗證零 caller」，實際 scripts/ 有 hard-import caller → runtime `ModuleNotFoundError`）。
 - **silent-failure claim**（silent drift / 靜默失效）:宣稱「行為 silent」須附**執行證據**（跑了該輸入、觀察到靜默通過），非靜態推論。**silent vs loud 不對稱風險**——誤判 loud（實為 silent）以為會炸卻靜默腐敗（危險）；誤判 silent（實為 loud）虛驚、跑測試推翻（安全）。無執行證據時**預設標 'inferred loud'，禁標 'silent'**。
 - **Review 雙向應用**：審查 diff 時看到 `raise`→`return None`、新增/拓寬 `try/except`、crash→filter、validation 緩步化 → 視為潛在 silent-corruption **引入**（loud→silent regression 檢查見 code-review-and-quality skill）。
+- **自報元資料不可信**（自報分類／判讀元資料）：agent 對自己輸出的 label 統計禁當驗收統計源；正解＝llm_label vs 標準答案逐案機械比對，禁用自報欄位做統計。
 
 ## 證據階層
 
