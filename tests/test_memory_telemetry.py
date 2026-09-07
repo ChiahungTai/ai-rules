@@ -1007,3 +1007,40 @@ def test_f3_missing_time_no_confirmed_copy(tmp_path):
     assert rep["aliases"] == [], "no time evidence — must not confirm a copy"
     assert rep["report"]["counts"]["ambiguous"] == 1
     assert rep["report"]["counts"]["successful"] == 2
+
+
+def test_n1_subsecond_iso_window_boundaries(tmp_path):
+    """N1: SQLite datetime() truncates subseconds — SQL preselection must
+    stay a superset of the Python half-open window judgment."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "w.md")
+    since = "2026-09-01T10:00:00.250000+00:00"
+    until = "2026-09-01T10:00:00.750000+00:00"
+
+    def run_with(op):
+        part = tool_part(
+            "Write", str(pool / "w.md"), op_start=op, op_end=op, call_id="c"
+        )
+        zdb = tmp_path / f"z-{op.split('.')[1][:6]}.db"
+        make_zdb(
+            zdb,
+            sessions=[("s1", None, None)],
+            parts=[("p1", "s1", 1787000000000, part)],
+        )
+        r, out = run_writes(
+            pool, tmp_path, zdb=zdb, extra=["--since", since, "--until", until]
+        )
+        assert r.returncode == 0, r.stderr
+        return json.loads(out.read_text())["report"]["counts"]["successful"]
+
+    # inside the subsecond window
+    assert run_with("2026-09-01T10:00:00.500000+00:00") == 1, (
+        "subsecond op inside window must be admitted (datetime() truncation)"
+    )
+    # exactly at until — half-open window excludes it
+    assert run_with("2026-09-01T10:00:00.750000+00:00") == 0, (
+        "op == until must stay excluded (Python half-open precision)"
+    )
+    # just below the lower bound, same second as since — SQL may fetch, Python excludes
+    assert run_with("2026-09-01T10:00:00.100000+00:00") == 0

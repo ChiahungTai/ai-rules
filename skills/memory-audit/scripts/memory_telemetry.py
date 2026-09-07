@@ -128,7 +128,7 @@ def read_zcode(db_path, pools, since, until):
                   json_extract(p.data, '$.state.time.start') is not null
                   and datetime(json_extract(p.data, '$.state.time.start')) is not null
                   and datetime(json_extract(p.data, '$.state.time.start')) >= datetime(?)
-                  and datetime(json_extract(p.data, '$.state.time.start')) < datetime(?)
+                  and datetime(json_extract(p.data, '$.state.time.start')) <= datetime(?)
                 )
                 or (
                   json_extract(p.data, '$.state.time.start') is null
@@ -144,7 +144,10 @@ def read_zcode(db_path, pools, since, until):
             # authoritative when present (parseable), record time only when
             # the operation clock is absent or unparseable by SQLite (the
             # Python layer re-judges those rows) — no fixed margin can
-            # guarantee completeness (F1)
+            # guarantee completeness (F1). The op-window bounds use >=/<= on
+            # purpose: datetime() truncates subseconds, so a same-second
+            # inclusive fetch keeps SQL a strict superset of the precise
+            # half-open window the Python layer applies (N1).
             (
                 iso(since),
                 iso(until),

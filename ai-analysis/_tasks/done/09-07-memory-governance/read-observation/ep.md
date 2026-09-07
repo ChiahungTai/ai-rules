@@ -154,3 +154,7 @@ codex 額度恢復後正式驗收 `bbd4467`：R1/R3 verified；反駁 muse「6/6
 Suggestion（baseline 副本驗證）採納：work-order review variant §8 補「驗證 baseline 用副本」；R6 驗收推進的正式 baseline 差值報告已補保存 `ai-analysis/memory-telemetry/r6-baseline-advance-20260907.json`（不倒回）。修正輪 198 passed＋ruff clean。
 
 **Followup review（muse job-mtrnmdec，2026-09-08）：通過——F1/F2/F3 全 closed**。每項讀碼＋定向測試＋自構反例（1 秒窗 1 小時 drift → successful=1；歷史碰撞多池 → exit 2；完整時間父子 clone 照折疊 2 tests）；三檔全集 95 passed；read-only 前後一致。無新 finding。
+
+## Codex 三輪驗收 N1（2026-09-08，`memory-governance-followup-bf38afb.md`）
+
+F2/F3 verified、F1 原反例過；新揪 **N1：SQLite `datetime()` 截斷小數秒**——ISO 窗 `[10:00:00.250, 10:00:00.750)`＋op `.500` 在 SQL 上界 `<` 比較被排除（numeric 對照正常，既有週報不受污染）。Judge 採納：SQL 預選需為 Python 精判半開窗的 superset——**op 窗上界 `<`→`<=`**（datetime() 截秒下同秒全含、Python 層半開窗排除多餘；下界 `>=` 截尾後天然 superset）＋註解固化語義。test_n1 三 case：.500 納入／.750=until 排除／同秒低於 since 排除——199 passed。
