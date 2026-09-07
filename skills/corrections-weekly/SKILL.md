@@ -1,6 +1,6 @@
 ---
 name: corrections-weekly
-description: "糾正模式週報＋CR 使用健檢——雙職週報：①挖掘本週用戶對 AI 的糾正訊息、分類計數、累積月檔；②量測 code-reality 消費指標（cr-query skill 調用、CR MCP 工具呼叫、對照 Bash rg 量），advisory 趨勢對比。腳本撈候選（ZCode db.sqlite 面——唯一讀遙測對話面的週期班次）、LLM 只做判讀分類。每週六 23:10 排程自動跑（ai-rules workspace）；也可手動觸發（『跑糾正週報』『corrections report』）。產出供治理決策：糾正暴增＝規則衰減訊號；CR 零使用一週＝滲透退化（升級①無效訊號）。"
+description: "糾正模式週報＋CR 使用健檢＋memory 寫入歸因——三職週報：①挖掘本週用戶對 AI 的糾正訊息、分類計數、累積月檔；②量測 code-reality 消費指標（cr-query skill 調用、CR MCP 工具呼叫、對照 Bash rg 量），advisory 趨勢對比；③memory 成功寫入歸因（AIR-40 telemetry——actor×entry 排行、copies/errors 分列、index baseline 對比；流量非品質，違規抽驗留 LLM）。腳本撈候選（ZCode db.sqlite 面）、LLM 只做判讀分類。每週六 23:10 排程自動跑（ai-rules workspace）；也可手動觸發。產出供治理決策。"
 when_to_use: "週期排程到點；或用戶要求糾正模式分析/月報/趨勢對比時手動載入。不適用：單一 session 的即時糾正處理（那是當下對話的事）。"
 allowed-tools: ["Read", "Bash", "Write", "Edit"]
 ---
@@ -28,6 +28,19 @@ allowed-tools: ["Read", "Bash", "Write", "Edit"]
 
    輸出三指標：CR skill 調用（cr-query＋code-reality，distinct sessions＋總計）、CR MCP 工具呼叫（per-tool distinct sessions）、對照 Bash rg part 數（`rg ` 開頭＋` rg ` 中綴形態）。判讀基準：🟢 CR MCP 有使用且 sessions 數持平/成長；🟡 CR MCP 零使用一週（滲透退化）或 CR skill（cr-query＋code-reality）持續零而 CR 需求訊號存在；對照 rg 量只作規模感（rg 高用量非問題——CR 是結構證據品質主張非 rg 取代）。
 
+2b. **跑 memory 寫入歸因腳本**（機械面——AIR-40；池＝本 repo 對應 CC 池）：
+
+   ```bash
+   uv run python /Users/ctai/Github/ai-rules/skills/memory-audit/scripts/memory_telemetry.py writes \
+     --pool ~/.claude/projects/-Users-ctai-Github-ai-rules/memory \
+     --zcode-db ~/.zcode/cli/db/db.sqlite \
+     --cc-root ~/.claude/projects/-Users-ctai-Github-ai-rules \
+     --output ai-analysis/_tasks/09-07-memory-governance/evidence/weekly-<YYYYMMDD>.json \
+     --baseline-dir ai-analysis/_tasks/09-07-memory-governance/evidence/baselines
+   ```
+
+   輸出 report：counts（successful／errors／copies_folded）、top_actors／top_entries（寫入次數×payload chars）、index_delta（baseline 對比；首輪建 baseline）。判讀：top 寫入者（subagent session 大戶＝抽驗線索——追 source_ref 到原始事件看上下文）；errors>0 如實報（失敗不冒充無寫入）；**寫入量是流量非品質/存量**——違規判斷留 LLM 抽驗，不按 chars 自動判。路徑陷阱：ZCode db＝`~/.zcode/cli/db/db.sqlite`（`~/.zcode/cli/db.sqlite` 頂層 0-byte 殘檔勿用）。
+
 3. **逐則判讀分類**（LLM 面）：對每個糾正候選判斷是否真糾正（關鍵詞有假陽性——技術討論中的「不需要」可能不是糾正），分類：**方向錯／重複勞動（whole-picture blind spot）／遺漏／修了仍壞／過度工程／驗證責任推給用戶／其他**。邊界案例標「疑似」不硬歸。
 
 4. **append 月檔**：`ai-analysis/reports/corrections-<YYYY-MM>.md`（每月一檔累積）。每週一節：
@@ -41,6 +54,8 @@ allowed-tools: ["Read", "Bash", "Write", "Edit"]
    ### CR 使用
    - CR skill（cr-query＋code-reality）：N sessions（總計）；CR MCP：refs N sessions／callers N sessions／（top 3 工具其餘一行）；對照 Bash rg：N
    - vs 前週趨勢＋verdict（🟢/🟡）
+   ### Memory 寫入（AIR-40）
+   - successful N（errors N／folded N）；top actors ≤3（session 短 id＋次數×chars）；top entries ≤3；index_delta（vs 前輪 baseline，首輪標 baseline 已建）；evidence 路徑一行
    ```
 
 5. **判讀產出**（報告尾一行）：本月累積趨勢是否支持「某規則在衰減、該修」或「CR 滲透退化、該接線」的具體建議——沒有就寫「無需動作」（不硬擠結論）。

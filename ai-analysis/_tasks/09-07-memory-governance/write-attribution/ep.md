@@ -3,7 +3,7 @@
 > **ep_type**: implementation
 > **parent**: ai-analysis/_tasks/09-07-memory-governance/ep.md
 > **baseline**: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
-> **status**: S1 已實作（4b20db8：collector＋11 tests，TDD＋muse 跨家族 EP review 回寫）；S2/S3 待作
+> **status**: S1-S3 全部已實作（S1＝4b20db8；S2＋首跑＋S3＝本弧 commits）——待母卡 AIR-42 整體驗收
 
 ## 實作總覽與已決策
 

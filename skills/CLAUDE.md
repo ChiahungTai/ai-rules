@@ -82,7 +82,7 @@
 - `/instruction-sync` — 檢查文檔與程式碼同步性
 - `instruction-writing` — instruction file 撰寫完整規範（reference skill：rule 留 always-on 核心，此處承載完整規範＋元資訊禁止行為表與論證＋文檔自洽五維檢查；rule+skill 分層控制 bundle 尺寸）
 - `/daily-maintain` — 每日自動維護（排程用），自動修正低風險問題 + commit
-- `corrections-weekly` — 糾正模式週報（排程用，週六 23:10 ZCode cron 開新 session）：腳本撈 ZCode db 糾正候選＋LLM 判讀分類，append 月檔 `ai-analysis/reports/corrections-<YYYY-MM>.md`；某類暴增＝規則衰減訊號
+- `corrections-weekly` — 糾正模式週報＋CR 使用健檢＋memory 寫入歸因（排程用，週六 23:10 ZCode cron 開新 session）：腳本撈 ZCode db 糾正候選＋LLM 判讀分類，append 月檔 `ai-analysis/reports/corrections-<YYYY-MM>.md`；某類暴增＝規則衰減訊號；memory 段＝AIR-40 telemetry（top actor×entry 寫入排行——subagent 大戶抽驗線索）
 
 ### 工作流 skills — 流程演化回饋
 
