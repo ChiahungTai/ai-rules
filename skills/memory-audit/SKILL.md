@@ -44,7 +44,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 ### 層 2：內容核實 vs repo（預設必做）
 
-條目多時 spawn agents 按段平行（每 agent 一段條目清單），少則主 session 直接做；**spawn 失敗（usage limit / 429）→ 降級主 session 分批直接核實，勿中止 audit**：
+條目多時 spawn agent 分段**序列處理**——一次一個、背景跑（`run_in_background`，同 tool-discipline「Subagent spawn 預設背景」）、完成通知再派下一段（user 2026-09-07 裁決「改用一個就好」——fan-out 平行 spawn 是波段唯一全批報廢點：3 agent 平行全撞 1308＋1302）；少則主 session 直接做；**spawn 失敗（usage limit / 429）→ 降級主 session 分批直接核實，勿中止 audit**。批次 sizing 參考：單 agent 載 4 cluster/18 檔/~48K chars ≈ 47 min／5.0M subagent tokens／41 tool calls：
 
 1. 每檔抽 **3-6 個 load-bearing claims**（路徑、符號、狀態宣稱）
 2. 逐項對 repo 驗證：
@@ -59,6 +59,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 ### 層 3：清理執行（用戶核可後；夜間 cron 輕量形態預先授權）
 
 - 刪檔前 `rg "\[\[<name>\]\]"` 查反向引用——不留新 dangling（引用者同步改）
+- **刪除前 mtime 稽核**（2026-09-07 mosaic cluster merge 波段實證——收尾時自加此步抓到兩個並行 writer 漂移，並行 writer 至此三次實證）：刪除成員檔前**逐成員比 mtime vs keeper 寫入時間**——成員晚於 keeper 吸收 → 先重吸收 delta 再刪；成員屬**活躍線**（近 7 天 owner 寫入）→ 優先 HOLD 不刪不併（避免在活躍 writer 上再製造 drift 競爭），列三選項交 user：併 keeper／另立指針小條／等線收案後隨弧蒸餾。理由：靜態「rg 反向引用清了」不涵蓋時間軸——成員檔在 keeper 吸收後、刪除前的窗口內被並行 session 更新，內容即 silently 丟失
 - **多池殘留掃描**：雙 harness 共用腳本跨多池部署後，清理/驗證掃描以「檔名 × 池」為維度——每個 pool 都要 rg（2026-08-30 實例：清理清單漏了 mosaic 池的同名測試條目）
 - 合併檔帶 `merged_from` 標記（保留追溯）
 - **cluster merge 機械觸發**：同主題散檔 ≥3（rg 主題詞/同前綴判定）→ merge candidate；併入目標優先既有最大 cluster（閾值可在 `_audit-state.md` per-project 覆寫）
