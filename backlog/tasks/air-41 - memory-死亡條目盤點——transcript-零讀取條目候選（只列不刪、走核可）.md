@@ -4,7 +4,7 @@ title: Memory body Read 觀測——覆蓋限定候選與用途判讀
 status: Done
 assignee: []
 created_date: '2026-09-07 07:56'
-updated_date: '2026-09-07 10:07'
+updated_date: '2026-09-07 11:02'
 labels:
   - memory
   - governance
@@ -38,5 +38,5 @@ ordinal: 32000
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-body Read 觀測全弧閉：reads 投影（TDD 6 tests、partial/range/source_ref 可追）＋候選機械豁免＋coverage manifest（不稱全使用率）；live 首跑 129 entries 淨候選 1（保留判讀記錄）；memory-audit 層 2 接入取樣線索語義
+reads telemetry（body Read 觀測）落地——I1-I4 dual review 修正輪全閉：rank mirror 層次模擬（F1 引號空白家族）/unpaired 計接觸/window_shortfall 觀測窗揭露/reads_without_entry HOLD 線索＋generators drift 對帳（F2）。13 fixture＋live 首跑（129 entries/33 zero 候選全保留供判讀/window_shortfall=true 揭露 26 天觀測限制）；190 tests passed。審查鏈：muse 重審＋GLM fresh-eyes→judge→修正→複驗 26 案例 battery 零分歧。證據 evidence/reads-post-i1234.json、重審紀錄 ep.md『Build 後 dual review』段
 <!-- SECTION:FINAL_SUMMARY:END -->

@@ -492,13 +492,50 @@ def project_writes(canonical, aliases, ambiguous, pools, baseline_dir):
     }
 
 
-RANKS = ("hot", "core", "cold")  # mirrors generate_index.parse_rank semantics
+RANKS = ("hot", "core", "cold")
+
+
+def _frontmatter_rank(text):
+    """Behavioral mirror of the pool generator's parse_frontmatter+parse_rank.
+
+    Equivalence contract (pinned by test_i1/test_i1b): requires a leading
+    '---' fence, the frontmatter block ends at the first closing '\\n---'
+    (body fences never leak in), only 'metadata:' indented children (not
+    other parents) feed the nested placement, a top-level rank with a value
+    wins over metadata.rank. Normalization mirrors the generator's two
+    layers: parse_frontmatter unquotes TOP-LEVEL values only, then
+    parse_rank strips+unquotes+lowercases once — so a quoted top-level
+    ' hot ' ends up hot (double-pass) while the same nested value stays
+    core (single-pass leaves inner whitespace). Invalid or missing -> core.
+    The per-pool generator hash rides along as generator_schema (report
+    "generators" map), so consumers can detect mirror drift.
+    """
+    if not text.startswith(("---\n", "---\r\n")):
+        return "core"
+    end = text.find("\n---", 4)
+    if end < 0:
+        return "core"
+    top = meta = None
+    parent = None
+    for line in text[4:end].splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if line.startswith((" ", "\t")):
+            k, _, v = line.strip().partition(":")
+            if parent == "metadata" and k.strip() == "rank" and v.strip():
+                meta = v.strip()  # generator keeps nested values raw
+            continue
+        k, _, v = line.partition(":")
+        parent = k.strip() if not v.strip() else None
+        if k.strip() == "rank" and v.strip():
+            top = v.strip().strip("'\"")  # generator unquotes top-level
+    raw = top or meta
+    val = str(raw).strip().strip("'\"").lower() if raw is not None else ""
+    return val if val in RANKS else "core"
 
 
 def snapshot_entries(pools):
     """Inventory with content hash / rank / mtime (AIR-41 S1)."""
-    import re
-
     inv = []
     for pool in pools:
         for p in sorted(pool.glob("*.md")):
@@ -508,44 +545,43 @@ def snapshot_entries(pools):
                 text = p.read_text(encoding="utf-8")
             except OSError:
                 continue
-            fm = text.split("---", 2)
-            raw_rank = None
-            if len(fm) >= 3:
-                m = re.search(r"^\s*rank:\s*['\"]?(\w+)", fm[1], re.MULTILINE)
-                if m:
-                    raw_rank = m.group(1).strip().lower()
             inv.append(
                 {
                     "entry": p.name,
                     "pool": str(pool),
                     "sha256": hashlib.sha256(text.encode()).hexdigest(),
-                    "rank": raw_rank if raw_rank in RANKS else "core",
+                    "rank": _frontmatter_rank(text),
                     "mtime": iso(datetime.fromtimestamp(p.stat().st_mtime, tz=UTC)),
                 }
             )
     return inv
 
 
-def project_reads(canonical, inventory, coverages, until):
+def project_reads(canonical, inventory, coverages, since, until):
     """AIR-41 S1/S2: body-Read observation + coverage-limited candidates."""
     reads_by_entry = {}
     read_errors = 0
+    unpaired = 0
     for e in canonical:
         if e.tool != "Read":
             continue
         if e.status == "error":
             read_errors += 1
             continue
-        if e.status != "completed":
-            continue
         if e.entry == "MEMORY.md":
             continue  # index file, not an entry (EP S1)
+        # unmatched (CC result missing) / unknown (zcode state absent) Reads
+        # still count as contact — dropping them would flip genuinely read
+        # entries into zero-body-read candidates (directional error).
+        if e.status != "completed":
+            unpaired += 1
         reads_by_entry.setdefault(e.entry, []).append(
             {
                 "source": e.source,
                 "session": e.session,
                 "actor": e.actor,
                 "ts": e.operation_start or e.record_time,
+                "status": e.status,
                 "partial": e.read_range is not None,
                 "range": e.read_range,
                 "source_ref": e.source_ref,
@@ -577,9 +613,28 @@ def project_reads(canonical, inventory, coverages, until):
                     "exemptions": exemptions,
                 }
             )
-    partial = not (
-        coverages.get("zcode", {}).get("readable")
-        and coverages.get("claude", {}).get("requested")
+    inventory_names = {item["entry"] for item in inventory}
+    reads_without_entry = sorted(set(reads_by_entry) - inventory_names)
+    firsts = []
+    for db_cov in coverages.get("zcode_dbs", []):
+        if db_cov.get("readable"):
+            first = parse_ts((db_cov.get("bounds") or {}).get("first"))
+            if first:
+                firsts.append(first)
+    cc_first = parse_ts((coverages.get("claude", {}).get("bounds") or {}).get("first"))
+    if cc_first:
+        firsts.append(cc_first)
+    # window_shortfall: a source whose earliest record post-dates --since
+    # cannot testify about the start of the window — zero-read conclusions
+    # there are coverage-limited, not evidence of disuse.
+    coverages["window_shortfall"] = any(first > since for first in firsts)
+    coverages["unpaired_reads"] = unpaired
+    partial = (
+        not (
+            coverages.get("zcode", {}).get("readable")
+            and coverages.get("claude", {}).get("requested")
+        )
+        or coverages["window_shortfall"]
     )
     coverages["partial"] = partial
     coverages["read_errors"] = read_errors
@@ -595,9 +650,11 @@ def project_reads(canonical, inventory, coverages, until):
         "candidates": {
             "no_body_read": no_body,
             "coverage_limited": partial,
-            # maintenance-only / purpose classification is LLM-side (skill):
-            # never auto-derive from session titles (EP S2).
-            "maintenance_only_unconfirmed": [],
+            # reads of entries absent from inventory: rename/delete identity
+            # clue (EP R6) — HOLD material for LLM adjudication, never
+            # auto-merged. maintenance-only / purpose classification stays
+            # LLM-side (skill); the collector emits no fake empty slot.
+            "reads_without_entry": reads_without_entry,
         },
     }
 
@@ -711,11 +768,14 @@ def main(argv=None):
     events.sort(key=lambda e: (e.record_time or "", e.id))
     if args.command == "reads":
         inventory = snapshot_entries(pools)
-        projection = project_reads(canonical, inventory, coverages, until)
+        projection = project_reads(canonical, inventory, coverages, since, until)
         report = {
             "schema": SCHEMA,
             "window": {"start": iso(since), "end": iso(until)},
             "coverage": coverages,
+            # the rank mirror above is a behavioral copy of the per-pool
+            # generator; its hash rides along so consumers can detect drift
+            "generators": {str(p): generator_identity(p) for p in pools},
             "aliases": aliases,
             "ambiguous": ambiguous,
             "unknown": unknown,
@@ -728,6 +788,8 @@ def main(argv=None):
             f"[OK] entries={len(inventory)} body_read_entries="
             f"{sum(1 for o in obs if o['body_reads'])} zero_body_read={zero} "
             f"read_errors={coverages.get('read_errors', 0)} "
+            f"unpaired_reads={coverages.get('unpaired_reads', 0)} "
+            f"window_shortfall={coverages.get('window_shortfall')} "
             f"partial={coverages.get('partial')}"
         )
         return 0

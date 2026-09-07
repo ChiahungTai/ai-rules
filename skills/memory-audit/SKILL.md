@@ -44,7 +44,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 ### 層 2：內容核實 vs repo（預設必做）
 
-> **Read 觀測取樣線索（AIR-41）**：`uv run python skills/memory-audit/scripts/memory_telemetry.py reads --pool <池> --zcode-db ~/.zcode/cli/db/db.sqlite --cc-root <CC 目錄> --output <報告路徑>`（90 日窗）——產 body Read 觀測＋zero-body-read 候選（機械豁免 hot/近 30 日 mtime；活躍弧豁免與用途判讀 work/maintenance 是 LLM 面——session title 不自動定性）。**觀測是取樣線索非真值**：候選≠可刪（「未觀測到讀」限 observed window＋partial coverage）；full/lite 核實仍需對 repo 查真值；不隨觀測改 rank/刪條目。
+> **Read 觀測取樣線索（AIR-41）**：`uv run python skills/memory-audit/scripts/memory_telemetry.py reads --pool <池> --zcode-db ~/.zcode/cli/db/db.sqlite --cc-root <CC 目錄> --output <報告路徑>`（90 日窗）——產 body Read 觀測＋zero-body-read 候選（機械豁免 hot/近 30 日 mtime；活躍弧豁免與用途判讀 work/maintenance 是 LLM 面——session title 不自動定性，collector 不輸出假空槽）。**觀測是取樣線索非真值**：候選≠可刪（「未觀測到讀」限 observed window＋partial coverage——`window_shortfall`（源最早記錄晚於窗起點）或源缺都抬 `coverage_limited`，zero 候選只證窗內無讀）；full/lite 核實仍需對 repo 查真值；不隨觀測改 rank/刪條目。**identity 線索 → HOLD**：`reads_without_entry`（讀到不在 inventory 的條目＝rename/刪除重建線索）或 owner 無法確認時——EP 級 LLM 裁決 HOLD（不自動合併身分），裁決記錄留在任務家可重放；unmatched/unknown Read 計接觸（`unpaired_reads`），不打成 zero 候選。rank 解析是 pool generator 的行為 mirror——per-pool hash 隨報告 `generators` map 揭露，對帳不符＝mirror 漂移警訊。
 
 條目多時 spawn agent 分段**序列處理**——一次一個、背景跑（`run_in_background`，同 tool-discipline「Subagent spawn 預設背景」）、完成通知再派下一段（user 2026-09-07 裁決「改用一個就好」——fan-out 平行 spawn 是波段唯一全批報廢點：3 agent 平行全撞 1308＋1302）；少則主 session 直接做；**spawn 失敗（usage limit / 429）→ 降級主 session 分批直接核實，勿中止 audit**。批次 sizing 參考：單 agent 載 4 cluster/18 檔/~48K chars ≈ 47 min／5.0M subagent tokens／41 tool calls：
 

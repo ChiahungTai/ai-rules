@@ -21,7 +21,7 @@
 | ID | 觸發 | 預期行為 | Checkpoint | UC |
 |---|---|---|---|---|
 | R1 | 雙源成功Read | join result後計body讀取，保留range | evidence | Read觀測 |
-| R2 | error/unmatched/只索引/rg | 不計body成功；盲區顯示 | diagnostics | Read觀測 |
+| R2 | error/unmatched/只索引/rg | error 不計接觸；unmatched/unknown 計接觸不計成功（unpaired_reads 揭露）；盲區顯示 | diagnostics | Read觀測 |
 | R3 | audit或蒸餾讀遍全池 | 維護Read與工作Read分開 | purpose ledger | 用途判讀 |
 | R4 | 缺來源、malformed、保留期不足 | observed-window/partial，不能產全域零讀結論 | coverage | 覆蓋 |
 | R5 | zeroRead但hot/近30日/活躍弧 | 豁免候選；豁免原因仍可觀測 | exclusions | 候選 |
@@ -99,3 +99,7 @@ AIR-40之後順序build，同script衝突先re-read。更新skills描述、索�
 | 2 | ℹ️ 提醒 | S2 | R8（description 已足夠）與 K6（42.1）同語義，兩處一致（皆保留） | 無，口徑一致 | implemented |
 
 審查結論：有條件執行（F1–F5 通過；須在 AIR-40 Done 後開工）。審查者：muse-code（跨家族獨立審查），2026-09-07。
+
+## Build 後 dual review 與修正輪（2026-09-07）
+
+實作（206148a）與結案（4051f3b）後 dual review 到件（muse 重審工單 `re-review-workorder-i1234.md`＋GLM fresh-eyes）：I1-I4 全 fixed 為兩家共識；GLM 新提 F1（mirror 引號空白家族——generator 頂層雙趟/巢狀單趟正規化不對稱）＋F2（reads 路徑缺 generators identity）經 judge 採納修正（F1 remedy 修正為層次模擬，非四趟統一——後者會在巢狀案例反向分歧）；F4（CC unmatched direct fixture）＋N1（R2 行 doc 同步）一併落地；F3/F5/N2 記債。修正輪 followup 複驗：F1 經獨立 26 案例 battery 零分歧、F2 hash 重算驗真——四項 CLOSED，複驗通過。live 證據 `../evidence/reads-post-i1234.json`（generators/window_shortfall/reads_without_entry 在場）。
