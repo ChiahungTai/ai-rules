@@ -3,7 +3,7 @@
 > **ep_type**: implementation
 > **product-type**: docs（母卡協調與整體驗收；不是 blueprint，不直接實作子卡）
 > **baseline**: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
-> **status**: AIR-40 S1 已實作（4b20db8，已併入 main）；S2/S3、AIR-41、AIR-42.1 待作
+> **status**: 已落地（AIR-40/41/42.1 三子卡全 Done——collector 35 tests＋6 份 live evidence＋分流 advisory＋規則修訂；本檔隨歸檔收案）
 
 ## 實作總覽
 

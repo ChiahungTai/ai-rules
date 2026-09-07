@@ -4,13 +4,16 @@ title: Memory 載體分流校準——樣本判讀與 rules skills 邊界收斂
 status: Done
 assignee: []
 created_date: '2026-09-07 08:44'
-updated_date: '2026-09-07 11:22'
+updated_date: '2026-09-07 11:23'
 labels:
   - memory
   - governance
 dependencies:
   - AIR-40
   - AIR-41
+references:
+  - >-
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/done/09-07-memory-governance/knowledge-routing/ep.md
 parent_task_id: AIR-42
 ordinal: 34000
 ---

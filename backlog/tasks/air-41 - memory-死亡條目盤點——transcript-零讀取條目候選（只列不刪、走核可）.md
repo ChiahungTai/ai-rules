@@ -4,7 +4,7 @@ title: Memory body Read 觀測——覆蓋限定候選與用途判讀
 status: Done
 assignee: []
 created_date: '2026-09-07 07:56'
-updated_date: '2026-09-07 11:02'
+updated_date: '2026-09-07 11:23'
 labels:
   - memory
   - governance
@@ -12,8 +12,7 @@ dependencies:
   - AIR-40
 references:
   - >-
-    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/09-07-memory-governance/read-observation/ep.md
-  - ai-analysis/_tasks/09-07-memory-governance/read-observation/
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/done/09-07-memory-governance/read-observation/ep.md
 parent_task_id: AIR-42
 ordinal: 32000
 ---

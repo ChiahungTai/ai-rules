@@ -4,15 +4,14 @@ title: Memory 寫入歸因——成功事件、複製去重與分量報告
 status: Done
 assignee: []
 created_date: '2026-09-07 07:56'
-updated_date: '2026-09-07 09:42'
+updated_date: '2026-09-07 11:23'
 labels:
   - memory
   - governance
 dependencies: []
 references:
   - >-
-    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/09-07-memory-governance/write-attribution/ep.md
-  - ai-analysis/_tasks/09-07-memory-governance/write-attribution/
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/done/09-07-memory-governance/write-attribution/ep.md
 parent_task_id: AIR-42
 ordinal: 31000
 ---
