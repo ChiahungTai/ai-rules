@@ -195,6 +195,8 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 
 審查完成後，基於已分析的 diff 直接產生 commit message。**格式 / 語言規範見 [commit.md](../commit/SKILL.md) 階段 4 — 單一真相源**（task #10：避免雙重定義 drift）。
 
+**settings.json permission 同步檢查**（收尾步驟，AIR-42.1 遷入）：本次審查/修正新建或改名了 skill 時，檢查 `settings.json` allow-list 是否同步新增對應 skill permission——allow-list 同步是高頻漏步（skill 定義與 permission 在不同檔、無自動關聯）；機械防線＝順手跑 `/sync-sources` 的 `skill_allowlist_coverage` invariant（集合比對抓漏，2026-08-24 實例抓到 5 個漏加）。
+
 **type 對應審查結論**（code-review 特有，映射審查發現 → type）：
 
 | 審查判斷 | type | 說明 |
