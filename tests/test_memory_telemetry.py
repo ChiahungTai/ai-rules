@@ -927,3 +927,83 @@ def test_r4_cross_pool_basename_collision_fails(tmp_path):
         check=False,
     )
     assert r.returncode == 2, "cross-pool basename collision must fail"
+
+
+def test_f2_alias_dedup_and_second_pool_refused(tmp_path):
+    """F2: aliases dedup to one pool; a second distinct pool is refused."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    (pool / "n.md").write_text("---\nname: n.md\n---\nbody\n", encoding="utf-8")
+    alias = tmp_path / "alias"
+    alias.symlink_to(pool)
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_writes(pool, tmp_path, zdb=zdb, extra=["--pool", str(alias)])
+    assert r.returncode == 0, r.stderr
+    rep = json.loads(out.read_text())
+    assert len(rep["report"]["current_inventory"]["entries"]) == 1, (
+        "same-pool alias must dedup, not double-count entries"
+    )
+    assert rep["coverage"]["pools"] == [str(pool.resolve())]
+
+    other = tmp_path / "other"
+    other.mkdir()
+    (other / "x.md").write_text("---\nname: x.md\n---\nbody\n", encoding="utf-8")
+    r2, _ = run_writes(pool, tmp_path, zdb=zdb, extra=["--pool", str(other)])
+    assert r2.returncode == 2, "a second distinct pool must be refused"
+
+
+def test_f1_narrow_window_long_drift(tmp_path):
+    """F1: selection must follow the operation clock, not a fixed margin."""
+    from datetime import UTC, datetime
+
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "w.md")
+    op = "2026-09-01T10:00:00+00:00"
+    part = tool_part("Write", str(pool / "w.md"), op_start=op, op_end=op, call_id="c1")
+    record_ms = int(datetime(2026, 9, 1, 9, 59, 58, tzinfo=UTC).timestamp() * 1000)
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb, sessions=[("s1", None, None)], parts=[("p1", "s1", record_ms, part)])
+    r, out = run_writes(
+        pool,
+        tmp_path,
+        zdb=zdb,
+        extra=[
+            "--since",
+            "2026-09-01T10:00:00+00:00",
+            "--until",
+            "2026-09-01T10:00:01+00:00",
+        ],
+    )
+    assert r.returncode == 0, r.stderr
+    rep = json.loads(out.read_text())
+    assert rep["report"]["counts"]["successful"] == 1, (
+        "1s window with 2s record/op drift: operation clock must still admit the event"
+    )
+
+
+def test_f3_missing_time_no_confirmed_copy(tmp_path):
+    """F3: missing operation times must surface ambiguity, never a fold."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "w.md")
+    base = tool_part("Write", str(pool / "w.md"), call_id="c1")
+    child = tool_part("Write", str(pool / "w.md"), call_id="c2")
+    del base["state"]["time"]
+    del child["state"]["time"]
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("sp", None, None), ("sc", "sp", None)],
+        parts=[
+            ("p1", "sp", 1787000000000, base),
+            ("p2", "sc", 1787000000500, child),
+        ],
+    )
+    r, out = run_writes(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    rep = json.loads(out.read_text())
+    assert rep["aliases"] == [], "no time evidence — must not confirm a copy"
+    assert rep["report"]["counts"]["ambiguous"] == 1
+    assert rep["report"]["counts"]["successful"] == 2

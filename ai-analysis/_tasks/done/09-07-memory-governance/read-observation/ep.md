@@ -140,3 +140,17 @@ codex dual-context 整弧審查（`35b8ab9..115227d`，findings `memory-governan
 否證重查：R1 親重現（不轉述 codex fixture）；R4「既有 judge 曾拒」反駁成立性複查（拒的理由=改 schema 成本，最小修不動 schema——維持 ✅）。修正輪 195 passed＋ruff clean。codex 屍體考古：fresh agent 撞 usage limit 於「獨立錨點驗證」步——本輪 judge 查證即補上該步。
 
 **Followup review（muse job-mtra5khf，2026-09-07）：通過——R1-R6 全 closed（6/6）**，每項實跑證據（40 passed 全集＋定向 5 passed＋/tmp 承接重跑 run2 delta 非 null＋lint 全綠）；兩條 ℹ️ 選項（O1 margin limitation 註解、O2 unreadable 專屬測例）記錄不擋。工單 `followup-workorder-r1r6.md` 可重放。
+
+## Codex 二輪驗收 judge 裁決（2026-09-08，`memory-governance-followup-bbd4467.md`）
+
+codex 額度恢復後正式驗收 `bbd4467`：R1/R3 verified；反駁 muse「6/6 closed」——**F1/F2/F3 三項實跑反例均採納**（judge 親驗修法設計後修正）：
+
+| 項 | 反例 | 修復 |
+|----|------|------|
+| F1 margin 非契約 | 1 秒窗＋record 早 op 2 秒 → successful=0（margin 隨窗縮水） | SQL 選取改 operation 等價：`json_extract('$.state.time.start')` 可解析即 op 窗、缺 op 才 record 窗、SQLite 不可解析的 op 全撈交 Python 層判——margin 移除——test_f1（窄窗長 drift） |
+| F2 guard 只掃現存檔 | B 池已刪 `note.md` 的歷史 Read 掛到 A 池同名（退出零讀候選）；同池 aliases 雙計 entries | **單池契約**：canonical 去重 aliases（同池 symlink 合一）＋拒絕第二個不同 pool——歷史事件混合在單池下不存在——test_f2 |
+| F3 None 進分組鍵（既有債，非 bbd4467 引入） | 父子同 key＋時間都缺 → aliases=1 basis「lineage+time+hash」（無時間證據當確定複本） | 折疊加時間證據 gate：任一側 operation_start 缺 → 不折疊、ambiguous 揭露（reason 標 missing time evidence）——test_f3（successful=2 計數不縮水） |
+
+Suggestion（baseline 副本驗證）採納：work-order review variant §8 補「驗證 baseline 用副本」；R6 驗收推進的正式 baseline 差值報告已補保存 `ai-analysis/memory-telemetry/r6-baseline-advance-20260907.json`（不倒回）。修正輪 198 passed＋ruff clean。
+
+**Followup review（muse job-mtrnmdec，2026-09-08）：通過——F1/F2/F3 全 closed**。每項讀碼＋定向測試＋自構反例（1 秒窗 1 小時 drift → successful=1；歷史碰撞多池 → exit 2；完整時間父子 clone 照折疊 2 tests）；三檔全集 95 passed；read-only 前後一致。無新 finding。

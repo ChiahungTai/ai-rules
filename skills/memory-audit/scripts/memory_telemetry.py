@@ -121,18 +121,35 @@ def read_zcode(db_path, pools, since, until):
         }
         rows = con.execute(
             """select p.id, p.session_id, p.time_created, p.data
-            from part p where p.time_created >= ? and p.time_created < ?
-            and json_extract(p.data, '$.type') = 'tool'
+            from part p
+            where json_extract(p.data, '$.type') = 'tool'
+              and (
+                (
+                  json_extract(p.data, '$.state.time.start') is not null
+                  and datetime(json_extract(p.data, '$.state.time.start')) is not null
+                  and datetime(json_extract(p.data, '$.state.time.start')) >= datetime(?)
+                  and datetime(json_extract(p.data, '$.state.time.start')) < datetime(?)
+                )
+                or (
+                  json_extract(p.data, '$.state.time.start') is null
+                  and p.time_created >= ? and p.time_created < ?
+                )
+                or (
+                  json_extract(p.data, '$.state.time.start') is not null
+                  and datetime(json_extract(p.data, '$.state.time.start')) is null
+                )
+              )
             order by p.time_created, p.id""",
-            # fetch one window-length margin on both sides: events enter by
-            # operation time (record as fallback), and record/op clocks drift
-            # apart in real data — pre-filtering tightly on record time would
-            # drop or admit events on the wrong side of the window (R2)
+            # selection mirrors the event contract: operation time is
+            # authoritative when present (parseable), record time only when
+            # the operation clock is absent or unparseable by SQLite (the
+            # Python layer re-judges those rows) — no fixed margin can
+            # guarantee completeness (F1)
             (
-                int(since.timestamp() * 1000)
-                - int((until - since).total_seconds() * 1000),
-                int(until.timestamp() * 1000)
-                + int((until - since).total_seconds() * 1000),
+                iso(since),
+                iso(until),
+                int(since.timestamp() * 1000),
+                int(until.timestamp() * 1000),
             ),
         ).fetchall()
     finally:
@@ -339,12 +356,19 @@ def resolve_lineage(events, sessions):
         if len(by_session) < 2:
             continue
         folded = False
+        missing_time = False
         for m in members:
             older = [
                 o for o in members if o is not m and o.session in ancestors(m.session)
             ]
             if older:
                 first = min(older, key=lambda o: (o.record_time, o.id))
+                # a confirmed copy needs complete time evidence on both
+                # sides; None==None in the group key is "no evidence", not
+                # "same time" — surface as ambiguity instead of folding (F3)
+                if m.operation_start is None or first.operation_start is None:
+                    missing_time = True
+                    continue
                 m.copy_of = first.id
                 aliases.append(
                     {"copy": m.id, "canonical": first.id, "basis": "lineage+time+hash"}
@@ -354,7 +378,11 @@ def resolve_lineage(events, sessions):
             ambiguous.append(
                 {
                     "members": [m.id for m in members],
-                    "reason": "multi-session same content without ancestor link",
+                    "reason": (
+                        "lineage+hash but missing operation time evidence"
+                        if missing_time
+                        else "multi-session same content without ancestor link"
+                    ),
                 }
             )
     canonical = [e for e in events if e.copy_of is None]
@@ -717,21 +745,17 @@ def main(argv=None):
         p = Path(raw).expanduser()
         if not p.is_dir():
             return fail(f"pool not a directory: {raw}")
-        pools.append(p.resolve())
+        p = p.resolve()
+        if p not in pools:
+            pools.append(p)
     if len(pools) > 1:
-        # projections key by entry basename; two pools sharing a basename
-        # would blend evidence across pools — refuse instead (R4)
-        owner = {}
-        for pool in pools:
-            for p in pool.glob("*.md"):
-                if p.name == "MEMORY.md" or p.name.startswith("_"):
-                    continue
-                if p.name in owner and owner[p.name] != pool:
-                    return fail(
-                        f"cross-pool basename collision: {p.name} in "
-                        f"{owner[p.name]} and {pool} — run one pool per report"
-                    )
-                owner[p.name] = pool
+        # projections key by entry basename and history contains deleted
+        # entries — guarding on current files cannot prevent cross-pool
+        # evidence blending, so the contract is one pool per report (F2)
+        return fail(
+            "multiple pools refused: projections key by basename and history "
+            "may collide — run one pool per report (aliases are deduplicated)"
+        )
     out = Path(args.output).expanduser()
     try:
         out_resolved = out.resolve()
