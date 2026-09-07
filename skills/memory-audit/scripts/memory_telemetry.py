@@ -43,6 +43,7 @@ class Event:
     copy_of: str | None = None
     actor: str = "unknown"
     source_ref: dict = field(default_factory=dict)
+    read_range: dict | None = None
 
 
 @dataclass
@@ -182,6 +183,11 @@ def read_zcode(db_path, pools, since, until):
                 call_id=d.get("callID"),
                 actor=sid if sid in sessions else "unknown",
                 source_ref={"db": str(db_path), "row": pid},
+                read_range=(
+                    {k: inp[k] for k in ("offset", "limit") if k in inp} or None
+                )
+                if d["tool"] == "Read"
+                else None,
             )
         )
     return events, coverage
@@ -190,6 +196,7 @@ def read_zcode(db_path, pools, since, until):
 def read_claude(roots, pools, since, until):
     events = []
     coverage = {
+        "requested": True,
         "readable": True,
         "files": 0,
         "malformed": 0,
@@ -271,6 +278,11 @@ def read_claude(roots, pools, since, until):
                             "file": str(path),
                             "line": line_no,
                         },
+                        read_range=(
+                            {k: inp[k] for k in ("offset", "limit") if k in inp} or None
+                        )
+                        if block["name"] == "Read"
+                        else None,
                     )
             for key, event in pending.items():
                 event.status = results.get(key, "unmatched")
@@ -480,6 +492,116 @@ def project_writes(canonical, aliases, ambiguous, pools, baseline_dir):
     }
 
 
+RANKS = ("hot", "core", "cold")  # mirrors generate_index.parse_rank semantics
+
+
+def snapshot_entries(pools):
+    """Inventory with content hash / rank / mtime (AIR-41 S1)."""
+    import re
+
+    inv = []
+    for pool in pools:
+        for p in sorted(pool.glob("*.md")):
+            if p.name == "MEMORY.md" or p.name.startswith("_"):
+                continue
+            try:
+                text = p.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            fm = text.split("---", 2)
+            raw_rank = None
+            if len(fm) >= 3:
+                m = re.search(r"^\s*rank:\s*['\"]?(\w+)", fm[1], re.MULTILINE)
+                if m:
+                    raw_rank = m.group(1).strip().lower()
+            inv.append(
+                {
+                    "entry": p.name,
+                    "pool": str(pool),
+                    "sha256": hashlib.sha256(text.encode()).hexdigest(),
+                    "rank": raw_rank if raw_rank in RANKS else "core",
+                    "mtime": iso(datetime.fromtimestamp(p.stat().st_mtime, tz=UTC)),
+                }
+            )
+    return inv
+
+
+def project_reads(canonical, inventory, coverages, until):
+    """AIR-41 S1/S2: body-Read observation + coverage-limited candidates."""
+    reads_by_entry = {}
+    read_errors = 0
+    for e in canonical:
+        if e.tool != "Read":
+            continue
+        if e.status == "error":
+            read_errors += 1
+            continue
+        if e.status != "completed":
+            continue
+        if e.entry == "MEMORY.md":
+            continue  # index file, not an entry (EP S1)
+        reads_by_entry.setdefault(e.entry, []).append(
+            {
+                "source": e.source,
+                "session": e.session,
+                "actor": e.actor,
+                "ts": e.operation_start or e.record_time,
+                "partial": e.read_range is not None,
+                "range": e.read_range,
+                "source_ref": e.source_ref,
+            }
+        )
+    cutoff = until - timedelta(days=30)
+    observations, no_body = [], []
+    for item in inventory:
+        name = item["entry"]
+        body = reads_by_entry.get(name, [])
+        mtime = parse_ts(item["mtime"])
+        exemptions = {
+            "hot": item["rank"] == "hot",
+            "recent_30d": mtime is not None and mtime >= cutoff,
+        }
+        observations.append(
+            {
+                "entry": name,
+                "body_reads": body,
+                "zero_body_read": not body,
+            }
+        )
+        if not body:
+            no_body.append(
+                {
+                    "entry": name,
+                    "rank": item["rank"],
+                    "mtime": item["mtime"],
+                    "exemptions": exemptions,
+                }
+            )
+    partial = not (
+        coverages.get("zcode", {}).get("readable")
+        and coverages.get("claude", {}).get("requested")
+    )
+    coverages["partial"] = partial
+    coverages["read_errors"] = read_errors
+    coverages["instrumented"] = [
+        s
+        for s in ("zcode", "claude")
+        if coverages.get(s, {}).get("readable") or coverages.get(s, {}).get("requested")
+    ]
+    coverages["uninstrumented"] = ["codex", "muse", "bash-rg"]
+    return {
+        "inventory": inventory,
+        "observations": observations,
+        "candidates": {
+            "no_body_read": no_body,
+            "coverage_limited": partial,
+            # maintenance-only / purpose classification is LLM-side (skill):
+            # never auto-derive from session titles (EP S2).
+            "maintenance_only_unconfirmed": [],
+        },
+    }
+
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(
         description="Read-only memory telemetry (AIR-40 S1)"
@@ -497,6 +619,13 @@ def parse_args(argv):
         default=None,
         help="enable index-delta snapshots in this directory (default: disabled)",
     )
+    rd = sub.add_parser("reads", help="body-Read observation (AIR-41)")
+    rd.add_argument("--pool", action="append", required=True)
+    rd.add_argument("--zcode-db", action="append", default=[])
+    rd.add_argument("--cc-root", action="append", default=[])
+    rd.add_argument("--since", default=None)
+    rd.add_argument("--until", default=None)
+    rd.add_argument("--output", required=True)
     return parser.parse_args(argv)
 
 
@@ -529,7 +658,8 @@ def main(argv=None):
     until = (
         parse_ts(args.until) if args.until else datetime.now(UTC).replace(microsecond=0)
     )
-    since = parse_ts(args.since) if args.since else until - timedelta(days=7)
+    default_days = 90 if args.command == "reads" else 7
+    since = parse_ts(args.since) if args.since else until - timedelta(days=default_days)
     if since is None or until is None or since >= until:
         return fail("invalid --since/--until window")
     try:
@@ -579,6 +709,28 @@ def main(argv=None):
         {e.session for e in events if e.actor == "unknown" and e.session != "unknown"}
     )
     events.sort(key=lambda e: (e.record_time or "", e.id))
+    if args.command == "reads":
+        inventory = snapshot_entries(pools)
+        projection = project_reads(canonical, inventory, coverages, until)
+        report = {
+            "schema": SCHEMA,
+            "window": {"start": iso(since), "end": iso(until)},
+            "coverage": coverages,
+            "aliases": aliases,
+            "ambiguous": ambiguous,
+            "unknown": unknown,
+            **projection,
+        }
+        out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+        obs = projection["observations"]
+        zero = len(projection["candidates"]["no_body_read"])
+        print(
+            f"[OK] entries={len(inventory)} body_read_entries="
+            f"{sum(1 for o in obs if o['body_reads'])} zero_body_read={zero} "
+            f"read_errors={coverages.get('read_errors', 0)} "
+            f"partial={coverages.get('partial')}"
+        )
+        return 0
     baseline_dir = Path(args.baseline_dir).expanduser() if args.baseline_dir else None
     projection = project_writes(canonical, aliases, ambiguous, pools, baseline_dir)
     report = {

@@ -44,6 +44,8 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 ### 層 2：內容核實 vs repo（預設必做）
 
+> **Read 觀測取樣線索（AIR-41）**：`uv run python skills/memory-audit/scripts/memory_telemetry.py reads --pool <池> --zcode-db ~/.zcode/cli/db/db.sqlite --cc-root <CC 目錄> --output <報告路徑>`（90 日窗）——產 body Read 觀測＋zero-body-read 候選（機械豁免 hot/近 30 日 mtime；活躍弧豁免與用途判讀 work/maintenance 是 LLM 面——session title 不自動定性）。**觀測是取樣線索非真值**：候選≠可刪（「未觀測到讀」限 observed window＋partial coverage）；full/lite 核實仍需對 repo 查真值；不隨觀測改 rank/刪條目。
+
 條目多時 spawn agent 分段**序列處理**——一次一個、背景跑（`run_in_background`，同 tool-discipline「Subagent spawn 預設背景」）、完成通知再派下一段（user 2026-09-07 裁決「改用一個就好」——fan-out 平行 spawn 是波段唯一全批報廢點：3 agent 平行全撞 1308＋1302）；少則主 session 直接做；**spawn 失敗（usage limit / 429）→ 降級主 session 分批直接核實，勿中止 audit**。批次 sizing 參考：單 agent 載 4 cluster/18 檔/~48K chars ≈ 47 min／5.0M subagent tokens／41 tool calls：
 
 1. 每檔抽 **3-6 個 load-bearing claims**（路徑、符號、狀態宣稱）
