@@ -874,3 +874,37 @@ def test_generator_rank_sorting_e2e(tmp_path):
     assert pos == sorted(pos), expected
     sec = [idx.index(f"## {t}") for t in ("User", "Feedback", "Project", "Reference")]
     assert sec == sorted(sec)
+
+
+def test_generator_rank_counts_line(tmp_path):
+    """--check 輸出 rank 分層計數行；hot 超 1/3 附 WARN（AIR-39 SM-6 可觀測）。"""
+    pool = make_pool(tmp_path, n=0)
+    write_rank_entry(pool, "a-hot", "feedback", "rank: hot")
+    write_rank_entry(pool, "b-core", "feedback", None)
+    write_rank_entry(pool, "c-cold", "feedback", "rank: cold")
+    r = subprocess.run(
+        [sys.executable, str(pool / "_generate_index.py"), "--check"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 0, r.stdout
+    assert "rank 分層：hot=1 core=1 cold=1" in r.stdout
+    assert "hot 佔比" not in r.stdout  # 1/3 未超＝無警示
+
+
+def test_generator_rank_counts_warn(tmp_path):
+    """hot 佔比超 1/3 時計數行附 WARN（rank 通膨可觀測）。"""
+    pool = make_pool(tmp_path, n=0)
+    for i in range(3):
+        write_rank_entry(pool, f"hot-{i}", "feedback", "rank: hot")
+    write_rank_entry(pool, "cold-0", "feedback", "rank: cold")
+    r = subprocess.run(
+        [sys.executable, str(pool / "_generate_index.py"), "--check"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 0, r.stdout
+    assert "rank 分層：hot=3 core=0 cold=1" in r.stdout
+    assert "hot 佔比超 1/3" in r.stdout

@@ -46,6 +46,7 @@ import os
 import pathlib
 import sys
 import time
+from typing import NamedTuple
 
 GATE_CHARS = 22_500
 TRUNCATE_DESC = 100  # desc 截斷線——須 == hooks/block-memory-index-write.py DESC_LIMIT（tests cross-layer 錨）
@@ -59,6 +60,17 @@ ORDER = [
 ]
 RANK_ORDER = {"hot": 0, "core": 1, "cold": 2}  # 缺省/invalid -> core（永不進 errs）
 TYPE_ORDER = {t: i for i, (t, _) in enumerate(ORDER)}
+
+
+class Entry(NamedTuple):
+    """索引條目——具名字段取代位置元組（AIR-39 post-build F1：e[4]/e[5] 位置耦合）。"""
+
+    typ: str
+    stem: str
+    name: str
+    hook: str
+    rank: int
+    mtime: float
 
 
 def parse_frontmatter(text: str) -> dict:
@@ -118,9 +130,11 @@ def main() -> int:
             errs.append(f"  {f.name}: type={typ!r}")
             continue
         hook = desc if len(desc) <= TRUNCATE_DESC else desc[: TRUNCATE_DESC - 1] + "…"
-        entries.append((typ, f.stem, f.name, hook, parse_rank(fm), f.stat().st_mtime))
+        entries.append(
+            Entry(typ, f.stem, f.name, hook, parse_rank(fm), f.stat().st_mtime)
+        )
     # fail-soft 載入序：type 分組 × rank 層 × 組內 mtime 新在前（name 尾鍵可重現）。
-    entries.sort(key=lambda e: (TYPE_ORDER[e[0]], e[4], -e[5], e[2]))
+    entries.sort(key=lambda e: (TYPE_ORDER[e.typ], e.rank, -e.mtime, e.name))
     lines = [
         "# Memory Index",
         "",
@@ -128,14 +142,12 @@ def main() -> int:
         "",
     ]
     for typ, title in ORDER:
-        group = [e for e in entries if e[0] == typ]
+        group = [e for e in entries if e.typ == typ]
         if not group:
             continue
         lines.append(f"## {title}")
         lines.append("")
-        lines.extend(
-            f"- [{stem}]({name}) - {hook}" for _, stem, name, hook, _, _ in group
-        )
+        lines.extend(f"- [{e.stem}]({e.name}) - {e.hook}" for e in group)
         lines.append("")
     content = "\n".join(lines).rstrip() + "\n"
     n_chars, n_lines = len(content), content.count("\n")
@@ -145,6 +157,10 @@ def main() -> int:
         if n_bytes > GATE_BYTES
         else ""
     )
+    rank_hits = [sum(1 for e in entries if e.rank == i) for i in range(3)]
+    rank_line = f"rank 分層：hot={rank_hits[0]} core={rank_hits[1]} cold={rank_hits[2]}"
+    if sum(rank_hits) and rank_hits[0] / sum(rank_hits) > 1 / 3:
+        rank_line += " —— [WARN] hot 佔比超 1/3（rank 通膨可疑）"
     if errs:
         print(
             info
@@ -172,14 +188,16 @@ def main() -> int:
         print(
             info
             + f"[OK] {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines"
-            f"（gate: {GATE_CHARS} chars／{GATE_BYTES} bytes／{GATE_LINES} 行；--check 未寫入）"
+            f"（gate: {GATE_CHARS} chars／{GATE_BYTES} bytes／{GATE_LINES} 行；--check 未寫入）\n"
+            + rank_line
         )
         return 0
     write_index(here, content)
     print(
         info
         + f"[OK] MEMORY.md 已重生成: {len(entries)} entries, {n_chars} chars, {n_bytes} bytes, {n_lines} lines"
-        f"（gate: {GATE_CHARS} chars／{GATE_BYTES} bytes／{GATE_LINES} 行）"
+        f"（gate: {GATE_CHARS} chars／{GATE_BYTES} bytes／{GATE_LINES} 行）\n"
+        + rank_line
     )
     return 0
 
