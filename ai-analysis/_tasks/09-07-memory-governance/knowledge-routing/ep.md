@@ -66,6 +66,11 @@ baseline: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
 
 影響instruction檔依instruction-writing；skills/CLAUDE索引同步。純docs跳過mypy/pytest/audit-test，報告殼沿用template需DOM測試。更新AIR-42.1結果與references，母家活躍時子目錄不另搬，母卡最後統一歸檔。共享memory只列owner處置提案，不留「已遷移」假完成；本卡可在advisory+規範修訂完成後Done，實際池遷移若用戶選擇再明確追蹤。母卡驗收也不要求一定遷移。
 
-## EP review
+## EP Review Findings
 
-待獨立 review 與裁決。
+| ID | 嚴重度 | EP 段落 | 問題 | 建議 | 狀態 |
+|----|--------|---------|------|------|------|
+| 1 | 🟡 建議 | S2 | `rg '寫入六問\|固化\|終態\|...'` 驗證命令含中文 alternation，引號包裹已寫明；施工注意 shell 轉義 | 照 EP 引號寫法執行 | implemented |
+| 2 | ℹ️ 提醒 | S1 | 讀池作 advisory 會污染 AIR-41 觀測（讀取用途標維護）已寫明 | 施工時每次讀池附用途註記 | implemented |
+
+審查結論：有條件執行（F1–F5 通過；docs-mode 無 pseudo 允許；須在 AIR-40/41 首跑證據後開工）。審查者：muse-code（跨家族獨立審查），2026-09-07。

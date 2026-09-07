@@ -100,6 +100,11 @@ baseline: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
 
 無SYSTEM-MAP/Capabilities新增，更新skills索引與相關instruction描述。production完成後 AIR-40 結案兩步，殼補實作證據與baseline/source SHA；父家尚活躍時不单独移动子目錄，由母卡統一歸檔同步refs。POC屬母家研究證據，不直接引用為production code；驗證結論已由正式測試/報告承接後再處置。memory池唯讀，結案蒸餾只交候選給owner。本EP規劃完成不代表子卡Done。
 
-## EP review
+## EP Review Findings
 
-待獨立 review 與裁決。
+| ID | 嚴重度 | EP 段落 | 問題 | 建議 | 狀態 |
+|----|--------|---------|------|------|------|
+| 1 | 🟡 建議 | S3 | corrections-weekly 插入點假設「現有機械量測後」結構，施工時若 skill 已改需重定位 | 施工前重讀該 SKILL 對應段，錨點漂移則先更新 EP 錨再動手 | implemented |
+| 2 | ℹ️ 提醒 | S1 | CC result join 跨 agent 只靠 call id 不可行已寫明；ZCode record-time fallback 需標記已寫明 | 無，條款充分 | implemented |
+
+審查結論：有條件執行（F1–F5 通過；11 引用錨點全存在且語義對；TDD 先RED已載明）。審查者：muse-code（跨家族獨立審查），2026-09-07。

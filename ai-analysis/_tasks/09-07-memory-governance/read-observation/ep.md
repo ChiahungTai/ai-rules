@@ -91,6 +91,11 @@ baseline: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
 
 AIR-40之後順序build，同script衝突先re-read。更新skills描述、索引與殼證據；元專案無library Capabilities/SYSTEM-MAP變更。AIR-41達行為驗收才結案兩步；母家活躍時保留子目錄位置，母卡歸檔統一更新refs。memory/shared configs不寫。結案蒸餾只列owner候選，不自動改其他弧條目。
 
-## EP review
+## EP Review Findings
 
-待獨立 review 與裁決。
+| ID | 嚴重度 | EP 段落 | 問題 | 建議 | 狀態 |
+|----|--------|---------|------|------|------|
+| 1 | 🟡 建議 | S1 | 依賴 AIR-40 reader schema（planned 狀態），schema 漂移則本 EP 錨點/ fixture 全錯 | EP 已載「開工先讀最終程式」條款；施工嚴格執行，不猜欄位 | implemented |
+| 2 | ℹ️ 提醒 | S2 | R8（description 已足夠）與 K6（42.1）同語義，兩處一致（皆保留） | 無，口徑一致 | implemented |
+
+審查結論：有條件執行（F1–F5 通過；須在 AIR-40 Done 後開工）。審查者：muse-code（跨家族獨立審查），2026-09-07。

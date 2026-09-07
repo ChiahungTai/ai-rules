@@ -67,6 +67,11 @@ baseline: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
 
 實作各卡在同 owning branch 順序完成，跨 session 用卡+EP，不依本對話。共享檔案先重讀最新內容。子卡進度更新各自殼；母卡最後更新殼實作章節與狀態，再結案兩步，隨任務家歸檔同步所有子路徑 references。沒有新增測試的純協調段不跑 audit-test；程式子卡必跑。記憶池不在本次寫入範圍，結案只列 owner 後續候選。
 
-## EP review
+## EP Review Findings
 
-待獨立 reviewer 檢查後在此記錄裁決，未審前不可標定稿。
+| ID | 嚴重度 | EP 段落 | 問題 | 建議 | 狀態 |
+|----|--------|---------|------|------|------|
+| 1 | 🟡 建議 | S1 | `product-type: docs` 非 EP schema 標準欄位 | 保留（implement 掃描只認 ep_type/parent/baseline，不影響）；不擴散到子 EP | implemented |
+| 2 | ℹ️ 提醒 | 全文 | 「分量觀测」簡體 typo 已修；evidence/README.md 已補 | 無 | implemented |
+
+審查結論：有條件執行（F1–F5 通過；依賴無循環已驗；POC 前提成立）。審查者：muse-code（跨家族獨立審查），2026-09-07。
