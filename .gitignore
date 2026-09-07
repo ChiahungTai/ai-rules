@@ -23,6 +23,9 @@
 .at-contexts/
 STATE.md
 
+# 週日治理看照 cron 趨勢 state（per-rule bytes 基線——活檔 working tree 不進版控，同 nightly-convergence.log 生命週期）
+ai-analysis/bundle-watch-state.json
+
 # Python bytecode
 __pycache__/
 *.pyc
