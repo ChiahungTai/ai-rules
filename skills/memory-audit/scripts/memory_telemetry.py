@@ -643,6 +643,8 @@ def project_reads(canonical, inventory, coverages, since, until):
         for s in ("zcode", "claude")
         if coverages.get(s, {}).get("readable") or coverages.get(s, {}).get("requested")
     ]
+    # static manifest — not probed at runtime; extend only when a harness
+    # gains a readable telemetry source
     coverages["uninstrumented"] = ["codex", "muse", "bash-rg"]
     return {
         "inventory": inventory,

@@ -103,3 +103,23 @@ AIR-40之後順序build，同script衝突先re-read。更新skills描述、索�
 ## Build 後 dual review 與修正輪（2026-09-07）
 
 實作（206148a）與結案（4051f3b）後 dual review 到件（muse 重審工單 `re-review-workorder-i1234.md`＋GLM fresh-eyes）：I1-I4 全 fixed 為兩家共識；GLM 新提 F1（mirror 引號空白家族——generator 頂層雙趟/巢狀單趟正規化不對稱）＋F2（reads 路徑缺 generators identity）經 judge 採納修正（F1 remedy 修正為層次模擬，非四趟統一——後者會在巢狀案例反向分歧）；F4（CC unmatched direct fixture）＋N1（R2 行 doc 同步）一併落地；F3/F5/N2 記債。修正輪 followup 複驗：F1 經獨立 26 案例 battery 零分歧、F2 hash 重算驗真——四項 CLOSED，複驗通過。live 證據 `../evidence/reads-post-i1234.json`（generators/window_shortfall/reads_without_entry 在場）。
+
+## Judge-review 第二輪（muse-code 獨立裁決，2026-09-07）
+
+第一輪 dual review（relay I1–I4＋S1–S9＋S10）對修正輪 3cc3284 的獨立裁決（code 實讀＋測試重跑＋lint 重跑，非轉述）：
+
+| 項 | 決策 | 機械證據 |
+|----|------|---------|
+| I1 rank mirror | ✅ adopted | `_frontmatter_rank` docstring 等價契約＋test_i1/test_i1b＋SKILL 漂移警示行 |
+| I2 unmatched 計接觸 | ✅ adopted | `unpaired` 計數＋CLI 行＋test_i2 |
+| I3 shortfall 旗標 | ✅ adopted | `window_shortfall`→partial＋CLI 行＋test_i3 |
+| I4 HOLD 口徑 | ✅ adopted（選項 b：EP 級 LLM 裁決） | `reads_without_entry`＋SKILL 47 行 HOLD doctrine＋test_i4 |
+| S10 RUF059 | ✅ adopted | ruff 全綠（本輪重跑） |
+| fresh F3 basename key／F5 命名 | ❌ 不採納 | 單池為文件示範用法；改 key 會 churn 剛落地的週報模板，成本＞收益；多池 reads 上線時重開 |
+| fresh F7 死碼／F8 mutate | ❌ 不採納 | 前者 defense-in-depth 保留，後者無行為差異 |
+| fresh F4 OSError／F6 靜態 manifest | ✅ 採納未落地 | 問題真實且便宜，但弧已結案——待 user 決定是否另開 fix（見主報告） |
+| primed F3/F4 | ✅ 被 I2/tests 覆蓋；reads determinism 缺 pin 併入上行 follow-up | grep 確認 reads 無 rerun 測試 |
+
+自查（反 sycophancy）：否證重查 F5——改名確實要 churn S3 剛加的模板消費行，維持 ❌；否證 I1——mirror＋hash 漂移偵測比 import 更適合 per-pool generator 拓撲（import 需 sys.path 接線 CLI 單檔執行），維持 ✅。35 tests＋ruff 重跑全綠為本輪實測（非轉述 commit 數）。
+
+**Judge 處置（主 session，2026-09-07）**：F6（uninstrumented 靜態性註解）當下落地；F4（resolve OSError 揭露）不做——觸發前提 near-impossible（工具實錄路徑不 resolve 失敗），與 drafts YAGNI 同型，不開卡攢批。
