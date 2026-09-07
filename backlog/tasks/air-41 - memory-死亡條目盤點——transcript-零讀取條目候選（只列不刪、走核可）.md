@@ -1,16 +1,20 @@
 ---
 id: AIR-41
 title: Memory body Read 觀測——覆蓋限定候選與用途判讀
-parent_task_id: AIR-42
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-07 07:56'
-updated_date: '2026-09-07 08:45'
+updated_date: '2026-09-07 10:07'
 labels:
   - memory
   - governance
 dependencies:
   - AIR-40
+references:
+  - >-
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/09-07-memory-governance/read-observation/ep.md
+  - ai-analysis/_tasks/09-07-memory-governance/read-observation/
+parent_task_id: AIR-42
 ordinal: 32000
 ---
 
@@ -30,3 +34,9 @@ ordinal: 32000
 - [ ] #4 零候選或全部保留合法；無強制刪除、處置或降rank
 - [ ] #5 memory-audit 觸發段與索引同步，消費 AIR-40 已驗證 reader 合約
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+body Read 觀測全弧閉：reads 投影（TDD 6 tests、partial/range/source_ref 可追）＋候選機械豁免＋coverage manifest（不稱全使用率）；live 首跑 129 entries 淨候選 1（保留判讀記錄）；memory-audit 層 2 接入取樣線索語義
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -4,7 +4,7 @@
 > **parent**: ai-analysis/_tasks/09-07-memory-governance/ep.md
 > **baseline**: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
 > **depends-on**: AIR-40 正式 reader 與首跑證據
-> **status**: 計畫；目前只有範圍有限的前期 POC
+> **status**: S1-S3 全部已實作（206148a：reads 投影＋TDD＋live 首跑＋skill 接入）——待母卡 AIR-42 整體驗收
 
 ## 實作總覽
 
