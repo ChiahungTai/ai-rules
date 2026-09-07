@@ -55,7 +55,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit"]
    - CR skill（cr-query＋code-reality）：N sessions（總計）；CR MCP：refs N sessions／callers N sessions／（top 3 工具其餘一行）；對照 Bash rg：N
    - vs 前週趨勢＋verdict（🟢/🟡）
    ### Memory 寫入（AIR-40）
-   - successful N（errors N／folded N）；top actors ≤3（session 短 id＋次數×chars）；top entries ≤3；index_delta（vs 前輪 baseline，首輪標 baseline 已建）；evidence 路徑一行
+   - successful N（errors N／unmatched N／folded N／ambiguous N）；top actors ≤3（session 短 id＋次數×chars）；top entries ≤3；index_delta（vs 前輪 baseline，首輪標 baseline 已建；partial 標記多 pool 部分和）；unknown actor sessions；evidence 路徑一行
    ```
 
 5. **判讀產出**（報告尾一行）：本月累積趨勢是否支持「某規則在衰減、該修」或「CR 滲透退化、該接線」的具體建議——沒有就寫「無需動作」（不硬擠結論）。

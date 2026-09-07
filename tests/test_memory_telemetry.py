@@ -565,7 +565,7 @@ def test_s2_index_delta_second_run_body_only_zero(tmp_path):
         ],
     )
     bdir = tmp_path / "base"
-    r, out = run_writes(pool, tmp_path, zdb=zdb, extra=["--baseline-dir", str(bdir)])
+    r, _ = run_writes(pool, tmp_path, zdb=zdb, extra=["--baseline-dir", str(bdir)])
     assert r.returncode == 0
     (pool / "one.md").write_text(
         "---\nname: one.md\n---\n\nmuch longer body only\n", encoding="utf-8"
@@ -632,3 +632,129 @@ def test_s2_deleted_entry_history_kept_separate_from_inventory(tmp_path):
     assert "gone.md" not in {
         p.get("entry") for p in inv.get("entries", []) if isinstance(p, dict)
     }
+
+
+def test_s2_f3_deterministic_timestamp_and_empty_none(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "t.md")
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("sa", None, None)],
+        parts=[
+            (
+                "p1",
+                "sa",
+                1787000000000,
+                tool_part("Write", str(pool / "t.md"), call_id="c1"),
+            ),
+            (
+                "p2",
+                "sa",
+                1787000005000,
+                tool_part("Edit", str(pool / "t.md"), call_id="c2"),
+            ),
+        ],
+    )
+    r1, o1 = run_writes(pool, tmp_path, zdb=zdb)
+    r2, _ = run_writes(
+        pool, tmp_path, zdb=zdb, extra=["--output", str(tmp_path / "r2.json")]
+    )
+    assert r1.returncode == 0 and r2.returncode == 0
+    rep1, rep2 = _report_of(o1), _report_of(tmp_path / "r2.json")
+    assert json.dumps(rep1, sort_keys=True) == json.dumps(rep2, sort_keys=True)
+    assert rep1["inventory_timestamp"] == "2026-08-17T20:53:25+00:00"
+    r3, _ = run_writes(
+        pool,
+        tmp_path,
+        zdb=zdb,
+        extra=[
+            "--since",
+            "2026-08-20T00:00:00+00:00",
+            "--until",
+            "2026-08-21T00:00:00+00:00",
+            "--output",
+            str(tmp_path / "r3.json"),
+        ],
+    )
+    assert r3.returncode == 0
+    assert _report_of(tmp_path / "r3.json")["inventory_timestamp"] is None
+
+
+def test_s2_f4_fork_copy_folded_in_projection(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "f.md")
+    zdb = tmp_path / "z.db"
+    op = tool_part("Write", str(pool / "f.md"), call_id="co")
+    op_copy = tool_part("Write", str(pool / "f.md"), call_id="cc")
+    make_zdb(
+        zdb,
+        sessions=[("sp", None, None), ("sf", "sp", "side")],
+        parts=[
+            ("po", "sp", 1787000002000, op),
+            ("pc", "sf", 1787000003000, op_copy),
+        ],
+    )
+    r, out = run_writes(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0
+    rep = _report_of(out)
+    assert rep["counts"]["copies_folded"] == 1
+    assert rep["top_entries"] == [
+        {
+            "entry": "f.md",
+            "successful_writes": 1,
+            "payload_chars": len("hello world"),
+        }
+    ], "copy must not double-count in ranking"
+
+
+def test_s2_f4_same_content_unrelated_sessions_ambiguous(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "u.md")
+    zdb = tmp_path / "z.db"
+    op = tool_part("Write", str(pool / "u.md"), call_id="c1")
+    op2 = tool_part("Write", str(pool / "u.md"), call_id="c2")
+    make_zdb(
+        zdb,
+        sessions=[("sx", None, None), ("sy", None, None)],
+        parts=[
+            ("px", "sx", 1787000000000, op),
+            ("py", "sy", 1787000000000, op2),
+        ],
+    )
+    r, out = run_writes(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0
+    rep = _report_of(out)
+    assert rep["counts"]["ambiguous"] >= 1
+    assert rep["counts"]["successful"] == 2
+
+
+def test_s2_f8_corrupt_baseline_incomparable(tmp_path):
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "k.md")
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("sb", None, None)],
+        parts=[
+            (
+                "p1",
+                "sb",
+                1787000000000,
+                tool_part("Write", str(pool / "k.md"), call_id="c1"),
+            )
+        ],
+    )
+    bdir = tmp_path / "b"
+    bdir.mkdir()
+    key = str(pool.resolve()).replace("/", "_")
+    (bdir / f"{key}.json").write_text("{not json", encoding="utf-8")
+    r, out = run_writes(pool, tmp_path, zdb=zdb, extra=["--baseline-dir", str(bdir)])
+    assert r.returncode == 0
+    idx = _report_of(out)["index_delta"]
+    assert idx["value"] is None
+    assert idx["incomparable"]

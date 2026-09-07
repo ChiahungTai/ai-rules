@@ -397,12 +397,15 @@ def index_delta_with_baseline(pools, baseline_dir: Path):
             json.dumps(snap, ensure_ascii=False, sort_keys=True), encoding="utf-8"
         )
         written.append(str(bfile))
-    if pool_deltas and not reasons or pool_deltas:
+    # partial semantics: with multiple pools, value sums only comparable pools
+    # — consumers must check "partial" before reading it as a total.
+    if pool_deltas:
         value = {
             k: sum(d[k] for d in pool_deltas.values())
             for k in ("index_chars", "index_lines", "entry_count")
         }
         value["pools"] = pool_deltas
+        value["partial"] = len(pool_deltas) < len(now)
     else:
         value = None
     return {
@@ -413,11 +416,18 @@ def index_delta_with_baseline(pools, baseline_dir: Path):
     }
 
 
-def project_writes(canonical, aliases, ambiguous, pools, baseline_dir, out_path):
+def project_writes(canonical, aliases, ambiguous, pools, baseline_dir):
     successful = [
         e for e in canonical if e.status == "completed" and e.tool in ("Write", "Edit")
     ]
-    errors = [e for e in canonical if e.status not in ("completed", "unknown")]
+    # errors share the Write/Edit scope with successful; CC unmatched pairs are
+    # in-flight, not failures — counted separately, never as write errors.
+    errors = [
+        e for e in canonical if e.status == "error" and e.tool in ("Write", "Edit")
+    ]
+    unmatched = [
+        e for e in canonical if e.status == "unmatched" and e.tool in ("Write", "Edit")
+    ]
     by_entry, by_actor = {}, {}
     for e in successful:
         ent = by_entry.setdefault(
@@ -430,19 +440,12 @@ def project_writes(canonical, aliases, ambiguous, pools, baseline_dir, out_path)
         )
         act["successful_writes"] += 1
         act["payload_chars"] += e.payload_chars
-    for table in (by_entry, by_actor):
-        for row in table.values():
-            row["actors" if "entry" in row else "entries"] = None
     top_entries = sorted(
         by_entry.values(), key=lambda r: (-r["payload_chars"], r["entry"])
     )
-    for row in top_entries:
-        row.pop("actors", None)
     top_actors = sorted(
         by_actor.values(), key=lambda r: (-r["payload_chars"], r["actor"])
     )
-    for row in top_actors:
-        row.pop("entries", None)
     snaps = snapshot_index(pools)
     inventory_entries = [
         {"entry": name, "pool": pk}
@@ -459,6 +462,7 @@ def project_writes(canonical, aliases, ambiguous, pools, baseline_dir, out_path)
             "events_total": len(canonical),
             "successful": len(successful),
             "errors": len(errors),
+            "unmatched": len(unmatched),
             "copies_folded": len(aliases),
             "ambiguous": len(ambiguous),
         },
@@ -491,7 +495,7 @@ def parse_args(argv):
     w.add_argument(
         "--baseline-dir",
         default=None,
-        help="directory for index snapshots (default: <output>/../baselines)",
+        help="enable index-delta snapshots in this directory (default: disabled)",
     )
     return parser.parse_args(argv)
 
@@ -576,7 +580,7 @@ def main(argv=None):
     )
     events.sort(key=lambda e: (e.record_time or "", e.id))
     baseline_dir = Path(args.baseline_dir).expanduser() if args.baseline_dir else None
-    projection = project_writes(canonical, aliases, ambiguous, pools, baseline_dir, out)
+    projection = project_writes(canonical, aliases, ambiguous, pools, baseline_dir)
     report = {
         "schema": SCHEMA,
         "window": {"start": iso(since), "end": iso(until)},

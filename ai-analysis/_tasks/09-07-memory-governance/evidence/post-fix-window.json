@@ -1,0 +1,896 @@
+{
+  "schema": 1,
+  "window": {
+    "start": "2026-09-07T04:00:00+00:00",
+    "end": "2026-09-07T09:00:00+00:00"
+  },
+  "coverage": {
+    "zcode_dbs": [
+      {
+        "path": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "readable": true,
+        "bounds": {
+          "first": "2026-08-16T22:25:52.821000+00:00",
+          "last": "2026-09-07T09:55:43.249000+00:00",
+          "global_parts": 390718
+        },
+        "rows_scanned": 759,
+        "unknown_shapes": 462
+      }
+    ],
+    "zcode": {
+      "readable": true,
+      "rows_scanned": 759,
+      "unknown_shapes": 462
+    },
+    "claude": {
+      "readable": true,
+      "files": 22,
+      "malformed": 0,
+      "bounds": {
+        "first": "2026-08-12T04:50:40.265000+00:00",
+        "last": "2026-09-05T09:06:54.206000+00:00"
+      },
+      "scope": "explicit --cc-root only; removed worktree dirs not enumerated unless passed"
+    },
+    "pools": [
+      "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+    ]
+  },
+  "events": [
+    {
+      "source": "zcode",
+      "id": "part_mtqptjm9_649750b1-92a4-4c0d-9480-13c78150897c",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Read",
+      "status": "completed",
+      "operation_start": "2026-09-07T04:03:07.291000+00:00",
+      "operation_end": "2026-09-07T04:03:07.366000+00:00",
+      "record_time": "2026-09-07T04:03:07.281000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/reference_external-runtime-delegation-family.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/reference_external-runtime-delegation-family.md",
+      "entry": "reference_external-runtime-delegation-family.md",
+      "payload_chars": 0,
+      "input_sha256": "1468bca75ca1284a6af5b91c3bf6756e774e5e9d4d59c5272c87d461ac408d2e",
+      "call_id": "call_85781cab1d404b5eb7a46069",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqptjm9_649750b1-92a4-4c0d-9480-13c78150897c"
+      }
+    },
+    {
+      "source": "zcode",
+      "id": "part_mtqpukef_c7b06db2-008e-4c65-b9fd-4048ad55f45c",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Edit",
+      "status": "completed",
+      "operation_start": "2026-09-07T04:03:55.136000+00:00",
+      "operation_end": "2026-09-07T04:03:55.146000+00:00",
+      "record_time": "2026-09-07T04:03:54.951000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/reference_external-runtime-delegation-family.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/reference_external-runtime-delegation-family.md",
+      "entry": "reference_external-runtime-delegation-family.md",
+      "payload_chars": 842,
+      "input_sha256": "8130efd88962dd328776772ebb9676715e63e9aea5821dff917491c0d5a1e241",
+      "call_id": "call_5995466bb1464de6b87175e6",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqpukef_c7b06db2-008e-4c65-b9fd-4048ad55f45c"
+      }
+    },
+    {
+      "source": "zcode",
+      "id": "part_mtqpukeh_917841b5-f4c8-4b27-965d-7be8a45faad0",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Edit",
+      "status": "completed",
+      "operation_start": "2026-09-07T04:03:55.195000+00:00",
+      "operation_end": "2026-09-07T04:03:55.203000+00:00",
+      "record_time": "2026-09-07T04:03:54.953000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/reference_external-runtime-delegation-family.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/reference_external-runtime-delegation-family.md",
+      "entry": "reference_external-runtime-delegation-family.md",
+      "payload_chars": 323,
+      "input_sha256": "8654ac706eafc21d623519c38d1c2fdb1dd25da79de5e22d6802fd488b79e931",
+      "call_id": "call_4bcf8b782506497698994c2e",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqpukeh_917841b5-f4c8-4b27-965d-7be8a45faad0"
+      }
+    },
+    {
+      "source": "zcode",
+      "id": "part_mtqpukei_db659177-3b01-4b85-a7e1-7e59cf55994e",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Edit",
+      "status": "completed",
+      "operation_start": "2026-09-07T04:03:55.253000+00:00",
+      "operation_end": "2026-09-07T04:03:55.262000+00:00",
+      "record_time": "2026-09-07T04:03:54.954000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/reference_external-runtime-delegation-family.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/reference_external-runtime-delegation-family.md",
+      "entry": "reference_external-runtime-delegation-family.md",
+      "payload_chars": 256,
+      "input_sha256": "7eb20045cf262cd0e774fcbdc09e17a9432b6b67216a693413af2a4289b5bd81",
+      "call_id": "call_4b608877128041a690a5cbce",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqpukei_db659177-3b01-4b85-a7e1-7e59cf55994e"
+      }
+    },
+    {
+      "source": "zcode",
+      "id": "part_mtqsmqbp_65c677f6-732c-45c5-9d0f-903efdea7a9a",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Read",
+      "status": "completed",
+      "operation_start": "2026-09-07T05:21:48.240000+00:00",
+      "operation_end": "2026-09-07T05:21:48.242000+00:00",
+      "record_time": "2026-09-07T05:21:48.229000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/project_memory-card-lifecycle-gate.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/project_memory-card-lifecycle-gate.md",
+      "entry": "project_memory-card-lifecycle-gate.md",
+      "payload_chars": 0,
+      "input_sha256": "ad77b04e2db777eee7a906d9486d707e69b1d46f097cdd362ec326e513050d58",
+      "call_id": "call_6c7c4cd417a44d4a8f22549d",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqsmqbp_65c677f6-732c-45c5-9d0f-903efdea7a9a"
+      }
+    },
+    {
+      "source": "zcode",
+      "id": "part_mtqsnug5_4ed15883-ee1f-4a36-a793-bc7273b73131",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Write",
+      "status": "completed",
+      "operation_start": "2026-09-07T05:22:40.438000+00:00",
+      "operation_end": "2026-09-07T05:22:40.465000+00:00",
+      "record_time": "2026-09-07T05:22:40.229000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/project_memory-card-lifecycle-gate.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/project_memory-card-lifecycle-gate.md",
+      "entry": "project_memory-card-lifecycle-gate.md",
+      "payload_chars": 857,
+      "input_sha256": "04b844bdc361b241edbc7b087125d171609188860de8e2ce5f0aed33cae49a3c",
+      "call_id": "call_8bdf7b1935e9414bafbb471e",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqsnug5_4ed15883-ee1f-4a36-a793-bc7273b73131"
+      }
+    },
+    {
+      "source": "zcode",
+      "id": "part_mtqsyoug_74aebc2c-bc1b-47a0-a555-0271cb60bcdd",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Read",
+      "status": "completed",
+      "operation_start": "2026-09-07T05:31:06.189000+00:00",
+      "operation_end": "2026-09-07T05:31:06.216000+00:00",
+      "record_time": "2026-09-07T05:31:06.184000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/project_air-38-routing-feedback-tier.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/project_air-38-routing-feedback-tier.md",
+      "entry": "project_air-38-routing-feedback-tier.md",
+      "payload_chars": 0,
+      "input_sha256": "8ab9ed56a85a3d6bd978c020e06ce0d499cec8d2411862fe411c14300f596b36",
+      "call_id": "call_d0d56959622045ddbcc247b7",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqsyoug_74aebc2c-bc1b-47a0-a555-0271cb60bcdd"
+      }
+    },
+    {
+      "source": "zcode",
+      "id": "part_mtqsz55i_f7f26ce0-1c47-44a5-934f-e04f803d1b66",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Write",
+      "status": "completed",
+      "operation_start": "2026-09-07T05:31:27.408000+00:00",
+      "operation_end": "2026-09-07T05:31:27.417000+00:00",
+      "record_time": "2026-09-07T05:31:27.318000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/project_air-38-routing-feedback-tier.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/project_air-38-routing-feedback-tier.md",
+      "entry": "project_air-38-routing-feedback-tier.md",
+      "payload_chars": 900,
+      "input_sha256": "064e74976cc5a4ea15d6c6503b57f82b040d3b79a56e29589e415c276558a89d",
+      "call_id": "call_6bc32341d3a44a32835ae769",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqsz55i_f7f26ce0-1c47-44a5-934f-e04f803d1b66"
+      }
+    },
+    {
+      "source": "zcode",
+      "id": "part_mtqthzlu_6a2db532-875a-4e47-b0a6-83eccb753dd3",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Read",
+      "status": "completed",
+      "operation_start": "2026-09-07T05:46:06.600000+00:00",
+      "operation_end": "2026-09-07T05:46:06.603000+00:00",
+      "record_time": "2026-09-07T05:46:06.594000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/feedback_memory-failsoft-importance-ordering.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/feedback_memory-failsoft-importance-ordering.md",
+      "entry": "feedback_memory-failsoft-importance-ordering.md",
+      "payload_chars": 0,
+      "input_sha256": "a68f699bfec278e4d6b42b24d7f8c6e436118687f6b3f59814bbb27df9eda05b",
+      "call_id": "call_7cedd6593ccc494c8d81a034",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqthzlu_6a2db532-875a-4e47-b0a6-83eccb753dd3"
+      }
+    },
+    {
+      "source": "zcode",
+      "id": "part_mtqticnz_7b50607f-19cb-4fa0-8bdc-8bbf2a18a414",
+      "session": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "parent": null,
+      "task_type": "interactive",
+      "tool": "Write",
+      "status": "completed",
+      "operation_start": "2026-09-07T05:46:23.622000+00:00",
+      "operation_end": "2026-09-07T05:46:23.634000+00:00",
+      "record_time": "2026-09-07T05:46:23.519000+00:00",
+      "time_source": "operation",
+      "raw_path": "/Users/ctai/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/feedback_memory-failsoft-importance-ordering.md",
+      "canonical_path": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/feedback_memory-failsoft-importance-ordering.md",
+      "entry": "feedback_memory-failsoft-importance-ordering.md",
+      "payload_chars": 758,
+      "input_sha256": "87201ab647f9a8330284b7c75b12ea5f1fdfe1791c4df86a1d972c368e22551e",
+      "call_id": "call_93c3ff7a2c424abc9b5e9541",
+      "prior_known": false,
+      "net_delta": null,
+      "copy_of": null,
+      "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+      "source_ref": {
+        "db": "/Users/ctai/.zcode/cli/db/db.sqlite",
+        "row": "part_mtqticnz_7b50607f-19cb-4fa0-8bdc-8bbf2a18a414"
+      }
+    }
+  ],
+  "aliases": [],
+  "ambiguous": [],
+  "unknown": [],
+  "report": {
+    "schema": 1,
+    "inventory_timestamp": "2026-09-07T05:46:23.519000+00:00",
+    "counts": {
+      "events_total": 10,
+      "successful": 6,
+      "errors": 0,
+      "unmatched": 0,
+      "copies_folded": 0,
+      "ambiguous": 0
+    },
+    "top_actors": [
+      {
+        "actor": "sess_5fcef0cd-2b0f-4e95-8a02-4feb508cc4cc",
+        "successful_writes": 6,
+        "payload_chars": 3936
+      }
+    ],
+    "top_entries": [
+      {
+        "entry": "reference_external-runtime-delegation-family.md",
+        "successful_writes": 3,
+        "payload_chars": 1421
+      },
+      {
+        "entry": "project_air-38-routing-feedback-tier.md",
+        "successful_writes": 1,
+        "payload_chars": 900
+      },
+      {
+        "entry": "project_memory-card-lifecycle-gate.md",
+        "successful_writes": 1,
+        "payload_chars": 857
+      },
+      {
+        "entry": "feedback_memory-failsoft-importance-ordering.md",
+        "successful_writes": 1,
+        "payload_chars": 758
+      }
+    ],
+    "net_file_delta": {
+      "value": null,
+      "reason": "no proven before-image for Write/Edit; payload_chars is flow, not stock"
+    },
+    "index_delta": {
+      "value": {
+        "index_chars": 0,
+        "index_lines": 0,
+        "entry_count": 0,
+        "pools": {
+          "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory": {
+            "index_chars": 0,
+            "index_lines": 0,
+            "entry_count": 0
+          }
+        },
+        "partial": false
+      },
+      "reason": null,
+      "baseline_written": [
+        "ai-analysis/_tasks/09-07-memory-governance/evidence/baselines/_Users_ctai_.claude_projects_-Users-ctai-Github-ai-rules_memory.json"
+      ],
+      "incomparable": null
+    },
+    "current_inventory": {
+      "entries": [
+        {
+          "entry": "ai-rules-dual-role-mosaic-shared.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "at-skill-zcode-cron-gaps.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "at-usage-reset-continuation.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "code-review-settings-sync.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "commit-consent-in-autonomous-mode.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "cross-workspace-actions-user-handles.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback-magnitude-over-precise-counts.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_absorb-patterns-not-tools.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_adjudication-materials-then-ask.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_agent-transient-death-autopsy.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_ai-rules-no-backward-compat.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_arch-impossibility-needs-topology-grounding.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_backlog-card-edit-precheck.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_backup-unversioned-live-configs.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_billing-trend-token-design.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_capability-tier-not-model-binding.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_cjk-char-corruption-rg-verify.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_codex-followup-user-relay.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_comments-in-english.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_compact-output-context-not-transcript.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_compact-user-judgment-memory-continuity.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_conditional-gates-test-condition-not-exit-code.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_consistency-gate-not-optional.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_counter-skip-confirmation-bias.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_demand-pull-fails-silent-gaps.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_diagnose-installed-vs-source-first.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_diagram-tool-selection.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_dispatch-reread-governing-docs.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_disposition-stray-artifacts.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_drift-scan-include-variants.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_dual-family-review-dispatch.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_engine-skill-trigger-collision.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_ep-rename-needs-fullrepo-grep.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_evidence-over-claims.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_fix-immediately-not-defer.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_full-arc-delivery-vehicle-immediately.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_full-domain-structure-uniformity.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_full-read-base-not-context-copy.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_gate-commands-state-sensitive.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_governance-intent-layer-first.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_harness-model-orthogonal-axes.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_inflow-needs-outflow.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_judge-review-stays-main-agent.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_line-anchors-rg-before-handoff.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_llm-native-no-skill.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_memory-failsoft-importance-ordering.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_no-rosetta-workarounds.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_no-sandbox-layer.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_output-self-sufficiency-gate-values.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_per-call-billing-model.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_permission-layer-no-behavioral.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_plain-status-explanations.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_project-first-containment.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_quota-failover-policy.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_read-current-file-before-reviewing.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_read-tool-source-before-upgrade-proposals.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_relay-claims-verify-current-state.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_review-even-on-quick-fix.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_rules-no-project-specific-facts.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_settlement-scripts-are-code.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_shell-diagram-quality-bar.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_sj-nt-authority-routing.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_slash-command-existence-verification.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_spec-self-contained-foreign-handoff.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_stale-experiment-rerun.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_subagent-background-spawn.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_symlink-alias-before-two-entities.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_uc-inventory-before-structure-proposal.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_verify-with-consumer-before-commit.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_verify-wt-before-commit.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "feedback_work-order-contract-point-to-source.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "flow-feedback-done-archive.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "global-vs-project-permissions.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "hook-vs-llm-flow-division.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "init-py-reasonableness-not-pattern.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "mac-nightly-sequence-oom-crash.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "multi-harness-architecture-direction.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_agents-registry-split-design.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_ai-analysis-restructure-design.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_air-26-push-collection.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_air-38-routing-feedback-tier.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_archify-illustrate-html-mode-eval.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_backlog-cleanup-vehicle.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_codex-fullrepo-review-adjudication.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_commit-finalization-gate.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_cr-live-faces-roadmap.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_deep-work-cc-workflow-pipeline.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_flash-forensic-0905.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_gate-severity-solidification-queue.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_instruction-init-blueprint-scope.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_memory-card-lifecycle-gate.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_memory-cc-alignment-diagnosis-0905.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_memory-desc-loop-posture-pending.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_plugin-review-absorption-p1-p7.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_post-build-command-dual-context.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_postbuild-tour-repair-loop-0907.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_rebase-skill-nowt-ff-fix.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_review-skill-state-rot-gap.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "project_session-topology-single-writer.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference-frontmatter-triggers-on-yaml-trap.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_backlog-md-browser-id-mechanics.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_bash32-set-u-empty-array-trap.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_browser-use-iab-facts.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_cbm-architecture-tree-sitter-hybrid-lsp.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_cc-agent-view-bg-sessions.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_cc-workflow-model-zcode-absence.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_ccr-local-gateway.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_code-reality-mcp-cli-faces.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_codex-config-zai-topology.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_cr-vs-cbm-positioning.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_crg-install-platform-coverage.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_external-runtime-delegation-family.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_generated-artifact-storage-patterns.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_git-mv-nesting-and-verification-traps.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_hook-python-heredoc-write-block.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_lsp-python-mcp-server.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_memory-index-load-truncation.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_muse-code-cli-facts.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_periodic-task-landscape.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_report-server-md-viewer-central-mount.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_rg-r-flag-display-replacement.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_rust-callgraph-macro-gap-research.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_skills-deploy-dir-level-symlink.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_underscore-prefix-sort-cross-tool.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_vscode-byok-chatlanguagemodels.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_zcode-cc-subagent-model-thinking.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "reference_zcode-platform-facts.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        },
+        {
+          "entry": "zcode-hooks-porting.md",
+          "pool": "/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory"
+        }
+      ]
+    }
+  }
+}
