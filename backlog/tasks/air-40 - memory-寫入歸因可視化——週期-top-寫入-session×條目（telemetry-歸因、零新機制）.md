@@ -1,15 +1,19 @@
 ---
 id: AIR-40
 title: Memory 寫入歸因——成功事件、複製去重與分量報告
-parent_task_id: AIR-42
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-07 07:56'
-updated_date: '2026-09-07 08:45'
+updated_date: '2026-09-07 09:42'
 labels:
   - memory
   - governance
 dependencies: []
+references:
+  - >-
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/09-07-memory-governance/write-attribution/ep.md
+  - ai-analysis/_tasks/09-07-memory-governance/write-attribution/
+parent_task_id: AIR-42
 ordinal: 31000
 ---
 
@@ -30,3 +34,9 @@ ordinal: 31000
 - [ ] #4 ai-rules 真實首跑與抽樣事件對帳，允許零違規；corrections-weekly 入口與索引同步
 - [ ] #5 不改 hooks/、不動 memory 池與排程配置
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+memory 成功寫入歸因全弧閉：S1 collector（codex，TDD 11 tests）→S2 投影分量（TDD 18 passed＋真池首跑 385 writes/9 folded evidence）→S3 corrections-weekly 三職接入（實跑驗證 index_delta 流量≠存量）；流量非品質、違規抽驗留 LLM
+<!-- SECTION:FINAL_SUMMARY:END -->
