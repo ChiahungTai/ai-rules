@@ -1,6 +1,6 @@
 ---
 name: model-routing
-description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/隨意〕×五公司，model 值單一源）＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋flash 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定。
+description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/隨意〕×五公司，model 值單一源）＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse+flash/影像 flash/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋flash 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定。
 ---
 
 # Model Routing — 解析表與 provider 事實
@@ -19,14 +19,17 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 > 證據狀態標註：repo-observed（本機實測）＞official-doc（官方文檔，非本機 L4）＞first-real-usage-pending（首例實戰待補）。
 
-### dispatch 預設（user 2026-09-05 裁定；訂閱現值變更只改本段＋上表格標註）
+### dispatch 預設（user 2026-09-05 裁定、09-07 修訂；訂閱現值變更只改本段＋上表格標註）
+
+**額度現值（2026-09-07 user 拍板「固定記載」）：可用＝GLM（5.3 主力＋flash）＋muse 兩家**；codex 額度最少不派、Anthropic／xai 未訂閱禁派——派發前可派池只有這兩家。
 
 **harness 主軸（user 的開發入口決定主力 model——與下方 external-runtime「角色 → family → profile 映射」同源）：**
 
-- **ZCode 開發（日常主力）**：主 session＝**GLM 5.3**（判斷/規劃/EP/judge）；lite subagent 執行檔＝glm-5.3-flash（省成本層）
+- **ZCode 開發（日常主力）**：主 session＝**GLM 5.3**（判斷/規劃/EP/judge；其餘角色 inherit 主 model）；lite subagent 執行檔＝glm-5.3-flash（省成本層）
 - **muse code 開發（user 直用時＝該弧主力 harness）**：muse-spark-1.3 全棧——實作/審查都在該 harness 內；repo 層 AGENTS.md muse 會載入（bridge log 實證；全域 guide 的 muse 部署點未查證）
-- **跨家族審查（任一 harness 發起需要第二意見）→ 對側家族優先 muse**——跨家族的價值在非 GLM 視角，muse 額度足為首選；in-harness 驗收側仍是 GLM
-- **ZCode→muse bridge 委派**（implement profile）：user 指定時派（AIR-13 慣例，單批指示）——與「user 直在 muse code 開發」是兩種形態，前者是委派後者是 harness 切換
+- **審查類（ep-review／code-review 等 review agent 層）→ muse／flash 皆可**（user 09-07 放寬「審查類都可以」）：跨家族第二意見仍 muse 優先（非 GLM 視角）；in-harness 審查可用 flash——原「full inherit 為基準＋保護面厚度條件降 lite」門檻就此放寬；**judge 裁決層不變：固定主 session GLM 5.3**（AIR-24 三防線）
+- **實作（implement profile bridge 委派）＝預設 muse**（user 09-07 修訂，取代 09-05「user 指定時派」單批指示慣例）：重實作段 muse、lite 機械段 flash；**CR 工具鏈 agent（cr-research 等）同收斂 muse＋flash**——與「user 直在 muse code 開發」仍是兩種形態（委派 vs harness 切換）
+- **影像（vision tier）現值＝flash**（user 09-07「影像目前都用 flash」）——muse `--image` 是能力備註（上表），非現值路由
 - **codex（OpenAI）→ 預設不派**（額度最少）——僅 user 顯式指定（例：「codex sol max」）。定性甜蜜點實證：control-plane／docs 形態 repo 的全 repo 狀態對抗深審（[/state-review](../state-review/SKILL.md) 的候選家族之一）——產出與 in-family 盲點正交（權威模型／事務完整性／provenance 類問題）；本行是能力備註，不構成取消顯式指定授權
 - **Anthropic／xai → 未訂閱禁派**（含影像格——上表保留能力對照）；Anthropic 之後**視性價比評估**再決定訂閱（CC 原生家，訂了可重配 backend），訂閱後解除標註並補查證
 
@@ -140,20 +143,25 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 **bridge 必經（muse 委派唯一入口）**：委派 muse 跑 repo 任務一律經 bridge 入口（上表 muse 列＝`muse-bridge.mjs` 子命令的抽象形態），禁直呼 `muse exec` 或其他繞過 bridge 的入口——bridge 落 per-repo `.muse-bridge/jobs.json` ledger（jobId／sessionId／status／text），非 bridge 入口的 muse 產出 ledger 查無，事後只能從副作用側考古（真實案例：mosaic post-build 鏈同鏈兩段 muse 委派一走 bridge 一繞道，繞道段收尾不可考）。完成回報攜帶 ledger jobId（reviewer 交接契約欄位）；委派了 muse 而 jobId 缺席＝入口違規，補查或標明。
 
-### 完成回報收法（push 化）
+### 完成回報收法
 
 > **經濟學動機**：LLM 層輪詢每輪＝1+ request 且全 context 重送；push 收法等待期間 0 request、完成時恰好 1 request。輪詢只存在 bridge 進程內部（muse `wait` 內建亞秒級固定輪詢——零 LLM 成本）。
 
 **決策樹**（未載入背景的 session 單讀可執行）：
 
 1. **簡單轉發（review／critique／diagnosis）**：主 session 背景 Bash 直呼 bridge 阻塞形（muse `task`／codex `task`）→ process exit 自動喚醒 → stdout 即 finalText；jobId 記錄不變（reviewer 交接契約欄位照舊）
-2. **長跑（>10min，xhigh 委派）**：背景 Bash 無前景 10min 限制——直呼照常；或兩段式 `task --background` 拿 jobId → 背景 Bash 掛 wait → exit 喚醒讀 JSON。**timeout 到期訊號兩家相反（拆家系判讀）**：
+2. **長跑（>10min，xhigh 委派）＝fire-and-forget 優先**：`muse task --background "<prompt>"`（長 prompt 改 `--prompt-file <path>` 形態）提交 → jobId 即回 → caller 結束 turn 釋放（不掛前景、不綁 session）；收＝事後 `wait <jobId>`（有界 timeout 迴圈，起點＝bridge 預設 5min）或 `show <jobId>` 認領（finalText 由 per-job jsonl 重導出，ledger entry 只存 status／exitCode／summary）。不想跨 session 時的便利形態＝背景 Bash 掛 `wait`（session 仍被佔用）。**timeout 到期訊號兩家相反（拆家系判讀——晚收同樣需要的語義，非殘留）**：
    - **muse `wait <jobId>`**：裸 wait 撞預設 5min＝`process.exit(124)`——exit 124＋status 仍 running＝重掛；`--timeout 0`＝forever（長跑必帶）
    - **codex `status --wait <jobId> --json`**：timeout 到期（預設 4min）＝**正常 exit 0**、JSON 帶 `waitTimedOut: true`——以此旗標判讀重掛（124 偵測對 codex 永不觸發）；**codex 無 0=forever**——`--timeout-ms 0` 靜默回落 4min 預設（`codex-companion.mjs:319` `Number(timeoutMs)||DEFAULT`），只能顯式大值
    - 任一家回非 completed 終態 → `jobs/<id>.jsonl`＋working tree 對照再判（reconcileStaleRunning 可能過早標 interrupted）
+   - **兩端 SessionEnd 差異（caller 在哪家 harness，決定能否跨 session 認領）**：ZCode 端 plugin hooks 不執行 → background worker（detached，脫離 caller 進程樹）跨 session 存活 → 任何 session 以 `runs`／`show` 認領（fire-and-forget 完整可用）；CC 端 SessionEnd hook 殺 running job 進程樹＋標 interrupted → holder session 必須活著 → fire-and-forget 限縮為「session 內釋放 turn」，跨 session 認領前先確認 holder 在場（事實源：`…/muse-market/muse/<ver>/scripts/session-lifecycle-hook.mjs`＋`hooks/hooks.json`，以 plugin cache 現版為準）
 3. **prompt 工程（codex gpt-5-4-prompting 改寫）**：wrapper 保留——wrapper 內單次阻塞 `task`＋env fallback 預寫不變（`CLAUDE_PLUGIN_ROOT` 缺失時 `MODULE_NOT_FOUND` 形態）；wrapper Bash 10min 上限是**約束事實**、wrapper≠job 錯位是**獨立實證**（wrapper 在 runtime 未終局時提前 complete 是系統性常態——muse×2＋codex×2 均需介入實證；wrapper agent 形態＝別名 alias）、兩者因果未驗證——預期超時的工單改走 2
 4. **LLM 層 fallback（罕見——原始派發無背景 Bash 掛載；前景短 arm 仍可用）**：ETA-gate 紀律——推估完成時刻前零檢查（一段 `--timeout <eta>` arm）→ 屆時單次檢查 → 未終局重掛遞減 timeout 的阻塞 wait arm（起點＝bridge 預設 5min／4min，按 ETA 緊化至 ~30s 級；每 arm 到期＝1 request）——**永不做 LLM 層定時輪詢**
 
+> **多工複用（fire-and-forget 的複用形態）**：一個 session 持 N 個 jobId 統一掃（`runs --json` sweep 後逐個 `show`／`wait` 認領）；並行 quota 語義＝同 5h window token 加總（並行買 wall-time 不省花費），實用並行上限 2-3 長任務。
+>
+> **晚收陷阱（Muse 諮詢收編——決策樹尾注）**：`wait` 用有界 timeout 迴圈、勿單一大 block；`stop`/清理前先 `show`／`export`（ledger GC 會吃證據）；委派工單設計成冪等（timeout 後可能重 wait 重收）；jobId 持久化在 workspace ledger（`.muse-bridge/`），不依賴提交 session 的 context——認領 session 只需 jobId＋同 workspace。
+>
 > **診斷手段（非收法）**：`.muse-bridge/jobs.json`／`show <jobId> --json`／`ps` 進程核對——懷疑 job 狀態時用它們查證，不當等待機制。
 
 > 工單模板見 `skills/_common/work-order.md`（foreign runtime 共用；prompt 為任務本文，禁含委派語言）。

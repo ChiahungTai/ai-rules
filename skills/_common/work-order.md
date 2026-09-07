@@ -111,4 +111,4 @@
 
 ---
 
-> 消費形態：skill 間以 `../_common/work-order.md` link 引用，或主 session 直接依本模板填寫新工單本文後經 bridge `task`／codex 派發。`rules/model-routing.md` tier 詞彙句與 `skills/model-routing/SKILL.md` 解析表為 family／profile 詞彙與映射單一源，本模板不自帶定義。
+> 消費形態：skill 間以 `../_common/work-order.md` link 引用，或主 session 直接依本模板填寫新工單本文後經 bridge `task`／codex 派發。長跑工單派發後回報 jobId（供 `wait`／`show` 晚收與跨 session 認領），收法單一源見 model-routing skill「完成回報收法」決策樹。`rules/model-routing.md` tier 詞彙句與 `skills/model-routing/SKILL.md` 解析表為 family／profile 詞彙與映射單一源，本模板不自帶定義。

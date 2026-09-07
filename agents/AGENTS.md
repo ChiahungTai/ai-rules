@@ -26,7 +26,7 @@ agents/
 > 治理原則：external-runtime 家族入口＝單一 thin forwarder（工單即介面），**不長特化 agent**——routing 混入 transport agent 的前車之鑑（`~/Github/muse-plugin-cc/FIX-S3-R2.md:49`）。跨 harness agent 定義保持 thin，路由決策與解析表在 `skills/model-routing/SKILL.md`（詞彙定義見 `rules/model-routing.md` tier 詞彙句），工單協議在 `skills/_common/work-order.md`。
 
 - **原則**：muse／codex 家族不新增特化 agent 定義檔；任務以工單為介面派發，profile 決定 spawn 參數。
-- **派發與收法單一源**：flag 具體值（flag profile → spawn 參數表）、dispatch 形態（bridge 必經、直呼 bridge CLI）、收法（push 決策樹／ETA-gate）、transport 三態判定（未啟動／在跑／死中途）——單一源在 `skills/model-routing/SKILL.md`，本檔不複載。
+- **派發與收法單一源**：flag 具體值（flag profile → spawn 參數表）、dispatch 形態（bridge 必經、直呼 bridge CLI）、收法（收法決策樹〔fire-and-forget 為頭形態〕／ETA-gate）、transport 三態判定（未啟動／在跑／死中途）——單一源在 `skills/model-routing/SKILL.md`，本檔不複載。
 - **flag 未暴露項對策**：以工單紅線替代（見 `skills/_common/work-order.md` 紅線首段），flag 暴露列 muse-plugin-cc 側 bridge roadmap（本 repo 不動跨 repo，僅記錄）。
 
 ## 全生命週期 execution contract
@@ -38,7 +38,7 @@ agents/
 | 開卡（backlog 建卡＋建卡 commit） | 主 session 直做 | — | full | — | 任務敘述→卡檔＋commit | —（機械命令，kanban-board skill） |
 | 研究（EP 段落 0／規格挖掘） | spawn | cr-research／spec-miner | lite | zcode | 問題→file:line 錨點＋逐字引用 | 重試≤2（1302）→主 session 自做 |
 | EP 規劃 | 主 session 直做（判斷密集） | — | full | — | 需求→ep.md（含 EP review 迴圈） | — |
-| EP review（雙家族） | 主 session 編排：GLM 側 spawn code-reviewer×2；muse 側**背景 Bash 直呼 bridge（不佔 agent 並發）** | code-reviewer（fresh）＋code-reviewer-primed（primed）；muse review（bridge 工單） | full（省略 model）為基準；條件式降 lite（保護面厚度，model-routing skill） | zcode＋claude（生成）；muse 經 bridge | diff＋EP→findings→judge 處置表 | classifier／1302 重試≤2→顯式降級記錄；muse 額度不足→in-harness 雙 context（顯式記錄） |
+| EP review（雙家族） | 主 session 編排：GLM 側 spawn code-reviewer×2；muse 側**`task` 形態＝`--background` fire-and-forget 提交＋`wait`／`show` 晚收（不佔 agent 並發、不佔 caller session，可跨 session 認領）；`review` 形態仍背景 Bash 阻塞（`review` 無 `--background`）** | code-reviewer（fresh）＋code-reviewer-primed（primed）；muse review（bridge 工單） | full（省略 model）為基準；條件式降 lite（保護面厚度，model-routing skill） | zcode＋claude（生成）；muse 經 bridge | diff＋EP→findings→judge 處置表 | classifier／1302 重試≤2→顯式降級記錄；muse 額度不足→in-harness 雙 context（顯式記錄） |
 | build 實作段 | 主 session 編排；機械可規格化段 spawn | impl-flash | lite | zcode | EP 段→code＋測試＋驗證證據 | 失敗家系處置（註 a）→主 session 直做該段；lite 測試＝規格陳述→驗收證據 full 複驗 |
 | build 內 Agent Review | spawn（3-perspective） | code-reviewer（fresh）＋code-reviewer-primed（primed）；Important+ 錨點驗證＝lite-verify | reviewers＝full（省略 model）為基準；錨點驗證＝lite | 全 zcode＋claude（生成） | diff→findings（錨點驗證後浮出） | 失敗家系處置（註 a）→主 session 自審＋fallback 標記 |
 | judge 裁決 | 主 session 直做（判斷密集；不派 agent） | — | full | — | findings→✅/❌/⚠️ 處置表 | — |
