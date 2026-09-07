@@ -1,9 +1,10 @@
 ---
 id: AIR-42.1
 title: Memory 載體分流校準——樣本判讀與 rules skills 邊界收斂
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-07 08:44'
+updated_date: '2026-09-07 08:44'
 labels:
   - memory
   - governance

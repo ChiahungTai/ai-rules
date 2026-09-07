@@ -1,9 +1,10 @@
 ---
 id: AIR-42
 title: Memory 知識治理改善——寫入歸因、讀取觀測與載體分流
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-07 08:44'
+updated_date: '2026-09-07 08:44'
 labels:
   - memory
   - governance
