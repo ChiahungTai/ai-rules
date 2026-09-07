@@ -5,7 +5,7 @@
 > **parent**: ai-analysis/_tasks/09-07-memory-governance/ep.md
 > **baseline**: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
 > **depends-on**: AIR-40、AIR-41 正式首跑與觀測限制
-> **status**: 計畫；不包含共享 memory 遷移執行
+> **status**: 已落地（S1 advisory＋S2 修訂；共享 memory 未動——advisory only）
 
 ## 實作總覽
 
@@ -74,3 +74,7 @@ baseline: f03d3460c9c157e1dc6079ccdfb7acd680bbe25a
 | 2 | ℹ️ 提醒 | S1 | 讀池作 advisory 會污染 AIR-41 觀測（讀取用途標維護）已寫明 | 施工時每次讀池附用途註記 | implemented |
 
 審查結論：有條件執行（F1–F5 通過；docs-mode 無 pseudo 允許；須在 AIR-40/41 首跑證據後開工）。審查者：muse-code（跨家族獨立審查），2026-09-07。
+
+## Build 後 dual review 與修正輪（2026-09-07）
+
+S1（`routing-advisory.md` 10 條四組）＋S2（memory-audit 四處＋rule 瘦身）落地後 dual review（muse 工單 `review-workorder-s1s2.md` job-mtr55yow 通過 3 Suggestion；GLM fresh-eyes 有條件通過 2 🟡＋6 🟢）：judge 採納 F1（#4 分類翻轉——條目 :18 F7 裁決「不預寫條件式文案」是行動增量、repo 零承載，退出候選→指針保留）、F2（#7 權威欄修正——機械檢查在 /sync-sources，僅收尾放置無承載）、F3（rules/AGENTS.md 四問→六問 stale）、F4/F5/F6/F7（數字/錨點/merged_from 錨精修）、F8（Q1 補「不因短就合法」明文）；muse F2（frontmatter 摘要滯後）記觀察不動。修正輪機械複驗：舊形態零殘留、新形態全在場。S1 抽樣自身實錄「流量vs存量 join 誤差」（top_entries 與 inventory 不同集合，absent≠zero-read）已記入 advisory 觀測誤差段。

@@ -1,10 +1,10 @@
 ---
 id: AIR-42.1
 title: Memory 載體分流校準——樣本判讀與 rules skills 邊界收斂
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-07 08:44'
-updated_date: '2026-09-07 08:44'
+updated_date: '2026-09-07 11:22'
 labels:
   - memory
   - governance
@@ -28,3 +28,9 @@ ordinal: 34000
 - [ ] #3 記錄 raw telemetry 誤差與索引召回盲區，不依低 Read 自動改 rank
 - [ ] #4 共享 memory/部署不在本卡變更範圍；跨檔一致性與獨立 EP review 完成
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+S1 routing-advisory（10 條四組抽樣：退出候選 1＋指針保留 1＋遷移候選 1＋保留 8；觀測誤差如實記錄含流量vs存量 join 實錄）＋S2 修訂（Q2 用途先判移除捷徑/固化覆蓋度分層/blocker 拆兩半/cluster 同召回情境判準/context-management rule 瘦身單一源化）。dual review（muse 通過＋GLM 有條件通過）→ judge 採納 F1 分類翻轉（F7 條款增量）等 8 項 → 修正輪機械複驗全過。advisory only 未動共享 memory；無新閘門（hooks/ 零變更）。審查工單 review-workorder-s1s2.md 可重放
+<!-- SECTION:FINAL_SUMMARY:END -->
