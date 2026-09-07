@@ -57,6 +57,8 @@ ORDER = [
     ("project", "Project"),
     ("reference", "Reference"),
 ]
+RANK_ORDER = {"hot": 0, "core": 1, "cold": 2}  # 缺省/invalid -> core（永不進 errs）
+TYPE_ORDER = {t: i for i, (t, _) in enumerate(ORDER)}
 
 
 def parse_frontmatter(text: str) -> dict:
@@ -79,6 +81,13 @@ def parse_frontmatter(text: str) -> dict:
         parent = k.strip() if not v.strip() else None
         out[k.strip()] = v.strip().strip("'\"")
     return out
+
+
+def parse_rank(fm) -> int:
+    # 雙落點（沿 type 先例：頂層 rank / metadata.rank）；巢狀值引號剝除
+    # （parse_frontmatter 只剝頂層）；缺省/invalid 一律 core、永不進 errs。
+    raw = fm.get("rank") or fm.get("metadata.rank")
+    return RANK_ORDER.get(str(raw).strip().strip("'\"").lower(), RANK_ORDER["core"])
 
 
 def write_index(here: pathlib.Path, content: str) -> None:
@@ -109,7 +118,9 @@ def main() -> int:
             errs.append(f"  {f.name}: type={typ!r}")
             continue
         hook = desc if len(desc) <= TRUNCATE_DESC else desc[: TRUNCATE_DESC - 1] + "…"
-        entries.append((typ, f.stem, f.name, hook))
+        entries.append((typ, f.stem, f.name, hook, parse_rank(fm), f.stat().st_mtime))
+    # fail-soft 載入序：type 分組 × rank 層 × 組內 mtime 新在前（name 尾鍵可重現）。
+    entries.sort(key=lambda e: (TYPE_ORDER[e[0]], e[4], -e[5], e[2]))
     lines = [
         "# Memory Index",
         "",
@@ -122,7 +133,9 @@ def main() -> int:
             continue
         lines.append(f"## {title}")
         lines.append("")
-        lines.extend(f"- [{stem}]({name}) - {hook}" for _, stem, name, hook in group)
+        lines.extend(
+            f"- [{stem}]({name}) - {hook}" for _, stem, name, hook, _, _ in group
+        )
         lines.append("")
     content = "\n".join(lines).rstrip() + "\n"
     n_chars, n_lines = len(content), content.count("\n")

@@ -781,3 +781,96 @@ def test_regen_skips_when_asset_source_missing(tmp_path, monkeypatch):
     assert any("資產源缺席" in n for n in notes)
     assert not (zdir / "MEMORY.md").exists()  # 未執行 generator
     assert (zdir / "_regen-skipped-stale").exists()  # 停滯可見
+
+
+# ---------------------------------------------------------------------------
+# generate_index rank 排序（AIR-39 S1——type 四組 × rank 三層 × mtime 尾序）
+# ---------------------------------------------------------------------------
+
+
+def write_rank_entry(
+    pool: Path, name: str, typ: str, rank_line=None, nested_rank=None
+) -> Path:
+    """寫一條 rank fixture：rank_line 為頂層 rank 行（如 "rank: hot"）；
+    nested_rank 為 metadata 內 rank 值原文（如 '"hot"' 含引號——解析器巢狀不剝引號）。"""
+    lines = ["---", f"name: {name}", f"description: {name} 描述"]
+    if rank_line is not None:
+        lines.append(rank_line)
+    lines.append("metadata:")
+    lines.append(f"  type: {typ}")
+    if nested_rank is not None:
+        lines.append(f"  rank: {nested_rank}")
+    lines.append("---")
+    lines.append("body")
+    p = pool / f"{name}.md"
+    p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return p
+
+
+def test_parse_rank_defaults_and_quote_stripping():
+    """parse_rank：缺省/invalid→core（永不進 errs）；巢狀帶引號值剝除；雙落點皆解析。"""
+    assert generator.parse_rank({}) == generator.RANK_ORDER["core"]
+    assert generator.parse_rank({"rank": "urgent"}) == generator.RANK_ORDER["core"]
+    assert generator.parse_rank({"rank": "hot"}) == generator.RANK_ORDER["hot"]
+    assert generator.parse_rank({"rank": "cold"}) == generator.RANK_ORDER["cold"]
+    assert (
+        generator.parse_rank({"metadata.rank": '"hot"'}) == generator.RANK_ORDER["hot"]
+    )
+    assert (
+        generator.parse_rank({"metadata.rank": "core"}) == generator.RANK_ORDER["core"]
+    )
+
+
+def test_generator_rank_sorting_e2e(tmp_path):
+    """S1 語義 E2E：type 四組序 × rank 三層 × 組內 mtime 新在前。
+
+    fixture 以 os.utime 顯式設 mtime 差（防 flaky）；檔名字母序 ≠ 期望投影序
+    （如 a-user-cold 字母首位但 rank cold 須沉 user 組尾）——排序未實作即紅燈。
+    """
+    pool = make_pool(tmp_path, n=0)
+    write_rank_entry(pool, "a-user-cold", "user", "rank: cold")
+    write_rank_entry(pool, "b-user-hot-old", "user", "rank: hot")
+    write_rank_entry(pool, "c-user-hot-new", "user", "rank: hot")
+    write_rank_entry(pool, "d-feedback-default", "feedback", None)
+    write_rank_entry(pool, "e-feedback-core", "feedback", "rank: core")
+    write_rank_entry(pool, "f-feedback-invalid", "feedback", "rank: urgent")
+    write_rank_entry(pool, "g-project-nested-hot", "project", None, '"hot"')
+    write_rank_entry(pool, "h-project-toplevel-cold", "project", "rank: cold")
+    write_rank_entry(pool, "i-reference-cold", "reference", "rank: cold")
+    base = time.time() - 1000
+    mtimes = {
+        "b-user-hot-old": base + 10,  # user/hot 舊 → hot 層尾
+        "c-user-hot-new": base + 20,  # user/hot 新 → hot 層首
+        "e-feedback-core": base + 30,  # feedback/core 最舊
+        "d-feedback-default": base + 40,  # 缺省 core 與顯式 core 同層、按 mtime 居中
+        "f-feedback-invalid": base + 50,  # invalid→core 最新 → core 層首
+        "g-project-nested-hot": base + 60,  # 巢狀引號 hot
+        "h-project-toplevel-cold": base + 70,  # 更新但 cold → 仍沉 hot 之後
+        "i-reference-cold": base + 80,
+        "a-user-cold": base + 900,  # 全池最新但 cold → 仍沉 user 組尾（rank 勝 mtime）
+    }
+    for stem, ts in mtimes.items():
+        os.utime(pool / f"{stem}.md", (ts, ts))
+    r = subprocess.run(
+        [sys.executable, str(pool / "_generate_index.py")],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 0, r.stdout
+    idx = (pool / "MEMORY.md").read_text(encoding="utf-8")
+    expected = [
+        "c-user-hot-new",
+        "b-user-hot-old",
+        "a-user-cold",
+        "f-feedback-invalid",
+        "d-feedback-default",
+        "e-feedback-core",
+        "g-project-nested-hot",
+        "h-project-toplevel-cold",
+        "i-reference-cold",
+    ]
+    pos = [idx.index(stem) for stem in expected]
+    assert pos == sorted(pos), expected
+    sec = [idx.index(f"## {t}") for t in ("User", "Feedback", "Project", "Reference")]
+    assert sec == sorted(sec)
