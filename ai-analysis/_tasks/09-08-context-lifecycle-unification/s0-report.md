@@ -273,3 +273,16 @@ ERROR: {"type":"error","status":400,"error":{"type":"invalid_request_error",
 | muse | muse-spark-1.3/xhigh（bridge task job-mts981lr） | 10/10 | 10/10 | B 領頭即觸發條件可直接對號入座；A 需先解碼術語再映射 |
 
 **結論**：B 形態零退化＋解析成本優——支持採用情境句領頭文法（S1 lint 規則 1 的實證背書）。**方法論限制（誠實段）**：hit-rate 在 10 條乾淨材料下飽和（兩家族雙雙全中），且情境由知悉條目者撰寫（語義空間同源）；鑑別力測試留給 S1 SM-1（136 條全索引＋截斷切片＋routing 條件）。codex 腿（terra/high）待 CLI 升級後同材料補跑。
+
+---
+
+## P6 結案補記（09-08 晚——CLI 升級後雙探針全綠）
+
+升級 `npm install -g @openai/codex@latest`：0.152.0 → **0.153.4**（gpt-6-astra 400 消失）。
+
+- 探針 1（尾端 sentinel）：回答 `<!-- bundle-end -->` ✅——79,287B 檔的尾端在 context
+- 探針 2（71.5KB 處 rule）：逐字回引「**核心原則**：exit code 是閘門依據，pipe 會被最後一環蓋掉。」✅——32KiB 預設下不可見的中段 rule 可見
+
+**verdict：`project_doc_max_bytes=102400` runtime 生效，codex 側根治確認（雙探針、兩個獨立位置）。**
+
+附帶觀察（清理候選，未動）：codex config 的 `http://127.0.0.1:5555/mcp` MCP 條目連線失敗刷屏（5555＝CRG 已退役服務——config 殘留）；「Skill descriptions were shortened to fit the skills context budget」警告＝codex 有獨立 skills context budget 且自動縮短 desc（S6 觸發面對齊的輸入）。
