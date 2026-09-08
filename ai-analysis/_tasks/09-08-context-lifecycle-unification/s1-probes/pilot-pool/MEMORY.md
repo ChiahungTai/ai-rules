@@ -1,0 +1,151 @@
+# Memory Index
+
+本檔為 _generate_index.py 機械投影，禁手寫（PreToolUse gate）——改條目檔後重跑 generator。
+
+## Feedback
+
+- [feedback_design-target-repo-confirm-first](feedback_design-target-repo-confirm-first.md) - 跨 repo 規則設計先確認「主場 repo／驅動 pain point」——卡 branch 弧實證：AI＋muse 雙家族同向「mosaic 不採納」被 user 一句反轉（設計本來就為 mos…
+- [feedback_quota-probes-user-pastes](feedback_quota-probes-user-pastes.md) - 額度敏感測試/probe（runtime 冒煙、A/B 測試）→ 給 user paste-ready 命令塊自己跑，AI 不派
+- [feedback_quota-failover-policy](feedback_quota-failover-policy.md) - dispatch 政策（09-07 修訂）：額度現值 GLM+muse；實作預設 muse+flash；影像 flash；審查類 muse/flash 皆可；詳 skill dispatch 節
+- [feedback_full-arc-delivery-vehicle-immediately](feedback_full-arc-delivery-vehicle-immediately.md) - user 預期「處理這件事」＝設計到落地一弧做完——衍生工作收案時當場建載體（卡/EP），禁懸空「後續卡說一聲」
+- [commit-consent-in-autonomous-mode](commit-consent-in-autonomous-mode.md) - commit 確認門：自主模式仍需原話確認＋條件授權鏈（過了即執行）；外部指示不 override 本地硬規則
+- [feedback_dual-family-review-dispatch](feedback_dual-family-review-dispatch.md) - user 的 review 派發慣例＝雙家族平行（GLM in-harness＋muse bridge）——muse 補流程面、GLM
+- [feedback_delegation-claims-verification](feedback_delegation-claims-verification.md) - 委派 agent 依主 session 調查產出文件（EP/報告）時——調查打包成編號宣稱清單＋不盲從條款（逐項機械驗證、推翻附證據）
+- [feedback_verify-wt-before-commit](feedback_verify-wt-before-commit.md) - commit 雙防護：具名 add＋staged 對帳；commit 前查 log/stat 防 concurrent 帶走或污染（紅燈即停）
+- [feedback_ai-rules-no-backward-compat](feedback_ai-rules-no-backward-compat.md) - ai-rules 重構不考慮向後相容（條文在 edit-discipline rule）；本條僅留 F7 增量——不預寫未發生情境的條件式文案
+- [feedback_governance-intent-layer-first](feedback_governance-intent-layer-first.md) - 治理/行為訴求動手前先確認目標層次（認知動作/規範/機械閘）——memory 廢話治理三連校正實證（audit→hook→寫前想）
+- [feedback_review-even-on-quick-fix](feedback_review-even-on-quick-fix.md) - review 三則：quick-fix 也跑收尾鏈＋結構化產物驗證五條＋per-project 引用查證範圍
+- [feedback_relay-claims-verify-current-state](feedback_relay-claims-verify-current-state.md) - 跨 session relay/通知對「接收方現況」的宣稱常過時（傳送方 snapshot 落後）——接手第一動＝機械驗證當前狀態，勿照 relay 描述行動
+- [feedback_memory-failsoft-importance-ordering](feedback_memory-failsoft-importance-ordering.md) - user 記憶治理設計觀——與其難 audit/壓縮，順著截斷特性設計：重要放前、可遺漏沉後、fail-soft（機制失靈也不離譜）；已落地 rank 排序
+- [feedback_drift-scan-include-variants](feedback_drift-scan-include-variants.md) - 假 CLEAN 掃描家族——殘留掃描必含拼寫變體與配對鏡像語句；刪除行核對必看完整 diff 禁 rg 過濾管道（過濾器輸出≠完整輸入）
+- [feedback_output-self-sufficiency-gate-values](feedback_output-self-sufficiency-gate-values.md) - gate/檢查工具輸出行必自帶門檻常數——輸出真空被旁側 stale prose 填補成假警（nightly-watch 兩次同型實證）
+- [feedback_ep-rename-needs-fullrepo-grep](feedback_ep-rename-needs-fullrepo-grep.md) - EP 治理對：動前全 repo 盤點（A/B 引用分類）＋_done 不等於落地（ghost-done 查檔）
+- [feedback_inflow-needs-outflow](feedback_inflow-needs-outflow.md) - 記憶治理三原則：現值不記（A/B/C/D）＋寫入當下即蒸＋有進有出（流出腿）
+- [at-usage-reset-continuation](at-usage-reset-continuation.md) - usage 排程分流：/usage-ping 純叫醒 vs /at 接任務＋/at 開頭判讀（排程非立即執行）
+- [feedback_plain-status-explanations](feedback_plain-status-explanations.md) - 對 user 報告「距離/餘裕/機制」類狀態時白話先行（油表百分比＋一句結論），緊湊多行排序表會被「我看不懂」退回
+- [feedback_compact-output-context-not-transcript](feedback_compact-output-context-not-transcript.md) - compact/summary 產出＝脈絡壓縮非時序流水帳、素材涵蓋全 session 非只尾端對話（user 09-07；AIR-35 已落地）
+- [feedback_disposition-stray-artifacts](feedback_disposition-stray-artifacts.md) - working tree 殘留物（非本 session 產物）user
+- [feedback_uc-inventory-before-structure-proposal](feedback_uc-inventory-before-structure-proposal.md) - 結構提案與架構討論皆 UC-first——先盤工作流/讀者與 repo 先例再提方案；論證用 use case 角度＋clean code 具名原則，勿自創縮寫
+- [feedback_stale-experiment-rerun](feedback_stale-experiment-rerun.md) - dated 實驗與「定案」都會錯——重跑當場 probe（symlink 判決被推翻實證）；工具失敗歸因須受控複測否證後才定案
+- [feedback_diagnose-installed-vs-source-first](feedback_diagnose-installed-vs-source-first.md) - 外部工具（plugin/binary/bridge）炸時先比對「安裝面版本 vs source HEAD」再下診斷——修復常已
+- [feedback_codex-followup-user-relay](feedback_codex-followup-user-relay.md) - 跨家族 review 迴路的 followup 驗收＝user 在 codex session 直跑（review context
+- [feedback_evidence-over-claims](feedback_evidence-over-claims.md) - user 對「完成」宣稱要求眼見為憑——「我要看你真的實作長怎樣，誰知道你是不是亂講」；回答配實物（結構 ls/三檔並排對照/live
+- [feedback_spec-self-contained-foreign-handoff](feedback_spec-self-contained-foreign-handoff.md) - 給外部 LLM 的 spec 必須自足（spec＋repo 唯一輸入）：痛點附後果、UC 三件、SM 自包含、findings 蒸餾成設計約束節（防重踩）；籌備期凍結下游
+- [feedback_harness-model-orthogonal-axes](feedback_harness-model-orthogonal-axes.md) - 三層勿混：provider→model→harness（muse 是 harness 非公司）；dispatch 不綁 backend id；需求三類＝旗艦/影像/隨意；五家清單見檔內
+- [feedback_diagram-tool-selection](feedback_diagram-tool-selection.md) - 畫圖工具選型判準（user 裁定＋MOS-41 形式化）——判準＝邊有無結構化通道＋成本軸（kchart ~8s 機械｜mermaid
+- [feedback_absorb-patterns-not-tools](feedback_absorb-patterns-not-tools.md) - user 設計原則——CC 官方工具不直用（「直接用可能會出事」）、參考作法重實現；deep-research 亂 web search 體感差→吸收編排模式＋源枚舉制
+- [feedback_shell-diagram-quality-bar](feedback_shell-diagram-quality-bar.md) - task brief 殼門檻：流程圖必備、首屏見圖、美感有底線；SA 選型已落地 diagram-selection skill；殼內 mmdc/CDN 渲染＋-I 唯一 id
+- [feedback_verify-with-consumer-before-commit](feedback_verify-with-consumer-before-commit.md) - 消費端回報 bug：先修活路徑（雙活期勿修新家）→回報方原始輸入重現→commit→交棒吸收（user 修正順序＋落點）
+- [feedback_comments-in-english](feedback_comments-in-english.md) - 新寫程式碼的註解/docstring/README 一律英文（user 2026-08-25 指示，新 repo 公開導向）
+- [feedback_per-call-billing-model](feedback_per-call-billing-model.md) - 計費模型定案＝token-value 制（Claude Max 同構）——策略雙軸＝省 requests＋省 context；輪次非計量軸、premium 倍率不可精算
+- [feedback_compact-user-judgment-memory-continuity](feedback_compact-user-judgment-memory-continuity.md) - compact 時機與 session 收線都是 user 判斷——AI 不推自動觸發、不自行提議收線；context 因應＝接續品質
+- [feedback_no-rosetta-workarounds](feedback_no-rosetta-workarounds.md) - user 2026-09-02 裁定不用 Rosetta（macOS 將退場支援）——x86_64 套件繞路禁提，平台缺口直接等
+- [feedback_billing-trend-token-design](feedback_billing-trend-token-design.md) - user 成本世界觀——帳制趨勢 token 化（zai 新方案 token、muse 暫 request）；設計
+- [feedback_symlink-alias-before-two-entities](feedback_symlink-alias-before-two-entities.md) - 兩路徑視為兩實體前先驗 symlink 別名——同檔 cmp identical 是 tautology 循環證據（09-03 mosaic 兩池誤判實證）
+- [feedback_backup-unversioned-live-configs](feedback_backup-unversioned-live-configs.md) - 改無版本活配置（gitignored settings.json 等）前先 cp .bak——備份→換→pipe-test→新 session 驗證；回滾不靠 transcript
+- [feedback_line-anchors-rg-before-handoff](feedback_line-anchors-rg-before-handoff.md) - 行號/路徑錨點跨邊界給出（relay/handoff）前當場查證源 repo——行號 rg 核對、暫存材料重跑；錯值死路徑會被下游複製傳播
+- [feedback_read-current-file-before-reviewing](feedback_read-current-file-before-reviewing.md) - 評論/引用任一產物檔前必讀當前檔——平行 session 可能已覆寫，context 版本記憶只是歷史非現況（「剛剛codex不是有重寫你有看嗎」實證）
+- [feedback_adjudication-materials-then-ask](feedback_adjudication-materials-then-ask.md) - 裁決批次先攤完整材料再問——AskUserQuestion 結構表單被退，user 自由文字逐項裁定（09-03 後議三項實證）
+- [feedback_consistency-gate-not-optional](feedback_consistency-gate-not-optional.md) - /consistency 與 post-build 鏈必跑非 optional；self-report 不算 gate——自檢問句＝「Skill 這輪調用了嗎」，替代須明示、豁免權在 user
+- [feedback_cjk-char-corruption-rg-verify](feedback_cjk-char-corruption-rg-verify.md) - Edit/Write 失誤兩形態——CJK 字元損壞（形似異體字肉眼難辨）與標題錨替換（插入未接回標題、段落孤兒化）；改完必機械 rg 驗證
+- [feedback_dispatch-reread-governing-docs](feedback_dispatch-reread-governing-docs.md) - 派發/決策當下重讀治理檔——session 記憶對快速演進域過期；看 commit 標題≠重讀條文；startup memory
+- [feedback_backlog-card-edit-precheck](feedback_backlog-card-edit-precheck.md) - backlog 卡操作前先對時卡 id 歸屬——編號假設會撞平行 session（AIR-26 撞號實證）；--ref
+- [feedback_agent-transient-death-autopsy](feedback_agent-transient-death-autopsy.md) - 背景 agent 死於帳號級 Model request failed——重試 prompt 燒入前任已知事實；驗屍＝mtime
+- [flow-feedback-done-archive](flow-feedback-done-archive.md) - 處理完的 flow-feedback 搬 ai-analysis/flow-feedback/_done/；/commit 是否自動化討論中
+- [feedback_settlement-scripts-are-code](feedback_settlement-scripts-are-code.md) - 量測誠信（尺與被量物）——結算/度量腳本自身 bug 腐敗證據（噪聲虛增缺口膨脹估值）；AI 評估報告正負向宣稱都需同等嚴格查證
+- [feedback-magnitude-over-precise-counts](feedback-magnitude-over-precise-counts.md) - 文件顯示 codebase 統計整數(importer/模組/test/node 數)用 magnitude 不用精確值;method(如實計數)與 display 分離
+- [feedback_judge-review-stays-main-agent](feedback_judge-review-stays-main-agent.md) - judge-review 固定主 agent 執行——user 裁定不派給另一個
+- [feedback_gate-commands-state-sensitive](feedback_gate-commands-state-sensitive.md) - handoff/排程清單內嵌腳本閘，編進新 prompt 前先驗腳本對當前狀態行為——狀態敏感閘會死鎖（precheck×In Progress 實證）
+- [feedback_engine-skill-trigger-collision](feedback_engine-skill-trigger-collision.md) - 第三方引擎掛到自家入口命令時，引擎自身的 agent skill 別進清單——description 觸發詞重疊 = 路由歧義（raw
+- [feedback_work-order-contract-point-to-source](feedback_work-order-contract-point-to-source.md) - 委派工單（muse/subagent）內嵌契約值會漂——卡 ref 形態等指向 skill 合約單一源路徑，不 inline
+- [feedback_conditional-gates-test-condition-not-exit-code](feedback_conditional-gates-test-condition-not-exit-code.md) - 條件閘門要驗「條件成立」（test -f／rg -l 輸出）非 exit code 短路——fd 無命中仍 exit 0，`fd X && cmd` 誤跑檢查（09-03 實證）
+- [cross-workspace-actions-user-handles](cross-workspace-actions-user-handles.md) - 停他 workspace 排程／改他池狀態檔＝user 自己動手（「我砍就好」）；AI 只整自己側＋回報，禁繞道改他檔
+- [feedback_counter-skip-confirmation-bias](feedback_counter-skip-confirmation-bias.md) - 建議跳過與建議 capture 都先對抗性自查——skip 查推進偏好、capture 查已存在否（雙向自檢）
+- [feedback_demand-pull-fails-silent-gaps](feedback_demand-pull-fails-silent-gaps.md) - Demand-pull 只對顯性故障有效——沉默缺口（undercount/覆蓋不足）需主動量測（spike-now-decide-on-data）
+- [feedback_project-first-containment](feedback_project-first-containment.md) - user 以專案（線）為單元要物理包含；結構美化（前綴/傘形/改名）會被喊停——交付最小功能差異；00- hack/sprint 不提
+- [feedback_read-tool-source-before-upgrade-proposals](feedback_read-tool-source-before-upgrade-proposals.md) - 提案「升級/修改某 tool/skill」前必讀其原始碼——能力假設錯會污染整條提案鏈（kanban-board 零渲染實證）
+- [hook-vs-llm-flow-division](hook-vs-llm-flow-division.md) - hook 只做純機械/單入口/立即危害；語義判斷交 LLM 流程（rule + command）
+- [feedback_full-domain-structure-uniformity](feedback_full-domain-structure-uniformity.md) - user 裁定結構慣例要 full domain——自家 repo 群全部採用（ai-rules 自家也 dogfood），探測
+- [feedback_subagent-background-spawn](feedback_subagent-background-spawn.md) - subagent 預設背景跑已固化為全域規則（rules/tool-discipline.md 背景執行段）
+- [feedback_sj-nt-authority-routing](feedback_sj-nt-authority-routing.md) - SJ/NT 查證路由（user 2026-09-01）：SJ 問 shioaji skill、NT 讀 repo（v1/v2
+- [feedback_fix-immediately-not-defer](feedback_fix-immediately-not-defer.md) - 合理的修正就立即落地，不要「之後再修」（之後 = 忘記修 = 拖延症）
+- [feedback_llm-native-no-skill](feedback_llm-native-no-skill.md) - skill 設置雙面判準——LLM 原生能力不設 skill（distill 類破壞性操作預設最保守）；重複性操作值得固化成一句話入口（觸發語句＋程序段＋when_to_use）
+- [feedback_arch-impossibility-needs-topology-grounding](feedback_arch-impossibility-needs-topology-grounding.md) - 「架構上不成立」級宣稱前必查依賴拓撲實態——引擎 in-process link vs 外部 server 包裝，成本結構完全不同
+- [feedback_rules-no-project-specific-facts](feedback_rules-no-project-specific-facts.md) - 通用規則:例子可領域特定(除權息等穩定概念 OK),規則邏輯才要通用;drift-prone 的是數字/現狀斷言/可改名符號/規則特化
+- [feedback_permission-layer-no-behavioral](feedback_permission-layer-no-behavioral.md) - 改 settings.json permission 時不要重複 rules/skills 層的 behavioral 約束
+- [feedback_full-read-base-not-context-copy](feedback_full-read-base-not-context-copy.md) - 全檔重寫 base 必須全文 Read（context 副本會被 elide）；staleness 擋門兩型鑑別——HEAD 位移時 git diff 空是假陰性，re-Read 一律全文禁片段
+- [init-py-reasonableness-not-pattern](init-py-reasonableness-not-pattern.md) - __init__.py 檢查的是「內容合理性權衡」不是「re-export pattern 偵測」
+- [feedback_slash-command-existence-verification](feedback_slash-command-existence-verification.md) - 驗證 skill/command 存在性時，先查 session 注入的 available skills 清單（權威來源），不要自己 rg/fd 搜 repo
+- [feedback_no-sandbox-layer](feedback_no-sandbox-layer.md) - User 覺得 sandbox 不好用而關掉；解決寫入權限時別提議 sandbox.allowWrite，動 permission list / defaultMode
+- [global-vs-project-permissions](global-vs-project-permissions.md) - ai-rules/settings.json 是全局權限,專案特定權限由各專案自己的 settings 管
+
+## Project
+
+- [project_card-branch-rule-proposal-pending](project_card-branch-rule-proposal-pending.md) - 卡 branch 弧 09-08 進行中——主場反轉 mosaic（三 VSCode=三 WT、branch=ambient UI）；命名定稿 線縮寫-卡號（war-77/v2-77/mos-77/…
+- [project_memory-redesign-read-path-0908](project_memory-redesign-read-path-0908.md) - AIR-45 context 統一生命週期弧——S0 全結＋文法 5 條 user 拍板 go（EP 決策10、報告歸檔 d4c98ab）；S1 child EP 待 user 點頭開工
+- [project_session-topology-single-writer](project_session-topology-single-writer.md) - ai-rules 檔案單一寫入者拓撲＋hub-relay 工作法——寫入面/執行面邊界、授權不跨 session、複掃防線
+- [project_flash-vocab-audit-0908](project_flash-vocab-audit-0908.md) - AIR-43 flash 詞彙治理弧終態—tier 定版（vision=支援影像的model）、full-tier 釘選 glm-5.3 已實證 wire、flash 僅存全名形態
+- [project_memory-governance-air40-42](project_memory-governance-air40-42.md) - memory 知識治理線終態（AIR-40/41/42 全閉＋codex 反例驅動修復 R1-R6→F1-F3→N1）——寫入歸因＋Read 觀測 telemetry＋載體分流；源覆蓋 drafts…
+- [project_muse-memory-mechanism-divergence](project_muse-memory-mechanism-divergence.md) - muse local memory 與 CC/ZCode 結構性不同（三 scope/48 檔上限/observer 召回）——telemetry 源覆蓋暫緩 draft，要用先重設計
+- [project_codex-quota-death-durable-checkpoint](project_codex-quota-death-durable-checkpoint.md) - 09-07 codex 配額死亡弧——durable-checkpoint rule 已 commit＋部署五端；worktree 0c6f findings 四輪反例驅動全閉（R1-R6→F1-F…
+- [at-skill-zcode-cron-gaps](at-skill-zcode-cron-gaps.md) - ZCode cron 落差定案集：session 綁定兩形態／冷 landing 禁多步／殘留判讀＋開放項待分辨
+- [project_archify-illustrate-html-mode-eval](project_archify-illustrate-html-mode-eval.md) - 人類 viewport 線三弧終態——B 軸受眾模型、illustrate html-mode（archify）、報告殼 template AIR-23、成本檢討吸收 AIR-30
+- [project_air-38-routing-feedback-tier](project_air-38-routing-feedback-tier.md) - AIR-38 已落地——路由詞彙「旗艦/一般」抽象＋旗艦資格條款（五項）入 model-routing skill；裁決錨：模型名只在解析層、family 軸第二軸、資格線 vs 坐位分層
+- [project_memory-card-lifecycle-gate](project_memory-card-lifecycle-gate.md) - memory 卡流水結案閘門（AIR-37 已落地）——條文在 commit skill 2.8＋execution-plan UC 盤點；教訓錨：卡 id 弱鍵＋desc 過期快照主動誤導
+- [mac-nightly-sequence-oom-crash](mac-nightly-sequence-oom-crash.md) - Mac watchdog panic 根因＝nightly pytest 記憶體常態＋隔夜 session＋swap ENOSPC；修法＝分批跑＋收工結算
+- [project_memory-cc-alignment-diagnosis-0905](project_memory-cc-alignment-diagnosis-0905.md) - memory 治理線終態——AIR-25 CC 對齊矯正（gate 先寫出＋desc hash 契約＋結案蒸餾＋寫入六問）＋三件套/symlink 拓撲/治理教訓
+- [project_gate-severity-solidification-queue](project_gate-severity-solidification-queue.md) - 治理收斂線終態——AIR 佇列收束、gate 90% 真線＋夜間 cron、bundle 減量三代（95.1%→82%）、治理 brainstorm 診斷、usage 盤點方法
+- [project_post-build-command-dual-context](project_post-build-command-dual-context.md) - post-build/review 鏈線終態——收尾鏈與 dual-context 雙審查者、鏈上載體分工（judge=主 agent）、新 skill 收編 post-build docs 鏈慣例
+- [project_commit-finalization-gate](project_commit-finalization-gate.md) - commit finalization 閘門：2.8 對帳＋孤兒結算＋docs 單檔閘＋footer 中性化＋ruff 機械改動免確認
+- [project_codex-fullrepo-review-adjudication](project_codex-fullrepo-review-adjudication.md) - 09-06 codex 全 repo 審查弧全閉——11 findings 全採＋followup 11/11 verified；remediation a102f8e；啟發弧修畢待 go
+- [project_review-skill-state-rot-gap](project_review-skill-state-rot-gap.md) - 審查鏈 state-rot 針劑弧終態——codex 三輪 7/7 verified；F2＝跨家族解析表全 cell＋降級停下問 user；commit 2 已落地
+- [project_cr-live-faces-roadmap](project_cr-live-faces-roadmap.md) - CR 三弧終態——SCIP 語義/換軌 token 評估/pyrefly PyPI＋滲透量測→AIR-32 範本層＋AIR-33 v0.6.4 閉合；修復迴路定形
+- [project_deep-work-cc-workflow-pipeline](project_deep-work-cc-workflow-pipeline.md) - deep-work 定位改自主開發流程引擎——任務描述預設全套鏈 execution-plan→implement→post-build、三觸發型；AIR-34 已結案
+- [project_memory-desc-loop-posture-pending](project_memory-desc-loop-posture-pending.md) - desc 夜修晝覆＝三層治理預期形態（姿態句入 skill 仍待 user 裁定）；③ annotate 膨脹已 MOS-69 handoff 收案
+- [project_postbuild-tour-repair-loop-0907](project_postbuild-tour-repair-loop-0907.md) - post-build tour_validate 修復閉環弧完結已 commit——程序單一源＝post-build 階段 4、鐵律＝tour-bootstrap；mosaic relay 項全解
+- [project_agents-registry-split-design](project_agents-registry-split-design.md) - agents registry/dispatch 弧群終態：AIR-13/28/29＋09-06 健檢＋雙源去重落地＋registry slim 不可行定論＋symlink 判決重驗中
+- [project_backlog-cleanup-vehicle](project_backlog-cleanup-vehicle.md) - backlog Done 欄清場每日 launchd 載體弧（ai-rules+mosaic 09-06
+- [project_instruction-init-blueprint-scope](project_instruction-init-blueprint-scope.md) - instruction/skill 體系線終態——init×blueprint 定案、commands→skills 遷移、調用紀律、arch-thinking 中性、sync 慣例
+- [project_plugin-review-absorption-p1-p7](project_plugin-review-absorption-p1-p7.md) - Anthropic plugin review 方法論吸收（P1-P6 採/P7 不採）——已隨 AIR-28 c83ddf4 落地（09-05）；證據釘 marketplace SHA
+- [project_air-26-push-collection](project_air-26-push-collection.md) - AIR-26 委派收法 push 化全弧終結——三層文檔＋範本預載＋POC 雙腿；AIR-21 附帶結案；殘餘 commit 待確認；grok W605 已結
+- [project_ai-analysis-restructure-design](project_ai-analysis-restructure-design.md) - 任務放置與 backlog 載體線終態——mosaic 三池重構＋任務家探測、Backlog.md kanban 定案、卡即 handoff 契約、放置學教訓群
+- [project_flash-forensic-0905](project_flash-forensic-0905.md) - 09-04 夜 GLM-5.3-Flash 大切換鑑識完結——三軸獨立取證；flash=執行層可靠/judge 塌陷；自述歸因三例被打臉；改良已落地 AIR-24＋C 轉 mosaic
+- [ai-rules-dual-role-mosaic-shared](ai-rules-dual-role-mosaic-shared.md) - ai-rules 雙角色:通用 rules + mosaic(3 worktree)共用 skills/commands 的家;看到 mosaic-specific skill 別當漂移
+- [multi-harness-architecture-direction](multi-harness-architecture-direction.md) - ai-rules 跨 harness 方向——兩消費端、standards-first＋客製化 overlay、ref-docs/harness 為參考
+- [project_rebase-skill-nowt-ff-fix](project_rebase-skill-nowt-ff-fix.md) - rebase skill 無 worktree branch 純祖先 ff 修正——主修 0f6291e 閉環、二修 33d6aa6；09-04 後續 all ff 收斂鏈語義落地 250f716
+- [zcode-hooks-porting](zcode-hooks-porting.md) - ZCode hooks 移植完結（940746a）——symlink 無效（config 絕對路徑）、事件子集、專案層被忽略；exit 2 stderr 回饋 LLM
+
+## Reference
+
+- [reference_codex-config-zai-topology](reference_codex-config-zai-topology.md) - codex 四面：z.ai 認證拓撲/rescue 轉發 env 陷阱/sol high 審查能力剖面/AGENTS.md 上限 knob——跨家族第二意見定位
+- [reference_external-runtime-delegation-family](reference_external-runtime-delegation-family.md) - muse/codex/grok 委派同族——派發政策（實作預設/審查優先/gate）＋收法階層（fire-and-forget/認領制）
+- [reference_muse-code-cli-facts](reference_muse-code-cli-facts.md) - Muse Code CLI 操作事實——JSONL 事件面、plugin gate、計費鐵則、bridge 機械、rules 64KiB 截斷 lane、session 記錄讀取
+- [reference_bash32-set-u-empty-array-trap](reference_bash32-set-u-empty-array-trap.md) - shell 陷阱四則：set -e 賦值繼承/set -u 空陣列/zsh equals展開/多位元組變數名——護衛語法＋實證
+- [reference_report-server-md-viewer-central-mount](reference_report-server-md-viewer-central-mount.md) - :6421 md preview 中央掛載定案（09-03 選項②）——viewer 單一源
+- [reference_zcode-platform-facts](reference_zcode-platform-facts.md) - ZCode 平台事實：compact 恢復、跨 session 參考、db.sqlite 遙測、ENOENT 故障、內建 memory 拓撲
+- [reference_git-mv-nesting-and-verification-traps](reference_git-mv-nesting-and-verification-traps.md) - 遷移機械陷阱五連——git mv 嵌套、先 Edit 後 mv 遺漏（rename 100% similarity 症狀）、fd 限深度
+- [reference_code-reality-mcp-cli-faces](reference_code-reality-mcp-cli-faces.md) - code-reality MCP×CLI 雙面——同 binary 同 graph.db、MCP-first 與 agent 地雷、build 傘形、freshness、免新 session
+- [reference_rg-r-flag-display-replacement](reference_rg-r-flag-display-replacement.md) - rg 旗標陷阱——-rn 是顯示替換（match 成字面 n）、-h=help 非 no-filename（用 -I）、-L=follow；grep 直覺不可遷移
+- [reference_zcode-cc-subagent-model-thinking](reference_zcode-cc-subagent-model-thinking.md) - ZCode/CC subagent 對照遺產——08-29 registry split 後多半過時；仍活：別名實測、新chat判決、cwd 錨定
+- [reference_zcode-quota-reset-gift](reference_zcode-quota-reset-gift.md) - ZCode 5h 額度 reset gift 機制——server-side 池逐次發放（各帶 expire_at）＋client 每
+- [reference_backlog-md-field-limits](reference_backlog-md-field-limits.md) - Backlog.md 卡欄位大小限制分寫入入口——CLI/REST/直接改檔無限制、僅 MCP schema 有
+- [reference_codex-rollout-jsonl-autopsy](reference_codex-rollout-jsonl-autopsy.md) - codex session 屍體考古機械——rollout JSONL 結構、jq 抽取路徑、配額死亡訊號形態、resume 檔名規則
+- [reference_codex-rules-exec-policy](reference_codex-rules-exec-policy.md) - Codex 的 rules/＝exec policy（Starlark prefix_rule）非行為
+- [reference_backlog-md-browser-id-mechanics](reference_backlog-md-browser-id-mechanics.md) - Backlog.md browser 視野/id 防撞/遮蔽三面體/port fallback——診斷先打 API，跨 WT 靠 commit 紀律
+- [reference_skills-deploy-dir-level-symlink](reference_skills-deploy-dir-level-symlink.md) - skills 部署形態會漂——.agents 目錄級 symlink 恆真；.zcode 兩觀測矛盾——判定當場 ls -ld＋ls -i 比 inode，勿信快照
+- [reference_browser-use-iab-facts](reference_browser-use-iab-facts.md) - ZCode IAB（browser-use plugin）操作事實——fullPage
+- [reference_hook-python-heredoc-write-block](reference_hook-python-heredoc-write-block.md) - PreToolUse hook 擋 python heredoc 寫檔（Edit/sed 禁令繞道偵測）——改檔含
+- [reference_cc-agent-view-bg-sessions](reference_cc-agent-view-bg-sessions.md) - CC --agent <name> --bg：registry agent 當 session 主體；supervisor 存活；worktree＋auto-commit 接線點
+- [reference_crg-install-platform-coverage](reference_crg-install-platform-coverage.md) - CRG（code-review-graph）安裝語義——三段式安裝、「one command」僅指 install、16 平台不含 ZCode、直寫 config 非 marketplace
+- [reference_lsp-python-mcp-server](reference_lsp-python-mcp-server.md) - 【已停擺 08-28：型別面由 CR bridge 接班】lsp_mcp v2 歷史記錄——payload 路由鏈＋多語言 backend（pyright/RA）；ZCode 單一 entry
+- [reference_cr-vs-cbm-positioning](reference_cr-vs-cbm-positioning.md) - cr vs CBM 定位定論（08-30）——cr=證據機器（A 軸機械驗證）、CBM=地圖機器（導航）；frontier 兩穩定點非互取代；問題＝哪類查詢路由到誰
+- [reference_cbm-architecture-tree-sitter-hybrid-lsp](reference_cbm-architecture-tree-sitter-hybrid-lsp.md) - CBM 索引架構——tree-sitter 162 grammars＋手寫 C type-resolvers（非 LSP/SCIP）；zero-edge；MCP 已裝 ZCode
+- [reference-frontmatter-triggers-on-yaml-trap](reference-frontmatter-triggers-on-yaml-trap.md) - skill/command frontmatter YAML 兩 trap——description 裸值含「: 」須 quoted；收尾 --- 必須自成一線（muse 嚴格拒收黏行）
+- [reference_ccr-local-gateway](reference_ccr-local-gateway.md) - claude-code-router v3 gateway——3456 唯一客戶端入口（Anthropic 相容）、3457 core 內部端點勿直連、config 在 config.sqlite
+- [reference_cc-workflow-model-zcode-absence](reference_cc-workflow-model-zcode-absence.md) - CC dynamic workflow 心智模型（script 持計畫/resume/確定性）＋ZCode 無此概念；deepwork 化=CC 原生＋ZCode 模式等價（落檔 findings）
+- [reference_periodic-task-landscape](reference_periodic-task-landscape.md) - ai-rules 排程現值→ai-analysis/schedule-registry.md；mosaic plist→ls ~/Library/LaunchAgents/
+- [reference_rust-callgraph-macro-gap-research](reference_rust-callgraph-macro-gap-research.md) - Rust call graph macro/dispatch 缺口生態研究——W6 關帳：殘餘≈0 不建（空白＝無價值非無人做）
+- [reference_generated-artifact-storage-patterns](reference_generated-artifact-storage-patterns.md) - 生成物（code index/cache/db）存放三形態分類與工具實例——repo-local cache／中央
+- [reference_memory-index-load-truncation](reference_memory-index-load-truncation.md) - memory 索引截斷定案——兩端同 200 行／25,000 字元（UTF-16）；「Claude 量 bytes」是欄位名誤讀；gate 分級 chars/lines 硬、bytes INFO
+- [reference_vscode-byok-chatlanguagemodels](reference_vscode-byok-chatlanguagemodels.md) - VSCode BYOK 走 user-level chatLanguageModels.json＋customendpoint；ccr 3456 已落地（手寫 entry 教訓）
+- [reference_underscore-prefix-sort-cross-tool](reference_underscore-prefix-sort-cross-tool.md) - 底線前綴目錄跨工具排序實測——VSCode 聚頂✓/Finder 忽略前導底線✗/ls 視 locale；_ 業界語義=私有框架保留非釘頂
