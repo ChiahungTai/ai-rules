@@ -116,7 +116,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 | family | model | effort | 容量現值 | 備註 |
 |--------|-------|--------|----------|------|
 | muse | `muse-spark-1.3` | `xhigh`（user 09-04 定；純機械掃描 advisory 可降 `low`/`medium` 省 quota）；深推理可升 `ultra`（CLI alias → provider 最高級＝API `max`，限 1.3 Standard tier；reasoning tokens 佔 output 比例更大，留意輸出上限截斷） | 長 context（以 provider dashboard 為準） | 具視覺輸入 `--image`，跨家族備選；advisory／implement／review 共用此 family；bridge 端預設 pin 與本表對齊（muse-plugin-cc 弧維護），`--model`／`--effort` passthrough 僅供臨時 override |
-| codex | `gpt-5.6-sol` | `high` | 約 258K（user 09-05 實值；以 provider 為準）——額度最少故預設不派（見 dispatch 預設段）；大 context 任務仍優先 muse | ad-hoc 選項（僅 user 顯式指定）；companion `--model` 可傳（內建 `spark` 別名），不傳落 `~/.codex/config.toml` 預設（本機已 pin 同值） |
+| codex | `gpt-5.6-sol` | `high` | 約 258K（user 09-05 實值；以 provider 為準）——額度最少故預設不派（見 dispatch 預設段）；大 context 任務仍優先 muse | ad-hoc 選項（僅 user 顯式指定）；companion `--model`／`--effort` 傳遞（值域 `none`…`xhigh`；`spark` 別名→`gpt-5.3-codex-spark`）——**`--effort` 是 plugin 轉發面詞彙，raw `codex exec` 不收**（unexpected argument 實證）；raw 形態＝`--model <id>`＋`-c model_reasoning_effort=<v>`。**不帶旗標＝落 config 預設，現值 `gpt-5.5`/`low`（09-08 查驗 `~/.codex/config.toml:5-6`；舊記「本機已 pin 同值 sol」已過時）——要 family 表值必須顯式帶旗標，禁信 config 預設** |
 | GLM（in-harness） | 見 tier 表 | 見 tier 表 | 高（遠高於 200K 級，見 provider dashboard） | 沿用 tier→lite／vision 路由，不經 external-runtime 派發；in-harness acceptance reviewer 屬此 |
 
 > 容量為「需現況查證」性質，隨 model 世代更新只改本表。
