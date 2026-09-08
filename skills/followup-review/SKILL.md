@@ -50,11 +50,11 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 
 驗收後更新 `.review/<branch>.md`(或 EP review 區段)finding 的 `status`(格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)):`verified`(採納且通過)/ `closed`(拒絕合理)/ 維持 `open`(未通過需再修)。新引入的 Critical / Important 問題,新增 finding(狀態 `open`)。
 
-### muse reviewer 續接驗收（委派形態；bridge ≥0.2.6——未實戰，首跑後回報修訂）
+### muse reviewer 續接驗收（委派形態；delegate-bridge ≥1.0.0——未實戰，首跑後回報修訂）
 
 原始 review 若為 muse 委派（經 bridge——reviewer 交接契約的 jobId→ledger sessionId 即續接定址鍵），followup 可定向續接**同一 reviewer session**——帶完整審查記憶（findings 理由、讀過的檔案、考慮過又放過的 near-miss）逐項驗收，非讀檔扮演。
 
-`muse task --session-id <review sessionId> -- "<逐項驗收>＋fix commit range"`（跨 workspace 加 `--allow-workspace-switch`；語義矩陣與守衛處置見 [model-routing](../model-routing/SKILL.md)「session 定向接續」節）
+`delegate-bridge task --session-id <review sessionId> -- "<逐項驗收>＋fix commit range"`（family 預設 muse；跨 workspace 加 `--allow-workspace-switch`；語義矩陣與守衛處置見 [model-routing](../model-routing/SKILL.md)「session 定向接續」節）
 
 - 語義＝**mutating 續寫**（append 進原 transcript）——多輪 followup 疊同一卷，reviewer 記得前輪驗收
 - prompt 必帶 fix commit range＋明示**重讀當前檔案**（卷內檔案狀態是修前的 stale）

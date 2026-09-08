@@ -115,8 +115,8 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 | family | model | effort | 容量現值 | 備註 |
 |--------|-------|--------|----------|------|
-| muse | `muse-spark-1.3` | `xhigh`（user 09-04 定；純機械掃描 advisory 可降 `low`/`medium` 省 quota）；深推理可升 `ultra`（CLI alias → provider 最高級＝API `max`，限 1.3 Standard tier；reasoning tokens 佔 output 比例更大，留意輸出上限截斷） | 長 context（以 provider dashboard 為準） | 具視覺輸入 `--image`，跨家族備選；advisory／implement／review 共用此 family；bridge 端預設 pin 與本表對齊（muse-plugin-cc 弧維護），`--model`／`--effort` passthrough 僅供臨時 override |
-| codex | `gpt-5.6-sol` | `high` | 約 258K（user 09-05 實值；以 provider 為準）——額度最少故預設不派（見 dispatch 預設段）；大 context 任務仍優先 muse | ad-hoc 選項（僅 user 顯式指定）；companion `--model`／`--effort` 傳遞（值域 `none`…`xhigh`；`spark` 別名→`gpt-5.3-codex-spark`）——**`--effort` 是 plugin 轉發面詞彙，raw `codex exec` 不收**（unexpected argument 實證）；raw 形態＝`--model <id>`＋`-c model_reasoning_effort=<v>`。**不帶旗標＝落 config 預設，現值 `gpt-5.5`/`low`（09-08 查驗 `~/.codex/config.toml:5-6`；舊記「本機已 pin 同值 sol」已過時）——要 family 表值必須顯式帶旗標，禁信 config 預設** |
+| muse | `muse-spark-1.3` | `xhigh`（user 09-04 定；純機械掃描 advisory 可降 `low`/`medium` 省 quota）；深推理可升 `ultra`（CLI alias → provider 最高級＝API `max`，限 1.3 Standard tier；reasoning tokens 佔 output 比例更大，留意輸出上限截斷） | 長 context（以 provider dashboard 為準） | 具視覺輸入 `--image`，跨家族備選；advisory／implement／review 共用此 family；bridge 端預設 pin 與本表對齊（delegate-bridge 弧維護），`--model`／`--effort` passthrough 僅供臨時 override |
+| codex | `gpt-5.6-sol` | `high` | 約 258K（user 09-05 實值；以 provider 為準）——額度最少故預設不派（見 dispatch 預設段）；大 context 任務仍優先 muse | ad-hoc 選項（僅 user 顯式指定）；**bridge ≥1.0.0 承載（`task --family codex`，AIR-47 吸收）**——`--model`／`--effort` bridge flag 直達（`spark` 別名→`gpt-5.3-codex-spark`）；raw 形態＝`-m <id>`＋`-c model_reasoning_effort=<v>`（raw `codex exec` 不收 `--effort`——unexpected argument 實證；codex 無 `ultra`）。**不帶旗標＝落 config 預設，現值 `gpt-5.5`/`low`（09-08 查驗 `~/.codex/config.toml:5-6`）——要 family 表值必須顯式帶旗標，禁信 config 預設**。raw CLI 事實集（事件流／resume／fork／sandbox）見 memory `reference_codex-cli-raw-facts`——官方 openai-codex companion 已退役（AIR-47），委派一律經 bridge |
 | GLM（in-harness） | 見 tier 表 | 見 tier 表 | 高（遠高於 200K 級，見 provider dashboard） | 沿用 tier→lite／vision 路由，不經 external-runtime 派發；in-harness acceptance reviewer 屬此 |
 
 > 容量為「需現況查證」性質，隨 model 世代更新只改本表。
@@ -146,18 +146,18 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 ### flag profile → spawn 參數（external-runtime）
 
-> 本表為 flag 具體值單一源（registry 側只留 thin forwarder 治理原則，見 `agents/AGENTS.md`）。bridge 未暴露的 flag 以工單紅線承載（見 `skills/_common/work-order.md`），暴露後改 flag；roadmap 記錄在 muse-plugin-cc 側。
+> 本表為 flag 具體值單一源（registry 側只留 thin forwarder 治理原則，見 `agents/AGENTS.md`）。bridge 未暴露的 flag 以工單紅線承載（見 `skills/_common/work-order.md`），暴露後改 flag；roadmap 記錄在 delegate-bridge 側。表列 `muse task`／`codex task` 為語義縮寫——實體命令＝`delegate-bridge.mjs task [--family muse|codex]`（v1.0.0 前入口為 `muse-bridge.mjs`，Muse 家族 CLI 相容不變）。
 
 | profile | family | spawn 參數 | 說明 |
 |---------|--------|------------|------|
-| advisory | muse | `muse task`＋read-only 紅線承載（`--disable-write` flag 未暴露——bridge 0.2.5 實測；暴露列 muse-plugin-cc roadmap） | read-only 掃描（SM-2）；effort 取上表 muse 列 |
+| advisory | muse | `muse task`＋read-only 紅線承載（`--disable-write` flag 未暴露——bridge 實測至 v1.0.0 未暴露；暴露列 delegate-bridge roadmap） | read-only 掃描（SM-2）；effort 取上表 muse 列 |
 | implement | muse | `muse task --trust-workspace` | 背景跑（見 rules/tool-discipline） |
-| implement／advisory（定向接續形態） | muse | `muse task --session-id <uuid>`（bridge ≥0.2.6；跨 workspace 加 `--allow-workspace-switch`） | resume 指定 session 續問——語義矩陣與守衛處置見下「session 定向接續」節 |
-| implement | codex | `codex task --write`（workspace-write） | 診斷／救援寫入型 |
+| implement／advisory（定向接續形態） | muse | `muse task --session-id <uuid>`（bridge ≥0.2.6 起暴露，現 delegate-bridge ≥1.0.0；跨 workspace 加 `--allow-workspace-switch`；codex 家族同形＝`task --family codex --session-id`） | resume 指定 session 續問——語義矩陣與守衛處置見下「session 定向接續」節 |
+| implement | codex | `codex task --write`（workspace-write；經 bridge `--family codex`） | 診斷／救援寫入型 |
 | review | muse | `muse review --json`（bridge `review` 子命令——**git-diff 審查工具**：`--base <ref>` 定 diff 範圍；非文件審查形態——EP 等文件審查走 `task`＋read-only 紅線，`--schema` flag 不存在〔bridge 0.2.5 實測〕） | diff 審查產出 verdict |
-| review | codex | `codex --output-schema <verdict>` | 同上，codex 形態 |
+| review | codex | `codex review --json`（bridge `--family codex`——`--output-schema` 注入＝verdict schema 原生機制，POC 實證） | 同上，codex 形態 |
 
-**bridge 必經（muse 委派唯一入口）**：委派 muse 跑 repo 任務一律經 bridge 入口（上表 muse 列＝`muse-bridge.mjs` 子命令的抽象形態），禁直呼 `muse exec` 或其他繞過 bridge 的入口——bridge 落 per-repo `.muse-bridge/jobs.json` ledger（jobId／sessionId／status／text），非 bridge 入口的 muse 產出 ledger 查無，事後只能從副作用側考古（真實案例：mosaic post-build 鏈同鏈兩段 muse 委派一走 bridge 一繞道，繞道段收尾不可考）。完成回報攜帶 ledger jobId（reviewer 交接契約欄位）；委派了 muse 而 jobId 缺席＝入口違規，補查或標明。
+**bridge 必經（雙家族委派唯一入口）**：委派 muse／codex 跑 repo 任務一律經 bridge 入口（上表列＝`delegate-bridge.mjs` 子命令的抽象形態，`--family` 選家族——v1.0.0 前為 `muse-bridge.mjs` 僅 muse），禁直呼 `muse exec`／`codex exec` 或其他繞過 bridge 的入口——bridge 落 per-repo `.delegate-bridge/jobs.json` ledger（jobId／sessionId／status／text／family 欄；v1.0.0 前舊 ledger `.muse-bridge/` 兩 dir 皆讀、id 去重），非 bridge 入口的產出 ledger 查無，事後只能從副作用側考古（真實案例：mosaic post-build 鏈同鏈兩段 muse 委派一走 bridge 一繞道，繞道段收尾不可考）。完成回報攜帶 ledger jobId（reviewer 交接契約欄位）；委派了外部 runtime 而 jobId 缺席＝入口違規，補查或標明。
 
 ### session 定向接續（`--session-id` resume／fork；09-08 L4 實測）
 
@@ -177,7 +177,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 - **writer 守衛**（live session 已有寫者）：muse `already in use`／codex thread-store conflict → 請 user 關對方 app/thread 釋放後重派，禁繞道
 - **workspace 守衛**（muse 跨 workspace resume）：session 建立於 workspace A、在 B resume 預設拒絕——經 bridge 加 `--allow-workspace-switch`（workspace 綁定移到 caller cwd）；raw `muse --workspace <path>`（釘原 workspace）bridge 未暴露
 
-**bridge 必經管轄**：定向接續經 bridge 產生新 ledger entry（caller-cwd `.muse-bridge/jobs.json` 記**原 sessionId**，新 entry prepend）——跨 repo 絕對定址已實證（caller ledger 從未見過該 session，照樣定址成功）；flag 暴露前禁繞道直呼 `muse exec`。
+**bridge 必經管轄**：定向接續經 bridge 產生新 ledger entry（caller-cwd `.delegate-bridge/jobs.json` 記**原 sessionId**，新 entry prepend）——跨 repo 絕對定址已實證（caller ledger 從未見過該 session，照樣定址成功）；flag 暴露前禁繞道直呼 `muse exec`。
 
 **成本警示**：continuation 帶整包 context（codex resume 實測 127K tokens／fork 65K）——任務可口述就走 handoff doc，別為省一張工單續整卷。
 
@@ -187,20 +187,19 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 **決策樹**（未載入背景的 session 單讀可執行）：
 
-1. **簡單轉發（review／critique／diagnosis）**：主 session 背景 Bash 直呼 bridge 阻塞形（muse `task`／codex `task`）→ process exit 自動喚醒 → stdout 即 finalText；jobId 記錄不變（reviewer 交接契約欄位照舊）
-2. **長跑（>10min，xhigh 委派）＝fire-and-forget 優先**：`muse task --background "<prompt>"`（長 prompt 改 `--prompt-file <path>` 形態）提交 → jobId 即回 → caller 結束 turn 釋放（不掛前景、不綁 session）。**收法分流（session 是否需接續）**：session 活著且完成後要接續做事 → **背景 Bash 掛 `wait <jobId>`（首選兩段式）**——零 model request，wait exit 觸發 harness notification **自動喚醒 session 接續**；session 將結束或不在乎即時收 → 純認領制（事後任何時刻 `show <jobId>`——**完成無推送、不會自己回來**，須主動查）。finalText 由 per-job jsonl 重導出，ledger entry 只存 status／exitCode／summary。**timeout 到期訊號兩家相反（拆家系判讀——晚收同樣需要的語義，非殘留）**：
-   - **muse `wait <jobId>`**：裸 wait 撞預設 5min＝`process.exit(124)`——exit 124＋status 仍 running＝重掛；`--timeout 0`＝forever（長跑必帶）
-   - **codex `status --wait <jobId> --json`**：timeout 到期（預設 4min）＝**正常 exit 0**、JSON 帶 `waitTimedOut: true`——以此旗標判讀重掛（124 偵測對 codex 永不觸發）；**codex 無 0=forever**——`--timeout-ms 0` 靜默回落 4min 預設（`codex-companion.mjs:319` `Number(timeoutMs)||DEFAULT`），只能顯式大值
+1. **簡單轉發（review／critique／diagnosis）**：主 session 背景 Bash 直呼 bridge 阻塞形（`task`，家族經 `--family`）→ process exit 自動喚醒 → stdout 即 finalText；jobId 記錄不變（reviewer 交接契約欄位照舊）
+2. **長跑（>10min，xhigh 委派）＝fire-and-forget 優先**：`task --background "<prompt>"`（長 prompt 改 `--prompt-file <path>` 形態）提交 → jobId 即回 → caller 結束 turn 釋放（不掛前景、不綁 session）。**收法分流（session 是否需接續）**：session 活著且完成後要接續做事 → **背景 Bash 掛 `wait <jobId>`（首選兩段式）**——零 model request，wait exit 觸發 harness notification **自動喚醒 session 接續**；session 將結束或不在乎即時收 → 純認領制（事後任何時刻 `show <jobId>`——**完成無推送、不會自己回來**，須主動查）。finalText 由 per-job jsonl 重導出，ledger entry 只存 status／exitCode／summary。**timeout 語義（AIR-47 S3 起對外單一形，兩家族同）**：
+   - bridge `wait <jobId>`：timeout 到期＝`process.exit(124)`——exit 124＋status 仍 running＝重掛；`--timeout 0`＝forever（長跑必帶）
    - 任一家回非 completed 終態 → `jobs/<id>.jsonl`＋working tree 對照再判（reconcileStaleRunning 可能過早標 interrupted）
-   - **兩端 SessionEnd 差異（caller 在哪家 harness，決定能否跨 session 認領）**：ZCode 端 plugin hooks 不執行 → background worker（detached，脫離 caller 進程樹）跨 session 存活 → 任何 session 以 `runs`／`show` 認領（fire-and-forget 完整可用）；CC 端 SessionEnd hook 殺 running job 進程樹＋標 interrupted → holder session 必須活著 → fire-and-forget 限縮為「session 內釋放 turn」，跨 session 認領前先確認 holder 在場（事實源：`…/muse-market/muse/<ver>/scripts/session-lifecycle-hook.mjs`＋`hooks/hooks.json`，以 plugin cache 現版為準）
-3. **prompt 工程（codex gpt-5-4-prompting 改寫）**：wrapper 保留——wrapper 內單次阻塞 `task`＋env fallback 預寫不變（`CLAUDE_PLUGIN_ROOT` 缺失時 `MODULE_NOT_FOUND` 形態）；wrapper Bash 10min 上限是**約束事實**、wrapper≠job 錯位是**獨立實證**（wrapper 在 runtime 未終局時提前 complete 是系統性常態——muse×2＋codex×2 均需介入實證；wrapper agent 形態＝別名 alias）、兩者因果未驗證——預期超時的工單改走 2
+   - **兩端 SessionEnd 差異（caller 在哪家 harness，決定能否跨 session 認領）**：ZCode 端 plugin hooks 不執行 → background worker（detached，脫離 caller 進程樹）跨 session 存活 → 任何 session 以 `runs`／`show` 認領（fire-and-forget 完整可用）；CC 端 SessionEnd hook 殺 running job 進程樹＋標 interrupted → holder session 必須活著 → fire-and-forget 限縮為「session 內釋放 turn」，跨 session 認領前先確認 holder 在場（事實源：`…/delegate-market/delegate/<ver>/scripts/session-lifecycle-hook.mjs`＋`hooks/hooks.json`，以 plugin cache 現版為準）
+3. **prompt 工程（codex gpt-5-4-prompting 改寫）**：**官方 openai-codex plugin 已退役（AIR-47）**——wrapper 形態隨 companion 退役不再是 ai-rules 路由引用面（plugin 快取仍在場可手動用）；歷史實證保留供參：wrapper Bash 10min 上限是約束事實、wrapper 在 runtime 未終局時提前 complete 是系統性常態（muse×2＋codex×2 均需介入實證）——預期超時的工單改走 2
 4. **LLM 層 fallback（罕見——原始派發無背景 Bash 掛載；前景短 arm 仍可用）**：ETA-gate 紀律——推估完成時刻前零檢查（一段 `--timeout <eta>` arm）→ 屆時單次檢查 → 未終局重掛遞減 timeout 的阻塞 wait arm（起點＝bridge 預設 5min／4min，按 ETA 緊化至 ~30s 級；每 arm 到期＝1 request）——**永不做 LLM 層定時輪詢**
 
 > **多工複用（fire-and-forget 的複用形態）**：一個 session 持 N 個 jobId 統一掃（`runs --json` sweep 後逐個 `show`／`wait` 認領）；並行 quota 語義＝同 5h window token 加總（並行買 wall-time 不省花費），實用並行上限 2-3 長任務。
 >
-> **晚收陷阱（Muse 諮詢收編——決策樹尾注）**：`wait` 用有界 timeout 迴圈、勿單一大 block；`stop`/清理前先 `show`／`export`（ledger GC 會吃證據）；委派工單設計成冪等（timeout 後可能重 wait 重收）；jobId 持久化在 workspace ledger（`.muse-bridge/`），不依賴提交 session 的 context——認領 session 只需 jobId＋同 workspace。
+> **晚收陷阱（Muse 諮詢收編——決策樹尾注）**：`wait` 用有界 timeout 迴圈、勿單一大 block；`stop`/清理前先 `show`／`export`（ledger GC 會吃證據）；委派工單設計成冪等（timeout 後可能重 wait 重收）；jobId 持久化在 workspace ledger（`.delegate-bridge/`），不依賴提交 session 的context——認領 session 只需 jobId＋同 workspace。
 >
-> **診斷手段（非收法）**：`.muse-bridge/jobs.json`／`show <jobId> --json`／`ps` 進程核對——懷疑 job 狀態時用它們查證，不當等待機制。
+> **診斷手段（非收法）**：`.delegate-bridge/jobs.json`／`show <jobId> --json`／`ps` 進程核對——懷疑 job 狀態時用它們查證，不當等待機制。
 
 > 工單模板見 `skills/_common/work-order.md`（foreign runtime 共用；prompt 為任務本文，禁含委派語言）。
 

@@ -1,6 +1,6 @@
 # Work Order — Foreign-runtime 委派工單模板（_common）
 
-> 共享子範本——foreign runtime（muse bridge task／codex）共用；skill 間引用＋主 session 直接填寫。prompt 為任務本文，禁含委派語言（muse-in-muse EPERM 教訓）。本檔定義十節硬欄位，缺一不可；消費端填寫時逐節落實，空缺＝未就緒。
+> 共享子範本——foreign runtime（delegate-bridge `task --family muse|codex`）共用；skill 間引用＋主 session 直接填寫。prompt 為任務本文，禁含委派語言（muse-in-muse EPERM 教訓）。本檔定義十節硬欄位，缺一不可；消費端填寫時逐節落實，空缺＝未就緒。
 
 ## 1. 紅線（首段，違反＝失敗）
 
@@ -8,7 +8,7 @@
 - read-only 任務禁任何寫入（advisory profile 尤甚）
 - 禁把產物寫到 `/tmp` 或 repo 外；中間筆記不留檔
 - 紅線違反＝失敗，非風格問題；審查未過不得結卡
-- 外部 runtime flag 未暴露時，以本紅線承載 read-only 約束（bridge 暴露 `--disable-write` 後改 flag；roadmap 記 muse-plugin-cc 側）
+- 外部 runtime flag 未暴露時，以本紅線承載 read-only 約束（bridge 暴露 `--disable-write` 後改 flag；roadmap 記 delegate-bridge 側）
 
 ## 2. 目標（一句話）
 
@@ -111,4 +111,4 @@
 
 ---
 
-> 消費形態：skill 間以 `../_common/work-order.md` link 引用，或主 session 直接依本模板填寫新工單本文後經 bridge `task`／codex 派發。長跑工單派發後回報 jobId（供 `wait`／`show` 晚收與跨 session 認領），收法單一源見 model-routing skill「完成回報收法」決策樹。`rules/model-routing.md` tier 詞彙句與 `skills/model-routing/SKILL.md` 解析表為 family／profile 詞彙與映射單一源，本模板不自帶定義。
+> 消費形態：skill 間以 `../_common/work-order.md` link 引用，或主 session 直接依本模板填寫新工單本文後經 bridge `task`（`--family muse|codex`）派發。長跑工單派發後回報 jobId（供 `wait`／`show` 晚收與跨 session 認領），收法單一源見 model-routing skill「完成回報收法」決策樹。`rules/model-routing.md` tier 詞彙句與 `skills/model-routing/SKILL.md` 解析表為 family／profile 詞彙與映射單一源，本模板不自帶定義。

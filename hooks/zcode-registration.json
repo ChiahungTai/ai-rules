@@ -3,8 +3,8 @@
   "_comment": [
     "ZCode user-level hooks 註冊範本。本檔內容是 ~/.zcode/cli/config.json hooks: 鍵下的子樹值——merge 進去而非整檔覆蓋（整檔覆蓋會毀掉 config 的 mcp/plugins 區塊）；merge 時取 events 子樹，_comment 鍵不隨行。",
     "SessionEnd 條目＝範本預載（現版不可 merge）：ZCode 3.7.7+ user-level hooks 是 7 事件子集、無 SessionEnd（ref-docs/harness/contracts.md 定案）——待 ZCode 官方支援 SessionEnd（屆時對 zcode hooks 文檔事件表複核一次）才 merge 進 config。",
-    "維護：plugin 升級會使 cache 版號路徑漂移——plugin 升級時同步更新 muse/codex 條目的絕對路徑。",
-    "grok-build plugin 未安裝：安裝後照 muse/codex 條目形態補第三條 SessionEnd（其 cache 的 scripts/session-lifecycle-hook.mjs）。孤兒清理落差與 remediation 詳見 hooks/AGENTS.md。"
+    "維護：plugin 升級會使 cache 版號路徑漂移——plugin 升級時同步更新 delegate 條目的絕對路徑（原 muse 條目隨 delegate-bridge v1.0.0 更名已改；openai-codex SessionEnd 條目已隨官方 plugin 退役移除——AIR-47）。",
+    "grok-build plugin 未安裝：安裝後照 delegate 條目形態補 SessionEnd（其 cache 的 scripts/session-lifecycle-hook.mjs）。孤兒清理落差與 remediation 詳見 hooks/AGENTS.md。"
   ],
   "events": {
     "PreToolUse": [
@@ -62,20 +62,7 @@
             "type": "process",
             "command": "node",
             "args": [
-              "/Users/ctai/.zcode/cli/plugins/cache/muse-market/muse/0.2.4/scripts/session-lifecycle-hook.mjs",
-              "SessionEnd"
-            ],
-            "timeoutMs": 5000
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "process",
-            "command": "node",
-            "args": [
-              "/Users/ctai/.zcode/cli/plugins/cache/openai-codex/codex/1.0.6/scripts/session-lifecycle-hook.mjs",
+              "/Users/ctai/.zcode/cli/plugins/cache/delegate-market/delegate/1.0.0/scripts/session-lifecycle-hook.mjs",
               "SessionEnd"
             ],
             "timeoutMs": 5000
