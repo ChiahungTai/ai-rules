@@ -1,6 +1,6 @@
 ---
 name: model-routing
-description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/一般〕×五公司，model 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse＋glm-5.3-flash/影像＝支援影像的 model/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋lite 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、glm-5.3-flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定。
+description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/一般〕×五公司，model 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse＋glm-5.3-flash/影像＝支援影像的 model/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋lite 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、glm-5.3-flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定、定向接續、session-id、fork、workspace 守衛。
 ---
 
 # Model Routing — 解析表與 provider 事實
@@ -152,11 +152,34 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 |---------|--------|------------|------|
 | advisory | muse | `muse task`＋read-only 紅線承載（`--disable-write` flag 未暴露——bridge 0.2.5 實測；暴露列 muse-plugin-cc roadmap） | read-only 掃描（SM-2）；effort 取上表 muse 列 |
 | implement | muse | `muse task --trust-workspace` | 背景跑（見 rules/tool-discipline） |
+| implement／advisory（定向接續形態） | muse | `muse task --session-id <uuid>`（bridge ≥0.2.6；跨 workspace 加 `--allow-workspace-switch`） | resume 指定 session 續問——語義矩陣與守衛處置見下「session 定向接續」節 |
 | implement | codex | `codex task --write`（workspace-write） | 診斷／救援寫入型 |
 | review | muse | `muse review --json`（bridge `review` 子命令——**git-diff 審查工具**：`--base <ref>` 定 diff 範圍；非文件審查形態——EP 等文件審查走 `task`＋read-only 紅線，`--schema` flag 不存在〔bridge 0.2.5 實測〕） | diff 審查產出 verdict |
 | review | codex | `codex --output-schema <verdict>` | 同上，codex 形態 |
 
 **bridge 必經（muse 委派唯一入口）**：委派 muse 跑 repo 任務一律經 bridge 入口（上表 muse 列＝`muse-bridge.mjs` 子命令的抽象形態），禁直呼 `muse exec` 或其他繞過 bridge 的入口——bridge 落 per-repo `.muse-bridge/jobs.json` ledger（jobId／sessionId／status／text），非 bridge 入口的 muse 產出 ledger 查無，事後只能從副作用側考古（真實案例：mosaic post-build 鏈同鏈兩段 muse 委派一走 bridge 一繞道，繞道段收尾不可考）。完成回報攜帶 ledger jobId（reviewer 交接契約欄位）；委派了 muse 而 jobId 缺席＝入口違規，補查或標明。
+
+### session 定向接續（`--session-id` resume／fork；09-08 L4 實測）
+
+> 判準落點分工：本節管 routing 機械面（語義矩陣／守衛處置／通道現值）；「continuation vs handoff doc」形態選擇見 [handoff](../handoff/SKILL.md)「與 /at 的邊界」。
+
+**語義矩陣**：
+
+| harness | 命令 | live session | 結束後 | fork |
+|---|---|---|---|---|
+| muse | `muse exec --session-id <uuid> -- "<p>"`（經 bridge＝`task --session-id`） | exit 1 `already in use`（fail-loud，模型不跑） | 續寫語義兩個 09-08 觀察並記（差異因子未隔離——workspace 形態×載體）：同 workspace raw exec 宣稱 ephemeral 不寫回；**跨 workspace bridge＋`--allow-workspace-switch` 實證 durable 續寫**（原 transcript append `session.resumed`→回應→`session.end` 段，回應內容持久化）——**路由一律視為 mutating** | 無 |
+| codex | `codex exec resume <uuid> "<p>"` | exit 1 thread-store conflict | 真續寫（append 同 rollout） | `codex exec fork <uuid> "<p>"`——live 也可；新 uuid 複製完整歷史、原卷不動 |
+| claude | `claude -p --resume <uuid> "<p>"` | 未驗（help 暗示同款守衛） | 真續寫（mtime 實證） | `--fork-session` 在場、未驗 |
+
+**路由預設**：定向接續一律視為 **mutating continuation**——原卷不動的查詢走 codex `fork`，或不 spawn 的讀卷面（transcript jq／bridge `export`）。接續＝載入舊 context＋新 prompt 一起走（resume/fork 命令形態直接帶新任務）。
+
+**守衛處置（兩道，皆 fail-loud 帶自解說）**：
+- **writer 守衛**（live session 已有寫者）：muse `already in use`／codex thread-store conflict → 請 user 關對方 app/thread 釋放後重派，禁繞道
+- **workspace 守衛**（muse 跨 workspace resume）：session 建立於 workspace A、在 B resume 預設拒絕——經 bridge 加 `--allow-workspace-switch`（workspace 綁定移到 caller cwd）；raw `muse --workspace <path>`（釘原 workspace）bridge 未暴露
+
+**bridge 必經管轄**：定向接續經 bridge 產生新 ledger entry（caller-cwd `.muse-bridge/jobs.json` 記**原 sessionId**，新 entry prepend）——跨 repo 絕對定址已實證（caller ledger 從未見過該 session，照樣定址成功）；flag 暴露前禁繞道直呼 `muse exec`。
+
+**成本警示**：continuation 帶整包 context（codex resume 實測 127K tokens／fork 65K）——任務可口述就走 handoff doc，別為省一張工單續整卷。
 
 ### 完成回報收法
 
