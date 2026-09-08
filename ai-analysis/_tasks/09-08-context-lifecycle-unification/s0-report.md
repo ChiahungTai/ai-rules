@@ -286,3 +286,7 @@ ERROR: {"type":"error","status":400,"error":{"type":"invalid_request_error",
 **verdict：`project_doc_max_bytes=102400` runtime 生效，codex 側根治確認（雙探針、兩個獨立位置）。**
 
 附帶觀察（清理候選，未動）：codex config 的 `http://127.0.0.1:5555/mcp` MCP 條目連線失敗刷屏（5555＝CRG 已退役服務——config 殘留）；「Skill descriptions were shortened to fit the skills context budget」警告＝codex 有獨立 skills context budget 且自動縮短 desc（S6 觸發面對齊的輸入）。
+
+**P5 codex 腿：取消（user 拍板 09-08 晚）**——astra 額度成本高於此測試價值；GLM＋muse 雙腿結論已足（B 零退化＋定性勝）。另：`terra` 模型在 ChatGPT 帳號認證下不可用（API 400 實證）。
+
+**P5 codex 腿補記（09-08 晚，user 自跑）**：前述「取消」由 user 自行執行取代——`codex exec`（gpt-5.5/low effort，54,731 tokens）＝**A=10/10、B=10/10**；觀察與另兩腿一致：「B 用『當你要／收到／改動』直接對齊使用情境，A 較像抽象索引名與壓縮描述」。**三家族（GLM flash／muse 1.3 xhigh／codex gpt-5.5）全數零退化＋定性 B 勝——文法採用的跨家族實證完備。**附註：升級 0.153.4 後 codex 預設模型為 gpt-5.5（早場同 config 為 gpt-6-astra）。
