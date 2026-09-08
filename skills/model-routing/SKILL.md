@@ -150,10 +150,10 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 | profile | family | spawn 參數 | 說明 |
 |---------|--------|------------|------|
-| advisory | muse | `muse task --disable-write`（bridge 暴露前由工單紅線承載） | read-only 掃描（SM-2）；effort 取上表 muse 列 |
+| advisory | muse | `muse task`＋read-only 紅線承載（`--disable-write` flag 未暴露——bridge 0.2.5 實測；暴露列 muse-plugin-cc roadmap） | read-only 掃描（SM-2）；effort 取上表 muse 列 |
 | implement | muse | `muse task --trust-workspace` | 背景跑（見 rules/tool-discipline） |
 | implement | codex | `codex task --write`（workspace-write） | 診斷／救援寫入型 |
-| review | muse | `muse review --schema verdict`（bridge `review` 子命令） | 產出 accept／reject／needs-fix |
+| review | muse | `muse review --json`（bridge `review` 子命令——**git-diff 審查工具**：`--base <ref>` 定 diff 範圍；非文件審查形態——EP 等文件審查走 `task`＋read-only 紅線，`--schema` flag 不存在〔bridge 0.2.5 實測〕） | diff 審查產出 verdict |
 | review | codex | `codex --output-schema <verdict>` | 同上，codex 形態 |
 
 **bridge 必經（muse 委派唯一入口）**：委派 muse 跑 repo 任務一律經 bridge 入口（上表 muse 列＝`muse-bridge.mjs` 子命令的抽象形態），禁直呼 `muse exec` 或其他繞過 bridge 的入口——bridge 落 per-repo `.muse-bridge/jobs.json` ledger（jobId／sessionId／status／text），非 bridge 入口的 muse 產出 ledger 查無，事後只能從副作用側考古（真實案例：mosaic post-build 鏈同鏈兩段 muse 委派一走 bridge 一繞道，繞道段收尾不可考）。完成回報攜帶 ledger jobId（reviewer 交接契約欄位）；委派了 muse 而 jobId 缺席＝入口違規，補查或標明。
