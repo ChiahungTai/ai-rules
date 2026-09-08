@@ -34,4 +34,6 @@ ordinal: 40000
 【P1 完成 09-08 晚】taxonomy 交付（任務家 p1-taxonomy.md）＋主 session 三輪抽驗通過。數字校正：desc ③ 原載『≈30 Write』係 rollout 膨脹計數假象——db 真值 2ok+2err（specimen 定性不變更強：2h≥5 寫入≥4 身份）。SM-5 破口量化 71/128+73/106。bundle 面無確證 scope creep。hook 在已實裝面完全有效（MEMORY.md 直寫 0 次）——缺的是放置閘＋desc 內容閘。下一步 P2。
 
 【P2 完成 09-08 晚】統一定義表 v1 交付：本體=memory-audit SKILL.md 新節「載體統一定義表」（九載體交叉表＋該寫哪一行流＋誤置→處置＋摩擦設計），審計副本=任務家 p2-definition-table.md（D1-D8＋Decoder test 9/9 反查通過）。指針鏈五處同步（instruction-writing/AGENTS.md/rules/context-management/memory-audit 內三處）＋memory 條目段名 drift 修正。驗證=rg 殘留零＋consistency 96/100。殼 hook 1 補建＋卡 ref 換殼 URL。摩擦設計定案：放置閘=提醒注入（語義留 LLM）、desc 內容閘三判準全過可硬擋、工具層不做——實作另裁。下一步 P3（B 切換，規格全在 EP P3 段含 R1-R5）。
+
+【P3 完成 09-08 深夜】B 上線切換完成（user 確認凍結 12 條）：generate_index B 形態分流（清單檔 opt-in；唯一解析鍵=stem——6/128 條 fm name 分離實證；R2 fail-loud 三形態；R3 先 inventory 後常駐面；gate B=6,000/A=22,500）＋hook 擴 _inventory.md 手寫防護＋SKILL 三處同步。測試 14 條新增（lifecycle 65 綠/全套 222 綠）。live 切換：開場面 20,794→2,244 chars（-89%）；mosaic 三池 A 形態驗證不變；R4 實測常駐面 UNCHANGED＋inventory 信號口徑成立。回滾：池=先移 _resident-set.md 再 regen。下一步 P4 dogfood（3-5 session/48h 逐案四欄）。（註：backlog CLI spawn ENOENT 三連失敗——本段以檔案 Edit 直寫）
 <!-- SECTION:NOTES:END -->
