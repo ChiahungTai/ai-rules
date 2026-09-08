@@ -28,7 +28,7 @@ description: "搜尋工具陷阱細則載體（reference skill）——fd/rg 旗
 | **統計:檔案數**（寫進文檔/claim） | `rg -l "pattern" \| wc -l`（**禁 head 截斷**） |
 | 統計:per-file match 數 | `rg -c "pattern"`（輸出 `file:count` 多行，語境不同於檔案數） |
 
-**真實案例**：`rg -l "from <pkg>" | head -20` 截斷 → consumers **41 誤寫 20**（head 只列前段），多處文檔寫錯，**自審抓不到**（claim 與截斷證據共享盲點，需獨立第三方 rg 才揭露）。同類陷阱不同載體：符號查詢的 truncation/masking 見 [lsp-navigation](../../rules/lsp-navigation.md)。
+**真實案例**：`rg -l "from <pkg>" | head -20` 截斷 → consumers **41 誤寫 20**（head 只列前段），多處文檔寫錯，**自審抓不到**（claim 與截斷證據共享盲點，需獨立第三方 rg 才揭露）。同類陷阱不同載體：符號查詢的 truncation/masking 見 [symbol-query-routing](../../rules/symbol-query-routing.md)。
 
 ## git pathspec 陷阱
 

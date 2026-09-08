@@ -12,7 +12,7 @@ artifact <type> <target>  — mid-session 切 active menu artifact（如 `artifa
 city <module>      — 放大某模組的依賴細節（= boundary artifact）
 flow <use-case>    — 畫另一個 use case 的 flow（= sequence artifact）
 reuse <RC-XXX>     — 深入某重用嫌疑（含 LOW confidence；Pattern Radar，mode A）
-verify <symbol>    — 鎖定嫌疑，用 LSP findReferences / call chain 驗證（見 rules/lsp-navigation.md；反應式驗證，非 holistic 判讀）
+verify <symbol>    — 鎖定嫌疑，用 LSP findReferences / call chain 驗證（見 rules/symbol-query-routing.md；反應式驗證，非 holistic 判讀）
 boundary <module>  — 細看某模組邊界（= boundary artifact）
 
 > menu artifact selection replaces 舊鬆散 運作流程/資料流/概念圖 labels；drill switches artifact，verify stays reactive。
@@ -26,19 +26,19 @@ boundary <module>  — 細看某模組邊界（= boundary artifact）
 
 | Type | 人類說什麼 | LLM 調查 |
 |------|------------|----------|
-| 🔗 重用嫌疑 | 「這感覺跟那個重複」 | Pattern Radar 枚舉 + 信心度 + LSP findReferences 驗證（見 rules/lsp-navigation.md） |
+| 🔗 重用嫌疑 | 「這感覺跟那個重複」 | Pattern Radar 枚舉 + 信心度 + LSP findReferences 驗證（見 rules/symbol-query-routing.md） |
 | 🗺️ 結構可疑 | 「這依賴怪怪的」 | LSP `incomingCalls`/`outgoingCalls` 追蹤 + import graph |
 | 📐 邊界 | 「這不該在這模組」 | LSP `findReferences` 看跨域存取 + Read 邊界 |
 | 💬 Free-form | 任意 | 自動分類或直接回答 |
 
 ## 機械分工（何時用哪個工具）
 
-> **核心**：枚舉（撈全 + 相似）用 scan-project / Pattern Radar；驗證（特定 claim）用 LSP（見 [lsp-navigation](../../rules/lsp-navigation.md)）。**人鎖定嫌疑後才上驗證**。
+> **核心**：枚舉（撈全 + 相似）用 scan-project / Pattern Radar；驗證（特定 claim）用 LSP（見 [symbol-query-routing](../../rules/symbol-query-routing.md)）。**人鎖定嫌疑後才上驗證**。
 
 | 子任務 | 工具 | 角色 |
 |--------|------|------|
 | 撈全既有 symbol、找重用候選 | scan-project / Pattern Radar（枚舉） | **primary** —— 餵人的 whole-picture |
-| 人鎖定「這 enum 跟那 enum 可能重疊」後驗證 | LSP（`findReferences` / call chain，見 rules/lsp-navigation.md） | **secondary** —— 確認嫌疑 |
+| 人鎖定「這 enum 跟那 enum 可能重疊」後驗證 | LSP（`findReferences` / call chain，見 rules/symbol-query-routing.md） | **secondary** —— 確認嫌疑 |
 | City Map / Flows 渲染 | /illustrate | 渲染引擎（人 viewport） |
 
 > LSP 是**反應式驗證**（驗證特定 claim → ✅/❌），不是 holistic 架構判讀 —— 判讀是人的 whole-picture 工作。它是查證 helper，不是結構判讀本身。

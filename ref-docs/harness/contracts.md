@@ -42,7 +42,7 @@
 | 瀏覽器自動化 | Playwright MCP | 內建瀏覽器面板 + 官方 Browser Use plugin（防網頁注入指令、Chrome 登入態導入） | 鏡像未載（`computer-use.md` 為 Meta API 層非 CLI；`muse-code/` 無 CLI 瀏覽器自動化記載；`rg browser` 命中 subscriptions/auth/changelog（皆非 CLI 自動化工具記載））（Muse Code 鏡像未載） | ✅ 各有千秋 |
 | 背景執行 | v2.1.198+ 預設背景 + background agents | 背景 subagent（spawn 端 `run_in_background`，runtime 實測）+ 閒時任務 | ✅ observers×4＋背景 subagents（`/tasks`/`/subagents`）＋headless `muse exec` 背景（Muse Code `muse-code/extending.md:19,39`＋`muse-code/interactive.md:119`） | ✅ |
 | 權限 | 宣告式 glob 白名單 + 多模式 | 4 檔 GUI 模式 + SQLite 精確匹配記憶（04 報告 §7） | ✅ 三態 approval-mode＋judge＋staged 審批＋Seatbelt/bubblewrap 沙箱；granular `--disable-write`/`--disable-shell`（--help 實機，鏡像未載）（Muse Code `muse-code/permissions.md:31,42,47,75`＋`muse --help`） | ⚠️ 無宣告式白名單 |
-| LSP | 原生 plugin set | 無原生 → 自建 MCP 替代（lsp-navigation「跨 harness LSP 載體對照」） | 無原生 LSP；工具面＝bash/read_file/search 三件套（Muse Code 鏡像未載；`rg LSP` 於 `muse-code/` 0 命中） | ❌ workaround |
+| LSP | 原生 plugin set | 無原生 → 自建 MCP 替代（symbol-query-routing「跨 harness LSP 載體對照」） | 無原生 LSP；工具面＝bash/read_file/search 三件套（Muse Code 鏡像未載；`rg LSP` 於 `muse-code/` 0 命中） | ❌ workaround |
 
 **Claude 有、ZCode 無**：巢狀 subagent、agent teams、`/fork`、headless `-p`/Agent SDK（CI 自動化）、宣告式權限 glob、原生 LSP、hook 的 prompt/agent/http/mcp_tool type、subagent per-agent hooks/skills/memory/isolation、設定熱載入（ZCode 全靠 per-session 快照）。
 

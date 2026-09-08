@@ -199,7 +199,7 @@ Signal/noise framework: [encoder-philosophy.md](../_common/encoder-philosophy.md
 | **導航-A：概念→符號** | 「台股除權息調整」→ `backward_adjust()` | **instruction file（不可約）** | LSP `workspaceSymbol` 要先有名字才能搜；概念是人類用語，符號是程式碼用語，這對應只能人寫 |
 | **導航-B：符號→位置/簽名/引用** | `backward_adjust()` → 哪個檔案、簽名、誰呼叫 | **LSP（可推導）** | `goToDefinition` / `hover` / `findReferences` / `incomingCalls`，live 且 100% 準確 |
 
-**LSP 時代原則**：instruction file 只需給導航-A（概念→symbol name）；導航-B 交給 LSP。檔案路徑不再是要求。LSP 工具決策樹與分工見 `rules/lsp-navigation.md`。
+**LSP 時代原則**：instruction file 只需給導航-A（概念→symbol name）；導航-B 交給 LSP。檔案路徑不再是要求。LSP 工具決策樹與分工見 `rules/symbol-query-routing.md`。
 
 ### 概念→符號映射（導航-A）
 

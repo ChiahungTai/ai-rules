@@ -10,7 +10,7 @@ harness-scope: neutral
 
 ## 工具選擇原則
 
-- 工具四路路由（符號→code-reality、型別→bridge、文字→rg、檔案→fd）見 [lsp-navigation.md](lsp-navigation.md)；本檔載紀律與陷阱
+- 工具四路路由（符號→code-reality、型別→bridge、文字→rg、檔案→fd）見 [symbol-query-routing.md](symbol-query-routing.md)；本檔載紀律與陷阱
 - **視覺判讀（截圖/圖表/證據影像/UI 驗收）→ vision-review agent**（合約式 dispatch：視覺錨點＋verdict 格式＋read-only），**禁主 session 直接 Read 圖檔**——圖像 token 全量駐留主 context、多張即灌爆（GLM 5.3 實測），agent 在自身 context 消化、主 session 只收文字 verdict；亦非單發 image-analysis MCP——差距在 agent loop 的查證迴路＋合約紀律（截切、跨圖佐證、「畫面內無 X 則宣稱無從核實」），非模型能力
 - **Agent prompt 必須指定工具**：spawn agent 時，根據任務性質在 prompt 中明確寫「用 LSP hover/ goToDefinition 查簽名」或「用 rg 搜文字」。禁止 agent prompt 只寫「讀取/驗證」不指定工具
 

@@ -145,7 +145,7 @@
 - `diagram-selection` — 畫圖前選載體的判準與跨載體共性（判準四問：通道/交錯/是否圖論問題/成本軸；載體對照 mermaid/HTML 塊/archify/表格/domain 渲染器；archify=最後手段；vision 三段式契約＋分批上限＋全樣本錨定；渲染/判讀分離）
 - `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
 - `llm-output-convention` — 雙通道輸出細則載體（reference skill：print tag 全表〔[OK]/[WARN]/[FAIL]/[LOG]/[ACTION]/[progress]〕、print/Logger 慣例細則與閉環、stdlib logging 與框架 Logger 並存、遷移注意；rule 端留核心原則＋Namespace——rule+skill 分層控制 bundle 尺寸）
-- `lsp-navigation` — LSP 深層參考（reference skill：LSP operation 速查表、驗證 workflow/輸出格式、rg 陷阱案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness/reindex 處置；rule 留 cr-first 路由/任務啟動 gate 核心——rule+skill 分層控制 bundle 尺寸）
+- `symbol-query-routing` — 符號查詢路由深層參考（reference skill：LSP operation 速查表、驗證 workflow/輸出格式、rg 陷阱案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness/reindex 處置；rule 留 cr-first 路由/任務啟動 gate 核心——rule+skill 分層控制 bundle 尺寸）
 - `modern-cli-preference` — 搜尋工具陷阱細則（reference skill：fd/rg 旗標與 alternation 陷阱、grep 旗標遷移、glob 錨定、git pathspec 三陷阱、統計用途禁 head 截斷、盤點執行點雙掃；rule 留核心分工句——rule+skill 分層控制 bundle 尺寸）
 - `context7` — Context7 MCP 文檔查詢（library/framework/SDK/API 用法先查最新文檔再回答，優先於 web search；跨 harness MCP 支援）
 - `voice-notification` — 三通道語音通知（系統召回 / 進度提醒 / 完成通知）

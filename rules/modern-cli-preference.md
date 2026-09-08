@@ -10,7 +10,7 @@ harness-scope: neutral
 
 ## 核心原則
 
-**文字搜尋用 rg、檔案搜尋用 fd（預設遵守 `.gitignore`，減少噪音）；符號/圖譜與型別面路由見 [lsp-navigation.md](lsp-navigation.md)。**
+**文字搜尋用 rg、檔案搜尋用 fd（預設遵守 `.gitignore`，減少噪音）；符號/圖譜與型別面路由見 [symbol-query-routing.md](symbol-query-routing.md)。**
 
 (Claude: `find -exec`、`grep -r` 是 Claude Code 系統層級硬限制；`fd`/`rg` 預設可 auto-allow。其他 harness 無此限制，fd/rg 語法優勢通用)
 

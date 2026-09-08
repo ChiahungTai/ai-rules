@@ -94,7 +94,7 @@ scope 極大（50+ 檔）才用 Agent（free-text 產出，主 session 組報告
 - **查證誠信段必含**：記錄翻案（撤銷）/ 深化 / 確認，展示「批判性追查」——對 audit-test 的差異化
 - **撤銷的 finding 保留**（標 ❌）：查證推翻不刪除，示範自我否證建立信任
 - **微觀 ASCII 圖**（problem → fix 對照）：**僅當釐清該 finding 的 problem→fix 時才畫**（非每個 finding 必畫，避免噪音）；**結構巨觀圖（call graph / city map / 重用 / 邊界）不自畫——交 `/illustrate @<scope>`**
-- **LSP stale 警告**：判死碼前 LSP `findReferences` 回可疑少（只 intra-file）必須 rg 補（[lsp-navigation skill](../lsp-navigation/SKILL.md) 條件式 fallback）——dogfood 實證：`throttle()` LSP 只回定義點，rg 才發現 production 在用
+- **LSP stale 警告**：判死碼前 LSP `findReferences` 回可疑少（只 intra-file）必須 rg 補（[symbol-query-routing skill](../symbol-query-routing/SKILL.md) 條件式 fallback）——dogfood 實證：`throttle()` LSP 只回定義點，rg 才發現 production 在用
 
 ## 執行流程
 
@@ -127,7 +127,7 @@ zoom 是 read-only（產 finding + 建議，不改 code）。後續修正 + 驗�
 - **推薦先行**：不給選項清單，給明確推薦 + 理由
 - **查證必須**：inferred finding 必查證（LSP / rg）才報；未查標 `inferred ⚠️`（防 false positive——dogfood T1 教訓：未查就報「符號不存在」，rg 推翻）
 - **撤銷透明**：查證推翻的 finding 標 ❌ 保留，不刪（示範誠信）
-- **LSP stale 警告**：判死碼 LSP 回可疑少 → rg 補（[lsp-navigation skill](../lsp-navigation/SKILL.md)）
+- **LSP stale 警告**：判死碼 LSP 回可疑少 → rg 補（[symbol-query-routing skill](../symbol-query-routing/SKILL.md)）
 - **不重造機械**：死碼 → arch-thinking / LSP；測試反模式 → audit-test；severity / confidence → review-engine
 - **預設 source + test 同審**；user 可明確排除——不強制，避免稀釋放大鏡焦點
 
@@ -230,5 +230,5 @@ zoom 不是機械列 finding（那是 audit-test），是**批判性追查**。�
 
 - **對抗性自查**：每個 finding 挑戰自己判斷（不放水，判準 3）
 - **兩個查證陷阱（dogfood 實證，必記）**：
-  1. **LSP-stale**：判死碼時 LSP `findReferences` 回可疑少（只 intra-file / 跨檔消失）→ 必須 rg 補（[lsp-navigation skill](../lsp-navigation/SKILL.md) 條件式 fallback）。dogfood 實證：`throttle()` LSP 只回定義點，rg 才見 production 消費者
+  1. **LSP-stale**：判死碼時 LSP `findReferences` 回可疑少（只 intra-file / 跨檔消失）→ 必須 rg 補（[symbol-query-routing skill](../symbol-query-routing/SKILL.md) 條件式 fallback）。dogfood 實證：`throttle()` LSP 只回定義點，rg 才見 production 消費者
   2. **符號路徑**：**符號存在 ≠ 走你想當然的路徑**。看到符號被引用，別假設它走你預期的路徑——**讀 body 確認**。dogfood 實證：`_get_historical_bars_sync` 符號存在且被 docstring 引用，初版假設它是 throttle 消費者；fresh-eyes 讀 body 才發現走 `async with`（acquire），不是 throttle

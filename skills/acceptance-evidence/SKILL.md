@@ -24,7 +24,7 @@ description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限�
 | 間接層 | 誰引用 wrapper/target | `rg -e "make " scripts/ deploy/ .github/workflows/` |
 | 直呼層 | X 本體直呼 | `rg -e pytest -e "uv run" Makefile scripts/ deploy/ .github/workflows/` |
 
-**反例（真實案例）**：判定「哪些 gate 擋 merge/release」只掃 CI workflow 的 make 引用——漏掉 build.yml **直呼**的 `uv run pytest`（Python 測試唯一落點、非 make target）；rg 間接層有 hits ≠ 執行點清單完整。同 family：head 截斷（modern-cli-preference 統計禁 head 段）、toplevel-only import 漏 local import（lsp-navigation rule）——pattern coverage blind spot 的不同載體。高風險場景（一次性儀式/稽核）把兩層掃法命令寫死在執行清單，不依賴 session 記得。
+**反例（真實案例）**：判定「哪些 gate 擋 merge/release」只掃 CI workflow 的 make 引用——漏掉 build.yml **直呼**的 `uv run pytest`（Python 測試唯一落點、非 make target）；rg 間接層有 hits ≠ 執行點清單完整。同 family：head 截斷（modern-cli-preference 統計禁 head 段）、toplevel-only import 漏 local import（symbol-query-routing rule）——pattern coverage blind spot 的不同載體。高風險場景（一次性儀式/稽核）把兩層掃法命令寫死在執行清單，不依賴 session 記得。
 
 ## 抽樣推廣與全量對帳（樣本選擇機制）
 
@@ -36,7 +36,7 @@ description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限�
 
 - **執行主體的 identity**：誰在跑 gate、它把誰當 authority？（真實案例：在舊 worktree 跑部署 freshness checker → 滿屏 false Critical——checker 把「執行它的任意 checkout」當部署權威；reviewer 第一反射信 gate，查證後才撤銷並反推為結構性 finding）
 - **exit code 的傳遞路徑**：pipe 會遮蔽退出碼（`cmd | tail` 回報的是 tail 的 0——規則明載仍會犯：同弧內 ruff 實際 errors 曾被 `tail` 吃掉）
-- **索引/快照新鮮度**：LSP workspace staleness（見 [lsp-navigation](../lsp-navigation/SKILL.md)）、cr index 過期——回報可疑少時先重建再下結論
+- **索引/快照新鮮度**：LSP workspace staleness（見 [symbol-query-routing](../symbol-query-routing/SKILL.md)）、cr index 過期——回報可疑少時先重建再下結論
 
 false-red 與 false-green 同危險——後者讓 coverage 型 gate 靜默放行（真實案例：殼 provenance lint 只被自身 unit test 引用、未接進任何閘門，實跑「全過」實為 coverage false-green）。
 

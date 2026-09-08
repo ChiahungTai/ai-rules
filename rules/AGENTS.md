@@ -26,7 +26,7 @@ uv run python scripts/deploy_agents.py
 非 Claude 端單檔 AGENTS.md 受 harness **截斷線**約束——超線內容**靜默失效**（不報錯，直接截掉）：
 
 - **ZCode 實測**：截斷線 **102,400 bytes（100KiB）**，硬編碼於 `zcode.cjs`（`hIn=100*1024`，讀前 100KiB bytes 再 UTF-8 decode），**無任何 config 可調**（官方文檔亦未記載）。載入模型：只讀 user 全域（`~/.zcode/AGENTS.md`）+ workspace（cwd 往上至 project root 第一個 `AGENTS.md`）**兩檔**，各檔獨立 100KiB 預算；**不展開 `@import/@include`、不掃子目錄、不依任務類型選規則檔**。
-- `deploy_agents.py` 內建 **90KiB 硬 fail gate**（常數 `BUNDLE_MAX_BYTES`，此處為描述非真相源）：bundle 超過即拒絕部署。撞線時先精簡 rules/（encoder-philosophy：砍可推導與敘事），或把 on-demand 級內容**下沉 skills/**（reference skill 分層模式：rule 留 always-on 核心＋pointer，深層內容住 `skills/<name>/SKILL.md`——skills/ 經全域 symlink 四 harness 按需可讀。先例：acceptance-evidence / lsp-navigation / instruction-writing / context7 / deep-thinking / model-routing / llm-output-convention / modern-cli-preference 等 rule+skill 分層）。
+- `deploy_agents.py` 內建 **90KiB 硬 fail gate**（常數 `BUNDLE_MAX_BYTES`，此處為描述非真相源）：bundle 超過即拒絕部署。撞線時先精簡 rules/（encoder-philosophy：砍可推導與敘事），或把 on-demand 級內容**下沉 skills/**（reference skill 分層模式：rule 留 always-on 核心＋pointer，深層內容住 `skills/<name>/SKILL.md`——skills/ 經全域 symlink 四 harness 按需可讀。先例：acceptance-evidence / symbol-query-routing / instruction-writing / context7 / deep-thinking / model-routing / llm-output-convention / modern-cli-preference 等 rule+skill 分層）。
 - 歷史教訓：部署版 141KB 時代，尾部 8 條 rules（含 tool-discipline、quality-constraints）落在截斷區靜默失效（2026-08-20 實證事故：spawn 背景規範沒載入 → 前景 spawn 被 user 插話殺掉）。**規範存在 ≠ 規範載入**。
 
 ### 部署驗證義務（deploy 跑通 ≠ 部署完成）
@@ -57,7 +57,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `context-management` | 🟢 neutral | context 重置＋想法即時落盤（durable checkpoint）＋STATE.md pointer＋memory 生命周期 pointer（六問/寫入點規範在 memory-audit skill「寫入端紀律」；Claude 機制用括號註）|
 | `outward-action-consent` | 🟢 neutral | outward action 需用戶授權（commit / deploy / push / send / live order；reversibility test + AUTH line）|
 | `llm-output-convention` | 🟢 neutral | print/Logger 雙通道核心——state transition 定義＋Namespace（tag 表/細則在 llm-output-convention skill）|
-| `lsp-navigation` | 🟢 neutral | cr-first 符號/型別查詢路由＋任務啟動 gate（LSP operation 速查表、反例群、Agent prompt 模板、載體對照、staleness 處置在 lsp-navigation skill）|
+| `symbol-query-routing` | 🟢 neutral | cr-first 符號/型別查詢路由＋任務啟動 gate（LSP operation 速查表、反例群、Agent prompt 模板、載體對照、staleness 處置在 symbol-query-routing skill）|
 | `modern-cli-preference` | 🟢 neutral | fd/rg 核心分工（陷阱目錄在 modern-cli-preference skill；Claude 權限段括號註隔離）|
 | `tool-discipline` | 🟢 neutral | 通用工具紀律（uv run / pipe-exit / 禁 sed / pytest 背景跑 / zsh 動態 flags 陣列 / 視覺判讀 agent 路由——禁主 session 讀圖）|
 | `edit-discipline` | 🟢 neutral | 通用編輯紀律（SRP/DIP/變更紀律/禁混合寫法）|
@@ -114,7 +114,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 
 ### 通用模式：跨 harness 載體對照（當工具呼叫方式跨 harness 不同時）
 
-當一個概念跨 harness 通用、但呼叫載體不同時（典型：LSP），用**對照表**表達，而非把某家 harness 的呼叫語法寫成主體。範例見 lsp-navigation skill「跨 harness LSP 載體對照」段。模式：
+當一個概念跨 harness 通用、但呼叫載體不同時（典型：LSP），用**對照表**表達，而非把某家 harness 的呼叫語法寫成主體。範例見 symbol-query-routing skill「跨 harness LSP 載體對照」段。模式：
 
 ```markdown
 ### 跨 harness X 載體對照

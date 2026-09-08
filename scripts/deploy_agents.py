@@ -40,7 +40,7 @@ config). The bundle carries a hard-fail limit of 90KiB (92,160 bytes),
 leaving headroom below the truncation line. Over the limit -> abort with
 guidance: slim rules/ (encoder-philosophy) or demote on-demand-grade
 content to a reference skill (rule keeps an always-on core + pointer).
-Precedents: acceptance-evidence / lsp-navigation / instruction-writing
+Precedents: acceptance-evidence / symbol-query-routing / instruction-writing
 rule+skill pairs.
 
 Run after editing rules/ (deploy discipline in rules/AGENTS.md). Idempotent.

@@ -185,7 +185,7 @@ TWINS: searched <pattern> - found <N> other sites: <files, or "none">
 - **N=0**：完成
 - **N>0**：列出位置；建議是否一併修（同一 commit 或分拆由用戶決定）
 
-**搜尋工具**：符號查詢 cr-first（cr `refs`；缺場 LSP `findReferences`）；文字 pattern 用 rg（工具選擇見 [lsp-navigation](../../rules/lsp-navigation.md)）。
+**搜尋工具**：符號查詢 cr-first（cr `refs`；缺場 LSP `findReferences`）；文字 pattern 用 rg（工具選擇見 [symbol-query-routing](../../rules/symbol-query-routing.md)）。
 
 **pattern 範例**（依 fix-test 失敗類型）：
 

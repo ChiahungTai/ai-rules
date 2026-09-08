@@ -63,12 +63,12 @@ domain ← use case ← adapter ← infra，依賴**向內**（內層不依賴�
 
 | 場景 | dep_graph 來源 | 查證工具 |
 |------|--------------|---------|
-| **code** | 複用 [scan-project](../scan-project/SKILL.md) dep_graph（.py AST，**不重造**） | scan-project 枚舉 primary + LSP 驗證 secondary（見 [lsp-navigation](../../rules/lsp-navigation.md)） |
+| **code** | 複用 [scan-project](../scan-project/SKILL.md) dep_graph（.py AST，**不重造**） | scan-project 枚舉 primary + LSP 驗證 secondary（見 [symbol-query-routing](../../rules/symbol-query-routing.md)） |
 | **docs** | scan-project dep_graph **不適用**（.py only）→ 自己 rg 跨檔畫命令/skill 拓樸 | rg（docs 場景取代 LSP） |
 
 > scan-project 的 **code↔doc findings**（掃 instruction 檔 Capabilities）在 docs 場景仍可用；只有 **dep_graph**（.py AST）不適用 docs。
 
-LSP 決策樹見 [lsp-navigation](../../rules/lsp-navigation.md)（本 skill 用 LSP，非重造決策樹）。
+LSP 決策樹見 [symbol-query-routing](../../rules/symbol-query-routing.md)（本 skill 用 LSP，非重造決策樹）。
 
 ### City Map 資料生成（非渲染）
 
@@ -160,7 +160,7 @@ code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠beha
 | 誰呼叫 X | `incomingCalls` |
 | X 呼叫誰 | `outgoingCalls` |
 
-**機械分工**：scan-project / Pattern Radar **枚舉**（撈全 + 相似）= primary；**LSP 驗證**（特定 claim → ✅/❌，見 [lsp-navigation](../../rules/lsp-navigation.md)）= secondary（人鎖定嫌疑後才上驗證）。
+**機械分工**：scan-project / Pattern Radar **枚舉**（撈全 + 相似）= primary；**LSP 驗證**（特定 claim → ✅/❌，見 [symbol-query-routing](../../rules/symbol-query-routing.md)）= secondary（人鎖定嫌疑後才上驗證）。
 
 > **圖譜 facts（code-reality — index 在場的 repo = co-equal primary，否則 companion fallback）**：transitive impact radius / 跨檔 callers·flows / hub·community 等**圖譜級**結構事實，**`.code-reality/graph.db` 在場的 repo 以 code-reality 為 primary**（見 [cr-query](../cr-query/SKILL.md)）—— 三層 facts 互補：scan-project 給 folder/module 級枚舉、LSP 查單一 symbol、code-reality 查 transitive graph。本 skill 的 City Map 資料 / hub / dep weight / bridge 在這些 repo**優先由 code-reality 機械產**（`hub_nodes`/`bridge_nodes`/`impact_radius`/`list_communities`），scan-project 為無 index repo 的 fallback（仍受 cr-query anti-over-reliance 約束：graph=structure≠behavior；**community ≠ module boundary** — 用目錄+AGENTS.md 為模組真相，community 只當 coupling hint）。engine 缺場 → `[WARN]` + fallback scan-project/LSP（cr-query GATE）。
 
@@ -231,7 +231,7 @@ code-reality-sourced edges 附 anti-over-reliance label（graph=structure≠beha
 |---------|------|
 | 用了哪些工具 | LSP operation（hover/findReferences/...）/ rg / fd — 每類結論標明主工具 |
 | 哪些無法驗證 | 未跑動態依賴分析、未跑 pytest --cov、workspace 在 worktree 非 production 等 |
-| LSP workspace 狀態 | LSP 結果是 workspace 狀態相依（見 [lsp-navigation skill](../lsp-navigation/SKILL.md)「Workspace 狀態相依性」）；私有 symbol findReferences 矛盾時先懷疑 reindex 時機，再懷疑工具能力 |
+| LSP workspace 狀態 | LSP 結果是 workspace 狀態相依（見 [symbol-query-routing skill](../symbol-query-routing/SKILL.md)「Workspace 狀態相依性」）；私有 symbol findReferences 矛盾時先懷疑 reindex 時機，再懷疑工具能力 |
 | 主觀研判標記 | 「刻意設計 vs 債」「可辯護 vs 該修」基於 DDD/Clean Architecture 原則推論，非機械結論 |
 
 **反例（真實案例，cross-harness 驗證）**：同一 `_PREV_COUNT` 符號，Claude session `findReferences` 只回 intra-file（誤推論為「LSP 對私有 symbol 固有 false-negative」），ZCode session 卻成功回傳跨檔引用 — 根因是 pyright workspace reindex 時機。**方法論限制段誠實記錄此差異，比「LSP 不可靠」的錯誤結論更有價值** — 它讓下個 session 知道要 reindex 而非換工具。

@@ -116,5 +116,5 @@ They compose: a CRG workflow gives the steps; `cr-query` governs *how each query
 - **CLI commands:** `code-reality --help`（graph_query 家族＋scip_refs＋graph_db build 等）
 - **code-reality MCP 接線：** stdio `code-reality-mcp --stdio`（plugin 形態）或 streamable-http `127.0.0.1:8200/mcp`（launchd `com.code-reality.mcp`）；工具呼叫一律帶 `repo_root`（不自動偵測）。舊 CRG server（com.user.crg-mcp @5555）已**完全退場**（2026-08-30：launchd 服務退場＋plist 刪＋uv tool v2.3.7 解裝；5555/launchctl 清潔態）。
 - **engine semantics 真相源:** ai-rules `skills/code-reality/SKILL.md`（接線語義）＋code-reality repo（`crates/AGENTS.md`＋plugin skill＝工具事實）
-- **Sibling facts discipline:** [lsp-navigation](../../rules/lsp-navigation.md) (symbol queries) — this skill is its graph counterpart
+- **Sibling facts discipline:** [symbol-query-routing](../../rules/symbol-query-routing.md) (symbol queries) — this skill is its graph counterpart
 - **Consumers:** [review-engine](../review-engine/SKILL.md) (change-impact lens), [arch-thinking](../arch-thinking/SKILL.md) §二 結構機械 (structure-facts lens), [execution-plan](../execution-plan/SKILL.md) 段落 0 (EP 依賴分析——ripple 宣稱工具證據 + 死路假設信號)
