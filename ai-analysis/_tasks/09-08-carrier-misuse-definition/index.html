@@ -82,7 +82,7 @@
   <div class="brand">
     <span class="badge progress">🟡 進行中</span>
     <h1>AIR-48 載體濫用鑑識 × 統一定義表</h1>
-    <div class="meta">baseline fca59d6<br>projection source 8e038c56af72（未 commit）<br>P1 ✅ · P2 ✅ · P3 待起</div>
+    <div class="meta">baseline fca59d6<br>projection source 36f4752+（P3 未 commit）<br>P1 ✅ · P2 ✅ · P3 ✅ · P4 待</div>
   </div>
   <ul>
     <li><a href="#s1" onclick="return go('s1',this)"><span class="num">01</span>任務與動機</a></li>
@@ -144,11 +144,13 @@
     <li>寫入摩擦設計定案（僅設計，實作另裁）：<b>放置閘</b>＝提醒注入非判斷攔截（Q1 語義留 LLM——假確定性零風險）；<b>desc 內容閘</b>（日期/session-id regex）三判準全過可硬擋；工具層明確不做。</li>
     <li>驗收＝Decoder test <b>9/9</b> 案例（P1 taxonomy 每案例反查定義表答得出「該寫哪、為什麼」）＋rg 殘留零＋consistency 96/100。</li>
   </ul>
-  <h3>P3 B 上線切換（定義表首次執法）<span class="tag-plan">計畫中</span></h3>
+  <h3>P3 B 上線切換（✅ 已交付——live 生效）</h3>
   <ul class="dots">
-    <li>live MEMORY.md → 常駐定額（顯式清單檔 <code>_resident-set.md</code> 為唯一機制，opt-in）＋<code>_inventory.md</code> 全量投影——rank 只排集合內順序，不決定常駐資格。</li>
-    <li>雙檔發布順序敏感：先原子發布 inventory、成功後才切常駐面；回滾先移清單檔再 regen。</li>
-    <li>治理信號隨形式：A 取 MEMORY.md chars、B 取 inventory chars；常駐面 ≈常數不得作為流入訊號。</li>
+    <li><b>開場面 -89%</b>：20,794 → 2,244 chars——MEMORY.md＝12 常駐條目（2,244 chars/26 行，gate 6,000 的 37%）＋Routing 段；全量 118 條住 <code>_inventory.md</code>（20,794 chars，rg 可達）。</li>
+    <li>清單檔 <code>_resident-set.md</code> opt-in（user 確認凍結 S2 原案 12 條——P1 無讀取證據推翻）；無清單檔的池維持 A 形態——mosaic 三池刷新副本、A 形態驗證不變。</li>
+    <li>安全設計全落地：R2 清單 fail-loud（缺檔/壞 fm/rename→保留舊常駐面）＋R3 先 inventory 後常駐面雙檔發布＋回滾兩層順序敏感（先移清單檔再 regen）。</li>
+    <li>R4 消費端實測：模擬流入 +2 條目→常駐面 UNCHANGED、inventory +102 chars——流入信號口徑成立（輸出行自帶機械可讀欄位）。</li>
+    <li>測試 14 條新增（解析/常數錨/投影/SM-4/R2 三形態/gate/R3 失敗恢復/--check/A 回歸/hook）——lifecycle 65 全綠、全套 222 綠。</li>
   </ul>
   <h3>P4 dogfood 首輪 / P5 雜項 <span class="tag-plan">計畫中</span></h3>
   <ul class="dots">

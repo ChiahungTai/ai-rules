@@ -53,8 +53,8 @@ HASH_RE = re.compile(
 
 
 def is_index_violation(file_path: str, has_generator: bool) -> bool:
-    """寫入目標名為 MEMORY.md，且同目錄裝有 generator（opt-in 條件）。"""
-    return Path(file_path).name == "MEMORY.md" and has_generator
+    """寫入目標名為 MEMORY.md 或 _inventory.md（B 形態全量投影），且同目錄裝有 generator（opt-in 條件）。"""
+    return Path(file_path).name in ("MEMORY.md", "_inventory.md") and has_generator
 
 
 def is_entry_file(file_path: str, has_generator: bool) -> bool:
@@ -115,10 +115,10 @@ def main() -> None:
     gen = Path(file_path).parent / GENERATOR_NAME
     has_generator = gen.exists()
 
-    # ① 索引手寫攔截（原有行為，不變）
+    # ① 索引手寫攔截（原有行為；AIR-48 P3 擴 _inventory.md——B 形態全量投影同禁手寫）
     if is_index_violation(file_path, has_generator):
         print(
-            "[Hook Blocked] MEMORY.md 是 generator 投影，禁手寫。\n"
+            "[Hook Blocked] MEMORY.md／_inventory.md 是 generator 投影，禁手寫。\n"
             "原因：索引由條目檔 frontmatter 機械投影；手寫必漂移"
             "（載入截斷 → 查重漏 → 近重複寫入）。\n"
             "修正方式：改條目檔（frontmatter name/description/type）後執行:\n"

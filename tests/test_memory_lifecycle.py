@@ -908,3 +908,200 @@ def test_generator_rank_counts_warn(tmp_path):
     assert r.returncode == 0, r.stdout
     assert "rank 分層：hot=3 core=0 cold=1" in r.stdout
     assert "hot 佔比超 1/3" in r.stdout
+
+
+# ---------------------------------------------------------------------------
+# generate_index B 形態（AIR-48 P3——_resident-set.md 清單檔 opt-in）
+# ---------------------------------------------------------------------------
+
+
+def make_resident_set(pool: Path, ids) -> Path:
+    lines = ["# 常駐集合（顯式清單——rank 只排集合內順序）"]
+    for i in ids:
+        lines.append(f"- {i}")
+    p = pool / "_resident-set.md"
+    p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return p
+
+
+def run_gen(pool: Path, *args) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, str(pool / "_generate_index.py"), *args],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+def test_parse_resident_set_line_forms():
+    """清單解析：backtick（necessity-set 直拷）／list marker／裸 id 三形態＋註解跳過。"""
+    text = (
+        "# header comment\n"
+        "\n"
+        "`commit-consent`——commit 確認門。\n"
+        "1. `feedback_verify-wt`——並行樹防護\n"
+        "- feedback_evidence-over-claims\n"
+        "project_session-topology\n"
+    )
+    assert generator.parse_resident_set(text) == [
+        "commit-consent",
+        "feedback_verify-wt",
+        "feedback_evidence-over-claims",
+        "project_session-topology",
+    ]
+
+
+def test_gate_chars_b_cross_layer():
+    """B 形態 gate 常數錨：6,000（SKILL 層 1 prose 同值——AIR-48 P3 單一源）。"""
+    assert generator.GATE_CHARS_B == 6_000
+
+
+def test_b_form_renders_resident_and_inventory(tmp_path):
+    """清單在場 → MEMORY.md＝常駐段＋Routing；_inventory.md＝全量投影。"""
+    pool = make_pool(tmp_path, n=3)
+    make_resident_set(pool, ["proj-000", "proj-002"])
+    r = run_gen(pool)
+    assert r.returncode == 0, r.stdout
+    mem = (pool / "MEMORY.md").read_text(encoding="utf-8")
+    assert "resident" in mem and "## Routing" in mem
+    assert "proj-000" in mem and "proj-002" in mem
+    assert "proj-001" not in mem  # 非常駐不進常駐面
+    inv = (pool / "_inventory.md").read_text(encoding="utf-8")
+    assert all(f"proj-00{i}" in inv for i in range(3))  # inventory 全量
+    assert "流入率口徑（B）＝inventory chars" in r.stdout
+
+
+def test_b_form_sm4_new_entry_grows_inventory_not_memory(tmp_path):
+    """SM-4：新增非 resident 條目 → 常駐面不變、inventory 增長。"""
+    pool = make_pool(tmp_path, n=2)
+    make_resident_set(pool, ["proj-000"])
+    assert run_gen(pool).returncode == 0
+    mem_before = (pool / "MEMORY.md").read_text(encoding="utf-8")
+    (pool / "proj-new.md").write_text(
+        "---\nname: proj-new\ndescription: 新條目\nmetadata:\n  type: project\n---\nbody\n",
+        encoding="utf-8",
+    )
+    r = run_gen(pool)
+    assert r.returncode == 0, r.stdout
+    assert (pool / "MEMORY.md").read_text(encoding="utf-8") == mem_before
+    assert "proj-new" in (pool / "_inventory.md").read_text(encoding="utf-8")
+
+
+def test_b_form_missing_entry_fail_loud(tmp_path):
+    """R2 缺檔：清單 id 不存在 → exit 1＋MEMORY.md 保留上一份常駐面＋inventory 照寫。"""
+    pool = make_pool(tmp_path, n=3)
+    make_resident_set(pool, ["proj-000"])
+    assert run_gen(pool).returncode == 0
+    mem_before = (pool / "MEMORY.md").read_text(encoding="utf-8")
+    make_resident_set(pool, ["proj-000", "ghost-entry"])
+    r = run_gen(pool)
+    assert r.returncode == 1
+    assert "ghost-entry" in r.stdout
+    assert (pool / "MEMORY.md").read_text(encoding="utf-8") == mem_before  # 保留舊面
+    assert "proj-002" in (pool / "_inventory.md").read_text(encoding="utf-8")
+
+
+def test_b_form_bad_frontmatter_fail_loud(tmp_path):
+    """R2 壞 frontmatter：清單 id 對到壞 fm 條目（進 errs 不在 entries）→ exit 1＋保留舊面。"""
+    pool = make_pool(tmp_path, n=2)
+    (pool / "broken.md").write_text(
+        "---\nname: broken\ndescription: 缺 type\n---\nbody\n", encoding="utf-8"
+    )
+    make_resident_set(pool, ["proj-000", "broken"])
+    r = run_gen(pool)
+    assert r.returncode == 1
+    assert "broken" in r.stdout
+    assert not (pool / "MEMORY.md").exists()  # 首跑即失敗——不發布常駐面
+
+
+def test_b_form_rename_fail_loud(tmp_path):
+    """R2 rename：條目 rename（檔名＋frontmatter name 同步改——夜間 merge/rename 真實形態）
+    後清單未同步（舊 id 命中 0）→ exit 1＋保留舊面＋提示同步清單。"""
+    pool = make_pool(tmp_path, n=2)
+    make_resident_set(pool, ["proj-000", "proj-001"])
+    assert run_gen(pool).returncode == 0
+    mem_before = (pool / "MEMORY.md").read_text(encoding="utf-8")
+    (pool / "proj-001.md").rename(pool / "proj-renamed.md")
+    (pool / "proj-renamed.md").write_text(
+        "---\nname: proj-renamed\ndescription: 條目 001 描述\nmetadata:\n"
+        "  type: project\n---\nbody\n",
+        encoding="utf-8",
+    )
+    r = run_gen(pool)
+    assert r.returncode == 1
+    assert "proj-001" in r.stdout
+    assert (pool / "MEMORY.md").read_text(encoding="utf-8") == mem_before
+
+
+def test_b_form_gate_6k_fail_loud(tmp_path):
+    """B gate：常駐面 >6,000 chars → exit 1＋常駐面照寫出（CC 式不停滯——成員都在只是胖）。"""
+    pool = make_pool(tmp_path, n=55, desc="深" * 100)
+    make_resident_set(pool, [f"proj-{i:03d}" for i in range(55)])
+    r = run_gen(pool)
+    assert r.returncode == 1
+    assert "[FAIL]" in r.stdout and "B gate" in r.stdout
+    mem = (pool / "MEMORY.md").read_text(encoding="utf-8")
+    assert "proj-054" in mem  # 照寫出（新鮮投影，不停滯）
+
+
+def test_b_form_inventory_write_fail_keeps_memory(tmp_path):
+    """R3 發布順序：inventory 寫入失敗（路徑被目錄佔用）→ 不切換常駐面＋marker＋exit 1。"""
+    pool = make_pool(tmp_path, n=2)
+    make_resident_set(pool, ["proj-000"])
+    assert run_gen(pool).returncode == 0
+    mem_before = (pool / "MEMORY.md").read_text(encoding="utf-8")
+    (pool / "_inventory.md").unlink()
+    (pool / "_inventory.md").mkdir()  # 佔住路徑——write tmp+replace 失敗
+    r = run_gen(pool)
+    assert r.returncode == 1
+    assert "_inventory.md 寫入失敗" in r.stdout
+    assert (pool / "MEMORY.md").read_text(encoding="utf-8") == mem_before
+    assert (pool / "_inventory-write-failed").exists()
+
+
+def test_b_form_inventory_write_fail_rerun_recovers(tmp_path):
+    """R3 重跑恢復：障礙移除 → regen 成功 → marker 清除＋B 形態在場。"""
+    pool = make_pool(tmp_path, n=2)
+    make_resident_set(pool, ["proj-000"])
+    assert run_gen(pool).returncode == 0
+    (pool / "_inventory.md").unlink()
+    (pool / "_inventory.md").mkdir()
+    assert run_gen(pool).returncode == 1
+    (pool / "_inventory.md").rmdir()  # 移除障礙
+    r = run_gen(pool)
+    assert r.returncode == 0, r.stdout
+    assert not (pool / "_inventory-write-failed").exists()
+    assert "resident" in (pool / "MEMORY.md").read_text(encoding="utf-8")
+    assert "proj-001" in (pool / "_inventory.md").read_text(encoding="utf-8")
+
+
+def test_b_form_check_zero_side_effects(tmp_path):
+    """--check 零副作用（B 形態）：MEMORY.md 與 _inventory.md 皆不寫、連殘檔都不清。"""
+    pool = make_pool(tmp_path, n=2)
+    make_resident_set(pool, ["proj-000"])
+    stale = pool / "_inventory.md.999.tmp"
+    stale.write_text("debris", encoding="utf-8")
+    old = time.time() - 120
+    os.utime(stale, (old, old))
+    r = run_gen(pool, "--check")
+    assert r.returncode == 0, r.stdout
+    assert not (pool / "MEMORY.md").exists()
+    assert not (pool / "_inventory.md").exists()
+    assert stale.exists()
+
+
+def test_a_form_no_inventory_without_set(tmp_path):
+    """A 形態回歸：無清單檔 → 不產 _inventory.md（形式選擇＝清單檔在場與否）。"""
+    pool = make_pool(tmp_path, n=2)
+    r = run_gen(pool)
+    assert r.returncode == 0, r.stdout
+    assert (pool / "MEMORY.md").exists()
+    assert not (pool / "_inventory.md").exists()
+    assert "resident" not in (pool / "MEMORY.md").read_text(encoding="utf-8")
+
+
+def test_block_memory_inventory_write_blocked():
+    """AIR-48 P3⑤：_inventory.md 手寫防護——B 形態全量投影同禁手寫。"""
+    assert block_memory.is_index_violation("/x/memory/_inventory.md", True)
+    assert block_memory.is_index_violation("_inventory.md", True)
+    assert not block_memory.is_index_violation("/x/memory/_inventory.md", False)
