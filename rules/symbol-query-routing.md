@@ -4,7 +4,7 @@ harness-scope: neutral
 
 # 符號／型別查詢路由（code-reality 優先）
 
-> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）。檔名保留 lsp-navigation（LSP 殘留面＋skill 同名配對）。**深層參考**（LSP operation 速查表、驗證輸出格式、反例案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness 處置）見 **lsp-navigation skill**（on-demand）
+> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）。**深層參考**（LSP operation 速查表、驗證輸出格式、反例案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness 處置）見 **symbol-query-routing skill**（on-demand）
 
 ---
 
@@ -14,7 +14,7 @@ harness-scope: neutral
 
 > **搜尋前自問（3 秒）**：找的是**符號**（class/def/引用/型別/呼叫鏈）還是**文字**（字串/註解/config/路徑）？符號 → code-reality；文字 → rg/fd。直覺想 rg 時停一下——符號查詢 rg 會 truncated/漏動態引用。
 
-**反例速覽**（完整案例群見 lsp-navigation skill）：
+**反例速覽**（完整案例群見 symbol-query-routing skill）：
 
 - rg 符號查詢結果會 **truncated**（只顯示 `n`）與 **display masking**（把 method 名 mask 掉，輸出看起來像真的但不是——比 truncation 危險：「給錯的」讓你停止往下查）
 - **符號覆蓋/存在性判斷**用 rg 會因命名 pattern 差異 false negative，把「自己沒查到」誤判為「不存在」（audit 誤報、judge-review 誤判兩真實案例）

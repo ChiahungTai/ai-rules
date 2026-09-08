@@ -1,11 +1,11 @@
 ---
-name: lsp-navigation
-description: LSP 語義導航深層參考 — LSP operation 速查表（自 rule 下沉 2026-08-31）、驗證任務 workflow 與輸出格式、rg 陷阱真實案例群（truncation/masking/local import/覆蓋判斷 false negative）、方法論限制 loopback、Agent prompt 工具指定模板（spawn agent 必填工具選擇）、跨 harness LSP 載體對照（Claude native vs ZCode bridge）、workspace staleness/reindex 與條件式 fallback。always-on 核心（cr-first 四路路由、任務啟動 gate、code-reality 分工）在 rules/lsp-navigation.md；做依賴審計/符號查證/review 需要反例論證、operation 對照、spawn agent 工具指定或跨 harness 呼叫細節時載入。觸發詞：LSP、findReferences、reindex、workspace stale、rg 陷阱、載體對照、operation 速查、agent prompt 工具指定。
+name: symbol-query-routing
+description: 符號查詢路由深層參考 — LSP operation 速查表（自 rule 下沉 2026-08-31）、驗證任務 workflow 與輸出格式、rg 陷阱真實案例群（truncation/masking/local import/覆蓋判斷 false negative）、方法論限制 loopback、Agent prompt 工具指定模板（spawn agent 必填工具選擇）、跨 harness LSP 載體對照（Claude native vs ZCode bridge）、workspace staleness/reindex 與條件式 fallback。always-on 核心（cr-first 四路路由、任務啟動 gate、code-reality 分工）在 rules/symbol-query-routing.md；做依賴審計/符號查證/review 需要反例論證、operation 對照、spawn agent 工具指定或跨 harness 呼叫細節時載入。觸發詞：符號查詢路由、LSP、findReferences、reindex、workspace stale、rg 陷阱、載體對照、operation 速查、agent prompt 工具指定。
 ---
 
-# LSP Navigation — 深層參考
+# 符號／型別查詢路由 — 深層參考
 
-> 本 skill 是 `rules/lsp-navigation.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（cr-first 四路路由、任務啟動 gate、code-reality 分工）；本檔承載 LSP operation 速查表、驗證 workflow 與輸出格式、反例論證、Agent prompt 工具指定模板、跨 harness 載體細節與 staleness 處置。
+> 本 skill 是 `rules/symbol-query-routing.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（cr-first 四路路由、任務啟動 gate、code-reality 分工）；本檔承載 LSP operation 速查表、驗證 workflow 與輸出格式、反例論證、Agent prompt 工具指定模板、跨 harness 載體細節與 staleness 處置。
 
 ## LSP operation 速查表（自 rule 下沉 2026-08-31）
 
