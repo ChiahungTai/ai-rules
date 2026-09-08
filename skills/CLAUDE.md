@@ -77,7 +77,7 @@
 
 ### 工作流 skills — instruction file 維護
 
-- `/instruction-init` — 為任意專案自動產生 instruction file 體系（root + 模組都雙檔：AGENTS.md source + CLAUDE.md @AGENTS.md wrapper，bottom-up）
+- `/instruction-init` — 為任意專案自動產生 instruction file 體系（root + 模組都雙檔：AGENTS.md source + CLAUDE.md @AGENTS.md wrapper，bottom-up；root 模板含記憶池路由行條件段——encoded 探測＋B/A/degraded 三形態）
 - `/instruction-clean` — 清理 Markdown 元資訊；`--distill` 蒸餾低 signal 內容（保守防護欄：預設 conservative、NEVER 清單禁觸失敗教訓/設計理由/約束、換形為主僅元資訊直刪、縮減 >30% 逐條列出）
 - `/instruction-sync` — 檢查文檔與程式碼同步性
 - `instruction-writing` — instruction file 撰寫完整規範（reference skill：rule 留 always-on 核心，此處承載完整規範＋元資訊禁止行為表與論證＋文檔自洽五維檢查；rule+skill 分層控制 bundle 尺寸）
@@ -131,7 +131,7 @@
 - `cross-verify` — 多源交叉查證（db/git/log/memory/cr/web 軸群平行取證→交叉對帳→verdict＋unverified；源枚舉制——web 軸須顯式點名；源缺場該軸 unverified 不阻斷；產出軌道①可餵 judge-review；執行載體＝`agents/roles/cross-verify-investigator.md` 單一參數化 agent）
 - `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表〔中文標籤旗艦/一般〕＋full-tier 旗艦釘選（ZCode＝registry 釘 glm-5.3——AIR-43 inherit 洞修補；CC＝inherit）＋旗艦資格條款（五項）／坐位註記＋lite 分工律〔執行層條件式降級＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律〕＋external-runtime family→(model,effort,容量) 解析表＋eligibility gate／reviewer 交接契約／完成回報收法（fire-and-forget 決策樹：--background 提交＋跨 session 認領＋wait/show 晚收、timeout 訊號家系拆分、ETA-gate fallback）／套用三路徑、rate limit 並發表、thoughtLevel 但書；rule 端留角色→tier 表＋詞彙定義＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
 - `self-contained-prompt` — 交接 prompt 設計原則（接手方三層 / schema / 決策脈絡 / drift / 機密）；/handoff 與 agent-review-cycle 共用
-- `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離；generator 池層 1 縮為 `--check` 投影驗證——資產 `scripts/generate_index.py`；寫入端紀律＝六問〔首問任務終態→卡〕＋desc 三不＋弧結案蒸餾〔mem-distill 執行形態〕＋rank 排序；body Read 觀測取樣線索＝`memory_telemetry.py reads`〔AIR-41——候選≠可刪、觀測非真值〕）
+- `memory-audit` — auto memory 稽核/清理（兩級：full 四層=索引量測+內容核實 vs repo+清理+盤點 / lite=git log 增量核實；索引整潔≠記憶健康、內容核實預設必做；狀態戳 `_audit-state.md`；advisory→核可→執行三分離；generator 池層 1 縮為 `--check` 投影驗證——資產 `scripts/generate_index.py`；寫入端紀律＝六問〔首問任務終態→卡〕＋desc 三不＋弧結案蒸餾〔mem-distill 執行形態〕＋rank 排序；body Read 觀測取樣線索＝`memory_telemetry.py reads`〔AIR-41——候選≠可刪、觀測非真值〕；收斂波 git 基線 diff-driven〔波前二分：流入快照/停波〕＋decay 候選清單〔AIR-49——`decay` subcommand 只產候選人裁〕）
 - `zcode-session-query` —（ZCode 專用）跨 session 查詢與參考：查 session id / 讀指定 session 尾部真人互動（scripts/zcode_tail_chat.py）/ ReadSessionContext（handoff 策略；relevant 大 session 逾時）；handoff / relay 的「讀進來」側；id 禁手打、sqlite3 CLI 無聲空輸出改 python ro uri
 
 ### 工具與查詢

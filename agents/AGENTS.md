@@ -81,7 +81,7 @@ agents/
 | zcode | zai | registry spawn（背景；快照制——新 session 載入） | `agents/zcode/` 生成檔（pins＝部署預設） | repo-observed |
 | cc（Claude Code） | zai（**本機配置**——CC 當前掛 GLM backend；原生家 Anthropic 未訂閱，訂閱後視性價比重配） | `--agent <name> --bg` named-agent＋Agent tool（spawn-time model/effort） | `agents/claude/` 生成檔 | repo-observed（2.1.261 實測：named-agent 可用、未知名稱即退出；session 跑 glm-5.3） |
 | muse code | meta | **雙身分**：user 直用開發 harness（該弧主力，muse-spark-1.3 全棧）＋ ZCode 端 bridge 工單委派（`task`／`review`，必經） | 直用＝repo AGENTS.md 載入（全域部署點未查證）；委派＝roles/ body 填工單 Role contract（work-order §2） | repo-observed |
-| codex | OpenAI | **經 delegate-bridge `task --family codex` 工單**（AIR-47 吸收；官方 openai-codex companion 退役——知識引用已移除，raw CLI 語義留 memory reference） | 同上 | repo-observed |
+| codex | OpenAI | **經 delegate-bridge `task --family codex` 工單**（AIR-47 吸收；raw CLI 語義留 memory reference） | 同上 | repo-observed |
 | grok-build | xai | 工單（同族委派 plugin 形態） | 同上 | **未安裝**·dispatch contract 未證實〔hooks/AGENTS.md〕——引用前先查證，不得假設可用 |
 
 ## 定義檔慣例

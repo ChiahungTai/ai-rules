@@ -63,6 +63,7 @@ ai-analysis/_projects/**/diagram-*.svg
 ai-analysis/_projects/**/diagram-*.png
 ai-analysis/_projects/**/diagram-*.visual-check.*.png
 .muse-bridge/
+.delegate-bridge/
 
 # Muse 共享記憶鎖（ephemeral）
 .agents/memory/.muse-memory.lock
