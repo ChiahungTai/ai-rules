@@ -74,6 +74,7 @@ Signal/noise framework: [encoder-philosophy.md](../_common/encoder-philosophy.md
 - **負空間指導**（不做什麼、禁止事項）
 - **型別關係區別**（相似型別的用途差異）
 - **跨模組慣例映射**（名稱推導不出語義的映射）
+- **分類判準與座標行**（AIR-45「Capabilities desc 文法與分類層級」節：desc、層級判準、座標四列——定義源見 instruction-writing skill；壓掉即觸發鏈斷裂）
 
 ### Signal/Noise 分類
 

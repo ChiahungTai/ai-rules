@@ -18,11 +18,13 @@ harness-scope: neutral
 
 同型 claim 群（均須獨立機械證據，詳案例見 acceptance-evidence skill）：
 
+<!-- bundle: skip-start -->
 - **數字/清單類 claim**（計數、規模、盤點）:寫進文檔前用獨立計數命令（`rg | wc -l` / `rg -c`）核對完整輸出，不靠印象或截斷結果人工數——AI 寫盤點清單易憑印象混入/漏掉成員（真實案例：consumers 數 41 誤寫 20，因 `rg | head -20` 截斷）。
 - **刪除/死碼自述**（zero caller /「沒人用」）:證據須涵蓋**全消費端**——靜態 import（LSP `findReferences`）+ 字串引用（rg 跨 .py/.yaml/.json）+ **非函式庫消費者**（scripts/、lab/、demo、saved config）+ 動態派發（getattr/importlib/registry auto-discovery/StrEnum 字串值）。只跑 LSP 宣稱「zero hits = 確認」**不足**。最低門檻：刪整檔/整 class 前，rg 符號名跨全專案 + 實際執行 import 測試（L4）受影響消費者——靜態 zero-hit ≠ runtime 無消費者（真實案例：自述「雙工具驗證零 caller」，實際 scripts/ 有 hard-import caller → runtime `ModuleNotFoundError`）。
 - **silent-failure claim**（silent drift / 靜默失效）:宣稱「行為 silent」須附**執行證據**（跑了該輸入、觀察到靜默通過），非靜態推論。**silent vs loud 不對稱風險**——誤判 loud（實為 silent）以為會炸卻靜默腐敗（危險）；誤判 silent（實為 loud）虛驚、跑測試推翻（安全）。無執行證據時**預設標 'inferred loud'，禁標 'silent'**。
 - **Review 雙向應用**：審查 diff 時看到 `raise`→`return None`、新增/拓寬 `try/except`、crash→filter、validation 緩步化 → 視為潛在 silent-corruption **引入**（loud→silent regression 檢查見 code-review-and-quality skill）。
 - **自報元資料不可信**（自報分類／判讀元資料）：agent 對自己輸出的 label 統計禁當驗收統計源；正解＝llm_label vs 標準答案逐案機械比對，禁用自報欄位做統計。
+<!-- bundle: skip-end -->
 
 ## 證據階層
 
@@ -54,4 +56,6 @@ harness-scope: neutral
 
 ## 與既有規則的關係
 
+<!-- bundle: skip-start -->
 風險分級（ai-development-guide「驗證約束」段）決定爬到第幾層（🟢 低風險不需六層——避免過度工程是內建約束）；漸進式驗證（[quality-constraints](./quality-constraints.md) 漸進式驗證（DEPTH-MIN→SAMPLE→FULL））是 L1→L3 爬坡順序；消費端驗證模式（[quality-constraints](./quality-constraints.md)）是 L3 的具體化，本階層為它提供「為什麼」。階層降低風險、**不消除風險**——每一層都值得懷疑，包括最頂層（L6 人類觀察會疲勞漏見；L5 POC 可能打自己畫的靶）。
+<!-- bundle: skip-end -->

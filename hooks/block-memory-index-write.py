@@ -44,7 +44,9 @@ from pathlib import Path
 GENERATOR_NAME = "_generate_index.py"
 DESC_LIMIT = 100  # frontmatter description 硬上限（＝寫入紀律值；09-03 P1 對齊）
 BODY_LIMIT = 12_000  # 條目檔總長上限（chars）
-NEW_ENTRY_LIMIT = 3_000  # 新建條目上限——寫入當下即蒸後形（cur=0 時 12K 膨脹治理無約束力，此閘補真空）
+NEW_ENTRY_LIMIT = (
+    3_000  # 新建條目上限——寫入當下即蒸後形（cur=0 時 12K 膨脹治理無約束力，此閘補真空）
+)
 HASH_RE = re.compile(
     r"\bcommit[s]?\s+(?=[0-9a-fA-F]*[0-9])[0-9a-fA-F]{7,}"
 )  # desc 禁 commit hash（09-05 S2；digit-lookdown 排除純字母 hex 形態——實戰偽陽性「commit feedback」〔feedbac 恰 7 hex〕，真 hash 7+ 碼全字母機率≈0.01%）

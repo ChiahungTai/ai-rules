@@ -1,4 +1,5 @@
 """P1 helper: local_setting rows (read-only; rebuilt per PROVENANCE)."""
+
 import sqlite3
 
 con = sqlite3.connect("file:/Users/ctai/.zcode/cli/db/db.sqlite?mode=ro", uri=True)

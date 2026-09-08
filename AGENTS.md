@@ -97,6 +97,7 @@
 - code-reality 工具鏈 — meta 層工具，**住獨立 repo `~/Github/code-reality`（Rust carrier，非本 repo 目錄）**；消費形態 `code-reality <tool> --repo <repo-root>`（binary 安裝與存在性偵測真相源見 skill）；工具用法/時點真相源 [skills/code-reality/SKILL.md](skills/code-reality/SKILL.md)；repo 知識歸各 repo 的 `.code-reality.toml` profile
 - muse-plugin-cc — Muse Code 委派 plugin（ZCode/CC 雙端 marketplace 發佈），**住獨立 repo `~/Github/muse-plugin-cc`（非本 repo 目錄）**；消費形態 plugin agent（`muse-rescue` 委派、`muse:muse-runtime` skills）；計費鐵則＝純訂閱 5h 窗口（無 API key 面）、預設模型 pin 與 task 預設 effort 現值見 model-routing skill 解析表 muse 行（單一源，不在此 materialize）；CLI 事實真相源 [memory reference_muse-code-cli-facts]、委派細節真相源 repo `docs/`
 - **Muse memory 唯讀**：`muse` 在本 repo **只讀不寫**——可用 `read_memory`（三 scope）與 `read_file` fallback 到 CC 實體池 `~/.claude/projects/-Users-ctai-Github-ai-rules/memory/`，**禁 `add_memory`/`edit_memory`**；需固化事實由 ZCode/CC 側寫入（見 `cross-harness-memory-symlink`）
+- **Memory spine 路由**：跨池共享記憶 spine 住 `~/.agents/memory-spine/`（plain md＋同格式 frontmatter；條目由 ai-rules 側 session 寫入，各池 generator 認養 routing 行段——位置決議與認養表見該目錄 `index.md`）
 
 ## 寫作治理
 

@@ -53,7 +53,7 @@ harness-scope: neutral
 - ❌ 禁止：「You're absolutely right!」式未查證同意；用感激表達**取代實作**（表演式）
 - ✅ 正確：先查證建議對**這個 codebase / 這個量化情境**技術上成立嗎？會壞既有功能嗎？與既有決定衝突嗎？→ 查證過才動手（READ → UNDERSTAND → **VERIFY against codebase** → EVALUATE → RESPOND → IMPLEMENT）；查證不了明說；建議錯就 push back（附技術理由），對的簡述修正不必感激
 
-**YAGNI check（reviewer 說「properly implement」時）**：先搜尋用量（符號用 LSP findReferences，字串用 rg）——沒用 → 提「移除它（YAGNI）？還是有我沒看到的用量？」；有用 → 才實作。**反向查證義務**：code 看似沒用要移除時，可能是 caller filter 阻斷 case 到達 producer（filter trap，見 acceptance-evidence skill）——YAGNI 往「刪」走；filter trap 往「驗證不能刪」走，移除前先判斷屬哪一類。
+**YAGNI check 與 filter trap 判別**：YAGNI 往「刪」走、filter trap 往「驗證不能刪」走，方向相反——判別細則與查證層級見 acceptance-evidence skill。
 
 **為什麼**：LLM 的討好傾向在 review 場景最危險——盲目同意一個「改 indicator 公式」的建議可能靜默污染回測 baseline。
 

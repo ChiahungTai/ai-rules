@@ -337,8 +337,7 @@ def test_parity_claude_pin_alias_matches_anthropic_column(tmp_path: Path):
     )
     drift = sync.check_parity(tmp_path)
     assert any(
-        "CLAUDE_PINS[full]=opus but skill anthropic column=sonnet" in d
-        for d in drift
+        "CLAUDE_PINS[full]=opus but skill anthropic column=sonnet" in d for d in drift
     ), drift
 
 

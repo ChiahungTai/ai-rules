@@ -169,7 +169,9 @@ def check_parity(repo: Path) -> list[str]:
         )
     anthropic_alias = parse_skill_anthropic_alias(skill_text)
     if anthropic_alias is None:
-        drift.append("CLAUDE_PINS 有值但 skill 權威表 Anthropic 欄未解析到——確認表格仍在")
+        drift.append(
+            "CLAUDE_PINS 有值但 skill 權威表 Anthropic 欄未解析到——確認表格仍在"
+        )
     else:
         for tier, alias in sorted(CLAUDE_PINS.items()):
             if anthropic_alias != alias:

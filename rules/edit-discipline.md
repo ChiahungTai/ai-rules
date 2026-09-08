@@ -36,6 +36,7 @@ harness-scope: neutral
 
 ### 範例
 
+<!-- bundle: skip-start -->
 ```python
 # ❌ 錯誤：混合兩種錯誤處理風格（部份用 try/except，部份用 assert）
 def process(data):
@@ -54,6 +55,7 @@ def process(data):
     assert result > 0
     return result
 ```
+<!-- bundle: skip-end -->
 
 ---
 
@@ -79,6 +81,7 @@ def process(data):
 
 ### 為了向後相容而保留壞味道的設計
 
+<!-- bundle: skip-start -->
 ```python
 # ❌ 錯誤：保留舊的、有問題的實作
 def old_api():
@@ -94,11 +97,14 @@ def refactored_api():
     # 重構後的乾淨實作
     pass
 ```
+<!-- bundle: skip-end -->
 
 ---
 
 ## 原理說明
 
+<!-- bundle: skip-start -->
 - **修改現有檔案保持程式碼組織的一致性**
 - **架構品質優先避免技術債務累積**
 - **測試保護下的重構是安全的，長期收益大於短期遷移成本**
+<!-- bundle: skip-end -->

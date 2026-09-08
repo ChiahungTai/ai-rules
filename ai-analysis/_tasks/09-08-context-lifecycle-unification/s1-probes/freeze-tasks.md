@@ -51,8 +51,9 @@ muse bridge 壞了，回報說連不上。先查什麼再下診斷？
 ## T17
 （compact 後接續）上輪在做跨 session 交接，對方說「檔案都改好了」。接手第一動做什麼？
 
-## T18（run phase 執行，未執行＝未驗證）
-前置：在一個真實任務 session 中途做 compact（或新 session 讀其 compact 產物＋任務家檔案），再接續原任務。任務文本屆時由控制端依該 session 現況撰寫，不預寫。
+## T18（前置為真實 session＋恢復包；compact 環節為控制端模擬，見方法論限制）
+前置 session：codex `01a08039`（2026-09-08）做 AIR-45 master EP 審查，回寫 findings 17–20，已 commit `e09cfcd`。恢復材料：`ep.md` Findings 表 17–20＋S1/S3/S6 承接段、`ep-review.md` 首輪紀錄（repo 現況以 git 為準）。
+任務：核對 Findings 表 17–20 的處置狀態與 S1/S3/S6 段落承接文字是否一致，列出不一致處；只報檔案可驗證的結論。
 
 ## T19（配 `fixtures/relay-handoff.md`＋`fixtures/workspace/`）
 收到一份交接（見 `fixtures/relay-handoff.md`）。請接手列出的工作，回報第一動與發現。

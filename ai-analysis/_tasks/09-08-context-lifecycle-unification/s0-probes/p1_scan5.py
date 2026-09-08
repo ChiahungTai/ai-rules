@@ -1,6 +1,6 @@
 """P1 step5: tool-part samples with wrapper + other recall markers + session_input/entry tables (read-only)."""
+
 import json
-import re
 import sqlite3
 
 DB = "file:/Users/ctai/.zcode/cli/db/db.sqlite?mode=ro"
@@ -31,12 +31,22 @@ for sid, ts, data in rows:
     idx = raw.find("<system-reminder>")
     print("-" * 70)
     print(f"session={sid} ts={ts} tool={tool} json_keys={keys}")
-    print(f"around wrapper: {raw[max(0,idx-120):idx+260]}")
+    print(f"around wrapper: {raw[max(0, idx - 120) : idx + 260]}")
 
 print()
 print("== user-role text parts scanned for recall-marker alternatives ==")
-markers = ["recalled", "Recalled", "memory context", "Relevant memories", "relevant memories",
-           "<memory", "memories>", "memory context block", "auto-injected", "automatically injected"]
+markers = [
+    "recalled",
+    "Recalled",
+    "memory context",
+    "Relevant memories",
+    "relevant memories",
+    "<memory",
+    "memories>",
+    "memory context block",
+    "auto-injected",
+    "automatically injected",
+]
 for mk in markers:
     n = cur.execute(
         "SELECT COUNT(*) FROM part p JOIN message m ON m.id=p.message_id WHERE json_extract(m.data,'$.role')='user' AND json_extract(p.data,'$.type')='text' AND p.data LIKE ? AND p.session_id != ?",
@@ -47,24 +57,34 @@ for mk in markers:
 print()
 print("== any-part scan for 'recalled' variants ==")
 for mk in ["%recalled memor%", "%Recalled memor%", "%recall%memory%"]:
-    n = cur.execute("SELECT COUNT(*) FROM part WHERE data LIKE ? AND session_id != ?", (mk, SELF)).fetchone()[0]
+    n = cur.execute(
+        "SELECT COUNT(*) FROM part WHERE data LIKE ? AND session_id != ?", (mk, SELF)
+    ).fetchone()[0]
     print(f"parts LIKE {mk}: {n}")
 
 print()
 print("== session_input kinds ==")
-for k, n in cur.execute("SELECT kind, COUNT(*) FROM session_input GROUP BY kind").fetchall():
+for k, n in cur.execute(
+    "SELECT kind, COUNT(*) FROM session_input GROUP BY kind"
+).fetchall():
     print(f"{k}: {n}")
 print("\n== session_input payload sample (1 row, truncated) ==")
-row = cur.execute("SELECT kind, payload FROM session_input ORDER BY time_created DESC LIMIT 1").fetchone()
+row = cur.execute(
+    "SELECT kind, payload FROM session_input ORDER BY time_created DESC LIMIT 1"
+).fetchone()
 if row:
     print(f"kind={row[0]} payload_head={row[1][:500]}")
 
 print()
 print("== session_entry types ==")
-for k, n in cur.execute("SELECT type, COUNT(*) FROM session_entry GROUP BY type").fetchall():
+for k, n in cur.execute(
+    "SELECT type, COUNT(*) FROM session_entry GROUP BY type"
+).fetchall():
     print(f"{k}: {n}")
 print("\n== session_entry data keys sample ==")
-row = cur.execute("SELECT type, substr(data,1,300) FROM session_entry ORDER BY time_created DESC LIMIT 5").fetchall()
+row = cur.execute(
+    "SELECT type, substr(data,1,300) FROM session_entry ORDER BY time_created DESC LIMIT 5"
+).fetchall()
 for t, d in row:
     print(f"type={t}: {d}")
 con.close()

@@ -1,4 +1,5 @@
 """P1 step1: part type distribution + system-reminder hit counts (read-only, SQL-side scan)."""
+
 import sqlite3
 
 DB = "file:/Users/ctai/.zcode/cli/db/db.sqlite?mode=ro"
@@ -18,7 +19,9 @@ for t, n in cur.execute(
     print(f"{t}: {n}")
 
 print("\n== parts containing 'system-reminder' ==")
-n = cur.execute("SELECT COUNT(*) FROM part WHERE data LIKE '%system-reminder%'").fetchone()[0]
+n = cur.execute(
+    "SELECT COUNT(*) FROM part WHERE data LIKE '%system-reminder%'"
+).fetchone()[0]
 print(f"parts with 'system-reminder': {n}")
 q = "SELECT COUNT(DISTINCT session_id) FROM part WHERE data LIKE '%system-reminder%'"
 print(f"distinct sessions: {cur.execute(q).fetchone()[0]}")
@@ -33,7 +36,9 @@ feats = {
     "rank:": "data LIKE '%rank:%'",
 }
 for label, cond in feats.items():
-    n = cur.execute(f"SELECT COUNT(*) FROM part WHERE data LIKE '%system-reminder%' AND {cond}").fetchone()[0]
+    n = cur.execute(
+        f"SELECT COUNT(*) FROM part WHERE data LIKE '%system-reminder%' AND {cond}"
+    ).fetchone()[0]
     print(f"system-reminder AND {label}: {n}")
 
 print("\n== bare memory-feature scan (no system-reminder filter), for comparison ==")

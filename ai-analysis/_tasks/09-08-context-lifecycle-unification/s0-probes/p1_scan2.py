@@ -1,4 +1,5 @@
 """P1 step2: sample system-reminder parts, classify content + timing (read-only)."""
+
 import json
 import sqlite3
 
@@ -28,7 +29,9 @@ for sid, mid, seq, ts, data in rows:
     start = max(0, idx - 100)
     snippet = text[start : idx + 500].replace("\n", "\\n")
     print("-" * 80)
-    print(f"session={sid} msg={mid} part_seq={seq} time={ts} part_type={ptype} text_len={len(text)}")
+    print(
+        f"session={sid} msg={mid} part_seq={seq} time={ts} part_type={ptype} text_len={len(text)}"
+    )
     print(f"snippet: {snippet}")
 
 print()
@@ -56,7 +59,9 @@ for sid, n_parts, first_ts, last_ts, first_user_seq, max_seq in rows:
     else:
         late += 1
 print(f"sessions with reminder+MEMORY.md parts: {len(rows)}")
-print(f"  single-burst early (span<60s, <=2 parts, likely session-start injection): {early}")
+print(
+    f"  single-burst early (span<60s, <=2 parts, likely session-start injection): {early}"
+)
 print(f"  single-burst later (<=2 parts): {mid}")
 print(f"  repeated injections (>2 parts in session): {late}")
 
@@ -67,5 +72,7 @@ for sid, n_parts, first_ts, last_ts, first_user_seq, max_seq in rows[:15]:
         "SELECT time_created, sequence FROM message WHERE id = (SELECT message_id FROM part WHERE session_id = ? AND data LIKE '%system-reminder%' AND data LIKE '%MEMORY.md%' LIMIT 1)",
         (sid,),
     ).fetchone()
-    print(f"session={sid} n_reminder_parts={n_parts} msg_seq={t[1] if t else '?'} first_user_seq={first_user_seq} session_max_seq={max_seq}")
+    print(
+        f"session={sid} n_reminder_parts={n_parts} msg_seq={t[1] if t else '?'} first_user_seq={first_user_seq} session_max_seq={max_seq}"
+    )
 con.close()

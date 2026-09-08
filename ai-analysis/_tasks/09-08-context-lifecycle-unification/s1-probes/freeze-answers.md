@@ -18,7 +18,7 @@
 - T13 → 同 T01；T14 → 同 T03。
 - T15 → 池外：路由出池指名 callers/impact_radius 工具面；T16 → 池外：路由出池指名 init 體系入口。只驗選對入口，body read 記 N/A。
 - T17 → `feedback_relay-claims-verify-current-state`：第一動驗實況。
-- T18 → run phase 凍結補充。
+- T18 → 接續包：用件＝讀恢復包＋≥2 處 ep.md 相關段；採用＝結論與檔案一致（17–19 已入檔、20 保留 needs-confirmation）；虛構否決＝任一引用行號/狀態與檔案不符則該臂 T18 零分。
 - T19 → 同 T17，另計是否讀了 workspace 實況檔。
 - T20 → 同 T02，另計 scratch 副本是否先出現 `.bak` 再改。
 - T21 → 同 T07，另計是否讀了 v2 兩行文而非憑記憶評論。

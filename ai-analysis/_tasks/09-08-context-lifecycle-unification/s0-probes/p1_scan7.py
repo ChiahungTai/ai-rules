@@ -1,5 +1,5 @@
 """P1 step7: enumerate synthetic injection taxonomy via semantics.kind (read-only)."""
-import json
+
 import sqlite3
 
 DB = "file:/Users/ctai/.zcode/cli/db/db.sqlite?mode=ro"
@@ -42,7 +42,7 @@ rows = cur.execute(
     GROUP BY k ORDER BY n DESC
     """
 ).fetchall()
-for (k, _n) in rows:
+for k, _n in rows:
     row = cur.execute(
         """
         SELECT m.id, m.time_created,
@@ -60,11 +60,15 @@ for (k, _n) in rows:
     ).fetchone()
     mid, ts, origin, syn, vis, text = row
     print("-" * 70)
-    print(f"kind={k} msg={mid} ts={ts} origin={origin} synthetic={syn} visibility={vis}")
+    print(
+        f"kind={k} msg={mid} ts={ts} origin={origin} synthetic={syn} visibility={vis}"
+    )
     print(f"text[:400]: {text}")
 
 print()
-print("== full body of newest todo_reminder / synthetic non-real messages: text parts ==")
+print(
+    "== full body of newest todo_reminder / synthetic non-real messages: text parts =="
+)
 rows = cur.execute(
     """
     SELECT p.session_id, p.time_created, json_extract(p.data,'$.type'), substr(json_extract(p.data,'$.text'),1,700)

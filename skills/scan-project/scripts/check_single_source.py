@@ -348,17 +348,23 @@ def check_deploy_freshness(inv: dict) -> list[tuple[str, str, str]]:
         spec = importlib.util.spec_from_file_location("deploy_agents", deploy_py)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        bundle = mod.build_bundle(
-            # "neutral" 綁定 deploy_agents main() 的 --scope default；default 改變時此處需同步
-            mod.discover_rules(mod.RULES_DIR, {"neutral"}),
-            "neutral",
-        ).encode("utf-8")
+        if hasattr(mod, "expected_bundle_for"):
+            # per-target 預期（含 muse 變體；S3 draft-3 A 案後 full bundle 比 muse 恆假）
+            expected = [(t, mod.expected_bundle_for(t)) for t in mod.TARGETS]
+        else:
+            # 舊形態（無變體）：單一 full bundle 比全部 TARGETS
+            bundle = mod.build_bundle(
+                # "neutral" 綁定 deploy_agents main() 的 --scope default；default 改變時此處需同步
+                mod.discover_rules(mod.RULES_DIR, {"neutral"}),
+                "neutral",
+            ).encode("utf-8")
+            expected = [(t, bundle) for t in mod.TARGETS]
     except Exception as exc:  # load/build 失敗（如 deploy_agents 編輯後 SyntaxError）
         return [(inv["id"], "important", f"無法以 source 重建 bundle: {exc!r}")]
     # marker 取自 HEADER 首行（單一源）——不硬編碼字串複製品，HEADER 改版自動跟隨
     marker = mod.HEADER.splitlines()[0].encode("utf-8")
     out = []
-    for target in mod.TARGETS:
+    for target, bundle in expected:
         data = target.read_bytes() if target.exists() else None
         if data is None or marker not in data:
             continue
@@ -629,7 +635,9 @@ def check_shell_provenance(inv: dict) -> list[tuple[str, str, str]]:
     if not script.exists():
         return [(inv["id"], "important", f"shell lint 不存在: {script}")]
     if shutil.which("uv") is None:
-        return [(inv["id"], "important", "uv 不在 PATH——無法執行 shell provenance gate")]
+        return [
+            (inv["id"], "important", "uv 不在 PATH——無法執行 shell provenance gate")
+        ]
     try:
         proc = subprocess.run(
             ["uv", "run", "--no-sync", "python", str(script)],
@@ -645,7 +653,9 @@ def check_shell_provenance(inv: dict) -> list[tuple[str, str, str]]:
     if proc.returncode == 0:
         return []
     out = (proc.stdout + proc.stderr).strip().splitlines()
-    fails = [ln.removeprefix("[FAIL] ").strip() for ln in out if ln.startswith("[FAIL]")]
+    fails = [
+        ln.removeprefix("[FAIL] ").strip() for ln in out if ln.startswith("[FAIL]")
+    ]
     if fails:
         return [(inv["id"], "important", msg) for msg in fails]
     return [

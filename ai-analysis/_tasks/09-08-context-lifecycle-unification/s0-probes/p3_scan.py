@@ -1,7 +1,8 @@
 """P3: muse sessions 09/07-08 forensics — rules_file text_bytes per workspace (streaming, read-only)."""
+
 import json
-import re
 import os
+import re
 from collections import Counter
 
 BASE = os.path.expanduser("~/.local/share/muse/sessions/2026/09")
@@ -23,7 +24,10 @@ def scan_file(path):
     with open(path, "r", encoding="utf-8", errors="replace") as f:
         for line in f:
             # cheap pre-filter before any json parsing
-            if "context_block_diagnostic" not in line and "/Users/ctai/Github/" not in line:
+            if (
+                "context_block_diagnostic" not in line
+                and "/Users/ctai/Github/" not in line
+            ):
                 continue
             # workspace guess: count repo-name occurrences on the raw line
             for m in WORKSPACE_PATH.finditer(line):
@@ -36,7 +40,12 @@ def scan_file(path):
                 continue
             children = frame.get("children")
             if children is None:
-                children = [{"child_index": 0, "record_json": json.dumps(frame, ensure_ascii=False)}]
+                children = [
+                    {
+                        "child_index": 0,
+                        "record_json": json.dumps(frame, ensure_ascii=False),
+                    }
+                ]
             for child in children:
                 try:
                     rec = json.loads(child.get("record_json", ""))
@@ -48,7 +57,10 @@ def scan_file(path):
                 ptypes[pt] += 1
                 payload = rec.get("payload", {})
                 ev = payload.get("event") if isinstance(payload, dict) else None
-                if isinstance(ev, dict) and ev.get("kind") == "context_block_diagnostic":
+                if (
+                    isinstance(ev, dict)
+                    and ev.get("kind") == "context_block_diagnostic"
+                ):
                     bid = ev.get("block_id")
                     tb = ev.get("text_bytes")
                     mb = ev.get("max_bytes")
@@ -56,7 +68,14 @@ def scan_file(path):
                     if bid == "rules_file":
                         rules_bytes.append(tb)
                         diag_records.append(
-                            (rec.get("sequence"), rec.get("recorded_at"), bid, tb, mb, ev.get("lifecycle"))
+                            (
+                                rec.get("sequence"),
+                                rec.get("recorded_at"),
+                                bid,
+                                tb,
+                                mb,
+                                ev.get("lifecycle"),
+                            )
                         )
     ws = ws_counter.most_common(1)[0][0] if ws_counter else "?"
     return rules_bytes, blocks, ws, ptypes, diag_records
@@ -80,7 +99,9 @@ for day in DAYS:
 
 print(f"scanned {len(results)} sessions")
 print()
-print("== per-session: day | session | workspace | rules_file text_bytes (all observations) ==")
+print(
+    "== per-session: day | session | workspace | rules_file text_bytes (all observations) =="
+)
 for day, sid, ws, rb, blocks, diags in results:
     if not rb:
         print(f"{day} {sid[:13]} ws={ws} rules_file: (none)")

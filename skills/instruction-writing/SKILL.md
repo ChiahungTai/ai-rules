@@ -123,7 +123,7 @@ allowed-tools: ["Read", "Write", "Edit"]
 - **過時範例**: 無法實際執行的範例
 - **專案特定事實**: 真實專案符號/路徑/數字（如 `myproject.common.enums.MyEnum`）—— 泛用 rules/commands 教 pattern，用 `<placeholder>`（`<package>`、`<EnumClass>` 等）。例子釘死專案現狀 → 該專案一改就 drift、其他專案讀無關。例外：① 專案特定工具（upgrade-* 等）；② **失敗教訓真實案例** —— 保留專案符號以維持 failure-lesson 可信度，但須含「真實案例」marker（機械可辨識），且教訓本身不依賴該符號現狀（符號改名/消失，教訓仍成立）
 - **重複描述（反模式是重複，不是集中）**: 集中清單（Symbol Map / Index 段落）與 per-concept 種子重複描述同概念 —— 寫兩遍浪費 token 且易 drift。集中段落（如「可複用基礎設施」）只用於跨模組共用 symbol（distinct purpose），不可與 per-concept 種子重複
-- **Class→檔案映射表（LSP 可推導）**: 整張「檔案 | Class/函式 | 職責」表的前兩欄是 LSP `goToDefinition` / `workspaceSymbol` 的機械產出（含 `_private` 私有 symbol），屬 Low Noise。集中表必然 drift —— 重構 rename/搬檔後過時，且無機制強制同步，過時表比無表更危險（誤導讀者）。職責語義用 per-concept 內嵌種子或 Capabilities 入口欄承載。**移除既有映射表前必須逐行查證 High Signal 是否與下方段落矛盾**（過時 drift 比單純冗餘更危險）
+- **Class→檔案映射表（LSP 可推導）**: 整張「檔案 | Class/函式 | 職責」表的前兩欄是 LSP `goToDefinition` / `workspaceSymbol` 的機械產出（含 `_private` 私有 symbol），屬 Low Noise。集中表必然 drift —— 重構 rename/搬檔後過時，且無機制強制同步，過時表比無表更危險（誤導讀者）。職責語義用 per-concept 內嵌種子或 Capabilities 入口欄承載（移除前查證見「既有映射表的 drift 查證」，不重述）。
 
 ### 引用語法（依檔案類型選擇）
 
@@ -264,6 +264,22 @@ Signal/noise framework: [encoder-philosophy.md](../_common/encoder-philosophy.md
 **禁止標題變體**：導航表統一「模組導航」，**禁止** "Navigation" / "導航" / "Navigation Table" 等變體 — 多種標題讓 `rg "模組導航"` 漏掉其他寫法，是 LSP 時代 audit/sync 的機械識別障礙。
 
 **設計決策類**：同義的「關鍵設計決策」/「核心設計決策」/「設計決策」統一為 `## 設計決策`；語義不同的「設計理由」(why) /「設計約束」(constraint) /「設計原則」(principle) 保留，不合併。
+
+### Capabilities desc 文法與分類層級（AIR-45，本節為定義源）
+
+Capabilities 表每行（能力 | 入口 | 狀態）須帶可檢索 desc，文法：`_cap_<verb>_<object>_`（正則 `^_cap_[a-z0-9_]+$`；佔位符寫 `<verb>`/`<object>` 非字面匹配，真值如 `_cap_review_diff_quality_`）。desc 缺失＝觸發判準無法機械比對，該能力視為未覆蓋。**分流待拍板**：本節 Capabilities 行的機械 token 文法與 memory 條目 desc 的情境句文法五條（AIR-45 決策 10，定義源在 memory-audit skill「寫入端紀律」）是兩個觸發面的分流設計——採用與否待 user 拍板，未拍板前本節為試行條款。
+
+| 層級 | 判準 | 落點 |
+|------|------|------|
+| L1 能力存在 | desc 命中該層 topics | 保留，補 desc |
+| L2 觸發可達 | desc 命中但 topics 未載入 | 新層骨架，待後續收斂波次認養 |
+| L3 未覆蓋 | desc 無命中 | 不建層，不寫文檔 |
+
+座標欄位（每層 AGENTS.md 必備四列）：`層級 / 入口層 / topics / desc 狀態`。topics 未載入時 desc 標 `待補`，禁捏造。
+
+試行條款：本節為 pilot 文法（F2 回應）。desc 載體＝Capabilities 行入口欄後括號註記（首個示範行由下次新建層承載，全 repo 尚無示範）；既有層不溯及，下次改動該層時補。
+
+**寫入門檻**：**預設少寫**——既有載體有位置就更新（rule/skill 既有節加行）、一次性資訊留任務文件（EP/卡/report）、只有**新增 memory 條目或全域常駐內容**（floor/bundle 進場）才做嚴格必要性判斷（一句話測試／寫入六問，定義源 memory-audit skill）。新能力先有可執行入口（function/method 符號）才寫 Capabilities 行；先有文檔無入口＝ L3，不寫。觸發透明度：觸發判準只讀 desc 與 topics，不讀正文散文。
 
 ### 既有映射表的 drift 查證（移除前義務）
 

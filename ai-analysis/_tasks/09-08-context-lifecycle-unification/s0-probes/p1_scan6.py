@@ -1,4 +1,5 @@
 """P1 step6: sample 'recalled memor' parts + user message JSON structure + user-role near-hits (read-only)."""
+
 import json
 import sqlite3
 
@@ -39,7 +40,7 @@ for sid, ts, ptype, text in rows:
     idx = text.lower().find("recalled memor")
     print("-" * 70)
     print(f"session={sid} ts={ts} type={ptype} text_len={len(text)}")
-    print(f"around hit: {text[max(0,idx-200):idx+400]}".replace("\n", "\\n"))
+    print(f"around hit: {text[max(0, idx - 200) : idx + 400]}".replace("\n", "\\n"))
 
 print()
 print("== user-role near-hits: 'memory context' (1) and '<memory' (3) ==")
@@ -63,7 +64,11 @@ for sid, ts, text in rows:
         if idx >= 0:
             print("-" * 70)
             print(f"session={sid} ts={ts} marker={mk} text_len={len(text)}")
-            print(f"around hit: {text[max(0,idx-150):idx+350]}".replace("\n", "\\n"))
+            print(
+                f"around hit: {text[max(0, idx - 150) : idx + 350]}".replace(
+                    "\n", "\\n"
+                )
+            )
 
 print()
 print("== user message data JSON structure (full keys, 3 newest user messages) ==")

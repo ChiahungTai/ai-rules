@@ -1,4 +1,5 @@
 """P5 helper: char-count validation of the 10 after descs (report table source)."""
+
 AFTER = [
     "當你要 commit 而無 user 本 session 原話授權時：停——自主/resume 模式≠免確認；條件式授權過了即執行，勿重問",
     "當你要 git add/commit 時：並行 session 共用 tree——先 log/status 對帳、具名 add、看 diff --cached 全容，數量不符即停",

@@ -69,9 +69,9 @@
 <button type="button" id="expand-btn" class="collapse-tab" aria-expanded="false" aria-controls="sidebar" aria-label="展開章節導覽" onclick="return setCollapsed(false,true)">›</button>
 <nav id="sidebar" aria-label="章節導覽">
   <div class="brand">
-    <span class="badge progress">🟡 進行中（S0 完成）</span>
+    <span class="badge done">✅ S1–S6 實作完成（待 commit）</span>
     <h1>AIR-45 context 統一生命週期機制——觸發保證 × 層級優化 × instruction-* 重構</h1>
-    <div class="meta">task baseline d443391<br>S0 report @s0-report.md<br>卡 AIR-45 · 2026-09-08</div>
+    <div class="meta">task baseline d443391<br>S0–S6 reports @s0-report.md…s6-report.md<br>卡 AIR-45 · 2026-09-08</div>
   </div>
   <ul>
     <li><a href="#s1" onclick="return go('s1',this)"><span class="num">01</span>任務總覽</a></li>
@@ -80,6 +80,7 @@
     <li><a href="#s4" onclick="return go('s4',this)"><span class="num">04</span>段落地圖 S0-S6</a></li>
     <li><a href="#s5" onclick="return go('s5',this)"><span class="num">05</span>驗收與風險</a></li>
     <li><a href="#s6" onclick="return go('s6',this)"><span class="num">06</span>回源</a></li>
+    <li><a href="#s7" onclick="return go('s7',this)"><span class="num">07</span>實作完成報告 S1–S6</a></li>
   </ul>
   <div class="backlinks">
     <a href="http://127.0.0.1:6420">← backlog board</a><br>
@@ -156,6 +157,20 @@
     <li><b>muse lane（SM-4/5）</b>：部署後 text_bytes==produced（ai-rules）；mosaic 場景有顯式層級處置</li>
   </ul>
   <div class="note"><b>致命假設</b>：ZCode/CC 有無 desc-matching 召回注入（S0 probe 先驗）。驗出「無」且 routing 紀律實測差 → no-go 處置已備（floor 擴權＋驗收基準降級＋止損範圍），判定權在 user。雙輪獨立審查（muse session 8 findings＋ZCode Explore 16 findings）全數收斂 implemented。</div>
+</section>
+
+<section id="s7">
+  <h2>實作完成報告 S1–S6</h2>
+  <div class="sub">做了什麼／驗證證據／認知誤差點——反映修正迴圈後最終態（post-build hook 2）</div>
+  <ul class="dots">
+    <li><b>S1 pilot</b>：25 runs 三臂行為綁定；B 面 3,649B vs A 面 32,502B（8.9x 省量）；基線重跑與凍結 .out IDENTICAL</li>
+    <li><b>S2 最小條目化</b>：零 rule 改寫落點，pilot 最小範圍</li>
+    <li><b>S3 部署投影</b>：muse 變體 gate＋probes（deploy --dry-run／deploy 實測）；rules slim markers</li>
+    <li><b>S4 生命週期引擎</b>：分類判準＋處置保全＋證據不足 HOLD；clean/sync 寫回澄清已承接（S5）</li>
+    <li><b>S5 family 重構</b>：writing＋AIR-45 節（desc 正則／L1-L3／座標四列／寫入門檻，定義源）；init 骨架四要素；clean NEVER＋1；sync 新增＋1；slim 有界（僅 L126 一句可證冗餘）</li>
+    <li><b>S6 對齊＋spine</b>：80 skills＋10 roles 全對齊（12 檔改首句）；spine 定案 <code>~/.agents/memory-spine/</code>＋routing 行；SM-1 跨池版：縮短至 37% 仍 12/12（寬判定下限；live codex 未跑，unverified）</li>
+  </ul>
+  <div class="note"><b>驗證證據</b>：<code>uv run pytest tests/ -x -q</code> → 207 passed；probe 重跑 IDENTICAL；frontmatter audit 80/80＋10/10；錨點 rg 4/4。<b>認知誤差點</b>：post-build 發現 clean/sync 錨點引用不精確（s5-report 曾宣稱一致，實為 2/4）→ 已修 4/4；P6sim v1 表格豁免致 −57B 無鑑別力 → v2 無豁免重測得硬結論。post-build 雙審查：fresh-eyes 抓 F1（freshness×muse變體死循環，已修＋三端MATCH實證）；primed 有條件通過（F1p/F2/F3＋F4–F7 全修；Finding Record 隨鏈存 working tree .review/（暫存，commit 後清除）；judge 主 session 自裁（降級註記）。</div>
 </section>
 
 <section id="s6">

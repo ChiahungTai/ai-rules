@@ -1,5 +1,4 @@
 """P4 helper: section byte split of mosaic root AGENTS.md (read-only)."""
-import re
 
 path = "/Users/ctai/Github/mosaic_alpha/AGENTS.md"
 text = open(path, encoding="utf-8").read()

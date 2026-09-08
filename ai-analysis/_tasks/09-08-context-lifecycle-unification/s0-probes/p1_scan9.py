@@ -1,5 +1,5 @@
 """P1 step9 (final): adjacency of synthetic msgs + session-start MEMORY.md auto-read + recall absence (read-only)."""
-import json
+
 import sqlite3
 
 DB = "file:/Users/ctai/.zcode/cli/db/db.sqlite?mode=ro"
@@ -69,7 +69,9 @@ rows = cur.execute(
     LIMIT 12
     """
 ).fetchall()
-print(f"sessions whose MEMORY.md tool mention occurs at assistant message seq<=6 (n shown, first 12): {len(rows)}")
+print(
+    f"sessions whose MEMORY.md tool mention occurs at assistant message seq<=6 (n shown, first 12): {len(rows)}"
+)
 for sid, seq in rows:
     # confirm it is a Read tool call with MEMORY.md path in input
     r = cur.execute(
@@ -86,7 +88,9 @@ for sid, seq in rows:
     blob = r[0] if r else ""
     is_read = '"tool":"Read"' in blob or '"tool": "Read"' in blob
     has_mem_path = "memories/projects" in blob or "MEMORY.md" in blob
-    print(f"session={sid} first_seq={seq} isRead={is_read} memPath={has_mem_path} head={blob[:180]}")
+    print(
+        f"session={sid} first_seq={seq} isRead={is_read} memPath={has_mem_path} head={blob[:180]}"
+    )
 
 n_all = cur.execute(
     """
@@ -98,7 +102,9 @@ n_all = cur.execute(
 print(f"(for scale) sessions with ANY tool part mentioning MEMORY.md: {n_all}")
 
 print()
-print("== D. desc-matching recall absence check: synthetic msgs quoting entry 'description:' fields ==")
+print(
+    "== D. desc-matching recall absence check: synthetic msgs quoting entry 'description:' fields =="
+)
 rows = cur.execute(
     """
     SELECT json_extract(m.data,'$.semantics.kind') AS k, COUNT(*) AS n

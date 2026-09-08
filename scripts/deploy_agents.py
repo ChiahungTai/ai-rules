@@ -47,6 +47,7 @@ Run after editing rules/ (deploy discipline in rules/AGENTS.md). Idempotent.
 """
 
 import argparse
+import dataclasses
 import os
 import pathlib
 import re
@@ -56,11 +57,86 @@ REPO = pathlib.Path(__file__).resolve().parent.parent
 GUIDE = REPO / "ai-development-guide.md"
 RULES_DIR = REPO / "rules"
 
-TARGETS = [
-    pathlib.Path.home() / ".zcode" / "AGENTS.md",
-    pathlib.Path.home() / ".codex" / "AGENTS.md",
-    pathlib.Path.home() / ".config" / "muse" / "AGENTS.md",
-]
+# draft-3 A案（S3）：muse 用不到的 harness-mechanics rules，從 muse 變體
+# 排除。rules/ 單一源不變（排除≠改 scope：codex/zcode bundle 不受影響；
+# 改名/刪除任一檔 tests/test_deploy_agents.py 即大聲失敗）。
+MUSE_MECHANICS_EXCLUDE = frozenset(
+    {
+        "tool-discipline.md",  # 背景 spawn/TaskOutput/batch——ZCode 機械
+        "symbol-query-routing.md",  # cr-first 路由——工單按需指名（高頻需 callers 查證時放回，代價 4.5KB）
+        "model-routing.md",  # agent tier 派發——主 session 職責
+        "context-management.md",  # /compact/STATE.md——headless 無此面
+        "instruction-writing.md",  # muse 不寫我們的 instruction 檔
+    }
+)
+
+
+@dataclasses.dataclass(frozen=True)
+class DeployTarget:
+    """單端部署配置：路徑＋scope＋排除＋獨立 size gate。"""
+
+    path: pathlib.Path
+    scopes: frozenset
+    exclude: frozenset
+    max_bytes: int
+    label: str
+
+
+VARIANT_LABEL_SUFFIX = ",muse-variant(no-mechanics)"
+
+
+def scopes_label_for(scopes: frozenset, exclude: frozenset) -> str:
+    """scopes → bundle label；exclude 非空＝變體後綴。bundle_for 與 main() 的單一組裝點。"""
+    label = ",".join(sorted(scopes))
+    if exclude:
+        label += VARIANT_LABEL_SUFFIX
+    return label
+
+
+def bundle_for(target: DeployTarget) -> str:
+    """該 target 的預期 bundle（label 語義與 main() 一致；freshness check 消費）。"""
+    return build_bundle(
+        discover_rules(RULES_DIR, target.scopes),
+        scopes_label_for(target.scopes, target.exclude),
+        target.exclude,
+    )
+
+
+def expected_bundle_for(target_path) -> bytes:
+    """部署路徑 → 預期 bytes；未知路徑 KeyError。供 check_single_source 消費。"""
+    for target in resolve_targets(pathlib.Path.home()):
+        if target.path == pathlib.Path(target_path):
+            return bundle_for(target).encode("utf-8")
+    raise KeyError(f"unknown deploy target: {target_path}")
+
+
+def resolve_targets(home: pathlib.Path) -> list[DeployTarget]:
+    """三端配置。muse 端變體＋獨立 gate；其餘兩端語義不動。"""
+    return [
+        DeployTarget(
+            home / ".zcode" / "AGENTS.md",
+            frozenset({"neutral"}),
+            frozenset(),
+            BUNDLE_MAX_BYTES,
+            "zcode",
+        ),
+        DeployTarget(
+            home / ".codex" / "AGENTS.md",
+            frozenset({"neutral"}),
+            frozenset(),
+            BUNDLE_MAX_BYTES,
+            "codex",
+        ),
+        DeployTarget(
+            home / ".config" / "muse" / "AGENTS.md",
+            frozenset({"neutral"}),
+            MUSE_MECHANICS_EXCLUDE,
+            50
+            * 1024,  # ai-rules 工作區 lane 約 51.9KB（64KiB − 專案層 − 包裝）；對齊 S3 gate
+            "muse",
+        ),
+    ]
+
 
 # ZCode truncates a single instruction file at 100KiB (102,400 bytes,
 # hardcoded; Codex limit covered by project_doc_max_bytes knob, set to
@@ -77,6 +153,8 @@ BUNDLE_WARN_RATIO = 0.85
 # Appended as the bundle's last line; a deployed file whose tail lacks it was
 # cut short (or hand-edited) -- load-time truncation is proven by size gate.
 BUNDLE_END_SENTINEL = "<!-- bundle-end -->"
+
+TARGETS = [t.path for t in resolve_targets(pathlib.Path.home())]
 
 # Matches <!-- bundle: skip-start --> ... <!-- bundle: skip-end --> (incl. the
 # trailing newline) so adjacent sections join cleanly. Non-greedy + DOTALL.
@@ -246,11 +324,17 @@ def slim_for_bundle(content: str, rule_name: str = "") -> str:
     return SKIP_PATTERN.sub("", content)
 
 
-def build_bundle(rule_paths: list[pathlib.Path], scopes_label: str) -> str:
+def build_bundle(
+    rule_paths: list[pathlib.Path],
+    scopes_label: str,
+    exclude: frozenset = frozenset(),
+) -> str:
     parts = [HEADER.format(scopes=scopes_label)]
     parts.append(GUIDE.read_text(encoding="utf-8").strip())
     parts.append("")
     for rule_path in rule_paths:
+        if rule_path.name in exclude:
+            continue
         parts.append(f"\n---\n<!-- rules/{rule_path.name} -->\n")
         parts.append(
             slim_for_bundle(
@@ -260,6 +344,16 @@ def build_bundle(rule_paths: list[pathlib.Path], scopes_label: str) -> str:
         parts.append("")
     parts.append(BUNDLE_END_SENTINEL)
     return "\n".join(parts)
+
+
+def check_size_gate(bundle_bytes: int, target: DeployTarget) -> str | None:
+    """該端超 gate 即回報訊息；通過回 None。"""
+    if bundle_bytes <= target.max_bytes:
+        return None
+    return (
+        f"[{target.label}] bundle {bundle_bytes:,} bytes exceeds "
+        f"{target.max_bytes:,} bytes ({target.max_bytes // 1024}KiB)"
+    )
 
 
 def deploy_all(targets: list[pathlib.Path], bundle: str) -> list[pathlib.Path]:
@@ -282,7 +376,9 @@ def deploy_all(targets: list[pathlib.Path], bundle: str) -> list[pathlib.Path]:
                     backup.write_text(existing, encoding="utf-8")
                     print(f"  [WARN] backed up {target} -> {backup}")
             tmp = target.with_name(target.name + ".tmp")
-            staged.append((tmp, target))  # 先登記再寫——寫入/fsync 失敗時 cleanup 涵蓋本 temp
+            staged.append(
+                (tmp, target)
+            )  # 先登記再寫——寫入/fsync 失敗時 cleanup 涵蓋本 temp
             with open(tmp, "w", encoding="utf-8") as fh:
                 fh.write(bundle)
                 fh.flush()
@@ -320,16 +416,12 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    target_scopes = {s.strip() for s in args.scope.split(",")}
-    scopes_label = ",".join(sorted(target_scopes))
+    scope_override = (
+        {s.strip() for s in args.scope.split(",")} if args.scope != "neutral" else None
+    )
 
     if not GUIDE.exists():
         print(f"[FAIL] Guide not found: {GUIDE}", file=sys.stderr)
-        return 1
-
-    rule_paths = discover_rules(RULES_DIR, target_scopes)
-    if not rule_paths:
-        print(f"[FAIL] No rules with scope in {target_scopes}", file=sys.stderr)
         return 1
 
     broken = check_broken_refs(RULES_DIR)
@@ -359,63 +451,86 @@ def main() -> int:
         )
         return 1
 
-    bundle = build_bundle(rule_paths, scopes_label)
-    # Sentinel integrity is the load-time truncation proof; guard it every run.
-    assert bundle.count(BUNDLE_END_SENTINEL) == 1
-    assert bundle.rstrip().endswith(BUNDLE_END_SENTINEL)
-    bundle_lines = bundle.count("\n") + 1
-    bundle_bytes = len(bundle.encode("utf-8"))
-    tok_est = bundle_bytes // 3200
+    targets = resolve_targets(pathlib.Path.home())
+    # partial-deploy 語義（有意）：各端獨立 build＋gate，一端失敗只跳過該端，
+    # 其餘端照樣部署；exit code 仍為 1 告警（F4 聲明）。
+    ready: list[tuple[DeployTarget, str]] = []
+    failed = False
+    for target in targets:
+        # 自訂 --scope 時 exclude 語義不變（綁 target 非 scope）：muse 端恆為
+        # no-mechanics 變體——變體是端點性質，與選了哪些 scope 無關。
+        scopes = scope_override or target.scopes
+        scopes_label = scopes_label_for(scopes, target.exclude)
+        rule_paths = discover_rules(RULES_DIR, scopes)
+        if not rule_paths:
+            print(f"[FAIL] No rules with scope in {scopes}", file=sys.stderr)
+            failed = True
+            continue
+        bundle = build_bundle(rule_paths, scopes_label, target.exclude)
+        # Sentinel integrity is the load-time truncation proof; guard it every run.
+        assert bundle.count(BUNDLE_END_SENTINEL) == 1
+        assert bundle.rstrip().endswith(BUNDLE_END_SENTINEL)
+        bundle_lines = bundle.count("\n") + 1
+        bundle_bytes = len(bundle.encode("utf-8"))
+        tok_est = bundle_bytes // 3200
 
-    rule_names = [p.name for p in rule_paths]
-    print(f"[OK] bundle: {len(rule_paths)} rules (scope={scopes_label}) + guide")
-    print(f"     rules: {', '.join(rule_names)}")
-    print(
-        f"     size: {bundle_lines} lines, {bundle_bytes:,} bytes "
-        f"(~{tok_est}K tokens est, {bundle_bytes * 100 // BUNDLE_MAX_BYTES}% of "
-        f"{BUNDLE_MAX_BYTES // 1024}KiB gate)"
-    )
-
-    if bundle_bytes >= BUNDLE_MAX_BYTES * BUNDLE_WARN_RATIO:
+        rule_names = [p.name for p in rule_paths if p.name not in target.exclude]
         print(
-            f"[WARN] bundle at {bundle_bytes * 100 // BUNDLE_MAX_BYTES}% of "
-            f"size gate ({BUNDLE_MAX_BYTES // 1024}KiB) -- deploy still OK, "
-            "but slimming should happen before the gate, not at it "
-            "(see rules/AGENTS.md size-gate note)",
-            file=sys.stderr,
+            f"[OK] [{target.label}] bundle: {len(rule_names)} rules "
+            f"(scope={scopes_label}) + guide"
+        )
+        print(f"     rules: {', '.join(rule_names)}")
+        print(
+            f"     size: {bundle_lines} lines, {bundle_bytes:,} bytes "
+            f"(~{tok_est}K tokens est, "
+            f"{bundle_bytes * 100 // target.max_bytes}% of "
+            f"{target.max_bytes // 1024}KiB gate)"
         )
 
-    if bundle_bytes > BUNDLE_MAX_BYTES:
-        print(
-            f"[FAIL] bundle {bundle_bytes:,} bytes exceeds size gate "
-            f"{BUNDLE_MAX_BYTES:,} bytes ({BUNDLE_MAX_BYTES // 1024}KiB)",
-            file=sys.stderr,
-        )
-        print(
-            "     Non-Claude harnesses truncate silently (ZCode: 102,400B hard "
-            "line). Slim rules/ per encoder-philosophy, or demote on-demand "
-            "content to a reference skill (rule keeps always-on core + "
-            "pointer; see rules/AGENTS.md size-gate note).",
-            file=sys.stderr,
-        )
-        return 1
+        if bundle_bytes >= target.max_bytes * BUNDLE_WARN_RATIO:
+            print(
+                f"[WARN] [{target.label}] bundle at "
+                f"{bundle_bytes * 100 // target.max_bytes}% of "
+                f"size gate ({target.max_bytes // 1024}KiB) -- deploy still OK, "
+                "but slimming should happen before the gate, not at it "
+                "(see rules/AGENTS.md size-gate note)",
+                file=sys.stderr,
+            )
+
+        gate_msg = check_size_gate(bundle_bytes, target)
+        if gate_msg is not None:
+            print(f"[FAIL] {gate_msg}", file=sys.stderr)
+            print(
+                "     Harness lanes truncate (ZCode: 102,400B hard line; "
+                "muse: 64KiB shared with project layer). Slim rules/ per "
+                "encoder-philosophy, or demote on-demand content to a "
+                "reference skill (rule keeps always-on core + pointer; "
+                "see rules/AGENTS.md size-gate note).",
+                file=sys.stderr,
+            )
+            failed = True
+            continue
+        ready.append((target, bundle))
 
     if args.dry_run:
         print("[DRY-RUN] skipping deploy")
-        return 0
+        return 1 if failed else 0
 
-    deployed = deploy_all(list(TARGETS), bundle)
-    if len(deployed) == len(TARGETS):
-        print(f"[OK] deployed to {len(deployed)}/{len(TARGETS)} non-Claude harnesses")
+    deployed = 0
+    for target, bundle in ready:
+        if deploy_all([target.path], bundle) == [target.path]:
+            deployed += 1
+    if deployed == len(ready) and not failed:
+        print(f"[OK] deployed to {deployed}/{len(targets)} non-Claude harnesses")
     else:
         print(
-            f"[FAIL] deployed to {len(deployed)}/{len(TARGETS)} non-Claude harnesses",
+            f"[FAIL] deployed to {deployed}/{len(targets)} non-Claude harnesses",
             file=sys.stderr,
         )
     print(
         "     Claude (~/.claude/CLAUDE.md) untouched -- rules via ~/.claude/rules/ auto-load"
     )
-    return 0 if len(deployed) == len(TARGETS) else 1
+    return 0 if deployed == len(targets) and not failed else 1
 
 
 if __name__ == "__main__":

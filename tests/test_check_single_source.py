@@ -405,6 +405,49 @@ def test_deploy_freshness_detached_head_downgrades(tmp_path, monkeypatch):
     assert "detached" in findings[0][2]
 
 
+def _fake_variant_repo(tmp_path: Path) -> Path:
+    """變體形態 fake：TARGETS＋expected_bundle_for（per-target 預期）。"""
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    target = tmp_path / "deployed.md"
+    (scripts / "deploy_agents.py").write_text(
+        "from pathlib import Path\n"
+        "RULES_DIR = Path(__file__).parent\n"
+        f"HEADER = {_MARKER!r}\n"
+        f"TARGETS = [Path({str(target)!r})]\n"
+        "def discover_rules(d, scopes):\n    return []\n"
+        "def build_bundle(paths, label, exclude=frozenset()):\n    return 'FULL:' + label\n"
+        "def resolve_targets(home):\n    return []\n"
+        "def expected_bundle_for(p):\n"
+        f"    return ({_MARKER!r} + chr(10) + 'VARIANT').encode('utf-8')\n",
+        encoding="utf-8",
+    )
+    return tmp_path
+
+
+def test_deploy_freshness_variant_match_is_silent(tmp_path, monkeypatch):
+    """muse 變體部署後 freshness 零誤報（F1：full bundle 比變體恆假的迴歸鎖）。"""
+    _fake_variant_repo(tmp_path)
+    target = tmp_path / "deployed.md"
+    target.write_text(_MARKER + "\nVARIANT", encoding="utf-8")
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(css, "_main_worktree", lambda: tmp_path)
+    monkeypatch.setattr(css, "_is_detached_head", lambda: False)
+    assert css.check_deploy_freshness(_freshness_inv()) == []
+
+
+def test_deploy_freshness_variant_mismatch_is_critical(tmp_path, monkeypatch):
+    _fake_variant_repo(tmp_path)
+    target = tmp_path / "deployed.md"
+    target.write_text(_MARKER + "\nSTALE", encoding="utf-8")
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(css, "_main_worktree", lambda: tmp_path)
+    monkeypatch.setattr(css, "_is_detached_head", lambda: False)
+    findings = css.check_deploy_freshness(_freshness_inv())
+    assert len(findings) == 1
+    assert findings[0][1] == "critical"
+
+
 # ---------------------------------------------------------------------------
 # shell_provenance：殼 provenance gate 委派（followup B2c——lint 必須接進
 # 機械閘門，不能只靠自身 unit test）

@@ -1,6 +1,5 @@
 """P1 step8: sample kind=system_reminder synthetic messages — content + timing (read-only)."""
-import json
-import re
+
 import sqlite3
 
 DB = "file:/Users/ctai/.zcode/cli/db/db.sqlite?mode=ro"
@@ -43,7 +42,13 @@ for mid, sid, ts, body in rows:
     sessions_with.add(sid)
     time_range.append(ts)
     b = (body or "").lower()
-    if "memory" in b and ("recall" in b or "memories" in b or "memory/" in b or "memory.md" in b or "desc" in b):
+    if "memory" in b and (
+        "recall" in b
+        or "memories" in b
+        or "memory/" in b
+        or "memory.md" in b
+        or "desc" in b
+    ):
         cat = "memory_related"
     elif "warning" in b or "shorter than" in b or "file" in b:
         cat = "file_read_warning"
@@ -55,9 +60,12 @@ for mid, sid, ts, body in rows:
     if len(samples[cat]) < 3:
         samples[cat].append((mid, sid, ts, (body or "")[:600]))
 
-print(f"total system_reminder msgs: {len(rows)}; distinct sessions: {len(sessions_with)}")
+print(
+    f"total system_reminder msgs: {len(rows)}; distinct sessions: {len(sessions_with)}"
+)
 if time_range:
     import datetime
+
     lo = datetime.datetime.fromtimestamp(min(time_range) / 1000)
     hi = datetime.datetime.fromtimestamp(max(time_range) / 1000)
     print(f"time range: {lo} .. {hi}")

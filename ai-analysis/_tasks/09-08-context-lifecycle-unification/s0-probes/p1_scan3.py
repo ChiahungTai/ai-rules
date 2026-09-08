@@ -1,5 +1,5 @@
 """P1 step3: clean sampling of memory system-reminders, excluding self-echo (read-only)."""
-import json
+
 import re
 import sqlite3
 
@@ -26,7 +26,9 @@ rows = cur.execute(
     (SELF,),
 ).fetchall()
 
-print(f"== {len(rows)} newest text/file parts with system-reminder+MEMORY.md (self session excluded) ==")
+print(
+    f"== {len(rows)} newest text/file parts with system-reminder+MEMORY.md (self session excluded) =="
+)
 shown = 0
 for sid, mid, ts, ptype, text in rows:
     if not text:
@@ -47,7 +49,9 @@ for sid, mid, ts, ptype, text in rows:
         break
 
 print()
-print("== classify reminder content shapes (all non-self text parts, no sample limit) ==")
+print(
+    "== classify reminder content shapes (all non-self text parts, no sample limit) =="
+)
 rows = cur.execute(
     """
     SELECT p.session_id, p.message_id, p.time_created, p.sequence,
@@ -81,11 +85,21 @@ for sid, mid, ts, seq, ptype, text in rows:
         seen_text_hashes.add(h)
         unique_texts += 1
     # find the reminder block
-    m = re.search(r"<system-reminder>(.{0,1200})", text, re.S) or re.search(r"system-reminder[:\s]*(.{0,1200})", text, re.S)
+    m = re.search(r"<system-reminder>(.{0,1200})", text, re.DOTALL) or re.search(
+        r"system-reminder[:\s]*(.{0,1200})", text, re.DOTALL
+    )
     block = m.group(1) if m else text[:1200]
-    has_index = ("MEMORY.md" in block and ("|" in block or "- [" in block or "read_memory" in block))
-    has_entry = bool(re.search(r"(desc\s*:|rank\s*:|---)", block)) and ("memory/" in block or "[[" in block)
-    is_read = "read_memory" in block or "memory-audit" in block.lower() and "hook" in block.lower()
+    has_index = "MEMORY.md" in block and (
+        "|" in block or "- [" in block or "read_memory" in block
+    )
+    has_entry = bool(re.search(r"(desc\s*:|rank\s*:|---)", block)) and (
+        "memory/" in block or "[[" in block
+    )
+    is_read = (
+        "read_memory" in block
+        or "memory-audit" in block.lower()
+        and "hook" in block.lower()
+    )
     if has_entry and not has_index:
         cat = "entry_body (frontmatter desc/rank/body)"
     elif has_index:
@@ -96,9 +110,13 @@ for sid, mid, ts, seq, ptype, text in rows:
         cat = "other"
     cats[cat] += 1
     if len(samples_by_cat[cat]) < 2:
-        samples_by_cat[cat].append((sid, mid, ts, seq, block[:400].replace("\n", "\\n")))
+        samples_by_cat[cat].append(
+            (sid, mid, ts, seq, block[:400].replace("\n", "\\n"))
+        )
 
-print(f"total non-self text parts with 'system-reminder': {len(rows)}; unique by first-2KB hash: {unique_texts}")
+print(
+    f"total non-self text parts with 'system-reminder': {len(rows)}; unique by first-2KB hash: {unique_texts}"
+)
 for k, v in cats.items():
     print(f"{k}: {v}")
     for sid, mid, ts, seq, s in samples_by_cat[k]:

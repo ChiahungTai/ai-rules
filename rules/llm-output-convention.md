@@ -23,13 +23,15 @@ paths:
 
 決策規則：AI 需要此資訊決定下一步 → print；AI 日後可能需要查閱 → logger。
 
+<!-- bundle: skip-start -->
 **單檔 vs 分檔**：預設單一 log 檔 + 三維分離（level / namespace / prefix），不分檔。同進程需交叉 timing 對齊 → 單檔；不同消費者且不需交叉 timing → 才分檔。
+<!-- bundle: skip-end -->
 
 ---
 
 ## Namespace 原則（Logger name 強制 module-path）
 
-Logger name 是 log → 源碼的反查鍵，**必須是 module-path**（`Logger(__name__)` 最常見，自動帶；需 runtime-varying 識別用 `Logger(f"{__name__}({adapter})")` 保留 module-path + 動態段），不可 flat name（`Logger("MyService")`——無法反查）。框架 Strategy/Actor 基類自帶 namespace（如 `self.log`）→ 不自建。框架若不輸出檔名/行號，namespace 是**唯一**反查鍵。
+Logger name 是 log → 源碼的反查鍵，**必須是 module-path**（`Logger(__name__)` 最常見，自動帶），不可 flat name（無法反查）。<!-- bundle: skip-start -->需 runtime-varying 識別用 `Logger(f"{__name__}({adapter})")` 保留 module-path + 動態段。框架 Strategy/Actor 基類自帶 namespace（如 `self.log`）→ 不自建。框架若不輸出檔名/行號，namespace 是**唯一**反查鍵。<!-- bundle: skip-end -->
 
 ---
 

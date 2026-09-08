@@ -1,5 +1,5 @@
 """P1 step10: sample the 7 background_notification msgs w/ description+memory (read-only)."""
-import json
+
 import sqlite3
 
 DB = "file:/Users/ctai/.zcode/cli/db/db.sqlite?mode=ro"

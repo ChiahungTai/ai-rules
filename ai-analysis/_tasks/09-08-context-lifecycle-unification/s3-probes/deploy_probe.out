@@ -1,0 +1,12 @@
+== per-target bundle ==
+zcode: 73962B / gate 92160 tail=True -> PASS
+codex: 73962B / gate 92160 tail=True -> PASS
+muse: 51180B / gate 51200 tail=True -> PASS
+== claude untouched ==
+symlink: True -> /Users/ctai/Github/ai-rules/ai-development-guide.md
+== pool surfaces (ai-rules trusted) ==
+MEMORY.md 31309B entries=143 (lane cap 65536 trusted)
+== lane math (ai-rules ws) ==
+user 51180 + project 12545 + wrapper ~1100 = 64825 vs 65536
+== trust ==
+live pool: trusted path only; untrusted/project-omitted degraded path = designed, runtime unverified

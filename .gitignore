@@ -67,3 +67,7 @@ ai-analysis/_projects/**/diagram-*.visual-check.*.png
 # Muse 共享記憶鎖（ephemeral）
 .agents/memory/.muse-memory.lock
 .agents/memory/*.lock
+
+# probe scratch 備份（F5：T20 運行副產不應進庫）
+*.bak
+*.bak-*

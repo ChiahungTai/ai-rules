@@ -21,8 +21,10 @@ harness-scope: neutral
 - 建立/修改後，必須 `uv run python <file>` 實際執行
 - 修改多個相關檔案時，每個可執行檔案都必須跑
 - AI 不得在未執行的情況下宣稱「完成」或「正確」
+<!-- bundle: skip-start -->
 - **POC 暫時性**：`poc/` 為暫時性驗證產物，僅存活到所屬 EP 段落 build+commit；build 時驗證行為改寫成正式測試，commit 階段 2.7 確認承接後清除（Claude: `/commit`）
 - **清理判準**：知識固化任一成立且完備即刪（test docstring 引用／EP 結論收編／量測文件收編數字）；量測型（測外部世界非 library 行為）固化後直接刪，test 轉移非必要
+<!-- bundle: skip-end -->
 
 ### 測試程式
 

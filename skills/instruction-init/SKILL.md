@@ -84,6 +84,8 @@ uv run python <scan-project-skill-dir>/scripts/scan_project.py --project-root . 
 - **Module Boundaries**：Depends on / Consumed by / Does NOT depend on
 - **關鍵設計決策**：從程式碼推導不出來的「為什麼」
 - **導航索引**：如果模組很大，用 `### 類別小標題` 分組導航種子（非集中符號對照表，見 [instruction-writing skill](../instruction-writing/SKILL.md)「大模組 selectivity」段；檔案路徑選用，LSP 可從符號解析）
+- **Capabilities 初值**：每層附 Capabilities 空表（含表頭 能力 | 入口 | 狀態）；已有可執行入口的能力才填行，desc 依 [instruction-writing skill](../instruction-writing/SKILL.md)「Capabilities desc 文法與分類層級（AIR-45）」文法填寫，無入口的行不寫（L3）
+- **新層骨架四要素**：模組定位（一句話職責＋邊界）＋ 導航種子（概念→符號，入口類須到可執行單元）＋ Capabilities 表 ＋ Module Boundaries；topics 未載入時 desc 標 `待補`，禁捏造
 
 **Module Boundaries 精確度**（有 Phase 1.5 時加成）：
 - `Depends on` 從 `edges[]` 精確推導（而非猜測）
