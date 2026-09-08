@@ -8,7 +8,7 @@ argument-hint: "<問題> [軸:db,git,log,memory,cr,web]"
 
 單一問題的證據強度來自**獨立源的交叉**——單軸取證易被該源的盲區綁架（telemetry 只記 session 視角、memory 條目反映寫入當下、git 只見 committed）。本命令把「多源查證」固化為可重跑流程：軸群平行取證 → 交叉對帳 → 合成。
 
-**受眾＝軌道①**（LLM 執行鏈）：產出是結構化 verdict，直接餵 `/judge-review` 當裁決材料；非人類 viewport（渲染類走 `/illustrate`）。源枚舉制吸收自 deep-research 教訓（自由 web 發散搜尋體感差）；flash 鑑識弧（db/git/memory 三軸模型歸因對帳）為原型「真實案例」。
+**受眾＝軌道①**（LLM 執行鏈）：產出是結構化 verdict，直接餵 `/judge-review` 當裁決材料；非人類 viewport（渲染類走 `/illustrate`）。源枚舉制吸收自 deep-research 教訓（自由 web 發散搜尋體感差）；GLM-5.3-Flash 鑑識弧（db/git/memory 三軸模型歸因對帳）為原型「真實案例」。
 
 ## 輸入（源枚舉制）
 

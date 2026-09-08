@@ -57,7 +57,7 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 | `claude-opus-*` / `glm-5-turbo` | opus | glm-5-turbo |
 | `glm-5.3-flash` | haiku | glm-5.3-flash（5.3 世代 lite 層） |
 
-**Step 2**：查「rate limit 與並發上限」表得**並發上限**——以**將 spawn 的 agent 所在 tier** 為準（lite tier agent 查 flash 列；與主 session 同 tier 的 spawn 才用 Step 1 偵測結果）（單一源 — 本檔不自帶數字，避免 provider 改限額時這裡 drift；表在 [model-routing skill](../model-routing/SKILL.md)）。
+**Step 2**：查「rate limit 與並發上限」表得**並發上限**——以**將 spawn 的 agent 所在 tier** 為準（lite tier agent 查 glm-5.3-flash 列；與主 session 同 tier 的 spawn 才用 Step 1 偵測結果）（單一源 — 本檔不自帶數字，避免 provider 改限額時這裡 drift；表在 [model-routing skill](../model-routing/SKILL.md)）。
 
 **spawn Agent 前必須印出確認**：`[Agent] model=<依 model-routing 角色 tier>, max=N, current=M`
 

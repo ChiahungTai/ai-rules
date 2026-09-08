@@ -66,7 +66,7 @@ mode B artifact 與 mode A/C city map 共用此映射（概念軸單一源；「
 
 **caller 端事實清單義務（archify 委派前）**：清單自帶**幾何分類**（主線/分支/消費＋標註哪些邊跨圖、哪些垂直相鄰——agent 才能守「single main path + side branches from nearest node」）；起手規格一句（3 lanes 起手×零堆疊×5-6 節點/lane、短 sublabel（code identifiers 保留、去 CJK 裝飾詞）、fromCol/toCol 按 phase 帶切乾淨禁重疊）——**事前預防 spec 過重**，非只靠 >4 輪止損；archify-gen 無權刪 caller 給的事實，長文案由 caller 自己收進 cards。
 
-**機械底稿（數據宣稱唯一來源）**：殼中一切**數據宣稱**（數字、狀態、覆蓋率、時間）只從機械底稿帶入、禁止敘事層自填——底稿＝**delta_tour 輸出／archify JSON IR／validate rounds ledger／命令輸出原文**（防 lite 產線的文檔宣稱漂移弱面——flash 分工律，model-routing skill）。
+**機械底稿（數據宣稱唯一來源）**：殼中一切**數據宣稱**（數字、狀態、覆蓋率、時間）只從機械底稿帶入、禁止敘事層自填——底稿＝**delta_tour 輸出／archify JSON IR／validate rounds ledger／命令輸出原文**（防 lite 產線的文檔宣稱漂移弱面——lite 分工律，model-routing skill）。
 
 **確定性再生 diff**：同一底稿重跑 archify-gen → JSON IR diff 應為空——再生等價被 diff 釘住（測試保護的等價物）；diff 非空＝底稿或產線漂移，先查因再交付。
 

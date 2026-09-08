@@ -33,7 +33,7 @@ ROLE_REQUIREMENTS: dict[str, str] = {
     "code-reviewer-primed": "full",
     "cr-research": "lite",
     "cross-verify-investigator": "lite",
-    "impl-flash": "lite",
+    "impl-lite": "lite",
     "lite-verify": "lite",
     "mem-distill": "lite",
     "spec-miner": "lite",

@@ -197,7 +197,7 @@ const allFindings = reviews.flatMap((r, di) =>
 const suggestions = allFindings.filter(f => f.severity === 'suggestion') // 不進錨點閘，直接保留（schema 允許無 file/line）
 const importantPlus = allFindings.filter(f => f.severity !== 'suggestion')
 const anchorable = importantPlus.filter(f => f.file != null && f.line != null) // 缺錨點＝閘未過，退回不浮出
-const ANCHOR_MODEL = 'sonnet' // lite 地板（user 09-05：haiku/luna 基本不用，最低 sonnet/terra 級；CC 詞彙，env 映射直達 GLM flash——dispatch 不綁 backend id）
+const ANCHOR_MODEL = 'sonnet' // lite 地板（user 09-05：haiku/luna 基本不用，最低 sonnet/terra 級；CC 詞彙，env 映射直達 glm-5.3-flash——dispatch 不綁 backend id）
 const ANCHOR_SCHEMA = { /* { results: [{ key, anchorReal: boolean, evidence }] } */ }
 const anchorReport = await agent(
   `批次驗證下列 findings 的錨點屬實性（file:line 存在、符號存在、引用原文屬實）。逐項附機械證據，不判斷成立性。\n` +
