@@ -18,7 +18,7 @@ instruction file 是給 AI 的協作指南，應專注於**核心原則**和**�
 
 每層都是 `AGENTS.md`（source, harness-neutral——四家 harness 都讀；body 禁 Claude 專屬散文）+ `CLAUDE.md`（`@AGENTS.md` thin wrapper, Claude 專屬）。**每層雙檔確保四家 harness 都讀得到該層 instruction**。全域指南（如 `ai-development-guide.md`）是獨立檔部署到各 harness 全域位置，**不是專案 root AGENTS.md**。
 
-> **`@` transclusion 是 Claude Code 專用**：CLAUDE.md 啟動時自動展開 `@path`；AGENTS.md（與 ZCode/OpenCode/Codex）**不展開 `@`**——AGENTS.md 內不可用 `@` 拉內容。
+> **`@` transclusion 是 Claude Code 專用**：CLAUDE.md 啟動時自動展開 `@path`；AGENTS.md（與 ZCode/Codex/Muse）**不展開 `@`**——AGENTS.md 內不可用 `@` 拉內容。
 
 ## 內容分類（精簡版）
 

@@ -7,7 +7,7 @@ harness-scope: meta
 rules/ 是 ai-rules 的行為規範庫。**Claude 與非 Claude 的 rules 載入架構不同**（成因：rules auto-load 是 Claude 獨有功能，非 Claude 沒有）：
 
 - **Claude 端**（雙路徑）：`~/.claude/CLAUDE.md` 是檔案 symlink → `ai-development-guide.md`（guide）；`~/.claude/rules/` 是**目錄 symlink** → `rules/`（rules auto-load，每 session 全載）。repo 改 → 即時生效，**不需 deploy**。
-- **非 Claude 端**（ZCode/OpenCode/Codex/Muse，單檔）：無 rules auto-load 機制 → 靠 `scripts/deploy_agents.py` 把 **guide + neutral rules 拼裝成單一 AGENTS.md**（snapshot），部署到 `~/.{zcode,config/opencode,codex,config/muse}/AGENTS.md`（muse＝machine-wide user rules，probe 實證 always load；專案 AGENTS.md 衝突時贏）。改 rule 後須重跑 deploy 才同步。
+- **非 Claude 端**（ZCode/Codex/Muse，單檔）：無 rules auto-load 機制 → 靠 `scripts/deploy_agents.py` 把 **guide + neutral rules 拼裝成單一 AGENTS.md**（snapshot），部署到 `~/.{zcode,codex,config/muse}/AGENTS.md`（muse＝machine-wide user rules，probe 實證 always load；專案 AGENTS.md 衝突時贏）。改 rule 後須重跑 deploy 才同步。
 
 ## 部署紀律（編輯 rule 時自動生效）
 
@@ -17,7 +17,7 @@ rules/ 是 ai-rules 的行為規範庫。**Claude 與非 Claude 的 rules 載入
 uv run python scripts/deploy_agents.py
 ```
 
-→ 重新 bundle guide + neutral rules → 部署到 `~/.{zcode,config/opencode,codex,config/muse}/AGENTS.md`（非 Claude 端的 rules 唯一來源）。
+→ 重新 bundle guide + neutral rules → 部署到 `~/.{zcode,codex,config/muse}/AGENTS.md`（非 Claude 端的 rules 唯一來源）。
 → Claude 端不需 deploy（`~/.claude/rules/` 目錄 symlink 即時同步）。
 → 注意：deploy 會將非 Claude 端的 AGENTS.md 從 symlink（live-sync）轉為 generated snapshot — 改 rule 後需重跑 generator 才同步。
 
@@ -75,7 +75,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 
 ## Neutral rule 中性化規範
 
-> **適用**：`harness-scope: neutral` 的 rule。這類 rule 會被 `deploy_agents.py` 打包進 bundle，部署到 ZCode / OpenCode / Codex 三家非 Claude harness。寫作時必須假設讀者**不是 Claude** — 不會展開 `@`、不能用 slash command、沒有 `~/.claude/rules/`、沒有 `CLAUDE.md wrapper`。
+> **適用**：`harness-scope: neutral` 的 rule。這類 rule 會被 `deploy_agents.py` 打包進 bundle，部署到 ZCode / Codex / Muse 三家非 Claude harness。寫作時必須假設讀者**不是 Claude** — 不會展開 `@`、不能用 slash command、沒有 `~/.claude/rules/`、沒有 `CLAUDE.md wrapper`。
 
 ### 禁止（非 Claude 讀者會斷裂）
 
@@ -123,7 +123,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 |---------|------|---------|
 | Claude | ... | ... |
 | ZCode | ... | ... |
-| OpenCode | ... | ... |
+| Codex | ... | ... |
 ```
 
 判準：一個概念跨 harness 通用、但「怎麼呼叫」各家不同 → 用對照表；若概念本身某家沒有（如 hooks），那不是載體差異而是 scope 差異 → 整段放 claude-specific rule 或括號註。

@@ -3,8 +3,8 @@
 Deploy bundled AGENTS.md to non-Claude harnesses.
 
 Bundles ai-development-guide.md (guide) + rules with matching harness-scope
-frontmatter -> writes to ~/.zcode/AGENTS.md, ~/.config/opencode/AGENTS.md,
-~/.codex/AGENTS.md, ~/.config/muse/AGENTS.md (muse machine-wide user rules
+frontmatter -> writes to ~/.zcode/AGENTS.md, ~/.codex/AGENTS.md,
+~/.config/muse/AGENTS.md (muse machine-wide user rules
 path — probe-verified 2026-09-07; loads unconditionally, project AGENTS.md
 wins on conflict).
 
@@ -58,13 +58,13 @@ RULES_DIR = REPO / "rules"
 
 TARGETS = [
     pathlib.Path.home() / ".zcode" / "AGENTS.md",
-    pathlib.Path.home() / ".config" / "opencode" / "AGENTS.md",
     pathlib.Path.home() / ".codex" / "AGENTS.md",
     pathlib.Path.home() / ".config" / "muse" / "AGENTS.md",
 ]
 
 # ZCode truncates a single instruction file at 100KiB (102,400 bytes,
-# hardcoded; OpenCode/Codex limits unverified). Keep the bundle under 90KiB
+# hardcoded; Codex limit covered by project_doc_max_bytes knob, set to
+# 102400 on 2026-09-08). Keep the bundle under 90KiB
 # so tail rules never land in the silent-truncation zone.
 BUNDLE_MAX_BYTES = 90 * 1024
 
