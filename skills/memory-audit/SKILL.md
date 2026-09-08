@@ -1,6 +1,6 @@
 ---
 name: memory-audit
-description: "memory 清理/稽核/過時/記憶健康檢查＋寫入端紀律（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。寫 memory 前的寫前一步（一句話測試——核心事實提煉不出一句話＝還沒想清楚＝不寫）＋寫入六問（任務終態→卡/repo 可推導就不寫/同主題加段/cluster-first/尺寸/載體判定）、單一寫入點（條目檔 frontmatter 唯一、MEMORY.md 機械投影）、desc/條目尺寸預算（新建 3,000/膨脹 12,000 hook 硬擋）＋body 形態＋desc 三不＋弧結案蒸餾（含 mem-distill 執行形態）見「寫入端紀律」段。觸發詞：一句話測試、寫入六問、任務終態、cluster-first、單一寫入點、索引投影、desc 上限、結案蒸餾、body 形態、載體判定、寫 memory、確定才寫、歸因未定、rank 排序。"
+description: "memory 清理/稽核/過時/記憶健康檢查＋寫入端紀律（memory audit / audit MEMORY.md / auto memory）。兩級稽核：full 四層（索引機械量測→內容核實 vs repo→清理執行→EP/任務盤點）/ lite 增量核實（git log 驅動）。內容核實預設必做——索引整潔 ≠ 記憶健康。狀態戳 _audit-state.md；advisory→用戶核可→執行三分離。寫 memory 前的寫前一步（一句話測試——核心事實提煉不出一句話＝還沒想清楚＝不寫）＋寫入六問（任務終態→卡/repo 可推導就不寫/同主題加段/cluster-first/尺寸/載體判定）、單一寫入點（條目檔 frontmatter 唯一、MEMORY.md 機械投影）、desc/條目尺寸預算（新建 3,000/膨脹 12,000 hook 硬擋）＋body 形態＋desc 三不＋弧結案蒸餾（含 mem-distill 執行形態）見「寫入端紀律」段。載體統一定義表（該寫哪——三處判準合一：載體職責×常駐-按需×寫入預設交叉表＋誤置→處置＋寫入摩擦設計）見同名節。觸發詞：一句話測試、寫入六問、任務終態、cluster-first、單一寫入點、索引投影、desc 上限、結案蒸餾、body 形態、載體判定、該寫哪、統一定義表、寫入摩擦、放置閘、寫 memory、確定才寫、歸因未定、rank 排序。"
 argument-hint: "full | lite | 無參數（讀狀態戳後建議）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 ---
@@ -67,7 +67,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 - **cluster merge 機械觸發**：同主題散檔 ≥3（rg 主題詞/同前綴判定）→ merge candidate；併入目標優先既有最大 cluster（閾值可在 `_audit-state.md` per-project 覆寫）
 - **蒸餾執行載體**：spawn `mem-distill`（role 定義＝`agents/roles/`、lite pin 生成於 zcode/ registry——registry 是 session 快照，須新建 session 才可解析）；prompt 給檔案清單＋每檔硬上限（預設 11,000 chars）＋desc 一併改寫 ≤100 指示
 - **固化→濃縮同步義務**（user 2026-09-01 定案；AIR-42.1 分層修訂）：經驗固化成 ai-rules skill/rule 落地後，對應 memory 條目按**覆蓋度分層**——**部分覆蓋**（memory 有細化增量：method/display 分離型、user 拍板語境）→ 已承載段壓成指針（觸發詞→skill 名＋一句精髓），user 事實/事故實例/commit 錨留；**完全覆蓋**（rule 句完整承載、memory 無增量——判法：rule 句單獨讀即可指導行動）→ 列**退出候選**交 user 裁，不自行刪。固化與濃縮不同步＝兩處 drift（skill 演進、memory 停舊版）
-- **收斂落點慣例**（與上互補，2026-09-03）：跨 repo 方法論→ai-rules skills/rules；模組知識（project 條目 durable lesson）→對應目錄的模組 AGENTS.md（3-6 行約束形態，非流水帳搬移；root 不動）；user/專案綁定事實→留 memory——三個載體各司其職，收斂時先判條目屬哪類
+- **收斂落點**（與上互補，2026-09-03）：條目處置去處判斷的單一源＝本檔「載體統一定義表」節——跨 repo 方法論→ai-rules skills/rules；模組知識（project 條目 durable lesson）→對應目錄的模組 AGENTS.md（root 不動）；user/專案綁定事實→留 memory——三個載體各司其職，收斂時先判條目屬哪類
 - **夜間收斂＝流出腿**（user 2026-09-03 定案「有進有出」，gate 22,500 配套；2026-09-06 波次修訂）：每日夜間 cron（ZCode automation、owning workspace）跑本層收斂波，輕量形態**隨 cron 預先授權**（heavier 清理仍走「用戶核可後」）。波次：①`--check` 盤點（輸出行自帶 gate 值——引用 gate 一律以該行為源，不信 `_audit-state.md` prose）＋hot 計數行（hot/core/cold 分層計數——hot 佔比 >1/3 標警示，rank 通膨可觀測）＋弧線軟預警（列單檔 >8,000 chars 且近 7 天活躍的條目——掃描形態 `wc -m *.md` 排序交叉 `fd --changed-within 7d`；僅報告不擋，「禁加段」的軟執行）＋**desc>100 掃尾＝全池常態**（mtime 窗口只是流入 catcher、窗口外存量永遠不可見——4 條殘餘連兩晚列建議實證；掃尾本就是波段觸發時被授權的全池動作，常態化非授權升級）②觸發（gate FAIL 或 `_regen-failed` 在場）→ 同主題 cluster merge（desc 掃尾已常態化至波次①，「逼近線」早期觸發退役——band 區間只會重跑掃尾＝冗餘）③regen 至過、清 marker。**排序鍵覆核**：定期整理＝整理排序鍵（條目檔 frontmatter `rank`），`MEMORY.md` 是投影禁手排；弧結案蒸餾時 rank 併同調整（活躍 hot→終態降 core/cold）。掃尾紀律：**壓縮改寫非截斷**——被刪細節若有價值先落 body（desc 是索引摘要層）；不確定的條目跳過，禁大規模語義重寫（那是 full audit 的事）。**desc 事實 drift 當晚修正**（2026-09-06 授權擴充）：層 2'／夜 watch 以機械證據登錄的 description 事實 drift（如「殘=commit 待確認」vs git log 已落地）不論 desc 是否 >100 同晚修正 description 事實面——僅 desc 層、body 歸 owner（分工鐵律不變：登錄段舉證、夜波執行）；已關閉弧線的 owner-touch 模式對此失效（owner session 不會回來，drift 無限滯留——MOS-25 案例）。週日治理 cron 跑 lite audit（健檢腿）——兩 cron 分工：每日流出、週日健檢
 - 索引精簡：generator 池＝修條目檔 description（索引行是投影、禁手寫）；未裝池＝一行 = 主題 + 一個鉤子，細節留在條目檔內
 - 每輪結束**重跑層 1**——驗證清理本身沒引入新問題
@@ -119,6 +119,46 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 - 處置保全：精煉保必要條件、淘汰不斷唯一入口、晉升不泛化一次性經驗；證據不足 HOLD 不處置。
 - 投影重建後必驗消費端（行為對照），不只驗產物存在。
 
+## 載體統一定義表（該寫哪——判準單一源）
+
+> 三處分散判準合一（本 skill 寫入六問 Q6 載體判定 × instruction-writing「載體選擇」（原載體決策樹）× 層 3 收斂落點慣例）——「該寫哪」一律查本表，引用處皆指針回此。稀缺性軸＝北極星分層（開場常駐最貴 → 任務中載入 → 按需檢索 → 零 context）；**載體職責與常駐-按需是正交軸**——同一載體可兩層並存（memory：索引常駐＋body 按需），不硬配「rule 都重要、memory 都次要」。
+
+| 載體 | 職責（收什麼） | 稀缺層（context 佔用） | 寫入預設 |
+|---|---|---|---|
+| rule（`rules/`） | 每次 session 都需要的硬紀律（一行能說完最好） | **開場常駐**（bundle 部署——最貴；on-demand 級內容下沉 skill＝reference 分層） | 寫作治理（AGENTS.md：修剪測試/選載體/驗證附著/長度預算/部署同步） |
+| skill（`skills/`） | on-demand 方法論（理論深掘/失敗案例群/撰寫細則） | 清單常駐（name+desc）＋**body 按需載入**（desc 觸發） | SKILL.md 撰寫規範；desc＝唯一觸發面 |
+| memory 條目 | 跨 session、與 user/專案綁定的事實（偏好/糾正/教訓） | 索引常駐（B 形態＝常駐定額）＋body 按需（rg） | 一句話測試 → 寫入六問 → 尺寸預算（本檔寫入端紀律段） |
+| 模組 AGENTS.md | 模組層約束與入口 | 開該模組任務時載入（路徑觸發） | 3-6 行約束形態，非流水帳搬移 |
+| backlog 卡 | 任務狀態/承諾/待辦——弧工作單元 | 按需（board/命令查詢；不進 context） | `task create`/`edit`；建卡即 commit |
+| EP 檔 | 弧規劃/段落自足/進度結算 | 按需（任務家路徑；session 讀） | 段落結算 append；產物路徑釘死在 EP |
+| scratch（`.agent-tmp/`） | 中間產物/暫存分析 | 零 context（落盤不載入；夜掃 7d） | 隨手寫——**草稿迭代住這，不住 memory** |
+| git repo | 可推導事實（log/程式碼/commit 訊息） | 零 context（rg/git 查詢） | commit 紀律；可推導的不重複記憶 |
+| hook（機制載體） | 機械閘門——承載執行不承載知識 | 零 context（執行時觸發） | 三判準（純機械＋單一入口＋無語義例外）**三者皆是**才選——資格論證與對照組見 [instruction-writing](../instruction-writing/SKILL.md) |
+
+### 該寫哪（一行流）
+
+**知識產生時**：任務終態/進度/承諾 → 卡 notes／EP 進度節（永不進 memory）→ repo 可推導 → 不寫 → 通用方法論（與 user 無關）→ 每次都要＝rule／on-demand＝skill／模組層＝模組 AGENTS.md → 跨 session user/專案綁定事實（確定才寫）→ memory 條目 → 暫存/草稿 → scratch。
+**機制設計時**：純機械＋單一入口＋無語義例外 → hook；缺一 → rule/skill/prompt（LLM 流程編排）按稀缺層。
+
+### 誤置 → 處置（AIR-48 P1 taxonomy 鑑識輸入；頻率＝ai-rules／mosaic 條目數）
+
+| 誤置（P1 實證） | 表判決（該寫哪） | 處置設計（實作另裁） | 層 |
+|---|---|---|---|
+| M1 任務終態/進度入池（8+30） | 卡 notes／EP 進度節 | **放置閘**——新建條目 hook 注入六問指針（機械提醒；Q1 判斷留 LLM） | hook 提醒＋LLM 流程 |
+| M2 desc 三不違反（12+21；內容閘不存在，31 條日期流水全放行） | desc 不放易變快照（現值/日期/session-id） | **內容閘**——desc regex 偵測日期/`sess_` 形態硬擋（三判準全過：純機械/單入口/desc 三無例外） | hook 機械閘 |
+| M3 多 writer 草稿式迭代（60+64；stale-collision ×13） | 草稿 → scratch；條目收終態事實（寫入當下即蒸後形） | stale-collision 訊息擴充——碰撞 error 附改道提示（13 次現成觸發點） | hook 訊息 |
+| M4 repo 可推導佔主體（2） | 不寫／模組操作知識 → 模組 AGENTS.md | Q2 判定是語義——本表 prose 承載，hook 只能提示 | LLM 流程 |
+| B1 bundle scope creep（未發現確證） | EP/卡承載有效 | 維持雙 ref 紀律 | 既有 |
+| SM-5 歸因破口（71/128＋73/106） | —（缺口非誤置） | writer 可見性修法建議（P5：條目 writer log 行／telemetry 擴欄／generator 註記） | 另段 |
+
+### 寫入摩擦設計（讓正確載體比 memory 更近——僅設計，實作另裁）
+
+P1 實證：正確載體**同等可達**（specimen writer 同 session 本來就在寫卡/EP——濫用是習慣非距離被迫）；hook 在已實裝面完全有效（MEMORY.md 直寫 0 次、desc 長度閘攔 39 次）。設計＝在寫入瞬間把指針距離歸零：
+
+- **hook 擴充（推薦）**：①放置閘——Write/Edit 落 memory/*.md 且標的為新建（檔不存在）時，stderr 注入一行「新條目：任務終態→卡；repo 可推導→不寫；確定的 user/專案事實才進池——六問＋載體統一定義表」。提醒不判斷——無擋/放決策，假確定性風險零；既有條目加段（多數寫入形態）不觸發，噪音可控。②desc 內容閘（上表 M2——可直接硬擋）。③stale-collision 訊息擴充（上表 M3）。
+- **提示層（既有，維持不加碼）**：rules/context-management.md 開場指針＋desc 文法五條已覆蓋。
+- **工具層（不做）**：memory 寫入是 harness auto 行為非 CLI 入口，包裝不可行；卡側 backlog CLI 已在場。
+
 ## 寫入端紀律：寫入六問與單一寫入點（寫 memory 前必查）
 
 > 本段是 `rules/context-management.md`「Memory 生命周期規範」的承載體（rule 留 pointer）——寫入側紀律與稽核側同檔，記憶治理單一源。
@@ -155,7 +195,7 @@ harness auto memory 預設「one file = one fact」的「fact」操作定義 = *
 3. **同主題已有？** → `rg -i <關鍵詞> <memory-dir>/` 全檔掃（**不信 MEMORY.md 索引**——載入截斷下尾部條目不可見）；命中 → 既有檔加段（段標題保留原始 name、標 original type）；**進行中弧線條目禁加段**——弧線進度每 session 追加是膨脹主因（實證：單檔 98 次 Edit 養到 84KB），等弧線收案一次性蒸餾；無 → 才開新檔
 4. **project-\* 已完結？** → 任務閉環先收斂既有 project 條目（刪現況細節、留決策教訓）再開新檔
 5. **尺寸預算？** → frontmatter `description` ≤100 chars（索引行原料；>100 被 PreToolUse hook 硬擋——hook 僅攔主 session，subagent 寫入不觸發）；**新建條目 ≤3,000 chars（寫入當下即蒸後形——形態見寫入六問後「body 形態」段）**；條目檔（含 frontmatter）≤12,000 chars（膨脹超限被 hook 擋；收斂方向＝改後比原檔短，放行）——超額 = 內容該住 EP 檔/repo 的訊號；索引軟上限 150 行，逼近 = cluster merge／收斂觸發
-6. **載體對嗎？** → 每次都要的紀律→rule／on-demand 方法論→skill／跨 session 事實→memory（手冊形內容不住 memory——它該住 skill）；**承諾/待辦→backlog 卡**（memory 只收事實與教訓，不收承諾）
+6. **載體對嗎？** → 查「載體統一定義表」（本檔上節）一行流——每次都要的紀律→rule／on-demand 方法論→skill／跨 session 事實→memory／模組層→模組 AGENTS.md；**承諾/待辦→backlog 卡**（memory 只收事實與教訓，不收承諾；手冊形內容不住 memory——它該住 skill）
 
 **rank 初判**（六問之後順手標，一句裁量非機械）：新條目 frontmatter 初判 `rank`——hot＝活躍弧/高頻教訓，core＝default，cold＝冷門/清候選。
 

@@ -1,10 +1,10 @@
 ---
 id: AIR-48
 title: 載體濫用鑑識×統一定義表——對話紀錄實證 memory/bundle/skill 誤置（AIR-45 dogfood 證據腿）
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-08 12:22'
-updated_date: '2026-09-08 13:33'
+updated_date: '2026-09-08 13:52'
 labels:
   - memory
   - governance
@@ -12,7 +12,7 @@ labels:
 dependencies: []
 references:
   - >-
-    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-carrier-misuse-definition/ep.md
+    http://127.0.0.1:6421/ai-rules/_tasks/09-08-carrier-misuse-definition/index.html
   - ai-analysis/_tasks/09-08-carrier-misuse-definition/ep.md
 ordinal: 40000
 ---
@@ -25,11 +25,13 @@ ordinal: 40000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 誤置 taxonomy＋統一定義表初稿交付（specimen 編入）
+- [x] #1 誤置 taxonomy＋統一定義表初稿交付（specimen 編入）
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 【P1 完成 09-08 晚】taxonomy 交付（任務家 p1-taxonomy.md）＋主 session 三輪抽驗通過。數字校正：desc ③ 原載『≈30 Write』係 rollout 膨脹計數假象——db 真值 2ok+2err（specimen 定性不變更強：2h≥5 寫入≥4 身份）。SM-5 破口量化 71/128+73/106。bundle 面無確證 scope creep。hook 在已實裝面完全有效（MEMORY.md 直寫 0 次）——缺的是放置閘＋desc 內容閘。下一步 P2。
+
+【P2 完成 09-08 晚】統一定義表 v1 交付：本體=memory-audit SKILL.md 新節「載體統一定義表」（九載體交叉表＋該寫哪一行流＋誤置→處置＋摩擦設計），審計副本=任務家 p2-definition-table.md（D1-D8＋Decoder test 9/9 反查通過）。指針鏈五處同步（instruction-writing/AGENTS.md/rules/context-management/memory-audit 內三處）＋memory 條目段名 drift 修正。驗證=rg 殘留零＋consistency 96/100。殼 hook 1 補建＋卡 ref 換殼 URL。摩擦設計定案：放置閘=提醒注入（語義留 LLM）、desc 內容閘三判準全過可硬擋、工具層不做——實作另裁。下一步 P3（B 切換，規格全在 EP P3 段含 R1-R5）。
 <!-- SECTION:NOTES:END -->

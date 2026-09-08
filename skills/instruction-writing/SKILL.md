@@ -11,16 +11,9 @@ description: Instruction file（AGENTS.md / CLAUDE.md / rules / SKILL.md）撰�
 
 instruction file 是給 AI 的協作指南，應專注於**核心原則**和**執行約束**，避免冗餘細節。
 
-## 載體決策樹（機械閘門 vs LLM 流程）
+## 載體選擇（機制設計入口 → 統一定義表）
 
-新增防範/驗證機制時先選載體再寫內容：
-
-| 判準 | 載體 |
-|------|------|
-| 純機械 pattern＋單一入口＋無語義例外（**三者皆是**） | **Hook**（exit 2 stderr 回饋 LLM） |
-| 每次 session 都需要的硬紀律（always-on 預算稀缺） | **Rule**（on-demand 級內容住 skill＝reference 分層） |
-| 方法論／理論深掘／失敗案例群／撰寫規範細則 | **Skill**（on-demand 載入） |
-| 語義判斷、需 context、有「看情況」例外 | **Prompt/LLM 流程**（rule＋command 編排） |
+「該寫哪／該用哪個載體」的**統一定義表**（載體職責×常駐-按需×寫入預設交叉表＋「該寫哪」一行流）單一源在 [memory-audit](../memory-audit/SKILL.md)「載體統一定義表」節——知識寫入與機制設計共用一表。本段承載 hook 資格論證（機制載體的方法論面）：
 
 **hook 三判準缺一即退 LLM 流程**：單一入口（Write/Edit/Bash 多入口補不全）、無語義例外（facade/docstring 例外需 context）、純機械（regex 可決定）。**假確定性比真語義危險**——hook 補不全時「確定性保證」是假的，讓人放鬆警惕，比真語義（LLM 流程雖非每次但判斷正確）更糟。第二維＝危害時間性：立即危害（當下發生）→ hook 零例外；累積型危害（慢慢長成）→ LLM 流程漸進清理。對照組：`hooks/block-python-c-comment.py` 適合 hook（python -c 只在 Bash、換行後 `#` 永遠該擋、純字串）；re-export 防範三判準全違反（多入口、facade/docstring 例外、需 context）→ rule＋LLM 流程。
 

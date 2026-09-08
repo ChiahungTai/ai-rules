@@ -126,7 +126,9 @@ P1→P2→P3 強依賴（P2 吃 P1 證據；P3 常駐集合依 P1 修訂）；P4
 
 ## 進度結算
 
-**P1 ✅（09-08 晚，lite-verify 執行＋主 session 三輪抽驗通過）**：taxonomy 交付（`p1-taxonomy.md`）——M1 任務狀態入池（8+30 條）/M2 desc 違反（12+21；長度閘活著攔 39 次、內容閘不存在）/M3 多 writer（60+64 條；stale-collision 13 次）/M4 repo 可推導（2 條）/B1 **bundle 面未發現確證 scope creep**；SM-5 破口量化＝**originSessionId≠末位 writer 71/128＋73/106（常態非例外）**；改道評估＝正確載體同等可達（習慣非距離）＋**hook 在已實裝面完全有效**（MEMORY.md 直寫 0 次）——缺放置閘。**specimen 數字校正**：原「≈30 Write」係 rollout 膨脹假象，db 真值 2ok+2err；但定性更強（單條目 2h≥5 寫入≥4 身份）。覆蓋率：muse/codex CLI 第三寫入通道實證存在（未覆蓋）。下一步＝P2（定義表吃本表）。
+**P1 ✅（09-08 晚，lite-verify 執行＋主 session 三輪抽驗通過）**：taxonomy 交付（`p1-taxonomy.md`）——M1 任務狀態入池（8+30 條）/M2 desc 違反（12+21；長度閘活著攔 39 次、內容閘不存在）/M3 多 writer（60+64 條；stale-collision 13 次）/M4 repo 可推導（2 條）/B1 **bundle 面未發現確證 scope creep**；SM-5 破口量化＝**originSessionId≠末位 writer 71/128＋73/106（常態非例外）**；改道評估＝正確載體同等可達（習慣非距離）＋**hook 在已實裝面完全有效**（MEMORY.md 直寫 0 次）——缺放置閘。**specimen 數字校正**：原「≈30 Write」係 rollout 膨脹假象，db 真值 2ok+2err；但定性更強（單條目 2h≥5 寫入≥4 身份）。覆蓋率：muse/codex CLI 第三寫入通道實證存在（未覆蓋）。
+
+**P2 ✅（09-08 晚，主 session 直做）**：統一定義表 v1 交付——本體＝memory-audit SKILL.md 新節「載體統一定義表」（九載體×職責×稀缺層×寫入預設交叉表＋「該寫哪」一行流雙入口＋誤置→處置表＋寫入摩擦設計三層評估），審計副本＝`p2-definition-table.md`（設計決策 D1-D8＋Decoder test 9/9 案例反查通過——SM-5 正確識別為缺口非誤置、B1 正確維持不過度擴權）。指針鏈同步五處：instruction-writing 決策樹段→「載體選擇」（表格移入統一定義表、hook 三判準論證留原處）＋AGENTS.md 治理第 2 點＋rules/context-management.md pointer＋memory-audit 層 3 收斂落點/Q6/description＋memory 條目 hook-vs-llm-flow-division 段名 drift 修正。摩擦設計定案（僅設計，實作另裁）：放置閘＝提醒注入非判斷攔截（Q1 語義判斷留 LLM——假確定性零風險）；desc 內容閘（日期/sess_ regex）三判準全過可硬擋；工具層明確不做。驗證：rg 殘留掃描（活躍檔零「載體決策樹」舊名引用——歷史檔不追改）＋consistency 96/100（B 形態 forward ref 輕微、P3 落地消解）。殼 hook 1 補建（骨架＋P1 結果章節＋degraded 圖槽登記 hook 2 延後項）＋卡 ref 換殼 URL。下一步＝P3（B 上線切換：generate_index 改造，規格 EP P3 段含 R1-R5 修正全在）。
 
 ## 收尾步驟
 
