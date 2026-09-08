@@ -1,10 +1,10 @@
 ---
 id: AIR-45
 title: context 統一生命週期機制——觸發保證×層級優化×instruction-*重構（blueprint）
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-08 04:25'
-updated_date: '2026-09-08 04:25'
+updated_date: '2026-09-08 04:50'
 labels:
   - memory
   - governance
