@@ -17,7 +17,7 @@
 **核心設計**（討論定案，子 EP 承接展開）：
 
 - **統一座標系**：一切知識單位 = entry `{情境觸發 desc（任務語境領頭）, 一句核心, body 指針, rank（hot/core/cold）, scope（harness 軸，即既有 harness-scope）}`。
-- **投影式讀取**：rank≤core ∩ scope → 投影進 always-on floor（AGENTS.md bundle 變投影產物；觸發剛性=必中類由 floor 承載）；其餘 → routing 索引＋rg 查詢紀律。
+- **投影式讀取**：非 Claude 三端的 bundle 以 rank≤core ∩ scope 投影進 always-on floor（觸發剛性=必中類由 floor 承載）；其餘 → routing 索引＋rg 查詢紀律。Claude Code 保留原生 rules 載入；bundle deploy 不影響其 CLAUDE.md。統一的是知識治理與查詢合約，各端載入 adapter 分立，不把 bundle 的 rank 過濾宣稱為 Claude 原生能力。
 - **層級軸**：user floor（跨 repo 必中集）／project 層（repo 特定＋目錄分層，mosaic 52 檔為正面標本）／觸發層（其餘）——三層判準表 + per-harness 預算互動（muse 單 lane 串接 vs ZCode 兩檔獨立預算 vs codex chain cap）。
 - **生命週期四動**：掃描（audit/telemetry 跨 lane）→ 歸類（cluster＋promotion：memory→skill/rule 固化既有慣例一般化）→ 精煉（distill 管線）→ 淘汰（retire 流程）——**引擎＝memory-audit**（四動判準/稽核方法論單一源）、**執行工具＝instruction-\* 家族**（clean=精煉/淘汰、sync=掃描）——判準與執行分離，不另創 skill（決策 5 相容）。
 
@@ -58,6 +58,8 @@
 
 ## EP Review Findings
 
+本輪證據與五維度覆蓋見 [ep-review.md](ep-review.md)。`implemented` 僅表示審查約束已回寫藍圖，不代表機制已實作或 runtime 驗收通過。
+
 | ID | 嚴重度 | EP 段落 | 問題 | 建議 | 狀態 |
 |----|--------|---------|------|------|------|
 | 1 | 🔴 必須修正 | S5/整合策略 | S5 依賴 S2/S4 卻排在 S4 之前（S3∥S5→S4），依賴不可滿足 | staging 改串行，writing/init 可與 S3 部分平行（L135 已改） | implemented |
@@ -76,6 +78,10 @@
 | 14 | 🟡 建議 | S6 | agents/ registry（roles description＝dispatch 觸發面）未宣告 in/out-of-scope；spine 無候選載體與生成掛點（最薄段落） | S6 補 agents 文法對齊 in-scope（僅文法、registry 投影機制不動）＋spine 候選載體與掛點 | implemented |
 | 15 | 🟡 建議 | Backlog 關聯 | draft-1/draft-2（telemetry 接線/探測，Draft 中）與 S4 掃描腿的依賴關係未交代 | 補依賴登記：S4 開工時吸收或宣告阻塞 | implemented |
 | 16 | 🔴 必須修正 | 整合策略 | S0 致命假設（有無 desc-matching 召回）驗出「無」且 routing 紀律實測差時，全 EP 無 no-go 分支 | 補 no-go 處置（見整合策略新段） | implemented |
+| 17 | 🔴 必須修正（confirmed） | S1/S6/SM-1 | rg 命中率以查詢已發生為前提，不能驗收 session 是否會主動觸發；P5 提供候選清單的 A/B 配對也不能補足 | 分開檢索測試與無提示任務行為 probe；go/no-go 使用後者，no-go 不自動改口徑放行 | implemented |
+| 18 | 🔴 必須修正（evidence-based） | S3/SM-4/5 | S0 P3 的 untrusted 32,000 bytes、project 跳過未被 master 驗收承接 | trust 作為前置軸；trusted 驗 lane 總額，untrusted 顯式 degraded，不自動改 trust | implemented |
+| 19 | 🟡 建議（confirmed） | 核心設計/S3/受影響載體 | 現有 deploy 僅三個非 Claude target，原文「四投放」及四端投影措辭混淆原生 rules 與 bundle | 依 user 澄清保留 Claude 原生 rules；三端 bundle 與 Claude 分別驗收，非要求 Claude 改走 bundle | implemented |
+| 20 | 🟡 建議（confirmed） | 決策 10/S1/S5/SM-9 | 批准 B3/B5/B6/B8 不全符合固定「當你要…時」，且 B5 含引號；直接照規則建 lint 會拒絕批准样本 | 條件句不得窄化為單一固定前綴；禁引號與 B5 的取捨須確認，未裁定前不批次套用相衝突 lint | needs-confirmation |
 
 ## UC 盤點（docs mode：受影響命令/rules 清單）
 
@@ -88,7 +94,7 @@
 | `skills/instruction-init/` | bottom-up 體系生成 | 重構：新專案初始化對齊層級判準表＋座標系欄位 |
 | `skills/instruction-clean/` | 元資訊清理＋distill | 重構：精煉/淘汰動作的承載體 |
 | `skills/instruction-sync/` | md↔code 同步檢查 | 重構：掃描動作（新鮮度/跨 lane）承載體 |
-| `scripts/deploy_agents.py` | 單 bundle 四投放＋90KiB gate | 退化為投影器（rank∩scope×per-target budget） |
+| `scripts/deploy_agents.py` | 單 bundle 投放 ZCode/Codex/Muse 三端＋90KiB gate；Claude 走原生 rules | 非 Claude bundle 投影器（rank∩scope×per-target budget），不改 Claude CLAUDE.md |
 | `hooks/block-memory-index-write.py` | 寫入閘（desc>100/body 上限） | S1 寫入閘放寬＋SM-9 desc 文法攔截 |
 | `rules/context-management.md` | L37-39 memory 生命週期 pointer（六問/rank 初判/投影禁手寫/蒸餾觸發詞） | S1/S4 改寫對象；S5 引用面同步 |
 | `rules/AGENTS.md`＋`rules/instruction-writing.md`＋`ai-development-guide.md` | 部署紀律/文法/總覽 | S3/S5 隨機制改寫 |
@@ -120,11 +126,11 @@
 
 | # | 場景 | 觸發 | 預期行為 | Checkpoint | 對應段落 |
 |---|------|------|---------|------------|---------|
-| SM-1 | 新 session 需要跨域事實（如 muse bridge 旗標） | routing 地圖行命中情境詞 | rg spine/池 → 條目命中（findability） | **機械驗法：N≥10 條情境 probe 語句 → rg spine＋各池 → 命中率下界 ≥80%** | S1/S6 |
-| SM-2 | 必中類知識（commit consent、fail-loud） | session 存在 | floor 恆在場——四 harness 投影後各自載入面皆含 | 每端 rg 抽查 | S3 |
+| SM-1 | 新 session 需要跨域事實（如 muse bridge 旗標） | 只提供自然任務，不提示查 memory、條目名稱或答案 | 自主啟動 routing → 讀正確 body → 在相關動作前採用約束；S1 驗單池，S6 再驗跨池 | 檢索測試保留 N≥10、≥80% 作 findability 指標；另以預先凍結的任務/答案、真實載入切片及工具軌跡計 trigger/read/use，含無關負例、同義改寫、切片外條目與 compact 後接續。S1 開工先定行為門檻，必中案例不得漏；P5 配對成績不抵此門 | S1/S6 |
+| SM-2 | 必中類知識（commit consent、fail-loud） | session 存在 | 非 Claude 三端經 bundle；Claude 經原生 rules；必要內容在各自實際載入面到達 | 每端載入面正例＋非 Claude rank/scope 排除負例；檔案 rg 與 session 載入證據分列 | S3 |
 | SM-3 | 池成長至 200+ 條 | 新增條目 | 載入切片尺寸不變（cold 不付預載稅） | 切片 wc 上下界 | S1 |
-| SM-4 | muse task 於 ai-rules workspace | 64KiB 單 lane 串接 | user floor 投影＋project 12.5K＋framing ≤65,536（部署後 text_bytes==produced） | 部署後 probe | S3 |
-| SM-5 | mosaic 場景（project 42.7K） | ZCode 兩檔預算／muse 單 lane | ZCode 端全載；muse 端層級策略有顯式處置（非靜默截斷） | 層級判準表＋muse 處置文件化 | S3 |
+| SM-4 | muse task 於 ai-rules workspace | 先確認 workspace trust，再按該狀態驗 lane | trusted：user floor＋project＋實際 framing ≤65,536，rendered_bytes 與 text_bytes 對帳且 user/project 關鍵內容到達；untrusted：依 S0 P3 的 32,000 cap／project 跳過驗出 degraded，不冒充全載通過 | 部署後 probe，記 trust/source 數、rendered_bytes、text_bytes 與內容錨點；不自動修改 trust | S3 |
+| SM-5 | mosaic 場景（project 42.7K） | ZCode 兩檔預算／muse 單 lane，muse 納入 trust 軸 | ZCode 端全載；muse trusted 驗重分配後完整載入，untrusted 或預算不足顯式 degraded 並阻止宣稱 project 約束全載 | 層級判準表＋部署後 probe；完整性不以處置文件代驗 | S3 |
 | SM-6 | 同教訓第二次出現 | 二次命中 | rank 晉升進切片（觀測或回報腿） | rank diff 記錄 | S1/S4 |
 | SM-7 | 條目過時 | 掃描（audit/telemetry） | 列淘汰/精煉候選→處置（retire 有證據門檻） | 清單+處置記錄 | S4 |
 | SM-8 | 新專案 init | instruction-init | 產出體系符合層級判準表＋觸發 desc 文法＋座標欄位 | init 產物 lint | S5 |
@@ -142,11 +148,15 @@
 ### S1：memory 讀取路徑 pilot（routing table）
 做什麼：MEMORY.md 改三段式（①觸發地圖～15 行②hot/core 條目行③指向 `_inventory.md` 全量投影不載入）；generator 改造（routing 段生成＋inventory 分離＋desc 文法 lint——S0 定案後規則化）；rank 語義改「觀測晉升」（telemetry 腿＋回報腿）；寫入閘放寬設計（cold 免稅後六問的尺寸焦慮面卸除）。依賴：S0④⑤。吸收：`project_memory-desc-loop-posture-pending`（姿態句順帶裁）。驗收：SM-1/3/6/9。→ 子 EP。
 
+**Review 承接（17/20）**：S1 子 EP 在改造前凍結 SM-1 的行為 probe 與門檻；單池即可驗 routing，不依賴 S6 尚未建立的 spine。檢索命中率、主動觸發率、正確 body 讀取與採用分列，無關任務亦記誤觸發與載入成本。S0 P5 僅支援文法選擇，不算此 gate 已過。情境句領頭涵蓋批准樣本的不同句式，不直接縮成 `^當你要`。**⚠️ 待確認：禁引號與 B5 的指令引句相衝突；需選「保留禁引號、改 B5 表達」或「禁令僅限實證引句、允許指令引句」；未裁定前不批次套用此拒寫條件。**其餘已定案條款保留。
+
 ### S2：座標系擴充——rules/skills 條目化
 做什麼：rules frontmatter 增 rank＋觸發 desc 欄位（harness-scope 已在場——兩軸合體）；16 條 rule 逐條條目化改寫（desc 情境句化、rank 初判、on-demand 級內容確認下沉 skill）；floor 預算重定（目標 user floor ~25-35KB 量級，結構必然非手工瘦身）。依賴：S1 文法定案。驗收：抽查 desc 文法全綠＋floor 尺寸落地。→ 子 EP。
 
 ### S3：投影器與層級軸優化（吸收 draft-3）
 做什麼：deploy_agents.py → 投影器（bundle=rank≤core∩scope 投影；per-target budget gate：muse user-floor ≤50KB 硬（**lane 總額制**：floor＋workspace project＋framing ≤65,536——ai-rules 工作區 floor 上限實算 ≈51.9KB，gate 取 50KB 留 framing 餘裕，防「gate 綠但 SM-4 紅」）＋codex 100K 軟（knob 已調，runtime 認證見 S0⑥）＋zcode 100K 硬＋opencode 依 S0②）；**user floor 收斂**＋**各 repo project 層重整**（層級判準表：user 必中集／project 特定／觸發層——mosaic root 42.7KB 為主案：依 S0④組成分析重分配至目錄層/觸發層）；muse lane 預算分配機制（user-first 串接下 project 保底策略；mosaic 級場景顯式處置）；**mosaic 肢跨 repo——由 mosaic 側 session 執行（工單路由，ai-rules EP 只出判準表與驗收），user 可改指 owning session**；部署驗證探針（SM-2/4/5）。依賴：S2。吸收：draft-3（結案）。→ 子 EP。
+
+**Review 承接（18/19）**：部署面明列 ZCode/Codex/Muse 三個 bundle target；Claude 原生 rules 另行抽驗，bundle deploy 不改其 CLAUDE.md，不以三端投影成功代驗 Claude。Muse 子 EP 必須消費 S0 P3 的 trust 分支與 SM-4/5：以實際 framing/source 集合對帳，50KB 僅是 trusted ai-rules 場景的保守 user 上限，不是所有 workspace 的完整性保證。untrusted、project 省略或超額均記 degraded／不支援完整載入，禁止冒充 SM-2/4/5 通過；任何 trust 變更另依使用者授權。S0 P2 runtime 未驗證不可推成 OpenCode 無上限；OpenCode 若納入部署先在子 EP 明示新增 target 範圍及驗收，未納入時不計入既有四端完成宣稱。
 
 ### S4：生命週期統一（掃描/歸類/精煉/淘汰）
 做什麼：四動語義定義與掛點——掃描（audit×telemetry 跨 lane 擴充：memory/rules/skills 一致的過時判準）、歸類（cluster＋promotion：memory→skill/rule 固化慣例一般化為座標系內晉升，含「犯兩次才 codify」原則化）、精煉（distill 管線統一：mem-distill 模式擴至 rule/skill 條目）、淘汰（retire 證據門檻＋退出記錄）；memory-audit 擴充為生命週期**引擎**（四動判準/稽核方法論單一源——名稱/職責重整；執行工具見 S5）。依賴：S1/S2。驗收：SM-6/7＋四動各有機械產物。→ 子 EP。
@@ -157,6 +167,8 @@
 ### S6：觸發面對齊與 spine
 做什麼：skills catalog desc 文法對齊（觸發詞任務語境化——不物理合併 harvest 機制）；**agents/ registry 的 roles description 納入文法對齊範圍**（description 也是 dispatch 觸發面——僅文法對齊，registry 投影生成機制不動）；跨專案 spine 實體（**候選載體**：CC/ZCode 共用池兄弟目錄或 `~/.agents/memory-spine/`——plain md、條目用 memory pool 同格式 frontmatter；**生成掛點**：各池 generator 認養 routing 行段，spine 條目由 ai-rules 側 session 寫入）＋各池/各 repo routing 行（「碰 muse/codex/bridge → rg spine」）；跨 harness 投影確認（CC symlink 面、muse read-only、codex auto-memory 不碰）。依賴：S1-S5。驗收：SM-1 跨池場景＋spine 路由行在場。→ 子 EP。
 
+**Review 承接（17/20）**：S5 的 writing 文法與 S1 lint 使用同一組已裁定正負樣本，SM-9 不接受「批准樣本被擋但 regex 通過」；S6 在真實 catalog 載入面重跑 SM-1 跨池版本，納入 S0 P6 觀察到的 desc 縮短情境。Claude symlink 面驗原生 rules/skills 可達性，不宣稱它經過 bundle rank 投影。
+
 ## 整合策略
 
 - **staging**：S0→S1（go/no-go 門：routing 紀律實測）→S2→S3→S4→S5→S6（S5 writing/init 可與 S3 部分平行；clean/sync 須隨 S4 後——S5 依賴 S2/S4 不可整段提前）
@@ -164,6 +176,8 @@
 - **驗收總則**：觸發保證量測（SM-1/2 抽測脚本化）；floor 預算與池成長脫鉤（SM-3）；四端載入面機械驗證（SM-2/4/5 的部署後探針）
 - **回滾面**：不用向後相容（user 定調）——但 S1/S3/S5 各留「投影前快照」（舊 MEMORY.md/bundle 形態/SKILL.md 原檔進任務家 version 目錄），災害時可回看
 - **S1 no-go 處置**（致命假設驗出「無 desc-matching 召回」且 routing 紀律實測差時）：①floor 擴權——切片放寬至 core 全量（觸發保證改由 floor 覆蓋率承載）；②驗收基準降級——SM-1 從「紀律觸發」改「floor 覆蓋率」並明記於收尾報告；③止損範圍——S2+ 的條目化投資不受影響（floor 投影本就吃座標系），僅查詢紀律的預期報酬下修。no-go 判定權在 user（S1 收尾時攤數據裁定）
+
+**Review 限定（17）**：上述三項是提交 user 的替代方案，不是自動放行流程。S1 原案已含 hot/core，提議「core 全量」時須列出相較原案實際增加的集合、各端預算及仍未覆蓋案例；集合未增不得稱為兜底。未達事先凍結的行為門檻時，保留 no-go 並由 user 裁定是否修改目標與驗收；floor 覆蓋率不能冒充原觸發 gate。任何擴權仍須滿足各端實際載入預算。
 
 ## 收尾步驟
 
