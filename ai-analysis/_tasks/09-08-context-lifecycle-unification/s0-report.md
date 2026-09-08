@@ -260,3 +260,16 @@ ERROR: {"type":"error","status":400,"error":{"type":"invalid_request_error",
 - **F2（low）**：5 個孤兒 `.out` 無生成腳本——補建等值腳本（`p1_local_setting.py`/`p4_sections.py`/`p5_entries.py`/`p5_charcount.py`）重跑覆寫；出處清冊見 `s0-probes/PROVENANCE.md`。
 - **F3（low）**：`p3_debug.py`/`p3_debug2.py`（hardcode 單 session 的 throwaway，被 `p3_scan.py` 取代）已刪除。
 - 5.3 主審抽驗（六項 load-bearing claims）：23,583 鐵證在場（兩處 log）／下沉目的地逐 byte 吻合／knob+sentinel 在場／P5 字數 69-85 全過／P1 system_reminder=210 逐數吻合（user messages 17,736→17,747 為活 db 漂移）——**verdict 全數成立**。
+
+---
+
+## P5 附錄：A/B recall dry-run 結果（09-08 晚，user 指定以實證代替人工校準）
+
+材料：`s0-probes/p5_ab_material.md`（清單 A=現行 desc／B=情境句草案；S1-S10 中性任務語境；答案 key 不隨題發）。兩家族獨立受測：
+
+| 腿 | 模型/effort | A 命中 | B 命中 | 定性觀察 |
+|---|---|---|---|---|
+| GLM（flash） | lite-verify agent | 10/10 | 10/10 | B「當你要X時」與任務語句結構同構、匹配更直接（S5/S8/S10 尤明顯）；A 靠主題詞可中但多一層語義對應 |
+| muse | muse-spark-1.3/xhigh（bridge task job-mts981lr） | 10/10 | 10/10 | B 領頭即觸發條件可直接對號入座；A 需先解碼術語再映射 |
+
+**結論**：B 形態零退化＋解析成本優——支持採用情境句領頭文法（S1 lint 規則 1 的實證背書）。**方法論限制（誠實段）**：hit-rate 在 10 條乾淨材料下飽和（兩家族雙雙全中），且情境由知悉條目者撰寫（語義空間同源）；鑑別力測試留給 S1 SM-1（136 條全索引＋截斷切片＋routing 條件）。codex 腿（terra/high）待 CLI 升級後同材料補跑。
