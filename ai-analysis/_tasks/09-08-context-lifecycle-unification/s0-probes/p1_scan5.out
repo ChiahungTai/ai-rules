@@ -1,0 +1,64 @@
+== tool parts with literal wrapper: tool name + head snippet ==
+----------------------------------------------------------------------
+session=sess_subagent_agent_ea84b7a6-7505-4375-a027-bb0f442bfef0 ts=1788819375969 tool=Read json_keys=['type', 'callID', 'tool', 'state']
+around wrapper: li/exec/sess_subagent_agent_ea84b7a6-7505-4375-a027-bb0f442bfef0/call_f47b51744655417e85b7f17a-stdout.log"}, "output": "<system-reminder>Warning: the file exists but is shorter than the provided offset (1). The file has 1 lines.</system-reminder>", "title": "Read", "metadata": {"schemaVersion": 1, "serialization": {"truncated": false, "originalBytes": 126, "returnedBytes": 126,
+----------------------------------------------------------------------
+session=sess_subagent_agent_0da0bf4d-8719-4bc3-a32f-08595a5f482a ts=1788790475560 tool=Read json_keys=['type', 'callID', 'tool', 'state']
+around wrapper: li/exec/sess_subagent_agent_0da0bf4d-8719-4bc3-a32f-08595a5f482a/call_c7bbfe9925d3471cad128842-stdout.log"}, "output": "<system-reminder>Warning: the file exists but is shorter than the provided offset (1). The file has 1 lines.</system-reminder>", "title": "Read", "metadata": {"schemaVersion": 1, "serialization": {"truncated": false, "originalBytes": 126, "returnedBytes": 126,
+----------------------------------------------------------------------
+session=sess_subagent_agent_74b7a63a-b2a7-4f8a-b8fe-019e54506432 ts=1788781942156 tool=Read json_keys=['type', 'callID', 'tool', 'state']
+around wrapper: li/exec/sess_subagent_agent_74b7a63a-b2a7-4f8a-b8fe-019e54506432/call_baa9f63cdd264b81b251ea18-stdout.log"}, "output": "<system-reminder>Warning: the file exists but is shorter than the provided offset (1). The file has 1 lines.</system-reminder>", "title": "Read", "metadata": {"schemaVersion": 1, "serialization": {"truncated": false, "originalBytes": 126, "returnedBytes": 126,
+----------------------------------------------------------------------
+session=sess_subagent_agent_5d10737b-bbd2-4983-a024-71b86304bc5f ts=1788778793057 tool=Read json_keys=['type', 'callID', 'tool', 'state']
+around wrapper: path": "/Users/ctai/Github/mosaic_alpha_offline_backtesting/.agent-tmp/s1_final2_pytest.txt", "offset": 18}, "output": "<system-reminder>Warning: the file exists but is shorter than the provided offset (18). The file has 17 lines.</system-reminder>", "title": "Read", "metadata": {"schemaVersion": 1, "serialization": {"truncated": false, "originalBytes": 128, "returnedBytes": 12
+----------------------------------------------------------------------
+session=sess_subagent_agent_5d10737b-bbd2-4983-a024-71b86304bc5f ts=1788778728559 tool=Read json_keys=['type', 'callID', 'tool', 'state']
+around wrapper: ers/ctai/Github/mosaic_alpha_offline_backtesting/.agent-tmp/s1_final_pytest.txt", "limit": 5, "offset": 25}, "output": "<system-reminder>Warning: the file exists but is shorter than the provided offset (25). The file has 23 lines.</system-reminder>", "title": "Read", "metadata": {"schemaVersion": 1, "serialization": {"truncated": false, "originalBytes": 128, "returnedBytes": 12
+----------------------------------------------------------------------
+session=sess_5c3b8fd0-a2b7-444a-95f1-61919cb371c4 ts=1788755467287 tool=Read json_keys=['type', 'callID', 'tool', 'state']
+around wrapper: s/ctai/.claude/projects/-Users-ctai-Github-mosaic-alpha/memory/_audit-state.md", "limit": 10, "offset": 55}, "output": "<system-reminder>Warning: the file exists but is shorter than the provided offset (55). The file has 36 lines.</system-reminder>", "title": "Read", "metadata": {"schemaVersion": 1, "serialization": {"truncated": false, "originalBytes": 128, "returnedBytes": 12
+----------------------------------------------------------------------
+session=sess_subagent_agent_b9722c61-c642-4a8a-9744-4d94df1672d5 ts=1788742614616 tool=? json_keys=[]
+around wrapper: {}
+----------------------------------------------------------------------
+session=sess_59e97f1e-db6a-4090-9cbd-a2c64df1d989 ts=1788736662944 tool=Read json_keys=['type', 'callID', 'tool', 'state']
+around wrapper: s/ctai/.zcode/cli/exec/sess_59e97f1e-db6a-4090-9cbd-a2c64df1d989/call_3341fe4c40c043a4aa00c2d4-stdout.log"}, "output": "<system-reminder>Warning: the file exists but is shorter than the provided offset (1). The file has 1 lines.</system-reminder>", "title": "Read", "metadata": {"schemaVersion": 1, "serialization": {"truncated": false, "originalBytes": 126, "returnedBytes": 126,
+
+== user-role text parts scanned for recall-marker alternatives ==
+user-text parts LIKE '%recalled%': 0
+user-text parts LIKE '%Recalled%': 0
+user-text parts LIKE '%memory context%': 1
+user-text parts LIKE '%Relevant memories%': 0
+user-text parts LIKE '%relevant memories%': 0
+user-text parts LIKE '%<memory%': 3
+user-text parts LIKE '%memories>%': 0
+user-text parts LIKE '%memory context block%': 0
+user-text parts LIKE '%auto-injected%': 0
+user-text parts LIKE '%automatically injected%': 0
+
+== any-part scan for 'recalled' variants ==
+parts LIKE %recalled memor%: 31
+parts LIKE %Recalled memor%: 31
+parts LIKE %recall%memory%: 1087
+
+== session_input kinds ==
+backgroundNotification: 572
+compact: 33
+sendText: 6018
+
+== session_input payload sample (1 row, truncated) ==
+kind=sendText payload_head={"text":"fit 樹是 condition 的自動發現器\n那是因為condition 跟 那五個 membership 有關係，那五個 membership 有個名詞嗎？不然要打好多字","intent":{"sourceCommandId":"01a07f5e-7ef6-707f-9797-c18d068631af","queueItemId":"queue_01a07f5e-7ef6-707f-9797-c18d068631af","clientId":"client-019f8daf-1cf3-7c1e-ab46-1e5e2e51aa00","kind":"sendText","text":"fit 樹是 condition 的自動發現器\n那是因為condition 跟 那五個 membership 有關係，那五個 membership 有個名詞嗎？不然要打好多字","admissionSeq":9,"admittedAt":1788843294466,"requestedDelivery":"guide","admittedDelivery":"guide","qu
+
+== session_entry types ==
+runtime/bash_shell_selection: 1910
+runtime/model_selection: 300
+runtime/user_input_auto_resolution: 61
+runtime/workspace_checkpoint: 19833
+v4/command_fact: 55
+
+== session_entry data keys sample ==
+type=runtime/workspace_checkpoint: {"eventId":"50130b01-231c-488f-910c-cd8c77bf04d8","payload":{"checkpointId":"checkpoint_d2a64915-33c2-4719-949c-fb6bb6bb03b1","messageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","targetMessageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","toolMessageId":"msg_mts79bcy_bd9a4fc1-4
+type=runtime/workspace_checkpoint: {"eventId":"a31e3b5a-c2e3-434a-9ee5-61e776009344","payload":{"checkpointId":"checkpoint_2142741b-1f57-44a6-bdfa-6fbf5326572a","messageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","targetMessageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","toolMessageId":"msg_mts7848j_d54040fe-5
+type=runtime/workspace_checkpoint: {"eventId":"173fe3bb-bd45-4b9f-9cb9-beffcf8a2c78","payload":{"checkpointId":"checkpoint_622d06c7-c1da-4d8e-87aa-a156e8240bb0","messageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","targetMessageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","toolMessageId":"msg_mts76ncj_9e2eb1fd-0
+type=runtime/workspace_checkpoint: {"eventId":"c181606a-f167-4723-8927-33496b254c4b","payload":{"checkpointId":"checkpoint_18603899-bcdf-431e-8a44-a5e59430da70","messageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","targetMessageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","toolMessageId":"msg_mts75tb3_996dc88e-6
+type=runtime/workspace_checkpoint: {"eventId":"24b84008-93e3-4f82-ba59-74a93149202c","payload":{"checkpointId":"checkpoint_519e60f3-d08e-49e0-88ab-a746552575ad","messageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","targetMessageId":"msg_mts7224v_6bcd0003-19f7-4037-81a8-a1f884f065a5","toolMessageId":"msg_mts74epk_7e420f78-b

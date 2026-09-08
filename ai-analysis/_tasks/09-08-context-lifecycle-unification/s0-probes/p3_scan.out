@@ -1,0 +1,125 @@
+scanned 55 sessions
+
+== per-session: day | session | workspace | rules_file text_bytes (all observations) ==
+07 01a07929-f78e ws=ai-rules rules_file text_bytes=[23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583, 23583] n_obs=24
+07 01a0792a-b799 ws=mosaic_alpha_trading_lab rules_file: (none)
+07 01a07948-c61b ws=mosaic_alpha rules_file text_bytes=[53701, 53701] n_obs=2
+07 01a0794c-c7e2 ws=mosaic_alpha rules_file text_bytes=[53701, 53701] n_obs=2
+07 01a0794f-57f0 ws=mosaic_alpha rules_file text_bytes=[53701, 53701] n_obs=2
+07 01a07951-f40f ws=ai-rules rules_file text_bytes=[23583] n_obs=1
+07 01a0795c-86e4 ws=mosaic_alpha rules_file text_bytes=[53701, 53701, 53701, 53701] n_obs=4
+07 01a07964-edfa ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a0796a-a4b4 ws=mosaic_alpha_offline_backtesting rules_file text_bytes=[53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701] n_obs=25
+07 01a0797d-a470 ws=mosaic_alpha_trading_lab rules_file text_bytes=[53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701] n_obs=41
+07 01a079c5-f741 ws=mosaic_alpha rules_file text_bytes=[53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701, 53701] n_obs=9
+07 01a079d8-e226 ws=mosaic_alpha rules_file: (none)
+07 01a07a12-359c ws=mosaic_alpha rules_file text_bytes=[53701, 53701] n_obs=2
+07 01a07a2c-20f8 ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a07a32-ad7d ws=mosaic_alpha rules_file text_bytes=[53701] n_obs=1
+07 01a07a3e-d4f6 ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a07a42-8be0 ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a07a4e-7881 ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a07a52-87bb ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a07a5e-2465 ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a07a63-b4c5 ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a07b61-1d82 ws=mosaic_alpha_offline_backtesting rules_file text_bytes=[53701, 53701] n_obs=2
+07 01a07b75-79b2 ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a07b76-ec8c ws=mosaic_alpha rules_file text_bytes=[53701, 53701] n_obs=2
+07 01a07b92-002c ws=ai-rules rules_file text_bytes=[23583, 23583] n_obs=2
+07 01a07ba1-a40c ws=ai-rules rules_file text_bytes=[23583] n_obs=1
+07 01a07ba2-4e75 ws=ai-rules rules_file text_bytes=[12989] n_obs=1
+07 01a07ba3-a8a2 ws=mosaic_alpha_trading_lab rules_file text_bytes=[31999, 31999] n_obs=2
+07 01a07ba3-ac45 ws=ai-rules rules_file text_bytes=[65534] n_obs=1
+07 01a07ba3-fb35 ws=mosaic_alpha_offline_backtesting rules_file text_bytes=[65534, 65534] n_obs=2
+07 01a07ba4-68b0 ws=mosaic_alpha rules_file text_bytes=[65534, 65534] n_obs=2
+07 01a07bc4-be4b ws=mosaic_alpha_offline_backtesting rules_file text_bytes=[65534, 65534] n_obs=2
+07 01a07bcb-f66f ws=ai-rules rules_file: (none)
+07 01a07bcc-119c ws=mosaic_alpha_trading_lab rules_file: (none)
+07 01a07bcc-3557 ws=mosaic_alpha rules_file text_bytes=[65534, 65534, 65534, 65534] n_obs=4
+07 01a07bcc-4fde ws=mosaic_alpha_offline_backtesting rules_file: (none)
+07 01a07c11-dd7d ws=ai-rules rules_file text_bytes=[65534, 65534] n_obs=2
+07 01a07c20-a8e5 ws=mosaic_alpha_trading_lab rules_file text_bytes=[32000, 32000] n_obs=2
+08 01a07d6b-00d7 ws=ai-rules rules_file text_bytes=[65534, 65534] n_obs=2
+08 01a07d6f-1f7f ws=mosaic_alpha rules_file text_bytes=[65534, 65534] n_obs=2
+08 01a07d77-0dc6 ws=mosaic_alpha rules_file text_bytes=[65534, 65534] n_obs=2
+08 01a07d7d-358d ws=ai-rules rules_file text_bytes=[65534, 65534] n_obs=2
+08 01a07dea-fce4 ws=mosaic_alpha_trading_lab rules_file text_bytes=[32000, 32000] n_obs=2
+08 01a07e4e-9a60 ws=ai-rules rules_file text_bytes=[65534, 65534] n_obs=2
+08 01a07e58-fb1a ws=ai-rules rules_file text_bytes=[65534, 65534] n_obs=2
+08 01a07e6e-cee5 ws=ai-rules rules_file text_bytes=[65536, 65536] n_obs=2
+08 01a07e71-39c0 ws=mosaic_alpha_offline_backtesting rules_file: (none)
+08 01a07e71-5015 ws=mosaic_alpha rules_file text_bytes=[65536, 65536] n_obs=2
+08 01a07e7b-4633 ws=mosaic_alpha rules_file text_bytes=[65536, 65536] n_obs=2
+08 01a07e7d-9d19 ws=mosaic_alpha rules_file text_bytes=[65536, 65536] n_obs=2
+08 01a07e84-daca ws=ai-rules rules_file text_bytes=[65536] n_obs=1
+08 01a07eb7-331d ws=mosaic_alpha_trading_lab rules_file text_bytes=[32000, 32000] n_obs=2
+08 01a07edb-2686 ws=ai-rules rules_file text_bytes=[65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535, 65535] n_obs=12
+08 01a07ee6-16c4 ws=mosaic_alpha_trading_lab rules_file text_bytes=[32000, 32000] n_obs=2
+08 01a07f13-bb8f ws=ai-rules rules_file text_bytes=[65533, 65533] n_obs=2
+
+== aggregate by workspace ==
+ai-rules: 24 sessions with rules_file obs
+   07 01a07929-f78e first=23583 last=23583
+   07 01a07951-f40f first=23583 last=23583
+   07 01a07964-edfa first=23583 last=23583
+   07 01a07a2c-20f8 first=23583 last=23583
+   07 01a07a3e-d4f6 first=23583 last=23583
+   07 01a07a42-8be0 first=23583 last=23583
+   07 01a07a4e-7881 first=23583 last=23583
+   07 01a07a52-87bb first=23583 last=23583
+   07 01a07a5e-2465 first=23583 last=23583
+   07 01a07a63-b4c5 first=23583 last=23583
+   07 01a07b75-79b2 first=23583 last=23583
+   07 01a07b92-002c first=23583 last=23583
+   07 01a07ba1-a40c first=23583 last=23583
+   07 01a07ba2-4e75 first=12989 last=12989
+   07 01a07ba3-ac45 first=65534 last=65534
+   07 01a07c11-dd7d first=65534 last=65534
+   08 01a07d6b-00d7 first=65534 last=65534
+   08 01a07d7d-358d first=65534 last=65534
+   08 01a07e4e-9a60 first=65534 last=65534
+   08 01a07e58-fb1a first=65534 last=65534
+   08 01a07e6e-cee5 first=65536 last=65536
+   08 01a07e84-daca first=65536 last=65536
+   08 01a07edb-2686 first=65535 last=65535
+   08 01a07f13-bb8f first=65533 last=65533
+mosaic_alpha: 15 sessions with rules_file obs
+   07 01a07948-c61b first=53701 last=53701
+   07 01a0794c-c7e2 first=53701 last=53701
+   07 01a0794f-57f0 first=53701 last=53701
+   07 01a0795c-86e4 first=53701 last=53701
+   07 01a079c5-f741 first=53701 last=53701
+   07 01a07a12-359c first=53701 last=53701
+   07 01a07a32-ad7d first=53701 last=53701
+   07 01a07b76-ec8c first=53701 last=53701
+   07 01a07ba4-68b0 first=65534 last=65534
+   07 01a07bcc-3557 first=65534 last=65534
+   08 01a07d6f-1f7f first=65534 last=65534
+   08 01a07d77-0dc6 first=65534 last=65534
+   08 01a07e71-5015 first=65536 last=65536
+   08 01a07e7b-4633 first=65536 last=65536
+   08 01a07e7d-9d19 first=65536 last=65536
+mosaic_alpha_offline_backtesting: 4 sessions with rules_file obs
+   07 01a0796a-a4b4 first=53701 last=53701
+   07 01a07b61-1d82 first=53701 last=53701
+   07 01a07ba3-fb35 first=65534 last=65534
+   07 01a07bc4-be4b first=65534 last=65534
+mosaic_alpha_trading_lab: 6 sessions with rules_file obs
+   07 01a0797d-a470 first=53701 last=53701
+   07 01a07ba3-a8a2 first=31999 last=31999
+   07 01a07c20-a8e5 first=32000 last=32000
+   08 01a07dea-fce4 first=32000 last=32000
+   08 01a07eb7-331d first=32000 last=32000
+   08 01a07ee6-16c4 first=32000 last=32000
+
+== all block ids seen (aggregate) ==
+session_identity: 233
+rules_file: 197
+workspace_identity: 197
+security_mode: 197
+skills_catalog: 197
+workflow_availability_explicit: 187
+subagent_delegation: 187
+memory_snapshot: 94
+sandbox_policy: 78
+final_summary_backstop: 2

@@ -1,0 +1,439 @@
+== sqlite_master objects ==
+index: input_history_project_time_idx
+index: input_history_time_idx
+index: local_setting_namespace_key_idx
+index: local_setting_scope_idx
+index: message_session_sequence_idx
+index: message_session_time_created_id_idx
+index: model_usage_query_source_idx
+index: model_usage_session_turn_idx
+index: model_usage_started_model_idx
+index: model_usage_trace_idx
+index: part_message_id_id_idx
+index: part_message_sequence_idx
+index: part_session_idx
+index: part_session_message_sequence_idx
+index: session_entry_session_idx
+index: session_entry_session_type_idx
+index: session_entry_time_created_idx
+index: session_input_session_admitted_idx
+index: session_input_session_status_idx
+index: session_parent_idx
+index: session_project_idx
+index: session_task_link_activity_idx
+index: session_task_link_parent_idx
+index: session_task_link_root_workflow_idx
+index: session_task_type_idx
+index: session_trace_idx
+index: session_workspace_idx
+index: sqlite_autoindex_input_history_1
+index: sqlite_autoindex_local_setting_1
+index: sqlite_autoindex_message_1
+index: sqlite_autoindex_model_usage_1
+index: sqlite_autoindex_part_1
+index: sqlite_autoindex_permission_1
+index: sqlite_autoindex_schema_migration_1
+index: sqlite_autoindex_session_1
+index: sqlite_autoindex_session_entry_1
+index: sqlite_autoindex_session_input_1
+index: sqlite_autoindex_session_target_1
+index: sqlite_autoindex_session_task_link_1
+index: sqlite_autoindex_session_task_link_2
+index: sqlite_autoindex_todo_1
+index: sqlite_autoindex_tool_usage_1
+index: sqlite_autoindex_turn_usage_1
+index: sqlite_autoindex_workflow_activity_1
+index: sqlite_autoindex_workflow_activity_2
+index: sqlite_autoindex_workflow_definition_1
+index: sqlite_autoindex_workflow_event_1
+index: sqlite_autoindex_workflow_event_2
+index: sqlite_autoindex_workflow_run_1
+index: todo_session_idx
+index: tool_usage_session_tool_call_idx
+index: tool_usage_session_turn_idx
+index: tool_usage_started_tool_idx
+index: turn_usage_started_idx
+index: workflow_activity_child_session_idx
+index: workflow_activity_run_status_idx
+index: workflow_definition_source_idx
+index: workflow_event_run_sequence_idx
+index: workflow_run_cwd_status_idx
+index: workflow_run_definition_idx
+index: workflow_run_parent_session_idx
+table: input_history
+table: local_setting
+table: message
+table: model_usage
+table: part
+table: permission
+table: schema_migration
+table: session
+table: session_entry
+table: session_input
+table: session_target
+table: session_task_link
+table: todo
+table: tool_usage
+table: turn_usage
+table: workflow_activity
+table: workflow_definition
+table: workflow_event
+table: workflow_run
+
+== table DDL ==
+CREATE TABLE schema_migration (
+      id text primary key,
+      checksum text not null,
+      app_version text,
+      time_applied integer not null
+    )
+---
+CREATE TABLE session (
+        id text primary key,
+        project_id text not null,
+        workspace_id text,
+        parent_id text,
+        slug text not null,
+        directory text not null,
+        path text,
+        title text not null,
+        version text not null,
+        share_url text,
+        summary_additions integer,
+        summary_deletions integer,
+        summary_files integer,
+        summary_diffs text,
+        revert text,
+        permission text,
+        time_created integer not null,
+        time_updated integer not null,
+        time_compacting integer,
+        time_archived integer
+      , task_type text not null default 'interactive', title_source text not null default 'first_input'
+        check(title_source in ('default', 'first_input', 'generated', 'custom')), title_message_id text, time_title_updated integer, trace_id text)
+---
+CREATE TABLE message (
+        id text primary key,
+        session_id text not null references session(id) on delete cascade,
+        time_created integer not null,
+        time_updated integer not null,
+        data text not null
+      , sequence integer)
+---
+CREATE TABLE part (
+        id text primary key,
+        message_id text not null references message(id) on delete cascade,
+        session_id text not null,
+        time_created integer not null,
+        time_updated integer not null,
+        data text not null
+      , sequence integer)
+---
+CREATE TABLE todo (
+        session_id text not null references session(id) on delete cascade,
+        content text not null,
+        status text not null,
+        priority text not null,
+        position integer not null,
+        time_created integer not null,
+        time_updated integer not null,
+        primary key(session_id, position)
+      )
+---
+CREATE TABLE session_entry (
+        id text primary key,
+        session_id text not null references session(id) on delete cascade,
+        type text not null,
+        time_created integer not null,
+        time_updated integer not null,
+        data text not null
+      )
+---
+CREATE TABLE permission (
+        project_id text primary key,
+        time_created integer not null,
+        time_updated integer not null,
+        data text not null
+      )
+---
+CREATE TABLE input_history (
+        id text primary key,
+        project_id text not null,
+        session_id text,
+        text text not null,
+        kind text not null,
+        time_created integer not null
+      , attachments text)
+---
+CREATE TABLE local_setting (
+        scope text not null,
+        scope_id text not null,
+        namespace text not null,
+        key text not null,
+        value text not null,
+        schema_version integer not null,
+        time_created integer not null,
+        time_updated integer not null,
+        primary key(scope, scope_id, namespace, key)
+      )
+---
+CREATE TABLE "session_target" (
+        session_id text primary key references session(id) on delete cascade,
+        target_id text not null,
+        objective text not null,
+        status text not null check(status in ('active', 'paused', 'budget_limited', 'complete')),
+        token_budget integer,
+        tokens_used integer not null default 0,
+        time_used_seconds integer not null default 0,
+        time_created integer not null,
+        time_updated integer not null
+      , summary_title text, active_input_id text, active_run_started_at integer, active_run_last_seen_at integer)
+---
+CREATE TABLE workflow_definition (
+        id text primary key,
+        name text not null,
+        source text not null check(source in ('builtin', 'user')),
+        trusted integer not null default 0 check(trusted in (0, 1)),
+        enabled integer not null default 1 check(enabled in (0, 1)),
+        script_path text,
+        script_hash text not null,
+        meta_json text not null,
+        time_created integer not null,
+        time_updated integer not null
+      , scope text not null default 'explicit'
+        check(scope in ('builtin', 'explicit', 'project', 'user')))
+---
+CREATE TABLE workflow_run (
+        id text primary key,
+        definition_id text,
+        name text not null,
+        kind text not null default 'script',
+        parent_session_id text references session(id) on delete set null,
+        cwd text not null,
+        script_path text,
+        script_hash text not null,
+        args_json text,
+        args_hash text,
+        status text not null check(status in (
+          'pending',
+          'running',
+          'paused',
+          'completed',
+          'failed',
+          'cancelled'
+        )),
+        current_phase text,
+        budget_total integer,
+        budget_spent integer not null default 0,
+        stats_json text,
+        failure_json text,
+        time_created integer not null,
+        time_started integer,
+        time_updated integer not null,
+        time_completed integer
+      )
+---
+CREATE TABLE workflow_activity (
+        id text primary key,
+        run_id text not null references workflow_run(id) on delete cascade,
+        parent_activity_id text,
+        call_index integer not null,
+        call_path text not null,
+        attempt integer not null default 1,
+        type text not null,
+        phase text,
+        label text,
+        input_hash text not null,
+        prompt text,
+        opts_json text,
+        status text not null check(status in (
+          'queued',
+          'running',
+          'completed',
+          'failed',
+          'skipped',
+          'cancelled',
+          'cached',
+          'lost'
+        )),
+        child_session_id text references session(id) on delete set null,
+        result_json text,
+        error_json text,
+        time_created integer not null,
+        time_started integer,
+        time_updated integer not null,
+        time_completed integer,
+        unique(run_id, call_path, attempt)
+      )
+---
+CREATE TABLE workflow_event (
+        id text primary key,
+        run_id text not null references workflow_run(id) on delete cascade,
+        sequence integer not null,
+        type text not null,
+        phase text,
+        activity_id text references workflow_activity(id) on delete set null,
+        payload_json text,
+        time_created integer not null,
+        unique(run_id, sequence)
+      )
+---
+CREATE TABLE session_task_link (
+        id text primary key,
+        root_workflow_run_id text references workflow_run(id) on delete cascade,
+        parent_link_id text references session_task_link(id) on delete cascade,
+        activity_id text references workflow_activity(id) on delete set null,
+        parent_session_id text references session(id) on delete set null,
+        child_session_id text not null references session(id) on delete cascade,
+        role text not null,
+        depth integer not null default 0,
+        path text not null,
+        phase text,
+        label text,
+        agent_type text,
+        model text,
+        status text not null,
+        time_created integer not null,
+        time_updated integer not null,
+        unique(child_session_id)
+      )
+---
+CREATE TABLE model_usage (
+        id text primary key,
+        logical_request_id text not null,
+        attempt_index integer not null default 0,
+        session_id text not null references session(id) on delete cascade,
+        turn_id text,
+        trace_id text,
+        span_id text,
+        assistant_message_id text,
+        parent_user_message_id text,
+        query_source text not null,
+        provider_id text not null,
+        model_id text not null,
+        variant text,
+        agent text,
+        mode text,
+        task_type text,
+        status text not null check(status in ('running', 'completed', 'error', 'cancelled')),
+        started_at integer not null,
+        first_token_at integer,
+        completed_at integer,
+        duration_ms integer,
+        time_to_first_token_ms integer,
+        finish_reason text,
+        tool_call_count integer not null default 0,
+        input_tokens integer not null default 0,
+        output_tokens integer not null default 0,
+        reasoning_tokens integer not null default 0,
+        cache_creation_input_tokens integer not null default 0,
+        cache_read_input_tokens integer not null default 0,
+        provider_total_tokens integer,
+        computed_total_tokens integer not null default 0,
+        retry_count integer not null default 0,
+        retryable integer not null default 0 check(retryable in (0, 1)),
+        cancelled_by_user integer not null default 0 check(cancelled_by_user in (0, 1)),
+        context_exceeded integer not null default 0 check(context_exceeded in (0, 1)),
+        error_type text,
+        error_code text,
+        error_message text,
+        raw_usage_json text,
+        provider_metadata_json text
+      )
+---
+CREATE TABLE turn_usage (
+        session_id text not null references session(id) on delete cascade,
+        turn_id text not null,
+        trace_id text,
+        user_message_id text,
+        status text not null check(status in ('running', 'completed', 'error', 'cancelled')),
+        started_at integer not null,
+        first_model_start_at integer,
+        first_token_at integer,
+        completed_at integer,
+        duration_ms integer,
+        time_to_first_token_ms integer,
+        model_request_count integer not null default 0,
+        model_retry_count integer not null default 0,
+        tool_call_count integer not null default 0,
+        tool_error_count integer not null default 0,
+        input_tokens integer not null default 0,
+        output_tokens integer not null default 0,
+        reasoning_tokens integer not null default 0,
+        cache_creation_input_tokens integer not null default 0,
+        cache_read_input_tokens integer not null default 0,
+        computed_total_tokens integer not null default 0,
+        retryable integer not null default 0 check(retryable in (0, 1)),
+        cancelled_by_user integer not null default 0 check(cancelled_by_user in (0, 1)),
+        context_exceeded integer not null default 0 check(context_exceeded in (0, 1)),
+        error_type text,
+        error_code text,
+        primary key(session_id, turn_id)
+      )
+---
+CREATE TABLE tool_usage (
+        id text primary key,
+        session_id text not null references session(id) on delete cascade,
+        turn_id text,
+        trace_id text,
+        tool_call_id text not null,
+        tool_name text not null,
+        side_effect_scope text,
+        read_only integer check(read_only in (0, 1)),
+        destructive integer check(destructive in (0, 1)),
+        approval_status text,
+        status text not null check(status in ('running', 'completed', 'error', 'cancelled')),
+        started_at integer not null,
+        first_output_at integer,
+        completed_at integer,
+        duration_ms integer,
+        time_to_first_output_ms integer,
+        exit_code integer,
+        output_bytes integer not null default 0,
+        stdout_bytes integer not null default 0,
+        stderr_bytes integer not null default 0,
+        truncated integer not null default 0 check(truncated in (0, 1)),
+        retry_count integer not null default 0,
+        retryable integer not null default 0 check(retryable in (0, 1)),
+        cancelled_by_user integer not null default 0 check(cancelled_by_user in (0, 1)),
+        error_type text,
+        error_code text,
+        error_message text
+      )
+---
+CREATE TABLE session_input (
+        id text primary key,
+        session_id text not null references session(id) on delete cascade,
+        kind text not null,
+        delivery text not null check(delivery in ('startNow', 'guide', 'queue')),
+        payload text not null,
+        admitted_sequence integer not null,
+        promoted_sequence integer,
+        promoted_message_id text,
+        status text not null check(status in ('admitted', 'promoted', 'cancelled', 'discarded', 'failed')),
+        status_reason text,
+        time_created integer not null,
+        time_updated integer not null
+      )
+---
+
+== row counts (may be slow on big tables) ==
+schema_migration: 18
+session: 2249
+message: 104488
+part: 415862
+todo: 1741
+session_entry: 22153
+permission: 0
+input_history: 100
+local_setting: 24
+session_target: 0
+workflow_definition: 0
+workflow_run: 0
+workflow_activity: 0
+workflow_event: 0
+session_task_link: 0
+model_usage: 80155
+turn_usage: 7932
+tool_usage: 108510
+session_input: 6622

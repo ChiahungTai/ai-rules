@@ -1,0 +1,60 @@
+== 12 newest samples (system-reminder AND MEMORY.md) ==
+--------------------------------------------------------------------------------
+session=sess_subagent_agent_b828b2de-6f13-451f-ba0e-402f0de64d00 msg=msg_mts75tb3_996dc88e-663d-4230-a11d-7b7d593c9c63 part_seq=3 time=1788843406017 part_type=? text_len=2
+snippet: {}
+--------------------------------------------------------------------------------
+session=sess_subagent_agent_b828b2de-6f13-451f-ba0e-402f0de64d00 msg=msg_mts75tb3_996dc88e-663d-4230-a11d-7b7d593c9c63 part_seq=1 time=1788843379359 part_type=reasoning text_len=1596
+snippet: 636 parts contain 'system-reminder', across 226 sessions. 193 of them also contain MEMORY.md, 145 contain memories/projects path, 103 wiki links. This strongly suggests memory-related system-reminder content IS persisted.\n\nNow I need to look at samples to determine: dynamic recall injection (content = specific entry body/desc fragments, timing follows user message) vs static index (content = MEMORY.md projection, at session start).\n\nLet me sample some of these parts: extract session_id, message_id, part type, the 
+--------------------------------------------------------------------------------
+session=sess_subagent_agent_b828b2de-6f13-451f-ba0e-402f0de64d00 msg=msg_mts75tb3_996dc88e-663d-4230-a11d-7b7d593c9c63 part_seq=2 time=1788843379359 part_type=text text_len=133
+snippet: 636 parts 含 system-reminder、跨 226 sessions，其中 193 同時含 MEMORY.md、145 含 memories/projects 路徑——強烈暗示有持久化的 memory 相關注入。抽取樣本判別動態召回 vs 靜態索引。
+--------------------------------------------------------------------------------
+session=sess_subagent_agent_b828b2de-6f13-451f-ba0e-402f0de64d00 msg=msg_mts75reh_078a3827-6598-42ad-aef2-def02b909bd6 part_seq=1 time=1788843379331 part_type=tool text_len=2605
+snippet: ta JSON role distribution ==\n12\tassistant: 86758\n13\tuser: 17736\n14\t\n15\t== parts containing 'system-reminder' ==\n16\tparts with 'system-reminder': 636\n17\tdistinct sessions: 226\n18\t\n19\t== memory-feature co-occurrence among those parts ==\n20\tsystem-reminder AND MEMORY.md: 193\n21\tsystem-reminder AND memories/projects path: 145\n22\tsystem-reminder AND memory/ path: 199\n23\tsystem-reminder AND wiki [[ link: 103\n24\tsystem-reminder AND desc: frontmatter: 7\n25\tsystem-reminder AND rank:: 4\n26\t\n27\t== bare memory-feature scan (no system-reminder filter), for comparison ==\n28\
+--------------------------------------------------------------------------------
+session=sess_subagent_agent_b828b2de-6f13-451f-ba0e-402f0de64d00 msg=msg_mts74epk_7e420f78-bf9a-4497-a906-da244350ac84 part_seq=3 time=1788843323146 part_type=? text_len=2
+snippet: {}
+--------------------------------------------------------------------------------
+session=sess_subagent_agent_b828b2de-6f13-451f-ba0e-402f0de64d00 msg=msg_mts73jvn_5bfdd15f-1e17-4680-81ff-0e70059650ee part_seq=3 time=1788843297566 part_type=? text_len=2
+snippet: {}
+--------------------------------------------------------------------------------
+session=sess_subagent_agent_b828b2de-6f13-451f-ba0e-402f0de64d00 msg=msg_mts73jvn_5bfdd15f-1e17-4680-81ff-0e70059650ee part_seq=1 time=1788843273827 part_type=reasoning text_len=1640
+snippet:  big but manageable with SQL LIKE scan\n\nNow P1 main scan. I want to find parts where data contains 'system-reminder' and memory features. The part.data is JSON. Let me do a SQL LIKE scan first to count occurrences, which is much faster than python streaming.\n\nStrategy:\n1. Count parts with data LIKE '%system-reminder%' — this will find stored system-reminder content. But wait: system-reminders injected at runtime might not be persisted as separate parts; they may be embedded in user message parts. Let me check what part types exist: SELECT data->>'$.type' maybe. The data is JSON with a type fie
+--------------------------------------------------------------------------------
+session=sess_subagent_agent_b828b2de-6f13-451f-ba0e-402f0de64d00 msg=msg_mts72v1i_733bd577-1457-4530-b7b3-b2e9872182f6 part_seq=1 time=1788843241638 part_type=reasoning text_len=1286
+snippet: py that dumps schema (SELECT sql FROM sqlite_master)\n2. Then write p1_scan.py that scans parts for 'system-reminder' content with memory features.\n\nGiven 2.2GB db, a full scan of all parts may take a while but is feasible with python streaming. But better to first get schema, then do a targeted scan (maybe LIMIT by recent sessions, or full scan with LIKE query in SQL — that's more efficient, SQLite will do full table scan internally but in C code, fast).\n\nLet me first create the report skeleton and probes dir, and dump the schema.
+--------------------------------------------------------------------------------
+session=sess_subagent_agent_b828b2de-6f13-451f-ba0e-402f0de64d00 msg=msg_mts72269_2ced8cb5-13af-4201-bc6f-9c850e43eb3c part_seq=1 time=1788843228437 part_type=? text_len=2
+snippet: {}
+--------------------------------------------------------------------------------
+session=sess_e9d91786-3a08-477f-be85-b652ab85460c msg=msg_mts6zy1g_4cbf513e-8657-4092-8fd0-f77f4dbe27de part_seq=3 time=1788843187401 part_type=? text_len=2
+snippet: {}
+--------------------------------------------------------------------------------
+session=sess_e9d91786-3a08-477f-be85-b652ab85460c msg=msg_mts6zy1g_4cbf513e-8657-4092-8fd0-f77f4dbe27de part_seq=1 time=1788843105556 part_type=? text_len=2
+snippet: {}
+--------------------------------------------------------------------------------
+session=sess_e9d91786-3a08-477f-be85-b652ab85460c msg=msg_mts6kj2b_c5185495-8ea5-4eb8-bc2f-4c1e5a6ca100 part_seq=4 time=1788842477295 part_type=? text_len=2
+snippet: {}
+
+== position-in-session statistics for all reminder+MEMORY.md parts ==
+sessions with reminder+MEMORY.md parts: 66
+  single-burst early (span<60s, <=2 parts, likely session-start injection): 37
+  single-burst later (<=2 parts): 10
+  repeated injections (>2 parts in session): 19
+
+== per-session detail (first 15 sessions) ==
+session=sess_03916836-783e-4ae2-8a2a-d7a98e006839 n_reminder_parts=1 msg_seq=1 first_user_seq=0 session_max_seq=32
+session=sess_07836405-5f73-4d17-9619-5456406f7cd3 n_reminder_parts=1 msg_seq=536 first_user_seq=0 session_max_seq=554
+session=sess_0ba5f35f-c47d-4af6-8277-d62851065c19 n_reminder_parts=3 msg_seq=51 first_user_seq=0 session_max_seq=62
+session=sess_0d614107-0f2d-40db-b8c8-8ecb2f848cc7 n_reminder_parts=1 msg_seq=415 first_user_seq=0 session_max_seq=427
+session=sess_10195ae5-9d9d-4b1e-b114-957f693aacce n_reminder_parts=9 msg_seq=100 first_user_seq=0 session_max_seq=492
+session=sess_11311689-4d7d-489e-8cf9-061d94ac4a9f n_reminder_parts=1 msg_seq=39 first_user_seq=0 session_max_seq=76
+session=sess_17c46ac6-2f64-4ecd-9a98-ef1651a3fcb1 n_reminder_parts=2 msg_seq=6 first_user_seq=0 session_max_seq=179
+session=sess_1e4235f3-2cd2-4f0d-b7f6-e7addc64b1df n_reminder_parts=1 msg_seq=1 first_user_seq=0 session_max_seq=8
+session=sess_264cb30e-d29c-4b24-8767-fd370a672e64 n_reminder_parts=2 msg_seq=37 first_user_seq=0 session_max_seq=92
+session=sess_26b5b74d-5fef-492c-9ea2-7546759918d3 n_reminder_parts=1 msg_seq=97 first_user_seq=0 session_max_seq=549
+session=sess_28229a2d-9e2a-4771-85f8-0079e164d8b7 n_reminder_parts=11 msg_seq=7 first_user_seq=0 session_max_seq=156
+session=sess_2d0ca973-7987-4c65-9d6c-3a9dafdcbc16 n_reminder_parts=1 msg_seq=480 first_user_seq=0 session_max_seq=840
+session=sess_2fe1ad7c-047a-4a54-9cd4-131cb363507c n_reminder_parts=1 msg_seq=80 first_user_seq=0 session_max_seq=256
+session=sess_3cb69bd7-b101-44ec-b11a-b187002efabb n_reminder_parts=12 msg_seq=100 first_user_seq=0 session_max_seq=778
+session=sess_3e9344b5-adca-4a9e-b03c-5f5c12fc19f5 n_reminder_parts=2 msg_seq=7 first_user_seq=0 session_max_seq=36

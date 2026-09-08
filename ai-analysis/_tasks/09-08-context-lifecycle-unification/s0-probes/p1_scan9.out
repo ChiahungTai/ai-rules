@@ -1,0 +1,31 @@
+== A. system_reminder adjacency: previous message kind ==
+system_reminder after system_reminder/user: 154
+system_reminder after compact_summary/user: 41
+subagent_notification after assistant_response/assistant: 24
+fork_notice after assistant_response/assistant: 8
+system_reminder after assistant_response/assistant: 7
+system_reminder after user_prompt/user: 7
+system_reminder after background_notification/user: 1
+subagent_notification after background_notification/user: 1
+
+== B. sessions with system_reminder AND time_compacting set ==
+system_reminder sessions: 43; of which with time_compacting: 0
+
+== C. session-start auto Read of MEMORY.md (static index preload evidence) ==
+sessions whose MEMORY.md tool mention occurs at assistant message seq<=6 (n shown, first 12): 12
+session=sess_03916836-783e-4ae2-8a2a-d7a98e006839 first_seq=1 isRead=False memPath=True head={"type":"tool","callID":"call_ca73224619f24a1a852eec58","tool":"Bash","state":{"status":"completed","input":{"command":"ls -la /Users/ctai/.zcode/cli/memories/projects/mosaic_alpha
+session=sess_07836405-5f73-4d17-9619-5456406f7cd3 first_seq=1 isRead=False memPath=True head={"type":"tool","callID":"call_a8ece76aedc44e94af2641ba","tool":"Skill","state":{"status":"completed","input":{"skill":"memory-audit"},"output":"<skill_content name=\"memory-audit\"
+session=sess_0d77f13c-3e3c-4d12-bd36-2e5b0b5b7e2e first_seq=2 isRead=False memPath=False head={"type":"tool","callID":"call_805986c9c8224a65924dfd53","tool":"CronList","state":{"status":"completed","input":{},"output":"{\"automations\":[{\"automationId\":\"automation-5297e1
+session=sess_16c19dc4-5477-4624-b907-c839569ae389 first_seq=1 isRead=False memPath=False head={"type":"tool","callID":"call_57f613f959ed47928f6238b6","tool":"CronList","state":{"status":"completed","input":{},"output":"{\"automations\":[{\"automationId\":\"automation-d348ea
+session=sess_17c46ac6-2f64-4ecd-9a98-ef1651a3fcb1 first_seq=1 isRead=True memPath=False head={"type":"tool","callID":"call_40f1a7fdadf84a9bbb007ccd","tool":"Read","state":{"status":"completed","input":{"file_path":"/Users/ctai/Github/ai-rules/rules/context-management.md"},
+session=sess_20a1734f-0bbd-4b5b-b131-0fbbc4d7201e first_seq=4 isRead=False memPath=True head={"type":"tool","callID":"call_e5b68d984631446180350d5e","tool":"Bash","state":{"status":"completed","input":{"command":"cd /Users/ctai/Github/mosaic_alpha && echo \"=== 驗收命令（排除兩形態）
+session=sess_20e20774-c5c7-4cf9-84aa-89356c1a4cc0 first_seq=1 isRead=True memPath=False head={"type":"tool","callID":"call_34f9a771eb4f44f881162d4a","tool":"Read","state":{"status":"completed","input":{"file_path":"/Users/ctai/Github/ai-rules/rules/context-management.md"},
+session=sess_264cb30e-d29c-4b24-8767-fd370a672e64 first_seq=2 isRead=False memPath=False head={"type":"tool","callID":"call_b33db8439b674b3ab4de234d","tool":"Bash","state":{"status":"completed","input":{"command":"find /Users/ctai/Github/ai-rules/ref-docs/harness/zcode -nam
+session=sess_27b92436-a599-4c35-8967-bfb09f516594 first_seq=3 isRead=False memPath=True head={"type":"tool","callID":"call_3f1dc7cc7f54400d8960a494","tool":"Edit","state":{"status":"error","input":{"file_path":"/Users/ctai/.zcode/cli/memories/projects/code-reality-c1ded160
+session=sess_36e2ed2b-ad41-4aba-8a4a-2bcedd47ff82 first_seq=6 isRead=False memPath=True head={"type":"tool","callID":"call_99fb3e8f66d04443aca233d8","tool":"Bash","state":{"status":"completed","input":{"command":"ls ~/.zcode/v2/sessions/91db1aef2f9b/ 2>/dev/null | head; ec
+session=sess_3acf69bd-2a3a-4136-afce-38c16d3963ce first_seq=2 isRead=False memPath=True head={"type":"tool","callID":"call_2f5908326efe405f88324a09","tool":"Bash","state":{"status":"completed","input":{"command":"rg -n \"R2F1|R2F2\" /Users/ctai/.zcode/cli/memories/projects
+session=sess_44ce10e8-3773-4756-925a-68e81ca4363e first_seq=4 isRead=False memPath=True head={"type":"tool","callID":"call_3907c75ca56640e88e27d093","tool":"Bash","state":{"status":"completed","input":{"command":"rg -l \"夜間修剪|白天覆寫|寫入自律\" /Users/ctai/.zcode/cli/memories/ 2>
+(for scale) sessions with ANY tool part mentioning MEMORY.md: 325
+
+== D. desc-matching recall absence check: synthetic msgs quoting entry 'description:' fields ==
+non-system_reminder synthetic msgs w/ description:+memory: ('background_notification', 7)

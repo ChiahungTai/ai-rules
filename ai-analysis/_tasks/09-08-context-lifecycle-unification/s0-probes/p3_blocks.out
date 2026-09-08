@@ -1,0 +1,3 @@
+ai_trusted_cap {"rules_file": 65533, "skills_catalog": 31638, "memory_snapshot": 327, "subagent_delegation": 956}
+mosaic_trusted_cap {"rules_file": 65536, "skills_catalog": 31626, "memory_snapshot": 559, "subagent_delegation": 956}
+tl_untrusted {"rules_file": 32000, "skills_catalog": 31626, "memory_snapshot": 327}

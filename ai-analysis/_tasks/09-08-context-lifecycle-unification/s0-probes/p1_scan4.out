@@ -1,0 +1,20 @@
+== literal '<system-reminder>' counts ==
+parts with literal '<system-reminder>': 122
+distinct sessions: 95
+
+== breakdown by part type x parent role ==
+type=tool role=assistant: 102
+type=reasoning role=assistant: 14
+type=text role=assistant: 1
+
+== memory-recall signatures inside <system-reminder> blocks (user-role text parts) ==
+user-role text parts scanned: 0; total <system-reminder> blocks: 0
+recalled memories: 0
+memory entry body (--- frontmatter + desc:): 0
+MEMORY.md mention: 0
+memory/ path: 0
+task-notification: 0
+plan/mode: 0
+todos: 0
+
+== sample blocks (first 6, any signature) ==

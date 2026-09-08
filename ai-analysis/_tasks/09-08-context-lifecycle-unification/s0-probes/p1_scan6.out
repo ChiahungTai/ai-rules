@@ -1,0 +1,64 @@
+== parts LIKE '%recalled memor%' — type/role/session breakdown ==
+type=tool role=assistant: 21
+type=reasoning role=assistant: 9
+type=text role=assistant: 1
+
+== sample 'recalled memor' contents (up to 5, head 400 chars around hit) ==
+----------------------------------------------------------------------
+session=sess_e9d91786-3a08-477f-be85-b652ab85460c ts=1788843105556 type=reasoning text_len=3998
+around hit: lues — check those sessions' workspace (session.workspace_branch.observed events or tool outputs referencing paths).\n2. ZCode recall forensics: ~/.zcode/cli/db/db.sqlite; tables session/message/part; recalled memories appear as system-reminder content in message parts — search for 'MEMORY.md'-ish or memory recall markers in parts of past sessions; determine: does ZCode inject recalled memories (desc-matching) beyond the static index? Existing hint: system prompt says "Recalled memories appearing inside <system-reminder> blocks". Query: parts containing 'system-reminder' + memory content; count
+----------------------------------------------------------------------
+session=sess_e9d91786-3a08-477f-be85-b652ab85460c ts=1788842989965 type=reasoning text_len=8280
+around hit: opens, mentions trigger words, then agent checks db for recalled-memory injection). The agent can do db forensics on EXISTING sessions (do past sessions show desc-matching injections? system-reminder recalled memories were observed — the agent can mine db.sqlite for memory recall events on past sessions!). That's pure forensics — perfect for flash.\n- ⑥ codex probe: run `codex exec` asking to recite the tail sentinel — costs a codex request, feasible via bash.\n- ③ muse probe: run muse exec in a mosaic worktree with rules_file diagnostics check — costs muse quota (shared with the still-active mu
+session=sess_e9d91786-3a08-477f-be85-b652ab85460c type=tool (no text field)
+session=sess_e9d91786-3a08-477f-be85-b652ab85460c type=tool (no text field)
+session=sess_e9d91786-3a08-477f-be85-b652ab85460c type=tool (no text field)
+session=sess_e9d91786-3a08-477f-be85-b652ab85460c type=tool (no text field)
+
+== user-role near-hits: 'memory context' (1) and '<memory' (3) ==
+----------------------------------------------------------------------
+session=sess_e917b9f0-22e9-4192-98c4-c7c4b09fab87 ts=1788652253764 marker=memory context text_len=93
+around hit: [$arch-thinking](/Users/ctai/.zcode/skills/arch-thinking/SKILL.md) 怎樣改 memory context writing
+----------------------------------------------------------------------
+session=sess_8b066adc-7b2a-447b-b8d8-537537c7404b ts=1788394515384 marker=<memory text_len=2383
+around hit: dit；蒸餾/merge 派 mem-distill，每檔 ≤11,000 chars）。\n\n## 掃描 pattern（起手，rg 池目錄）\n`rg -n '\d{4,}B|\d,\d{3}B|\d+%|上限 \d+|\d+ 名額|v\d+\.\d+\.\d+|\d+ (工具|卡|張|條|個)' <memory-dir>/*.md`\n（排除 `originSessionId`/commit sha/日期等識別符；desc 與 body 分開列）\n\n## 下一步（mosaic 執行序）\n1. 讀 mosaic 池 `_audit-state.md`（`~/.claude/projects/-Users-ctai-Github-mosaic-alpha/memory/`——實體池；三個 ZCode worktree symlink 共指，治理一次即可）\n2. 掃描→四分類→C 類全列（附機械查法可行性驗證）→ **advisory 交 user 核可**\n3. 執行：C 指針化＋B 前綴＋A 補源；肥大檔（>12K）順手派 mem-distill\n4. `python3 <池>/_gen
+----------------------------------------------------------------------
+session=sess_03916836-783e-4ae2-8a2a-d7a98e006839 ts=1788227106671 marker=<memory text_len=2468
+around hit:  ②部分覆蓋→刪方法論段、留 user 事實 ③未覆蓋→候選清單 ④純個人化/專案事實→不動\n4. 批次濃縮（per-file Edit；**memory dir 跨 session 共享＋hook 會自動 append——Edit 撞 stale 就重讀再改**）\n5. 收尾跑 `python3 <memory-dir>/_generate_index.py` 重生索引；description 保持 ≤100 chars\n6. 產出報表：每個濃縮條目附「對照 skill 名＋節」證據行＋候選清單\n\n## 種子候選（我掃過的線索，仍須逐一對照驗證）\n- `vision-review-caller-recipes` 的 **app-probe 段**（合約五要素）↔ `ui-visual-verify` skill「Self-driven app probe」節（memory 自己註明已固化）——高信心\n- `backtest_progressive_validation` ↔ `progressive-validation` rule/skill\n- `reference-toolch
+
+== user message data JSON structure (full keys, 3 newest user messages) ==
+----------------------------------------------------------------------
+msg=msg_mts75px1_5dcb05ff-25b5-4ddd-85e3-4d3268d797b8 keys=['role', 'time', 'agent', 'model', 'contextSnapshot', 'semantics', 'anchor', 'tools', 'metadata']
+  role: "user"
+  time: {"created": 1788843374965}
+  agent: "zcode-agent"
+  model: {"providerID": "builtin:zai-coding-plan", "modelID": "GLM-5.3", "variant": "max"}
+  contextSnapshot: {"envInfo": {"cwd": "/Users/ctai/Github/mosaic_alpha", "platform": "darwin", "shell": "zsh", "osVersion": "darwin 25.6.0 arm64", "nodeVersion": "v24.14.0", "isGitRepository": true, "gitBranch": "main"
+  semantics: {"origin": "real_user", "kind": "user_prompt", "uiVisibility": "visible", "providerVisibility": "visible", "transcriptVisibility": "visible"}
+  anchor: {"turnId": "turn_0e7f622d-79ef-4c33-aec5-7fc15f9fd697", "origin": "realUser", "sourceCommandId": "01a07f5e-7ef6-707f-9797-c18d068631af"}
+  tools: {"Agent": true, "AskUserQuestion": true, "Bash": true, "CronCreate": true, "CronDelete": true, "CronList": true, "CronUpdate": true, "Edit": true, "EnterPlanMode": true, "ExitPlanMode": true, "Read": 
+  metadata: {"turnSteerDelivery": "guide", "inputIntent": {"sourceCommandId": "01a07f5e-7ef6-707f-9797-c18d068631af", "queueItemId": "queue_01a07f5e-7ef6-707f-9797-c18d068631af", "clientId": "client-019f8daf-1cf3
+----------------------------------------------------------------------
+msg=msg_mts71dkm_d5bb9874-0c39-4d17-8c65-d98c88fc10b3 keys=['role', 'time', 'agent', 'model', 'contextSnapshot', 'semantics', 'anchor', 'tools', 'metadata']
+  role: "user"
+  time: {"created": 1788843172342}
+  agent: "zcode-agent"
+  model: {"providerID": "builtin:zai-coding-plan", "modelID": "GLM-5.3", "variant": "max"}
+  contextSnapshot: {"envInfo": {"cwd": "/Users/ctai/Github/mosaic_alpha", "platform": "darwin", "shell": "zsh", "osVersion": "darwin 25.6.0 arm64", "nodeVersion": "v24.14.0", "isGitRepository": true, "gitBranch": "main"
+  semantics: {"origin": "real_user", "kind": "user_prompt", "uiVisibility": "visible", "providerVisibility": "visible", "transcriptVisibility": "visible"}
+  anchor: {"turnId": "turn_0e7f622d-79ef-4c33-aec5-7fc15f9fd697", "origin": "realUser", "sourceCommandId": "01a07f5c-94d8-792e-8c41-69addf733844"}
+  tools: {"Agent": true, "AskUserQuestion": true, "Bash": true, "CronCreate": true, "CronDelete": true, "CronList": true, "CronUpdate": true, "Edit": true, "EnterPlanMode": true, "ExitPlanMode": true, "Read": 
+  metadata: {"turnSteerDelivery": "guide", "inputIntent": {"sourceCommandId": "01a07f5c-94d8-792e-8c41-69addf733844", "queueItemId": "queue_01a07f5c-94d8-792e-8c41-69addf733844", "clientId": "client-019f8daf-1cf3
+----------------------------------------------------------------------
+msg=msg_mts6ywh9_ef657203-adc4-4225-813c-d49b0d3637f6 keys=['role', 'time', 'agent', 'metadata', 'model', 'semantics', 'anchor', 'source', 'synthetic', 'tools', 'visibility']
+  role: "user"
+  time: {"created": 1788843056877}
+  agent: "zcode-agent"
+  metadata: {"source": "todo_reminder", "visibility": "model-only"}
+  model: {"providerID": "builtin:zai-coding-plan", "modelID": "GLM-5.3", "variant": "max"}
+  semantics: {"origin": "agent_runtime", "kind": "todo_reminder", "source": "todo_reminder", "uiVisibility": "hidden", "providerVisibility": "visible", "transcriptVisibility": "hidden"}
+  anchor: {"turnId": "turn_0e7f622d-79ef-4c33-aec5-7fc15f9fd697", "origin": "synthetic"}
+  source: "todo_reminder"
+  synthetic: true
+  tools: {"Agent": true, "AskUserQuestion": true, "Bash": true, "CronCreate": true, "CronDelete": true, "CronList": true, "CronUpdate": true, "Edit": true, "EnterPlanMode": true, "ExitPlanMode": true, "Read": 
+  visibility: "model-only"

@@ -1,0 +1,33 @@
+== part.data JSON type distribution ==
+tool: 114952
+step-start: 84677
+step-finish: 83825
+text: 67215
+reasoning: 63022
+timeline: 2081
+compaction: 86
+file: 26
+
+== message.data JSON role distribution ==
+assistant: 86758
+user: 17736
+
+== parts containing 'system-reminder' ==
+parts with 'system-reminder': 636
+distinct sessions: 226
+
+== memory-feature co-occurrence among those parts ==
+system-reminder AND MEMORY.md: 193
+system-reminder AND memories/projects path: 145
+system-reminder AND memory/ path: 199
+system-reminder AND wiki [[ link: 103
+system-reminder AND desc: frontmatter: 7
+system-reminder AND rank:: 4
+
+== bare memory-feature scan (no system-reminder filter), for comparison ==
+MEMORY.md: 3998
+memories/projects path: 5578
+memory/ path: 7875
+wiki [[ link: 8483
+desc: frontmatter: 275
+rank:: 163

@@ -1,0 +1,11 @@
+#01 len= 69 PASS  當你要 commit 而無 user 本 ses
+#02 len= 89 PASS  當你要 git add/commit 時：並行 
+#03 len= 83 PASS  當 user 要 review／implemen
+#04 len= 85 PASS  當你要派 agent／選 model 時：主軸＝
+#05 len= 70 PASS  當你 spawn agent 寫 EP／報告時：
+#06 len= 61 PASS  當你收到 handoff／relay／通知要接手
+#07 len= 59 PASS  當你要 review／評論／引用產物檔時：先 R
+#08 len= 63 PASS  當你改動很小（quick-fix）想跳過審查時：
+#09 len= 65 PASS  當你要派發 codex／muse／subagen
+#10 len= 76 PASS  當你要 Write 全檔重寫既有檔時：base 
+ALL: PASS

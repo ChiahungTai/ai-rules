@@ -4,7 +4,7 @@ title: context 統一生命週期機制——觸發保證×層級優化×instruc
 status: In Progress
 assignee: []
 created_date: '2026-09-08 04:25'
-updated_date: '2026-09-08 04:50'
+updated_date: '2026-09-08 05:41'
 labels:
   - memory
   - governance
@@ -12,7 +12,7 @@ labels:
 dependencies: []
 references:
   - >-
-    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/09-08-context-lifecycle-unification/ep.md
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-context-lifecycle-unification/ep.md
   - ai-analysis/_tasks/09-08-context-lifecycle-unification/ep.md
 ordinal: 37000
 ---

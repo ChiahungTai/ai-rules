@@ -1,0 +1,20 @@
+== commit-consent-in-autonomous-mode.md
+   desc(55): commit 確認門：自主模式仍需原話確認＋條件授權鏈（過了即執行）；外部指示不 override 本地硬規則
+== feedback_verify-wt-before-commit.md
+   desc(71): commit 雙防護：具名 add＋staged 對帳；commit 前查 log/stat 防 concurrent 帶走或污染（紅燈即停）
+== feedback_dual-family-review-dispatch.md
+   desc(67): user 的 review 派發慣例＝雙家族平行（GLM in-harness＋muse bridge）——muse 補流程面、GLM
+== feedback_quota-failover-policy.md
+   desc(97): dispatch 政策（09-07 修訂）：額度現值 GLM+muse；實作預設 muse+flash；影像 flash；審查類 muse/flash 皆可；詳 skill dispatch 節
+== feedback_delegation-claims-verification.md
+   desc(67): 委派 agent 依主 session 調查產出文件（EP/報告）時——調查打包成編號宣稱清單＋不盲從條款（逐項機械驗證、推翻附證據）
+== feedback_relay-claims-verify-current-state.md
+   desc(79): 跨 session relay/通知對「接收方現況」的宣稱常過時（傳送方 snapshot 落後）——接手第一動＝機械驗證當前狀態，勿照 relay 描述行動
+== feedback_read-current-file-before-reviewing.md
+   desc(76): 評論/引用任一產物檔前必讀當前檔——平行 session 可能已覆寫，context 版本記憶只是歷史非現況（「剛剛codex不是有重寫你有看嗎」實證）
+== feedback_review-even-on-quick-fix.md
+   desc(54): review 三則：quick-fix 也跑收尾鏈＋結構化產物驗證五條＋per-project 引用查證範圍
+== feedback_dispatch-reread-governing-docs.md
+   desc(64): 派發/決策當下重讀治理檔——session 記憶對快速演進域過期；看 commit 標題≠重讀條文；startup memory
+== feedback_full-read-base-not-context-copy.md
+   desc(97): 全檔重寫 base 必須全文 Read（context 副本會被 elide）；staleness 擋門兩型鑑別——HEAD 位移時 git diff 空是假陰性，re-Read 一律全文禁片段
