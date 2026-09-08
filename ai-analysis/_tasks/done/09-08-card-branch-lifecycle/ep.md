@@ -59,7 +59,7 @@ baseline: d4c98ab7cdf25f880551c29dc2c0ababf05f0b8f
 |---|------|------|---------|------------|---------|
 | SM-1 | Happy path 開工（ai-rules） | implement 階段 1，起手式 ⑤ 完成 | `git checkout -b air-46`（自 main） | 無 | UC 主行 |
 | SM-2 | Happy path 開工（mosaic） | 同上，卡屬 warrant 線 | `git checkout -b lab-77`（**自 warrant**——起點必為 owning 線 branch）；VSCode 顯示 `lab-77` | 無 | UC 主行 |
-| SM-3 | 跨 session 接續 | `/handoff`／`/at` 接手，branch 已存在 | `git checkout lab-77` 續用（不 `-b`）；起手式 ④ 新鮮度核對擴及 `git log warrant..lab-77`。branch 名不需 handoff 傳遞——由卡 id＋owning 線（卡 desc）機械重建 | 無 | UC 主行 |
+| SM-3 | 跨 session 接續／同名遺留撞名 | `/handoff`／`/at` 接手 branch 已存在；或開工 `checkout -b` 撞同名未吸收遺留 | 既有形：`git checkout lab-77` 續用（不 `-b`）；起手式 ④ 新鮮度核對擴及 `git log warrant..lab-77`。branch 名不需 handoff 傳遞——由卡 id＋owning 線（卡 desc）機械重建。撞名處置：`git log <owning線>..<branch>` 有本卡未吸收 commits → 改續用（不 `-b`）；無 → 依卡狀態判（吸收或拋棄，SM-4） | 無 | UC 主行 |
 | SM-4 | session 死亡未收 | quota 死亡，branch 遺留（跨 session/過夜屬正常非異常） | 接手者處置：卡仍活→續用；卡判死→吸收或拋棄 | 卡 notes | UC 主行 |
 | SM-5 | 整卡拋棄 | 探索失敗，**user 明確確認後** | `git branch -D lab-77`（不可逆破壞需確認——/commit gate quote-scope 不涵蓋 `-D`）；已 push 者補 `git push --delete`；卡標 ❌；owning 線零中間 commit 留痕 | user 確認 | UC 可拋棄 |
 | SM-6 | 吸收時 owning 線已前進 | 卡期間線收斂（rebase onto main）或他卡吸收 | `--ff-only` 大聲拒絕 → `/rebase <owning線名>` 兩步：卡 branch rebase onto **owning 線**（mosaic 禁默認 `main`——錯 base 即跨線污染）→ 再 ff 吸收。衝突解壞走 rebase skill abort/reflog 復原（skill 既有，引用不重述） | 無 | UC 吸收 |
@@ -106,7 +106,7 @@ baseline: d4c98ab7cdf25f880551c29dc2c0ababf05f0b8f
 **改動 A——AGENTS.md 新節**（約 12 行，內容六塊）：
 1. **命名**：卡 branch＝`<線縮寫>-<卡號>`；本 repo 單線 → `air-<N>` 小寫，映射 `air-*`↔main；卡號=Backlog.md id
 2. **生命**：開工（implement 階段 1 起手式 ⑤ 後的 ⑥）自 main checkout `-b`；建卡不開；**卡 branch 上 commits message 帶卡 id**（`air-46: ...` 或括注形態）
-3. **收尾**：/commit 確認通過、卡 branch commit 至 **clean** 後——`checkout main && merge --ff-only air-XX && branch -d air-XX`（WT 回 main）；吸收前 dirty＝checkout 會被拒＝護欄
+3. **收尾**：/commit 確認通過、卡 branch commit 至 **clean** 後——`checkout main && merge --ff-only air-XX && branch -d air-XX`（WT 回 main）；dirty checkout 未必被拒（不衝突即帶走）——clean 紀律由 /commit gate 守，非 checkout 護欄（R2 user 拍板）
 4. **`/rebase all` 護欄**：all 之前 `git branch --list 'air-*'` 非空 → 先收卡，不跑 all（SM-14；`*` 不可省）
 5. **軟條款**：忘記 checkout 直落 main 屬軟失敗不回頭搬（SM-8）；夜間 automation commits 落卡 branch 無害（SM-7）；拋棄需 user 明確確認（SM-5）；跨 session 遺留屬正常處置（SM-4）
 6. **mosaic 變體指針**：多線形態（`lab-77`/`bt-77`/`mos-77`、owning 線欄位、線判定路徑查表、SM-6 base=owning 線）定義源＝本 EP——只留一行指針不重述（單一源）
@@ -172,8 +172,8 @@ baseline: d4c98ab7cdf25f880551c29dc2c0ababf05f0b8f
 | F5-1..F5-8 | 場景 | should/nit | base 歧義／換線缺失／stale 稽核／message 前提／-D 確認／dirty 邊界／push --delete | ✅ SM-6 點名 base＋abort 指針；SM-15 換線；SM-16 稽核；內容塊 2 message 帶卡 id；SM-5 user 確認＋--delete；內容塊 3 clean 後吸收；SM-13 補機械自查 |
 | 反轉①-⑦ | — | — | muse 前次反對論點對照：①部分化解（窗口期→S2 生效排序）②基本化解（F5-2 殘餘已補）③部分化解（SM-16＋--delete 補）④方向化解（message 慣例入規則文）⑤基本化解（收斂頻率假設→監控項）⑥化解（SM-13 他律化）⑦反轉成立（ambient UI 需求壓過 tag 替代） | ✅ 全數吸收進正文 |
 | R1 | 一致性 | must | 護欄命令缺 `*`：SM-13/SM-14/S1-A4 的 `git branch --list '<縮寫>-'` 無通配只精確匹配字面名，永遠空——SM-14 護欄成空殼（F4-4 緩解失效）；SM-16 的 `rg` 子串匹配不受影響 | ✅ 三處已補 `*`（/tmp probe 實測 `'war-'`零命中／`'war-*'`命中） |
-| R2 | 一致性 | should | S1-A3「吸收前 dirty＝checkout 會被拒＝護欄」誇大：dirty 切 branch 未必被拒（不衝突即帶著走），不能當護欄；前置「commit 至 clean」本身正確 | 待 user 拍板（改或不改） |
-| R3 | 場景 | nit | 同名未吸收殘留 branch 會撞 `checkout -b`：SM-16 只管已吸收未刪（`--merged`），quota 死遺留的未吸收同名殘留開工即撞；SM-4/SM-5 有處置但開工路徑未寫 | 待 user 拍板（SM-3/SM-16 補半行或不補） |
+| R2 | 一致性 | should | S1-A3「吸收前 dirty＝checkout 會被拒＝護欄」誇大：dirty 切 branch 未必被拒（不衝突即帶著走），不能當護欄；前置「commit 至 clean」本身正確 | ✅ user 拍板改寫（09-09）——內容塊 3 拿掉護欄宣稱，clean 紀律歸 /commit gate |
+| R3 | 場景 | nit | 同名未吸收殘留 branch 會撞 `checkout -b`：SM-16 只管已吸收未刪（`--merged`），quota 死遺留的未吸收同名殘留開工即撞；SM-4/SM-5 有處置但開工路徑未寫 | ✅ user 拍板補（09-09）——SM-3 觸發/行為欄補撞名處置（`git log <owning線>..<branch>` 判本卡遺留） |
 | R4 | 設計 | should（user 拍板已改） | 線身份改走路徑：branch 只是該 WT 當前 checkout（開卡 branch 後即換），線身份應為 worktree 路徑（key 取 basename）；SM-11 branch 前綴匹配退役，改 `toplevel` 查表 | ✅ L22＋SM-11＋S1-A6＋S2-1 已改寫；殼 s2 表 key 改 WT |
 | R5 | 命名 | should（user 拍板已定） | 前綴取自 WT 目錄名（非 branch）：trading_lab→lab-、offline_backtesting→bt-（user 二選一親定）；v2 branch 名未定案不影響縮寫；mos-/air- 維持 | ✅ EP/殼/卡全量更名；卡 desc④同步為路徑查表 |
 

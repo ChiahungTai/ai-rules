@@ -72,7 +72,7 @@
 <button type="button" id="expand-btn" class="collapse-tab" aria-expanded="false" aria-controls="sidebar" aria-label="展開章節導覽" onclick="return setCollapsed(false,true)">›</button>
 <nav id="sidebar" aria-label="章節導覽">
   <div class="brand">
-    <span class="badge plan">📋 計畫</span>
+    <span class="badge done">✅ 完成</span>
     <h1>AIR-46 卡 branch 生命週期</h1>
     <div class="meta">task baseline d4c98ab<br>projection ep@82b1dd84（未 commit content SHA）</div>
   </div>
@@ -80,10 +80,11 @@
     <li><a href="#s1" onclick="return go('s1',this)"><span class="num">01</span>為什麼改</a></li>
     <li><a href="#s2" onclick="return go('s2',this)"><span class="num">02</span>規則形態</a></li>
     <li><a href="#s3" onclick="return go('s3',this)"><span class="num">03</span>審查與落地</a></li>
+    <li><a href="#s4" onclick="return go('s4',this)"><span class="num">04</span>實作與驗收</a></li>
   </ul>
   <div class="backlinks">
     <a href="http://127.0.0.1:6420">← backlog board</a><br>
-    <a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-card-branch-lifecycle/ep.md">EP 全文（viewer）</a>
+    <a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/done/09-08-card-branch-lifecycle/ep.md">EP 全文（viewer）</a>
   </div>
 </nav>
 <button type="button" id="collapse-btn" class="collapse-tab" aria-expanded="true" aria-controls="sidebar" aria-label="收合章節導覽" onclick="return setCollapsed(true,true)">‹</button>
@@ -116,9 +117,20 @@
     <li><b>開錯線防護</b>：卡 desc 記 owning 線；開工驗證 checkout 起點＝owning 線 branch。收尾 rebase 的 base 恆為 owning 線（mosaic 禁默認 main——錯 base＝跨線污染）。</li>
     <li><b>護欄</b>：<code>/rebase all</code> 前檢查無進行中卡 branch（all 目標集合會把卡 branch 當 feature 提前吸收）；拋棄（<code>-D</code>）需 user 明確確認；忘記 checkout 直落線＝軟失敗不回頭搬。</li>
   </ul>
-  <div class="frame-wrap degraded">
-    <div class="bar"><span>圖槽位（降級）：卡生命週期流程圖待 hook 2 補</span></div>
-    <div class="degraded-body"><b>圖尚未產生</b>——基礎款殼，<code>diagram-flow</code> 由 post-build hook 2 依 diagram-selection 選型補位（建卡→開工 checkout→build→吸收→刪 branch 生命線）。</div>
+  <div class="frame-wrap">
+    <div class="bar"><span>卡 branch 生命週期（air-46 狗糧實錄）</span><span>mermaid · CDN lazy</span></div>
+    <pre class="mermaid" style="margin:0;padding:16px">
+flowchart LR
+  A["📋 建卡 AIR-46 · 建卡即 commit 進 main"] --> B["🟡 開工 · 起手式⑥ checkout -b air-46"]
+  B --> C["🔨 build · commits 落卡 branch · message 帶卡 id"]
+  C --> D{"🚦 /commit gate · user 確認"}
+  D --> E["✅ 吸收三連 · checkout main → merge --ff-only → branch -d"]
+  E --> F["／ main 純直線前進 · branch 消失"]
+  C -. "探索失敗 · user 確認" .-> G["🗑 拋棄 branch -D · main 零痕"]
+  style A fill:#1f6f3c33,stroke:#2ea043,color:#e6edf3
+  style D fill:#2d220066,stroke:#d29922,color:#e6edf3
+  style G fill:#4a1c1c66,stroke:#f85149,color:#e6edf3
+    </pre>
   </div>
 </section>
 
@@ -132,9 +144,21 @@
     <li><b>落地結構</b>：S1（本 repo）＝AGENTS.md git 慣例節＋kanban skill 兩處編輯；S2（衍生 MOS 卡）＝mosaic 線判定升級＋owning 線欄位＋映射表——<b>判定升級先落地，mosaic 才開第一張卡 branch</b>。</li>
   </ul>
   <p class="src">
-    EP：<a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-card-branch-lifecycle/ep.md">ai-analysis/_tasks/09-08-card-branch-lifecycle/ep.md</a><br>
+    EP：<a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/done/09-08-card-branch-lifecycle/ep.md">ai-analysis/_tasks/done/09-08-card-branch-lifecycle/ep.md</a><br>
     task baseline：d4c98ab · projection source：ep@82b1dd84（未 commit content SHA）· 卡：AIR-46
   </p>
+</section>
+
+<section id="s4">
+  <h2>實作與驗收</h2>
+  <div class="sub">docs mode 弧——3 個 product 檔＋歸檔；muse 雙輪審查閉環；全程狗糧</div>
+  <ul class="dots">
+    <li><b>做了什麼</b>：AGENTS.md 新「git 慣例（本 repo 卡 branch）」節（命名 air-46／生命／收尾三連／<code>/rebase all</code> 護欄／軟條款／mosaic 純指針）＋ kanban 三處（差異宣告改寫「預設解耦＋repo opt-in」、起手式⑥ pointer、建卡段守衛）；EP＋殼歸檔 <code>done/</code>；卡 AIR-46 結案兩步＋消費場景提煉。</li>
+    <li><b>狗糧實錄</b>：本弧全程站在 <code>air-46</code> branch 上工作——開工 checkout（誤開 main-46 → <code>branch -m</code> 正名）、工作 commits 落其上、commit 確認後吸收三連回 main。harness 顯示的 branch 名即當前卡。</li>
+    <li><b>驗證證據</b>：rg 殘留零（per-task branch 舊句／main-46）；<code>/consistency</code> AGENTS.md＋kanban 六維 100/100（修正後重驗：三連結檔案存在）；muse 審查 10 findings 全採納 → <b>resume 同 session</b> followup：F1-F10 全 resolved、零殘留。</li>
+    <li><b>認知誤差點</b>：①命名 prefix 兩次反轉（air → 誤判 main → 定案 WT basename 縮寫）——「最穩定的身份層」是 <b>worktree 路徑</b>不是 branch 名（branch 開卡後就換了）；②AIR-50 建卡 commit 落在 air-46 上——「建卡即 commit 進所在線」的落點假設在卡 branch 開著時失效（守衛已入 kanban 建卡段）。</li>
+    <li><b>delta tour</b>：docs mode 弧（無 code edges 變更）——降級不產，EP 對照由 muse 審查＋本節承擔。</li>
+  </ul>
 </section>
 
 </main>
@@ -176,6 +200,10 @@ function setCollapsed(c,moveFocus){
   var link=document.querySelector('#sidebar li a[href="#'+target+'"]');
   go(target,link);
 })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+if(window.mermaid){mermaid.initialize({startOnLoad:false,theme:'dark'});mermaid.run({querySelector:'pre.mermaid'});}
 </script>
 </body>
 </html>

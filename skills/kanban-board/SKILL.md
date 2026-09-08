@@ -27,7 +27,7 @@ backlog init "<project>" --agent-instructions none
 # 多 WT id 防撞預掃（單 WT repo 跳過）：跨 WT 檔案系統全域 max id——涵蓋 git 掃描盲區（他 WT untracked/staged 卡）
 for wt in $(git worktree list --porcelain | rg "^worktree " | cut -d" " -f2); do ls "$wt/backlog/tasks/" 2>/dev/null; done | rg -o '^[a-zA-Z]+-[0-9.]+' | sort -V | tail -1
 backlog task create "<標題>" -l <labels> -d <目標一句> [--ac "<驗收條件>"]   # CLI id=本 WT max+1，無 --id 可指定
-git add backlog/ && git commit -m "chore(backlog): <卡id> <標題>"   # 建卡即 commit（批次建卡併一顆）——跨 WT id 防撞靠卡及時進 branch ref；user 裁定此形態免逐次確認（例外條款見 [outward-action-consent](../../rules/outward-action-consent.md)「Commit 專屬段」）
+git add backlog/ && git commit -m "chore(backlog): <卡id> <標題>"   # 建卡即 commit（批次建卡併一顆）——跨 WT id 防撞靠卡及時進 branch ref；user 裁定此形態免逐次確認（例外條款見 [outward-action-consent](../../rules/outward-action-consent.md)「Commit 專屬段」）；建卡前確認當前 branch＝owning 線（非進行中卡 branch）——建卡 commit 落錯 branch 會污染他卡邊界（真實案例：AIR-46 狗糧——AIR-50 建卡落 air-46 上）
 ```
 **預掃衝突處置**：預掃輸出的全域最高 id 高於本 WT 所見最高 id → 他 WT 有未進版控的更高卡，CLI 自動配 id 會撞號 → **停下協調**（他 WT 卡 commit 進 branch 後 cross-branch 掃描接手，再建卡），不得就地建。
 **建卡 desc gate**（跨 session To Do 卡必過；session 內即辦豁免）：`desc` 須含三必有——①`baseline`（`〔baseline：<repo> <hash>〕`）②`已決策勿重辯`（`〔已決策勿重辯：①…〕`）③`驗收`（`〔驗收：…〕`）；語義在場即可，標記形式不限。軟自查：`rg -c "baseline|已決策|驗收" backlog/tasks/<卡>.md` 應 ≥3（豁免卡除外）。風險面屬性標註（「寫入契約首改」「跨文件交叉推導」「無保護面新能力」）是「已決策」段的合法內容形態。
@@ -44,6 +44,8 @@ backlog task edit <id> -s "In Progress"   # 🔴 必是動卡的第一個動作
 # ⑤ 開工雙 ref
 backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 ```
+
+（採卡 branch 的 repo 在 ⑤ 之後另有 **⑥ checkout 卡 branch**——規則源＝該 repo AGENTS.md「git 慣例」節；通用起手式恆五步，⑥ 是 repo 層擴充）
 
 **🔴 雙 ref 內建合約**：references 只對 http(s) 前綴渲染可點連結（`TaskDetailsModal.tsx:1362-1375`）——**相對路徑單獨出現＝board 上不可點＝錯誤形態**。兩值都要掛：
 - `http URL`＝report server 上的 Report Shell／md preview 位址（**repo 慣例**——如 mosaic `http://127.0.0.1:6421/<wt>/<任務路徑>/index.html`；殼未建前的過渡形態指中央 md viewer `http://127.0.0.1:6421/viewer/_md-viewer.html?p=/<route>/<任務路徑>/ep.md`——**viewer 單一源**版控於 ai-rules `report-assets/`，`fetch(?p=)` 同源絕對路徑可渲染任一 route 的 md，raw `.md` 直連永遠是原檔；hook 1 建殼後更新為殼 URL）
@@ -101,7 +103,7 @@ lsof -iTCP:<port> -sTCP:LISTEN -P | rg backlog    # ③ 驗證實際綁的 port�
 ## 與官方工作流的差異宣告（兩條）
 
 1. **PLAN 不寫進卡**——實作計畫唯一源＝EP（任務家 `<task>/ep.md`）；卡用 `references` 指回 EP/殼（EP 深度＝baseline hash/Report Shell/post-build 鏈，是卡 PLAN 欄位的超集）
-2. **不掝 per-task branch**——任務與分支解耦（多 worktree 紀律由各 repo 自訂）；spawned／automation session 的 owning-WT 約束單一源＝[collaboration-constraints rule](../../rules/collaboration-constraints.md)「Agent 派發與產出回收」（always-load 層—— spawned session 不載本 skill 也約束得到）
+2. **任務與分支預設解耦；採卡 branch 的 repo 以其 AGENTS.md「git 慣例」節為準**（多 worktree 紀律由各 repo 自訂）；spawned／automation session 的 owning-WT 約束單一源＝[collaboration-constraints rule](../../rules/collaboration-constraints.md)「Agent 派發與產出回收」（always-load 層—— spawned session 不載本 skill 也約束得到）
 
 ## 容錯
 

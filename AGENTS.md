@@ -27,6 +27,15 @@
 - **review 鏈**：review command 支援「產出 finding → 跨 session 貼回 → `/judge-review`」多 session 鏈
 - **自主性**：自主 command（`/deep-work`、cron 排程）假設人類不在場——紅線/黃線分級 + 完成報告
 
+## git 慣例（本 repo 卡 branch）
+
+- **命名**：卡 branch＝`<線縮寫>-<卡號>`——線縮寫＝**worktree toplevel basename 縮寫**（線的身份是 WT 路徑，穩定；branch 開卡 branch 後就換了）。本 repo 單 WT（repo 根）→ `air-<N>`（`air-46`＝卡 AIR-46；與卡 id 前綴字面重合屬巧合非要求）；卡號＝Backlog.md id
+- **生命**：開工（implement 階段 1 起手式 ⑤ 後——⑤ 定義＝[kanban](skills/kanban-board/SKILL.md) 起手式五步）自 main `git checkout -b air-<N>`；branch 已存在→先 `git log main..<branch>` 判本卡遺留再續用（非本卡殘留不續用）；建卡不開 branch；卡 branch 上 commits message 帶卡 id（`(air-46)` scope 或 `air-46: …` 前綴）
+- **收尾**：/commit 確認通過後——`git checkout main && git merge --ff-only air-XX && git branch -d air-XX`（WT 回 main）；`--ff-only` 被拒＝main 已前進→先 `/rebase main` 再吸（mosaic：`/rebase <owning線>`，禁默認 main）；clean 紀律由 /commit gate 守（dirty checkout 不衝突會帶走，不是護欄）；trunk 永不被 rebase、永不 force（[rebase skill](skills/rebase/SKILL.md) 鐵律）
+- **`/rebase all` 護欄**：all 之前 `git branch --list 'air-*'` 非空 → 先收卡，不跑 all（`*` 不可省）；user 紀律：all 只在所有卡收尾後下
+- **軟條款**：忘記 checkout 直落 main＝軟失敗不回頭搬（message 已帶卡 id）；夜間 automation commits 落卡 branch 無害；拋棄（`branch -D`）需 user 明確確認；跨 session 遺留屬正常（接手者續用或判死吸收）
+- **mosaic 變體**：多線形態（前綴＝WT toplevel basename 縮寫、owning 線記卡 desc、線判定路徑查表、收尾 rebase base＝owning 線）定義源＝[09-08 卡 branch EP](ai-analysis/_tasks/done/09-08-card-branch-lifecycle/ep.md)——落地由 mosaic 側 MOS 卡承接
+
 ## 命令的受眾視角
 
 > **核心心智模型**：commands 不是按生命週期階段（EP / code）分，是按**產出受眾**分。設計、審查、討論任何命令時，先問「這命令的產出給誰消費」。
