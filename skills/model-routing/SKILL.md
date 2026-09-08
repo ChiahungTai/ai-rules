@@ -52,7 +52,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 | tier | harness 填法 |
 |---|---|
 | lite／vision | ZCode：`model: glm-5.3-flash`＋`thoughtLevel: high※`（pins 由 sync_agents 生成，非 authoring）；CC：**用 CC 自己的模型詞彙**——預設 inherit（主 session）、lite 點名 `sonnet` 別名（env 映射層直達 glm-5.3-flash，見 settings.json `ANTHROPIC_DEFAULT_*`）——dispatch 不綁實體 backend id；**地板＝sonnet/terra 級（haiku／luna 基本不用，user 09-05）** |
-| full | ZCode：`model: glm-5.3`＋`thoughtLevel: high`（AIR-43 釘選）；CC：`model` 省略（inherit）為現值——別名映射已查證（`opus`→glm-5.3，AIR-44），釘選與否待決策 |
+| full | ZCode：`model: glm-5.3`＋`thoughtLevel: high`（AIR-43 釘選）；CC：`model: opus` 別名釘選（AIR-44——**別名可攜**：env 映射切 provider〔glm-5.3↔真 opus↔fabel 端點〕時 alias 直接可用、免重釘；lite/vision 維持省略 inherit） |
 | ccr 模式（未啟用） | `Fusion/<tier>`；啟用時 pins 只換值、角色/tier 不動 |
 
 ## role → requirement（tier）分配表

@@ -19,8 +19,8 @@ subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什�
 
 | 角色 | tier | 說明 |
 |------|------|------|
-| code-reviewer / code-reviewer-primed／review **command** agent | full 為基準（ZCode＝registry 釘 glm-5.3——AIR-43；CC＝inherit）；**條件式降 lite** | 品質閘門需強度。降級條件＝**保護面厚度**（既有測試釘住＋驗證閉環＋非跨邊界語義面）；條件不滿足時「review 順手降級」直覺不適用 |
-| impl / test-gen agent | full 為基準（ZCode＝registry 釘 glm-5.3——AIR-43；CC＝inherit）；機械段條件式降 lite（條件同 review） | 寫 production code／等價測試設計；降級附加約束＝lite 模型測試僅規格陳述非驗收證據（mock 假設即 bug），驗收證據另補 |
+| code-reviewer / code-reviewer-primed／review **command** agent | full 為基準（ZCode＝registry 釘 glm-5.3——AIR-43；CC＝opus 別名釘選——AIR-44）；**條件式降 lite** | 品質閘門需強度。降級條件＝**保護面厚度**（既有測試釘住＋驗證閉環＋非跨邊界語義面）；條件不滿足時「review 順手降級」直覺不適用 |
+| impl / test-gen agent | full 為基準（ZCode＝registry 釘 glm-5.3——AIR-43；CC＝opus 別名釘選——AIR-44）；機械段條件式降 lite（條件同 review） | 寫 production code／等價測試設計；降級附加約束＝lite 模型測試僅規格陳述非驗收證據（mock 假設即 bug），驗收證據另補 |
 | judge 裁決（judge-review）／EP 規劃（execution-plan）／post-build 編排 | **full 能力檔（不可條件降級）** | 判斷密集位——judge 自證塌陷＋sycophancy 是能力剖面問題非努力不足；lite＋max effort 補償＝未驗證路徑（採用前先小規模實證，紀錄回 skill） |
 | spec-miner / lite-verify / cross-verify-investigator / render／cron 機械段（automation session 選 lite 模型） | lite | 機械查證（rg+Read+逐字引用）、清單驅動驗證、單軸多源查證（軸＝prompt 參數；源缺場回報 unverified 不腦補）、渲染、排程收斂/watch——規則明確、read-only |
 | mem-distill | lite（寫入型） | memory 條目蒸餾——規則明確的語義壓縮（清單內 Read→Write 全覆寫）；hook 不攔 subagent 寫入，上限＝prompt 紀律（registry `agents/zcode/`） |

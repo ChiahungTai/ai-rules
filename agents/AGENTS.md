@@ -10,7 +10,7 @@ agents/
             #   thoughtLevel 鍵——正文 prose 豁免；body：①目標 ②做法 ③角色特定節〔紀律/方法論等，
             #   skills 引用 inline 散在 body〕）
   zcode/    # 生成物（~/.zcode/agents → 此）：roles 投影＋部署預設 pins（lite/vision/full 帶 model+thoughtLevel）
-  claude/   # 生成物（~/.claude/agents → 此）：roles 投影（省略 model/thoughtLevel；tools 減 CR MCP 行）
+  claude/   # 生成物（~/.claude/agents → 此）：roles 投影（full 帶 model: opus 別名釘選〔AIR-44——env 映射可攜〕；lite/vision 省略 model；tools 減 CR MCP 行）
 ```
 
 - **「指定哪個 harness 用哪些 agent」＝role 出現在哪些 registry**（機制，非命名紀律）。**registry 內是實檔拷貝**——理由＝per-harness frontmatter 差異需整檔分歧（zcode pins／claude 減 CR MCP 行），symlink 是整檔單位無法承載差異。ZCode loader 可載入 file-level symlink（2026-09-06 新 session 對照實驗：symlink／實檔探針皆載入，推翻 08-29「檔案 symlink 靜默不載」舊判決——舊判決疑為快照過期混淆）；hardlink 被 clone 破壞不可用，symlink 為 git 原生追蹤

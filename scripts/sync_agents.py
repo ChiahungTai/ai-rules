@@ -49,6 +49,11 @@ ZCODE_PINS: dict[str, tuple[str, str]] = {
     "vision": ("glm-5.3-flash", "high"),
 }
 
+# CC 端部署預設（別名層——值抄 skill 權威表 Anthropic 欄首 token，check_parity
+# 對其 guard）。別名可攜：env 映射（ANTHROPIC_DEFAULT_*）切 provider 時 alias
+# 直接可用、免重釘。effort＝CC spawn-time enum 非 frontmatter，故僅 model。
+CLAUDE_PINS: dict[str, str] = {"full": "opus"}
+
 # CC 端 CR MCP 白名單是 ZCode-only 接線（known divergence：claude 拷貝剝除）
 CR_MCP_PREFIX = "mcp__plugin_code-reality_code-reality__"
 
@@ -67,6 +72,11 @@ _ROLE_REQ_HEADING = "## role → requirement"
 _TIER_TABLE_HEADING = "## tier → (model, effort)"
 _ZAI_PIN_RE = re.compile(
     r"^\|\s*\*{0,2}(full|lite|vision)\*{0,2}（.*?）\s*\|\s*`?([a-z0-9.\-]+)`?"
+)
+# full 行 Anthropic 欄首 token（別名）——zai 欄 [^|\n]* 不得含 "|"（表 cell
+# 註記用〔〕不用（）的慣例防跨欄回溯，AIR-44 實證）
+_ANTHROPIC_ALIAS_RE = re.compile(
+    r"^\|\s*\*{0,2}full\*{0,2}（.*?）\s*\|[^|\n]*\|\s*`?([a-z0-9.\-]+)`?"
 )
 _EFFORT_RE = re.compile(r"thoughtLevel: ([a-z]+)")
 
@@ -119,6 +129,15 @@ def parse_skill_effort(skill_text: str) -> str | None:
     return m.group(1) if m else None
 
 
+def parse_skill_anthropic_alias(skill_text: str) -> str | None:
+    """萃取權威表 full 行 Anthropic 欄首 token（CC 別名釘選的 parity 鍵）。"""
+    for line in _section(skill_text, _TIER_TABLE_HEADING).splitlines():
+        m = _ANTHROPIC_ALIAS_RE.match(line.strip())
+        if m:
+            return m.group(1)
+    return None
+
+
 def check_parity(repo: Path) -> list[str]:
     """dicts ↔ skill 權威表 parity（真 repo 呼叫；drift 清單）。
 
@@ -148,6 +167,15 @@ def check_parity(repo: Path) -> list[str]:
         drift.append(
             f"ZCODE_PINS[{tier}] 有值但 skill 權威表 zai 欄未解析到——確認表格仍在"
         )
+    anthropic_alias = parse_skill_anthropic_alias(skill_text)
+    if anthropic_alias is None:
+        drift.append("CLAUDE_PINS 有值但 skill 權威表 Anthropic 欄未解析到——確認表格仍在")
+    else:
+        for tier, alias in sorted(CLAUDE_PINS.items()):
+            if anthropic_alias != alias:
+                drift.append(
+                    f"CLAUDE_PINS[{tier}]={alias} but skill anthropic column={anthropic_alias}"
+                )
     skill_effort = parse_skill_effort(skill_text)
     if skill_effort is not None:
         for tier, (_model, thought) in sorted(ZCODE_PINS.items()):
@@ -232,6 +260,8 @@ def render_registry(
     if target == "zcode" and requirement in ZCODE_PINS:
         model, thought_level = ZCODE_PINS[requirement]
         target_fields = f"\nmodel: {model}\nthoughtLevel: {thought_level}"
+    elif target == "claude" and requirement in CLAUDE_PINS:
+        target_fields = f"\nmodel: {CLAUDE_PINS[requirement]}"
     return f"---\n{frontmatter}{target_fields}\n---\n{OWNERSHIP_MARKER}\n{body}"
 
 

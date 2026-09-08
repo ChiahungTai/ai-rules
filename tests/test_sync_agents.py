@@ -102,12 +102,15 @@ def test_render_zcode_full_pins_flagship():
     assert "thoughtLevel: high" in head
 
 
-def test_render_claude_no_target_fields_and_strips_cr_mcp():
-    """SM-13 負向：claude 生成物零 model:/thoughtLevel；CR MCP 剝除。"""
+def test_render_claude_full_pins_alias_and_strips_cr_mcp():
+    """CC 端 full-tier 別名釘選（AIR-44）：model: opus（別名層——env 映射切
+    provider 時 alias 直接可用、免重釘）；無 thoughtLevel（CC effort＝spawn-time
+    enum 非 frontmatter）。CR MCP 剝除不變。"""
     rendered = sync.render_registry("t-full", ROLE_FULL, "claude", "full")
-    frontmatter = rendered.split("\n---\n")[0]
-    assert "model:" not in frontmatter
-    assert "thoughtLevel" not in frontmatter
+    head = rendered.split("\n---\n")[0]
+    # 精確尾斷言——pin 是 frontmatter 最後一行，尾換行屬 --- 分隔符不在 head 內
+    assert head.endswith("model: opus")
+    assert "thoughtLevel" not in head
     assert "mcp__plugin_code-reality_code-reality__" not in rendered
     # 非 CR 的 MCP 全名保留（context7）
     assert "mcp__context7__query-docs" in rendered
@@ -319,6 +322,26 @@ def test_parity_unparseable_zai_cell_fails_loud(tmp_path: Path):
     ), drift
 
 
+def test_parity_claude_pin_alias_matches_anthropic_column(tmp_path: Path):
+    """CLAUDE_PINS 別名 ↔ skill 權威表 Anthropic 欄（AIR-44）：
+    改表不改 dict → fail loud（與 ZCODE_PINS 值層 parity 同構）。"""
+    skill = tmp_path / "skills" / "model-routing" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    real = (REPO_ROOT / sync.PARITY_SOURCE).read_text(encoding="utf-8")
+    skill.write_text(
+        real.replace(
+            "opus＝**env 別名直達 glm-5.3**",
+            "sonnet＝**env 別名直達 glm-5.3**",
+        ),
+        encoding="utf-8",
+    )
+    drift = sync.check_parity(tmp_path)
+    assert any(
+        "CLAUDE_PINS[full]=opus but skill anthropic column=sonnet" in d
+        for d in drift
+    ), drift
+
+
 def test_parity_effort_layer_fails_on_thought_level_change(tmp_path: Path):
     """muse F2：部署填法表 effort 改而 dict 未跟 → fail。"""
     skill = tmp_path / "skills" / "model-routing" / "SKILL.md"
@@ -483,6 +506,7 @@ def test_render_golden_bytes_full_role():
         'description: "golden anchor"\n'
         "tools: Read, Bash\n"
         "background: true\n"
+        "model: opus\n"
         "---\n"
         f"{sync.OWNERSHIP_MARKER}\n"
         "\n## 目標\n\nanchor body。\n"
@@ -491,7 +515,7 @@ def test_render_golden_bytes_full_role():
 
 def test_render_golden_bytes_full_role_pins():
     """golden bytes：zcode full 生成形態（AIR-43 釘選——model: glm-5.3＋thoughtLevel: high）；
-    claude 對照不變（D4——CC 端零 model/thoughtLevel）。"""
+    claude 對照（AIR-44——model: opus 別名釘選、無 thoughtLevel）。"""
     role = (
         "---\n"
         "name: golden-full\n"
@@ -521,6 +545,7 @@ def test_render_golden_bytes_full_role_pins():
         'description: "golden full anchor"\n'
         "tools: Read, Bash\n"
         "background: true\n"
+        "model: opus\n"
         "---\n"
         f"{sync.OWNERSHIP_MARKER}\n"
         "\n## 目標\n\nanchor body。\n"
