@@ -1,13 +1,17 @@
 ---
 id: AIR-44
 title: model-routing 後續兩項——CC 端 opus 映射查證（full 釘選評估）＋sticky flip 實驗
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-08 01:42'
-updated_date: '2026-09-08 02:19'
+updated_date: '2026-09-08 08:22'
 labels:
   - governance
 dependencies: []
+references:
+  - >-
+    https://github.com/ChiahungTai/ai-rules/blob/main/skills/model-routing/SKILL.md
+  - skills/model-routing/SKILL.md
 ordinal: 36000
 ---
 
@@ -19,7 +23,7 @@ ordinal: 36000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 CC 映射表實測更新；flip 判定回寫但書段
+- [x] #1 CC 映射表實測更新；flip 判定回寫但書段
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -31,3 +35,9 @@ ordinal: 36000
 
 【09-08 CC 別名釘選落地（user 拍板＋可攜性確認）】CLAUDE_PINS={'full':'opus'}＋_ANTHROPIC_ALIAS_RE parity guard＋render claude 分支；TDD 3 RED→32 passed；生成物 agents/claude/code-reviewer{,-primed}.md 帶 model: opus（lite/vision 對照無）；設計要點＝釘別名非釘 id——env 映射切 provider（glm-5.3↔真 opus↔fabel）時 alias 直接可用免重釘；文檔四處同步（部署填法表/rules×2/agents AGENTS）＋bundle 重部署四家
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+三項全落地——①CC 映射查證 opus→glm-5.3・sonnet/haiku→glm-5.3-flash（agent-workflow Step 1 表＋解析表，4b948f6）②sticky flip：定義值 silent no-op、DB 直寫不傳播（SKILL.md:68 但書段＋platform-facts，20226a6）③CC full-tier 別名釘選 opus＝CLAUDE_PINS＋parity guard＋TDD 32 tests（67c5836）；殘餘 open 觀察＝UI 層動態改傳播性（user UI 級操作，非 AC 項）
+<!-- SECTION:FINAL_SUMMARY:END -->
