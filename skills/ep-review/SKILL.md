@@ -25,7 +25,7 @@ Workflow 執行協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 ## 審查模式選擇
 
-review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」—— 本命令僅定義 EP 特有 profile（F1-F5）+ 產出（回寫 EP）。模式判定規則（effort/max-agents → Workflow/Agent Tool）見 [review-engine](../review-engine/SKILL.md)；啟用 F1-F5 五維度（下表），Workflow 執行細節（schema/腳本）見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)。
+review 執行預設（force 獨立 / max-agents / model 預設）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」—— 本命令僅定義 EP 特有 profile（F1-F5）+ 產出（回寫 EP）。模式判定規則（effort/max-agents → Workflow/Agent Tool）見 [review-engine](../review-engine/SKILL.md)；啟用 F1-F5 五維度（下表），Workflow 執行細節（schema/腳本）見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)。
 
 **Workflow 模式**（判定條件見 [review-engine](../review-engine/SKILL.md)）：
 

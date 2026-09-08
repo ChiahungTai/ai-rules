@@ -1,13 +1,18 @@
 ---
 id: AIR-43
 title: model 詞彙治理——flash 去階層化、vision＝支援影像的 model、full-tier 旗艦釘選（inherit 洞）
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-07 23:36'
+updated_date: '2026-09-08 00:17'
 labels:
   - governance
   - agents
 dependencies: []
+references:
+  - >-
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/09-08-model-vocab-governance/ep.md
+  - ai-analysis/_tasks/09-08-model-vocab-governance/ep.md
 ordinal: 35000
 ---
 

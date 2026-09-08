@@ -94,10 +94,12 @@ def test_render_zcode_lite_adds_pins():
     assert "mcp__plugin_code-reality_code-reality__refs" in rendered
 
 
-def test_render_zcode_full_omits_model():
+def test_render_zcode_full_pins_flagship():
     rendered = sync.render_registry("t-full", ROLE_FULL, "zcode", "full")
-    assert "model:" not in rendered.split("\n---\n")[0]
-    assert "thoughtLevel" not in rendered
+    head = rendered.split("\n---\n")[0]
+    # 精確斷言含結尾換行——防 "glm-5.3" ⊂ "glm-5.3-flash" 前綴假綠（EP R4）
+    assert "model: glm-5.3\n" in head
+    assert "thoughtLevel: high" in head
 
 
 def test_render_claude_no_target_fields_and_strips_cr_mcp():
@@ -282,6 +284,41 @@ def test_parity_pin_value_layer_fails_on_model_change(tmp_path: Path):
     assert any("ZCODE_PINS[lite]" in d for d in drift), drift
 
 
+def test_parity_pin_value_layer_fails_on_full_model_change(tmp_path: Path):
+    """值層 parity full 變體（SM-3）：skill 權威表 full 行改 model 而 dict 未跟 → fail。"""
+    skill = tmp_path / "skills" / "model-routing" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    real = (REPO_ROOT / sync.PARITY_SOURCE).read_text(encoding="utf-8")
+    skill.write_text(
+        real.replace(
+            "| **full**（旗艦） | `glm-5.3`（旗艦釘選，AIR-43——inherit 洞修補）",
+            "| **full**（旗艦） | `glm-6.0`（旗艦釘選，AIR-43——inherit 洞修補）",
+        ),
+        encoding="utf-8",
+    )
+    drift = sync.check_parity(tmp_path)
+    assert any("ZCODE_PINS[full]" in d for d in drift), drift
+
+
+def test_parity_unparseable_zai_cell_fails_loud(tmp_path: Path):
+    """SM-4 分支釘住（F1）：full 行 zai 欄非反引號 id 開頭（舊 inherit 敘述形態）
+    → 「有值但未解析到」分支 fail loud（此分支先前零測試覆蓋）。"""
+    skill = tmp_path / "skills" / "model-routing" / "SKILL.md"
+    skill.parent.mkdir(parents=True)
+    real = (REPO_ROOT / sync.PARITY_SOURCE).read_text(encoding="utf-8")
+    skill.write_text(
+        real.replace(
+            "`glm-5.3`（旗艦釘選，AIR-43——inherit 洞修補）",
+            "GLM 5.3＝主 session inherit（不釘 id）",
+        ),
+        encoding="utf-8",
+    )
+    drift = sync.check_parity(tmp_path)
+    assert any(
+        "ZCODE_PINS[full] 有值但 skill 權威表 zai 欄未解析到" in d for d in drift
+    ), drift
+
+
 def test_parity_effort_layer_fails_on_thought_level_change(tmp_path: Path):
     """muse F2：部署填法表 effort 改而 dict 未跟 → fail。"""
     skill = tmp_path / "skills" / "model-routing" / "SKILL.md"
@@ -301,13 +338,18 @@ def test_zai_pin_parser_ignores_lines_outside_tier_section(tmp_path: Path):
         "## tier → (model, effort) 解析表（requirement × provider 權威表——model 值單一源）\n"
         "| tier（requirement） | zai | Anthropic |\n"
         "|---|---|---|\n"
-        "| **full**（旗艦） | GLM 5.3＝主 session inherit（不釘 id） | opus |\n"
+        # full 行貼真實表格行全文（M5——非簡化縮影）；cell 以 backtick id 開頭（D2 規約）
+        "| **full**（旗艦） | `glm-5.3`（旗艦釘選，AIR-43——inherit 洞修補）〔repo-observed；registry pin wire 首例 first-real-usage-pending→S3 後改 repo-observed〕 | opus〔**未訂閱禁派**〕 | sol high／max〔**預設不派**——額度最少〕 | fabel〔**未訂閱禁派**〕 | muse-spark-1.3（effort xhigh 起） |\n"
         "| **vision**（影像） | glm-5.3-flash（多模✓） | x |\n"
         "| **lite**（一般） | glm-5.3-flash〔repo-observed〕 | x |\n"
         "\n## 後記\n| **vision**（誘餌） | phantom-model |\n"
     )
     pins = sync.parse_skill_zai_pins(text)
-    assert pins == {"lite": "glm-5.3-flash", "vision": "glm-5.3-flash"}
+    assert pins == {
+        "full": "glm-5.3",
+        "lite": "glm-5.3-flash",
+        "vision": "glm-5.3-flash",
+    }
 
 
 def test_main_fatal_exits_2_not_1(repo: Path):
@@ -439,6 +481,44 @@ def test_render_golden_bytes_full_role():
         "---\n"
         "name: golden\n"
         'description: "golden anchor"\n'
+        "tools: Read, Bash\n"
+        "background: true\n"
+        "---\n"
+        f"{sync.OWNERSHIP_MARKER}\n"
+        "\n## 目標\n\nanchor body。\n"
+    )
+
+
+def test_render_golden_bytes_full_role_pins():
+    """golden bytes：zcode full 生成形態（AIR-43 釘選——model: glm-5.3＋thoughtLevel: high）；
+    claude 對照不變（D4——CC 端零 model/thoughtLevel）。"""
+    role = (
+        "---\n"
+        "name: golden-full\n"
+        'description: "golden full anchor"\n'
+        "tools: Read, Bash\n"
+        "background: true\n"
+        "---\n"
+        "\n## 目標\n\nanchor body。\n"
+    )
+    zcode = sync.render_registry("golden-full", role, "zcode", "full")
+    assert zcode == (
+        "---\n"
+        "name: golden-full\n"
+        'description: "golden full anchor"\n'
+        "tools: Read, Bash\n"
+        "background: true\n"
+        "model: glm-5.3\n"
+        "thoughtLevel: high\n"
+        "---\n"
+        f"{sync.OWNERSHIP_MARKER}\n"
+        "\n## 目標\n\nanchor body。\n"
+    )
+    claude = sync.render_registry("golden-full", role, "claude", "full")
+    assert claude == (
+        "---\n"
+        "name: golden-full\n"
+        'description: "golden full anchor"\n'
         "tools: Read, Bash\n"
         "background: true\n"
         "---\n"

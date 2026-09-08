@@ -53,7 +53,7 @@ Workflow 執行協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 ## 審查模式選擇
 
-review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」—— code-review **預設 spawn 獨立 agent**（與其他 review 命令一致，force 獨立；取消 Main LLM 自審 — 實證：獨立 agent 抓自審盲點）。模式判定規則（effort/max-agents → A/B）見 [review-engine](../review-engine/SKILL.md)；max-agents 查 [model-routing 並發上限](../model-routing/SKILL.md)（agent-workflow defer 到此、不自帶數字）。下方 A/B 為本命令的六軸啟用配置（C 已廢除，見下方 C 段）：
+review 執行預設（force 獨立 / max-agents / model 預設）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」—— code-review **預設 spawn 獨立 agent**（與其他 review 命令一致，force 獨立；取消 Main LLM 自審 — 實證：獨立 agent 抓自審盲點）。模式判定規則（effort/max-agents → A/B）見 [review-engine](../review-engine/SKILL.md)；max-agents 查 [model-routing 並發上限](../model-routing/SKILL.md)（agent-workflow defer 到此、不自帶數字）。下方 A/B 為本命令的六軸啟用配置（C 已廢除，見下方 C 段）：
 
 **A. Workflow 模式**（判定條件見 [review-engine](../review-engine/SKILL.md)）：
 

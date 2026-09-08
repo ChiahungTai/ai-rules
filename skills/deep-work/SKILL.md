@@ -152,7 +152,7 @@ permission mode 是 CLI 啟動旗標 / dir 設定，**命令本身無法中途�
 
 #### Agent Review Cycle
 
-**Writer/Reviewer 分離**：用戶不在場，Agent Review 是唯一的品質閘門。review 執行預設（force 獨立 / max-agents / model inherit / 3-perspective）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」；3-perspective（① clean + ② UC-anchored + ③ Correctness）完整流程見 [agent-review-cycle.md](../_common/agent-review-cycle.md)。
+**Writer/Reviewer 分離**：用戶不在場，Agent Review 是唯一的品質閘門。review 執行預設（force 獨立 / max-agents / model 預設 / 3-perspective）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」；3-perspective（① clean + ② UC-anchored + ③ Correctness）完整流程見 [agent-review-cycle.md](../_common/agent-review-cycle.md)。
 
 #### 主 LLM — /judge-review
 

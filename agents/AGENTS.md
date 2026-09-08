@@ -9,7 +9,7 @@ agents/
   roles/    # role authoring 單一源（frontmatter 白名單 name/description/tools/background＋零 model/
             #   thoughtLevel 鍵——正文 prose 豁免；body：①目標 ②做法 ③角色特定節〔紀律/方法論等，
             #   skills 引用 inline 散在 body〕）
-  zcode/    # 生成物（~/.zcode/agents → 此）：roles 投影＋部署預設 pins（lite/vision 帶 model+thoughtLevel）
+  zcode/    # 生成物（~/.zcode/agents → 此）：roles 投影＋部署預設 pins（lite/vision/full 帶 model+thoughtLevel）
   claude/   # 生成物（~/.claude/agents → 此）：roles 投影（省略 model/thoughtLevel；tools 減 CR MCP 行）
 ```
 
@@ -38,9 +38,9 @@ agents/
 | 開卡（backlog 建卡＋建卡 commit） | 主 session 直做 | — | full | — | 任務敘述→卡檔＋commit | —（機械命令，kanban-board skill） |
 | 研究（EP 段落 0／規格挖掘） | spawn | cr-research／spec-miner | lite | zcode | 問題→file:line 錨點＋逐字引用 | 重試≤2（1302）→主 session 自做 |
 | EP 規劃 | 主 session 直做（判斷密集） | — | full | — | 需求→ep.md（含 EP review 迴圈） | — |
-| EP review（雙家族） | 主 session 編排：GLM 側 spawn code-reviewer×2；muse 側**`task` 形態＝`--background` fire-and-forget 提交＋`wait`／`show` 晚收（不佔 agent 並發、不佔 caller session，可跨 session 認領）；`review` 形態仍背景 Bash 阻塞（`review` 無 `--background`）** | code-reviewer（fresh）＋code-reviewer-primed（primed）；muse review（bridge 工單） | full（省略 model）為基準；條件式降 lite（保護面厚度，model-routing skill） | zcode＋claude（生成）；muse 經 bridge | diff＋EP→findings→judge 處置表 | classifier／1302 重試≤2→顯式降級記錄；muse 額度不足→in-harness 雙 context（顯式記錄） |
+| EP review（雙家族） | 主 session 編排：GLM 側 spawn code-reviewer×2；muse 側**`task` 形態＝`--background` fire-and-forget 提交＋`wait`／`show` 晚收（不佔 agent 並發、不佔 caller session，可跨 session 認領）；`review` 形態仍背景 Bash 阻塞（`review` 無 `--background`）** | code-reviewer（fresh）＋code-reviewer-primed（primed）；muse review（bridge 工單） | full（ZCode 釘 glm-5.3）為基準；條件式降 lite（保護面厚度，model-routing skill） | zcode＋claude（生成）；muse 經 bridge | diff＋EP→findings→judge 處置表 | classifier／1302 重試≤2→顯式降級記錄；muse 額度不足→in-harness 雙 context（顯式記錄） |
 | build 實作段 | 主 session 編排；機械可規格化段 spawn | impl-lite | lite | zcode | EP 段→code＋測試＋驗證證據 | 失敗家系處置（註 a）→主 session 直做該段；lite 測試＝規格陳述→驗收證據 full 複驗 |
-| build 內 Agent Review | spawn（3-perspective） | code-reviewer（fresh）＋code-reviewer-primed（primed）；Important+ 錨點驗證＝lite-verify | reviewers＝full（省略 model）為基準；錨點驗證＝lite | 全 zcode＋claude（生成） | diff→findings（錨點驗證後浮出） | 失敗家系處置（註 a）→主 session 自審＋fallback 標記 |
+| build 內 Agent Review | spawn（3-perspective） | code-reviewer（fresh）＋code-reviewer-primed（primed）；Important+ 錨點驗證＝lite-verify | reviewers＝full（ZCode 釘 glm-5.3）為基準；錨點驗證＝lite | 全 zcode＋claude（生成） | diff→findings（錨點驗證後浮出） | 失敗家系處置（註 a）→主 session 自審＋fallback 標記 |
 | judge 裁決 | 主 session 直做（判斷密集；不派 agent） | — | full | — | findings→✅/❌/⚠️ 處置表 | — |
 | post-build 編排 | 主 session 直做（判斷密集） | — | full | — | 收尾鏈：code-review（dual-context）→judge-review→修正→consistency→metadata-sync→殼 refresh | — |
 | 機械驗證／consistency gate | spawn | lite-verify | lite | zcode | 查證清單→逐項機械證據（rg 命中／exit code／file:line） | 失敗家系處置（註 a）→主 session 跑組合命令 |
@@ -93,7 +93,7 @@ markdown + YAML frontmatter，正文 = 系統提示詞。兩家必填欄位同�
 | 類別 | 欄位 | 說明 |
 |------|------|------|
 | 直接共用 | `name` / `description` / `color` / `maxTurns` / `disallowedTools` / `tools` | tools 只列 built-in 共通名（Read / Bash / Edit / Write / WebFetch / WebSearch / TodoWrite）；`Grep`/`Glob` 是 Claude built-in 名，ZCode runtime 未注入但靜默忽略不報錯（見「tools 清單陷阱」） |
-| 省略共用 | `model` | 省略 → 兩家皆 inherit 主 session（Claude 別名 sonnet/opus/... 在 ZCode 無效） |
+| 省略共用 | `model` | 省略＝inherit 僅存於 CC 投影（Claude 別名 sonnet/opus/... 在 ZCode 無效）；ZCode 端 pins 全 tier 覆蓋（full 亦釘——AIR-43），生成檔不省略 |
 | 可寫（ZCode 安全忽略） | Claude 專屬：`permissionMode` / `skills` / `hooks` / `memory` / `background` / `isolation` / `effort` / `initialPrompt` | ZCode 官方明說未知欄位靜默忽略不報錯 |
 | 禁寫進共用檔 | ZCode 專屬：`thoughtLevel` / `injectAgentsMd` | Claude 對未知欄位容忍度未明 — 需要 per-harness 差異時另建 fork 檔 |
 | 語義有差 | `mcpServers` | 兩家都吃名稱參考；ZCode 精確匹配、宣告未連接的服務直接失敗；**同名 server user-level 蓋 project-level**（官方文檔「項目配置覆蓋不了」——user 條目缺專案條目的 headers 會 shadow 專案設定，2026-08-22 實測險釀 lsp-python 回歸後回退）；Claude 另支援 inline 定義 |

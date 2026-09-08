@@ -42,8 +42,9 @@ ROLE_REQUIREMENTS: dict[str, str] = {
 
 # ZCode 部署預設 pins（值抄 skill tier×provider 權威表 zai 欄——
 # check_parity 逐 tier 機械比對，改表不改 dict → fail）；
-# full＝model 省略（inherit）故無列
+# full＝旗艦釘選（AIR-43 inherit 洞修補：unpinned 會跟主 session 漂移）
 ZCODE_PINS: dict[str, tuple[str, str]] = {
+    "full": ("glm-5.3", "high"),
     "lite": ("glm-5.3-flash", "high"),
     "vision": ("glm-5.3-flash", "high"),
 }
@@ -65,7 +66,7 @@ _TIER_TOKENS = {"full", "vision", "lite"}
 _ROLE_REQ_HEADING = "## role → requirement"
 _TIER_TABLE_HEADING = "## tier → (model, effort)"
 _ZAI_PIN_RE = re.compile(
-    r"^\|\s*\*{0,2}(lite|vision)\*{0,2}（.*?）\s*\|\s*`?([a-z0-9.\-]+)`?"
+    r"^\|\s*\*{0,2}(full|lite|vision)\*{0,2}（.*?）\s*\|\s*`?([a-z0-9.\-]+)`?"
 )
 _EFFORT_RE = re.compile(r"thoughtLevel: ([a-z]+)")
 
@@ -113,7 +114,7 @@ def parse_skill_zai_pins(skill_text: str) -> dict[str, str]:
 
 
 def parse_skill_effort(skill_text: str) -> str | None:
-    """萃取部署填法表的 thoughtLevel 值（lite/vision 共用一值）。"""
+    """萃取部署填法表的 thoughtLevel 值（全 tier 共用一值）。"""
     m = _EFFORT_RE.search(skill_text)
     return m.group(1) if m else None
 

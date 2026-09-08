@@ -302,7 +302,7 @@ docs mode 的 `/implement` 執行分支見 [implement skill](../implement/SKILL.
 ## EP Review Cycle
 
 **Writer/Reviewer 分離**：用獨立 Agent context 審查 EP，避免主 LLM 審查自己的計畫。
-review 執行預設（force 獨立 / max-agents / model inherit）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」。**適應式多 Agent Review**：依模型並發上限和 EP 複雜度決定 spawn 幾個 review agent。
+review 執行預設（force 獨立 / max-agents / model 預設）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」。**適應式多 Agent Review**：依模型並發上限和 EP 複雜度決定 spawn 幾個 review agent。
 
 ### Step 1: 偵測模型 → 查表
 
