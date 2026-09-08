@@ -82,7 +82,7 @@
   <div class="brand">
     <span class="badge progress">🟡 進行中</span>
     <h1>AIR-48 載體濫用鑑識 × 統一定義表</h1>
-    <div class="meta">baseline fca59d6<br>projection source 36f4752+（P3 未 commit）<br>P1 ✅ · P2 ✅ · P3 ✅ · P4 待</div>
+    <div class="meta">baseline fca59d6<br>projection source 3d06942<br>P1 ✅ · P2 ✅ · P3 ✅ · P4 dogfood 進行中 · P5 ✅</div>
   </div>
   <ul>
     <li><a href="#s1" onclick="return go('s1',this)"><span class="num">01</span>任務與動機</a></li>
@@ -152,10 +152,15 @@
     <li>R4 消費端實測：模擬流入 +2 條目→常駐面 UNCHANGED、inventory +102 chars——流入信號口徑成立（輸出行自帶機械可讀欄位）。</li>
     <li>測試 14 條新增（解析/常數錨/投影/SM-4/R2 三形態/gate/R3 失敗恢復/--check/A 回歸/hook）——lifecycle 65 全綠、全套 222 綠。</li>
   </ul>
-  <h3>P4 dogfood 首輪 / P5 雜項 <span class="tag-plan">計畫中</span></h3>
+  <h3>P5 雜項（✅ 已交付）</h3>
   <ul class="dots">
-    <li>P4＝切換後真實任務觀察（3-5 session 或 48h）——「無 fail」不等於成功，需確有需求案例＋可核對軌跡。</li>
-    <li>P5＝codex catalog 真通道探針＋writer 歸因可見性修法建議（可與 P2/P3 平行）。</li>
+    <li><b>①catalog 真通道探針</b>——源碼查證（render.rs：budget＝window×2% tokens（cap 10K）、三層階梯分配、System→Admin→Repo→User 省略序——USER scope 最尾）＋live 探針（12 live 條目 USER-scope 真實安裝、catalog-surface 匹配）＝<b>11/12 exact</b>＋tier-2 縮短警告實彈（94 skills 真預算、round-robin 縮短、零省略下可達性維持）——<b>SM-7 真通道關閉</b>；清理 94→82 diff 零差異。記錄＝<code>p5-codex-catalog-probe.md</code>。</li>
+    <li><b>②writer 歸因修法建議</b>——三案四維矩陣（覆蓋率/尺寸/摩擦/紀律張力），推薦 <b>(b) telemetry last-writer 投影</b>（層 3 mtime 稽核升級 mtime×writer 交叉；耐久性弱點由 AIR-49① git 基線互補）；三 user 裁決點標出（採案/第三通道殘盲/實作排序 AIR-49 後）。文件＝<code>p5-writer-attribution-proposal.md</code>。</li>
+  </ul>
+  <h3>P4 dogfood 首輪 <span class="tag-plan">🟡 進行中</span></h3>
+  <ul class="dots">
+    <li>窗口＝3-5 session 或 48h（至 09-10）；「無 fail」不等於成功——通過判定＝有確有需求案例且全部可核對軌跡下找得到。</li>
+    <li>case#1（09-08）三段已記：commit 段常駐承載、研究/P5 段 Routing 兩命中、rg -rn 事後諸葛一發（需求感知失敗）——記錄＝<code>p4-dogfood-round1.md</code>。</li>
   </ul>
 </section>
 
@@ -165,7 +170,8 @@
   <p class="src">
     EP：<a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-carrier-misuse-definition/ep.md">ai-analysis/_tasks/09-08-carrier-misuse-definition/ep.md</a><br>
     P1 taxonomy：<a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-carrier-misuse-definition/p1-taxonomy.md">同目錄 p1-taxonomy.md</a><br>
-    task baseline：fca59d6 · projection source：8e038c56af72（未 commit）· 卡：AIR-48
+    P5 探針／建議／dogfood 記錄：<a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-carrier-misuse-definition/p5-codex-catalog-probe.md">p5-codex-catalog-probe.md</a> · <a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-carrier-misuse-definition/p5-writer-attribution-proposal.md">p5-writer-attribution-proposal.md</a> · <a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-carrier-misuse-definition/p4-dogfood-round1.md">p4-dogfood-round1.md</a><br>
+    task baseline：fca59d6 · projection source：3d06942 · 卡：AIR-48
   </p>
 </section>
 
