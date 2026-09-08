@@ -197,7 +197,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 > **多工複用（fire-and-forget 的複用形態）**：一個 session 持 N 個 jobId 統一掃（`runs --json` sweep 後逐個 `show`／`wait` 認領）；並行 quota 語義＝同 5h window token 加總（並行買 wall-time 不省花費），實用並行上限 2-3 長任務。
 >
-> **晚收陷阱（Muse 諮詢收編——決策樹尾注）**：`wait` 用有界 timeout 迴圈、勿單一大 block；`stop`/清理前先 `show`／`export`（ledger GC 會吃證據；`export` 對 codex job fail-loud——codex 無 trajectory export 等價物，AIR-47 R8）；委派工單設計成冪等（timeout 後可能重 wait 重收）；jobId 持久化在 workspace ledger（`.delegate-bridge/`），不依賴提交 session 的context——認領 session 只需 jobId＋同 workspace。
+> **晚收陷阱（Muse 諮詢收編——決策樹尾注）**：`wait` 用有界 timeout 迴圈、勿單一大 block；`stop`/清理前先 `show`／`export`（ledger GC 會吃證據；`export` 對 codex job fail-loud——codex 無 trajectory export 等價物，AIR-47 R8）；委派工單設計成冪等（timeout 後可能重 wait 重收）；jobId 持久化在 workspace ledger（`.delegate-bridge/`），不依賴提交 session 的 context——認領 session 只需 jobId＋同 workspace。
 >
 > **診斷手段（非收法）**：`.delegate-bridge/jobs.json`／`show <jobId> --json`／`ps` 進程核對——懷疑 job 狀態時用它們查證，不當等待機制。
 
