@@ -1,18 +1,18 @@
 ---
 id: AIR-43
 title: model 詞彙治理——flash 去階層化、vision＝支援影像的 model、full-tier 旗艦釘選（inherit 洞）
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-07 23:36'
-updated_date: '2026-09-08 00:49'
+updated_date: '2026-09-08 00:50'
 labels:
   - governance
   - agents
 dependencies: []
 references:
   - >-
-    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/09-08-model-vocab-governance/ep.md
-  - ai-analysis/_tasks/09-08-model-vocab-governance/ep.md
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/done/09-08-model-vocab-governance/ep.md
+  - ai-analysis/_tasks/done/09-08-model-vocab-governance/ep.md
 ordinal: 35000
 ---
 
@@ -34,3 +34,9 @@ S1 ✅ 627dd67＋S2 ✅ 12a5673（tests 31／hook 202）＋雙路審查綠（lit
 
 S3 ✅ 首例實證（zcode-code-reviewer model_id=glm-5.3 小寫 pin 達 wire、variant=max）＋S4 ✅ visual-shots lane（兩 repo 7 處）——S1-S4 全畢，走 S5 結案
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+模型詞彙治理定版——flash 去階層化＋vision=支援影像的 model＋full-tier 旗艦釘選 glm-5.3（wire 首例實證）＋visual-shots lane；四 commits 627dd67/12a5673/fb60628/8c98374
+<!-- SECTION:FINAL_SUMMARY:END -->
