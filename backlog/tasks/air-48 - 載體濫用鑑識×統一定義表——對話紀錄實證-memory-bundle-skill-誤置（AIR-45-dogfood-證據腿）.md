@@ -4,7 +4,7 @@ title: 載體濫用鑑識×統一定義表——對話紀錄實證 memory/bundle
 status: To Do
 assignee: []
 created_date: '2026-09-08 12:22'
-updated_date: '2026-09-08 12:46'
+updated_date: '2026-09-08 13:33'
 labels:
   - memory
   - governance
@@ -27,3 +27,9 @@ ordinal: 40000
 <!-- AC:BEGIN -->
 - [ ] #1 誤置 taxonomy＋統一定義表初稿交付（specimen 編入）
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+【P1 完成 09-08 晚】taxonomy 交付（任務家 p1-taxonomy.md）＋主 session 三輪抽驗通過。數字校正：desc ③ 原載『≈30 Write』係 rollout 膨脹計數假象——db 真值 2ok+2err（specimen 定性不變更強：2h≥5 寫入≥4 身份）。SM-5 破口量化 71/128+73/106。bundle 面無確證 scope creep。hook 在已實裝面完全有效（MEMORY.md 直寫 0 次）——缺的是放置閘＋desc 內容閘。下一步 P2。
+<!-- SECTION:NOTES:END -->

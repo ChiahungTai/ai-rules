@@ -124,6 +124,10 @@ P1→P2→P3 強依賴（P2 吃 P1 證據；P3 常駐集合依 P1 修訂）；P4
 - staging：P1→P2→P3→P4 強依賴；P5 平行。P3 完成前池形態凍結（不再手動收斂——避免兩種改造交錯）。
 - baseline: 8296b79；跨 session 接續靠本檔進度結算（每段落完成即 append）。
 
+## 進度結算
+
+**P1 ✅（09-08 晚，lite-verify 執行＋主 session 三輪抽驗通過）**：taxonomy 交付（`p1-taxonomy.md`）——M1 任務狀態入池（8+30 條）/M2 desc 違反（12+21；長度閘活著攔 39 次、內容閘不存在）/M3 多 writer（60+64 條；stale-collision 13 次）/M4 repo 可推導（2 條）/B1 **bundle 面未發現確證 scope creep**；SM-5 破口量化＝**originSessionId≠末位 writer 71/128＋73/106（常態非例外）**；改道評估＝正確載體同等可達（習慣非距離）＋**hook 在已實裝面完全有效**（MEMORY.md 直寫 0 次）——缺放置閘。**specimen 數字校正**：原「≈30 Write」係 rollout 膨脹假象，db 真值 2ok+2err；但定性更強（單條目 2h≥5 寫入≥4 身份）。覆蓋率：muse/codex CLI 第三寫入通道實證存在（未覆蓋）。下一步＝P2（定義表吃本表）。
+
 ## 收尾步驟
 
 1. 卡 AIR-48 結案兩步＋弧結案蒸餾（範圍＝UC 盤點登記條目；AIR-45 終態條目補 AIR-48 行）
