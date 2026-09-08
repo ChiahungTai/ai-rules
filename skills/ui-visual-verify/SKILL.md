@@ -1,6 +1,6 @@
 ---
 name: ui-visual-verify
-description: UI 開發/健檢驗收編排配方。觸發詞：UI 驗收、視覺健檢、UI 視覺驗證、playwright 截圖、截圖判讀、DOM 量測、盲判讀、UI component 瀏覽器測試、flash lane。三鏈合流：app 啟動（port 錯開＋就緒判定）→ playwright 截圖＋shadow DOM 機械量測 → vision-review agent 盲判讀 → findings 合流；確定性契約沉澱 pytest，LLM 判讀 opt-in 不入 hard gate。與 ui-collab 分工＝驗收期 vs 互動期。
+description: UI 開發/健檢驗收編排配方。觸發詞：UI 驗收、視覺健檢、UI 視覺驗證、playwright 截圖、截圖判讀、DOM 量測、盲判讀、UI component 瀏覽器測試、visual-shots lane。三鏈合流：app 啟動（port 錯開＋就緒判定）→ playwright 截圖＋shadow DOM 機械量測 → vision-review agent 盲判讀 → findings 合流；確定性契約沉澱 pytest，LLM 判讀 opt-in 不入 hard gate。與 ui-collab 分工＝驗收期 vs 互動期。
 ---
 
 # UI 視覺驗證（ui-visual-verify）
@@ -79,15 +79,15 @@ spawn vision-review（背景），prompt 要點：
 4. **產物隔離**——`.agent-tmp/<run>/<app>/`（截圖＋pageerror 收集），可追溯
 5. **verdict 格式**——每張一行 PASS/FAIL＋一句話證據，末行總結；pageerror/console 清單必附
 
-**可行性邊界預先標注**（caller 職責）：哪些 app 可自主跑（唯讀資料源、無外部連線/鎖）哪些降級——需外部服務（broker 連線）、solo lockfile 在場、依賴重 runtime 的 app 用**測試級截圖**（flash lane env 開啟跑測試）交被動判讀。
+**可行性邊界預先標注**（caller 職責）：哪些 app 可自主跑（唯讀資料源、無外部連線/鎖）哪些降級——需外部服務（broker 連線）、solo lockfile 在場、依賴重 runtime 的 app 用**測試級截圖**（visual-shots lane env 開啟跑測試）交被動判讀。
 
-**收尾紀律**：agent 殺自己起的進程（port 對應 process）；**彙整**（caller）：FAIL 先查「合約錯還是真缺陷」（形態/預期寫錯優先）；「僅互動測試覆蓋的 UI 無截圖」類缺口＝在對應測試補截圖呼叫（flash lane）重跑。
+**收尾紀律**：agent 殺自己起的進程（port 對應 process）；**彙整**（caller）：FAIL 先查「合約錯還是真缺陷」（形態/預期寫錯優先）；「僅互動測試覆蓋的 UI 無截圖」類缺口＝在對應測試補截圖呼叫（visual-shots lane）重跑。
 
 ## 測試端整合（shift-left）
 
 健檢是一次性的；其中的**確定性契約**（幾何不溢出、渲染到達 client、range 不變）沉澱為 pytest 元件測試：
 
 - 元件級 host：最小 layout 直掛目標元件（真依賴、剝離 app 殼），秒級跑完進 build 迴圈
-- **flash lane（opt-in）**：env flag 開時測試落截圖＋metrics JSON 產物 → 供 vision-review 盲判讀消費；**LLM 判讀不入 hard gate**（成本＋非確定性，gate 會飄）
+- **visual-shots lane（opt-in）**：env flag 開時測試落截圖＋metrics JSON 產物 → 供 vision-review 盲判讀消費；**LLM 判讀不入 hard gate**（成本＋非確定性，gate 會飄）
 - silent-skip 防護：real-browser 測試線依賴 browser binary 與 playwright 版本同步——升級 playwright 未重裝 browser → 整線 silent skip、綠燈零覆蓋；nightly/regression 加「browser 線 skipped 數 > 0 即 WARN」機械檢查
-- 真實案例：mosaic `tests/integration_tests/ui/browser/test_kchart_component.py`（元件直掛 host 三契約＋flash lane 範本）
+- 真實案例：mosaic `tests/integration_tests/ui/browser/test_kchart_component.py`（元件直掛 host 三契約＋visual-shots lane 範本）
