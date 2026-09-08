@@ -339,7 +339,7 @@ def test_zai_pin_parser_ignores_lines_outside_tier_section(tmp_path: Path):
         "| tier（requirement） | zai | Anthropic |\n"
         "|---|---|---|\n"
         # full 行貼真實表格行全文（M5——非簡化縮影）；cell 以 backtick id 開頭（D2 規約）
-        "| **full**（旗艦） | `glm-5.3`（旗艦釘選，AIR-43——inherit 洞修補）〔repo-observed；registry pin wire 首例 first-real-usage-pending→S3 後改 repo-observed〕 | opus〔**未訂閱禁派**〕 | sol high／max〔**預設不派**——額度最少〕 | fabel〔**未訂閱禁派**〕 | muse-spark-1.3（effort xhigh 起） |\n"
+        "| **full**（旗艦） | `glm-5.3`（旗艦釘選，AIR-43——inherit 洞修補）〔repo-observed；wire 首例已實證——AIR-43 S3 遙測 model_id='glm-5.3'〕 | opus〔**未訂閱禁派**〕 | sol high／max〔**預設不派**——額度最少〕 | fabel〔**未訂閱禁派**〕 | muse-spark-1.3（effort xhigh 起） |\n"
         "| **vision**（影像） | glm-5.3-flash（多模✓） | x |\n"
         "| **lite**（一般） | glm-5.3-flash〔repo-observed〕 | x |\n"
         "\n## 後記\n| **vision**（誘餌） | phantom-model |\n"
