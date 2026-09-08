@@ -7,10 +7,11 @@ sources. Scope is S1 (events + coverage); ranking projection is S2.
 
 import hashlib
 import json
+import os
 import sqlite3
 import subprocess
 import sys
-from datetime import UTC
+from datetime import UTC, datetime
 from pathlib import Path
 
 SCRIPT = (
@@ -1044,3 +1045,334 @@ def test_n1_subsecond_iso_window_boundaries(tmp_path):
     )
     # just below the lower bound, same second as since — SQL may fetch, Python excludes
     assert run_with("2026-09-01T10:00:00.100000+00:00") == 0
+
+
+# ---- AIR-49 P2: decay subcommand (usage-driven candidates) ----
+
+
+def _epoch(year: int, month: int, day: int) -> int:
+    return int(datetime(year, month, day, tzinfo=UTC).timestamp())
+
+
+def write_entry_ranked(pool: Path, name: str, rank=None, mtime_epoch=None) -> Path:
+    """Entry fixture with optional frontmatter rank and backdated mtime."""
+    lines = [f"name: {name}", "originSessionId: s"]
+    if rank:
+        lines.append(f"rank: {rank}")
+    p = pool / name
+    p.write_text("---\n" + "\n".join(lines) + "\n---\n\nbody\n", encoding="utf-8")
+    if mtime_epoch is not None:
+        os.utime(p, (mtime_epoch, mtime_epoch))
+    return p
+
+
+def read_part(file_path, op_start, call_id):
+    return tool_part(
+        "Read", file_path, op_start=op_start, op_end=op_start, call_id=call_id
+    )
+
+
+def run_decay(pool, tmp_path, zdb=None, cc_root=None, extra=()):
+    """Decay has no --output flag: it always writes the fixed pair
+    <pool>/_decay-candidates.{json,md} (EP F3)."""
+    cmd = [
+        sys.executable,
+        str(SCRIPT),
+        "decay",
+        "--pool",
+        str(pool),
+        "--since",
+        SINCE,
+        "--until",
+        UNTIL,
+    ]
+    if zdb:
+        cmd += ["--zcode-db", str(zdb)]
+    if cc_root:
+        cmd += ["--cc-root", str(cc_root)]
+    cmd += list(extra)
+    return subprocess.run(cmd, capture_output=True, text=True, check=False)
+
+
+def test_decay_zero_read_unused_and_exempt_notes(tmp_path):
+    """Rule 1: zero in-window reads and not exempted -> unused; exempted
+    zero-read entries (hot rank / recent-30d mtime) go to the notes section,
+    never to candidates. Aggregate rows carry the EP per-entry fields."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry_ranked(pool, "unused.md", rank="core", mtime_epoch=_epoch(2026, 7, 1))
+    write_entry_ranked(pool, "hot-zero.md", rank="hot", mtime_epoch=_epoch(2026, 7, 1))
+    write_entry_ranked(
+        pool, "fresh-zero.md", rank="core", mtime_epoch=_epoch(2026, 8, 20)
+    )
+    write_entry_ranked(pool, "read.md", rank="core", mtime_epoch=_epoch(2026, 7, 1))
+    zdb = tmp_path / "z.db"
+    make_zdb(
+        zdb,
+        sessions=[("s1", None, None)],
+        parts=[
+            (
+                "p1",
+                "s1",
+                1787000000000,
+                read_part(str(pool / "read.md"), "2026-08-15T00:00:00+00:00", "c1"),
+            )
+        ],
+    )
+    r = run_decay(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    rep = json.loads((pool / "_decay-candidates.json").read_text())
+    assert rep["type"] == "decay_candidates"
+    assert [c["entry"] for c in rep["candidates"]["unused"]] == ["unused.md"]
+    exempted = {c["entry"]: c for c in rep["candidates"]["exempted_zero_read"]}
+    assert set(exempted) == {"hot-zero.md", "fresh-zero.md"}
+    assert exempted["hot-zero.md"]["exemptions"]["hot"] is True
+    assert exempted["fresh-zero.md"]["exemptions"]["recent_30d"] is True
+    u = rep["candidates"]["unused"][0]
+    for field in ("entry", "rank", "mtime", "reads_count", "last_read_ts", "exempted"):
+        assert field in u, f"EP aggregate field missing: {field}"
+    assert u["reads_count"] == 0
+    assert u["last_read_ts"] is None
+    assert u["exempted"] is False
+    assert [c["entry"] for c in rep["candidates"]["healthy"]] == ["read.md"]
+    assert rep["counts"]["entries"] == 4
+
+
+def test_decay_boundary_days_29_30_31(tmp_path):
+    """Rule 3 boundary: last_read exactly 30 days before window end stays
+    healthy (strict >); 31 days decays; flag --max-unused-days is honored."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    cases = {
+        "d29.md": "2026-08-10T00:00:00+00:00",
+        "d30.md": "2026-08-09T00:00:00+00:00",
+        "d31.md": "2026-08-08T00:00:00+00:00",
+    }
+    parts = []
+    for i, (name, ts) in enumerate(cases.items()):
+        write_entry_ranked(pool, name, rank="core", mtime_epoch=_epoch(2026, 7, 1))
+        parts.append(
+            (f"p{i}", "s1", 1787000000000 + i, read_part(str(pool / name), ts, f"c{i}"))
+        )
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb, sessions=[("s1", None, None)], parts=parts)
+    r = run_decay(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    rep = json.loads((pool / "_decay-candidates.json").read_text())
+    assert [c["entry"] for c in rep["candidates"]["decaying"]] == ["d31.md"]
+    assert {c["entry"] for c in rep["candidates"]["healthy"]} == {"d29.md", "d30.md"}
+    r2 = run_decay(pool, tmp_path, zdb=zdb, extra=["--max-unused-days", "31"])
+    assert r2.returncode == 0, r2.stderr
+    rep2 = json.loads((pool / "_decay-candidates.json").read_text())
+    assert rep2["candidates"]["decaying"] == [], "31d must stay healthy at flag=31"
+    assert rep2["parameters"]["max_unused_days"] == 31
+
+
+def test_decay_usage_ordering_and_rank_promotion(tmp_path):
+    """Rule 2: remaining entries sort by reads asc then last_read asc.
+    Cold entries with heavy in-window reads surface as promotion candidates."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry_ranked(
+        pool, "cold-busy.md", rank="cold", mtime_epoch=_epoch(2026, 7, 1)
+    )
+    write_entry_ranked(
+        pool, "cold-stale.md", rank="cold", mtime_epoch=_epoch(2026, 7, 1)
+    )
+    write_entry_ranked(
+        pool, "core-active.md", rank="core", mtime_epoch=_epoch(2026, 7, 1)
+    )
+    read_specs = [
+        ("cold-stale.md", "2026-08-01T00:00:00+00:00"),  # 38d before UNTIL
+        ("core-active.md", "2026-09-01T00:00:00+00:00"),
+        ("core-active.md", "2026-09-02T00:00:00+00:00"),
+        ("core-active.md", "2026-09-03T00:00:00+00:00"),
+        ("core-active.md", "2026-09-04T00:00:00+00:00"),
+        ("core-active.md", "2026-09-05T00:00:00+00:00"),
+        ("cold-busy.md", "2026-08-20T00:00:00+00:00"),
+        ("cold-busy.md", "2026-08-21T00:00:00+00:00"),
+        ("cold-busy.md", "2026-08-22T00:00:00+00:00"),
+    ]
+    parts = [
+        (f"p{i}", "s1", 1787000000000 + i, read_part(str(pool / name), ts, f"c{i}"))
+        for i, (name, ts) in enumerate(read_specs)
+    ]
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb, sessions=[("s1", None, None)], parts=parts)
+    r = run_decay(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    rep = json.loads((pool / "_decay-candidates.json").read_text())
+    assert [c["entry"] for c in rep["candidates"]["decaying"]] == ["cold-stale.md"]
+    healthy = [c["entry"] for c in rep["candidates"]["healthy"]]
+    assert healthy == ["cold-busy.md", "core-active.md"], "usage asc ordering"
+    promo = [c["entry"] for c in rep["candidates"]["rank_promotion"]]
+    assert promo == ["cold-busy.md"], "cold with >=3 in-window reads"
+    r2 = run_decay(pool, tmp_path, zdb=zdb, extra=["--promotion-min-reads", "4"])
+    assert r2.returncode == 0, r2.stderr
+    rep2 = json.loads((pool / "_decay-candidates.json").read_text())
+    assert rep2["candidates"]["rank_promotion"] == []
+    # core-rank heavy reader must never appear in promotion
+    assert "core-active.md" not in promo
+
+
+def test_decay_empty_pool(tmp_path):
+    """Empty pool: success, all candidate lists empty, both files written."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb)
+    r = run_decay(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    rep = json.loads((pool / "_decay-candidates.json").read_text())
+    assert rep["counts"]["entries"] == 0
+    for section in rep["candidates"].values():
+        assert section == []
+    md = (pool / "_decay-candidates.md").read_text(encoding="utf-8")
+    assert "Coverage" in md
+
+
+def test_decay_alias_dedup_and_multi_pool_refused(tmp_path):
+    """zcode symlink <-> CC real pool alias dedups to one pool (output lands
+    in the resolved real pool); a second distinct pool is refused."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry_ranked(pool, "n.md", rank="core", mtime_epoch=_epoch(2026, 7, 1))
+    alias = tmp_path / "alias"
+    alias.symlink_to(pool)
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb)
+    cmd = [
+        sys.executable,
+        str(SCRIPT),
+        "decay",
+        "--pool",
+        str(pool),
+        "--pool",
+        str(alias),
+        "--since",
+        SINCE,
+        "--until",
+        UNTIL,
+        "--zcode-db",
+        str(zdb),
+    ]
+    r = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    assert r.returncode == 0, r.stderr
+    rep = json.loads((pool.resolve() / "_decay-candidates.json").read_text())
+    assert rep["counts"]["entries"] == 1, "same-pool alias must dedup"
+    assert rep["pool"] == str(pool.resolve())
+    other = tmp_path / "other"
+    other.mkdir()
+    write_entry_ranked(other, "x.md", rank="core", mtime_epoch=_epoch(2026, 7, 1))
+    cmd2 = [
+        sys.executable,
+        str(SCRIPT),
+        "decay",
+        "--pool",
+        str(pool),
+        "--pool",
+        str(other),
+        "--since",
+        SINCE,
+        "--until",
+        UNTIL,
+        "--zcode-db",
+        str(zdb),
+    ]
+    r2 = subprocess.run(cmd2, capture_output=True, text=True, check=False)
+    assert r2.returncode == 2, "a second distinct pool must be refused"
+
+
+def test_decay_md_json_shape_fixed_path_deterministic(tmp_path):
+    """Output pair lands at the fixed underscore-prefixed path (invisible to
+    the inventory projection), md carries the four sections + coverage
+    statement + 'candidates are not verdicts', rerun is deterministic."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry_ranked(pool, "z-zero.md", rank="core", mtime_epoch=_epoch(2026, 7, 1))
+    zdb = tmp_path / "z.db"
+    make_zdb(zdb)
+    (tmp_path / "cc-empty").mkdir()
+    r1 = run_decay(pool, tmp_path, zdb=zdb, cc_root=tmp_path / "cc-empty")
+    assert r1.returncode == 0, r1.stderr
+    json_path = pool / "_decay-candidates.json"
+    md_path = pool / "_decay-candidates.md"
+    assert json_path.is_file() and md_path.is_file()
+    raw1 = json_path.read_text()
+    rep1 = json.loads(raw1)
+    md1 = md_path.read_text(encoding="utf-8")
+    for kw in (
+        "Unused",
+        "豁免註記",
+        "衰減候選",
+        "Rank 升級候選",
+        "Coverage 聲明",
+        "候選非判決",
+        "muse",
+        "codex",
+    ):
+        assert kw in md1, f"md section/statement missing: {kw}"
+    assert rep1["coverage"]["partial"] is not None
+    r2 = run_decay(pool, tmp_path, zdb=zdb, cc_root=tmp_path / "cc-empty")
+    assert r2.returncode == 0, r2.stderr
+    assert json_path.read_text() == raw1, "rerun must be deterministic"
+    assert md_path.read_text(encoding="utf-8") == md1
+    # decay artifacts are underscore-prefixed: next run's inventory still N
+    assert rep1["counts"]["entries"] == 1
+
+
+def test_decay_fixed_output_source_protection(tmp_path):
+    """F4: a pool resolving inside a source tree (cc-root) must be refused —
+    R1 canonical-path semantics applied to the decay fixed outputs; source
+    bytes stay identical and no candidates pair is written."""
+    cc_root = tmp_path / "transcripts"
+    pool = cc_root / "pool-inside-source"
+    pool.mkdir(parents=True)
+    write_entry_ranked(pool, "entry-a.md")
+    before = sorted(p.read_bytes() for p in cc_root.rglob("*") if p.is_file())
+    r = run_decay(pool, tmp_path, cc_root=cc_root)
+    assert r.returncode != 0
+    assert "decay fixed output inside sources refused" in r.stderr + r.stdout
+    assert not (pool / "_decay-candidates.json").exists()
+    after = sorted(p.read_bytes() for p in cc_root.rglob("*") if p.is_file())
+    assert before == after
+
+
+def test_date_only_window_strings_accepted(tmp_path):
+    """date-only --since/--until（SKILL 呼叫慣例形態）不得與 epoch-derived
+    aware 事件比較時 TypeError——naive 一律視為 UTC（09-09 回測實證）。"""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry_ranked(pool, "entry-a.md")
+    r = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "decay",
+            "--pool",
+            str(pool),
+            "--since",
+            "2026-09-04",
+            "--until",
+            "2026-09-08",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 0, r.stderr
+    assert "[OK] entries=1" in r.stdout + r.stderr
+
+
+def test_decay_fixed_output_symlink_refused(tmp_path):
+    """R3: a symlinked fixed decay output (pointing at a pool entry) must be
+    refused — write_text would follow it and clobber the entry bytes."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    entry = write_entry_ranked(pool, "entry-a.md")
+    raw = entry.read_bytes()
+    (pool / "_decay-candidates.md").symlink_to(entry)
+    r = run_decay(pool, tmp_path, cc_root=tmp_path / "cc-empty")
+    assert r.returncode != 0
+    assert "decay fixed output is a symlink, refused" in r.stderr + r.stdout
+    assert entry.read_bytes() == raw

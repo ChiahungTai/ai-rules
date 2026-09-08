@@ -59,9 +59,14 @@ def parse_ts(value):
     if isinstance(value, (int, float)):
         return datetime.fromtimestamp(value / 1000, UTC)
     try:
-        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     except ValueError:
         return None
+    # date-only / naive ISO strings（SKILL 呼叫慣例形態）一律視為 UTC——
+    # naive 與 epoch 解析出的 aware 比較會 TypeError（09-09 回測實證）
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt
 
 
 def iso(dt):
@@ -541,6 +546,18 @@ def project_writes(canonical, aliases, ambiguous, pools, baseline_dir):
 RANKS = ("hot", "core", "cold")
 
 
+def read_exemptions(rank, mtime, until):
+    """F2 (AIR-49 P2) single source of the zero-read exemption criterion:
+    layer-2 no_body_read and the decay projection must judge identically —
+    rank=hot or mtime within 30 days of the window end is mechanically
+    exempt (until-anchored, deterministic; not a wall-clock judgment)."""
+    cutoff = until - timedelta(days=30)
+    return {
+        "hot": rank == "hot",
+        "recent_30d": mtime is not None and mtime >= cutoff,
+    }
+
+
 def _frontmatter_rank(text):
     """Behavioral mirror of the pool generator's parse_frontmatter+parse_rank.
 
@@ -633,16 +650,12 @@ def project_reads(canonical, inventory, coverages, since, until):
                 "source_ref": e.source_ref,
             }
         )
-    cutoff = until - timedelta(days=30)
     observations, no_body = [], []
     for item in inventory:
         name = item["entry"]
         body = reads_by_entry.get(name, [])
         mtime = parse_ts(item["mtime"])
-        exemptions = {
-            "hot": item["rank"] == "hot",
-            "recent_30d": mtime is not None and mtime >= cutoff,
-        }
+        exemptions = read_exemptions(item["rank"], mtime, until)
         observations.append(
             {
                 "entry": name,
@@ -709,6 +722,172 @@ def project_reads(canonical, inventory, coverages, since, until):
     }
 
 
+def project_decay(projection, until, max_unused_days=30, promotion_min_reads=3):
+    """AIR-49 P2: aggregate the reads projection into decay candidates.
+
+    Rules (spec, candidates only — never verdicts, never auto-delete):
+    1) zero in-window body reads and not exempted -> unused; exempted
+    zero-read entries are noted separately (same criterion as layer-2
+    no_body_read, via read_exemptions). 2) everything else sorts by
+    reads_count asc then last_read asc (decay order). 3) last_read older
+    than max_unused_days before the window end marks a decaying candidate.
+    Cold entries with heavy in-window reads surface as rank-promotion
+    candidates (human-adjudication input; automation leg left open).
+    """
+    cutoff = until - timedelta(days=max_unused_days)
+    inv = {i["entry"]: i for i in projection["inventory"]}
+    no_body = {c["entry"]: c for c in projection["candidates"]["no_body_read"]}
+    unused, exempted_zero, active = [], [], []
+    for obs in projection["observations"]:
+        name = obs["entry"]
+        item = inv[name]
+        body = obs["body_reads"]
+        count = len(body)
+        last = max((r["ts"] for r in body if r["ts"]), default=None)
+        exemptions = (
+            no_body[name]["exemptions"]
+            if count == 0
+            else read_exemptions(item["rank"], parse_ts(item["mtime"]), until)
+        )
+        rec = {
+            "entry": name,
+            "rank": item["rank"],
+            "mtime": item["mtime"],
+            "reads_count": count,
+            "last_read_ts": last,
+            "exempted": exemptions["hot"] or exemptions["recent_30d"],
+            "exemptions": exemptions,
+        }
+        if count == 0:
+            (exempted_zero if rec["exempted"] else unused).append(rec)
+        else:
+            active.append(rec)
+    # rule 2: usage asc, then last_read asc (parse_ts key——ISO 字串序在混合時區偏移下≠時序；
+    # None fallback＝tz-aware 下界，避免 None/aware datetime 混排 TypeError)
+    active.sort(
+        key=lambda r: (
+            r["reads_count"],
+            parse_ts(r["last_read_ts"]) or datetime.min.replace(tzinfo=UTC),
+        )
+    )
+    decaying, healthy = [], []
+    for rec in active:
+        last = parse_ts(rec["last_read_ts"]) if rec["last_read_ts"] else None
+        (decaying if last is not None and last < cutoff else healthy).append(rec)
+    promotion = sorted(
+        (
+            rec
+            for rec in active
+            if rec["rank"] == "cold" and rec["reads_count"] >= promotion_min_reads
+        ),
+        key=lambda r: (-r["reads_count"], r["entry"]),
+    )
+    return {
+        "unused": unused,
+        "exempted_zero_read": exempted_zero,
+        "decaying": decaying,
+        "healthy": healthy,
+        "rank_promotion": promotion,
+    }
+
+
+def render_decay_md(report):
+    """Human-readable four-section view: 1 unused (+exempt notes) / 2 decaying
+    / 3 rank promotion / 4 coverage statement. Candidates are never verdicts
+    — a human adjudicates, nothing is deleted automatically."""
+    cand = report["candidates"]
+    counts = report["counts"]
+    win = report["window"]
+    params = report["parameters"]
+    cov = report["coverage"]
+    display = {"zcode": "ZCode", "claude": "CC"}
+    channels = [display.get(s, s) for s in cov.get("instrumented", [])]
+    lines = [
+        f"# Decay 候選清單（{report['pool']}）",
+        "",
+        (
+            f"> 窗：{win['start']} → {win['end']}"
+            f"｜max_unused_days={params['max_unused_days']}"
+            f"｜promotion_min_reads={params['promotion_min_reads']}"
+        ),
+        (
+            "> **候選非判決——人裁不自動刪**（decay 只產候選；"
+            "由 memory-audit 層 3 夜波①併入報告人裁消費）"
+        ),
+        "",
+        "## 1. Unused 候選（窗內零 body reads、未豁免）",
+        "",
+    ]
+    if cand["unused"]:
+        lines += ["| entry | rank | mtime |", "|---|---|---|"]
+        lines += [
+            f"| {r['entry']} | {r['rank']} | {r['mtime']} |" for r in cand["unused"]
+        ]
+    else:
+        lines.append("（無）")
+    lines += ["", "### 豁免註記（零讀但機械豁免——僅記錄，不入候選）", ""]
+    if cand["exempted_zero_read"]:
+        lines += ["| entry | rank | mtime | exemptions |", "|---|---|---|---|"]
+        for r in cand["exempted_zero_read"]:
+            reasons = ",".join(k for k, v in r["exemptions"].items() if v) or "none"
+            lines += [f"| {r['entry']} | {r['rank']} | {r['mtime']} | {reasons} |"]
+    else:
+        lines.append("（無）")
+    lines += [
+        "",
+        f"## 2. 衰減候選（有 reads，last_read 距窗尾 > {params['max_unused_days']} 日）",
+        "",
+    ]
+    if cand["decaying"]:
+        lines += ["| entry | rank | reads | last_read |", "|---|---|---|---|"]
+        lines += [
+            f"| {r['entry']} | {r['rank']} | {r['reads_count']} | {r['last_read_ts']} |"
+            for r in cand["decaying"]
+        ]
+    else:
+        lines.append("（無）")
+    lines += [
+        "",
+        "## 3. Rank 升級候選（窗內高讀取且 rank=cold——人裁輸入；自動化腿遺留標記）",
+        "",
+    ]
+    if cand["rank_promotion"]:
+        lines += ["| entry | reads | last_read |", "|---|---|---|"]
+        lines += [
+            f"| {r['entry']} | {r['reads_count']} | {r['last_read_ts']} |"
+            for r in cand["rank_promotion"]
+        ]
+    else:
+        lines.append("（無）")
+    lines += [
+        "",
+        "## 4. Coverage 聲明",
+        "",
+        (
+            f"- 通道覆蓋：{'＋'.join(channels) if channels else '無（未提供 telemetry 來源）'}"
+            " 兩主通道觀測；未覆蓋通道："
+            + "、".join(cov.get("uninstrumented", ["codex", "muse", "bash-rg"]))
+            + "（其 reads 不入 db/transcript＝盲區，不假裝覆蓋）"
+        ),
+        (
+            f"- partial={cov.get('partial')}"
+            f"｜window_shortfall={cov.get('window_shortfall')}"
+            f"｜read_errors={cov.get('read_errors', 0)}"
+            f"｜unpaired_reads={cov.get('unpaired_reads', 0)}"
+        ),
+        (
+            f"- 統計：entries={counts['entries']}"
+            f"｜unused={counts['unused']}"
+            f"｜豁免={counts['exempted_zero_read']}"
+            f"｜衰減={counts['decaying']}"
+            f"｜healthy={counts['healthy']}"
+            f"｜rank 升級候選={counts['rank_promotion']}"
+        ),
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def parse_args(argv):
     parser = argparse.ArgumentParser(
         description="Read-only memory telemetry (AIR-40 S1)"
@@ -733,6 +912,32 @@ def parse_args(argv):
     rd.add_argument("--since", default=None)
     rd.add_argument("--until", default=None)
     rd.add_argument("--output", required=True)
+    dc = sub.add_parser(
+        "decay", help="usage-driven decay candidates (AIR-49 P2; candidates only)"
+    )
+    dc.add_argument("--pool", action="append", required=True)
+    dc.add_argument("--zcode-db", action="append", default=[])
+    dc.add_argument("--cc-root", action="append", default=[])
+    dc.add_argument("--since", default=None)
+    dc.add_argument("--until", default=None)
+    dc.add_argument(
+        "--max-unused-days",
+        type=int,
+        default=30,
+        help=(
+            "last_read older than this many days before the window end "
+            "marks a decaying candidate (default: 30)"
+        ),
+    )
+    dc.add_argument(
+        "--promotion-min-reads",
+        type=int,
+        default=3,
+        help=(
+            "cold entries with at least this many in-window reads surface "
+            "as rank-promotion candidates (default: 3)"
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -759,11 +964,18 @@ def main(argv=None):
             "multiple pools refused: projections key by basename and history "
             "may collide — run one pool per report (aliases are deduplicated)"
         )
-    out = Path(args.output).expanduser()
-    try:
-        out_resolved = out.resolve()
-    except OSError:
-        out_resolved = out.absolute()
+    if args.command == "decay":
+        # F3 (AIR-49 P2): decay writes the fixed _decay-candidates.{json,md}
+        # pair inside the pool by design — there is no --output flag, so the
+        # generic output-inside-sources guard below does not apply. The
+        # source-side half of that guard still applies and runs below (F4).
+        out_resolved = None
+    else:
+        out = Path(args.output).expanduser()
+        try:
+            out_resolved = out.resolve()
+        except OSError:
+            out_resolved = out.absolute()
 
     def _resolved(raw):
         try:
@@ -774,28 +986,53 @@ def main(argv=None):
     # sources must be canonicalized the same way as the output, otherwise a
     # relative path or symlink alias defeats the equality check (R1)
     source_paths = [_resolved(p) for p in args.zcode_db + args.cc_root]
-    for protected in pools + source_paths:
-        try:
-            if out_resolved == protected or protected in out_resolved.parents:
-                return fail(f"output inside sources refused: {args.output}")
-        except OSError:
-            continue
-    if getattr(args, "baseline_dir", None):
-        baseline_resolved = _resolved(args.baseline_dir)
+    if args.command == "decay":
+        # F4 (AIR-49): a pool alias resolving inside a source tree (db dir or
+        # transcript root) puts the fixed decay outputs inside the sources —
+        # writing them would clobber the input. R1 canonical-path semantics,
+        # scoped to sources only (pool-internal output is by design).
+        # R3: a symlinked fixed output (e.g. pointing at a pool entry) evades
+        # the resolved-path source check — write_text follows it and clobbers
+        # the target. Refuse symlinks outright.
+        for out in (
+            pools[0] / "_decay-candidates.json",
+            pools[0] / "_decay-candidates.md",
+        ):
+            if out.is_symlink():
+                return fail(f"decay fixed output is a symlink, refused: {out}")
+            out_r = _resolved(out)
+            for protected in source_paths:
+                if out_r == protected or protected in out_r.parents:
+                    return fail(f"decay fixed output inside sources refused: {out}")
+    if out_resolved is not None:
         for protected in pools + source_paths:
-            if baseline_resolved == protected or protected in baseline_resolved.parents:
-                return fail(f"baseline dir inside sources refused: {args.baseline_dir}")
+            try:
+                if out_resolved == protected or protected in out_resolved.parents:
+                    return fail(f"output inside sources refused: {args.output}")
+            except OSError:
+                continue
+        if getattr(args, "baseline_dir", None):
+            baseline_resolved = _resolved(args.baseline_dir)
+            for protected in pools + source_paths:
+                if (
+                    baseline_resolved == protected
+                    or protected in baseline_resolved.parents
+                ):
+                    return fail(
+                        f"baseline dir inside sources refused: {args.baseline_dir}"
+                    )
     until = (
         parse_ts(args.until) if args.until else datetime.now(UTC).replace(microsecond=0)
     )
-    default_days = 90 if args.command == "reads" else 7
+    default_days = 90 if args.command in ("reads", "decay") else 7
     since = parse_ts(args.since) if args.since else until - timedelta(days=default_days)
     if since is None or until is None or since >= until:
         return fail("invalid --since/--until window")
-    try:
-        out.parent.mkdir(parents=True, exist_ok=True)
-    except OSError as exc:
-        return fail(f"cannot create output dir: {exc}")
+    if out_resolved is not None:
+        try:
+            out.parent.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            return fail(f"cannot create output dir: {exc}")
     events, coverages, sessions = [], {}, {}
     if args.zcode_db:
         for db_path in args.zcode_db:
@@ -839,6 +1076,44 @@ def main(argv=None):
         {e.session for e in events if e.actor == "unknown" and e.session != "unknown"}
     )
     events.sort(key=lambda e: (e.record_time or "", e.id))
+    if args.command == "decay":
+        inventory = snapshot_entries(pools)
+        projection = project_reads(canonical, inventory, coverages, since, until)
+        candidates = project_decay(
+            projection, until, args.max_unused_days, args.promotion_min_reads
+        )
+        report = {
+            "schema": SCHEMA,
+            "type": "decay_candidates",
+            "window": {"start": iso(since), "end": iso(until)},
+            "pool": str(pools[0]),
+            "parameters": {
+                "max_unused_days": args.max_unused_days,
+                "promotion_min_reads": args.promotion_min_reads,
+            },
+            "coverage": coverages,
+            "generators": {str(p): generator_identity(p) for p in pools},
+            "counts": {
+                "entries": len(inventory),
+                **{k: len(v) for k, v in candidates.items()},
+            },
+            "candidates": candidates,
+        }
+        json_path = pools[0] / "_decay-candidates.json"
+        md_path = pools[0] / "_decay-candidates.md"
+        json_path.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        md_path.write_text(render_decay_md(report), encoding="utf-8")
+        c = report["counts"]
+        print(
+            f"[OK] entries={c['entries']} unused={c['unused']} "
+            f"exempted_zero_read={c['exempted_zero_read']} "
+            f"decaying={c['decaying']} healthy={c['healthy']} "
+            f"rank_promotion={c['rank_promotion']} "
+            f"partial={coverages.get('partial')} out={json_path}"
+        )
+        return 0
     if args.command == "reads":
         inventory = snapshot_entries(pools)
         projection = project_reads(canonical, inventory, coverages, since, until)

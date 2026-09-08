@@ -1,18 +1,18 @@
 ---
 id: AIR-49
 title: 觀察池基建升級——git 基線收斂＋usage 驅動選擇＋注入安全＋codex 路由感知
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-08 14:09'
-updated_date: '2026-09-08 14:10'
+updated_date: '2026-09-08 15:51'
 labels:
   - memory
   - governance
 dependencies: []
 references:
   - >-
-    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-08-pool-infra-upgrade/spec.md
-  - ai-analysis/_tasks/09-08-pool-infra-upgrade/spec.md
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/done/09-08-pool-infra-upgrade/ep.md
+  - ai-analysis/_tasks/done/09-08-pool-infra-upgrade/ep.md
 ordinal: 41000
 ---
 
@@ -26,3 +26,15 @@ ordinal: 41000
 <!-- AC:BEGIN -->
 - [ ] #1 diff-driven 收斂實證＋usage 選擇接線＋安全條款＋codex 實測讀到池
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+【驗收④認定】存量批次＝ai-rules 一件（AGENTS.md 觀察池路由行）；mosaic 三池路由行＋池 git 化移交 mosaic 側 session（AIR-45 殘餘判準同源）。【審查鏈】EP fresh-eyes 12 findings＋muse job-mtsubolv READY-TO-WRAP（Minor 2+1 全採納）——.review/main.md。產出未 commit 留工作樹（AGENTS.md 混 air-47 改動，commit 時具名 add 注意）。
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+四段全交付：池 git 基線 f068330＋diff-driven 收斂波（drill 4/4 PASS）＋telemetry decay subcommand（首份清單 132 entries）＋注入安全條款＋codex 唯讀路由（E2E 三要素 PASS）；EP 審查 12＋muse dual-family 2+1 findings 全閉；228 tests 綠
+<!-- SECTION:FINAL_SUMMARY:END -->

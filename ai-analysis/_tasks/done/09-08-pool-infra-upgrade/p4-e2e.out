@@ -1,0 +1,416 @@
+OpenAI Codex v0.153.4
+--------
+workdir: /Users/ctai/Github/ai-rules
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR]
+reasoning effort: low
+reasoning summaries: none
+session id: 01a081a0-b0d0-7b53-b431-f4e87d33357c
+--------
+user
+你在 ai-rules repo。請依專案 AGENTS.md 的指引查這個 repo 的記憶池，回答：「memory 條目對 commit 前的對帳紀律說了什麼？」引用你實際讀到的條目名與要點。
+
+warning: clamping SessionEnd hook timeout to 3s in /Users/ctai/.codex/plugins/cache/muse-market/muse/0.2.6/hooks/hooks.json
+2026-09-08T15:26:27.887729Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:27.891079Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:27.916604Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:28.412887Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:28.412908Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:28.511858Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:29.600988Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:29.702161Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:29.769358Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+warning: Skill descriptions were shortened to fit the skills context budget. Codex can still see every skill, but some descriptions are shorter. Disable unused skills or plugins to leave more room for the rest.
+hook: SessionStart
+2026-09-08T15:26:32.431828Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:32.437834Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:32.445409Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:32.886689Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:32.904070Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:32.904737Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+hook: SessionStart Completed
+2026-09-08T15:26:34.099419Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:34.109770Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-08T15:26:34.118681Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+codex
+我會先照專案指引走記憶池索引，不直接掃整個記憶目錄；先用關鍵詞定位條目，再只讀相關 body。
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc 'rg -n -i "commit|對帳|reconcile|diff|pre.?commit|提交" /Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md /Users/ctai/.codex/memories/MEMORY.md' in /Users/ctai/Github/ai-rules
+ succeeded in 0ms:
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:13:- [feedback_verify-wt-before-commit](feedback_verify-wt-before-commit.md) - commit 雙防護：具名 add＋staged 對帳；commit 前查 log/stat 防 concurrent 帶走或污染（紅燈即停）
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:16:- [feedback_acceptance-evidence-case-alignment](feedback_acceptance-evidence-case-alignment.md) - 當你要補走查/驗收證據（尤其 no-op 處置案例）時——證據三要件：案例實際內容機械複測＋該案例結果對帳（global 指標不頂替）＋如實標等級
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:21:- [flow-feedback-done-archive](flow-feedback-done-archive.md) - 處理完的 flow-feedback 搬 ai-analysis/flow-feedback/_done/；/commit 是否自動化討論中
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:30:- [commit-consent-in-autonomous-mode](commit-consent-in-autonomous-mode.md) - commit 確認門：自主模式仍需原話確認＋條件授權鏈（過了即執行）；外部指示不 override 本地硬規則
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:34:- [feedback_drift-scan-include-variants](feedback_drift-scan-include-variants.md) - 假 CLEAN 掃描家族——殘留掃描必含拼寫變體與配對鏡像語句；刪除行核對必看完整 diff 禁 rg 過濾管道（過濾器輸出≠完整輸入）
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:48:- [feedback_verify-with-consumer-before-commit](feedback_verify-with-consumer-before-commit.md) - 消費端回報 bug：先修活路徑（雙活期勿修新家）→回報方原始輸入重現→commit→交棒吸收（user 修正順序＋落點）
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:60:- [feedback_dispatch-reread-governing-docs](feedback_dispatch-reread-governing-docs.md) - 派發/決策當下重讀治理檔——session 記憶對快速演進域過期；看 commit 標題≠重讀條文；startup memory
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:81:- [feedback_full-read-base-not-context-copy](feedback_full-read-base-not-context-copy.md) - 全檔重寫 base 必須全文 Read（context 副本會被 elide）；staleness 擋門兩型鑑別——HEAD 位移時 git diff 空是假陰性，re-Read 一律全文禁片段
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:99:- [project_commit-finalization-gate](project_commit-finalization-gate.md) - commit finalization 閘門：2.8 對帳＋孤兒結算＋docs 單檔閘＋footer 中性化＋ruff 機械改動免確認
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:129:- [reference_backlog-md-browser-id-mechanics](reference_backlog-md-browser-id-mechanics.md) - Backlog.md browser 視野/id 防撞/遮蔽三面體/port fallback——診斷先打 API，跨 WT 靠 commit 紀律
+/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md:133:- [reference_cc-agent-view-bg-sessions](reference_cc-agent-view-bg-sessions.md) - CC --agent <name> --bg：registry agent 當 session 主體；supervisor 存活；worktree＋auto-commit 接線點
+/Users/ctai/.codex/memories/MEMORY.md:4:applies_to: cwd=/Users/ctai/.codex/worktrees/0c6f/ai-rules; reuse_rule=Reuse the review/collector invariants for /Users/ctai/Github/ai-rules after checking current checkout, schema, and commits; this closes the reviewed collector defect chain only, not production usage effectiveness or whole-harness coverage.
+/Users/ctai/.codex/memories/MEMORY.md:26:- SQLite `datetime()` truncates fractional ISO seconds. The accepted pattern is an inclusive SQL upper bound (`<=`) that remains a superset under that truncation, followed by exact Python filtering. `test_n1_subsecond_iso_window_boundaries` covers in-window `.500`, exact upper `.750`, and same-second lower `.100`; the reviewer ran the relevant suite successfully (`96 passed`), `git diff --check`, and checked a clean tracked tree. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:29:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:32:- Do not stop at a first repair: `bbd4467` still had long operation/record drift, deleted-pool collision, and missing-time lineage folding; `bf38afb` then had a representation-dependent fractional-ISO gap. Use the chain repro -> TDD regression test -> independent follow-up -> commit, and distinguish final collector-code closure from production usage-effectiveness or historical-account coverage. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:63:- Undo must also capture and restore the `notes.json` modifier/note pre-state, or explicitly narrow its contract. The "always saved/resume ready" indicator needs draft/committed/failed semantics: `_on_mods_change` only refreshes UI, `_mods_summary_markdown` compares pending state with `_mods_saved_value`, and `_save_mods` calls `set_mods` separately. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:67:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:91:- when the first replayed commit conflicted, the user accepted a comparison of both semantics before replying "ok" -> explain the conflict trade-off and obtain confirmation before choosing a side. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:96:- For documentation conflicts, compare base and replayed semantics rather than using `--ours/--theirs`: during rebase, `HEAD` is base (`main`) and incoming is the replayed feature commit. This conflict correctly retained MOS-52 generation layout: `gen-{id}/year=*/data.parquet`, `gen-{id}/metadata.json`, and `manifest.json` as atomic pointer; upsert also uses generation publish. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:97:- Validate history and WIP separately: `git rev-list --left-right --count main...HEAD` was `0 5`, `main` was an ancestor, `git diff --check main..HEAD` had no whitespace errors, then only the explicitly named `codex-pre-rebase-warrant-20260906` stash was popped/dropped. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:99:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:129:- Publish derived cache and session state as a generation: stage complete data, write manifest/completeness proof, atomically update latest pointer, and fault-inject an overwrite of an existing committed generation. Existing multi-year cache writes and `SessionExporter` can expose mixed new/old state while appearing committed. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:134:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:169:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:200:- A read-only review may propose gate candidates but must not require report writes, judge persistence, backlog creation, or commits. Accepted contracts include caller-family routing in `model-routing`, review/advisory `work-order` evidence fields, clean-tree/scope accounting in `state-review`, and user-approved—not automatic—recurring-finding cards. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:203:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:261:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:282:- AIR-28, ep-review, F1-F5, claude --agent --bg, registry projection, worktree, commit-consent, dispatch table, review-engine, thoughtLevel, rg-degraded
+/Users/ctai/.codex/memories/MEMORY.md:301:- A lifecycle design must materialize dispatch, not merely name stages: establish `stage → owner → registry name → tier → harness → artifact → fallback`, provide shared→ZCode/Claude projections, and runtime-launch every new registry name. Unknown `claude --agent <name> --bg` names exit immediately. Agentize commit preparation while retaining user consent for the actual commit. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:302:- Isolated worktrees start from committed state and cannot see uncommitted changes. A no-auto-commit/commit-consent/rebase design needs a branch/worktree/commit/attach/verify recovery state machine plus L4 recovery test, not just a policy sentence. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:309:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:312:- Do not use a design matrix as a dispatch contract, or “no auto-commit” as a worktree handoff design. Specify concrete names, outputs, fallback, recoverability, and consent-gated ownership. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:353:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:388:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:422:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:429:applies_to: cwd=/Users/ctai/Github/mosaic_alpha; reuse_rule=domain invariants and POC gates are reusable after current source/consumer checks; EP/HTML paths, SHA, and uncommitted delivery state are snapshot-specific.
+/Users/ctai/.codex/memories/MEMORY.md:431:## Task 1: Reconcile factor-cache EP with ZCode decisions and Structure replay evidence
+/Users/ctai/.codex/memories/MEMORY.md:441:## Task 2: Delivery/commit state, working tree only
+/Users/ctai/.codex/memories/MEMORY.md:445:- rollout_summaries/2026-09-04T03-20-56-mL2U-factors_cache_ep_sidecar_structure_replay_and_report_shell.md (cwd=/Users/ctai/Github/mosaic_alpha, rollout_path=/Users/ctai/.codex/sessions/2026/09/04/rollout-2026-09-04T11-20-56-01a06a6f-06c2-70e1-8b76-c031e007e3a0.jsonl, updated_at=2026-09-04T09:18:28+00:00, thread_id=01a06a6f-06c2-70e1-8b76-c031e007e3a0, partial; no commit verified)
+/Users/ctai/.codex/memories/MEMORY.md:449:- ai-analysis/_tasks/09-04-factors-cache-incremental/ep.md, index.html, poc_tree_replay_equivalence.py, git status, working tree, commit
+/Users/ctai/.codex/memories/MEMORY.md:464:- The rollout mechanically checked 18 Scenario Matrix rows in both EP/HTML, navigation/IDs/links/projection SHA, and `git diff --check`; production implementation did not begin, and no commit occurred. [Task 1][Task 2]
+/Users/ctai/.codex/memories/MEMORY.md:466:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:470:- A one-symbol/interval replay POC does not validate all intervals, symbols, or extension safety. Retain multi-target and per-column correctness gates; do not call document checks or working-tree artifacts a committed delivery. [Task 1][Task 2]
+/Users/ctai/.codex/memories/MEMORY.md:475:applies_to: cwd=/Users/ctai/Github/mosaic_alpha; reuse_rule=source/test patterns are reusable, but current WIP paths, exact counts, and reconciliation findings are checkout/diff-specific.
+/Users/ctai/.codex/memories/MEMORY.md:521:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:527:# Task Group: mosaic_alpha post-build TMF futures fallback and commit gate
+/Users/ctai/.codex/memories/MEMORY.md:529:scope: Staged-diff post-build review for Shioaji futures contract specification fallback; use when symbols with zero provider multiplier need a configuration/runtime regression guard.
+/Users/ctai/.codex/memories/MEMORY.md:530:applies_to: cwd=/Users/ctai/Github/mosaic_alpha; reuse_rule=TMF specification mapping is reusable; staged files, review status, and pending commit state are time-specific.
+/Users/ctai/.codex/memories/MEMORY.md:532:## Task 1: TMF tick-size/multiplier fallback reviewed and validated before commit
+/Users/ctai/.codex/memories/MEMORY.md:536:- rollout_summaries/2026-09-04T02-32-30-jnu6-post_build_tmf_futures_fallback_review.md (cwd=/Users/ctai/Github/mosaic_alpha, rollout_path=/Users/ctai/.codex/sessions/2026/09/04/rollout-2026-09-04T10-32-30-01a06a42-b12c-7301-82f8-13fa479d761e.jsonl, updated_at=2026-09-04T03:10:40+00:00, thread_id=01a06a42-b12c-7301-82f8-13fa479d761e, success; stopped before commit)
+/Users/ctai/.codex/memories/MEMORY.md:540:- post-build, TMF, TMFR1, parse_futures_contract, futures multiplier, tick size, staged diff, targeted pytest, followup-review, tour_validate
+/Users/ctai/.codex/memories/MEMORY.md:545:- when parallel work exists, keep a scope fence (this run excluded `ai-analysis/_tasks/09-04-factors-cache-incremental/` and MOS-23); post-build stops before commit and puts a proposed message in pending inbox until user confirmation. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:550:- The validated staged result had targeted Ruff pass, `20 passed, 2 warnings`, and `git diff --cached --check`; warnings were pre-existing NautilusTrader Parquet deprecations. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:552:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:554:- A fresh-eyes review with graph queries that remains silent for minutes is not clear; interrupt and retry with a narrow bounded diff/source review. Use absolute repo path for `code-reality tour_validate --manifest --repo /Users/ctai/Github/mosaic_alpha`; relative `--repo .` caused false reports. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:562:## Task 1: AIR-23 Report Shell repaired, browser-verified, and finalized without commit
+/Users/ctai/.codex/memories/MEMORY.md:575:- `post-build` completes review/fix/verification/metadata but never commits without a later user-confirmed commit step. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:580:- `rg 'SLOT:'` is not a ship gate. Require both slot markers and uniform placeholder tokens absent in consumers. Use content SHA for an uncommitted EP's projection source, and classify docs mode by a `.md`/static Report Shell `.html` allowlist. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:583:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:590:scope: Post-build triage of uncommitted Cargo developer profile and rust-analyzer target isolation, including intermittent rust backend convergence validation.
+/Users/ctai/.codex/memories/MEMORY.md:597:- rollout_summaries/2026-09-04T02-35-58-4N1T-post_build_uncommitted_rust_config_review.md (cwd=/Users/ctai/Github/code-reality, rollout_path=/Users/ctai/.codex/sessions/2026/09/04/rollout-2026-09-04T10-35-58-01a06a45-ddc1-7a72-8cff-8349d6166349.jsonl, updated_at=2026-09-04T03:01:45+00:00, thread_id=01a06a45-ddc1-7a72-8cff-8349d6166349, success; no commit)
+/Users/ctai/.codex/memories/MEMORY.md:605:- after "你查看看現在uncommited的" and "再一次", re-query `status`, diff, and untracked files: a working tree can change within the same rollout. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:612:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:615:- `$post-build` must fail loud on a clean tree with no task shell or EP baseline; do not guess an upstream/merge-base range. It also does not auto-commit. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:653:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:660:applies_to: cwd=/Users/ctai/Github/mosaic_alpha; reuse_rule=checkout/diff-specific findings; reuse provider semantics and branch-observability guards only after checking current adapter contracts.
+/Users/ctai/.codex/memories/MEMORY.md:662:## Task 1: Shioaji fill universe-skip, XTAI KBar, and fixture-ripple independent review, fixes required before commit
+/Users/ctai/.codex/memories/MEMORY.md:685:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:690:- `git diff --check` passed, but `uv run ruff check --select F401,PLC0415 ...` could not initialize `/Users/ctai/.cache/uv` (`Operation not permitted`), pytest was not run, and code-reality MCP was rejected. Mark lint/tests unexecuted; historical `pending-decisions.md` counts are not current verification. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:694:scope: Read-only review of golden pretriage pool/render/assemble/commit-proposed contracts, especially interrupted state, evidence completeness, resume identity, and TRAIN decision integrity.
+/Users/ctai/.codex/memories/MEMORY.md:695:applies_to: cwd=/Users/ctai/Github/mosaic_alpha; reuse_rule=baseline/diff-specific findings from `0a55dbe2`; preserve the cross-stage guard patterns but re-read current schemas and helpers before changes.
+/Users/ctai/.codex/memories/MEMORY.md:705:- golden-pretriage, pretriage, cmd_assemble, manifest, resume, render fingerprint, commit-proposed, golden_key, TRAIN-guard, overlay, readings-schema, atomic_write_json, mypy, code-reality
+/Users/ctai/.codex/memories/MEMORY.md:709:- when reviewing parallel work, the user required "僅這些檔案" and excluded `classify.py/test_classify.py/AGENTS.md` -> maintain a strict allowlist and do not mix nearby-session diffs into conclusions. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:718:- `cmd_commit_proposed` marks `key` required but rebuilds identity from `code|market|period_start_iso`. Before any write, assert `d["key"] == golden_key(d["code"], d["market"], d["period_start_iso"])` and validate the ISO date; otherwise a claimed TEST key can pass TRAIN precheck yet write another decision. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:723:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:726:- `uv run ruff check --no-cache ...` failed to initialize `/Users/ctai/.cache/uv` with `Operation not permitted`; pytest/mypy were not run. `git diff --check` alone is not a runtime gate. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:757:- S2 had an unmet sidebar prerequisite: `classify.py` and `test_classify.py` were uncommitted (`375 insertions, 7 deletions`). Hard-stop until both are clean, the sidebar SHA exists, and the EP baseline is updated. Zero-residue acceptance must scope to tracked production plus tracked active docs; ignored `.at-contexts/`, `.agent-tmp/`, and `.playwright-mcp/` are historical artifacts, not blind-edit targets. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:759:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:800:- Work orders need execution identity/baseline, failure-and-escalation rules, independent handoff evidence, explicit `git add`/commit/push and dirty-tree policy, requirement-by-requirement completion checks, and acceptance written as command plus expected result. The reviewer must read work order -> independently obtain diff/source -> inspect tests/evidence -> then writer report; record accept/reject/needs-fix, and no record means no Done state. [Task 1][Task 2]
+/Users/ctai/.codex/memories/MEMORY.md:806:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:836:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:843:applies_to: cwd=/Users/ctai/Github/mosaic_alpha; reuse_rule=checkout/diff-specific; reuse review heuristics and cleared axes only while the relevant implementation and EP remain comparable.
+/Users/ctai/.codex/memories/MEMORY.md:845:## Task 1: Annotate sidebar/dossier working-diff adversarial review, four findings
+/Users/ctai/.codex/memories/MEMORY.md:867:- when reviewing a working diff, the user asked: "find problems that will break tomorrow — real bugs, regressions, silent corruption, test blind spots — not style opinions" -> prioritize reachable correctness and misleading behavior over style opinions. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:868:- when parallel work exists, the user required only specified paths and explicitly excluded ma-sqz changes -> establish a strict allowlist, including untracked in-scope artifacts, and ignore unrelated diffs. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:879:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:881:- `uv run` failed before tests with `Failed to initialize cache at /Users/ctai/.cache/uv ... Operation not permitted`; `git diff --check` passed, but no runtime validation occurred. Do not present this review as test-validated. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:907:- GLM 5.3, golden_route_report, GOLDEN_CONDITION_GROUPS, _GOLDEN_SPLITS, _golden_path_dists, terminal leaves, Other, near-tie, flip-scale distance, tree_confidence, proposed.jsonl, _propose_case, commit-proposed
+/Users/ctai/.codex/memories/MEMORY.md:913:- when requesting a "良心評價" and correcting "ep 他也有回寫", the user expects direct diff/EP/source/evidence comparison and a precise distinction between formally rewritten planning artifacts and unverified production implementation. [Task 2]
+/Users/ctai/.codex/memories/MEMORY.md:924:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:943:- docs-review, vocabulary.md, blueprint, phantom detection, RegimeSegment, MarketStateCondition, Pattern, ConditionBase, label_sets, classify, rg -l, git diff --check
+/Users/ctai/.codex/memories/MEMORY.md:953:- For doc-only changesets, read relevant code and validate the full document, not only its diff. First establish actual roots (`mosaic_alpha/research`, not `research`), then restrict exact searches to source paths and state a complete consumer-count convention. [Task 1]
+/Users/ctai/.codex/memories/MEMORY.md:958:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:988:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:1031:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:1071:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:1111:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:1154:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:1183:## Failures and how to do differently
+/Users/ctai/.codex/memories/MEMORY.md:1213:## Failures and how to do differently
+
+exec
+/bin/zsh -lc 'pwd && git status --short --branch' in /Users/ctai/Github/ai-rules
+ succeeded in 0ms:
+/Users/ctai/Github/ai-rules
+## main...origin/main [ahead 19]
+ M .gitignore
+ M AGENTS.md
+ M agents/AGENTS.md
+ M "backlog/drafts/draft-2 - muse-grok-telemetry-\350\250\230\351\214\204\351\235\242\346\216\242\346\270\254\342\200\224\342\200\224\345\217\257\350\241\214\345\211\207\346\216\245\347\267\232\343\200\201\344\270\215\345\217\257\350\241\214\345\211\207\346\217\255\351\234\262\345\256\232\346\241\210.md"
+ M "backlog/tasks/air-47 - muse-plugin-cc-\351\233\231\345\256\266\346\227\217-bridge\342\200\224\342\200\224codex-adapter-\345\220\270\346\224\266\357\274\213\350\252\236\347\276\251\347\265\261\344\270\200\357\274\213plugin-\350\272\253\344\273\275\351\207\215\345\241\221\357\274\210\345\220\253-ai-rules-\347\237\245\350\255\230\345\220\214\346\255\245\357\274\211.md"
+ M "backlog/tasks/air-49 - \350\247\200\345\257\237\346\261\240\345\237\272\345\273\272\345\215\207\347\264\232\342\200\224\342\200\224git-\345\237\272\347\267\232\346\224\266\346\226\202\357\274\213usage-\351\251\205\345\213\225\351\201\270\346\223\207\357\274\213\346\263\250\345\205\245\345\256\211\345\205\250\357\274\213codex-\350\267\257\347\224\261\346\204\237\347\237\245.md"
+ M hooks/zcode-registration.json
+ M skills/instruction-init/SKILL.md
+ M skills/memory-audit/SKILL.md
+ M skills/model-routing/SKILL.md
+?? ai-analysis/_tasks/09-08-pool-infra-upgrade/ep.md
+?? ai-analysis/_tasks/09-08-pool-infra-upgrade/index.html
+?? ai-analysis/_tasks/09-08-pool-infra-upgrade/p1-drill.md
+?? ai-analysis/_tasks/09-08-pool-infra-upgrade/p4-e2e.out
+
+codex
+索引裡直接命中一個 commit 前對帳條目，另有一個 finalization gate 條目像是同一紀律的專案化版本；我會讀這兩個 body 來避免只靠 inventory 摘要。
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc 'nl -ba /Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/feedback_verify-wt-before-commit.md' in /Users/ctai/Github/ai-rules
+exec
+/bin/zsh -lc 'nl -ba /Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/project_commit-finalization-gate.md' in /Users/ctai/Github/ai-rules
+ succeeded in 0ms:
+     1	---
+     2	name: feedback_verify-wt-before-commit
+     3	description: commit 雙防護：具名 add＋staged 對帳；commit 前查 log/stat 防 concurrent 帶走或污染（紅燈即停）
+     4	metadata: 
+     5	  node_type: memory
+     6	  type: feedback
+     7	  originSessionId: d5b0964b-d5f8-4bc6-bd0d-3db4ccd88ab1
+     8	---
+     9	
+    10	多 session 共用 working tree——commit 前查 log/stat（防帶走）＋具名 add＋staged 對帳（防撈進）；**看 `git diff --cached` 內容**，name-only 不夠。（09-08 蒸餾：舊實例壓行，留互補盲點四則）
+    11	
+    12	> merged_from: feedback_git-add-specific-files.md, 2026-08-31 (earlier wave)
+    13	
+    14	**核心三律**：①commit 前（尤其放了一陣子）先 `git log --oneline -5`＋`git status --short`——working tree 不是你上次看到的狀態；②**stat 與預期檔數不符＝紅燈停**（refactor 只跑 1 檔先查 concurrent 帶走，勿產出文不對題 commit）；③`git add <具體檔>`禁 `-A/.`（含 skill 內建目錄級 add——並行期目錄 add 後必掃 staged 清單退外來檔），commit 後 `git diff-tree` 驗。
+    15	
+    16	**互補盲點四則**：
+    17	- **staging 早被污染（09-03 mosaic 實證）**：具名 add 防不住「staging 裡本來就有別人 staged 的」——commit 前必 `git diff --cached --name-only` 對帳本次清單；補救＝soft reset→`restore --staged .`→只 add 自己的→驗 cached→commit→精確還原他人 staged。
+    18	- **反向：我的編輯被帶走（09-06 AIR-30；09-08 再證——air-45 commit 捲走另一 session 未 commit 知識 edits 三檔）**：staged 核對要抓「少」不只「多」——某檔從清單消失先 `git log -2 -- <path>` 診斷；內容已落地就不重做，移除出清單＋記錄歸屬；帶走方 commit 已成且平行線活躍→接受不重寫歷史（message 文不對題屬化妝品級，內容在 HEAD 驗證無損即可收案）。
+    19	- **同檔 hunk 糾纏（09-01）**：同檔不同行並行改動整檔 add 必撈進——`git diff` 產 patch 濾 hunk `apply --cached`；**context 3 行會合併 ≤8 行相鄰改動**→先 `-U1` 拆 hunk；「File modified since read」＝並行寫入信號先看全貌。
+    20	- **git mv 自帶 stage（09-08 建卡 commit 汙染）**：git mv 早把 rename stage 進 index，後續 scoped `git add <dir>`＋commit 照樣把殘留 rename 掃進去——rename 顯示 100% 相似＝mv 後的內容編輯根本沒被 stage；commit 後 `git show <sha>` 驗實際內容，汙染＝reset mixed→具名 add 重 commit（僅 local 未 push 可救）。
+    21	- **對帳誤讀（09-08 AIR-47 建卡二連）**：對帳執行≠對帳通過——`git diff --cached --name-only` 輸出被誤讀為「add 成功證明」，71 行他人 staged 檔案隨 commit 整包帶走（72 檔/1649 行、message 文不對題）。**綠燈判準＝staged 清單逐行==自己具名 add 的集合**，多一行即停；commit 後 `git show --stat` 檔數暴增＝紅燈當場攔。補救（local 未 push 可救）＝soft reset→`restore --staged .`→具名 add→cached 對帳→重 commit——他人 staged→unstaged 無害（working tree 零損失、對方 commit 時自行 add）。
+    22	- **對帳白名單須檔案級列舉（09-08 三證——`git add -A`＋前綴級排除）**：staged 對帳的排除 pattern 用目錄前綴（`rg -v '^(rules|skills|agents)/'`）＝放行同目錄外來檔——晚於審查開工的並行 session（bridge 落地弧）3 檔隨 AIR-45 commit 帶走、繞過三輪審查；且 `add -A` 在共享樹＋活躍並行 session 是根源。**白名單=逐檔列舉本次清單**，空回≠乾淨；補救同上條（soft reset→`restore --staged <外來檔>`→重 commit），外來檔留 working tree 給 owning session 隨其弧 commit。
+    23	- **pathspec commit 隔離（09-04）**：`git commit -m … -- <paths>`（--only 語義）完全不動共享 staging——比 unstaged 四步干擾小；前提該 path 全屬自己（先 diff 核對）。
+    24	
+    25	舊例壓行：ruff 閘門擴張（08-19，diff 純格式→獨立 style commit）／untracked 目錄 staged 展開（08-28，cached 按 M/A 分解對帳）／patch 匯出缺件（08-25，apply 後對 M 清單）／接手判準（08-26，mtime＋.review 收斂態＋獨立複驗）／lint 閘門 mypy 未配如實記（08-19）。
+
+ succeeded in 0ms:
+     1	---
+     2	name: commit-finalization-gate
+     3	description: commit finalization 閘門：2.8 對帳＋孤兒結算＋docs 單檔閘＋footer 中性化＋ruff 機械改動免確認
+     4	metadata:
+     5	  node_type: memory
+     6	  type: project
+     7	  originSessionId: sess_3380ab28-4197-4433-aa66-e2f54587b64b
+     8	---
+     9	
+    10	commit 漏帶是機率性漏失——閘門（對帳＋半套偵測）＋孤兒結算回收＋機械改動免確認三件套。
+    11	
+    12	> merged_from: project_commit-footer-harness-neutral, feedback_format-spillover-style-commit, 2026-09-07 cluster-merge wave
+    13	
+    14	## 2.8 閘門＋孤兒結算（original: project，keeper 本體）
+    15	
+    16	2026-09-05 user 報案「/commit 流程容易漏 backlog 卡相關 commit」：同 skill 三 session 只 1 帶齊。**三形態現場**：完整對照 trading_lab `95709128a`／半套 mosaic `6bc648698`（refs 指未落地路徑）／事後回寫 offline `1abf2085a`（hash 記不進被記的 commit——雞生蛋懸掛）。**落地**（`1bfefa2`＋`154d29c`）：skills/commit 階段 **2.8 Finalization 對帳閘門**（status 掃 finalization 路徑面＋半套歸檔偵測＋歸屬判定）＋階段 6 pre-commit 結算（無 hash、禁 post-commit 回寫）＋AIR-24 卡結案兩步 pre-commit 同 commit 落地。**閘門首戰抓自己**：目錄級 `git add backlog/` 把並行卡混入——staged 核對＋soft reset 重組（目錄級 add＝小範圍 `git add .`，並行期目錄 add 後必掃 staged 清單）。
+    17	
+    18	**孤兒結算（user 抓到）**：卡 Done＋Final Summary 在場、owning session 已結束、從未 commit＝孤兒（非並行遺留）→ 收編；**commit 標題寫結算≠真結算**（`2a4b43a` 當時卡仍 In Progress——讀卡 frontmatter 非標題）。→ 判定表第三列：活躍排除 vs 孤兒收編（`270551b`＋`0379275`）。**docs 單檔閘門**（`836c645`）：純 `.md` 直 commit 未跑 post-build → commit 前跑 `/consistency`（放執行約束非 2.5——捷徑跳過 2.5）。**殘項指針**：mosaic 補 commit×2＋三池歸因＋版權 lint 已 handoff 轉出（09-05，狀態見 mosaic 側）；池結構問題由 [[memory-cc-alignment-diagnosis-0905]]（AIR-25）接手。相關 [[feedback_verify-wt-before-commit]]（防多面）、[[flash-forensic-0905]]、[[feedback_inflow-needs-outflow]]。
+    19	
+    20	## footer harness 中性化（original: project，純機械事實）
+    21	
+    22	載體是 `skills/commit/SKILL.md` 寫死的 `Co-Authored-By: Claude`（非 git template——`~/.stCommitMsg` 是空 SourceTree 殘留）。已 commit `eeb1be5`：footer＝`Co-Authored-By: <當前 harness 名>`——**刻意不寫死**（skill 四 harness 共用）；歷史 commit 不動。**pre-existing 未決**：階段編號 2.7→4 跳號；L172 link text 舊名（目標存在）。
+    23	
+    24	## ruff 機械改動免確認（original: feedback，09-06 一般化裁定已規則化）
+    25	
+    26	user 兩段裁定：「ruff 自動修改直接 commit 不用確認」＋「混批不拆分隨所在 commit 走」——落地 outward-action-consent 例外二，僅互動 session。**Why**：零語義改動逐次確認無風險對沖；溢出長期滯留污染 status 判讀。**How**：純 ruff→`style:` 直接 commit（具名 add 遵守 [[feedback_verify-wt-before-commit]]）；無主改動先 `git diff -w`——零殘留即同型收清，有殘留＝並行進行中不碰。
+
+exec
+/bin/zsh -lc "nl -ba /Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/_inventory.md | sed -n '1,110p'" in /Users/ctai/Github/ai-rules
+ succeeded in 0ms:
+     1	# Memory Inventory（全量投影）
+     2	
+     3	本檔為 _generate_index.py 機械投影，禁手寫——全量條目住此（底線前綴不進開場）；rg 可達。
+     4	
+     5	## Feedback
+     6	
+     7	- [feedback_absorb-patterns-not-tools](feedback_absorb-patterns-not-tools.md) - user 設計原則——CC 官方工具不直用（「直接用可能會出事」）、參考作法重實現；deep-research 亂 web search 體感差→吸收編排模式＋源枚舉制
+     8	- [feedback_exhaust-own-tools-before-user-handoff](feedback_exhaust-own-tools-before-user-handoff.md) - 當你要把工作轉交 user（paste-ready／請終端代跑）前——先窮盡自己工具面（Bash 掛→Read/Edit
+     9	- [feedback_relay-claims-verify-current-state](feedback_relay-claims-verify-current-state.md) - 跨 session relay/通知對「接收方現況」的宣稱常過時（傳送方 snapshot 落後）——接手第一動＝機械驗證當前狀態，勿照 relay 描述行動
+    10	- [feedback_compact-user-judgment-memory-continuity](feedback_compact-user-judgment-memory-continuity.md) - compact 時機與 session 收線都是 user 判斷——AI 不推自動觸發、不自行提議收線；context 因應＝接續品質
+    11	- [hook-vs-llm-flow-division](hook-vs-llm-flow-division.md) - hook 只做純機械/單入口/立即危害；語義判斷交 LLM 流程（rule + command）
+    12	- [feedback_delegation-claims-verification](feedback_delegation-claims-verification.md) - 委派 agent 依主 session 調查產出文件（EP/報告）時——調查打包成編號宣稱清單＋不盲從條款（逐項機械驗證、推翻附證據）
+    13	- [feedback_verify-wt-before-commit](feedback_verify-wt-before-commit.md) - commit 雙防護：具名 add＋staged 對帳；commit 前查 log/stat 防 concurrent 帶走或污染（紅燈即停）
+    14	- [feedback_governance-intent-layer-first](feedback_governance-intent-layer-first.md) - 治理/行為訴求動手前先確認目標層次（認知動作/規範/機械閘）——memory 廢話治理三連校正實證（audit→hook→寫前想）
+    15	- [feedback_freeze-peripheral-focus-core](feedback_freeze-peripheral-focus-core.md) - 當你要把 AI 發現的周邊 trade-off 升級成主線 blocker 時——user 會以「現在可用就好」凍結爭點拉回核心命題，勿讓次要優化辯論擋主軸
+    16	- [feedback_acceptance-evidence-case-alignment](feedback_acceptance-evidence-case-alignment.md) - 當你要補走查/驗收證據（尤其 no-op 處置案例）時——證據三要件：案例實際內容機械複測＋該案例結果對帳（global 指標不頂替）＋如實標等級
+    17	- [feedback_dual-family-review-dispatch](feedback_dual-family-review-dispatch.md) - user 的 review 派發慣例＝雙家族平行（GLM in-harness＋muse bridge）——muse 補流程面、GLM
+    18	- [feedback_quota-probes-user-pastes](feedback_quota-probes-user-pastes.md) - 額度敏感測試/probe（runtime 冒煙、A/B 測試）→ 給 user paste-ready 命令塊自己跑，AI 不派
+    19	- [feedback_shorthand-ambiguity-align-first](feedback_shorthand-ambiguity-align-first.md) - 當你要轉述或執行跨 session 工單中的簡稱時——撞詞雙解先對齊所指再動手（writing 案例：muse 與 AI 讀成
+    20	- [feedback_work-order-contract-point-to-source](feedback_work-order-contract-point-to-source.md) - 委派工單（muse/subagent）內嵌契約值會漂——卡 ref 形態等指向 skill 合約單一源路徑，不 inline
+    21	- [flow-feedback-done-archive](flow-feedback-done-archive.md) - 處理完的 flow-feedback 搬 ai-analysis/flow-feedback/_done/；/commit 是否自動化討論中
+    22	- [feedback_shell-diagram-quality-bar](feedback_shell-diagram-quality-bar.md) - task brief 殼門檻：流程圖必備、首屏見圖、美感有底線；SA 選型已落地 diagram-selection skill；殼內 mmdc/CDN 渲染＋-I 唯一 id
+    23	- [feedback_full-domain-structure-uniformity](feedback_full-domain-structure-uniformity.md) - user 裁定結構慣例要 full domain——自家 repo 群全部採用（ai-rules 自家也 dogfood），探測
+    24	- [feedback_diagram-tool-selection](feedback_diagram-tool-selection.md) - 畫圖工具選型判準（user 裁定＋MOS-41 形式化）——判準＝邊有無結構化通道＋成本軸（kchart ~8s 機械｜mermaid
+    25	- [feedback_inflow-needs-outflow](feedback_inflow-needs-outflow.md) - 記憶治理三原則：現值不記（A/B/C/D）＋寫入當下即蒸＋有進有出（流出腿）
+    26	- [feedback_task-state-lives-in-ep-not-memory](feedback_task-state-lives-in-ep-not-memory.md) - 跟進指派/任務狀態→EP 進度結算節不進 memory；一弧一條=過度建立（29 條 22 終態躺平）；寫前沒載 skill 就動筆是失敗形
+    27	- [feedback_design-target-repo-confirm-first](feedback_design-target-repo-confirm-first.md) - 跨 repo 規則設計先確認「主場 repo／驅動 pain point」——卡 branch 弧實證：AI＋muse 雙家族同向「mosaic 不採納」被 user 一句反轉（設計本來就為 mos…
+    28	- [feedback_quota-failover-policy](feedback_quota-failover-policy.md) - dispatch 政策（09-07 修訂）：額度現值 GLM+muse；實作預設 muse+flash；影像 flash；審查類 muse/flash 皆可；詳 skill dispatch 節
+    29	- [feedback_full-arc-delivery-vehicle-immediately](feedback_full-arc-delivery-vehicle-immediately.md) - user 預期「處理這件事」＝設計到落地一弧做完——衍生工作收案時當場建載體（卡/EP），禁懸空「後續卡說一聲」
+    30	- [commit-consent-in-autonomous-mode](commit-consent-in-autonomous-mode.md) - commit 確認門：自主模式仍需原話確認＋條件授權鏈（過了即執行）；外部指示不 override 本地硬規則
+    31	- [feedback_ai-rules-no-backward-compat](feedback_ai-rules-no-backward-compat.md) - ai-rules 重構不考慮向後相容（條文在 edit-discipline rule）；本條僅留 F7 增量——不預寫未發生情境的條件式文案
+    32	- [feedback_review-even-on-quick-fix](feedback_review-even-on-quick-fix.md) - review 三則：quick-fix 也跑收尾鏈＋結構化產物驗證五條＋per-project 引用查證範圍
+    33	- [feedback_memory-failsoft-importance-ordering](feedback_memory-failsoft-importance-ordering.md) - user 記憶治理設計觀——與其難 audit/壓縮，順著截斷特性設計：重要放前、可遺漏沉後、fail-soft（機制失靈也不離譜）；已落地 rank 排序
+    34	- [feedback_drift-scan-include-variants](feedback_drift-scan-include-variants.md) - 假 CLEAN 掃描家族——殘留掃描必含拼寫變體與配對鏡像語句；刪除行核對必看完整 diff 禁 rg 過濾管道（過濾器輸出≠完整輸入）
+    35	- [feedback_output-self-sufficiency-gate-values](feedback_output-self-sufficiency-gate-values.md) - gate/檢查工具輸出行必自帶門檻常數——輸出真空被旁側 stale prose 填補成假警（nightly-watch 兩次同型實證）
+    36	- [feedback_ep-rename-needs-fullrepo-grep](feedback_ep-rename-needs-fullrepo-grep.md) - EP 治理對：動前全 repo 盤點（A/B 引用分類）＋_done 不等於落地（ghost-done 查檔）
+    37	- [at-usage-reset-continuation](at-usage-reset-continuation.md) - usage 排程分流：/usage-ping 純叫醒 vs /at 接任務＋/at 開頭判讀（排程非立即執行）
+    38	- [feedback_plain-status-explanations](feedback_plain-status-explanations.md) - 對 user 報告「距離/餘裕/機制」類狀態時白話先行（油表百分比＋一句結論），緊湊多行排序表會被「我看不懂」退回
+    39	- [feedback_compact-output-context-not-transcript](feedback_compact-output-context-not-transcript.md) - compact/summary 產出＝脈絡壓縮非時序流水帳、素材涵蓋全 session 非只尾端對話（user 09-07；AIR-35 已落地）
+    40	- [feedback_disposition-stray-artifacts](feedback_disposition-stray-artifacts.md) - working tree 殘留物（非本 session 產物）user
+    41	- [feedback_uc-inventory-before-structure-proposal](feedback_uc-inventory-before-structure-proposal.md) - 結構提案與架構討論皆 UC-first——先盤工作流/讀者與 repo 先例再提方案；論證用 use case 角度＋clean code 具名原則，勿自創縮寫
+    42	- [feedback_stale-experiment-rerun](feedback_stale-experiment-rerun.md) - dated 實驗與「定案」都會錯——重跑當場 probe（symlink 判決被推翻實證）；工具失敗歸因須受控複測否證後才定案
+    43	- [feedback_diagnose-installed-vs-source-first](feedback_diagnose-installed-vs-source-first.md) - 外部工具（plugin/binary/bridge）炸時先比對「安裝面版本 vs source HEAD」再下診斷——修復常已
+    44	- [feedback_codex-followup-user-relay](feedback_codex-followup-user-relay.md) - 跨家族 review 迴路的 followup 驗收＝user 在 codex session 直跑（review context
+    45	- [feedback_evidence-over-claims](feedback_evidence-over-claims.md) - user 對「完成」宣稱要求眼見為憑——「我要看你真的實作長怎樣，誰知道你是不是亂講」；回答配實物（結構 ls/三檔並排對照/live
+    46	- [feedback_spec-self-contained-foreign-handoff](feedback_spec-self-contained-foreign-handoff.md) - 給外部 LLM 的 spec 必須自足（spec＋repo 唯一輸入）：痛點附後果、UC 三件、SM 自包含、findings 蒸餾成設計約束節（防重踩）；籌備期凍結下游
+    47	- [feedback_harness-model-orthogonal-axes](feedback_harness-model-orthogonal-axes.md) - 三層勿混：provider→model→harness（muse 是 harness 非公司）；dispatch 不綁 backend id；需求三類＝旗艦/影像/隨意；五家清單見檔內
+    48	- [feedback_verify-with-consumer-before-commit](feedback_verify-with-consumer-before-commit.md) - 消費端回報 bug：先修活路徑（雙活期勿修新家）→回報方原始輸入重現→commit→交棒吸收（user 修正順序＋落點）
+    49	- [feedback_comments-in-english](feedback_comments-in-english.md) - 新寫程式碼的註解/docstring/README 一律英文（user 2026-08-25 指示，新 repo 公開導向）
+    50	- [feedback_per-call-billing-model](feedback_per-call-billing-model.md) - 計費模型定案＝token-value 制（Claude Max 同構）——策略雙軸＝省 requests＋省 context；輪次非計量軸、premium 倍率不可精算
+    51	- [feedback_no-rosetta-workarounds](feedback_no-rosetta-workarounds.md) - user 2026-09-02 裁定不用 Rosetta（macOS 將退場支援）——x86_64 套件繞路禁提，平台缺口直接等
+    52	- [feedback_billing-trend-token-design](feedback_billing-trend-token-design.md) - user 成本世界觀——帳制趨勢 token 化（zai 新方案 token、muse 暫 request）；設計
+    53	- [feedback_symlink-alias-before-two-entities](feedback_symlink-alias-before-two-entities.md) - 兩路徑視為兩實體前先驗 symlink 別名——同檔 cmp identical 是 tautology 循環證據（09-03 mosaic 兩池誤判實證）
+    54	- [feedback_backup-unversioned-live-configs](feedback_backup-unversioned-live-configs.md) - 改無版本活配置（gitignored settings.json 等）前先 cp .bak——備份→換→pipe-test→新 session 驗證；回滾不靠 transcript
+    55	- [feedback_line-anchors-rg-before-handoff](feedback_line-anchors-rg-before-handoff.md) - 行號/路徑錨點跨邊界給出（relay/handoff）前當場查證源 repo——行號 rg 核對、暫存材料重跑；錯值死路徑會被下游複製傳播
+    56	- [feedback_read-current-file-before-reviewing](feedback_read-current-file-before-reviewing.md) - 評論/引用任一產物檔前必讀當前檔——平行 session 可能已覆寫，context 版本記憶只是歷史非現況（「剛剛codex不是有重寫你有看嗎」實證）
+    57	- [feedback_adjudication-materials-then-ask](feedback_adjudication-materials-then-ask.md) - 裁決批次先攤完整材料再問——AskUserQuestion 結構表單被退，user 自由文字逐項裁定（09-03 後議三項實證）
+    58	- [feedback_consistency-gate-not-optional](feedback_consistency-gate-not-optional.md) - /consistency 與 post-build 鏈必跑非 optional；self-report 不算 gate——自檢問句＝「Skill 這輪調用了嗎」，替代須明示、豁免權在 user
+    59	- [feedback_cjk-char-corruption-rg-verify](feedback_cjk-char-corruption-rg-verify.md) - Edit/Write 失誤兩形態——CJK 字元損壞（形似異體字肉眼難辨）與標題錨替換（插入未接回標題、段落孤兒化）；改完必機械 rg 驗證
+    60	- [feedback_dispatch-reread-governing-docs](feedback_dispatch-reread-governing-docs.md) - 派發/決策當下重讀治理檔——session 記憶對快速演進域過期；看 commit 標題≠重讀條文；startup memory
+    61	- [feedback_backlog-card-edit-precheck](feedback_backlog-card-edit-precheck.md) - backlog 卡操作前先對時卡 id 歸屬——編號假設會撞平行 session（AIR-26 撞號實證）；--ref
+    62	- [feedback_agent-transient-death-autopsy](feedback_agent-transient-death-autopsy.md) - 背景 agent 死於帳號級 Model request failed——重試 prompt 燒入前任已知事實；驗屍＝mtime
+    63	- [feedback_settlement-scripts-are-code](feedback_settlement-scripts-are-code.md) - 量測誠信（尺與被量物）——結算/度量腳本自身 bug 腐敗證據（噪聲虛增缺口膨脹估值）；AI 評估報告正負向宣稱都需同等嚴格查證
+    64	- [feedback-magnitude-over-precise-counts](feedback-magnitude-over-precise-counts.md) - 文件顯示 codebase 統計整數(importer/模組/test/node 數)用 magnitude 不用精確值;method(如實計數)與 display 分離
+    65	- [feedback_judge-review-stays-main-agent](feedback_judge-review-stays-main-agent.md) - judge-review 固定主 agent 執行——user 裁定不派給另一個
+    66	- [feedback_gate-commands-state-sensitive](feedback_gate-commands-state-sensitive.md) - handoff/排程清單內嵌腳本閘，編進新 prompt 前先驗腳本對當前狀態行為——狀態敏感閘會死鎖（precheck×In Progress 實證）
+    67	- [feedback_engine-skill-trigger-collision](feedback_engine-skill-trigger-collision.md) - 第三方引擎掛到自家入口命令時，引擎自身的 agent skill 別進清單——description 觸發詞重疊 = 路由歧義（raw
+    68	- [feedback_conditional-gates-test-condition-not-exit-code](feedback_conditional-gates-test-condition-not-exit-code.md) - 條件閘門要驗「條件成立」（test -f／rg -l 輸出）非 exit code 短路——fd 無命中仍 exit 0，`fd X && cmd` 誤跑檢查（09-03 實證）
+    69	- [cross-workspace-actions-user-handles](cross-workspace-actions-user-handles.md) - 停他 workspace 排程／改他池狀態檔＝user 自己動手（「我砍就好」）；AI 只整自己側＋回報，禁繞道改他檔
+    70	- [feedback_counter-skip-confirmation-bias](feedback_counter-skip-confirmation-bias.md) - 建議跳過與建議 capture 都先對抗性自查——skip 查推進偏好、capture 查已存在否（雙向自檢）
+    71	- [feedback_demand-pull-fails-silent-gaps](feedback_demand-pull-fails-silent-gaps.md) - Demand-pull 只對顯性故障有效——沉默缺口（undercount/覆蓋不足）需主動量測（spike-now-decide-on-data）
+    72	- [feedback_project-first-containment](feedback_project-first-containment.md) - user 以專案（線）為單元要物理包含；結構美化（前綴/傘形/改名）會被喊停——交付最小功能差異；00- hack/sprint 不提
+    73	- [feedback_read-tool-source-before-upgrade-proposals](feedback_read-tool-source-before-upgrade-proposals.md) - 提案「升級/修改某 tool/skill」前必讀其原始碼——能力假設錯會污染整條提案鏈（kanban-board 零渲染實證）
+    74	- [feedback_subagent-background-spawn](feedback_subagent-background-spawn.md) - subagent 預設背景跑已固化為全域規則（rules/tool-discipline.md 背景執行段）
+    75	- [feedback_sj-nt-authority-routing](feedback_sj-nt-authority-routing.md) - SJ/NT 查證路由（user 2026-09-01）：SJ 問 shioaji skill、NT 讀 repo（v1/v2
+    76	- [feedback_fix-immediately-not-defer](feedback_fix-immediately-not-defer.md) - 合理的修正就立即落地，不要「之後再修」（之後 = 忘記修 = 拖延症）
+    77	- [feedback_llm-native-no-skill](feedback_llm-native-no-skill.md) - skill 設置雙面判準——LLM 原生能力不設 skill（distill 類破壞性操作預設最保守）；重複性操作值得固化成一句話入口（觸發語句＋程序段＋when_to_use）
+    78	- [feedback_arch-impossibility-needs-topology-grounding](feedback_arch-impossibility-needs-topology-grounding.md) - 「架構上不成立」級宣稱前必查依賴拓撲實態——引擎 in-process link vs 外部 server 包裝，成本結構完全不同
+    79	- [feedback_rules-no-project-specific-facts](feedback_rules-no-project-specific-facts.md) - 通用規則:例子可領域特定(除權息等穩定概念 OK),規則邏輯才要通用;drift-prone 的是數字/現狀斷言/可改名符號/規則特化
+    80	- [feedback_permission-layer-no-behavioral](feedback_permission-layer-no-behavioral.md) - 改 settings.json permission 時不要重複 rules/skills 層的 behavioral 約束
+    81	- [feedback_full-read-base-not-context-copy](feedback_full-read-base-not-context-copy.md) - 全檔重寫 base 必須全文 Read（context 副本會被 elide）；staleness 擋門兩型鑑別——HEAD 位移時 git diff 空是假陰性，re-Read 一律全文禁片段
+    82	- [init-py-reasonableness-not-pattern](init-py-reasonableness-not-pattern.md) - __init__.py 檢查的是「內容合理性權衡」不是「re-export pattern 偵測」
+    83	- [feedback_slash-command-existence-verification](feedback_slash-command-existence-verification.md) - 驗證 skill/command 存在性時，先查 session 注入的 available skills 清單（權威來源），不要自己 rg/fd 搜 repo
+    84	- [feedback_no-sandbox-layer](feedback_no-sandbox-layer.md) - User 覺得 sandbox 不好用而關掉；解決寫入權限時別提議 sandbox.allowWrite，動 permission list / defaultMode
+    85	- [global-vs-project-permissions](global-vs-project-permissions.md) - ai-rules/settings.json 是全局權限,專案特定權限由各專案自己的 settings 管
+    86	
+    87	## Project
+    88	
+    89	- [project_session-id-continuation-absorption-0908](project_session-id-continuation-absorption-0908.md) - 當你要跨 harness 接續 session／規劃 muse-plugin-cc 雙家族 bridge 時——--session-id 弧完結；雙家族＝AIR-47；勿以 ROI 勸退
+    90	- [at-skill-zcode-cron-gaps](at-skill-zcode-cron-gaps.md) - ZCode cron 落差定案集：session 綁定兩形態／冷 landing 禁多步／殘留判讀＋開放項待分辨
+    91	- [project_agents-registry-split-design](project_agents-registry-split-design.md) - 當你要 dispatch subagent／派發代理、查 registry 快照語義或委派 external runtime 時讀——AIR-13/28/29 終態與勿重辯
+    92	- [project_memory-cc-alignment-diagnosis-0905](project_memory-cc-alignment-diagnosis-0905.md) - memory 治理線終態——AIR-25 對齊矯正＋三件套/symlink 拓撲/治理教訓；併 AIR-37 卡閘門錨＋AIR-40-42 telemetry 語義（09-08 收斂波）
+    93	- [project_cr-live-faces-roadmap](project_cr-live-faces-roadmap.md) - 當你要 query code-reality 符號圖譜／symbol query，或重辯 CR 三弧（SCIP/換軌/pyrefly）定案時讀——勿重辯＋觸發載體定律
+    94	- [project_session-topology-single-writer](project_session-topology-single-writer.md) - ai-rules 檔案單一寫入者拓撲＋hub-relay 工作法——寫入面/執行面邊界、授權不跨 session、複掃防線
+    95	- [ai-rules-dual-role-mosaic-shared](ai-rules-dual-role-mosaic-shared.md) - ai-rules 雙角色:通用 rules + mosaic(3 worktree)共用 skills/commands 的家;看到 mosaic-specific skill 別當漂移
+    96	- [project_card-branch-rule-proposal-pending](project_card-branch-rule-proposal-pending.md) - 卡 branch 弧 09-08 進行中——主場反轉 mosaic（三 VSCode=三 WT、branch=ambient UI）；命名定稿 線縮寫-卡號（war-77/v2-77/mos-77/…
+    97	- [project_muse-memory-mechanism-divergence](project_muse-memory-mechanism-divergence.md) - muse local memory 與 CC/ZCode 結構性不同（三 scope/48 檔上限/observer 召回）——telemetry 源覆蓋暫緩 draft，要用先重設計
+    98	- [mac-nightly-sequence-oom-crash](mac-nightly-sequence-oom-crash.md) - Mac watchdog panic 根因＝nightly pytest 記憶體常態＋隔夜 session＋swap ENOSPC；修法＝分批跑＋收工結算
+    99	- [project_commit-finalization-gate](project_commit-finalization-gate.md) - commit finalization 閘門：2.8 對帳＋孤兒結算＋docs 單檔閘＋footer 中性化＋ruff 機械改動免確認
+   100	- [project_memory-desc-loop-posture-pending](project_memory-desc-loop-posture-pending.md) - desc 夜修晝覆＝三層治理預期形態（姿態句入 skill 仍待 user 裁定）；③ annotate 膨脹已 MOS-69 handoff 收案
+   101	- [project_backlog-cleanup-vehicle](project_backlog-cleanup-vehicle.md) - backlog Done 欄清場每日 launchd 載體弧（ai-rules+mosaic 09-06
+   102	- [project_plugin-review-absorption-p1-p7](project_plugin-review-absorption-p1-p7.md) - Anthropic plugin review 方法論吸收（P1-P6 採/P7 不採）——已隨 AIR-28 c83ddf4 落地（09-05）；證據釘 marketplace SHA
+   103	- [multi-harness-architecture-direction](multi-harness-architecture-direction.md) - ai-rules 跨 harness 方向——兩消費端、standards-first＋客製化 overlay、ref-docs/harness 為參考
+   104	- [zcode-hooks-porting](zcode-hooks-porting.md) - ZCode hooks 移植完結（940746a）——symlink 無效（config 絕對路徑）、事件子集、專案層被忽略；exit 2 stderr 回饋 LLM
+   105	- [project_memory-redesign-read-path-0908](project_memory-redesign-read-path-0908.md) - AIR-45 終態——(a)採B＋desc 文法五條；AIR-48 P1-P5 已落地（B live＋定義表＋dogfood＋探針/建議）；歸因建議待 user 裁
+   106	
+   107	## Reference
+   108	
+   109	- [reference_codex-cli-exec-facts](reference_codex-cli-exec-facts.md) - 當你要經 bridge 派 codex 或查 raw codex CLI exec 語義時——0.153.4 實測（JSONL
+   110	- [reference_codex-config-zai-topology](reference_codex-config-zai-topology.md) - codex 四面：z.ai 認證拓撲/rescue 轉發 env 陷阱/sol high 審查能力剖面/AGENTS.md 上限 knob——跨家族第二意見定位
+
+codex
+記憶池裡主要有兩個條目在講 commit 前對帳紀律：
+
+**`feedback_verify-wt-before-commit`**
+要點是「commit 雙防護」：commit 前先查 `git log --oneline -5` 和 `git status --short`，確認 working tree 不是舊 snapshot；只用 `git add <具體檔>`，禁 `git add -A` / `git add .`；stage 後必看 `git diff --cached` 的實際內容，`--name-only` 不夠。
+
+它特別強調幾個事故型態：
+
+- `staged` 可能早就被別人污染，所以具名 add 仍不足，commit 前要用 `git diff --cached --name-only` 對帳「逐行等於本次自己要 commit 的檔案集合」。
+- 對帳要抓「多了外來檔」也要抓「少了自己的檔」；如果檔案從清單消失，要查 `git log -2 -- <path>`，可能已被平行 session 帶走。
+- 同檔 hunk 糾纏時，整檔 add 會撈進別人相鄰改動；要用 patch staging，必要時 `-U1` 拆 hunk。
+- `git mv` 會自帶 stage，後續 scoped add 也可能把殘留 rename 帶進 commit；commit 後還要用 `git show <sha>` 或 `git diff-tree` 驗實際內容。
+- 綠燈判準不是「我跑過對帳命令」，而是 staged 清單完全等於本次白名單；多一行就停。
+
+**`project_commit-finalization-gate`**
+這是 ai-rules 專案化的 commit finalization 閘門記憶。它說 commit 漏帶不是偶發個案，而是需要「對帳＋半套偵測＋孤兒結算回收＋機械改動例外」一起處理。
+
+具體要點：
+
+- `skills/commit` 已落地階段 `2.8 Finalization 對帳閘門`：commit 前掃 finalization 路徑面、偵測半套歸檔、判斷歸屬。
+- backlog / EP / finalization 不能 post-commit 回寫來補，應在 pre-commit 結算並跟 code 同 commit 落地。
+- 「commit 標題寫結算」不代表真的結算；要讀卡 frontmatter / 狀態，而不是相信 commit message。
+- 純 `.md` 直 commit 若沒有走 post-build，commit 前要跑 `/consistency`。
+- ruff 純機械改動有免確認例外，但仍要遵守 `feedback_verify-wt-before-commit` 的具名 add 與 staged 對帳。
+
+我實際讀到的條目名是：
+
+- `feedback_verify-wt-before-commit`
+- `project_commit-finalization-gate`
+
+結論一句話：commit 前紀律不是只看 `git status` 或跑一次 `git add`，而是要把「本次預期檔案集合」和 `git diff --cached` / staged 清單逐檔對帳；任何多、少、rename、同檔 hunk 混入、finalization 半套或孤兒狀態都要在 commit 前停下處理。
+
+
+hook: Stop
+hook: Stop Completed
+tokens used
+71,250
+記憶池裡主要有兩個條目在講 commit 前對帳紀律：
+
+**`feedback_verify-wt-before-commit`**
+要點是「commit 雙防護」：commit 前先查 `git log --oneline -5` 和 `git status --short`，確認 working tree 不是舊 snapshot；只用 `git add <具體檔>`，禁 `git add -A` / `git add .`；stage 後必看 `git diff --cached` 的實際內容，`--name-only` 不夠。
+
+它特別強調幾個事故型態：
+
+- `staged` 可能早就被別人污染，所以具名 add 仍不足，commit 前要用 `git diff --cached --name-only` 對帳「逐行等於本次自己要 commit 的檔案集合」。
+- 對帳要抓「多了外來檔」也要抓「少了自己的檔」；如果檔案從清單消失，要查 `git log -2 -- <path>`，可能已被平行 session 帶走。
+- 同檔 hunk 糾纏時，整檔 add 會撈進別人相鄰改動；要用 patch staging，必要時 `-U1` 拆 hunk。
+- `git mv` 會自帶 stage，後續 scoped add 也可能把殘留 rename 帶進 commit；commit 後還要用 `git show <sha>` 或 `git diff-tree` 驗實際內容。
+- 綠燈判準不是「我跑過對帳命令」，而是 staged 清單完全等於本次白名單；多一行就停。
+
+**`project_commit-finalization-gate`**
+這是 ai-rules 專案化的 commit finalization 閘門記憶。它說 commit 漏帶不是偶發個案，而是需要「對帳＋半套偵測＋孤兒結算回收＋機械改動例外」一起處理。
+
+具體要點：
+
+- `skills/commit` 已落地階段 `2.8 Finalization 對帳閘門`：commit 前掃 finalization 路徑面、偵測半套歸檔、判斷歸屬。
+- backlog / EP / finalization 不能 post-commit 回寫來補，應在 pre-commit 結算並跟 code 同 commit 落地。
+- 「commit 標題寫結算」不代表真的結算；要讀卡 frontmatter / 狀態，而不是相信 commit message。
+- 純 `.md` 直 commit 若沒有走 post-build，commit 前要跑 `/consistency`。
+- ruff 純機械改動有免確認例外，但仍要遵守 `feedback_verify-wt-before-commit` 的具名 add 與 staged 對帳。
+
+我實際讀到的條目名是：
+
+- `feedback_verify-wt-before-commit`
+- `project_commit-finalization-gate`
+
+結論一句話：commit 前紀律不是只看 `git status` 或跑一次 `git add`，而是要把「本次預期檔案集合」和 `git diff --cached` / staged 清單逐檔對帳；任何多、少、rename、同檔 hunk 混入、finalization 半套或孤兒狀態都要在 commit 前停下處理。
+
+
