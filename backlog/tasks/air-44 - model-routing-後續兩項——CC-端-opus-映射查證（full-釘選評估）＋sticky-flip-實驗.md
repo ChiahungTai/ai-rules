@@ -4,6 +4,7 @@ title: model-routing 後續兩項——CC 端 opus 映射查證（full 釘選評
 status: To Do
 assignee: []
 created_date: '2026-09-08 01:42'
+updated_date: '2026-09-08 01:59'
 labels:
   - governance
 dependencies: []
@@ -20,3 +21,9 @@ ordinal: 36000
 <!-- AC:BEGIN -->
 - [ ] #1 CC 映射表實測更新；flip 判定回寫但書段
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+【09-08 進展】①CC opus 映射查證✅：定義源＝~/.claude/settings.json env（ANTHROPIC_BASE_URL=z.ai 相容端點）——opus→glm-5.3[1m]、sonnet/haiku→glm-5.3-flash[1m]，走 GLM 額度非 Anthropic 訂閱；agent-workflow Step 1 表＋model-routing 解析表 Anthropic 欄＋dispatch 段已同步更新（commit 見後）。殘餘＝CC 端釘選設計決策（claude 投影 full-tier 可釘 model: opus 別名——補完 inherit 洞雙 harness 修補；涉 sync_agents CC 投影改動）待 user 拍板。②sticky flip 未動。
+<!-- SECTION:NOTES:END -->

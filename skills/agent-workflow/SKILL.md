@@ -50,12 +50,13 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 
 **Step 1**：從系統提示詞的 model 資訊判斷當前 GLM 模型：
 
-| 系統提示詞中的模型 ID | 對應模型 | GLM 模型 |
+| 系統提示詞中的模型 ID | 對應模型 | GLM 模型（env 映射現值） |
 |---------------------|---------|---------|
-| `claude-haiku-*` / `glm-4.7` | haiku | glm-4.7 |
-| `claude-sonnet-*` / `glm-5.1` | sonnet | glm-5.1 |
-| `claude-opus-*` / `glm-5-turbo` | opus | glm-5-turbo |
-| `glm-5.3-flash` | haiku | glm-5.3-flash（5.3 世代 lite 層） |
+| `claude-opus-*` | opus | **glm-5.3**（旗艦） |
+| `claude-sonnet-*` / `claude-haiku-*` | sonnet／haiku | **glm-5.3-flash** |
+| `glm-5.3-flash` | — | glm-5.3-flash（5.3 世代 lite 層） |
+
+> env 映射定義源＝`~/.claude/settings.json` `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL`（z.ai 相容端點 `ANTHROPIC_BASE_URL`，`[1m]` 後綴＝context 變體標記）——本表值抄該處，改 env 時同步此表〔repo-observed 2026-09-08〕。舊值（glm-4.7／glm-5.1／glm-5-turbo）為前世代 env 映射，已退役。
 
 **Step 2**：查「rate limit 與並發上限」表得**並發上限**——以**將 spawn 的 agent 所在 tier** 為準（lite tier agent 查 glm-5.3-flash 列；與主 session 同 tier 的 spawn 才用 Step 1 偵測結果）（單一源 — 本檔不自帶數字，避免 provider 改限額時這裡 drift；表在 [model-routing skill](../model-routing/SKILL.md)）。
 
