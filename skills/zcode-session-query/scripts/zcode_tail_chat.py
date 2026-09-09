@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Show last N human<->assistant exchanges of a ZCode session.
 
-Mechanical extractor (standup pattern): read ~/.zcode/cli/db/db.sqlite
+Mechanical extractor: read ~/.zcode/cli/db/db.sqlite
 read-only, walk message -> part for one session, keep human input (user
 text part without `synthetic` flag) and assistant text parts, print the
 tail rounds. Tool results / continuation notes / system reminders all

@@ -70,7 +70,6 @@
 - `/fix-test` — 測試失敗分類修復（先 triage 哨兵＋病歷＋仲裁，再分類 A/B/C/D/E；防止盲目讓測試通過）+ 階段 4.5 TWINS 同類缺陷 sweep
 - `/audit-test` — 測試品質稽核（反模式偵測、覆蓋對稱性、mock 健康度，只讀不寫）
 - `/smell-detector` — 壞味道偵測（layer 3，行動前/審既有）：架構審查＋重構前期研究＋測試優化盤點；兩 mode——`<dir|files>` zoom 變焦批判（質疑存在：6 判準+查證誠信+Domain 層判準 4/5）/ `--baseline <dir>` 廣角盤點（per-directory 4 檔+invariants+--status/--stale/--arch）；測試 smell 三類（資源/怪獸/結構，與 /audit-test 正交）；read-only 偵測器，修復走 /implement、/fix-test
-- `/corpus-recall` — 行動前敘事脈絡檢索（topic→前因後果卡片，與 smell-detector 對仗＝行動前偵察雙軸）：symbol/模組/關鍵詞→callstack-plan 錨點＋tour 景點＋manifest 交叉＋md 內文＋hub_refs 影響域的機械求全，LLM 判讀 confidence 三級；輸出相關鏈（職責一句＋為何相關＋走讀/深讀雙入口）——corpus 超過瀏覽閾值後的檢索前門；無語料誠實停不硬湊
 - `/consistency` — 文檔品質檢查（自洽性、矛盾性、順序、自包含、精準度、Signal/Noise）
 - `/sync-sources` — 跨檔 single-source invariant 機械檢查（含非 Claude 部署 bundle 新鮮度）
 - `/state-review` — 全 repo 狀態對抗審查（A 軸機器，抓 diff-review 盲區的 state-rot：跨弧累積漂移）：環境凍結（clean-tree 預設＋前後比對 fail-loud）＋scope manifest（core/leaf/generated/mirror 分類帳）→ external family 單發深審（work-order review variant；family 與 caller 相異、依 dispatch 慣例解析）→ in-family judge-review → gate 候選提案；read-only 全程（報告對話輸出，落檔/建卡＝user 拍板後續動作），修復走 /implement
@@ -126,7 +125,6 @@
 - `kanban-board` — Tasks.md 看板卡片管理（讀 / 建 / 移動 / 回顧）
 - `maintain` — `/daily-maintain` 的 4-phase 維護核心（勿直接呼叫）
 - `scan-project` — 統一專案知識掃描（on-demand；imports + Capabilities + kanban → dep_graph / findings）
-- `standup` — 每日晨間簡報昨日活動 digest（跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition；ZCode 23:20 定時任務整合）
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / spawn 預設背景 / spawn 型別 gate（內建 general-purpose／Explore 無 pin 繼承主模型——lite 任務必派 registry 角色）/ 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）/ **全生命週期 execution contract 消費側**（各段 dispatch 查表；表主體在 agents/AGENTS.md）
 - `cross-verify` — 多源交叉查證（db/git/log/memory/cr/web 軸群平行取證→交叉對帳→verdict＋unverified；源枚舉制——web 軸須顯式點名；源缺場該軸 unverified 不阻斷；產出軌道①可餵 judge-review；執行載體＝`agents/roles/cross-verify-investigator.md` 單一參數化 agent）
 - `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表〔中文標籤旗艦/一般〕＋full-tier 旗艦釘選（ZCode＝registry 釘 glm-5.3——AIR-43 inherit 洞修補；CC＝inherit）＋旗艦資格條款（五項）／坐位註記＋內建型別無 pin 繼承（general-purpose／Explore 繼承主 session 模型；lite 任務誤派＝旗艦燒機械段反模式）＋lite 分工律〔執行層條件式降級＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律〕＋external-runtime family→(model,effort,容量) 解析表＋eligibility gate／reviewer 交接契約／完成回報收法（fire-and-forget 決策樹：--background 提交＋跨 session 認領＋wait/show 晚收、timeout 訊號家系拆分、ETA-gate fallback）／套用三路徑、rate limit 並發表、thoughtLevel 但書；rule 端留角色→tier 表＋詞彙定義＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
@@ -157,7 +155,6 @@
 
 ### 領域特定
 - `trading-analysis` — 股票 / 市場走勢三層分析（經典 TA → 量化 → 第二層思考）＋事件研究與回測量測紀律
-- `broker-flow-analysis` — 台股券商分點進出（BSR）盤底接手 playbook + 單分點角色診斷（反散槍 focal-point 紀律）
 - `kbar-form-analysis` — K 線形態獨立判讀 pipeline（focus/background 雙視圖＋數值包三證據層、vision agent 盲判合約、fail-visible 分層保證——標記輔助/誤判歸因/批量掃描）
 
 ## Frontmatter 配置

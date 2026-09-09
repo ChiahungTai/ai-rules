@@ -50,7 +50,7 @@ uv run --project ~/Github/ai-rules python ~/.zcode/skills/zcode-session-query/sc
 ## 陷阱（實測得來）
 
 - **session id 禁手打**：uuid 一個字元抄錯即 silently not found——一律複製貼上，或不確定時用 `LIKE 'sess_<前8碼>%'` 前綴查
-- **`sqlite3` CLI 對此 DB 會無聲空輸出**（原因未查明）——改用 python `sqlite3` 模組 + `file:...?mode=ro` uri 連線（standup 的 aggregate_sessions.py 同模式）
+- **`sqlite3` CLI 對此 DB 會無聲空輸出**（原因未查明）——改用 python `sqlite3` 模組 + `file:...?mode=ro` uri 連線
 - `ReadSessionContext` / `SendMessage` 官方文檔未記載（2026-08 全量鏡像 27 頁零記載）——行為以實測為準，升級後重新驗證
 
 ## 資料結構速查（DB 直查 / 維護腳本時用）

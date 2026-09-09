@@ -360,7 +360,7 @@ fd -e py . tests/
 
 ### 步驟 10：產出報告
 
-按輸出格式模板產出報告。Daily Scan 時由排程載體（ZCode 23:20 定時任務週六條件段）直接 append `### 🔍 audit-test` section 進 daily-report（不經 standup——test-quality 在報告裡有自己的 section）；手動跑的 claude-sync log 落點慣例隨 claude -p 載體退役一併停用。
+按輸出格式模板產出報告。Daily Scan 時由排程載體（ZCode 23:20 定時任務週六條件段）直接 append `### 🔍 audit-test` section 進 daily-report（test-quality 在報告裡有自己的 section）；手動跑的 claude-sync log 落點慣例隨 claude -p 載體退役一併停用。
 
 ---
 
@@ -369,7 +369,7 @@ fd -e py . tests/
 | 命令 | 與 /audit-test 的關係 |
 |------|---------------------|
 | `/fix-test` | 互補：fix-test 修**失敗**的測試，audit-test 偵測**通過但品質差**的測試 |
-| ZCode 23:20 定時任務（週六條件段） | Daily Scan 結果直接 append `### 🔍 audit-test` section 進 daily-report（standup skill 不再消費——已退役整合） |
+| ZCode 23:20 定時任務（週六條件段） | Daily Scan 結果直接 append `### 🔍 audit-test` section 進 daily-report |
 | `/code-review` | Correctness 軸可引用 audit-test 發現 |
 | `/implement` | 段落完成後跑 audit-test 確認測試品質 |
 | `/commit` | pre-commit gate：audit-test 無 Critical 才建議 commit |
