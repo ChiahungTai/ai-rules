@@ -1,9 +1,10 @@
 ---
 id: AIR-64
 title: handoff 網頁版改寫——web-brief雙軌（問架構／講實作）＋可重現＋輕機密
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-09 10:18'
+updated_date: '2026-09-09 23:13'
 labels: []
 dependencies: []
 ordinal: 50000
@@ -19,3 +20,9 @@ ordinal: 50000
 <!-- AC:BEGIN -->
 - [ ] #1 web-ask/web-tell 範例各一；本地軌零變更；兩檔自洽無 drift
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+triage 併入 AIR-63（視圖雙件弧段二）——user 09-10 拍板；原 desc 見本卡。
+<!-- SECTION:FINAL_SUMMARY:END -->

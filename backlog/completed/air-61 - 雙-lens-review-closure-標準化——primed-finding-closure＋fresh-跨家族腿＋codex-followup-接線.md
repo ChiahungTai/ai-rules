@@ -1,9 +1,10 @@
 ---
 id: AIR-61
 title: 雙 lens review closure 標準化——primed finding closure＋fresh 跨家族腿＋codex followup 接線
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-09 13:20'
+updated_date: '2026-09-09 23:13'
 labels:
   - governance
   - skills
@@ -21,3 +22,9 @@ ordinal: 50000
 
 〔驗收：①followup-review skill（或 post-build 鏈對應段）載明雙 lens 分工與 primed 邊界②一次真實 codex review 弧完成 --session-id followup 接線：state-review「派發形態現況」codex followup 從 first-real-usage-pending 改已驗證（附 bridge jobId）③下游引用面（review-engine／judge-review／post-build）rg 掃描無 drift④工單模板含授權失效條款（與恢復鏈治理卡③同步）〕
 <!-- SECTION:DESCRIPTION:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+triage 併入 AIR-60（session 接續×review closure 治理弧段二）——user 09-10 拍板關聯合一連續做；原 desc 全文見本卡 Description。
+<!-- SECTION:FINAL_SUMMARY:END -->

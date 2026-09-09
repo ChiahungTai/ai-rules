@@ -1,9 +1,10 @@
 ---
 id: AIR-62
 title: segment receipt——EP 段落收斂狀態盤上化（機械欄生成＋freshness 鏈）
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-09 13:20'
+updated_date: '2026-09-09 23:13'
 labels:
   - governance
   - skills
@@ -21,3 +22,9 @@ ordinal: 51000
 
 〔驗收：①段落收斂時機械產出 segment receipt（git 可推導欄零 LLM 手寫；生成器有測試）②resume 流程（單一源恢復序列）讀 receipt 判段落完成度，不從 git log 反推③與恢復序列單一源接線一致（不另立讀取路徑）④implement skill 對應段同步（斷點格式寫進階段文件）〕
 <!-- SECTION:DESCRIPTION:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+triage 併入 AIR-60（段三 segment receipt）——user 09-10 拍板；原 desc 見本卡。
+<!-- SECTION:FINAL_SUMMARY:END -->

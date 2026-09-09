@@ -4,6 +4,7 @@ title: session 接續恢復鏈治理——rehydration 單一源＋at 先結算�
 status: To Do
 assignee: []
 created_date: '2026-09-09 13:20'
+updated_date: '2026-09-09 23:13'
 labels:
   - governance
   - skills
@@ -21,3 +22,9 @@ ordinal: 49000
 
 〔驗收：①rg 驗三處（at／context-management／handoff）均引用同一單一源恢復序列，無各自為政殘留②at SKILL.md Phase 0 含結算三件且時序在寫 at-context 之前③授權失效條款在 at resume prompt＋work-order 範本（skills/_common/work-order.md）＋model-routing「session 定向接續」節三處在場④sync-sources 機械新鮮度檢查通過＋guide 部署同步（deploy_agents）〕
 <!-- SECTION:DESCRIPTION:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+〔triage 併弧 09-10——升級為 session 接續×review closure 治理弧〕併入 AIR-61（雙 lens review closure 標準化：primed finding closure＋fresh 跨家族腿＋codex followup 接線——原卡搬 completed/ 可查全 desc）＋AIR-62（segment receipt：EP 段落收斂狀態盤上化——機械欄生成＋freshness 鏈）。三段連續做：①rehydration 單一源＋at 先結算＋接續授權失效條款②雙 lens closure③segment receipt。
+<!-- SECTION:NOTES:END -->

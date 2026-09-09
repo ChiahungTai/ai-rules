@@ -1,10 +1,10 @@
 ---
 id: AIR-69
 title: memory 雙池內容正確性 full audit——ai-rules＋mosaic 全量條目 vs repo 現況核實
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-09 22:16'
-updated_date: '2026-09-09 23:09'
+updated_date: '2026-09-09 23:13'
 labels:
   - governance
   - memory
@@ -25,3 +25,9 @@ ordinal: 55000
 
 〔CC 09-10 擴充——三方會議裁決承接（ai-analysis/reports/2026-09-10-carrier-placement-v2-conference.md）＋user 拍板全修〕排序依賴解除：S6 已由 mos-88 收斂，兩側均可跑。本弧新增三段：〔A 判準落地〕memory-audit 統一定義表兩處修補——層級閘首句（裁決書§二定版條文逐字）＋誤置表 A/B 兩行；零 bundle 增量硬約束（deployed 36,773B 不增，只刪改指針）；同 commit 完成＋rg 驗零殘留正文（原子性條件）。〔B 先鋒批次 8 條已裁（user 09-10 拍板照辦）〕①bridge-job-completion-no-push→規範正文刪（model-routing 收法段是源），留事故證據＋pointer ②backlog-cli-entry→整條刪 ③global-vs-project-permissions→重寫為 project 現況條（mixed 輕處置）④cross-session-commit-on-active-branch→規範搬 kanban SKILL 建卡段（worktree 直進 main 分流——含今天 user 拍板的 skill 歸屬）＋memory 留事故證據 ⑤backlog-card-edit-precheck→kanban SKILL 卡操作段補 id 對時一句＋留 AIR-26 事故 ⑥skill-deletion-consumer-scan→規範進 instruction-clean/edit-discipline＋事故併入 zcode-skill-usage-audit 後刪（與其重複）⑦work-order-contract-point-to-source→work-order.md 合約段一句＋留事故 ⑧diagnose-installed-vs-source-first→debugging-and-error-recovery skill＋留事故。淨效果：池瘦 ~8-9K chars＋六規範各歸正源。〔C 全量 audit 照原 desc 續跑〕雙向掃描（裁決書§三 forward/reverse lane regex candidate-only）＋歸因投影輔助。執行形態：主 session full。
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+triage 併入 AIR-70（一致性×錯置總治理弧段二）——user 09-10 拍板；desc＋notes（含會議裁決承接三段）全文見本卡。
+<!-- SECTION:FINAL_SUMMARY:END -->
