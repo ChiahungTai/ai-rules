@@ -4,6 +4,7 @@ title: Muse bundle 超限治理——撤五規則排除＋per-target size gate�
 status: To Do
 assignee: []
 created_date: '2026-09-09 02:09'
+updated_date: '2026-09-09 02:24'
 labels:
   - governance
   - context
@@ -21,3 +22,9 @@ ordinal: 45000
 <!-- AC:BEGIN -->
 - [ ] #1 bundle 38,830B＋tests 綠＋post-build muse flash 審查過
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+【post-build 審查（muse ultra→runtime gate 降 xhigh；job job-mtth0nsn-yscfae）】1 Important＋2 Suggestion。F1（Important）edit-discipline SOLID 列舉被精煉成裸詞——OCP/子型替換/ISP rules/ 零殘留＝刪除非合併（違卡決策③）——已修（列舉補回，審查者建議形態）。F2（Sugg）muse bundle 38,830/40,960＝94.8% gate、餘量 ~2KB——設計如此（global-only 留專案空間），bundle-watch 跟蹤、撞線前先精煉。F3（Sugg）VARIANT_LABEL_SUFFIX 不可達＋tests 零覆蓋——baseline 同樣零覆蓋非回歸，保留作未來鉤子不補測。約束保全 A/B/C 對照（outward 紅線/正確性 gate/crash-only）：20 保留條款、約束刪除 0。驗收 6 條全過（uv 與 ~/.config 被 sandbox 擋→.venv 直跑＋同源碼重建 byte 對帳，muse 如實揭露）。
+<!-- SECTION:NOTES:END -->
