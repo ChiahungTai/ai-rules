@@ -4,7 +4,7 @@ title: memory 雙池內容正確性 full audit——ai-rules＋mosaic 全量條�
 status: To Do
 assignee: []
 created_date: '2026-09-09 22:16'
-updated_date: '2026-09-09 23:00'
+updated_date: '2026-09-09 23:09'
 labels:
   - governance
   - memory
@@ -22,4 +22,6 @@ ordinal: 55000
 
 <!-- SECTION:NOTES:BEGIN -->
 〔AIR-54 收尾審查移交——對帳清單 09-10（post-build 三路：flash fresh/primed＋codex bridge job-mtuou4f1-wt7hfk）〕①memory_pack 120 行索引/單條 8KB 數值現駐 skills/memory-audit/SKILL.md「Inbox 消費」節＋池 reference_muse-code-cli-facts——muse 升版兩處須同步重驗；②8KB 單位語義（bytes vs chars）未實測——判讀 8K-12K 治理政策前先以修剪樣本釘住（draft-4 待辦 4 已註記）；③23:40 cron prompt「path contract 五條」vs SKILL 列①-⑥（⑥ edit 專屬）計數措辭——下次修 cron prompt 時對齊，勿為此單獨重放；④同節名「Inbox 消費」跨池掛不同波次載體（mosaic 23:20 看照波 vs ai-rules 23:40 夜波——部署自由非錯，對帳一次即可）。素材：draft-4 修訂版（本日）。
+
+〔CC 09-10 擴充——三方會議裁決承接（ai-analysis/reports/2026-09-10-carrier-placement-v2-conference.md）＋user 拍板全修〕排序依賴解除：S6 已由 mos-88 收斂，兩側均可跑。本弧新增三段：〔A 判準落地〕memory-audit 統一定義表兩處修補——層級閘首句（裁決書§二定版條文逐字）＋誤置表 A/B 兩行；零 bundle 增量硬約束（deployed 36,773B 不增，只刪改指針）；同 commit 完成＋rg 驗零殘留正文（原子性條件）。〔B 先鋒批次 8 條已裁（user 09-10 拍板照辦）〕①bridge-job-completion-no-push→規範正文刪（model-routing 收法段是源），留事故證據＋pointer ②backlog-cli-entry→整條刪 ③global-vs-project-permissions→重寫為 project 現況條（mixed 輕處置）④cross-session-commit-on-active-branch→規範搬 kanban SKILL 建卡段（worktree 直進 main 分流——含今天 user 拍板的 skill 歸屬）＋memory 留事故證據 ⑤backlog-card-edit-precheck→kanban SKILL 卡操作段補 id 對時一句＋留 AIR-26 事故 ⑥skill-deletion-consumer-scan→規範進 instruction-clean/edit-discipline＋事故併入 zcode-skill-usage-audit 後刪（與其重複）⑦work-order-contract-point-to-source→work-order.md 合約段一句＋留事故 ⑧diagnose-installed-vs-source-first→debugging-and-error-recovery skill＋留事故。淨效果：池瘦 ~8-9K chars＋六規範各歸正源。〔C 全量 audit 照原 desc 續跑〕雙向掃描（裁決書§三 forward/reverse lane regex candidate-only）＋歸因投影輔助。執行形態：主 session full。
 <!-- SECTION:NOTES:END -->
