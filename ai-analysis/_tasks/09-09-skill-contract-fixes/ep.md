@@ -109,6 +109,7 @@
 | SM-16 | 三鍵等價 delta-only（happy path） | implement 階段 4 已審同範圍＋同 revision＋同 profile | post-build 只補修正迴圈 delta＋跨段整合面（不全審） | 帳本 identity 對照可機械判（muse M-F5） | S4 |
 | SM-17 | EP/code review spawn 審查 agents | ep-review／code-review 執行 | 審查 agents 跑 lite（flash pin）；judge 仍主 session full | rg：registry pins＋skill「lite 預設」條款（user 09-09） | S10 |
 | SM-18 | rename/move/retire 型 EP 結案 | 弧含符號改名/下沉/退役 | metadata-sync 段反掃舊符號（AGENTS.md 家族＋快 drift 檔）→ 命中修或記 drift；非 rename 弧空跳 | rg：post-build 反掃條款在場；實證錨＝mosaic `TW_STOCK_REGIME` 殘留 | S11 |
+| SM-19 | 刪除／派工前查證 | 刪無測試檔／派 bridge 工單／user 提模型詞 | 刪前查 backlog 卡；bridge 派發印 echo；口語詞經 family 表正規化（非表內詞＝查表訊號） | rg 三條款在場（user 09-09——四事故收口） | S12 |
 
 ## 段落劃分原則
 
@@ -297,9 +298,20 @@
 - **修改要點**：post-build 階段 4 metadata-sync 段補機械步驟——①**rename 清單萃取**：弧 diff 萃取 rename/move/retire 舊符號（檔級 rename 用 `git diff --diff-filter=R -M`；符號級由 LLM 讀 diff 提取——弧內 diff 便宜）②**反掃**：`rg "<舊符號>"` 掃 AGENTS.md 家族（`fd -g AGENTS.md`）＋專案快 drift 檔（參數化——各 repo 藍圖層慣例不同，由專案 AGENTS.md 宣稱或 EP 攜帶清單）③**處置**：命中即修（新錨點）或顯式記 drift；零命中＝步驟完成證據。**不做全檔重驗**（成本與弧大小成正比——A 軸證明基礎命中率高，平時不漂）。非 rename/move/retire 弧＝步驟自然空跳（清單空）
 - **驗證**：SM-18；rg post-build 反掃條款在場；實證錨——mosaic `TW_STOCK_REGIME` 殘留（修法落地後該類弧結案會命中）。
 
+## S12：派工／查證三修補（user 09-09 裁定——當日四事故的規則面收口）
+
+**Context**：general-purpose 誤派 ×2（最大洞已由 AIR-51 補）、muse effort 口語誤讀（表在場未查）、standup 誤刪（刪除查證清單缺 backlog 卡面）——三個一行級修補。
+
+- **依賴**：model-routing 加入共檔序列鏈尾（S5 bridge 段→S10 tier 段→**S12 派發段**）；rules/collaboration-constraints.md 無共檔。
+- **修改要點**：
+  1. `rules/collaboration-constraints.md`「破壞性選擇的查證觸發」清單補：「**backlog 卡（To Do／In Progress／drafts）是否提及或依賴**」——standup 事故：恢復事實只記在 AIR-52 desc，原清單不含卡面
+  2. `skills/model-routing/SKILL.md` 派發段補 **bridge echo**：「派 bridge 工單必印 `[Bridge] family=<f> model=<m> effort=<e>`」——與 in-harness「spawn 前印確認 `[Agent] model=…`」對稱（muse effort=medium 事故若印出，出發前即被肉眼攔）
+  3. 同檔補**口語正規化**：「user 對話中的模型／檔位詞（flash／max…）不是值——派發前經 family 表正規化；非表內詞＝查表觸發訊號，禁猜測直接套用」（flash 對 muse 非合法 effort 值，本身就是該查表的訊號）
+- **驗證**：三條款 rg 在場；SM-19。
+
 ## 整合策略
 
-- **執行序**：S0（gate，已完成）→ S7（已降級結案）→〔S1→S2→S3→S4→S11 序列（S11 排 S4 後——post-build 共檔鏈收尾）；S6、S8、S9、S10 與 A 線平行——S9 的定義表條目待 S5 承載者明文定稿後落〕→ 收尾。**共檔序列化（codex R4 修正＋S10/S11 增補）**：`post-build` 共檔鏈 S1→S2→S3→S11 依序動；`followup-review` 與 `review-engine` 兩檔的 S5 部分均**待 S1 完成後再動**（S1 唯一擁有 review-engine 擴欄、followup-review 帳本措辭；S5 消費驗證同詞）；**`model-routing` 同檔序列：S5（bridge 段）→ S10（tier 段）依序動**；S5 其餘檔案（work-order）與 A 線不重疊；S10 的 rules/model-routing.md／ep-review／code-review／registry 無共檔。
+- **執行序**：S0（gate，已完成）→ S7（已降級結案）→〔S1→S2→S3→S4→S11 序列（S11 排 S4 後——post-build 共檔鏈收尾）；S6、S8、S9、S10、S12 與 A 線平行——S9 的定義表條目待 S5 承載者明文定稿後落〕→ 收尾。**共檔序列化（codex R4 修正＋S10/S11 增補）**：`post-build` 共檔鏈 S1→S2→S3→S11 依序動；`followup-review` 與 `review-engine` 兩檔的 S5 部分均**待 S1 完成後再動**（S1 唯一擁有 review-engine 擴欄、followup-review 帳本措辭；S5 消費驗證同詞）；**`model-routing` 同檔序列：S5（bridge 段）→ S10（tier 段）→ S12（派發段）依序動**；S5 其餘檔案（work-order）與 A 線不重疊；S10 的 rules/model-routing.md／ep-review／code-review／registry 無共檔。
 - **全弧 rg 掃描清單**（定義源變更必掃，single-source drift 防護）：`結案兩步`（S2）、`兩段式`（S5）、`agent 轉發`（S5/S6）、`驗證式`（S1/S5 同詞）、`docs mode` 觸發判準（S3）、`uncommitted 空`（S1）、`唯一結構化防線`（S3）。
 - **部署面**：ai-development-guide.md（S2）與 rules/tool-discipline.md（S6）變更後跑 `uv run python scripts/deploy_agents.py`＋`/sync-sources`（bundle 新鮮度）；skills/CLAUDE.md 工作流索引 description 同步（收尾）。
 
