@@ -4,7 +4,7 @@ title: 跨池記憶主體遷移——muse project memory 一等公民＋CC/ZCode
 status: In Progress
 assignee: []
 created_date: '2026-09-09 02:47'
-updated_date: '2026-09-09 11:02'
+updated_date: '2026-09-09 21:06'
 labels:
   - memory
   - governance
@@ -45,4 +45,6 @@ ordinal: 46000
 〔收尾補記 09-09〕draft-4/draft-5 出處：muse session（09-09 下午）順產——draft-4＝EP 收尾步驟 6 的審視產出、draft-5＝pending 讀取覆層設計定案（user 09-09 拍板「只做設計不寫程式」，AIR-57 建卡承接——5a6ce2e 建卡 commit 落 air-54 branch 為 muse 越界〔建卡紀律應在 owning 線〕，隨收尾 merge 進 main、message 已帶正確 id，歷史交 git log）；air-58 為獨立任務卡（非本弧）。post-build 三視角（primed/fresh/codex）22 findings 裁決全 apply——帳本 .review/air-54.md；VP3 recall sentinel 結論＝僅 explicit 過＝召回面受限（EP 風險 7 已補記）。
 
 〔VP3 更正 09-09〕前則「僅 explicit 過＝召回面受限」為單腿結論——與 muse 15:00 工具鏈腿（_inventory.md 直讀→定位→讀 body，綠）合成後正解：一等公民 gate 關閉（observer 工具鏈召回可達）＋直達注入限清單內（深度記錄）。EP 風險 7 已更新。
+
+〔AIR-54 收尾 handoff 09-10 CC〕S1-S5 已進 main（e417693）＋首波/驗證綠＋.bak 刪。收尾段＝①S6 mosaic 移植（EP :252-284 自足：前置 muse 自建三檔過六問併入或遷 processing→主體進駐 mosaic repo .agents/memory〔owning=main WT、版控排除沿用 exclude〕→CC dir 換 symlink→次 WT symlink F2 實測〔拒則顯性降級 read_file 絕對路徑〕→hooks.json+AGENTS.md+memory-policy.md 直寫政策改寫→夜波路徑比照 S2+repo 外 bundle G2-11）②SM-12：三端開場+WT inode 一致+夜波一輪③ai-rules 欠項×2：memory-audit SKILL 補「Inbox 消費」節（源=23:40 cron prompt 步驟 0）＋registry 條 4 重放（.agent-tmp/air-54-registry-row4-*）④EP 收尾步驟 1-5＋結案兩步＋弧結案蒸餾。開場帶一句：mosaic MOS-86 源卡結案回報（mosaic 側懸掛，errata 已閉環於 ai-rules main）。勿重辯：直寫 MLM 廢止、WAL=LIGHT、CAS v1、exclude 慣例不強推 gitignore。
 <!-- SECTION:NOTES:END -->
