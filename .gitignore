@@ -65,6 +65,10 @@ ai-analysis/_projects/**/diagram-*.visual-check.*.png
 .muse-bridge/
 .delegate-bridge/
 
+# machine-local runtime 產物（muse hooks 配置／playwright MCP 截圖——不入版控）
+.muse/
+.playwright-mcp/
+
 # Muse 共享記憶鎖（ephemeral）
 .agents/memory/.muse-memory.lock
 .agents/memory/*.lock

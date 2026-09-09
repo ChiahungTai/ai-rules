@@ -4,7 +4,7 @@ title: 治理同步弧——排程解綁＋registry 外部依賴反查＋跨 rep
 status: In Progress
 assignee: []
 created_date: '2026-09-09 01:35'
-updated_date: '2026-09-09 13:02'
+updated_date: '2026-09-09 13:12'
 labels:
   - governance
   - doc-sync
@@ -39,4 +39,6 @@ ordinal: 44000
 〔S4 今晚首波後（時序硬約束：23:40 首波完成、log 落盤前禁 CronUpdate）〕①CronList 讀現行 prompt（AIR-54 已改路徑欄指 .agents/memory——勿回退）②gate 口徑動態化：移除硬編 22,500/21,000/190/24,000，改「動態讀 GATE_CHARS/GATE_BYTES/GATE_LINES（rg skills/memory-audit/scripts/generate_index.py）＋--check 輸出行」，形態仿週日治理 prompt 段 2 層 1；逼近線改 gate 百分比口徑③cross-verify memory 軸／commit 2.8 掃描面補 _inventory.md 檢索語義（B 形態 routing：MEMORY.md 只是 resident 投影，全量條目住 _inventory.md）④P5 改寫落地（上方文案）⑤收斂後結案兩步＋弧結案蒸餾＋post-build 鏈。
 
 〔今晚 rebase 注意〕air-59→main ff 後 air-52 rebase：①registry「更新時點」行預期一行 conflict（air-54 前綴 2026-09-09 註記 vs 本弧尾注）——解法＝兩則並存②AIR-54 未提交 registry 條 4（一次性驗證 cron automation-d64fd994 記帳行）備份於 .agent-tmp/air-54-registry-row4-pending.{diff,full.md}＋README——歸 AIR-54 收尾 session 在 owning branch 重放，非本弧範圍。
+
+〔command center 補充 09-09 晚〕①S2 反查表建議擴欄「新架構職責註記」（AIR-54 落地後每條排程的職責變化／保留裁決——user 點名要掃排程必要性，此表為機械載體，不另開弧）。②順手項×2：draft-3 檔殼收尾（已被 AIR-53 承接落地，drafts/ 清除）；corrections-weekly SKILL:35 的 --pool 舊路徑示例改指 .agents/memory/（介面路徑經 symlink 仍通＝口徑債非斷線，S2 同檔順手）。③情報：夜波 cron prompt 已被 AIR-54 S4 更新（新路徑+inbox+bundle），S4 只剩 step 1 的 A 形態硬編數字（22,500/190→動態 gate 口徑）。
 <!-- SECTION:NOTES:END -->
