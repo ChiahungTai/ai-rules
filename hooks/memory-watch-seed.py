@@ -10,8 +10,9 @@ lists pool entries (top-level .md, excluding MEMORY.md and _-prefixed files —
 the same entry filter `memory_hook_common.is_pool_entry` applies, so we never
 watch files the dirty sensor would drop).
 
-Always exits 0; pool missing/empty -> empty watch list (harmless no-op).
-Hook runtime is python 3.9 — no 3.10+ syntax in this file.
+Always exits 0; pool missing -> stderr hint + empty watch list; pool empty
+-> empty watch list (harmless no-op). Hook runtime is python 3.9 — no 3.10+
+syntax in this file.
 """
 
 import json
@@ -23,6 +24,14 @@ POOL = Path.home() / ".claude" / "projects" / "-Users-ctai-Github-ai-rules" / "m
 
 def watch_paths():
     if not (POOL / "MEMORY.md").is_file():
+        # Pool missing is abnormal on this machine (F4a): surface on stderr
+        # instead of silently seeding an empty watch list. Cross-machine /
+        # multi-pool derivation is deliberately out of scope here — AIR-54 S2
+        # owns the path-governance redesign.
+        print(
+            f"memory-watch-seed: pool not found at {POOL}; seeding empty watch list",
+            file=sys.stderr,
+        )
         return []
     return sorted(
         str(p.resolve())
