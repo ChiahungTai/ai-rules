@@ -120,7 +120,7 @@ UC 引用：實作「跨池共享記憶主體」。依賴：無前置段（先�
 6. ZCode 端不動（既有 symlink 經 CC_MEM 雙跳）——驗 `readlink -f` 到 AGENT_MEM
 7. `.gitignore` 兩行已於 59baf29 落地（驗證在場即可）
 8. **E2E 驗證矩陣（G2-9＝`.bak` 解鎖條件）**：三端開場讀＋**CC/ZCode write-through**（經 symlink 寫測試條目→regen→讀回→刪）＋**muse 攔截鏈**（add→deny→inbox 落地）＋consolidation 模擬（含 path contract）＋夜波 dry-run＋inner git 操作（status/log）
-9. **E2E 全綠後**才刪 `$POOL.bak`
+9. **E2E 全綠後**：先手動產出首份 repo 外 bundle（`git -C $AGENT_MEM bundle create ~/.agents/memory-bundles/ai-rules-$(date +%F).bundle --all`——歸零「刪 .bak 到首個夜波」之間的無備份空窗）→ 才刪 `$POOL.bak`
 
 ### Pseudo Code
 ```
