@@ -21,7 +21,8 @@ for name in NAMES:
     for prefix in ("", "feedback_", "reference_", "project_"):
         cand = os.path.join(POOL, f"{prefix}{name}.md")
         if os.path.exists(cand):
-            text = open(cand, encoding="utf-8").read()
+            with open(cand, encoding="utf-8") as f:
+                text = f.read()
             head = text.split("---")[1] if text.startswith("---") else text[:300]
             desc = ""
             for line in head.split("\n"):

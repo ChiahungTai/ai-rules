@@ -1,7 +1,8 @@
 """P4 helper: section byte split of mosaic root AGENTS.md (read-only)."""
 
 path = "/Users/ctai/Github/mosaic_alpha/AGENTS.md"
-text = open(path, encoding="utf-8").read()
+with open(path, encoding="utf-8") as f:
+    text = f.read()
 lines = text.split("\n")
 total = 0
 current = "(header)"

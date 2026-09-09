@@ -66,8 +66,8 @@ print(
 if time_range:
     import datetime
 
-    lo = datetime.datetime.fromtimestamp(min(time_range) / 1000)
-    hi = datetime.datetime.fromtimestamp(max(time_range) / 1000)
+    lo = datetime.datetime.fromtimestamp(min(time_range) / 1000, tz=datetime.UTC)
+    hi = datetime.datetime.fromtimestamp(max(time_range) / 1000, tz=datetime.UTC)
     print(f"time range: {lo} .. {hi}")
 for k, v in cats.items():
     print(f"{k}: {v}")

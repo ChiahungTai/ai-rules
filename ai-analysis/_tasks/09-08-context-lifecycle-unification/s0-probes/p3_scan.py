@@ -36,7 +36,7 @@ def scan_file(path):
                 continue
             try:
                 frame = json.loads(line)
-            except Exception:
+            except json.JSONDecodeError:
                 continue
             children = frame.get("children")
             if children is None:
@@ -49,7 +49,7 @@ def scan_file(path):
             for child in children:
                 try:
                     rec = json.loads(child.get("record_json", ""))
-                except Exception:
+                except json.JSONDecodeError:
                     continue
                 pt = rec.get("payload_type", "")
                 if "context_block" not in line and "workspace" not in pt:
