@@ -32,3 +32,9 @@
 1. **是否採 (b)**：若你更看重「歸因隨條目耐久」可選 (a)——代價是尺寸紀律正面讓步（不建議；(a) 的耐久性部分可由 AIR-49① git 補）
 2. **第三通道殘餘盲是否需要更重機制**（如 hook 層寫入攔截記錄）——建議等 dogfood 窗口內實例數據再議
 3. **實作排序**：建議排 AIR-49 之後——避免 dogfood 觀測窗口內池工具鏈異動（AIR-48 整合策略同型考量）
+
+## 裁決（user 09-09，定稿）
+
+1. **採 (b)＋修正**：sidecar 語義改 `last_tracked_writer`＋三態（consistent／unattributed_external／ambiguous；consistent 禁叫 verified）；tie 加 ambiguous（寧可錯放不硬判）；actor＝kind＋root＋prompt＋leaf 雙欄（session_id 留 join key）；projection 只說看到誰、verifier 才說信多少。watermark／(e) 列觀察項（batch 語義下邊際價值待實例）。
+2. **hook sensor 拆獨立小卡**：CC 側 PostToolUse(Edit|Write)＋FileChanged 先行；ZCode 側維持 (b)+hash（僅 PreToolUse／Stop，無 PostToolUse——分通道覆蓋邊界寫進實作卡）。
+3. 排序約束已滿足（AIR-49 Done）；實作另開卡。外部第二意見（ChatGPT 跨 provider 諮詢：same-content／ABA 反例、watermark race、(e) journal、prompt_id）已吸收，handoff 在發起 session transcript。
