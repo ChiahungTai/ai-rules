@@ -4,107 +4,24 @@ harness-scope: neutral
 
 # 編輯紀律
 
-> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
-
 ## 核心原則
 
-**優先編輯現有檔案，品質優先於向後相容。**
+優先編輯現有檔案；測試保護下可大幅重構，品質、正確性、清晰度優先，預設不保留向後相容。
 
 ## 必須遵守的約束
 
-- **優先編輯現有檔案**：必須優先編輯現有檔案而非創建新檔案
-- **品質優先**：可以大幅重構來改善架構品質
-- **快速迭代**：優先正確性和清晰度
-- **架構優先**：預設不考慮向後相容，優先考慮架構品質
-- **依賴方向**：import 必須遵循依賴層級（library → scripts（demo 入口））；scripts 不反向依賴 library 內部，可複用邏輯一旦累積須上抽進 library，不讓 scripts 變第二個 library
-- **單一職責（SRP）**：一個 class/function 一個改變理由 — 改 A 不該順便碰 B；職責多時拆分而非堆疊
-- **依賴向內（DIP）**：高層不依賴低層細節，依賴透過 interface（定義在內層）反轉；新增依賴先問「能否透過內層 interface」
-- **不洩漏實作細節**：公開介面不暴露內部資料結構/型別；消費者不該知道實作
-- **SOLID 指標**：SRP/OCP/LSP（子型替換）/ISP/DIP 實作時遵循（頂層總綱見 design-thinking rule；source 在 ai-rules repo）
-
----
+- 依賴遵循 library 與 scripts 入口層級，scripts 不反向侵入 library 內部；可複用邏輯上抽 library，勿讓 scripts 成第二個 library。
+- 遵循 SOLID：單一改變理由、多責任拆分；高層透過內層 interface 反轉依賴；公開介面不暴露內部資料/型別。
+- 每個新增 validation/logging/config 必能回答解決什麼具體問題，禁投機。
 
 ## 衝突寫法處理（禁止混合）
 
-> **核心原則**：程式庫中存在兩種矛盾寫法時，選擇一種，不要混合。
-
-### 強制規則
-
-- **禁止混合寫法**：兩種矛盾寫法「各照顧一點」的結果比任何一種原始寫法都更難維護
-- **選擇並說明**：選擇較新或測試較完整的寫法，說明理由，標記另一種待清理
-- **發現就標記**：遇到矛盾寫法時主動回報，不要默默自行融合
-
-### 範例
-
-<!-- bundle: skip-start -->
-```python
-# ❌ 錯誤：混合兩種錯誤處理風格（部份用 try/except，部份用 assert）
-def process(data):
-    assert data is not None
-    try:
-        result = transform(data)
-    except ValueError:
-        return None
-    assert result > 0
-    return result
-
-# ✅ 正確：統一使用一種風格（此處選擇 crash-only，符合專案哲學）
-def process(data):
-    assert data is not None
-    result = transform(data)
-    assert result > 0
-    return result
-```
-<!-- bundle: skip-end -->
-
----
+矛盾寫法不各取一半；選較新或測試完整者、說明理由、標另一者待清，發現即回報，禁默默混合。
 
 ## 向後相容確認機制
 
-只有影響以下情況時才需要確認向後相容：
-- 外部系統整合
-- 數據處理流程
-- 部署環境
-- 用戶明確要求
-
----
+影響外部整合、數據流程、部署環境或 user 明確要求時確認；其他內部改動預設品質優先。
 
 ## 變更範圍紀律
 
-- **價值驅動，不投機**：可以加 validation / logging / config，但每個新增都必須能回答「解決什麼具體問題」
-- **修 bug 與架構重構分開**：修 bug 只改必要的行；架構改善在重構段一次改好
-- **清理自己的孤兒**：自己的改動造成的 dead import/variable 必須清理；預先存在的 dead code 只標記不刪。刪除**不留 tombstone**（「已除役」註記/遷墓誌）——歷史去 git log/歸檔區查；歸檔的歷史文檔例外不動
-
----
-
-## ❌ 常見錯誤模式
-
-### 為了向後相容而保留壞味道的設計
-
-<!-- bundle: skip-start -->
-```python
-# ❌ 錯誤：保留舊的、有問題的實作
-def old_api():
-    # 舊的、有問題的實作
-    pass
-
-def new_api():
-    # 新的、更好的實作
-    pass
-
-# ✅ 正確：在測試保護下重構，移除舊 API
-def refactored_api():
-    # 重構後的乾淨實作
-    pass
-```
-<!-- bundle: skip-end -->
-
----
-
-## 原理說明
-
-<!-- bundle: skip-start -->
-- **修改現有檔案保持程式碼組織的一致性**
-- **架構品質優先避免技術債務累積**
-- **測試保護下的重構是安全的，長期收益大於短期遷移成本**
-<!-- bundle: skip-end -->
+修 bug 只改必要行，架構重構另段完成；清自己造成的 dead import/variable，既存 dead code 只標不刪。刪除不留 tombstone，歷史交 git log；歸檔歷史文檔不動。

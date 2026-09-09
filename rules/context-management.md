@@ -4,36 +4,24 @@ harness-scope: neutral
 
 # Context 管理
 
-> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
-
 ## Session 管理
 
-### Context 保護
-
-- **任務切換時重置 context**：不同任務之間重置 context（Claude: `/clear`），避免不相關資訊累積
-- **研究用 subagent**：大範圍探索交給 Agent 在獨立 context 中完成，結果摘要回主 session
-- **Writer/Reviewer 分離**：審查自己剛寫的 code 有 bias，開新 session 審查品質更好
-
-### 糾正策略
-
-- 同一問題連續糾正 2 次仍失敗 → 重置 context（Claude: `/clear`），用更好的 prompt 重來（累積的失敗嘗試比乾淨 context 更糟）
-- 糾正超過 2 次 → 說明 prompt 不夠好，不是 AI 不夠努力
+不同任務重置 context（Claude: /clear），大範圍探索用獨立 context agent 回摘要；Writer/Reviewer 分離避免自審 bias。同題連續糾正兩次仍失敗就換 prompt、重置 context，不靠累積失敗硬撐；超過兩次應檢討 prompt。
 
 ## 想法即時落盤（durable checkpoint）
 
-> **核心原則**：context 是揮發性記憶，quota 死亡無預警——值得留下的東西在**產生當下**寫入檔案，不等段落結算或 session 結束。只活在對話裡的思考，恢復時靠 transcript 考古（成本極高；真實案例：codex 連續多日多個 session 死於 usage limit，某審查弧 findings 寫到「中間檢查點」後死亡，最終合成只活在 transcript）。
+context 揮發且 quota 可能突然耗盡；真實案例：Codex 審查弧只落中間 findings，最終合成留在 transcript 後 session 死亡，接手需昂貴考古。
 
-- **落盤時機**（事件驅動）：關鍵發現、方向決策與其理由、被排除的路徑與原因、下一步意圖——出現即寫
-- **落盤位置**（既有載體分流，不新發明）：有 EP → EP 檔進度節即時 append（不等段落完成）；有 backlog 卡 → `task edit --append-notes`；探索期（兩者皆無）→ `.agent-tmp/session-journal.md`（repo 內，夜間清掃兜底）
-- **落盤內容自帶完成度狀態**：標明「中間檢查點／最終」＋尚待什麼——死亡後接手者才知道可信邊界，不會把未驗收宣稱當完成
-- **與 memory 邊界**：journal 是工作記憶外化（未定案也寫）；memory 仍守一句話測試＋確定才寫——journal 不觸發 memory 寫入
-- **spawn 長任務 agent**：prompt 注入「中間發現即時落盤 `.agent-tmp/`」——agent 死於 quota 時 findings 不陪葬
-- **quota 死亡接手第一動**：先讀 journal／EP 進度／卡 notes 再續行——現況以檔案為準，非對話記憶
+- 關鍵發現、方向及理由、排除路徑及原因、下一步意圖，產生即記，不等結算。附「中間檢查點／最終」＋尚待事項，防止未驗收被當完成。
+- 有 EP→append 進度；有卡→`task edit --append-notes`；兩者皆無→repo `.agent-tmp/session-journal.md`。長任務 spawn prompt 須注入中間發現落盤要求。
+- **唯讀或工單限制寫入時，以該限制為準**：不得自行寫 EP/卡/筆記；以進度訊息回主 session，由有權寫入者保存。checkpoint 不擴張寫入授權。
+- 接手 quota 中斷先讀 journal/EP 進度/卡 notes，以檔案現況續行。
+- journal 可記未定案工作，不觸發 memory 寫入；memory 須一句話測試＋確定才寫。
 
 ## STATE.md（Last session 觀察層）
 
-STATE.md 定義（定位 / 觀察層 vs 事實層邊界 / 職責矩陣 / 生命週期 / 路徑 / 觸發）與寫入步驟見 state-md-write 共用子範本（Claude: `../skills/_common/state-md-write.md`）（寫入由 at/deep-work 觸發；Open failures 走 kanban 不進 STATE）。
+定位、觀察/事實邊界、路徑、生命週期及寫入步驟見 state-md-write 共用子範本（Claude: skills/_common/state-md-write.md）。由 at/deep-work 觸發；Open failures 走 kanban，不進 STATE。
 
 ## Memory 生命周期規範（pointer）
 
-寫 memory **前**先過一句話測試（提煉不出一句話＝還沒想清楚＝不寫；提煉得出但屬未定案歸因＝還沒確定＝不寫——user 09-06 拍板）；六問程序、rank 初判、尺寸預算、body 形態等細節**寫前載 memory-audit skill「寫入端紀律」段**（單一源，本 rule 不重述）；「該寫哪」（載體選擇）判準單一源＝同 skill「載體統一定義表」節。索引 ownership：`MEMORY.md` 是條目 frontmatter 的機械投影**禁手寫**（條目檔是唯一寫入點）；弧結案時同步蒸餾條目為終態 facts（結案兩步第三動）。觸發詞：一句話測試、寫入六問、任務終態、cluster-first、索引投影、desc 上限、結案蒸餾、body 形態、該寫哪、確定才寫、歸因未定。
+寫前載 memory-audit skill「寫入端紀律」與「載體統一定義表」：一句話都提煉不出或歸因未定，就不寫；六問、rank、尺寸、body/cluster、desc 等依該 skill。MEMORY.md 是 frontmatter 機械投影，禁手寫，條目檔是唯一寫入點；弧結案同步蒸餾終態 facts（結案兩步第三動）。

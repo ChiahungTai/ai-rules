@@ -34,10 +34,11 @@ Bundle slimming: rule bodies may mark sections to drop from the bundle with
 Claude reads the full file via ~/.claude/rules/ symlink; non-Claude bundles
 get the slimmed version. No-op for rules without markers.
 
-Size gate: non-Claude harnesses truncate the single AGENTS.md silently.
-ZCode truncates at 102,400 bytes (100KiB, hardcoded in zcode.cjs -- no
-config). The bundle carries a hard-fail limit of 90KiB (92,160 bytes),
-leaving headroom below the truncation line. Over the limit -> abort with
+Size gate: ZCode truncates each instruction file at 102,400 bytes;
+Muse delegation startup shares 65,536 bytes across global/project rules
+and loader framing. Each target has a global-bundle gate; this does not
+replace checking the actual workspace's combined startup context.
+Over the target limit -> refuse that deployment with
 guidance: slim rules/ (encoder-philosophy) or demote on-demand-grade
 content to a reference skill (rule keeps an always-on core + pointer).
 Precedents: acceptance-evidence / symbol-query-routing / instruction-writing
@@ -57,19 +58,6 @@ REPO = pathlib.Path(__file__).resolve().parent.parent
 GUIDE = REPO / "ai-development-guide.md"
 RULES_DIR = REPO / "rules"
 
-# draft-3 A案（S3）：muse 用不到的 harness-mechanics rules，從 muse 變體
-# 排除。rules/ 單一源不變（排除≠改 scope：codex/zcode bundle 不受影響；
-# 改名/刪除任一檔 tests/test_deploy_agents.py 即大聲失敗）。
-MUSE_MECHANICS_EXCLUDE = frozenset(
-    {
-        "tool-discipline.md",  # 背景 spawn/TaskOutput/batch——ZCode 機械
-        "symbol-query-routing.md",  # cr-first 路由——工單按需指名（高頻需 callers 查證時放回，代價 4.5KB）
-        "model-routing.md",  # agent tier 派發——主 session 職責
-        "context-management.md",  # /compact/STATE.md——headless 無此面
-        "instruction-writing.md",  # muse 不寫我們的 instruction 檔
-    }
-)
-
 
 @dataclasses.dataclass(frozen=True)
 class DeployTarget:
@@ -82,7 +70,7 @@ class DeployTarget:
     label: str
 
 
-VARIANT_LABEL_SUFFIX = ",muse-variant(no-mechanics)"
+VARIANT_LABEL_SUFFIX = ",filtered"
 
 
 def scopes_label_for(scopes: frozenset, exclude: frozenset) -> str:
@@ -111,7 +99,7 @@ def expected_bundle_for(target_path) -> bytes:
 
 
 def resolve_targets(home: pathlib.Path) -> list[DeployTarget]:
-    """三端配置。muse 端變體＋獨立 gate；其餘兩端語義不動。"""
+    """三端皆保留 neutral 核心；Muse 為 project instructions 留出空間。"""
     return [
         DeployTarget(
             home / ".zcode" / "AGENTS.md",
@@ -130,9 +118,8 @@ def resolve_targets(home: pathlib.Path) -> list[DeployTarget]:
         DeployTarget(
             home / ".config" / "muse" / "AGENTS.md",
             frozenset({"neutral"}),
-            MUSE_MECHANICS_EXCLUDE,
-            50
-            * 1024,  # ai-rules 工作區 lane 約 51.9KB（64KiB − 專案層 − 包裝）；對齊 S3 gate
+            frozenset(),
+            40 * 1024,  # global-only gate；合併專案指令仍須驗 64KiB startup limit。
             "muse",
         ),
     ]
@@ -457,8 +444,7 @@ def main() -> int:
     ready: list[tuple[DeployTarget, str]] = []
     failed = False
     for target in targets:
-        # 自訂 --scope 時 exclude 語義不變（綁 target 非 scope）：muse 端恆為
-        # no-mechanics 變體——變體是端點性質，與選了哪些 scope 無關。
+        # 自訂 --scope 只改 scope；target 的排除與尺寸契約不變。
         scopes = scope_override or target.scopes
         scopes_label = scopes_label_for(scopes, target.exclude)
         rule_paths = discover_rules(RULES_DIR, scopes)

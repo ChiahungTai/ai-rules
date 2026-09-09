@@ -4,19 +4,13 @@ harness-scope: neutral
 
 # 驗收證據階層
 
-> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）。**深層理論**（認知誤差與 EP 預見極限、Intent Drift 兩型、filter trap 重構查證、L3 整合實例、Runtime Invariant Assurance、B 軸演進）見 **acceptance-evidence skill**（on-demand）
-
 ## 核心原則:證據獨立性
 
-傳統 TDD 的權威性建立在一個從未被明說的前提:測試的「意圖」與實作的「理解」分屬不同認知主體。**AI 同時寫實作與測試時,這個獨立性塌縮**——綠燈只證明「AI 自洽地重複了自己的錯」。最危險的不是測試太弱,而是測試與實作共享同一個錯誤前提——AI 誤解問題時,測試忠實反映誤解、實作忠實滿足誤解。
-
-**判斷準則**:驗收證據的強度,取決於「證據來源是否獨立於被驗證物」。AI 同寫 test + impl = 零獨立性 = 證據強度低。
+證據強度取決於來源是否獨立於被驗證物。AI 同寫 test＋impl 共享理解，可能忠實實現同一個錯誤前提；綠燈只證明自洽。認知誤差、EP 預見極限、Intent Drift、filter trap、L3 實例及 runtime assurance 見 acceptance-evidence skill。
 
 ### Claim→Evidence→Trust(no-impact claim 校驗)
 
-當 AI/producer 宣稱「不影響 X」(accounting/risk/invariant)時,這個 claim 須有**獨立機械證據**反證(git diff / rg 殘留 / LSP findReferences),否則 claim 退化為 self-report — AI 同時產 code 與 claim,受同一 mental model drift 污染。**AI 誠實說「沒影響」時最危險** — 獨立性塌縮點。
-
-同型 claim 群（均須獨立機械證據，詳案例見 acceptance-evidence skill）：
+producer 宣稱「不影響 X」（accounting/risk/invariant）須有獨立機械證據（diff、rg 殘留、LSP references），否則只是共享 mental model drift 的 self-report；誠實自述也不能取代查證。其他 claim 類型見 acceptance-evidence skill。
 
 <!-- bundle: skip-start -->
 - **數字/清單類 claim**（計數、規模、盤點）:寫進文檔前用獨立計數命令（`rg | wc -l` / `rg -c`）核對完整輸出，不靠印象或截斷結果人工數——AI 寫盤點清單易憑印象混入/漏掉成員（真實案例：consumers 數 41 誤寫 20，因 `rg | head -20` 截斷）。
@@ -28,31 +22,27 @@ harness-scope: neutral
 
 ## 證據階層
 
-「功能完成」不是布林值,是證據債券 — 不同驗證手段產生不同強度的證據,覆蓋不同 bug 類別:
+| 層 | 證據與覆蓋 | 限制/風險 |
+|---|---|---|
+| L1 靜態 | type check/ruff/ast.parse；語法、型別 | 機械執行；低風險 |
+| L2 單元 | unit test（含 mock）；函式邏輯 | 最易同義反覆、mock 假設即 bug；中風險 |
+| L3 整合 | 真 DB/跨模組 fixture；組合、FK、擴散 | 仍可能 mock 關鍵邊界；中風險 |
+| L4 可執行 demo | 真腳本/資料；API 幻覺、第三方真實行為 | 可能只挑 happy path；外部依賴高風險 |
+| L5 對抗性 POC | 髒資料/已知陷阱；除權息、減資、NaN、時區、溢出 | AI 自選標的仍可能避開盲區；數據高風險 |
+| L6 人類觀察 | 看真輸出/畫面/log；需求誤解 | 疲勞、看一眼就信；單向門 |
 
-| 層 | 證據形式 | 抓什麼 bug | AI 造假風險 | 風險映射 |
-|--|--|--|--|--|
-| L1 靜態 | type check / ruff / ast.parse | 語法、型別契約 | 不能(機械執行) | 🟢 低 |
-| L2 單元 | unit test(含 mock) | 函式內部邏輯 | **最易**(同義反覆、mock 假設即 bug、測試反映實作) | 🟡 中 |
-| L3 整合 | integration(真實 DB / 跨模組 fixture) | 組合契約、跨檔擴散、FK 約束 | 可能 mock 掉關鍵邊界 | 🟡 中 |
-| L4 可執行 demo | 真實跑腳本 / 資料片段 | **AI 幻覺 API、第三方程式庫真實行為** | 不能(程式真的跑了),但會選擇性跑 happy path | 🔴 高(外部依賴) |
-| L5 對抗性 POC | 刻意用髒資料 / 邊界 / 已知陷阱 | **AI 對邊界的盲區**(除權息、減資、NaN、時區、溢出) | 若 POC 標的也是 AI 挑,會潛意識避開自己盲區 | 🔴 高(數據完整性) |
-| L6 人類觀察 | 人在迴圈看真實輸出 / 畫面 / log | **需求誤解**(AI 正確實作了錯誤的理解) | 不會誤信 PASS,但會「看一眼就夠」 | 單向門決策 |
-
-**根本禁令**:用低層證據冒充高層驗收是核心錯誤——現有零散禁令（L1 冒充 L4+ 等）皆為此原則的表現（層級定義見上方證據階層表）；驗證深度順序見 [quality-constraints](./quality-constraints.md) 漸進式驗證、消費端驗證模式同檔，L3 正向實例與 filter trap 查證見 acceptance-evidence skill。
+**禁用低層證據冒充高層驗收**。風險分級定深度，驗證順序及消費端模式見 [quality-constraints](quality-constraints.md)。
 
 ### 證據時效性
 
-證據階層談「強度」,但證據還有「時效」— 測試通過的證據會隨系統演化而**腐化**。重構改變行為後,測試可能:過時但仍通過（死測試:測試被改成迎合新實作,從「驗證意圖」降級為「反映實作」）、或驗證的行為已無關。過時測試比沒測試更危險 — 它給虛假信心。**重構後必須重新確認證據有效**,否則 L2 證據 silently 貶值。
+重構後必須重新確認測試仍驗原意；過時但綠、被改成迎合實作、行為已無關的測試，都會給虛假信心。
 
 ## A / B 雙軸分工
 
-| 軸 | 職責 | 證據層 | 天花板 |
-|--|--|--|--|
-| **A 機器自驗** | 內部實作細節的正確性 | L1-L3 | **AI 內部自洽** — 機器斷言跳不出 AI 信念體系 |
-| **B 人類驗收** | 跨越「自洽 → 對外部正確」的鴻溝 | L4-L6 | 部分落地:debrief + illustrate + smell-detector = 人類 viewport(三層介入);完整 L4-L6 執行驗收仍為設計方向(見 skill) |
+- A 機器自驗（L1–L3）：必要但不充分，天花板是 AI 自洽。
+- B 人類驗收（L4–L6）：外部正確性的來源；debrief/illustrate/smell-detector 已提供人類 viewport，完整 L4–L6 執行驗收仍是設計方向。
 
-**鐵律**:A 是必要不充分,B 是充分性的來源。A 軸深化有邊際效益遞減 — 天花板是 AI 自洽,真正的驗收鴻溝在 B 軸。Agent Review 的「獨立 context」≠「獨立智能」:同家族 LLM 共享系統性偏誤,quorum 對共同盲點無效,A 軸的深層防線最終仍由 B 軸兜底。人審亦有結構上限（疲勞/注意力/確認偏差，經驗無關）→ P0 invariant 需 Runtime Invariant Assurance 補（A 機械、B 人審、runtime assurance 三層守衛,詳見 skill）。
+獨立 context 不等於獨立智能：同家族模型共享偏誤，quorum 解不了共同盲點。人類也有疲勞/確認偏差，P0 invariant 須加 Runtime Invariant Assurance（A 機械＋B 人審＋runtime 三層），詳 acceptance-evidence skill。各層只能降低、不能消除風險。
 
 ## 與既有規則的關係
 

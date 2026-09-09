@@ -236,28 +236,30 @@ def test_deploy_all_success_and_backup_of_foreign_file(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# per-target 配置：muse 變體（draft-3 A案，S3）＋各端獨立 size gate
+# per-target 配置：所有端保留 neutral 核心，各端獨立 size gate
 # ---------------------------------------------------------------------------
 
 
-def test_muse_variant_excludes_mechanics_only(tmp_path):
+def test_targets_keep_neutral_rules_with_independent_size_gates(tmp_path):
     targets = {t.label: t for t in da.resolve_targets(tmp_path)}
     assert set(targets) == {"zcode", "codex", "muse"}
     assert targets["zcode"].exclude == frozenset()
     assert targets["codex"].exclude == frozenset()
-    assert targets["muse"].exclude == da.MUSE_MECHANICS_EXCLUDE
+    assert targets["muse"].exclude == frozenset()
     # 非 muse 端 gate 不動（既有 90KiB 語義）
     assert targets["zcode"].max_bytes == da.BUNDLE_MAX_BYTES
     assert targets["codex"].max_bytes == da.BUNDLE_MAX_BYTES
-    # muse 端獨立 gate（ai-rules 工作區 lane 約 51.9KB，取 50KiB 對齊 S3）
-    assert targets["muse"].max_bytes == 50 * 1024
+    # 留出 project instructions 與 startup 包裝的空間。
+    assert targets["muse"].max_bytes == 40 * 1024
 
 
-def test_muse_exclude_pinned_to_existing_rules():
-    # 改名/刪除被排除檔時大聲失敗，不靜默改變變體語義
-    for name in da.MUSE_MECHANICS_EXCLUDE:
-        assert (da.RULES_DIR / name).exists(), f"excluded rule gone: {name}"
-        assert da.read_scope(da.RULES_DIR / name) == "neutral"
+def test_muse_bundle_contains_every_neutral_rule(tmp_path):
+    # 工單沒有保證補回通用約束，部署給 Muse 的實際內容不可整檔漏載。
+    targets = {t.label: t for t in da.resolve_targets(tmp_path)}
+    bundle = da.bundle_for(targets["muse"])
+    for path in da.discover_rules(da.RULES_DIR, {"neutral"}):
+        assert f"<!-- rules/{path.name} -->" in bundle
+    assert bundle == da.bundle_for(targets["codex"])
 
 
 def test_build_bundle_respects_exclude(tmp_path):

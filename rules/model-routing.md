@@ -4,36 +4,29 @@ harness-scope: neutral
 
 # Model Routing（角色 → tier → model 解析）
 
-> **載入機制**: source 在 ai-rules repo `rules/`；Claude 端 `~/.claude/rules/` symlink auto-load；其他 harness 靠全域 guide bundle 載入
+subagent 的 model/effort 由角色需求決定，不依主 session 模型。兩跳：本檔角色→tier，再依 harness×provider 查 **model-routing skill** tier×provider 權威表（model 值唯一源；ZCode 由 sync_agents 材料化部署 pins）。
 
-subagent 的 (model, effort) 由**角色需求**決定（與主 session 開什麼模型無關），經兩跳解析：
-
-1. **角色 → tier**（通用表——本檔單一源；tier 詞＝requirement 正式 token：full＝旗艦需求／vision＝支援影像的 model（影像需求）／lite＝一般需求，中文語義標籤，與 skill 權威表對齊行同詞彙）
-
-> **旗艦資格條款（五項）與坐位註記**見 model-routing skill（`skills/model-routing/SKILL.md`；rule 留骨架）。
-2. **tier → (model, effort)**（依 harness × 當前 provider 查解析表——在 model-routing skill 的 tier×provider 權威表，model 值唯一源；ZCode 端材料化為 `agents/zcode/` 定義檔 frontmatter pins〔部署預設，由 sync_agents 生成〕，pin 值以該表為單一源）
-
-> **tier 是能力檔語義，非模型綁定**——哪個具體模型夠格坐哪個 tier，單一源在 skill 解析表（provider 演進只改該表）；本檔只錄角色需要的能力檔與升降級條件（分工律證據與條款見 skill「lite 分工律」）。
+tier＝requirement 能力檔，非模型綁定：full＝旗艦、vision＝影像、lite＝一般。旗艦五項資格、坐位註記、升降級與歸因細則見該 skill。
 
 ## 角色 → tier
 
-| 角色 | tier | 說明 |
-|------|------|------|
-| code-reviewer / code-reviewer-primed／review **command** agent | full 為基準（ZCode＝registry 釘 glm-5.3——AIR-43；CC＝opus 別名釘選——AIR-44）；**條件式降 lite** | 品質閘門需強度。降級條件＝**保護面厚度**（既有測試釘住＋驗證閉環＋非跨邊界語義面）；條件不滿足時「review 順手降級」直覺不適用 |
-| impl / test-gen agent | full 為基準（ZCode＝registry 釘 glm-5.3——AIR-43；CC＝opus 別名釘選——AIR-44）；機械段條件式降 lite（條件同 review） | 寫 production code／等價測試設計；降級附加約束＝lite 模型測試僅規格陳述非驗收證據（mock 假設即 bug），驗收證據另補 |
-| judge 裁決（judge-review）／EP 規劃（execution-plan）／post-build 編排 | **full 能力檔（不可條件降級）** | 判斷密集位——judge 自證塌陷＋sycophancy 是能力剖面問題非努力不足；lite＋max effort 補償＝未驗證路徑（採用前先小規模實證，紀錄回 skill） |
-| spec-miner / lite-verify / cross-verify-investigator / render／cron 機械段（automation session 選 lite 模型） | lite | 機械查證（rg+Read+逐字引用）、清單驅動驗證、單軸多源查證（軸＝prompt 參數；源缺場回報 unverified 不腦補）、渲染、排程收斂/watch——規則明確、read-only |
-| mem-distill | lite（寫入型） | memory 條目蒸餾——規則明確的語義壓縮（清單內 Read→Write 全覆寫）；hook 不攔 subagent 寫入，上限＝prompt 紀律（registry `agents/zcode/`） |
-| vision-review | vision | 多模視覺驗收（Read 本地圖；remote URL 先 Bash curl 落地再 Read。白名單 MCP 全名**僅對連線中 server 合法**——未連線全名才整顆拒絕 spawn〔d32ddb0 邊界定版〕；CR plugin per-session 連線故白名單可掛） |
-| research / explore | 內建 Explore 承接（預設繼承主模型即正確；歷史「釘 lite」屬可選項非必要——與 skills/agent-workflow spawn 段同義）；EP 段落 0 全域研究＝registry `cr-research`（ZCode：lite pin＋CR MCP 白名單） | — |
-| **harness 內建型別**（`general-purpose`／`Explore`） | **無 pin——繼承主 session 模型**（ZCode 官方設計行為；設定頁可為內建單獨釘模型，清空恢復繼承） | 機械/lite 任務誤派 general-purpose＝旗艦燒機械段——**常犯錯**（「subagent 預設便宜層」是錯覺；AIR-50 弧兩次實例）；lite 角色任務必派本表 registry 對應 agent |
+| 角色 | tier 與約束 |
+|---|---|
+| code-reviewer / code-reviewer-primed / review command agent | full 基準；僅既有測試釘住＋驗證閉環＋非跨邊界語義面（保護面厚度）皆滿足才降 lite，禁順手降級 |
+| impl / test-gen | full 基準，機械段依同條件降 lite；lite test 僅規格陳述，不是獨立驗收證據，須另補 |
+| judge-review / execution-plan / post-build 編排 | full，不可條件降級；判斷/自證塌陷/sycophancy 非 effort 可補，lite＋max 須另先小規模實證並記 skill |
+| spec-miner / lite-verify / cross-verify-investigator / render / cron 機械段 | lite，rg＋Read 逐字查證/清單驗證/單軸多源/渲染/watch；read-only、缺源標 unverified 不腦補 |
+| mem-distill | lite 寫入型，清單內 Read→Write 蒸餾；hook 不攔 subagent，靠 prompt 範圍紀律 |
+| vision-review | vision；Read 本地圖，remote 先 curl 落地；MCP 白名單只可列已連線 server，未連線全名會拒絕 spawn，CR per-session 連線可掛 |
+| research / explore | 內建 Explore 繼承主模型；釘 lite 可選非必要。EP 段落 0 全域研究用 registry cr-research（ZCode lite＋CR 白名單） |
+| harness 內建 general-purpose / Explore | 無 pin、繼承主模型（ZCode 設定可釘、清空恢復）。機械/lite 工作須派對應 registry，禁誤以內建預設便宜 |
 
-> tier 詞彙（full / lite / vision）與 family／profile 詞彙（GLM／muse／codex；implement／review／advisory 等）單一源在此；agents/AGENTS.md 治理段、工單模板與 agent 命名引用之，不自帶定義。
+review/impl 的 ZCode registry 與 CC opus 別名釘選依 skill 解析表；不可在此另維護 model 值。
 
 ## external-runtime routing（family 軸）
 
-> **定位**：external-runtime routing policy（family 軸），非 tier→model 映射擴充、非 registry pin。
+family＝GLM/muse/codex；profile＝implement/review/advisory。tier、family、profile 詞彙由本檔定義，agents 治理與工單引用，不重定義。
 
-角色→family→profile 映射、eligibility gate 六條、reviewer 交接契約、bridge 必經（雙家族委派唯一入口——delegate-bridge ≥1.0.0，`task --family muse|codex`）、完成回報收法（收法決策樹）、套用（三路徑）、session 定向接續（`--session-id` resume／fork 語義矩陣＋守衛處置）——見 model-routing skill（`skills/model-routing/SKILL.md` on-demand；觸發詞：external-runtime、eligibility、reviewer 交接、bridge 必經、委派、收法、定向接續、session-id、fork）。
+委派、收法、定向接續/session-id/fork 時載入 **model-routing skill**：角色→family→profile、eligibility、reviewer 交接契約、bridge 必經（`task --family muse|codex`）、完成回報決策樹、resume/fork 守衛。external-runtime policy 不擴充 tier 表或 registry pin。工單禁止再委派時遵守工單，不能因載入 routing 而自行 spawn。
 
-> tier→(model, effort) 解析表、lite 分工律（執行層降級條件＋風險面＋歸因紀律）、external-runtime family 解析表、thoughtLevel 但書、rate limit 與並發上限表、classifier 處置＋spawn 失敗態辨識——見 model-routing skill。
+rate limit/並發、classifier/失敗態、thoughtLevel、lite 分工律與模型歸因亦依該 skill。

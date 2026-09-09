@@ -4,101 +4,50 @@ harness-scope: neutral
 
 # 品質約束
 
-> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
-
----
-
 ## 完整交付標準
 
-> **核心原則**：方向明確時必須完整執行到可用狀態，絕不交付半成品。
-
-- ✅ 必須完成：核心功能完整實現、相關測試全部通過、邊界情況妥善處理、文檔同步更新、對應目錄的 instruction 檔（AGENTS.md source；Claude 端 CLAUDE.md wrapper）同步更新
-- **instruction 檔同步檢查**：實作完成後，識別變更檔案範圍 → 檢查所在目錄及上層目錄的 AGENTS.md → 判斷變更是否影響其描述的架構、API、模組職責
-- ❓ 停下請示：技術方案有多種可行路徑、需求不明確、發現風險需用戶決策、資源限制需調整優先級
-
----
+方向明確就做到可用：完整核心功能、相關測試、邊界處理與文檔同步。完成後檢查變更所在及上層 AGENTS.md 的架構/API/模組職責描述，必要時同步（含 Claude 端 CLAUDE.md wrapper）。方案需選擇、需求不明、風險需裁決或資源需調整優先級時請示。
 
 ## 數據完整性優先（Crash-Only Design）
 
-> **核心原則**：損壞數據比沒有數據更災難，無效輸入必須立即崩潰。
+損壞數據比缺失更危險。無效輸入、溢出、轉型/解析失敗立即崩潰，禁吞錯續行或修補損壞輸入。檢查非空、必要欄位、NaN、inf。
 
-- **崩潰哲學**：崩潰是停止系統的唯一方法、從崩潰狀態恢復是啟動的唯一方法（恢復邏輯即初始化邏輯，單一代碼路徑）、系統設計為崩潰後快速重啟
-- **數據完整性**：算術溢出立即崩潰而非靜默傳播、類型轉換失敗拒絕處理、格式解析錯誤崩潰而非嘗試修復損壞輸入
-- **架構**：關鍵狀態外部化（DB/隊列）、操作等冪（重啟可安全重試）、服務層無狀態
-- **適用**：量化交易、高頻、實時風控、批次處理。**不適用**：長時間用戶會話、複雜 UI 狀態、UX 優先的互動應用
-
-- **推薦做法**：嚴格驗證，失敗即崩潰——`assert not data.empty`、必要欄位存在、`notna().all()`、`not np.isinf(result).any()`；禁 try/except 吞錯續行。
-- **持久化產物禁 `tempfile.TemporaryDirectory`**：目錄隨 scope 結束即毀＝備份/輸出自動失效——落專案外持久路徑（如 `~/.mosaic/backup/`）
+- 狀態外部化（DB/隊列），操作等冪、服務無狀態；停止即崩潰、恢復即初始化，單一路徑支援快速重啟。
+- 適用量化交易、高頻、實時風控、批次；不適用長會話、複雜 UI 狀態、UX 優先互動。
+- 持久化輸出/備份禁用 `tempfile.TemporaryDirectory`（scope 結束即毀），須放專案外持久路徑。
 
 ### 誤用警告：crash-only 不是「graceful 不修」的藉口
 
-> **核心原則**：crash-only 是 defense-in-depth 的**後備保證**（graceful shutdown 意外失敗時系統仍正確），**不是**「graceful 可預期地壞掉也不修」的合理化——整合 bug、配置錯誤、合約違反是可修 bug，該修，不可用 crash-only 跳過。披著「設計哲學」外衣的跳過比一般 bug 更危險，code review 難抓。
-
-**實例**：ReplayHost SIGTERM graceful shutdown 失敗，曾被錯誤以「crash-only 接受」跳過——正解：TDD red（xfail strict）釘住 graceful 目標＋另開 EP 修復（test-driven-development skill）。
-
----
+Crash-only 是 graceful 意外失敗的後備保證，不豁免可預期的整合 bug、配置錯誤或合約違反。真實案例：ReplayHost SIGTERM 失敗曾被以 crash-only 跳過；正解是 TDD red（xfail strict）釘住 graceful 目標，另開 EP 修復（test-driven-development skill）。
 
 ## 主動揭露錯誤（Fail Loud）
 
-> **核心原則**：無法確認成功時，必須明確說明，絕不回報「完成」。
-
-- **跳過就是失敗**：跳過了任何步驟、測試、驗證 → 不得回報「完成」
-- **不確定性必須可見**：無法驗證結果時，明確標注未驗證項目；寧可多報問題，不默默跳過
-- 禁止：測試跳過部分案例卻說「測試通過」；migration 靜默跳過記錄卻說「完成」；沒驗邊界卻說「功能完成」；**用隔離單元測試通過就宣稱功能完成**
+未確認成功、跳過步驟/案例/驗證、migration 跳記錄、未驗邊界，都須明列限制，不得報完成或全通過；隔離單元綠燈不代表功能完成。
 
 ### 消費端驗證模式
 
-功能是給特定消費端用的，單元測試通過不等於功能可用。必須在**實際消費端上下文**中驗證——問「功能的主要消費者是誰？在那個消費者的完整流程中跑一次」。
+先定位主要消費者，在它的完整流程實跑：scoring/ranking 用 watchlist 真資料；Feature 驅動下游 pipeline 並驗受影響 features 測試；除權息用真股票日/週/月 K；DB 改動跑 fetch→transform→write→read；Step 放回上層 Pipeline。
 
-| 功能類型 | 消費端 | 驗證方式 |
-|---------|--------|---------|
-| scoring / ranking 函數 | watchlist pipeline | 用 pipeline 真實資料跑一次完整流程 |
-| 新 Feature | 使用該 Feature 的下游 pipeline | 跑整個 `tests/unit_tests/features/`（跨模組交互） |
-| 除權息調整邏輯 | catalog + indicators | 真實除權息股票做日/週/月 K 驗證 |
-| DB schema 變更 | 整個 data pipeline | 從 fetch → transform → write → read 全跑一次 |
-| Pipeline Step | 上層 Pipeline | 在 Pipeline 完整流程中跑，不只測單一 Step |
-
-**跨模組影響擴散**：修改共用模組（如 `_validate_output`、`column_metadata`）時，影響跨測試檔案（parity / interaction / consistency test）——必須跑整個受影響目錄而非單一檔案。**受影響測試集必須機械反查**——`code-reality graph_query impact_radius --repo <root> --files <絕對路徑>` 或 `code-reality scip_refs <符號> --callers --repo <root>` 或 `rg "<符號>" tests/ -l`——**禁以目錄直覺代替**（測試檔跨目錄擺放時直覺必漏）。
+共用模組變更須驗整個受影響目錄，涵蓋跨檔 parity/interaction/consistency。**測試集必須機械反查，不憑目錄直覺**：用 code-reality `impact_radius` / `scip_refs --callers`，或 `rg "<符號>" tests/ -l`。
 
 ### 符號覆蓋 vs 整合路徑覆蓋
 
-理論基礎見 [acceptance-evidence](./acceptance-evidence.md) 證據階層 L3。**符號覆蓋**（symbol 出現在 tests）≠ **整合路徑覆蓋**（新參數 / 新接線 / 多組件組合被實際驅動）：
+symbol 出現在測試不代表新參數/接線/組合被驅動（證據分層見 [acceptance-evidence](acceptance-evidence.md)）。
 
-- **新 public 參數 / 注入點**：既有符號 + 新參數組合必須被測試。例：guard 注入既有 Strategy——`on_bar()` 測試全走 `guard=None`，新注入路徑零測試。機械檢查：`rg "<param>=" tests/` → 0 hits = 路徑未覆蓋。
-- **新增 registry 成員**：auto-discovery 接線必須被斷言。per-class 單元測試只證明邏輯正確，不證明接上 registry。機械檢查：在 test files 搜尋 `list_*_classes()` membership 斷言。
-
-### 整合器型變更判定
-
-整合器型變更判定（三條件）、mock 循環論證陷阱與兩層整合測試（接線 guard＋真實邊界，缺任一即缺口）見 validation-strategy skill「整合器型變更判定」章。
+- 新 public 參數/注入點必測既有符號＋新參數組合；全部 `guard=None` 不涵蓋 guard 注入。用 `rg "<param>=" tests/` 查接線，無命中須補查/補測。
+- registry 新成員須斷言 auto-discovery membership（如 `list_*_classes()`）；per-class 測試不證明已註冊。
+- 整合器型變更須載入 validation-strategy skill：三條件判定、mock 循環論證、接線 guard＋真實邊界兩層整合測試，缺一即缺口。
 
 ## 漸進式驗證（DEPTH-MIN→SAMPLE→FULL）
 
-> **核心原則**：大範圍驗證禁止一步到位——先小範圍確認正確，再擴大規模。
+每次修改先 MIN；邏輯穩定再 SAMPLE；兩者過才 FULL。MIN 選 3–5 個多分支案例，至少一個已知易錯案例。任一失敗先分析、修正、重回 MIN；禁修改後直跑全量或 FULL 失敗盲重跑，避免基本錯誤拖到全量末端才被發現。
 
-| 層級 | 觸發時機 | 耗時預期 | 失敗處理 |
-|------|---------|---------|---------|
-| DEPTH-MIN | 每次修改後 | 秒級~分鐘 | 修 code，重跑 DEPTH-MIN |
-| DEPTH-SAMPLE | 策略/邏輯穩定後 | 分鐘級 | 分析失敗案例，修 code，重回 DEPTH-MIN |
-| DEPTH-FULL | DEPTH-MIN + DEPTH-SAMPLE 都通過 | 分鐘~小時 | 記錄失敗案例，分析是否需改邏輯 |
-
-- **最小集合選擇原則**：優先覆蓋多種邏輯分支（如除權息、減資、零股），數量 3-5 個即足，必須包含至少一個已知易錯案例。
-- **禁止行為**：❌ 未通過 DEPTH-MIN 直跑 DEPTH-FULL；❌ 修改後直跑全量；❌ DEPTH-FULL 失敗不分析即重跑（先回 DEPTH-MIN 確認）。
-- **為什麼**：全量耗時長，基本邏輯錯時全跑完才發現＝浪費；漸進把發現時間壓到秒級~分鐘級。
-- **與風險分級的關係**：風險分級定「驗到多深」，漸進驗證定「用何順序到達」——兩者互補，定義見 ai-development-guide「驗證約束 → 風險分級標準」；高風險以 DEPTH-FULL 為標準、起點仍是 DEPTH-MIN（順序不因風險跳級）。
-
----
+風險分級定驗到多深（guide「驗證約束」），漸進順序定如何抵達；高風險需 FULL，仍從 MIN 起。
 
 ## 多步驟任務檢查點
 
-> **核心原則**：完成每個重要步驟後回報狀態，無法描述當前狀態時必須停下。
-
-- **每步回報**：完成重要步驟後，主動回報「已完成、已驗證、剩餘事項」
-- **迷失就停**：無法精確描述當前進度時，停止並重新釐清；不確定前面步驟是否正確時，禁止盲目續行
-- 適用：跨多檔重構、多段落實作（Claude: `/implement`）、3 步以上修改
-
----
+跨檔重構、多段實作或三步以上修改，每個重要步驟回報已完成/已驗證/剩餘事項；無法精確描述進度或不確定前步正確時停下釐清，禁盲續。
 
 ## 功能驗證標準
 
-- **可執行範例**：每個功能必須有可實際執行的使用範例；API 設計必須通過實際呼叫驗證可用性
-- **邊界測試**：必須驗證邊界情況的處理
+每個功能須有可執行範例；API 必須實際呼叫，邊界處理必須驗證。
