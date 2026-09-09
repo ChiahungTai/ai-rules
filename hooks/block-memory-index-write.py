@@ -10,9 +10,11 @@ PreToolUse hook（matcher Edit|Write|NotebookEdit）: memory 寫入治理（兩�
    寫入五問 Q1/Q2/Q4：
    - frontmatter description >100 chars → 擋（索引行原料＝寫入紀律值，
      name×2 重複已佔索引行 40% 開銷，desc 是主要槓桿）
-   - desc 含 commit hash 形態（`\bcommit[s]?\s+(?=[0-9a-fA-F]*[0-9])[0-9a-fA-F]{7,}`，
-     09-05 S2/AIR-25＋同日 digit-lookahead 補強）→ 擋：
+   - desc 含 hash 兩形態（commit-前綴 09-05 S2/AIR-25＋同日 digit-lookahead 補強；
+     bare hash 09-10 擴——mosaic「收案 93715b60a」繞過實證）→ 擋：
      hash 屬 git log 可推導（官方 skip-derivable），desc＝觸發詞＋一句鉤子。
+   - desc 含日期 MM-DD／sess_ 形態（09-10 M2 實作——收案群「09-09」流入實證）→ 擋：
+     易變快照住 body／卡，desc 只留觸發詞＋鉤子（存量不溯及）。
      邊界：\b 擋 "recommit" 誤傷；複數/大寫 hex 涵蓋；digit-lookahead 排除
      「commit feedback/facade/defaced」類純字母 hex 偽陽性（mosaic 實戰案例）；
      只查 desc 不查 body（body 引 hash 是歷史合法引用，另有 12K 膨脹治理）。
@@ -49,7 +51,24 @@ NEW_ENTRY_LIMIT = (
 )
 HASH_RE = re.compile(
     r"\bcommit[s]?\s+(?=[0-9a-fA-F]*[0-9])[0-9a-fA-F]{7,}"
-)  # desc 禁 commit hash（09-05 S2；digit-lookdown 排除純字母 hex 形態——實戰偽陽性「commit feedback」〔feedbac 恰 7 hex〕，真 hash 7+ 碼全字母機率≈0.01%）
+    r"|\b(?=[0-9a-fA-F]*[0-9])(?=[0-9a-fA-F]*[a-fA-F])[0-9a-fA-F]{7,}\b"
+)  # desc 禁 hash 兩形態（09-05 S2 commit-前綴；09-10 擴 bare hash——mosaic 收案群
+#   desc「收案 93715b60a」無前綴流入兩晚實證）：bare 分支要求 7+ hex 且同時含數字
+#   與 a-f 字母——純數字 7+ 串（緊湊日期 20260909／長編號）放行（漏全數字真 hash
+#   ~2-4%，與 digit-lookahead 漏全字母 hash 同構，歸掃尾）；digit-lookdown 排除
+#   純字母 hex 形態——實戰偽陽性「commit feedback」〔feedbac 恰 7 hex〕，真 hash
+#   7+ 碼全字母機率≈0.01%。殘餘：hex 字母詞＋數字（如 decade12）在 desc 語彙罕見
+#   （MOS-78／EP／kebab 名含 - 斷 run／版號用點號），誤傷成本＝一次改寫重試。
+DATE_RE = re.compile(
+    r"\b\d{2}-\d{2}\b"
+)  # desc 禁日期流水 MM-DD（09-10 M2 實作——收案群「09-09」流入實證；全日期
+#   經 MM-DD 子串命中）。合法碰撞面：版號用點號／範圍用 ~／時刻用冒號／比例用
+#   斜線；字母前綴數字（S1-S4）因 \b 不中。純數字 8 位（20260909）不中，歸掃尾。
+SESS_RE = re.compile(
+    r"\bsess_[0-9A-Za-z]{3,}"
+)  # desc 禁 session id（09-10 M2 實作；sess_ 前綴高特異，碰撞≈零）
+# 共同邊界（三 pattern 同界）：CJK 緊貼（`案93715…` 無空白）因 \b／Unicode \w
+# 含 CJK 而漏——歸夜間掃尾，不擴邊界。
 
 
 def is_index_violation(file_path: str, has_generator: bool) -> bool:
@@ -144,9 +163,23 @@ def main() -> None:
             sys.exit(2)
         if HASH_RE.search(desc):
             print(
-                "[Hook Blocked] 條目 description 含 commit hash——desc＝觸發詞＋一句鉤子。\n"
+                "[Hook Blocked] 條目 description 含 hash（commit／bare 形態）——desc＝觸發詞＋一句鉤子。\n"
                 "hash 屬 git log 可推導（官方 skip-derivable），不進索引行。\n"
                 "修正方式：desc 去掉 hash（收案錨點留 body 或指向 repo 檔案）。",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        if DATE_RE.search(desc):
+            print(
+                "[Hook Blocked] 條目 description 含日期（MM-DD）——desc 不放易變快照。\n"
+                "日期／進度狀態住 body 或卡，desc 只留觸發詞＋一句鉤子。",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        if SESS_RE.search(desc):
+            print(
+                "[Hook Blocked] 條目 description 含 session id——sess_ 屬 DB 可推導。\n"
+                "修正方式：desc 去掉 session id（接續錨點留 body）。",
                 file=sys.stderr,
             )
             sys.exit(2)
@@ -182,8 +215,22 @@ def main() -> None:
             sys.exit(2)
         if desc and HASH_RE.search(desc):
             print(
-                "[Hook Blocked] 新 description 含 commit hash——desc＝觸發詞＋一句鉤子，\n"
+                "[Hook Blocked] 新 description 含 hash（commit／bare 形態）——desc＝觸發詞＋一句鉤子，\n"
                 "hash 屬 git log 可推導。修正方式：desc 去掉 hash。",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        if desc and DATE_RE.search(desc):
+            print(
+                "[Hook Blocked] 新 description 含日期（MM-DD）——desc 不放易變快照，\n"
+                "日期住 body 或卡。",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+        if desc and SESS_RE.search(desc):
+            print(
+                "[Hook Blocked] 新 description 含 session id——sess_ 屬 DB 可推導，\n"
+                "接續錨點留 body。",
                 file=sys.stderr,
             )
             sys.exit(2)

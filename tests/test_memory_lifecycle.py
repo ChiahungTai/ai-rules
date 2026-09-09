@@ -493,6 +493,126 @@ def test_entry_write_folded_desc_hash_passthrough(tmp_path):
     assert r.returncode == 0
 
 
+def test_entry_write_desc_bare_hash_blocked(tmp_path):
+    """09-10 bare-hash 擴（mosaic 收案群「收案 93715b60a」繞過實證）：desc 含無前綴
+    hash（7+ hex 且含數字與 a-f 字母）→ exit 2——與 commit-前綴分支同契約。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "bare-hash.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: bare-hash\ndescription: 控制台收案 93715b60a 卡 Done\n"
+                "metadata:\n  type: project\n---\nbody\n"
+            ),
+        )
+    )
+    assert r.returncode == 2
+    assert "hash" in r.stderr
+
+
+def test_entry_edit_desc_bare_hash_blocked(tmp_path):
+    """Edit 分支同契約：new_string 的 description 行帶 bare hash → exit 2。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "edit-bare-hash.md"
+    target.write_text(
+        "---\nname: edit-bare-hash\ndescription: 原始合規\nmetadata:\n  type: project\n---\nbody\n",
+        encoding="utf-8",
+    )
+    r = run_hook(
+        hook_payload(
+            "Edit",
+            target,
+            old_string="description: 原始合規",
+            new_string="description: 收案 d4f9e3ca4 整理",
+        )
+    )
+    assert r.returncode == 2
+    assert "hash" in r.stderr
+
+
+def test_entry_write_desc_pure_digit_run_allowed(tmp_path):
+    """邊界（文檔化殘餘）：純數字 7+ 串（緊湊日期 20260909）放行——bare 分支要求
+    a-f 字母，漏全數字真 hash（~2-4%）歸夜間掃尾。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "digit-run.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: digit-run\ndescription: 版本 20260909 快照整理\n"
+                "metadata:\n  type: project\n---\nbody\n"
+            ),
+        )
+    )
+    assert r.returncode == 0
+
+
+def test_entry_write_desc_date_blocked(tmp_path):
+    """09-10 M2（收案群「09-09」流入實證）：desc 含 MM-DD → exit 2——日期住 body／卡。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "date-desc.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: date-desc\ndescription: 09-09 控制台收案進度\n"
+                "metadata:\n  type: project\n---\nbody\n"
+            ),
+        )
+    )
+    assert r.returncode == 2
+    assert "日期" in r.stderr
+
+
+def test_entry_write_desc_session_id_blocked(tmp_path):
+    """09-10 M2：desc 含 sess_ → exit 2（sess_ 屬 DB 可推導，接續錨點留 body）。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "sess-desc.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: sess-desc\ndescription: 接續 sess_zzzz99 未完事項\n"
+                "metadata:\n  type: project\n---\nbody\n"
+            ),
+        )
+    )
+    assert r.returncode == 2
+    assert "session" in r.stderr
+
+
+def test_entry_write_desc_version_dots_allowed(tmp_path):
+    """反向：點號版號（v2.1——點斷 hex run）→ exit 0——日期閘不誤傷版號語彙。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "version-desc.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: version-desc\ndescription: 升級 v2.1 整理要點\n"
+                "metadata:\n  type: project\n---\nbody\n"
+            ),
+        )
+    )
+    assert r.returncode == 0
+
+
+def test_desc_gate_regex_boundaries():
+    """三 pattern 邊界單元錨：全日期經 MM-DD 子串命中；字母前綴數字（S1-S4）
+    因 \\b 不中；bare hash 同時要求數字與 a-f 字母。"""
+    assert block_memory.DATE_RE.search("2026-09-10 全量重跑")
+    assert not block_memory.DATE_RE.search("S1-S4 全鏈完成")
+    assert block_memory.HASH_RE.search("收案 93715b60a")
+    assert not block_memory.HASH_RE.search("版本 20260909 快照")
+    assert block_memory.SESS_RE.search("接續 sess_740807c3")
+
+
 def test_entry_edit_grow_overlimit_blocked(tmp_path):
     """既有 11,800 chars 檔 Edit +500（變大且超 12,000）→ exit 2——膨脹方向擋。"""
     pool = make_pool(tmp_path, n=1)
