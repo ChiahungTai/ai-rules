@@ -1,6 +1,6 @@
 ---
 name: model-routing
-description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/一般〕×五公司，model 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse＋glm-5.3-flash/影像＝支援影像的 model/muse 跨家族審查優先/codex 預設不派——chatgpt-web webgpt 顯式形態（high＝旗艦、web 訊息額度 pool））＋額度 failover＋lite 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、general-purpose、內建型別、繼承主模型、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、glm-5.3-flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、chatgpt-web、webgpt、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定、定向接續、session-id、fork、workspace 守衛。
+description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/一般〕×五公司，model 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse+codex（09-10 帳號切換恢復）/實作預設 muse＋glm-5.3-flash/影像＝支援影像的 model/muse 跨家族審查優先/codex 預設不派——chatgpt-web webgpt 顯式形態（high＝旗艦、web 訊息額度 pool））＋額度 failover＋lite 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、general-purpose、內建型別、繼承主模型、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、glm-5.3-flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、chatgpt-web、webgpt、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定、定向接續、session-id、fork、workspace 守衛。
 ---
 
 # Model Routing — 解析表與 provider 事實
@@ -33,7 +33,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 ### dispatch 預設（user 2026-09-05 裁定、09-07 修訂；訂閱現值變更只改本段＋上表格標註）
 
-**額度現值（2026-09-07 user 拍板「固定記載」；09-09 補 codex web pool）：可用＝GLM（5.3 主力＋glm-5.3-flash）＋muse 兩家**；codex 額度最少不派（09-09 起 `chatgpt-web/*` 走 ChatGPT web 訊息額度——獨立 pool、零 API 費，**不改變顯式指定才派政策**，見 family 表 codex row）、Anthropic／xai 未訂閱禁派——派發前可派池只有這兩家。
+**額度現值（2026-09-07 user 拍板「固定記載」；09-10 帳號切換修訂）：可用＝GLM（5.3 主力＋glm-5.3-flash）＋muse＋codex 三家**；codex 09-10 帳號切換後恢復（主用 `chatgpt-web/*` web 訊息額度 pool——bridge adapter 預設 `chatgpt-web/high`、零 API 費；**顯式指定/advisory 派發政策不變**，見 family 表 codex row；訂閱載具仍有窗口限額，耗盡形態與處置見 memory `quota-failover-policy` 條目）、Anthropic／xai 未訂閱禁派。
 
 **harness 主軸（user 的開發入口決定主力 model——與下方 external-runtime「角色 → family → profile 映射」同源）：**
 
@@ -42,7 +42,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 - **審查類（ep-review／code-review 等 review agent 層）→ lite 預設（glm-5.3-flash；user 09-09 裁定）**：findings 生產層跨家族/跨層品質已實證，判斷價值集中 judge 裁決層；跨家族第二意見仍 muse 優先（非 GLM 視角）；升 full 條件＝高保護面／跨邊界語義面（保護面厚度反轉為升級觸發）；**judge 裁決層不變：固定主 session GLM 5.3**（AIR-24 三防線）；dual-family 鏈 judge 全採納（零否決）時顯性自查三防線#2（sycophancy 下傳——AIR-46 實證零否決×2 未觸發）；外部 runtime 委派承載者＝主 session 背景 Bash（禁 subagent wrapper——見 reviewer 交接契約「承載者」）；registry 釘選＝base 非強制——顯式升級＝換 full-tier 載體（高保護面／跨邊界語義面）；跨家族第二意見換 muse（ZCode 無 spawn-time model 參數）
 - **實作（implement profile bridge 委派）＝預設 muse**（user 09-07 修訂，取代 09-05「user 指定時派」單批指示慣例）：重實作段 muse、lite 機械段 glm-5.3-flash；**CR 工具鏈 agent（cr-research 等）同收斂 muse＋glm-5.3-flash**——與「user 直在 muse code 開發」仍是兩種形態（委派 vs harness 切換）
 - **影像需求（vision tier）＝需「支援影像的 model」，現值＝glm-5.3-flash**（user 09-07「影像目前都用 flash」——選它因 5.3 flash 原生多模，非因 lite tier；非所有 lite 款都具影像能力）——muse `--image` 是能力備註（上表），非現值路由
-- **codex（OpenAI）→ 預設不派**（額度最少）——僅 user 顯式指定（例：「codex sol max」；09-09 起顯式指定多一種形態：`chatgpt-web/*` 走 web 訊息額度 pool，例「codex web high」→ `chatgpt-web/high` 旗艦）。定性甜蜜點實證：control-plane／docs 形態 repo 的全 repo 狀態對抗深審（[/state-review](../state-review/SKILL.md) 的候選家族之一）——產出與 in-family 盲點正交（權威模型／事務完整性／provenance 類問題）；本行是能力備註，不構成取消顯式指定授權
+- **codex（OpenAI）→ 預設不派**（09-10 帳號切換後額度已恢復——不派屬 ad-hoc 政策非額度因素）——僅 user 顯式指定（例：「codex sol max」；09-09 起顯式指定多一種形態：`chatgpt-web/*` 走 web 訊息額度 pool，例「codex web high」→ `chatgpt-web/high` 旗艦）。定性甜蜜點實證：control-plane／docs 形態 repo 的全 repo 狀態對抗深審（[/state-review](../state-review/SKILL.md) 的候選家族之一）——產出與 in-family 盲點正交（權威模型／事務完整性／provenance 類問題）；本行是能力備註，不構成取消顯式指定授權
 - **CC（Anthropic 端點）→ env 別名直達 GLM，可派**（user 09-08 起：`ANTHROPIC_BASE_URL`＝z.ai 相容端點，`opus`→glm-5.3、`sonnet`/`haiku`→glm-5.3-flash——走 GLM 額度非 Anthropic 訂閱；定義源 settings.json `ANTHROPIC_DEFAULT_*`，與 agent-workflow Step 1 表同步維護）；Anthropic 直訂閱仍未訂、xai 未訂閱禁派
 
 **額度 failover（僅撞牆時）**：GLM 撞 1308（錯誤訊息含重置時間戳）→ muse 承接執行段；muse 亦乾 → 等 reset（`/at`）或 user 裁定硬跑；任何降級必顯式記錄（AIR-13）
