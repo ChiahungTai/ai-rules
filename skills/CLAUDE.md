@@ -125,6 +125,7 @@
 - `kanban-board` — Tasks.md 看板卡片管理（讀 / 建 / 移動 / 回顧）
 - `maintain` — `/daily-maintain` 的 4-phase 維護核心（勿直接呼叫）
 - `scan-project` — 統一專案知識掃描（on-demand；imports + Capabilities + kanban → dep_graph / findings）
+- `standup` — 每日晨間簡報昨日活動 digest（跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition；由排程載體整合進 daily-report）
 - `agent-workflow` — Agent 派發 / worktree 隔離 / 並發控制 / spawn 預設背景 / spawn 型別 gate（內建 general-purpose／Explore 無 pin 繼承主模型——lite 任務必派 registry 角色）/ 委派框架（delegation）/ side-discovery / Rule Freshness（spawn 時注入）/ Writer-Reviewer / spawn 失敗階梯（429 降並發→serialization）/ **全生命週期 execution contract 消費側**（各段 dispatch 查表；表主體在 agents/AGENTS.md）
 - `cross-verify` — 多源交叉查證（db/git/log/memory/cr/web 軸群平行取證→交叉對帳→verdict＋unverified；源枚舉制——web 軸須顯式點名；源缺場該軸 unverified 不阻斷；產出軌道①可餵 judge-review；執行載體＝`agents/roles/cross-verify-investigator.md` 單一參數化 agent）
 - `model-routing` — subagent 模型分層深層載體（reference skill：tier→(model,effort) 解析表〔中文標籤旗艦/一般〕＋full-tier 旗艦釘選（ZCode＝registry 釘 glm-5.3——AIR-43 inherit 洞修補；CC＝inherit）＋旗艦資格條款（五項）／坐位註記＋內建型別無 pin 繼承（general-purpose／Explore 繼承主 session 模型；lite 任務誤派＝旗艦燒機械段反模式）＋lite 分工律〔執行層條件式降級＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律〕＋external-runtime family→(model,effort,容量) 解析表＋eligibility gate／reviewer 交接契約／完成回報收法（fire-and-forget 決策樹：--background 提交＋跨 session 認領＋wait/show 晚收、timeout 訊號家系拆分、ETA-gate fallback）／套用三路徑、rate limit 並發表、thoughtLevel 但書；rule 端留角色→tier 表＋詞彙定義＋兩跳骨架——rule+skill 分層控制 bundle 尺寸）
