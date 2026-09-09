@@ -228,10 +228,10 @@ Rebase 成功後（無衝突或衝突已解決），檢查**非衝突區域**的
 
 ### 其他 feature（Phase 3 報告，未自動同步）
 ⚠️ backbone 落後 main 3 commits → 切到 backbone worktree 跑 /rebase main
-⚠️ warrant 落後 main 2 commits（無 worktree，純祖先）→ git fetch . main:warrant
+⚠️ legacy-sync 落後 main 2 commits（無 worktree，純祖先）→ git fetch . main:legacy-sync
 
 ### 總結
-1/1 成功，0 衝突（backbone/warrant 待你手動同步）
+1/1 成功，0 衝突（backbone/legacy-sync 待你手動同步）
 ```
 
 ---
@@ -310,7 +310,7 @@ git worktree list                            # branch → worktree 對應（同�
 
 ### 結果
 ✅ replay: rebase onto main（2 commits replayed）
-✅ warrant: fetch ff onto main（無 worktree）
+✅ legacy-sync: fetch ff onto main（無 worktree）
 ⚠️ backbone: 跳過（dirty，未處理）
 ❌ features-x: 衝突未解（卡在 rebase，等你處置）
 
