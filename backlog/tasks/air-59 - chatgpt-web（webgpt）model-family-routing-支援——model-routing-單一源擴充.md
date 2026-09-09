@@ -1,13 +1,18 @@
 ---
 id: AIR-59
 title: chatgpt-web（webgpt）model family routing 支援——model-routing 單一源擴充
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-09 11:40'
+updated_date: '2026-09-09 11:50'
 labels:
   - model-routing
   - governance
 dependencies: []
+references:
+  - >-
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/skills/model-routing/SKILL.md
+  - skills/model-routing/SKILL.md
 ordinal: 51000
 ---
 
@@ -21,3 +26,9 @@ ordinal: 51000
 <!-- AC:BEGIN -->
 - [ ] #1 chatgpt-web/{high,medium} 進 family 表且 high 標旗艦 full；額度現值段含 web pool 註記；gpt-5.5/low 過時落點註記修正；部署面 rg 命中驗證；五維自洽＋consistency 過
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+chatgpt-web family 進 tier/family 表（high＝旗艦、web 訊息額度獨立 pool）、現值落點修正（chatgpt-web/medium）、三面部署驗證＋consistency 六維過
+<!-- SECTION:FINAL_SUMMARY:END -->

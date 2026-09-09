@@ -1,6 +1,6 @@
 ---
 name: model-routing
-description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/一般〕×五公司，model 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse＋glm-5.3-flash/影像＝支援影像的 model/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋lite 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、general-purpose、內建型別、繼承主模型、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、glm-5.3-flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定、定向接續、session-id、fork、workspace 守衛。
+description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/一般〕×五公司，model 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse＋glm-5.3-flash/影像＝支援影像的 model/muse 跨家族審查優先/codex 預設不派——chatgpt-web webgpt 顯式形態（high＝旗艦、web 訊息額度 pool））＋額度 failover＋lite 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、general-purpose、內建型別、繼承主模型、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、glm-5.3-flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、chatgpt-web、webgpt、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定、定向接續、session-id、fork、workspace 守衛。
 ---
 
 # Model Routing — 解析表與 provider 事實
@@ -13,9 +13,9 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 | tier（requirement） | zai | Anthropic | OpenAI | xai | meta |
 |---|---|---|---|---|---|
-| **full**（旗艦） | `glm-5.3`（旗艦釘選，AIR-43——inherit 洞修補）〔repo-observed；wire 首例已實證——AIR-43 S3 遙測 model_id='glm-5.3'〕 | opus＝**env 別名直達 glm-5.3**〔z.ai 端點 `ANTHROPIC_DEFAULT_OPUS_MODEL`，GLM 額度非 Anthropic 訂閱——CC 可派；repo-observed 2026-09-08〕 | sol high／max〔**預設不派**——額度最少〕 | fabel〔**未訂閱禁派**〕 | muse-spark-1.3（effort xhigh 起） |
+| **full**（旗艦） | `glm-5.3`（旗艦釘選，AIR-43——inherit 洞修補）〔repo-observed；wire 首例已實證——AIR-43 S3 遙測 model_id='glm-5.3'〕 | opus＝**env 別名直達 glm-5.3**〔z.ai 端點 `ANTHROPIC_DEFAULT_OPUS_MODEL`，GLM 額度非 Anthropic 訂閱——CC 可派；repo-observed 2026-09-08〕 | sol high／max〔**預設不派**——額度最少〕；`chatgpt-web/high`〔旗艦，user 09-09——ChatGPT web 訊息額度（webgpt bridge 獨立 pool，語義見 family 表）；顯式指定才派；repo-observed〕 | fabel〔**未訂閱禁派**〕 | muse-spark-1.3（effort xhigh 起） |
 | **vision**（影像） | glm-5.3-flash（多模✓ 已實戰）〔repo-observed〕 | 〔別名層未定視覺映射——影像需求 CC 端暫不派〕 | 〔預設不派〕 | 〔未訂閱＋本機未安裝〕 | muse-spark-1.3 `--image`✓〔repo-observed〕 |
-| **lite**（一般） | glm-5.3-flash〔repo-observed〕 | sonnet／haiku＝env 別名直達 glm-5.3-flash〔同上定義源；地板 sonnet 級——haiku 別名同名款可用〕 | terra high+（**luna 排除，基本不用**）〔**預設不派**〕 | 〔未訂閱禁派〕 | —（與旗艦同體；額度貴，非省成本預設） |
+| **lite**（一般） | glm-5.3-flash〔repo-observed〕 | sonnet／haiku＝env 別名直達 glm-5.3-flash〔同上定義源；地板 sonnet 級——haiku 別名同名款可用〕 | terra high+（**luna 排除，基本不用**）〔**預設不派**〕；`chatgpt-web/medium`〔web pool——同 full 行 chatgpt-web/high 條款〕 | 〔未訂閱禁派〕 | —（與旗艦同體；額度貴，非省成本預設） |
 
 > 證據狀態標註：repo-observed（本機實測）＞official-doc（官方文檔，非本機 L4）＞first-real-usage-pending（首例實戰待補）。
 
@@ -33,7 +33,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 ### dispatch 預設（user 2026-09-05 裁定、09-07 修訂；訂閱現值變更只改本段＋上表格標註）
 
-**額度現值（2026-09-07 user 拍板「固定記載」）：可用＝GLM（5.3 主力＋glm-5.3-flash）＋muse 兩家**；codex 額度最少不派、Anthropic／xai 未訂閱禁派——派發前可派池只有這兩家。
+**額度現值（2026-09-07 user 拍板「固定記載」；09-09 補 codex web pool）：可用＝GLM（5.3 主力＋glm-5.3-flash）＋muse 兩家**；codex 額度最少不派（09-09 起 `chatgpt-web/*` 走 ChatGPT web 訊息額度——獨立 pool、零 API 費，**不改變顯式指定才派政策**，見 family 表 codex row）、Anthropic／xai 未訂閱禁派——派發前可派池只有這兩家。
 
 **harness 主軸（user 的開發入口決定主力 model——與下方 external-runtime「角色 → family → profile 映射」同源）：**
 
@@ -42,7 +42,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 - **審查類（ep-review／code-review 等 review agent 層）→ lite 預設（glm-5.3-flash；user 09-09 裁定）**：findings 生產層跨家族/跨層品質已實證，判斷價值集中 judge 裁決層；跨家族第二意見仍 muse 優先（非 GLM 視角）；升 full 條件＝高保護面／跨邊界語義面（保護面厚度反轉為升級觸發）；**judge 裁決層不變：固定主 session GLM 5.3**（AIR-24 三防線）；dual-family 鏈 judge 全採納（零否決）時顯性自查三防線#2（sycophancy 下傳——AIR-46 實證零否決×2 未觸發）；外部 runtime 委派承載者＝主 session 背景 Bash（禁 subagent wrapper——見 reviewer 交接契約「承載者」）；registry 釘選＝base 非強制——顯式升級＝換 full-tier 載體（高保護面／跨邊界語義面）；跨家族第二意見換 muse（ZCode 無 spawn-time model 參數）
 - **實作（implement profile bridge 委派）＝預設 muse**（user 09-07 修訂，取代 09-05「user 指定時派」單批指示慣例）：重實作段 muse、lite 機械段 glm-5.3-flash；**CR 工具鏈 agent（cr-research 等）同收斂 muse＋glm-5.3-flash**——與「user 直在 muse code 開發」仍是兩種形態（委派 vs harness 切換）
 - **影像需求（vision tier）＝需「支援影像的 model」，現值＝glm-5.3-flash**（user 09-07「影像目前都用 flash」——選它因 5.3 flash 原生多模，非因 lite tier；非所有 lite 款都具影像能力）——muse `--image` 是能力備註（上表），非現值路由
-- **codex（OpenAI）→ 預設不派**（額度最少）——僅 user 顯式指定（例：「codex sol max」）。定性甜蜜點實證：control-plane／docs 形態 repo 的全 repo 狀態對抗深審（[/state-review](../state-review/SKILL.md) 的候選家族之一）——產出與 in-family 盲點正交（權威模型／事務完整性／provenance 類問題）；本行是能力備註，不構成取消顯式指定授權
+- **codex（OpenAI）→ 預設不派**（額度最少）——僅 user 顯式指定（例：「codex sol max」；09-09 起顯式指定多一種形態：`chatgpt-web/*` 走 web 訊息額度 pool，例「codex web high」→ `chatgpt-web/high` 旗艦）。定性甜蜜點實證：control-plane／docs 形態 repo 的全 repo 狀態對抗深審（[/state-review](../state-review/SKILL.md) 的候選家族之一）——產出與 in-family 盲點正交（權威模型／事務完整性／provenance 類問題）；本行是能力備註，不構成取消顯式指定授權
 - **CC（Anthropic 端點）→ env 別名直達 GLM，可派**（user 09-08 起：`ANTHROPIC_BASE_URL`＝z.ai 相容端點，`opus`→glm-5.3、`sonnet`/`haiku`→glm-5.3-flash——走 GLM 額度非 Anthropic 訂閱；定義源 settings.json `ANTHROPIC_DEFAULT_*`，與 agent-workflow Step 1 表同步維護）；Anthropic 直訂閱仍未訂、xai 未訂閱禁派
 
 **額度 failover（僅撞牆時）**：GLM 撞 1308（錯誤訊息含重置時間戳）→ muse 承接執行段；muse 亦乾 → 等 reset（`/at`）或 user 裁定硬跑；任何降級必顯式記錄（AIR-13）
@@ -78,7 +78,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 | 審查／判斷（review 委派） | `high` | `high` | `high` | `high` | review 工單 |
 | 深推理（判斷密集／深挖） | `max`（user 層級；定義檔設值 sticky 不達 wire——見上方但書） | `high` | `xhigh`～`ultra` | `xhigh` | muse 委派預設（09-04 定）；深推理升 `ultra` |
 
-> 可考值域：codex 接受 `none`/`minimal`/`low`/`medium`/`high`/`xhigh`（**codex plugin** 的 codex-cli-runtime skill——plugin cache 面，非本 repo 檔；repo 內鏡像 `ref-docs/harness/codex/config-sample.md` 的 config-level enum 無 `none`——companion flag 值域與 config 值域是兩個面）；muse 用 `low`/`medium`/`high`/`xhigh`/`ultra`（`ultra`＝CLI alias → provider 最高級＝API `max`）；ZCode 欄位名是 `thoughtLevel`（非 `reasoningEffort`——未知欄位靜默忽略）、user reasoningLevel 層級含 `max`；CC effort enum 以 CC runtime 為準（repo 慣用 `high`）。跨家族委派時 effort 值以**各家族解析表**為準（muse/codex 見 external-runtime family 表、in-harness 見 tier 解析表），本表只對詞彙。
+> 可考值域：codex 接受 `none`/`minimal`/`low`/`medium`/`high`/`xhigh`（**codex plugin** 的 codex-cli-runtime skill——plugin cache 面，非本 repo 檔；repo 內鏡像 `ref-docs/harness/codex/config-sample.md` 的 config-level enum 無 `none`——companion flag 值域與 config 值域是兩個面）；`chatgpt-web/*` 例外＝slug 自帶固定 effort（light/medium/high＝display Instant/Medium/High），effort 旗標不換 browser model（值域對 web slug 無效）；muse 用 `low`/`medium`/`high`/`xhigh`/`ultra`（`ultra`＝CLI alias → provider 最高級＝API `max`）；ZCode 欄位名是 `thoughtLevel`（非 `reasoningEffort`——未知欄位靜默忽略）、user reasoningLevel 層級含 `max`；CC effort enum 以 CC runtime 為準（repo 慣用 `high`）。跨家族委派時 effort 值以**各家族解析表**為準（muse/codex 見 external-runtime family 表、in-harness 見 tier 解析表），本表只對詞彙。
 
 ## lite 分工律（執行層降級條件）
 
@@ -116,7 +116,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 | family | model | effort | 容量現值 | 備註 |
 |--------|-------|--------|----------|------|
 | muse | `muse-spark-1.3` | `xhigh`（user 09-04 定；純機械掃描 advisory 可降 `low`/`medium` 省 quota）；深推理可升 `ultra`（CLI alias → provider 最高級＝API `max`，限 1.3 Standard tier；reasoning tokens 佔 output 比例更大，留意輸出上限截斷） | 長 context（以 provider dashboard 為準） | 具視覺輸入 `--image`，跨家族備選；advisory／implement／review 共用此 family；bridge 端預設 pin 與本表對齊（delegate-bridge 弧維護），`--model`／`--effort` passthrough 僅供臨時 override |
-| codex | `gpt-5.6-sol` | `high` | 約 258K（user 09-05 實值；以 provider 為準）——額度最少故預設不派（見 dispatch 預設段）；大 context 任務仍優先 muse | ad-hoc 選項（僅 user 顯式指定）；**bridge ≥1.0.0 承載（`task --family codex`，AIR-47 吸收）**——`--model`／`--effort` bridge flag 直達（`spark` 別名→`gpt-5.3-codex-spark`）；raw 形態＝`-m <id>`＋`-c model_reasoning_effort=<v>`（raw `codex exec` 不收 `--effort`——unexpected argument 實證；codex 無 `ultra`）。**不帶旗標＝落 config 預設，現值 `gpt-5.5`/`low`（09-08 查驗 `~/.codex/config.toml:5-6`）——要 family 表值必須顯式帶旗標，禁信 config 預設**。raw CLI 事實集（事件流／resume／fork／sandbox／spawn stdin 陷阱）見 memory `reference_codex-cli-exec-facts`——官方 companion 已退役（AIR-47），委派一律經 bridge |
+| codex | `gpt-5.6-sol`（原生）／**`chatgpt-web/high`（旗艦，user 09-09）**、`chatgpt-web/medium`（web 形態） | 原生 `high`；**web slug 自帶固定 effort**——slug 即檔位，`--effort` 不換 browser model | 原生約 258K（user 09-05 實值；以 provider 為準）；web 256K（3× experimental）——原生 pool 額度最少故預設不派（見 dispatch 預設段，web 形態同政策）；大 context 任務仍優先 muse | ad-hoc 選項（僅 user 顯式指定）；**bridge ≥1.0.0 承載（`task --family codex`，AIR-47 吸收）**——`--model`／`--effort` bridge flag 直達（`spark` 別名→`gpt-5.3-codex-spark`）；raw 形態＝`-m <id>`＋`-c model_reasoning_effort=<v>`（raw `codex exec` 不收 `--effort`——unexpected argument 實證；codex 無 `ultra`）。**web 形態（09-09 webgpt bridge）**：`chatgpt-web/*` 底層 gpt-5.6-sol、吃 ChatGPT web 訊息額度（零 API 費、與原生 slug 的訂閱 Codex 額度分帳）；原生 slug 經 bridge passthrough 額度照舊；**bridge（`127.0.0.1:17841`）＝全 model 單點——launcher 死＝全 fail-closed**。**不帶旗標＝落 config 預設，現值 `chatgpt-web/medium`/`medium`（09-09 查驗）——要 family 表值必須顯式帶旗標，禁信 config 預設**。raw CLI 事實集（事件流／resume／fork／sandbox／spawn stdin 陷阱）見 memory `reference_codex-cli-exec-facts`——官方 companion 已退役（AIR-47），委派一律經 bridge |
 | GLM（in-harness） | 見 tier 表 | 見 tier 表 | 高（遠高於 200K 級，見 provider dashboard） | 沿用 tier→lite／vision 路由，不經 external-runtime 派發；in-harness acceptance reviewer 屬此 |
 
 > 容量為「需現況查證」性質，隨 model 世代更新只改本表。
