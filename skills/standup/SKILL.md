@@ -7,7 +7,7 @@ allowed-tools: ["Read", "Bash", "Glob", "Grep"]
 
 # standup skill — 昨日活動 digest
 
-產出「昨日活動 digest」**body**——跨 worktree session 敘事 + commit/kanban/SYSTEM-MAP transition。**只產 body,不加 `## ` header**(header `## 📝 昨日活動` 由 invoker 加:排程載體 append 進 daily-report;或 `/standup` 直接在 chat 顯示 body)。這是 nightly-thin(test-regression/BSR = 機器狀態層)未覆蓋的人類活動層。
+產出「昨日活動 digest」**body**——跨 worktree session 敘事 + commit/kanban/SYSTEM-MAP transition。**只產 body,不加 `## ` header**(header `## 📝 昨日活動` 由 invoker 加:排程載體 append 進 daily-report;或 `/standup` 直接在 chat 顯示 body)。這是機器狀態層報告（test-regression/BSR——載體現況見 registry 反查表 A1）未覆蓋的人類活動層。
 
 ## 🔴 輸出紀律(text output 會逐字進 daily-report)
 

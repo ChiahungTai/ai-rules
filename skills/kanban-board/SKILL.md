@@ -18,7 +18,7 @@ backlog init "<project>" --agent-instructions none
 ```
 
 - `--agent-instructions none`：不注入 CRITICAL_INSTRUCTION 區塊（與本 repo AGENTS.md 治理／元資訊禁令衝突）
-- config.yml 關鍵鍵：`statuses`（建議三欄 To Do/In Progress/Done）、`task_prefix`（repo 識別前綴，如 mosaic=`mos`、ai-rules=`air`）、`auto_commit: false`（外部 git 紀律——CLI 只改檔）、`check_active_branches: true`（多 WT repo 必開——board 唯讀顯示他 branch 已 commit 卡＋next-id 掃描跨 branch 卡防撞；untracked/staged 卡不在 branch ref 上，git 掃描天生看不見，殘餘防撞靠建卡預掃〔見命令合約建卡段〕）
+- config.yml 關鍵鍵：`statuses`（建議三欄 To Do/In Progress/Done）、`task_prefix`（repo 識別前綴，如 mosaic=`mos`、ai-rules=`air`）、`auto_commit: false`（外部 git 紀律——CLI 只改檔）、`check_active_branches: true`（多 WT repo 必開——board 唯讀顯示他 branch 已 commit 卡＋next-id 掃描跨 branch 卡防撞；untracked/staged 卡不在 branch ref 上，git 掃描天生看不見，殘餘防撞靠建卡預掃〔見命令合約建卡段〕；**ai-rules 現值 false**——09-09 起單 WT working copy 單一真相形態，id 防撞靠建卡預掃）
 
 ## 命令合約（消費端引用本段）
 
