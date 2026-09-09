@@ -1,18 +1,18 @@
 ---
 id: AIR-51
 title: sub-agent 派發模型路由寫法修補——內建型別繼承語義補洞
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-09 00:50'
-updated_date: '2026-09-09 00:52'
+updated_date: '2026-09-09 03:26'
 labels:
   - docs
   - skills
 dependencies: []
 references:
   - >-
-    http://127.0.0.1:6421/ai-rules/_tasks/09-09-subagent-model-routing-fix/index.html
-  - ai-analysis/_tasks/09-09-subagent-model-routing-fix/index.html
+    http://127.0.0.1:6421/ai-rules/_tasks/done/09-09-subagent-model-routing-fix/index.html
+  - ai-analysis/_tasks/done/09-09-subagent-model-routing-fix/index.html
 ordinal: 43000
 ---
 
@@ -26,3 +26,9 @@ ordinal: 43000
 <!-- AC:BEGIN -->
 - [ ] #1 四層修補＋索引同步＋tier 標籤落地（rg 可驗）；commit 帶本弧 35 檔＋EP 任務家；結案含 memory 蒸餾（reference 條目對齊＋feedback_dispatch-model-tier-glm53 :12/:14 錯誤表述必改）
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+四層修補（rule 內建列/skill 派發段/agent-workflow 檢查點/agents 治理節）＋roles tier 標籤 10/10/10＋registry regen 三端部署落地（7836f08，dual-context 複審＋judge 修正完）
+<!-- SECTION:FINAL_SUMMARY:END -->
