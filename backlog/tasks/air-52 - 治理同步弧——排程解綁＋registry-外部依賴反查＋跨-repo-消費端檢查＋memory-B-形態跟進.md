@@ -4,7 +4,7 @@ title: 治理同步弧——排程解綁＋registry 外部依賴反查＋跨 rep
 status: In Progress
 assignee: []
 created_date: '2026-09-09 01:35'
-updated_date: '2026-09-09 13:12'
+updated_date: '2026-09-09 20:11'
 labels:
   - governance
   - doc-sync
@@ -41,4 +41,6 @@ ordinal: 44000
 〔今晚 rebase 注意〕air-59→main ff 後 air-52 rebase：①registry「更新時點」行預期一行 conflict（air-54 前綴 2026-09-09 註記 vs 本弧尾注）——解法＝兩則並存②AIR-54 未提交 registry 條 4（一次性驗證 cron automation-d64fd994 記帳行）備份於 .agent-tmp/air-54-registry-row4-pending.{diff,full.md}＋README——歸 AIR-54 收尾 session 在 owning branch 重放，非本弧範圍。
 
 〔command center 補充 09-09 晚〕①S2 反查表建議擴欄「新架構職責註記」（AIR-54 落地後每條排程的職責變化／保留裁決——user 點名要掃排程必要性，此表為機械載體，不另開弧）。②順手項×2：draft-3 檔殼收尾（已被 AIR-53 承接落地，drafts/ 清除）；corrections-weekly SKILL:35 的 --pool 舊路徑示例改指 .agents/memory/（介面路徑經 symlink 仍通＝口徑債非斷線，S2 同檔順手）。③情報：夜波 cron prompt 已被 AIR-54 S4 更新（新路徑+inbox+bundle），S4 只剩 step 1 的 A 形態硬編數字（22,500/190→動態 gate 口徑）。
+
+〔S4 partial done 09-10 04:15 air-52 session〕首波機械驗證：nightly-convergence.log 最新段「2026-09-09 23:41 夜間收斂（cron 排程跑）」完整收斂（AIR-54 新制首跑：流入快照 7d600ea＋波次 commit f49dd2b＋首份 bundle＋marker 清）。CronUpdate 已執行：23:40 prompt 步驟 1（盤點）／步驟 4（波段收斂觸發）gate 口徑動態化——單一源＝generator 輸出行＋exit code（自帶 A/B 形態判定），逼近線 ≥85% 以輸出實值動態計算、B 形態看常駐面；硬編 22,500/21,000/190/24,000 全移除；路徑欄維持 AIR-54 版未動；今晚 23:40 波起生效。cross-verify memory 軸＋commit 2.8 池對帳腿 _inventory.md 檢索語義已落地。**P5 仍待**：04:08 查證 air-59 尚未 ff 進 main——merge＋air-52 rebase 後套用上方備援文案，隨後 post-build 鏈＋結案兩步＋弧結案蒸餾收斂本卡。另：首波 log 缺口登記（memory-audit skill 缺「Inbox 消費」節）歸 AIR-54 收尾 session。
 <!-- SECTION:NOTES:END -->
