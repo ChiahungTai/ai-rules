@@ -1,0 +1,23 @@
+---
+id: AIR-60
+title: session 接續恢復鏈治理——rehydration 單一源＋at 先結算再排程＋接續授權失效條款
+status: To Do
+assignee: []
+created_date: '2026-09-09 13:20'
+labels:
+  - governance
+  - skills
+  - handoff
+dependencies: []
+ordinal: 49000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+〔baseline：ai-rules 6e96e0e〕09-09 三顧問 session 接續討論（muse/flash/codex 交叉兩輪）收斂的恢復鏈治理落地卡；討論全程記錄 .agent-tmp/session-journal.md（ephemeral 7d，決策以本卡為準）。
+
+〔已決策勿重辯：①rehydration 順序單一源——三份局部版在場且會 drift（at skill「Resume 後的行為」1-4／context-management rule「接手 quota 中斷先讀」清單／handoff schema 欄序），合併為一條寫死的恢復序列單一源、三處改引用；「死前結算寫進五處、死後只讀兩處」是現況缺口（五落盤層：EP／卡 notes／journal／compact-context／STATE／.review）；先合併再談新載體（不新增第六落盤層）②at Phase 0 改序——先結算（EP append＋卡 notes＋STATE.md 觀察）再寫 at-context 排程；/at 本來就是 cold rollover 形態（不捕 snapshot＋fresh landing＋git log 重建），殘餘缺口只在結算順序、非 rollover 形態③接續授權失效條款——mutating continuation 工單＋at resume prompt 固定加「卷內既有授權全部失效，outward 動作一律 PENDING」；at「禁止詢問用戶確認」是自主執行指令、不得解讀為授權展期（授權隨卷延續＝接續最大未管理風險，恰好繞過 outward-action-consent「一次授權≠永久授權」）〕
+
+〔驗收：①rg 驗三處（at／context-management／handoff）均引用同一單一源恢復序列，無各自為政殘留②at SKILL.md Phase 0 含結算三件且時序在寫 at-context 之前③授權失效條款在 at resume prompt＋work-order 範本（skills/_common/work-order.md）＋model-routing「session 定向接續」節三處在場④sync-sources 機械新鮮度檢查通過＋guide 部署同步（deploy_agents）〕
+<!-- SECTION:DESCRIPTION:END -->
