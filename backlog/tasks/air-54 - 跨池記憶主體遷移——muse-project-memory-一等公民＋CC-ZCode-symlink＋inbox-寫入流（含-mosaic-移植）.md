@@ -4,7 +4,7 @@ title: 跨池記憶主體遷移——muse project memory 一等公民＋CC/ZCode
 status: Done
 assignee: []
 created_date: '2026-09-09 02:47'
-updated_date: '2026-09-09 22:29'
+updated_date: '2026-09-09 23:01'
 labels:
   - memory
   - governance
@@ -51,6 +51,10 @@ ordinal: 46000
 〔CC 緊急補充 09-10——S6 基線漂移〕EP :258『muse 自建三檔』情報已過時：mosaic_alpha/.agents/memory/ 已進化為完整 B 形態治理池（_generate_index.py/_resident-set.md/_inventory.md/_audit-state.md＋數十條目，含 feedback-subagent-serial-background 等）——S6 前置處置（三檔過六問併入）須改為『既有治理池整體搬遷/對接』重新盤點，非三檔小併。已知一條漂移待修：project-memory-audit-advisory-only.md desc 稱『AIR-54 S6 主體進 repo』——S6 未收斂，宣稱過早。S6 session 動手前先 ls 池現況對帳。
 
 〔CC 快訊 09-10 給續 session（sess_a167e4c3）——執行前必讀：世界已前進〕①結案兩步＋EP 歸檔 done/＋欠項② 已由 CC 補收（2d06dbb）：欠項②處置＝**作廢重放**（cron automation-d64fd994 已於 09-10 晨提前手動執行＋刪除——照原 diff git apply 會讓 registry 記不存在的 cron 造成週日比對 drift；已改更新時點歷史記載句存查）——**禁再 git apply air-54-registry-row4-pending.diff**。②欠項① skill Inbox 節已在場（對照 cron prompt 後預期零改或小補）。③前置 gate 已解除：air-66 弧已收斂（卡 Done、WT 回 main 乾淨）。④你的正當剩餘＝EP 收尾步驟 1-6（尤其步驟 6 三端鏈路總圖＋ZCode 待辦清點——提案落 drafts/）＋弧結案蒸餾三條（muse-memory-mechanism-divergence 終態化／muse-code-cli-facts 收斂＋S6 後形態／memory-cc-alignment-diagnosis 補 mosaic 新拓撲）。⑤卡已 Done——不重跑結案兩步；你的產出（總圖/清點/蒸餾）直接落檔＋commit（message 帶 air-54）。⑥mosaic 主體 git 基線 1e3da43＋收斂 3cfb464 供對帳。
+
+〔AIR-54 蒸餾尾段 09-10 ZCode sess_a167e4c3——CC 快訊指派項全清〕欠項①：SKILL「Inbox 消費」節對照 23:40 cron prompt 步驟 0＝機械步驟零缺（WAL 三態/path contract①-⑥/CAS/六問/receipts/quarantine 全在場），小補一行 S6 消費端事實（memory_pack 1.1.1＝索引 120 行＋單條 8KB inline 超限僅列名＋deny 1.1.1 相容——寫入 Q5 尺寸判斷消費面）。EP 收尾步驟驗證：1/4 零改（skills/CLAUDE.md 索引層零涉池路徑；context-management pointer 語義未變）、3 SYSTEM-MAP 不存在跳過、5 test_muse_memory_inbox.py 10 綠；步驟 6 draft-4 修訂至 S6 後形態（總圖 muse 讀取分級＋mosaic 同構＋P1/P3/P4 ✅＋ZCode 待辦補 8KB 消費面張力註 AIR-69 承接）。弧結案蒸餾三條落地：divergence 終態重寫（清 09-10 過時「S6 未跑」段＋desc 懸空指針）、muse-code-cli-facts 補 S6 後形態＋AIR-66 改已落地、cc-alignment 補 mosaic 同構拓撲；池 regen 綠（resident 2,257/6,000、inventory 26,448）。池 git 不自行收斂（多檔並行流入，留今晚 23:40 波次快照）。
+
+〔AIR-54 post-build 三路審查收斂 09-10〕flash fresh（5 sugg）＋flash primed（3 sugg，意圖九元素全 ✅）＋codex chatgpt-web/high（job-mtuou4f1-wt7hfk，Conditional Pass→1 Important）——0 Critical；採納 6：SKILL :80 校準（8KB＝消費端軟壓力非寫入閘、Q5 hard gate 12,000 不變、8K-12K 政策歸 AIR-69）＋:214 Q5 指針＋升版重驗錨；draft-4 :27 watchdog 口徑對齊 P5＋:34 8KB 單位語義未實測註記＋:42 P5 AIR-52 A1 已落地更新。reject 3（cron 五條措辭/跨池時刻/updated_date 時鐘）——前二轉 AIR-69 對帳清單（已落卡 notes）。帳本 .review/air-54.md（commit 後清）。
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary

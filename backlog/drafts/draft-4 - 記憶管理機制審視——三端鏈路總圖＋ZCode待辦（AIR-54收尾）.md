@@ -13,32 +13,33 @@ dependencies: []
 
 # 記憶管理機制審視（AIR-54 收尾步驟 6——審視與提案，不擴實作 scope）
 
-## 三端鏈路總圖（AIR-54 S1-S5 落地後，2026-09-09）
+## 三端鏈路總圖（S6 後修訂 2026-09-10——AIR-54 全弧含 mosaic 移植落地後）
 
-主體＝repo 內 `.agents/memory/`（gitignored＋池自帶 git；bundle 夜波外送 `~/.agents/memory-bundles/`）。
+主體＝repo 內 `.agents/memory/`（gitignored＋池自帶 git；bundle 夜波外送 `~/.agents/memory-bundles/`）。**同構複製（S6，09-10）**：mosaic_alpha 同形主體（owning＝main WT 實體、`.git/info/exclude` 排除版控；既有池經 MOS-88 遷 B 形態治理池）＋CC 三 project dir symlink＋ZCode 雙跳＋inbox hooks——細節單一源＝mosaic AGENTS.md「Muse memory」節。
 
 | 端 | 讀鏈 | 寫鏈 | 證據 |
 |---|---|---|---|
-| muse | project scope 原生讀（開場注入 MEMORY.md＋清單；`read_memory` 按需） | 經 `.muse/hooks.json` PreToolUse 閘代存 `.agents/memory-inbox/`（deny），consolidation 入池 | VP1/VP2 全綠＋recall sentinel 兩腿過（一等公民成立） |
+| muse | 讀取分級（S6 F2 實測）：main WT＝project scope 原生（開場注入＝索引 120 行上限＋單條 8KB inline 上限〔超限修剪僅列名〕；`read_memory` 按需）；次 WT 經目錄 symlink 的注入/read_memory 皆拒→降級 read_file 絕對路徑 | 經 `.muse/hooks.json` PreToolUse 閘代存 `.agents/memory-inbox/`（deny——1.1.1 相容），consolidation 入池 | VP1/VP2 全綠＋recall sentinel 兩腿過（一等公民成立）；mosaic main/次 WT 雙探針 |
 | CC | 舊徑 `~/.claude/projects/<encoded>/memory` 今為目錄 symlink→主體，透明穿透 | 直寫主體（write-sensor 觀測；MEMORY/_index 寫由閘擋） | headless probe 開場載入全綠；write-through 綠 |
 | ZCode | 既有 symlink→CC 舊徑→主體（雙跳，同 inode） | 直寫主體 | 三路徑同 inode 實測；真開場＝下 session 自然確認 |
 | codex（第四端） | 檔案級 Read 穿透；目錄級 rg/glob 走主體路徑（CC 舊徑需 `-L`） | 回報制，不直寫 | SM-13；AGENTS.md 觀察池路由已註明 |
 
-寫入收斂站＝consolidation（memory-audit「Inbox 消費」節）：夜波 23:40 或手動；WAL light（new→processing→done/rejected＋receipt）；path contract＋CAS＋六問；逾期 >48h 由 daily-maintain watchdog 異故障域報警。
+寫入收斂站＝consolidation（memory-audit「Inbox 消費」節）：夜波 23:40 或手動；WAL light（new→processing→done/rejected＋receipt）；path contract＋CAS＋六問；逾期 >48h 的 watchdog 檢查已寫入 daily-maintain（異故障域設計）——獨立執行者歸屬與 live 觸發驗證待 P5 拍板，不宣稱自動雙故障偵測。
 
 ## ZCode 待辦清點（本弧不做，僅盤點）
 
 1. **spine registry routing 待辦腿**（AIR-45 S6 遺留）：`~/.agents/memory-spine/index.md` ZCode 腿仍待認養路由——muse 腿已註記主體直連，本項維持後議。
 2. **ZCode memory config 面**：per-project 隔離 v3.6.4+ 預設關，本弧零改；若日後開啟，雙跳鏈需重驗（載入時機＝session 啟動一次性，建/改 symlink 的 session 讀不到）。
 3. **per-session 行為**：CC/ZCode 載入器皆啟動一次性—— symlink 變更需新 session 才生效（既有平台事實，非本弧引入）。
+4. **條目 8KB 消費面張力（S6 後觀察，未承諾）**：池膨脹預算 12K chars vs muse 直達注入單條 8KB 上限（**單位語義 bytes vs chars 未實測釘住**——若為 bytes，CJK 條目受影響區間更寬，判讀前先以修剪樣本實測）——8K-12K 區間條目在 muse 開場直達面僅剩列名（`_inventory` 工具鏈兩跳讀不受限）；是否收緊寫入端預算或接受分級，留 memory 治理線（AIR-69 雙池 full audit）判讀。muse user bundle 36KiB 自限已由 AIR-66 落地（`MUSE_USER_BUDGET` 部署硬 gate——部署面不再掛待辦）。
 
 ## 後續提案（未承諾，按序）
 
-- P1（今晚自然發生）：首個完整 23:40 夜波驗證（inbox 掃描段＋bundle 尾巴在 AGENT_MEM 上運作）→ 綠後刪 `memory.bak`（EP 時點微調：刪除 gate＝矩陣＋首波）。
+- P1 ✅（已完成）：首個完整 23:40 夜波六判據全綠（09-09 首跑）→ 09-10 晨 CC 手動執行驗證、`memory.bak` 刪除閉環＋08:30 一次性驗證 cron 收除。
 - P2（待 user 拍板）：inbox→索引 pending 區折衷（只進 `_inventory.md` rg 可達層、不進開場注入）——09-09 討論結論：常態連 MEMORY.md 否決（繞品質閘＋搶 6K context 預算）；同 session 重讀走 deny reason 路徑已夠。
-- P3（結案第三動）：divergence 條目終態重寫（收斂宣告尾段；現 desc 有「終態見本條尾段」懸空指針，結案蒸餾時補）。
-- P4（另 handoff）：S6 mosaic 移植（owning 線實體＋inbox 比照＋memory-policy 改寫）歸 mosaic session。
-- P5（T3-4 殘餘，待 user 拍板）：watchdog 執行者——daily-maintain Phase 0 已有雙檢查（inbox age＋porcelain-vs-receipt），但執行者歸屬未驗證（skill 記每日 23:20 vs registry 無此條，AIR-52 解綁處理中）；選項 (a) 確認／排程執行者 (b) 併入週日 23:00 治理看照（advisory 只讀，體質相合；需 ZCode 側改 prompt，不在本 session 越權範圍）。結案口徑（終審裁定）：git anomaly detector exists; automatic independent execution pending P5——不得宣稱自動雙故障偵測；P5 不必塞回 AIR-54 即可結案。
+- P3 ✅（已完成 09-10，本弧蒸餾）：divergence 條目終態重寫落地，desc「終態見本條尾段」懸空指針清除。
+- P4 ✅（已完成 09-10）：S6 mosaic 移植由 mosaic session 落地（mos-88 池 B 形態遷移結案；F2 次 WT 降級 read_file 路線定案並寫入 mosaic AGENTS.md「Muse memory」節）。
+- P5（T3-4 殘餘，待 user 拍板）：watchdog 執行者——daily-maintain Phase 0 已有雙檢查（inbox age＋porcelain-vs-receipt）；AIR-52 反查表 A1 已落地（記載執行者＝mosaic workspace 23:20 cron，跨 workspace provenance 標註），殘餘＝live 觸發驗證（該 cron 是否實跑 Phase 0 雙檢查未觀測）；選項 (a) 實測確認 (b) 併入週日 23:00 治理看照（advisory 只讀，體質相合；需 ZCode 側改 prompt，不在本 session 越權範圍）。結案口徑（終審裁定）：git anomaly detector exists; automatic independent execution pending P5——不得宣稱自動雙故障偵測；P5 不必塞回 AIR-54 即可結案。
 
 ## 終審第三輪（T3，跨 provider，Conditional Pass → 修畢待關）
 

@@ -77,6 +77,8 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Agent", "Edit", "Write"]
 
 muse `add_memory`/`edit_memory` 經 PreToolUse hook（`hooks/muse_memory_inbox.sh`＋`.muse/hooks.json`〔machine-local 生成物——`hooks/setup-muse-hooks.sh` 產〕）代存 `.agents/memory-inbox/`（payload＝原始 JSON；path 命中池內既有條目者附 `_inbox_meta.base_sha256`——T3-6：與 tool 名無關，add 指既有 path 亦附）——本節＝入池站。觸發：夜波（波前二分之後、收斂步驟之前）或手動（本 skill session）。**閘是純機械導流，語義判斷（六問/frontmatter 補全）全在本站**。
 
+**消費端尺寸事實（muse 1.1.1 實測；升版重驗）**：`memory_pack` 開場注入＝索引 120 行上限＋單條 inline 8KB 上限（超限修剪僅列名）——條目越過 8KB 後 muse 直達面僅剩列名（`_inventory` 工具鏈兩跳讀不受限）。**8KB＝消費端軟壓力，非寫入閘**——Q5 hard gate 仍為 12,000 chars；8K-12K 區間治理政策（收緊預算或接受分級）未決、歸 AIR-69 判讀，本站不自行推導。hook deny 契約 1.1.1 相容（mosaic main/次 WT 雙探針）。
+
 1. **前置——fail-open 第二道偵測**：`git -C <pool> status --porcelain`——無 inbox receipt 且非 CC/ZCode provenance 的變更（muse hook 故障直寫主體的形態特徵：裸 content 零 frontmatter 條目）→ 列 quarantine 清單分類處置，不併入本波
 2. **WAL light 狀態機**：inbox root `.json`（new）→ `mv` 進 `processing/`（claim）→ 處理完 `done/`｜`rejected/`，各留 receipt 一行 JSON（來源檔名/去處/時間）。`processing/` 殘留＝中斷證據——**停下人判，不自動重跑**；hook 端 temp+rename 原子發布保證本站不讀半檔。`.tmp-*` 殘留（hook 在寫入與 rename 之間崩潰的孤兒）＝同類中斷證據——列報告後順手清（mtime>1d）；它不匹配 `*.json` 消費 glob，屬偵測面非資料面
 3. **path contract（寫主體前逐條機械檢查——payload 的 path 是模型未驗證 input，不得直接當寫入座標）**：① scope=project only ② 池根 basename（禁子目錄——generator／watch-seed／索引連結只看頂層，子目錄請求明確 rejected；T4-2）③ ancestry 判定必須 delimiter-aware：`realpath` 等於 `$AGENT_MEM` 或以 `$AGENT_MEM/`（含尾 slash）為前綴——純字串 startswith 會把 sibling `memory-inbox` 誤判為池內（T3-3；回歸樣本 `../memory-inbox/<合法.md>` 必擋）④ symlink component 逐段 `lstat` 拒絕——realpath-containment 只是必要條件（`alias -> 池內實目錄` 會通過 containment，仍須擋；T3-2）⑤ 非 reserved（比對大小寫無關——本機 macOS CI fs，`memory.md` 命中 `MEMORY.md`；池 basename 現全 ASCII，Unicode aliasing 暫 N/A）⑥ edit 命中已存在且 frontmatter 合法的條目。任一不過 → `rejected/` receipt 記理由
@@ -209,7 +211,7 @@ harness auto memory 預設「one file = one fact」的「fact」操作定義 = *
 2. **repo 可推導 or 通用原則？** → git log / instruction 檔 / 程式碼 / **進行中 EP 的進度與狀態（住 EP 檔）**可推導 → 不寫；**LLM 通用做事原則/方法論**（與 user 個人化無關、任何 session 都適用）屬 rules/skills 知識——**先判用途與最小適用範圍再落載體**（每次都要的紀律→範圍最小的 rule；on-demand 方法→skill；**通用 ≠ rule**——scope 判斷，AIR-42.1），不開 memory 條目。memory 收與 user／專案綁定的事實（偏好、糾正、專案約束、外部資源參照）——通用工程原則不收
 3. **同主題已有？** → `rg -i <關鍵詞> <memory-dir>/` 全檔掃（**不信 MEMORY.md 索引**——載入截斷下尾部條目不可見）；命中 → 既有檔加段（段標題保留原始 name、標 original type）；**進行中弧線條目禁加段**——弧線進度每 session 追加是膨脹主因（實證：單檔 98 次 Edit 養到 84KB），等弧線收案一次性蒸餾；無 → 才開新檔
 4. **project-\* 已完結？** → 任務閉環先收斂既有 project 條目（刪現況細節、留決策教訓）再開新檔
-5. **尺寸預算？** → frontmatter `description` ≤100 chars（索引行原料；>100 被 PreToolUse hook 硬擋——hook 僅攔主 session，subagent 寫入不觸發）；**新建條目 ≤3,000 chars（寫入當下即蒸後形——形態見寫入六問後「body 形態」段）**；條目檔（含 frontmatter）≤12,000 chars（膨脹超限被 hook 擋；收斂方向＝改後比原檔短，放行）——超額 = 內容該住 EP 檔/repo 的訊號；索引軟上限 150 行，逼近 = cluster merge／收斂觸發
+5. **尺寸預算？** → frontmatter `description` ≤100 chars（索引行原料；>100 被 PreToolUse hook 硬擋——hook 僅攔主 session，subagent 寫入不觸發）；**新建條目 ≤3,000 chars（寫入當下即蒸後形——形態見寫入六問後「body 形態」段）**；條目檔（含 frontmatter）≤12,000 chars（膨脹超限被 hook 擋；收斂方向＝改後比原檔短，放行）——超額 = 內容該住 EP 檔/repo 的訊號；索引軟上限 150 行，逼近 = cluster merge／收斂觸發；消費端另有一層 muse 直達注入 8KB 軟壓力（非閘——見「Inbox 消費」節）
 6. **載體對嗎？** → 查「載體統一定義表」（本檔上節）一行流——每次都要的紀律→rule／on-demand 方法論→skill／跨 session 事實→memory／模組層→模組 AGENTS.md；**承諾/待辦→backlog 卡**（memory 只收事實與教訓，不收承諾；手冊形內容不住 memory——它該住 skill）
 
 **rank 初判**（六問之後順手標，一句裁量非機械）：新條目 frontmatter 初判 `rank`——hot＝活躍弧/高頻教訓，core＝default，cold＝冷門/清候選。
