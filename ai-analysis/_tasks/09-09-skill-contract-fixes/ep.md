@@ -63,7 +63,7 @@
 | B | S7 | （降級結案——重現不重現；產出＝`references/tour-validate-repro.md`，無 product 變更） |
 | B | S8 | （跨 repo 工單——產出 `references/delegate-bridge-redesign.md` 新檔；無 skill 編修） |
 | C | S9 | skills/memory-audit（統一定義表新條目——唯 product edit）＋任務家 09-08-carrier-misuse-definition 消費（P4 dogfood 記錄/p5 提案） |
-| 裁 | S10 | skills/model-routing（tier 段 :42）、rules/model-routing.md（角色→tier 表）、skills/ep-review、skills/code-review（spawn 指引）；agents/zcode/ 經 `scripts/sync_agents.py` 重生成（生成檔不手改） |
+| 裁 | S10 | skills/model-routing（tier 段 :42＋:40 例外細節）、rules/model-routing.md（角色→tier 表）、skills/ep-review、skills/code-review（spawn 指引）、agents/roles/（code-reviewer(-primed) tier 標籤）、agents/zcode/ 經 `scripts/sync_agents.py` 重生成（生成檔不手改） |
 
 > **收尾自舉範圍＝本表與各段「修改要點」所指檔案的聯集**（codex D-A1 明文）；表為 file-level 完整清單，單一檔可多段共編（如 guide 同時是 S2 結案時點與 S3 invariant 例外面）。
 
@@ -282,8 +282,8 @@
 - **修改要點**：
   1. model-routing skill :42 強化：「review agent 層（ep-review／code-review 的審查 agents）**預設 lite（glm-5.3-flash）**；升 full 條件＝高保護面／跨邊界語義面（保護面厚度概念反轉為升級觸發）；**judge 裁決／EP 規劃層不變（full 主 session，AIR-24）**；跨家族第二意見仍 muse 優先」
   2. `rules/model-routing.md` 角色→tier 表 code-reviewer row 對齊（「full 為基準＋條件式降 lite」→「**lite 預設（user 09-09）＋條件式升 full**」——兼修 rule↔skill 既有 drift）
-  3. registry pins：tier×provider 權威表（skill）改後跑 `scripts/sync_agents.py` 重生成 `agents/zcode/`（code-reviewer／code-reviewer-primed → `glm-5.3-flash`）；claude 側 spawn-time 分層同步
-  4. ep-review／code-review skills：spawn 指引註記 lite 載體——ep-review 現指定 `Explore`（內建型別**繼承主模型**，見 memory `reference-zcode-agent-model-inheritance`）→ 改為 registry 唯讀 lite 載體（lite-verify 等——read-only 契約＋flash pin 雙確定性）；code-review 模式 B 的 `agents/roles/` 引用不變（roles 定義層不綁 model，pins 在 registry）
+  3. registry pins：tier×provider 權威表（skill）改後跑 `scripts/sync_agents.py` 重生成 `agents/zcode/`（code-reviewer／code-reviewer-primed → `glm-5.3-flash`）；claude 側 spawn-time 分層同步；**agents/roles/ 標籤隨 pins 同步**（code-reviewer(-primed) description `〔tier: full〕`→`〔tier: lite〕`——09-09 subagent-model-routing-fix 弧引入的靜態標籤，pins 翻轉後不同步＝spawn 選單顯示 full、實際 wire flash；judge P1——該弧 dual-context 審查抓到的協調洞，S10 item 4 原「roles 引用不變」作廢）＋regen
+  4. ep-review／code-review skills：spawn 指引註記 lite 載體——ep-review 現指定 `Explore`（內建型別**繼承主模型**，見 memory `reference-zcode-agent-model-inheritance`）→ 改為 registry 唯讀 lite 載體（lite-verify 等——read-only 契約＋flash pin 雙確定性）；code-review 模式 B 的 `agents/roles/` 引用不變（roles 定義層不綁 model——model 綁定走 pins 與 tier 標籤，見 item 3）；**skill:40 補 rule 同款「設定頁可為內建單獨釘模型、清空恢復繼承」例外細節**（judge P2——rule 單側，S10 動 tier 段順手補）
 - **驗證**：`rg "^model:" agents/zcode/code-reviewer*.md` → `glm-5.3-flash`；rule 與 skill 同詞（`rg "lite 預設" rules/model-routing.md skills/model-routing/SKILL.md` 兩處命中）；sync_agents 重跑冪等；SM-17。
 
 ## 整合策略
