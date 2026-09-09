@@ -85,7 +85,7 @@ build 情境 A 憑整合驗證升 Verified;情境 B(中間段)只到 Built 預�
 ## 兩段式執行(三 mode 共用)
 
 1. **偵測 → 展示清單**:build mode 依情境矩陣列該做的結算項；收斂後結案 mode 列結案段四件；standalone mode 列漏項/過時項
-2. **用戶確認**:standalone mode 遵循 [outward-action-consent](../../rules/outward-action-consent.md) 精神獨立確認；build mode 免確認（授權來源＝EP 已批准＋IM2 單一 authority——build 流程內結算不另確認）
+2. **用戶確認**:standalone mode 遵循 [outward-action-consent](../../rules/outward-action-consent.md) 精神獨立確認；build mode 免確認（授權來源＝EP 已批准＋finalization consent 單一 owner＝build 流程——流程內機械結算不另確認）；**收斂後結案 mode**——機械結算三件（backlog 結案兩步／SYSTEM-MAP 升級／EP 歸檔）免確認（授權＝EP 已批准＋收斂 gate 已過），**flow-feedback 歸檔屬判斷型結算、保留獨立確認**（與 :46 flow-feedback 判斷 gate 同義）
 3. **執行**:寫入 / 搬移 / 歸檔
 4. **consistency 閘門**:對動過的導航文檔跑 `/consistency`
 

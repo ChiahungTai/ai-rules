@@ -10,8 +10,10 @@ Scope contract (fail-loud, not fake coverage):
   `memory_hook_common.is_pool_entry`).
 - Bash redirects / external processes are INVISIBLE here (see
   memory-dirty-sensor.py FileChanged + the hash leg in `attribution`).
-- ZCode has no PostToolUse (PreToolUse/Stop only) — this sensor is CC-only;
-  the ZCode channel stays collector+hash (coverage boundary in AIR-56 card).
+- ZCode 3.7.7 events DO include PostToolUse (04-report measured subset);
+  CC-only scope is an AIR-56 arc decision, not a mechanism limit — a ZCode
+  registration is possible later (collector+hash is the current ZCode channel,
+  coverage boundary in AIR-56 card).
 - Always exits 0: a sensor must never block or fail the tool call.
 - Hook runtime is python 3.9 — no 3.10+ syntax in this file.
 """

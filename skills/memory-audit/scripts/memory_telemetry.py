@@ -860,6 +860,9 @@ def build_attribution(canonical, sessions, inventory, prior, dirty=None):
     (same-content-rewrite suspect flag; status enum unchanged). Unparseable
     dirty ts is retained as {"unordered": True} and forces the flag
     (fail-closed: unorderable mutation, never dropped).
+    Single-pool semantics: entry keys are bare pool filenames; main() REFUSES
+    multiple --pool args outright (see pools guard) precisely because basename
+    keying cannot prevent cross-pool evidence blending. One pool per report.
     """
     current = {item["entry"]: item["sha256"] for item in inventory}
     writes_by_entry = {}
@@ -1663,7 +1666,6 @@ def main(argv=None):
         print(
             f"[OK] entries={len(entries)} "
             + " ".join(f"{k}={v}" for k, v in sorted(by_status.items()))
-            + f" partial={coverages.get('partial')}"
         )
         return 0
     baseline_dir = Path(args.baseline_dir).expanduser() if args.baseline_dir else None

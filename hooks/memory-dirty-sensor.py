@@ -8,11 +8,13 @@ attaches it per entry (`dirty_after_tracked`) and the hash leg decides.
 
 Scope contract (fail-loud):
 - Same shared pool filter (`memory_hook_common.is_pool_entry`).
-- Wiring limitation (verified 09-09): FileChanged matchers are cwd-scoped
-  literal filenames; the memory pool lives OUTSIDE any repo cwd, so the pool
-  cannot be watched in our topology. This script ships logic-verified
-  (stdin->log); live wiring stays unverified until a pool-under-cwd topology
-  exists. The hash leg remains the external-write backstop.
+- Wiring limitation (verified 09-09): FileChanged matcher SEEDS are cwd-scoped
+  literal filenames, so a pool outside any repo cwd cannot be seed-watched;
+  however SessionStart/CwdChanged hooks can return `watchPaths` (absolute
+  paths, per CC mirror docs) to dynamically watch the pool — a wiring path
+  EXISTS, not taken this arc. This script ships logic-verified (stdin->log);
+  live wiring stays unverified. The hash leg remains the external-write
+  backstop.
 - Always exits 0. Hook runtime is python 3.9 — no 3.10+ syntax.
 """
 

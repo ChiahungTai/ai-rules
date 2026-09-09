@@ -49,6 +49,7 @@
   .card .t.c{color:var(--accent)}.card .t.r{color:var(--rose)}.card .t.g{color:var(--green)}.card .t.v{color:var(--violet)}.card .t.a{color:var(--amber)}
   .card p{font-size:12.5px;color:var(--muted);line-height:1.65}
   .tag-plan{display:inline-block;font-size:11.5px;color:var(--violet);border:1px solid #6e40c966;background:#6e40c622;border-radius:10px;padding:1px 8px;margin-left:8px;white-space:nowrap;vertical-align:middle}
+  .tag-done{display:inline-block;font-size:11.5px;color:var(--green);border:1px solid #2ea04366;background:#2ea04322;border-radius:10px;padding:1px 8px;margin-left:8px;white-space:nowrap;vertical-align:middle}
   .num-big{font-size:26px;font-weight:800;font-family:ui-monospace,Menlo,monospace}
   .frame-wrap{margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--panel)}
   .frame-wrap .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
@@ -80,7 +81,7 @@
 <button type="button" id="expand-btn" class="collapse-tab" aria-expanded="false" aria-controls="sidebar" aria-label="展開章節導覽" onclick="return setCollapsed(false,true)">›</button>
 <nav id="sidebar" aria-label="章節導覽">
   <div class="brand">
-    <span class="badge plan">📋</span>
+    <span class="badge done">✅</span>
     <h1>AIR-50 開發流程契約修復＋反饋固化</h1>
     <div class="meta">baseline ba386cbc1742<br>projection ep@f6bc28e137f3<br>docs mode · 三線九段</div>
   </div>
@@ -94,14 +95,14 @@
   </ul>
   <div class="backlinks">
     <a href="http://127.0.0.1:6422">← backlog board</a><br>
-    <a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-09-skill-contract-fixes/ep.md">EP 全文（viewer）</a>
+    <a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/done/09-09-skill-contract-fixes/ep.md">EP 全文（viewer）</a>
   </div>
 </nav>
 <button type="button" id="collapse-btn" class="collapse-tab" aria-expanded="true" aria-controls="sidebar" aria-label="收合章節導覽" onclick="return setCollapsed(true,true)">‹</button>
 <main>
 
 <section id="s1">
-  <h2>為什麼——動機鏈<span class="tag-plan">EP 計畫中</span></h2>
+  <h2>為什麼——動機鏈<span class="tag-done">已落地</span></h2>
   <div class="sub">三個獨立證據源在同一週指向同一件事：這套流程的方法論成熟，但跨 skill 的執行契約接不起來</div>
   <ul class="dots">
     <li><b>codex 架構審查（09-09）</b>：六個契約斷點——finding 帳本分裂（judge 寫 EP、鏈讀 .review）、結案時點四方 drift（guide/implement/metadata-sync/illustrate-html-mode 各說各話）、純 .md 跳行為審查（ai-rules 的 md 就是控制面）、純 refactor 跳架構同步、review scope 不綁被審內容身份、invariant 防線掛在 simple 不寫的 EP 上。ZCode 側逐項查證：引用全數屬實。</li>
@@ -112,7 +113,7 @@
 </section>
 
 <section id="s2">
-  <h2>要修什麼——三線九段<span class="tag-plan">EP 計畫中</span></h2>
+  <h2>要修什麼——三線九段<span class="tag-done">已落地</span></h2>
   <div class="sub">一個弧、一個 branch（air-50）、一張驅動卡（AIR-50）、兩張結案卡（50＋48 同時 Done）</div>
   <div class="cardrow">
     <div class="card"><div class="t c">A 線 · codex 六斷點（S1-S4）</div><p>S1 帳本正典化（.review＝工作帳本、identity 含 untracked）＋驗證式欄；S2 結案收斂後單一發布（5a 只到 🟡 Built；收斂檢查/發布去重/缺帳本三分支）；S3 分流語義判準＋分級快道（模態詞機械護欄）；S4 shared/isolated 前置修正＋審查去重（比對缺席→全審）。</p></div>
@@ -151,17 +152,23 @@
 </section>
 
 <section id="s3">
-  <h2>推進與驗收<span class="tag-plan">EP 計畫中</span></h2>
+  <h2>推進與驗收<span class="tag-done">已落地</span></h2>
   <div class="sub">docs mode——驗證是 rg 殘留掃描、跨檔一致性、consistency、sync-sources，不是 pytest</div>
   <ul class="dots">
     <li><b>執行序</b>：S0 研究 gate（已完成——三 agents 吸收＋證據搬 durable）→ S1→S2→S3→S4 序列（共檔）；S6/S8/S9 平行；followup-review 與 review-engine 的 S5 部分待 S1 完成後再動。</li>
     <li><b>驗收</b>：SM-1~16 場景全部 rg 可驗（例：控制面分流、untracked identity、「結案兩步」全消費端同詞、transport 恢復無 wrapper 依賴、快道模態詞排除）；收尾跑 sync-sources＋guide 部署同步（deploy_agents）。</li>
     <li><b>審查閉環（規劃期已完成）</b>：三輪獨立審查收斂——GLM in-pipeline（F1-F6）＋codex 跨家族（R1-R5，含「以本 EP 自身證明 untracked 假吻合」的實證）＋muse 審查鏈三腿（review→followup→收斂腿 PASS，零殘留）。Findings 全數回寫 EP 卷尾表。</li>
   </ul>
+  <div class="sub" style="margin-top:12px">實作完成（hook 2——2026-09-09 補錄）</div>
+  <ul class="dots">
+    <li><b>做了什麼</b>：S1-S4＋S11＝<code>fc0552a</code>（9+11 檔契約）；S5/S10/S12/S9＝<code>c08f260</code>（bridge 直跑＋lite 預設 pins flash＋三修補＋AIR-48 P4/P5）；B 線 S6/S8＝muse bridge（job-mttjod8d）；雙卡（AIR-50＋AIR-48）結案兩步＋EP 歸檔 done/。build 主體＝muse session（GLM 主 session 完成 S1 前半後 usage limit 接手）。</li>
+    <li><b>驗證證據</b>：pytest 265 passed exit 0（終態）；deploy 3/3（muse bundle 97% gate 警告留意）；掃描組舊措辭 0 殘留；sync-sources 殼 provenance FAIL=0（殘餘 hook_registration CRITICAL×3＝user 接線裁決項，非弧缺口）。</li>
+    <li><b>獨立 post-build 審計（2026-09-09 晚）</b>：dual-context（fresh 4I/3S＋primed 1I/2S＋機械面）→ judge 10✅/2❌/1⚠️ → 12 項修正落地（定義表 stale、ZCode PostToolUse 事實、watchPaths 接線路徑、ep-review 載體、metadata-sync 結案分流、rotation 測試補、四殼 provenance 等）；明細隨 <code>.review/main.md</code>（local-only，commit 時清除）。</li>
+  </ul>
 </section>
 
 <section id="s4">
-  <h2>風險與降級<span class="tag-plan">EP 計畫中</span></h2>
+  <h2>風險與降級<span class="tag-done">已落地</span></h2>
   <div class="sub">修法自己的失敗模式，與對應護欄</div>
   <ul class="dots">
     <li><b>快道復活 PB1</b>：單檔 MUST→SHOULD 過 consistency＋rg 卻改變控制語義——模態詞機械排除（禁／必須／禁止／不得／應該／永不／MUST／SHOULD／NEVER 命中即升 docs-mode）。</li>
@@ -173,7 +180,7 @@
 </section>
 
 <section id="s5">
-  <h2>決策記錄（勿重辯）<span class="tag-plan">EP 計畫中</span></h2>
+  <h2>決策記錄（勿重辯）<span class="tag-done">已落地</span></h2>
   <div class="sub">已定案事項——卡 desc ①-⑪ 是權威清單，此處是導讀</div>
   <ul class="dots">
     <li>保留七個 skill 入口<b>不</b>合併；修序：先交接→再分流→最後減法。</li>
@@ -188,7 +195,7 @@
   <h2>回源</h2>
   <div class="sub">殼是展示層——本體（source of record）與證據鏈全在 repo</div>
   <p class="src">
-    EP：<a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/09-09-skill-contract-fixes/ep.md">ai-analysis/_tasks/09-09-skill-contract-fixes/ep.md</a><br>
+    EP：<a href="http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/_tasks/done/09-09-skill-contract-fixes/ep.md">ai-analysis/_tasks/09-09-skill-contract-fixes/ep.md</a><br>
     證據：references/（codex 審查 9 檔＋mosaic 反饋佇列＋bridge 配方＋tour_validate repro）與 .agent-tmp/dryrun/（三 agent 考古＋三輪審查報告）<br>
     task baseline：ba386cbc174226dedbeb1f75be63ba3f54702c3e · projection source：ep@f6bc28e137f3（EP 未 commit 用 content SHA；進度節 append 會漂移——commit 時定格）<br>
     卡：AIR-50（驅動）＋AIR-48（同弧結案）· branch：air-50（開工 checkout）

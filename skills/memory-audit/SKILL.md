@@ -151,7 +151,7 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 | M4 repo 可推導佔主體 | 不寫／模組操作知識 → 模組 AGENTS.md | Q2 判定是語義——本表 prose 承載，hook 只能提示 | LLM 流程 |
 | M5 外部 runtime 委派由 agent wrapper 承載 | caller 背景 Bash process 直跑（run_in_background＋stdout 重導） | 禁 wrapper 承載——佔 in-harness agent slot／rate limit；wrapper 唯一「價值」是被誤判的 600s timeout 約束（從未存在；AIR-46 msg 118＋MOS-74 實證；S8 跨 repo 工單） | 機制誤置（見 [model-routing](../model-routing/SKILL.md)「承載者」） |
 | B1 bundle scope creep（未發現確證） | EP/卡承載有效 | 維持雙 ref 紀律 | 既有 |
-| SM-5 歸因破口（常態非例外——量化見 p1-taxonomy） | —（缺口非誤置） | writer 可見性修法建議（P5：條目 writer log 行／telemetry 擴欄／generator 註記） | 另段 |
+| SM-5 歸因破口（常態非例外——量化見 p1-taxonomy） | —（缺口非誤置） | 已落地：歸因投影（AIR-55——本表上方「歸因投影（AIR-55/P5）」條款）——last_tracked_writer per entry；P5 裁決採 (b)，(a) generator 註記／(c) 全 log 已否決 | 已閉 |
 
 ### 寫入摩擦設計（讓正確載體比 memory 更近——僅設計，實作另裁）
 

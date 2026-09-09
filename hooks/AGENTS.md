@@ -12,8 +12,8 @@
 ## memory sensors（AIR-56，CC-only）
 
 - `memory-write-sensor.py`（PostToolUse，matcher `Edit|Write`）：成功後才記 actor 證據→ `$MEMORY_HOOK_LOG`（預設 `~/.local/share/ai-rules/memory-hook-events.jsonl`）。池判定＝父目錄含 MEMORY.md。
-- `memory-dirty-sensor.py`（FileChanged）：只記 dirty（watcher≠writer，不指派）。**接線限制（已驗證）**：FileChanged matcher 是 cwd 域字面檔名，池在 repo cwd 外→池不可被 watch；本腳本邏輯已驗、live 接線未驗證——外部寫入後備仍是 hash 腿。
-- ZCode 側無 PostToolUse（僅 PreToolUse/Stop）→ ZCode 通道維持 collector＋hash，不裝 sensor。
+- `memory-dirty-sensor.py`（FileChanged）：只記 dirty（watcher≠writer，不指派）。**接線限制（已驗證）**：FileChanged **matcher 種子**是 cwd 域字面檔名，池在 repo cwd 外→種子路徑 watch 不到；但 hooks 可經 SessionStart／CwdChanged 回傳 `watchPaths`（絕對路徑數組，CC 鏡像 hooks.md watchPaths 節）把池動態納入 watch——接線路徑存在、本弧未接。本腳本邏輯已驗、live 接線未驗證——外部寫入後備仍是 hash 腿。
+- ZCode 3.7.7 事件子集**含 PostToolUse**（04 報告 §207 實測：SessionStart/UserPromptSubmit/PreToolUse/PermissionRequest/PostToolUse/PostToolUseFailure/Stop——SessionEnd 不在）→ write-sensor 的 CC-only 範圍是本弧取捨非機制限制，ZCode 側可另接（未接：本弧外決策）。
 - 註冊（user 側 `~/.claude/settings.json` 的 `hooks` 鍵，merge 非覆蓋；改前 cp .bak）：PostToolUse 條目 command 指本目錄絕對路徑＋matcher `Edit|Write`；FileChanged 條目待池入 cwd 拓撲才接。collector 消費：`attribution --hook-events <log>`（merge 去重＋dirty 旗）。
 
 ## 孤兒清理落差（SessionEnd hook 在 ZCode 缺席）

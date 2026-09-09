@@ -157,3 +157,42 @@ def test_log_override_falls_back_when_relative_or_pool_file(tmp_path):
     )
     assert r.returncode == 0
     assert entry.read_text() == before
+
+
+def test_log_rotation_single_generation(tmp_path):
+    """F4: >2 MiB log rotates to .prev (old content) and new log holds only the new line."""
+    _, entry = make_pool(tmp_path)
+    log = tmp_path / "hook-events.jsonl"
+    filler_line = json.dumps({"kind": "old", "pad": "x" * 512}) + "\n"
+    lines_needed = (2 * 1024 * 1024 // len(filler_line)) + 10
+    log.write_text(filler_line * lines_needed)
+    assert log.stat().st_size > 2 * 1024 * 1024
+    payload = {
+        "session_id": "sess_rot",
+        "tool_name": "Edit",
+        "tool_input": {"file_path": str(entry)},
+        "tool_use_id": "tu_rot",
+    }
+    r, lines = run_sensor(WRITE_SENSOR, payload, tmp_path)
+    assert r.returncode == 0, r.stderr
+    prev = tmp_path / "hook-events.jsonl.prev"
+    assert prev.is_file(), "old generation must survive as .prev"
+    assert "old" in prev.read_text()[:200]
+    assert len(lines) == 1
+    assert lines[0]["session_id"] == "sess_rot"
+
+
+def test_underscore_prefixed_pool_file_excluded(tmp_path):
+    """Pool maintenance files (_inventory.md etc.) are not entries: no event."""
+    pool, _ = make_pool(tmp_path)
+    underscore = pool / "_inventory.md"
+    underscore.write_text("# projection\n")
+    payload = {
+        "session_id": "sess_u",
+        "tool_name": "Edit",
+        "tool_input": {"file_path": str(underscore)},
+        "tool_use_id": "tu_u",
+    }
+    r, lines = run_sensor(WRITE_SENSOR, payload, tmp_path)
+    assert r.returncode == 0, r.stderr
+    assert lines == []
