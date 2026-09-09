@@ -4,7 +4,7 @@
 >
 > **維護規則**：動排程的 session（`CronCreate`／`CronUpdate`／`CronDelete`）順手同步本檔——慣例層；比對腿兜底見週日 23:00 治理看照（[design.md §4](_tasks/done/09-03-backlog-governance-design/design.md#§4-排程單一真相源)）。
 >
-> **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser`／`backlog-cleanup` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）——反查表 A1/A2 為 mosaic 排程的記載面例外（消費端在本 repo）。
+> **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser`／`backlog-cleanup` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）——反查表 A1/A2/A6 為 mosaic 排程的記載面例外（消費端在本 repo）。
 >
 > **更新時點**：2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。2026-09-09（AIR-54 S2——池主體遷 `/Users/ctai/Github/ai-rules/.agents/memory/`，條 1 對象路徑與跨 repo 指針同步；CronList 兩 prompt 同步換址）。2026-09-10（AIR-52——新增「外部依賴反查表」A1-A5；S1 skill 端排程解綁的對側載體）。
 
@@ -27,15 +27,16 @@
 
 ## 外部依賴反查表（排程側 → skill/腳本消費端）
 
-> S1 解綁（AIR-52）的對側：skill 端只寫行為契約（去時刻/系統名），排程事實由排程系統＋本表承載——「誰在跑 X」從本表反查。**對帳義務**：動排程或改消費端接線時同步對應行；跨 workspace 條目（A1/A2）以記載面為準並標 provenance。
+> S1 解綁（AIR-52）的對側：skill 端只寫行為契約（去時刻/系統名），排程事實由排程系統＋本表承載——「誰在跑 X」從本表反查。**對帳義務**：動排程或改消費端接線時同步對應行；跨 workspace 條目（A1/A2/A6）以記載面為準並標 provenance。
 
 | # | 排程側 | 消費端 | 契約一句 | 對帳狀態 | 新架構職責註記（AIR-54 後） |
 |---|--------|--------|----------|----------|---------------------------|
-| A1 | mosaic workspace ZCode cron「每日 23:20 report」（mosaic 側系統名 nightly-thin） | daily-maintain（Phase 1-3）／standup（昨日活動節）／audit-test（週六條件段 Daily Scan） | 排程任務讀 skill 檔依規範執行、report 節由任務 append | 記載：memory `reference_periodic-task-landscape`＋mosaic memory `project-weekly-idle-tasks-status`；23:20 automationId 在 mosaic workspace CronList（本 workspace 不可見） | 不變；保留——report 組裝＋三 skill 執行的唯一排程載體 |
+| A1 | mosaic workspace ZCode cron「每日 23:20 report」 | daily-maintain（Phase 1-3）／standup（昨日活動節）／audit-test（週六條件段 Daily Scan） | 排程任務讀 skill 檔依規範執行、report 節由任務 append | 記載：memory `reference_periodic-task-landscape`＋mosaic memory `project-weekly-idle-tasks-status`；23:20 automationId 在 mosaic workspace CronList（本 workspace 不可見） | 不變；保留——人類活動層 report 節＋三 skill 執行的唯一排程載體（機器狀態層＝A6） |
 | A2 | 同 23:20 report「🌃 夜間看照」節（原 23:50 nightly-watch 併入） | memory-audit lite 配方／arch 看照／bundle 大小看照 | 治理面隨每日 report；含自動 commit | 併入記載於 memory（f681b71c9）；prompt 本體未逐字驗證（跨 workspace） | 保留；配方引用的池路徑隨 AIR-54 主體同步（`.agents/memory/`） |
 | A3 | launchd `com.ai-rules.backlog-cleanup`＋twin `com.mosaic.backlog-cleanup` | kanban-board 清理段——`deploy/scripts/run-backlog-cleanup.sh` → 逐卡 `skills/kanban-board/scripts/backlog_precheck.sh` → `task complete` → commit | Done>30d 清場自動腿；precheck 紅燈跳過該卡 | plist 在場＋腳本 precheck 接線已核；時刻見上表 | 不變；保留——Done 卡清場唯一自動腿 |
 | A4 | ai-rules workspace 三 ZCode cron（上表 #1-3） | #1→memory-audit（收斂＋Inbox 消費）；#2→治理看照（自含步驟）；#3→corrections-weekly | cron prompt 引用 skill 為方法論源 | CronList 已核（automationId 見上表） | #1 職責擴充（AIR-54：＋inbox 消費＋波尾 bundle；AIR-14：＋清淤兜底）、gate 口徑已動態化（AIR-52 S4）；保留——唯一寫手腿，與 #2 審計／#3 報告角色分離 |
 | A5 | 服務型 launchd（常駐非週期）：`com.mosaic.report-server`＋`com.ai-rules.backlog-browser`＋`com.mosaic.backlog-browser` | report-assets（viewer/_md-viewer 單一源，版控本 repo）＋各 repo board/report 服務（`run-report-server.sh`／`run-backlog-browser.sh`） | report URL（:6421）與 board port 的服務承載 | plist 在場已核；服務現值 `ls ~/Library/LaunchAgents/com.*` | 不變；保留——服務承載無週期職責 |
+| A6 | launchd `com.mosaic.nightly-sequence`（22:57；任務別名 nightly-thin——skill 端稱 report 組裝任務） | daily-report 機器狀態層組裝（test-regression/BSR 節）＋maintain foreign-section 契約＋daily-maintain §配合（report 主體組裝者） | 機器狀態層 append、不產人類活動層（人類層＝A1） | plist 在場（`~/Library/LaunchAgents/com.mosaic.nightly-sequence.plist`→mosaic_alpha）＋memory landscape（OP 測試序列） | 不變；保留——report 機器狀態層唯一組裝者，與 A1 人類活動層互補 |
 
 ## 跨 repo 指針
 

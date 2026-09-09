@@ -54,7 +54,7 @@ Commit message 格式與自動 commit 範圍：見 [maintain](../maintain/SKILL.
 
 ## 與排程載體的配合
 
-nightly `claude -p` 載體已退役——本 skill 由**排程載體**執行（讀 skill 檔依規範跑 Phase 1-3；Phase 4 晨報寫檔 skip，report 主體由 registry 反查表 A1 排程載體（mosaic 23:20 report）組裝、判讀節由該任務產生；時刻/載體現況見 ai-rules ai-analysis/schedule-registry.md 反查表）。手動補跑仍可用：
+nightly `claude -p` 載體已退役——本 skill 由**排程載體**執行（讀 skill 檔依規範跑 Phase 1-3；Phase 4 晨報寫檔 skip，report 主體由 nightly-thin 任務（registry 反查表 A6）組裝、判讀節由該任務產生；時刻/載體現況見 ai-rules ai-analysis/schedule-registry.md 反查表）。手動補跑仍可用：
 
 ```bash
 # 完整四合一（互動 session 觸發）

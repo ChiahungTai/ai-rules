@@ -1,5 +1,5 @@
 ---
-id: AIR-59
+id: AIR-65
 title: memory 池治理三議題裁決固化——mosaic mini-merge 後續（bytes 波次／bare hash／M2 日期閘）
 status: In Progress
 assignee: []
