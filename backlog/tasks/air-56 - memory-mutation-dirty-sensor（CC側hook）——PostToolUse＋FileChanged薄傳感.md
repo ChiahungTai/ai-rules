@@ -1,9 +1,10 @@
 ---
 id: AIR-56
 title: memory mutation dirty sensor（CC側hook）——PostToolUse＋FileChanged薄傳感
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-09 04:54'
+updated_date: '2026-09-09 05:31'
 labels:
   - memory
   - hooks
@@ -23,3 +24,9 @@ P5裁決②實作（AIR-48定稿）。範圍：CC側新增memory-write-sensor（
 - [ ] #2 FileChanged只做dirty不指派writer
 - [ ] #3 事件併入collector既有normalize
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+CC hook雙sensor落地：PostToolUse actor證據＋FileChanged dirty；collector merge/enrich/dirty旗；live接線未驗證（hash腿兜底）；全倉263綠
+<!-- SECTION:FINAL_SUMMARY:END -->

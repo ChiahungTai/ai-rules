@@ -68,6 +68,9 @@ def tool_part(
     content="hello world",
     extra_input=None,
 ):
+    """Fixture default is operation-basis (op times parseable). Production
+    ZCode rows carry no op times (record_fallback) — tests covering the
+    record path must pass op_start=None, op_end=None explicitly."""
     inp = {"file_path": file_path, "content": content}
     inp.update(extra_input or {})
     return {
@@ -1376,3 +1379,1117 @@ def test_decay_fixed_output_symlink_refused(tmp_path):
     assert r.returncode != 0
     assert "decay fixed output is a symlink, refused" in r.stderr + r.stdout
     assert entry.read_bytes() == raw
+
+
+def run_attribution(pool, tmp_path, zdb=None, cc_root=None, extra=()):
+    out = tmp_path / "attr.json"
+    cmd = [
+        sys.executable,
+        str(SCRIPT),
+        "attribution",
+        "--pool",
+        str(pool),
+        "--since",
+        SINCE,
+        "--until",
+        UNTIL,
+        "--output",
+        str(out),
+    ]
+    if zdb:
+        cmd += ["--zcode-db", str(zdb)]
+    if cc_root:
+        cmd += ["--cc-root", str(cc_root)]
+    cmd += list(extra)
+    return subprocess.run(cmd, capture_output=True, text=True, check=False), out
+
+
+def test_attr_last_writer_basic(tmp_path):
+    """AIR-55: last completed Write/Edit in window wins with actor fields."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "a-note.md")
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(
+        zdb,
+        sessions=[("sess_a", None, "interactive"), ("sess_b", None, "interactive")],
+        parts=[
+            (
+                "p1",
+                "sess_a",
+                1787000000000,
+                tool_part(
+                    "Write",
+                    str(target),
+                    call_id="c1",
+                    op_start="2026-09-01T10:00:00+00:00",
+                    op_end="2026-09-01T10:00:05+00:00",
+                ),
+            ),
+            (
+                "p2",
+                "sess_b",
+                1787000001000,
+                tool_part(
+                    "Edit",
+                    str(target),
+                    call_id="c2",
+                    op_start="2026-09-02T10:00:00+00:00",
+                    op_end="2026-09-02T10:00:05+00:00",
+                ),
+            ),
+        ],
+    )
+    r, out = run_attribution(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    rep = json.loads(out.read_text())
+    ent = rep["entries"]["a-note.md"]
+    w = ent["last_tracked_writer"]
+    assert (w["session"], w["tool"]) == ("sess_b", "Edit")
+    assert w["kind"] == "interactive"
+    assert w["root"] == "sess_b"
+    assert ent["status"] == "consistent"
+    assert ent["write_count_window"] == 2
+    assert ent["tracked_content_hash"] == ent["current_sha256"]
+
+
+def test_attr_subagent_kind_and_root(tmp_path):
+    """AIR-55: parented session -> kind subagent, root oldest ancestor."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "b-note.md")
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(
+        zdb,
+        sessions=[
+            ("sess_main", None, "interactive"),
+            ("sess_kid", "sess_main", "subagent_child"),
+        ],
+        parts=[
+            (
+                "p1",
+                "sess_kid",
+                1787000000000,
+                tool_part("Write", str(target), call_id="c1"),
+            )
+        ],
+    )
+    r, out = run_attribution(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    w = json.loads(out.read_text())["entries"]["b-note.md"]["last_tracked_writer"]
+    assert w["kind"] == "subagent"
+    assert (w["session"], w["root"]) == ("sess_kid", "sess_main")
+
+
+def test_attr_same_ts_tie_is_ambiguous(tmp_path):
+    """AIR-55: same-timestamp competing writes -> ambiguous + candidates."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "c-note.md")
+    zdb = tmp_path / "z.sqlite"
+    same = "2026-09-01T10:00:05+00:00"
+    make_zdb(
+        zdb,
+        sessions=[("sess_a", None, "interactive"), ("sess_b", None, "interactive")],
+        parts=[
+            (
+                "p1",
+                "sess_a",
+                1787000000000,
+                tool_part(
+                    "Write", str(target), call_id="c1", op_end=same, content="alpha"
+                ),
+            ),
+            (
+                "p2",
+                "sess_b",
+                1787000000000,
+                tool_part(
+                    "Write", str(target), call_id="c2", op_end=same, content="beta"
+                ),
+            ),
+        ],
+    )
+    r, out = run_attribution(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["c-note.md"]
+    assert ent["status"] == "ambiguous"
+    assert ent["last_tracked_writer"] is None
+    assert sorted(c["session"] for c in ent["candidates"]) == ["sess_a", "sess_b"]
+
+
+def test_attr_prior_carry_and_external(tmp_path):
+    """AIR-55: prior hash match carries writer; mismatch + no event = external."""
+    import hashlib
+
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    kept = write_entry(pool, "kept.md")
+    changed = write_entry(pool, "changed.md")
+    kept_sha = hashlib.sha256(kept.read_bytes()).hexdigest()
+    changed.write_text(changed.read_text() + "\nexternal edit\n")
+    prior = tmp_path / "prior.json"
+    prior.write_text(
+        json.dumps(
+            {
+                "attribution_schema": 1,
+                "entries": {
+                    "kept.md": {
+                        "tracked_content_hash": kept_sha,
+                        "last_tracked_writer": {"session": "sess_old"},
+                    },
+                    "changed.md": {
+                        "tracked_content_hash": "0" * 64,
+                        "last_tracked_writer": {"session": "sess_old"},
+                    },
+                },
+            }
+        )
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    rep = json.loads(out.read_text())["entries"]
+    assert rep["kept.md"]["status"] == "consistent"
+    assert rep["kept.md"]["last_tracked_writer"]["session"] == "sess_old"
+    assert rep["changed.md"]["status"] == "unattributed_external"
+    assert rep["changed.md"]["last_tracked_writer"] is None
+
+
+def test_attr_stale_without_events_or_prior(tmp_path):
+    """AIR-55: untouched + no prior -> stale, writer null (not fabricated)."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "lonely.md")
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["lonely.md"]
+    assert ent["status"] == "stale"
+    assert ent["last_tracked_writer"] is None
+
+
+def test_attr_output_inside_pool_refused(tmp_path):
+    """AIR-55: R1 output guard applies to attribution (no clobbering pool)."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "a-note.md")
+    out = pool / "attr.json"
+    r = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "attribution",
+            "--pool",
+            str(pool),
+            "--since",
+            SINCE,
+            "--until",
+            UNTIL,
+            "--output",
+            str(out),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode != 0
+    assert "output inside sources refused" in r.stderr + r.stdout
+    assert not out.exists()
+
+
+def write_hook_log(path, lines):
+    path.write_text("\n".join(json.dumps(ln) for ln in lines) + "\n")
+
+
+def test_attr_hook_merge_enriches_no_duplicate(tmp_path):
+    """AIR-56: hook event matching transcript (session+call_id) merges."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "h-note.md")
+    cc_root = tmp_path / "cc"
+    cc_root.mkdir()
+    (cc_root / "s.jsonl").write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "timestamp": "2026-09-01T10:00:00+00:00",
+                        "sessionId": "sess_c",
+                        "cwd": str(tmp_path),
+                        "message": {
+                            "content": [
+                                {
+                                    "type": "tool_use",
+                                    "id": "tu_1",
+                                    "name": "Write",
+                                    "input": {
+                                        "file_path": str(target),
+                                        "content": "hey",
+                                    },
+                                }
+                            ]
+                        },
+                    }
+                ),
+                json.dumps(
+                    {
+                        "timestamp": "2026-09-01T10:00:06+00:00",
+                        "sessionId": "sess_c",
+                        "message": {
+                            "content": [{"type": "tool_result", "tool_use_id": "tu_1"}]
+                        },
+                    }
+                ),
+            ]
+        )
+    )
+    hooklog = tmp_path / "hooks.jsonl"
+    write_hook_log(
+        hooklog,
+        [
+            {
+                "kind": "post_tool_use",
+                "source": "claude",
+                "ts": "2026-09-01T10:00:05+00:00",
+                "session_id": "sess_c",
+                "tool": "Write",
+                "file_path": str(target),
+                "tool_use_id": "tu_1",
+                "agent_id": "ag_1",
+                "agent_type": "Task",
+            }
+        ],
+    )
+    r, out = run_attribution(
+        pool, tmp_path, cc_root=cc_root, extra=("--hook-events", str(hooklog))
+    )
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["h-note.md"]
+    assert ent["write_count_window"] == 1  # merged, not doubled
+    assert ent["last_tracked_writer"]["kind"] == "subagent"  # agent_id present
+
+
+def test_attr_hook_only_event_adds_tracked_write(tmp_path):
+    """AIR-56: hook event with no transcript match becomes tracked write."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "k-note.md")
+    hooklog = tmp_path / "hooks.jsonl"
+    write_hook_log(
+        hooklog,
+        [
+            {
+                "kind": "post_tool_use",
+                "source": "claude",
+                "ts": "2026-09-01T10:00:05+00:00",
+                "session_id": "sess_h",
+                "tool": "Edit",
+                "file_path": str(target),
+                "tool_use_id": "tu_9",
+                "agent_id": None,
+                "agent_type": None,
+            }
+        ],
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--hook-events", str(hooklog))
+    )
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["k-note.md"]
+    assert ent["status"] == "consistent"
+    assert ent["last_tracked_writer"]["session"] == "sess_h"
+    assert ent["last_tracked_writer"]["kind"] == "harness"
+
+
+def test_attr_dirty_after_tracked_flag(tmp_path):
+    """AIR-56: file_changed later than last tracked write sets the flag."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "d-note.md")
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(
+        zdb,
+        sessions=[("sess_a", None, "interactive")],
+        parts=[
+            (
+                "p1",
+                "sess_a",
+                1787000000000,
+                tool_part(
+                    "Write",
+                    str(target),
+                    call_id="c1",
+                    op_end="2026-09-01T10:00:05+00:00",
+                ),
+            )
+        ],
+    )
+    hooklog = tmp_path / "hooks.jsonl"
+    write_hook_log(
+        hooklog,
+        [
+            {
+                "kind": "file_changed",
+                "source": "claude",
+                "ts": "2026-09-01T09:00:00+00:00",
+                "watcher_session": "w1",
+                "file_path": str(target),
+            },
+            {
+                "kind": "file_changed",
+                "source": "claude",
+                "ts": "2026-09-03T10:00:00+00:00",
+                "watcher_session": "w2",
+                "file_path": str(target),
+            },
+            "garbage line{",
+        ],
+    )
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--hook-events", str(hooklog))
+    )
+    assert r.returncode == 0, r.stderr
+    rep = json.loads(out.read_text())
+    ent = rep["entries"]["d-note.md"]
+    assert ent["dirty_after_tracked"] is True  # 09-03 dirty postdates write
+    assert len(ent["dirty_events"]) == 2
+    assert rep["coverage"]["hooks"]["malformed"] == 1
+
+
+def test_attr_absent_entry_keeps_carried_writer(tmp_path):
+    """AIR-55 F1: deleted entry + prior -> absent (not external)."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    prior = tmp_path / "prior.json"
+    prior.write_text(
+        json.dumps(
+            {
+                "attribution_schema": 1,
+                "entries": {
+                    "gone.md": {
+                        "tracked_content_hash": "a" * 64,
+                        "last_tracked_writer": {
+                            "session": "sess_old",
+                            "kind": "interactive",
+                        },
+                    }
+                },
+            }
+        )
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["gone.md"]
+    assert ent["status"] == "absent"
+    assert ent["last_tracked_writer"]["session"] == "sess_old"
+    assert ent["present"] is False
+    # Reviewer-F4b: the absent path also migrates (sourceless v1 writer).
+    w = ent["last_tracked_writer"]
+    assert w["identity"] == "unmatched"
+    assert w["root_complete"] is False
+    assert w["ts_basis"] == "unknown"
+
+
+def test_attr_invalid_prior_writer_is_dropped(tmp_path):
+    """AIR-55 F9: hand-edited prior writer (non-str session) is not carried."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "v-note.md")
+    import hashlib
+
+    sha = hashlib.sha256(target.read_bytes()).hexdigest()
+    prior = tmp_path / "prior.json"
+    prior.write_text(
+        json.dumps(
+            {
+                "attribution_schema": 1,
+                "entries": {
+                    "v-note.md": {
+                        "tracked_content_hash": sha,
+                        "last_tracked_writer": {"session": 123},
+                    }
+                },
+            }
+        )
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["v-note.md"]
+    assert ent["last_tracked_writer"] is None
+    assert ent["status"] == "stale"
+
+
+def test_attr_subsecond_hook_writes_order(tmp_path):
+    """AIR-56 F2: same-second hook writes keep order (no false ambiguous)."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "s-note.md")
+    hooklog = tmp_path / "hooks.jsonl"
+    write_hook_log(
+        hooklog,
+        [
+            {
+                "kind": "post_tool_use",
+                "source": "claude",
+                "ts": "2026-09-01T10:00:05.100000+00:00",
+                "session_id": "sess_a",
+                "tool": "Write",
+                "file_path": str(target),
+                "tool_use_id": "t1",
+            },
+            {
+                "kind": "post_tool_use",
+                "source": "claude",
+                "ts": "2026-09-01T10:00:05.900000+00:00",
+                "session_id": "sess_b",
+                "tool": "Write",
+                "file_path": str(target),
+                "tool_use_id": "t2",
+            },
+        ],
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--hook-events", str(hooklog))
+    )
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["s-note.md"]
+    assert ent["status"] == "consistent"
+    assert ent["last_tracked_writer"]["session"] == "sess_b"
+
+
+def test_attr_hook_skip_counters(tmp_path):
+    """AIR-56 F7: out-of-window/out-of-pool hook lines are counted."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    write_entry(pool, "w-note.md")
+    hooklog = tmp_path / "hooks.jsonl"
+    write_hook_log(
+        hooklog,
+        [
+            {
+                "kind": "post_tool_use",
+                "source": "claude",
+                "ts": "2020-01-01T00:00:00+00:00",
+                "session_id": "s",
+                "tool": "Write",
+                "file_path": str(pool / "w-note.md"),
+                "tool_use_id": "t0",
+            },
+            {
+                "kind": "post_tool_use",
+                "source": "claude",
+                "ts": "2026-09-01T10:00:05+00:00",
+                "session_id": "s",
+                "tool": "Write",
+                "file_path": "/elsewhere/x.md",
+                "tool_use_id": "t1",
+            },
+        ],
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--hook-events", str(hooklog))
+    )
+    assert r.returncode == 0, r.stderr
+    cov = json.loads(out.read_text())["coverage"]["hooks"]
+    assert cov["skipped_window"] == 1
+    assert cov["skipped_pool"] == 1
+    assert cov["added"] == 0
+
+
+def write_cc_completed(cc_root, name, session, ts, tool_use_id, file_path, content):
+    """Transcript fixture: completed Write (tool_use + non-error tool_result)."""
+    (cc_root / name).write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    {
+                        "timestamp": ts,
+                        "sessionId": session,
+                        "cwd": str(cc_root.parent),
+                        "message": {
+                            "content": [
+                                {
+                                    "type": "tool_use",
+                                    "id": tool_use_id,
+                                    "name": "Write",
+                                    "input": {
+                                        "file_path": file_path,
+                                        "content": content,
+                                    },
+                                }
+                            ]
+                        },
+                    }
+                ),
+                json.dumps(
+                    {
+                        "timestamp": ts,
+                        "sessionId": session,
+                        "message": {
+                            "content": [
+                                {
+                                    "type": "tool_result",
+                                    "tool_use_id": tool_use_id,
+                                }
+                            ]
+                        },
+                    }
+                ),
+            ]
+        )
+    )
+
+
+def test_attr_mixed_time_bases_ambiguous(tmp_path):
+    """ChatGPT-B: operation-vs-record clocks across channels have no total
+    order — different ts must still be ambiguous, never a confident winner."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "x-note.md")
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(
+        zdb,
+        sessions=[("sess_z", None, "interactive")],
+        parts=[
+            (
+                "pz",
+                "sess_z",
+                1787000000000,
+                tool_part(
+                    "Write",
+                    str(target),
+                    call_id="cz",
+                    op_start=None,
+                    op_end=None,
+                    content="zcode side",
+                ),
+            )
+        ],
+    )
+    cc_root = tmp_path / "cc"
+    cc_root.mkdir()
+    write_cc_completed(
+        cc_root,
+        "s.jsonl",
+        "sess_c",
+        "2026-09-01T10:00:00+00:00",
+        "tu_1",
+        str(target),
+        "claude side",
+    )
+    r, out = run_attribution(pool, tmp_path, zdb=zdb, cc_root=cc_root)
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["x-note.md"]
+    assert ent["status"] == "ambiguous"
+    assert ent["last_tracked_writer"] is None
+    assert sorted(c["session"] for c in ent["candidates"]) == ["sess_c", "sess_z"]
+    assert ent["reason"] == "mixed-time-bases"
+
+
+def test_attr_same_basis_still_orders(tmp_path):
+    """Guard rail: same-basis competition keeps total order + new record keys."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "y-note.md")
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(
+        zdb,
+        sessions=[("sess_a", None, "interactive"), ("sess_b", None, "interactive")],
+        parts=[
+            (
+                "p1",
+                "sess_a",
+                1787000000000,
+                tool_part(
+                    "Write",
+                    str(target),
+                    call_id="c1",
+                    op_start=None,
+                    op_end=None,
+                    content="first",
+                ),
+            ),
+            (
+                "p2",
+                "sess_b",
+                1787000001000,
+                tool_part(
+                    "Write",
+                    str(target),
+                    call_id="c2",
+                    op_start=None,
+                    op_end=None,
+                    content="second",
+                ),
+            ),
+        ],
+    )
+    r, out = run_attribution(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["y-note.md"]
+    assert ent["status"] == "consistent"
+    w = ent["last_tracked_writer"]
+    assert w["session"] == "sess_b"
+    assert w["ts_basis"] == "record_fallback"
+    assert w["identity"] == "exact"
+    assert w["root_complete"] is True
+
+
+def test_attr_cycle_parent_chain_marks_root_incomplete(tmp_path):
+    """ChatGPT-A: cyclic ancestry must not silently elect a cycle node."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "cyc-note.md")
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(
+        zdb,
+        sessions=[
+            ("s1", "s2", "interactive"),
+            ("s2", "s3", "interactive"),
+            ("s3", "s2", "interactive"),
+        ],
+        parts=[("p1", "s1", 1787000000000, tool_part("Write", str(target)))],
+    )
+    r, out = run_attribution(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    w = json.loads(out.read_text())["entries"]["cyc-note.md"]["last_tracked_writer"]
+    assert w["kind"] == "subagent"
+    assert w["root"] == "s1"  # only verified containment
+    assert w["root_complete"] is False
+
+
+def test_attr_truncated_parent_chain_marks_root_incomplete(tmp_path):
+    """ChatGPT-A: parent id absent from the session map is outermost-known,
+    not a verified root."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "tr-note.md")
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(
+        zdb,
+        sessions=[("s1", "ghost", "interactive")],
+        parts=[("p1", "s1", 1787000000000, tool_part("Write", str(target)))],
+    )
+    r, out = run_attribution(pool, tmp_path, zdb=zdb)
+    assert r.returncode == 0, r.stderr
+    w = json.loads(out.read_text())["entries"]["tr-note.md"]["last_tracked_writer"]
+    assert w["root"] == "ghost"
+    assert w["root_complete"] is False
+
+
+def test_attr_hook_only_identity_unmatched(tmp_path):
+    """ChatGPT-C: sole unmatched hook observation is consistent but graded."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "u-note.md")
+    hooklog = tmp_path / "hooks.jsonl"
+    write_hook_log(
+        hooklog,
+        [
+            {
+                "kind": "post_tool_use",
+                "source": "claude",
+                "ts": "2026-09-01T10:00:05+00:00",
+                "session_id": "sess_h",
+                "tool": "Edit",
+                "file_path": str(target),
+                "tool_use_id": "tu_9",
+            }
+        ],
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--hook-events", str(hooklog))
+    )
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["u-note.md"]
+    assert ent["status"] == "consistent"
+    w = ent["last_tracked_writer"]
+    assert w["session"] == "sess_h"
+    assert w["identity"] == "unmatched"
+    assert w["root_complete"] is True
+
+
+def test_attr_hook_vs_exact_competition_ambiguous(tmp_path):
+    """ChatGPT-C: unmatched hook ts must not outrank an exact-identity
+    transcript event — different ts still ambiguous."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "v-note.md")
+    cc_root = tmp_path / "cc"
+    cc_root.mkdir()
+    write_cc_completed(
+        cc_root,
+        "s.jsonl",
+        "sess_c",
+        "2026-09-01T10:00:00+00:00",
+        "tu_1",
+        str(target),
+        "transcript side",
+    )
+    hooklog = tmp_path / "hooks.jsonl"
+    write_hook_log(
+        hooklog,
+        [
+            {
+                "kind": "post_tool_use",
+                "source": "claude",
+                "ts": "2026-09-02T10:00:00+00:00",
+                "session_id": "sess_h",
+                "tool": "Write",
+                "file_path": str(target),
+                "tool_use_id": "tu_9",
+            }
+        ],
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool,
+        tmp_path,
+        zdb=zdb,
+        cc_root=cc_root,
+        extra=("--hook-events", str(hooklog)),
+    )
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["v-note.md"]
+    assert ent["status"] == "ambiguous"
+    assert ent["last_tracked_writer"] is None
+    assert sorted(c["session"] for c in ent["candidates"]) == ["sess_c", "sess_h"]
+    assert ent["reason"] == "unmatched-hook-vs-exact"
+
+
+def test_attr_malformed_dirty_ts_retained_unordered(tmp_path):
+    """ChatGPT-Extra3: unparseable dirty ts is an unorderable mutation —
+    fail closed, never silently dropped."""
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "m-note.md")
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(
+        zdb,
+        sessions=[("sess_a", None, "interactive")],
+        parts=[
+            (
+                "p1",
+                "sess_a",
+                1787000000000,
+                tool_part("Write", str(target), call_id="c1"),
+            )
+        ],
+    )
+    hooklog = tmp_path / "hooks.jsonl"
+    write_hook_log(
+        hooklog,
+        [
+            {
+                "kind": "file_changed",
+                "source": "claude",
+                "ts": "not-a-time",
+                "watcher_session": "w9",
+                "file_path": str(target),
+            }
+        ],
+    )
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--hook-events", str(hooklog))
+    )
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["m-note.md"]
+    assert ent["dirty_after_tracked"] is True
+    assert ent["dirty_events"] == [
+        {"ts": "not-a-time", "watcher": "w9", "unordered": True}
+    ]
+
+
+def write_v1_prior(tmp_path, entry_name, sha, writer):
+    """Pre-schema-2 prior: writer lacks ts_basis/identity/root_complete."""
+    prior = tmp_path / "prior.json"
+    prior.write_text(
+        json.dumps(
+            {
+                "attribution_schema": 1,
+                "entries": {
+                    entry_name: {
+                        "tracked_content_hash": sha,
+                        "last_tracked_writer": writer,
+                    }
+                },
+            }
+        )
+    )
+    return prior
+
+
+def test_attr_v1_prior_carry_backfills_leaf_writer(tmp_path):
+    """ChatGPT-R2.1: v1 prior, root==session (no chain traversed) -> carried
+    with reconstructed identity, root_complete True, ts_basis unknown."""
+    import hashlib
+
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "old.md")
+    sha = hashlib.sha256(target.read_bytes()).hexdigest()
+    prior = write_v1_prior(
+        tmp_path,
+        "old.md",
+        sha,
+        {
+            "ts": "2026-08-01T00:00:00+00:00",
+            "source": "zcode",
+            "session": "sess_old",
+            "root": "sess_old",
+            "kind": "interactive",
+            "prompt": None,
+            "tool": "Write",
+            "call_id": "c0",
+        },
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    ent = json.loads(out.read_text())["entries"]["old.md"]
+    assert ent["status"] == "consistent"
+    assert ent["carried_from_prior"] is True
+    w = ent["last_tracked_writer"]
+    assert w["session"] == "sess_old"
+    assert w["identity"] == "exact"
+    assert w["root_complete"] is True
+    assert w["ts_basis"] == "unknown"
+
+
+def test_attr_v1_prior_carry_marks_chained_root_incomplete(tmp_path):
+    """ChatGPT-R2.1: v1 prior, root!=session (chain unverifiable post-hoc)
+    -> carried but root_complete False (fail-closed, not an upgrade)."""
+    import hashlib
+
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "oldchain.md")
+    sha = hashlib.sha256(target.read_bytes()).hexdigest()
+    prior = write_v1_prior(
+        tmp_path,
+        "oldchain.md",
+        sha,
+        {
+            "ts": "2026-08-01T00:00:00+00:00",
+            "source": "zcode",
+            "session": "sess_kid",
+            "root": "sess_main",
+            "kind": "subagent",
+            "prompt": None,
+            "tool": "Write",
+            "call_id": "c0",
+        },
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    w = json.loads(out.read_text())["entries"]["oldchain.md"]["last_tracked_writer"]
+    assert (w["root"], w["identity"]) == ("sess_main", "exact")
+    assert w["root_complete"] is False
+
+
+def test_attr_v1_prior_hook_writer_carries_unmatched(tmp_path):
+    """ChatGPT-R2.1: v1 hook-source writer reconstructs identity from source,
+    never defaults to exact."""
+    import hashlib
+
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "oldhook.md")
+    sha = hashlib.sha256(target.read_bytes()).hexdigest()
+    prior = write_v1_prior(
+        tmp_path,
+        "oldhook.md",
+        sha,
+        {
+            "ts": "2026-08-01T00:00:00+00:00",
+            "source": "hook",
+            "session": "sess_h",
+            "root": "sess_h",
+            "kind": "harness",
+            "prompt": None,
+            "tool": "Write",
+            "call_id": "tu_9",
+        },
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    w = json.loads(out.read_text())["entries"]["oldhook.md"]["last_tracked_writer"]
+    assert w["identity"] == "unmatched"
+    assert w["root_complete"] is True
+
+
+def test_attr_v2_prior_keys_pass_through_untouched(tmp_path):
+    """Guard: new-schema prior keys are never clobbered by migration."""
+    import hashlib
+
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "new.md")
+    sha = hashlib.sha256(target.read_bytes()).hexdigest()
+    prior = write_v1_prior(
+        tmp_path,
+        "new.md",
+        sha,
+        {
+            "ts": "2026-08-01T00:00:00+00:00",
+            "source": "zcode",
+            "session": "sess_kid",
+            "root": "sess_main",
+            "kind": "subagent",
+            "prompt": None,
+            "tool": "Write",
+            "call_id": "c0",
+            "ts_basis": "operation",
+            "identity": "exact",
+            "root_complete": True,
+        },
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    w = json.loads(out.read_text())["entries"]["new.md"]["last_tracked_writer"]
+    assert (w["ts_basis"], w["identity"], w["root_complete"]) == (
+        "operation",
+        "exact",
+        True,
+    )
+
+
+def test_attr_v1_corrupt_leaf_stays_incomplete(tmp_path):
+    """Reviewer-F1: v1 non-hook subagent with root==session is a
+    cycle/self-parent fallback, not a proven leaf -> root_complete False."""
+    import hashlib
+
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "cyc-old.md")
+    sha = hashlib.sha256(target.read_bytes()).hexdigest()
+    prior = write_v1_prior(
+        tmp_path,
+        "cyc-old.md",
+        sha,
+        {
+            "ts": "2026-08-01T00:00:00+00:00",
+            "source": "zcode",
+            "session": "s1",
+            "root": "s1",
+            "kind": "subagent",
+            "prompt": None,
+            "tool": "Write",
+            "call_id": "c0",
+        },
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    w = json.loads(out.read_text())["entries"]["cyc-old.md"]["last_tracked_writer"]
+    assert w["identity"] == "exact"
+    assert w["root_complete"] is False
+
+
+def test_attr_v1_sourceless_writer_is_unmatched(tmp_path):
+    """Reviewer-F4a: tampered writer (no source) never defaults to exact."""
+    import hashlib
+
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "tamper.md")
+    sha = hashlib.sha256(target.read_bytes()).hexdigest()
+    prior = write_v1_prior(
+        tmp_path,
+        "tamper.md",
+        sha,
+        {
+            "ts": "2026-08-01T00:00:00+00:00",
+            "session": "sess_x",
+            "prompt": None,
+            "tool": "Write",
+        },
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    w = json.loads(out.read_text())["entries"]["tamper.md"]["last_tracked_writer"]
+    assert w["identity"] == "unmatched"
+    assert w["root_complete"] is False
+    assert w["ts_basis"] == "unknown"
+
+
+def test_attr_v2_hook_exact_contradiction_downgraded(tmp_path):
+    """Reviewer-F3: source hook + identity exact is a combo writer_record
+    never emits -> forced back to unmatched on carry."""
+    import hashlib
+
+    pool = tmp_path / "pool"
+    pool.mkdir()
+    target = write_entry(pool, "contra.md")
+    sha = hashlib.sha256(target.read_bytes()).hexdigest()
+    prior = write_v1_prior(
+        tmp_path,
+        "contra.md",
+        sha,
+        {
+            "ts": "2026-08-01T00:00:00+00:00",
+            "source": "hook",
+            "session": "sess_h",
+            "root": "sess_h",
+            "kind": "harness",
+            "prompt": None,
+            "tool": "Write",
+            "call_id": "tu_9",
+            "ts_basis": "operation",
+            "identity": "exact",
+            "root_complete": True,
+        },
+    )
+    zdb = tmp_path / "z.sqlite"
+    make_zdb(zdb, sessions=[], parts=[])
+    r, out = run_attribution(
+        pool, tmp_path, zdb=zdb, extra=("--prior-sidecar", str(prior))
+    )
+    assert r.returncode == 0, r.stderr
+    w = json.loads(out.read_text())["entries"]["contra.md"]["last_tracked_writer"]
+    assert w["identity"] == "unmatched"
+    assert w["root_complete"] is True

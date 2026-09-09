@@ -21,7 +21,7 @@ TOOLS = ("Read", "Write", "Edit")
 
 @dataclass
 class Event:
-    source: str  # zcode | claude
+    source: str  # zcode | claude | hook (hook-synthesized, AIR-56)
     id: str
     session: str
     parent: str | None
@@ -317,6 +317,14 @@ def read_claude(roots, pools, since, until):
                         source_ref={
                             "file": str(path),
                             "line": line_no,
+                            # prompt/turn join key when the transcript carries
+                            # one (messageId/uuid); absent -> omitted, never
+                            # fabricated (writer_record reads .get only)
+                            **(
+                                {"message_id": str(d.get("messageId") or d.get("uuid"))}
+                                if (d.get("messageId") or d.get("uuid"))
+                                else {}
+                            ),
                         },
                         read_range=(
                             {k: inp[k] for k in ("offset", "limit") if k in inp} or None
@@ -722,6 +730,460 @@ def project_reads(canonical, inventory, coverages, since, until):
     }
 
 
+ATTRIBUTION_SCHEMA = 2
+
+
+def migrate_prior_writer(prev_writer):
+    """Backfill schema-2 provenance keys onto a carried v1 writer.
+
+    Fail-closed migration (never a confidence upgrade):
+    - identity: hook source forces "unmatched" (a writer_record never
+      emits hook+exact, so the combo is tampered — F3); otherwise an
+      existing v2 value passes through, and a missing one is
+      RECONSTRUCTED by allowlist — only "zcode"/"claude" yield "exact"
+      (F2: "", garbage, or missing source -> unmatched, never silent
+      exact).
+    - root_complete is True only for a verifiably chain-free record:
+      root == session AND (hook source — the hook branch never walks
+      chains — or a leaf kind). A carried root != session claims a
+      chain nobody can re-walk -> False; a non-hook "subagent" with
+      root == session is a v1 cycle/self-parent fallback (classify_actor
+      returns session on corruption), NOT a proven leaf -> False (F1).
+    - ts_basis is "unknown": old ts provenance is unknowable, and
+      carried writers never re-enter winner competition (carry runs
+      only with zero window events), so no ordering risk.
+    Dirty "unordered" needs no backfill: dirty_events are recomputed
+    from the current window every run and never carried — absence of
+    the key means ordered, regardless of what any old version emitted.
+    """
+    w = dict(prev_writer)
+    if w.get("source") == "hook":
+        w["identity"] = "unmatched"
+    elif w.get("identity") not in ("exact", "unmatched"):
+        w["identity"] = (
+            "exact" if w.get("source") in ("zcode", "claude") else "unmatched"
+        )
+    w.setdefault(
+        "root_complete",
+        w.get("root") == w.get("session")
+        and (
+            w.get("source") == "hook"
+            or w.get("kind")
+            in ("interactive", "harness", "automation", "external_unknown")
+        ),
+    )
+    w.setdefault("ts_basis", "unknown")
+    return w
+
+
+# actor kind single source (AIR-55/P5): evidence -> kind, never guessed.
+# - interactive: zcode task_type interactive, no parent
+# - subagent: parented session or subagent-ish task_type (or hook-merged
+#   agent_id on a transcript event)
+# - harness: claude/hook-channel session with no leaf evidence
+# - external_unknown: zcode event whose session is absent from the session
+#   table (join miss). Hash-mismatch / dirty legs emit writer None, never a
+#   classified kind — absence of attribution, not a kind.
+# - automation: task_type in AUTOMATION_TASKS (empty-match today; extension
+#   point — cron sessions have no distinct task_type in current db evidence)
+AUTOMATION_TASKS = ("cron", "scheduled", "launchd")
+SUBAGENT_TASKS = ("subagent_child", "selection_side_chat", "fork")
+
+
+def classify_actor(event, sessions):
+    """Return (kind, root, root_complete).
+
+    Root is the outermost-KNOWN actor/session id, not a proven traversal:
+    root_complete=False when the chain is truncated (a parent id absent from
+    the session map — window/deleted ancestry) or cyclic (corrupt data; root
+    falls back to the event session, the only verified containment). A
+    cyclic node is never silently elected as root.
+    """
+    parent, task = sessions.get(event.session, (None, None))
+    if event.source == "hook":
+        # CC PostToolUse sensor: agent_id present = subagent leaf, else the
+        # harness session itself acted (channel known, leaf unknown).
+        ref = event.source_ref or {}
+        kind = "subagent" if ref.get("agent_id") else "harness"
+        return kind, event.session, True
+    # + hook-merged agent_id on a transcript event: a known leaf beats the
+    # channel-default harness rule below (root stays the session: CC carries
+    # no parent chain).
+    if (
+        parent is not None
+        or task in SUBAGENT_TASKS
+        or (event.source == "claude" and (event.source_ref or {}).get("agent_id"))
+    ):
+        root, seen, complete = event.session, {event.session}, True
+        while parent:
+            if parent in seen:
+                complete, root = False, event.session
+                break
+            seen.add(parent)
+            root = parent
+            if parent not in sessions:
+                complete = False
+                break
+            parent, _ = sessions.get(parent)
+        return "subagent", root, complete
+    if task == "interactive":
+        return "interactive", event.session, True
+    if task in AUTOMATION_TASKS:
+        return "automation", event.session, True
+    if event.source == "claude":
+        return "harness", event.session, True
+    return "external_unknown", event.session, True
+
+
+def _event_ts(event):
+    return event.operation_end or event.record_time
+
+
+def build_attribution(canonical, sessions, inventory, prior, dirty=None):
+    """AIR-55/P5: per-entry last-tracked-writer projection.
+
+    Contract (projection says who was last SEEN, never how much to trust):
+    - strictly-latest completed Write/Edit -> consistent (+current hash stored)
+    - top tie (same ts, differing session or input) -> ambiguous + candidates
+    - mixed time_source among competitors -> ambiguous, reason
+      "mixed-time-bases" (cross-channel clocks have no total order)
+    - unmatched-hook winner vs exact-identity competitors -> ambiguous,
+      reason "unmatched-hook-vs-exact" (hook-vs-hook keeps ts order)
+    Downgrade priority: timestamp-tie is judged first; mixed-time-bases
+    second; unmatched-hook-vs-exact last (all ambiguous — reason only
+    routes triage, never changes the verdict).
+    - no window event + prior hash match -> consistent (carried writer)
+    - no window event + prior hash mismatch -> unattributed_external
+    - no window event + no prior -> stale (writer null, never fabricated)
+    dirty: [{entry, ts}] file_changed evidence (watcher != writer) — sets
+    dirty_after_tracked when a dirty ts postdates the last tracked write
+    (same-content-rewrite suspect flag; status enum unchanged). Unparseable
+    dirty ts is retained as {"unordered": True} and forces the flag
+    (fail-closed: unorderable mutation, never dropped).
+    """
+    current = {item["entry"]: item["sha256"] for item in inventory}
+    writes_by_entry = {}
+    for e in canonical:
+        if e.tool not in ("Write", "Edit") or e.status != "completed":
+            continue
+        if e.entry == "MEMORY.md":
+            continue
+        writes_by_entry.setdefault(e.entry, []).append(e)
+    prior_entries = {}
+    prior_note = None
+    if prior is not None:
+        if isinstance(prior, dict) and isinstance(prior.get("entries"), dict):
+            prior_entries = prior["entries"]
+        else:
+            prior_note = "prior sidecar unreadable or wrong shape; treated as absent"
+    entries = {}
+    names = sorted(set(current) | set(writes_by_entry) | set(prior_entries))
+    for name in names:
+        sha_now = current.get(name)
+        evs = writes_by_entry.get(name, [])
+        # dedupe same session+content retries; order by ts, id for determinism
+        seen, uniq = set(), []
+        for e in sorted(evs, key=lambda x: (_event_ts(x) or "", x.id)):
+            key = (e.session, e.input_sha256, _event_ts(e))
+            if key not in seen:
+                seen.add(key)
+                uniq.append(e)
+        count = len(uniq)
+        if uniq:
+            top_ts = _event_ts(uniq[-1])
+            tied = [e for e in uniq if _event_ts(e) == top_ts]
+            contested = any(
+                (e.session, e.input_sha256) != (tied[0].session, tied[0].input_sha256)
+                for e in tied[1:]
+            )
+            if contested:
+                entries[name] = {
+                    "status": "ambiguous",
+                    "last_tracked_writer": None,
+                    "tracked_content_hash": sha_now,
+                    "current_sha256": sha_now,
+                    "write_count_window": count,
+                    "candidates": [writer_record(e, sessions) for e in tied],
+                    "reason": "timestamp-tie",
+                }
+                continue
+            winner = uniq[-1]
+            # B: operation-vs-record clocks across channels have no total
+            # order — mixed bases among competitors mean ordering_uncertain,
+            # never a confident winner (no fabricated skew margin can fix
+            # cross-harness clocks; same-basis keeps its order).
+            if len({e.time_source for e in uniq}) > 1:
+                entries[name] = {
+                    "status": "ambiguous",
+                    "last_tracked_writer": None,
+                    "tracked_content_hash": sha_now,
+                    "current_sha256": sha_now,
+                    "write_count_window": count,
+                    "candidates": [writer_record(e, sessions) for e in uniq],
+                    "reason": "mixed-time-bases",
+                }
+                continue
+            # C: an unmatched hook observation (sentinel hash, no transcript
+            # counterpart) must not outrank exact-identity events on ts
+            # alone. Hook-vs-hook keeps ts order (same identity grade).
+            if winner.source == "hook" and any(e.source != "hook" for e in uniq):
+                entries[name] = {
+                    "status": "ambiguous",
+                    "last_tracked_writer": None,
+                    "tracked_content_hash": sha_now,
+                    "current_sha256": sha_now,
+                    "write_count_window": count,
+                    "candidates": [writer_record(e, sessions) for e in uniq],
+                    "reason": "unmatched-hook-vs-exact",
+                }
+                continue
+            entries[name] = {
+                "status": "consistent",
+                "last_tracked_writer": writer_record(winner, sessions),
+                "tracked_content_hash": sha_now,
+                "current_sha256": sha_now,
+                "write_count_window": count,
+                "candidates": [],
+            }
+            continue
+        prev = (
+            prior_entries.get(name, {})
+            if isinstance(prior_entries.get(name), dict)
+            else {}
+        )
+        prev_hash = prev.get("tracked_content_hash")
+        prev_writer = prev.get("last_tracked_writer")
+        # F9: prior is untrusted input — carry only a well-formed writer
+        # (session str); anything else is treated as no prior (fail-closed,
+        # writer null rather than propagated garbage).
+        if not isinstance(prev_writer, dict) or not isinstance(
+            prev_writer.get("session"), str
+        ):
+            prev_hash, prev_writer = None, None
+        else:
+            # schema-2 migration: v1 writers lack ts_basis/identity/
+            # root_complete — backfill fail-closed, never upgrade.
+            prev_writer = migrate_prior_writer(prev_writer)
+        if sha_now is None:
+            # F1: entry absent from pool with no window writes — not a live
+            # external mutation; keep the carried writer for forensics.
+            entries[name] = {
+                "status": "absent",
+                "last_tracked_writer": prev_writer,
+                "tracked_content_hash": prev_hash,
+                "current_sha256": None,
+                "write_count_window": 0,
+                "candidates": [],
+            }
+            continue
+        if prev_hash is not None and isinstance(prev_writer, dict):
+            if sha_now is not None and sha_now == prev_hash:
+                entries[name] = {
+                    "status": "consistent",
+                    "last_tracked_writer": prev_writer,
+                    "tracked_content_hash": sha_now,
+                    "current_sha256": sha_now,
+                    "write_count_window": 0,
+                    "candidates": [],
+                    "carried_from_prior": True,
+                }
+                continue
+            entries[name] = {
+                "status": "unattributed_external",
+                "last_tracked_writer": None,
+                "tracked_content_hash": sha_now,
+                "current_sha256": sha_now,
+                "write_count_window": 0,
+                "candidates": [],
+            }
+            continue
+        entries[name] = {
+            "status": "stale",
+            "last_tracked_writer": None,
+            "tracked_content_hash": sha_now,
+            "current_sha256": sha_now,
+            "write_count_window": 0,
+            "candidates": [],
+        }
+    for rec in entries.values():
+        rec.setdefault("present", rec.get("current_sha256") is not None)
+    dirty_by_entry = {}
+    for d in dirty or []:
+        # unparseable ts -> (None, d): retained as an unorderable mutation,
+        # never dropped (fail-closed).
+        dirty_by_entry.setdefault(d.get("entry"), []).append((parse_ts(d.get("ts")), d))
+    for name, rec in entries.items():
+        devs = dirty_by_entry.get(name, [])
+        wts = parse_ts((rec["last_tracked_writer"] or {}).get("ts"))
+        unordered = any(dts is None for dts, _ in devs)
+        rec["dirty_after_tracked"] = unordered or any(
+            wts is None or dts > wts for dts, _ in devs if dts is not None
+        )
+        rec["dirty_events"] = [
+            (
+                {"ts": d.get("ts"), "watcher": d.get("watcher"), "unordered": True}
+                if dts is None
+                else {"ts": d.get("ts"), "watcher": d.get("watcher")}
+            )
+            for dts, d in devs
+        ]
+    return entries, prior_note
+
+
+def normalize_hook_events(paths, pools, since, until, canonical):
+    """AIR-56: merge CC hook sensor JSONL into canonical + dirty evidence.
+
+    - post_tool_use matching an existing event (session + call_id) enriches
+      it (agent ids) instead of duplicating; unmatched becomes a new tracked
+      write (source hook, sentinel input hash — never folds copies).
+    - file_changed is dirty evidence only (watcher != writer): returned
+      separately, never as a write event.
+    """
+    dirty = []
+    coverage = {
+        "requested": bool(paths),
+        "files": 0,
+        "malformed": 0,
+        "merged": 0,
+        "added": 0,
+    }
+    if not paths:
+        return dirty, coverage
+    by_key = {
+        (e.session, e.call_id, e.canonical_path): e
+        for e in canonical
+        if e.call_id and e.canonical_path
+    }
+    for raw in paths:
+        p = Path(str(raw)).expanduser()
+        if not p.is_file():
+            coverage.setdefault("missing", []).append(str(raw))
+            continue
+        coverage["files"] += 1
+        try:
+            text = p.read_text(encoding="utf-8")
+        except OSError:
+            coverage.setdefault("unreadable", []).append(str(raw))
+            continue
+        for line_no, line in enumerate(text.splitlines(), 1):
+            if not line.strip():
+                continue
+            try:
+                d = json.loads(line)
+            except json.JSONDecodeError:
+                coverage["malformed"] += 1
+                continue
+            if not isinstance(d, dict):
+                coverage["malformed"] += 1
+                continue
+            kind = d.get("kind")
+            ts = parse_ts(d.get("ts"))
+            if kind == "file_changed":
+                canon, entry = resolve_pool_entry(pools, d.get("file_path"))
+                if canon is None or entry is None:
+                    coverage["skipped_pool"] = coverage.get("skipped_pool", 0) + 1
+                    continue
+                if ts is None:
+                    # fail-closed: a mutation was seen but carries no
+                    # orderable clock — retain the raw ts; the projection
+                    # marks the entry dirty-unordered (never silently
+                    # dropped, never counted as skipped).
+                    dirty.append(
+                        {
+                            "entry": entry,
+                            "pool": canon,
+                            "ts": d.get("ts"),
+                            "watcher": d.get("watcher_session"),
+                        }
+                    )
+                elif in_window(ts, since, until):
+                    dirty.append(
+                        {
+                            "entry": entry,
+                            "pool": canon,
+                            "ts": iso(ts),
+                            "watcher": d.get("watcher_session"),
+                        }
+                    )
+                else:
+                    coverage["skipped_window"] = coverage.get("skipped_window", 0) + 1
+                continue
+            if kind != "post_tool_use":
+                coverage["malformed"] += 1
+                continue
+            canon, entry = resolve_pool_entry(pools, d.get("file_path"))
+            if canon is None or entry is None:
+                coverage["skipped_pool"] = coverage.get("skipped_pool", 0) + 1
+                continue
+            if ts is None or not in_window(ts, since, until):
+                coverage["skipped_window"] = coverage.get("skipped_window", 0) + 1
+                continue
+            call_id = d.get("tool_use_id")
+            key = (d.get("session_id"), call_id, canon)
+            if call_id and key in by_key:
+                ref = by_key[key].source_ref or {}
+                for k in ("agent_id", "agent_type"):
+                    if d.get(k) and k not in ref:
+                        ref[k] = d[k]
+                by_key[key].source_ref = ref
+                coverage["merged"] += 1
+                continue
+            canonical.append(
+                Event(
+                    source="hook",
+                    id=f"hook-{coverage['files']}-{line_no}",
+                    session=d.get("session_id") or "unknown",
+                    parent=None,
+                    task_type=None,
+                    tool=d.get("tool")
+                    if d.get("tool") in ("Write", "Edit")
+                    else "Write",
+                    status="completed",
+                    operation_start=iso(ts),
+                    operation_end=iso(ts),
+                    record_time=iso(ts),
+                    time_source="operation",
+                    raw_path=str(d.get("file_path")),
+                    canonical_path=canon,
+                    entry=entry,
+                    payload_chars=0,
+                    input_sha256="hook:" + str(call_id or f"{p}:{line_no}"),
+                    call_id=str(call_id) if call_id else None,
+                    source_ref={
+                        "hook_log": str(p),
+                        "line": line_no,
+                        "agent_id": d.get("agent_id"),
+                        "agent_type": d.get("agent_type"),
+                    },
+                )
+            )
+            coverage["added"] += 1
+    return dirty, coverage
+
+
+def writer_record(event, sessions):
+    kind, root, root_complete = classify_actor(event, sessions)
+    return {
+        "ts": _event_ts(event),
+        # ts_basis: which clock the ts came from — consumers must not
+        # total-order across differing bases (see build_attribution B).
+        "ts_basis": event.time_source,
+        "source": event.source,
+        "session": event.session,
+        "root": root,
+        # root_complete=False: outermost-KNOWN id, not a verified root
+        # (truncated chain or cycle — see classify_actor).
+        "root_complete": root_complete,
+        "kind": kind,
+        # identity: hook sentinels never merged to a transcript event are
+        # observations, not exact-identity writes (see C).
+        "identity": "exact" if event.source != "hook" else "unmatched",
+        "prompt": (event.source_ref or {}).get("message_id"),
+        "tool": event.tool,
+        "call_id": event.call_id,
+    }
+
+
 def project_decay(projection, until, max_unused_days=30, promotion_min_reads=3):
     """AIR-49 P2: aggregate the reads projection into decay candidates.
 
@@ -912,6 +1374,28 @@ def parse_args(argv):
     rd.add_argument("--since", default=None)
     rd.add_argument("--until", default=None)
     rd.add_argument("--output", required=True)
+    at = sub.add_parser(
+        "attribution", help="per-entry last-tracked-writer sidecar (AIR-55/P5)"
+    )
+    at.add_argument("--pool", action="append", required=True)
+    at.add_argument("--zcode-db", action="append", default=[])
+    at.add_argument("--cc-root", action="append", default=[])
+    at.add_argument("--since", default=None)
+    at.add_argument("--until", default=None)
+    at.add_argument("--output", required=True)
+    at.add_argument(
+        "--prior-sidecar",
+        default=None,
+        help="previous attribution output: hash continuity leg (carry vs "
+        "unattributed_external); corrupt/missing treated as absent (noted)",
+    )
+    at.add_argument(
+        "--hook-events",
+        action="append",
+        default=[],
+        help="hook sensor JSONL (post_tool_use merged/enriched, file_changed "
+        "as dirty evidence; AIR-56)",
+    )
     dc = sub.add_parser(
         "decay", help="usage-driven decay candidates (AIR-49 P2; candidates only)"
     )
@@ -1139,6 +1623,47 @@ def main(argv=None):
             f"unpaired_reads={coverages.get('unpaired_reads', 0)} "
             f"window_shortfall={coverages.get('window_shortfall')} "
             f"partial={coverages.get('partial')}"
+        )
+        return 0
+    if args.command == "attribution":
+        hook_dirty, hook_cov = normalize_hook_events(
+            getattr(args, "hook_events", []), pools, since, until, canonical
+        )
+        coverages["hooks"] = hook_cov
+        inventory = snapshot_entries(pools)
+        prior, prior_status = None, "absent"
+        prior_path = getattr(args, "prior_sidecar", None)
+        if prior_path:
+            try:
+                prior = json.loads(
+                    Path(prior_path).expanduser().read_text(encoding="utf-8")
+                )
+                prior_status = "loaded"
+            except (ValueError, OSError) as exc:
+                prior_status = f"unreadable ({exc}); treated as absent"
+        entries, prior_note = build_attribution(
+            canonical, sessions, inventory, prior, hook_dirty
+        )
+        if prior_note:
+            prior_status = prior_note
+        by_status: dict = {}
+        for rec in entries.values():
+            by_status[rec["status"]] = by_status.get(rec["status"], 0) + 1
+        report = {
+            "attribution_schema": ATTRIBUTION_SCHEMA,
+            "pool": str(pools[0]),
+            "window": {"start": iso(since), "end": iso(until)},
+            "built_at": iso(datetime.now(UTC).replace(microsecond=0)),
+            "coverage": coverages,
+            "prior": {"requested": bool(prior_path), "status": prior_status},
+            "counts": {"entries": len(entries), **by_status},
+            "entries": entries,
+        }
+        out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+        print(
+            f"[OK] entries={len(entries)} "
+            + " ".join(f"{k}={v}" for k, v in sorted(by_status.items()))
+            + f" partial={coverages.get('partial')}"
         )
         return 0
     baseline_dir = Path(args.baseline_dir).expanduser() if args.baseline_dir else None

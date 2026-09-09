@@ -1,9 +1,10 @@
 ---
 id: AIR-55
 title: memory last-writer歸因sidecar（b）實作——telemetry投影＋hash腿＋actor schema
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-09 04:54'
+updated_date: '2026-09-09 05:31'
 labels:
   - memory
   - telemetry
@@ -23,3 +24,9 @@ P5裁決①實作（AIR-48定稿，提案檔裁決段）。範圍：memory_telem
 - [ ] #2 三態語義（consistent非verified）有機械驗證
 - [ ] #3 actor雙欄＋prompt_id
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+歸因sidecar(b)落地：telemetry投影＋hash五態＋actor schema＋hook merge；ChatGPT-R1四修＋R2 migration全收斂；全倉263綠；commit air-55
+<!-- SECTION:FINAL_SUMMARY:END -->
