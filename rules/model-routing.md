@@ -12,7 +12,7 @@ tier＝requirement 能力檔，非模型綁定：full＝旗艦、vision＝影像
 
 | 角色 | tier 與約束 |
 |---|---|
-| code-reviewer / code-reviewer-primed / review command agent | full 基準；僅既有測試釘住＋驗證閉環＋非跨邊界語義面（保護面厚度）皆滿足才降 lite，禁順手降級 |
+| code-reviewer / code-reviewer-primed / review command agent | lite 預設（user 09-09——審查 findings 生產層跨層品質已實證，判斷價值集中 judge 裁決層）；高保護面／跨邊界語義面才升 full，禁順手升級 |
 | impl / test-gen | full 基準，機械段依同條件降 lite；lite test 僅規格陳述，不是獨立驗收證據，須另補 |
 | judge-review / execution-plan / post-build 編排 | full，不可條件降級；判斷/自證塌陷/sycophancy 非 effort 可補，lite＋max 須另先小規模實證並記 skill |
 | spec-miner / lite-verify / cross-verify-investigator / render / cron 機械段 | lite，rg＋Read 逐字查證/清單驗證/單軸多源/渲染/watch；read-only、缺源標 unverified 不腦補 |

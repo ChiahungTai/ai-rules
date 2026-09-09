@@ -21,7 +21,7 @@ harness-scope: neutral
 
 ### 破壞性選擇的查證觸發
 
-刪除/整併看似等價的無測試檔案，先查 README 權威指名、Capabilities 入口、git 活躍度與內容完整性，不憑檔名選。存活檔只有路徑修正而無內容吸收，是刪錯訊號，停下重判。
+刪除/整併看似等價的無測試檔案，先查 README 權威指名、Capabilities 入口、git 活躍度與內容完整性＋backlog 卡（To Do／In Progress／drafts）是否提及或依賴，不憑檔名選。存活檔只有路徑修正而無內容吸收，是刪錯訊號，停下重判。（standup 誤刪實證：恢復事實只記在 AIR-52 desc，原清單不含卡面）
 
 ## 具體明確表達
 

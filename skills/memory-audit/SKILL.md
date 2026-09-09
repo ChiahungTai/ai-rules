@@ -148,6 +148,7 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 | M2 desc 三不違反（鑑識時內容閘不存在，日期流水全放行） | desc 不放易變快照（現值/日期/session-id） | **內容閘**——desc regex 偵測日期/`sess_` 形態硬擋（三判準全過：純機械/單入口/desc 三無例外） | hook 機械閘 |
 | M3 多 writer 草稿式迭代（stale-collision 多發） | 草稿 → scratch；條目收終態事實（寫入當下即蒸後形） | stale-collision 訊息擴充——碰撞 error 附改道提示（既有 collision error 即觸發點） | hook 訊息 |
 | M4 repo 可推導佔主體 | 不寫／模組操作知識 → 模組 AGENTS.md | Q2 判定是語義——本表 prose 承載，hook 只能提示 | LLM 流程 |
+| M5 外部 runtime 委派由 agent wrapper 承載 | caller 背景 Bash process 直跑（run_in_background＋stdout 重導） | 禁 wrapper 承載——佔 in-harness agent slot／rate limit；wrapper 唯一「價值」是被誤判的 600s timeout 約束（從未存在；AIR-46 msg 118＋MOS-74 實證；S8 跨 repo 工單） | 機制誤置（見 [model-routing](../model-routing/SKILL.md)「承載者」） |
 | B1 bundle scope creep（未發現確證） | EP/卡承載有效 | 維持雙 ref 紀律 | 既有 |
 | SM-5 歸因破口（常態非例外——量化見 p1-taxonomy） | —（缺口非誤置） | writer 可見性修法建議（P5：條目 writer log 行／telemetry 擴欄／generator 註記） | 另段 |
 

@@ -1,10 +1,10 @@
 ---
 id: AIR-48
 title: 載體濫用鑑識×統一定義表——對話紀錄實證 memory/bundle/skill 誤置（AIR-45 dogfood 證據腿）
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-08 12:22'
-updated_date: '2026-09-08 22:33'
+updated_date: '2026-09-09 04:17'
 labels:
   - memory
   - governance
@@ -12,8 +12,8 @@ labels:
 dependencies: []
 references:
   - >-
-    http://127.0.0.1:6421/ai-rules/_tasks/09-08-carrier-misuse-definition/index.html
-  - ai-analysis/_tasks/09-08-carrier-misuse-definition/ep.md
+    http://127.0.0.1:6421/ai-rules/_tasks/done/09-08-carrier-misuse-definition/index.html
+  - ai-analysis/_tasks/done/09-08-carrier-misuse-definition/ep.md
 ordinal: 40000
 ---
 
@@ -41,3 +41,9 @@ ordinal: 40000
 
 【09-09 合併】user 裁定 AIR-48 剩餘（P4 dogfood 收尾——窗口至 09-10＋P5 三 user 裁決點＋統一定義表 wrapper 條目）併 AIR-50 整合弧執行——EP：ai-analysis/_tasks/09-09-skill-contract-fixes/ep.md（S9 段）；結案兩步隨該弧
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+P4 dogfood n=2收斂（case#2本弧＋ID核對事件；窗口至09-10晚無新case即定稿）＋M5 wrapper條目＋P5裁決點彙整（①採b②維持觀察待user裁決；③已滿足）
+<!-- SECTION:FINAL_SUMMARY:END -->

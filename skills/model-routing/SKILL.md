@@ -37,9 +37,9 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 **harness 主軸（user 的開發入口決定主力 model——與下方 external-runtime「角色 → family → profile 映射」同源）：**
 
-- **ZCode 開發（日常主力）**：主 session＝**GLM 5.3**（判斷/規劃/EP/judge；full-tier agent＝registry 釘 glm-5.3〔AIR-43——不隨主 session 漂移〕）；lite subagent 執行檔＝glm-5.3-flash（省成本層）；**內建 `general-purpose`／`Explore` 非 registry——無 pin、繼承主 session 旗艦**（官方設計行為，鏡像 `ref-docs/harness/zcode/cn/docs/qa.md`），lite 角色任務誤派內建型別＝旗艦燒機械段（真實案例：AIR-50 弧考察任務兩次誤派 general-purpose 被 user 抓——「registry lite agent＝flash」不可外推到內建型別）
+- **ZCode 開發（日常主力）**：主 session＝**GLM 5.3**（判斷/規劃/EP/judge；full-tier agent＝registry 釘 glm-5.3〔AIR-43——不隨主 session 漂移〕）；lite subagent 執行檔＝glm-5.3-flash（省成本層）；**內建 `general-purpose`／`Explore` 非 registry——無 pin、繼承主 session 旗艦**（官方設計行為，鏡像 `ref-docs/harness/zcode/cn/docs/qa.md`；例外：ZCode 設定頁可為內建型別單獨釘模型，清空恢復繼承）——lite 角色任務誤派內建型別＝旗艦燒機械段（真實案例：AIR-50 弧考察任務兩次誤派 general-purpose 被 user 抓——「registry lite agent＝flash」不可外推到內建型別）
 - **muse code 開發（user 直用時＝該弧主力 harness）**：muse-spark-1.3 全棧——實作/審查都在該 harness 內；repo 層 AGENTS.md muse 會載入（bridge log 實證；全域 guide 的 muse 部署點未查證）
-- **審查類（ep-review／code-review 等 review agent 層）→ muse／glm-5.3-flash 皆可**（user 09-07 放寬「審查類都可以」）：跨家族第二意見仍 muse 優先（非 GLM 視角）；in-harness 審查可用 glm-5.3-flash——原「full inherit 為基準＋保護面厚度條件降 lite」門檻就此放寬；**judge 裁決層不變：固定主 session GLM 5.3**（AIR-24 三防線）；registry 釘選＝base 非強制——顯式降級＝換 lite-tier 載體或 muse（ZCode 無 spawn-time model 參數）
+- **審查類（ep-review／code-review 等 review agent 層）→ lite 預設（glm-5.3-flash；user 09-09 裁定）**：findings 生產層跨家族/跨層品質已實證，判斷價值集中 judge 裁決層；跨家族第二意見仍 muse 優先（非 GLM 視角）；升 full 條件＝高保護面／跨邊界語義面（保護面厚度反轉為升級觸發）；**judge 裁決層不變：固定主 session GLM 5.3**（AIR-24 三防線）；dual-family 鏈 judge 全採納（零否決）時顯性自查三防線#2（sycophancy 下傳——AIR-46 實證零否決×2 未觸發）；外部 runtime 委派承載者＝主 session 背景 Bash（禁 subagent wrapper——見 reviewer 交接契約「承載者」）；registry 釘選＝base 非強制——顯式升級＝換 full-tier 載體（高保護面／跨邊界語義面）；跨家族第二意見換 muse（ZCode 無 spawn-time model 參數）
 - **實作（implement profile bridge 委派）＝預設 muse**（user 09-07 修訂，取代 09-05「user 指定時派」單批指示慣例）：重實作段 muse、lite 機械段 glm-5.3-flash；**CR 工具鏈 agent（cr-research 等）同收斂 muse＋glm-5.3-flash**——與「user 直在 muse code 開發」仍是兩種形態（委派 vs harness 切換）
 - **影像需求（vision tier）＝需「支援影像的 model」，現值＝glm-5.3-flash**（user 09-07「影像目前都用 flash」——選它因 5.3 flash 原生多模，非因 lite tier；非所有 lite 款都具影像能力）——muse `--image` 是能力備註（上表），非現值路由
 - **codex（OpenAI）→ 預設不派**（額度最少）——僅 user 顯式指定（例：「codex sol max」）。定性甜蜜點實證：control-plane／docs 形態 repo 的全 repo 狀態對抗深審（[/state-review](../state-review/SKILL.md) 的候選家族之一）——產出與 in-family 盲點正交（權威模型／事務完整性／provenance 類問題）；本行是能力備註，不構成取消顯式指定授權
@@ -59,9 +59,9 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 | requirement | roles |
 |---|---|
-| full | code-reviewer, code-reviewer-primed |
+| full | （空——judge／EP 規劃／post-build 編排是主 session 職責非 role；review agent 層已 lite 化，user 09-09） |
 | vision | vision-review |
-| lite | archify-gen, cr-research, cross-verify-investigator, impl-lite, lite-verify, mem-distill, spec-miner |
+| lite | archify-gen, code-reviewer, code-reviewer-primed, cr-research, cross-verify-investigator, impl-lite, lite-verify, mem-distill, spec-miner |
 
 > 判斷密集位（judge 裁決／EP 規劃／post-build 編排）不是 role——**主 session 直做**（AIR-24 分工律）；「非 full＋max effort 補償＝未驗證路徑」。新 role 須在此表登記 requirement——缺登記＝`sync_agents.py` fail loud（防靜默 unpinned 上線）。
 
@@ -143,6 +143,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 - **完成回報固定欄位**：jobId 或 thread id／base commit／改檔清單／實跑驗收命令與原始輸出／未驗證項
 - **reviewer 讀料順序**：work order → diff → evidence → writer report 最後讀
 - **產出**：accept／reject／needs-fix 三態 verdict；無 reviewer record 不得結卡（record 落 EP 或工單指定位置）
+- **承載者（硬性）**：外部 runtime 委派＝caller 背景 Bash process 直呼 bridge（run_in_background＋stdout 重導），**禁 subagent wrapper 承載**——外部 runtime 不佔 in-harness agent slot／rate limit（wrapper 唯一「價值」是被誤判的 600s timeout 約束——從未存在，見「完成回報收法」）
 
 ### flag profile → spawn 參數（external-runtime）
 
@@ -157,7 +158,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 | review | muse | `muse review --json`（bridge `review` 子命令——**git-diff 審查工具**：`--base <ref>` 定 diff 範圍；非文件審查形態——EP 等文件審查走 `task`＋read-only 紅線，`--schema` flag 不存在〔bridge 0.2.5 實測〕） | diff 審查產出 verdict |
 | review | codex | `codex review --json`（bridge `--family codex`——`--output-schema` 注入＝verdict schema 原生機制，POC 實證） | 同上，codex 形態 |
 
-**bridge 必經（雙家族委派唯一入口）**：委派 muse／codex 跑 repo 任務一律經 bridge 入口（上表列＝`delegate-bridge.mjs` 子命令的抽象形態，`--family` 選家族），禁直呼 `muse exec`／`codex exec` 或其他繞過 bridge 的入口——bridge 落 per-repo `.delegate-bridge/jobs.json` ledger（jobId／sessionId／status／text／family 欄；v1.0.0 前舊 ledger dir 相容雙讀、id 去重——新者勝），非 bridge 入口的產出 ledger 查無，事後只能從副作用側考古（真實案例：mosaic post-build 鏈同鏈兩段 muse 委派一走 bridge 一繞道，繞道段收尾不可考）。完成回報攜帶 ledger jobId（reviewer 交接契約欄位）；委派了外部 runtime 而 jobId 缺席＝入口違規，補查或標明。
+**bridge 必經（雙家族委派唯一入口）**：委派 muse／codex 跑 repo 任務一律經 bridge 入口（上表列＝`delegate-bridge.mjs` 子命令的抽象形態，`--family` 選家族），禁直呼 `muse exec`／`codex exec` 或其他繞過 bridge 的入口。**派發前正規化**：user 對話中的模型／檔位口語詞（flash／max…）不是值——派發前經 family 表正規化為 `--model`／`--effort` 顯式旗標；非表內詞＝查表觸發訊號，禁猜測直接套用（flash 對 muse 非合法 effort 值，本身就是該查表的訊號）——bridge 落 per-repo `.delegate-bridge/jobs.json` ledger（jobId／sessionId／status／text／family 欄；v1.0.0 前舊 ledger dir 相容雙讀、id 去重——新者勝），非 bridge 入口的產出 ledger 查無，事後只能從副作用側考古（真實案例：mosaic post-build 鏈同鏈兩段 muse 委派一走 bridge 一繞道，繞道段收尾不可考）。完成回報攜帶 ledger jobId（reviewer 交接契約欄位）；委派了外部 runtime 而 jobId 缺席＝入口違規，補查或標明。
 
 ### session 定向接續（`--session-id` resume／fork；09-08 L4 實測）
 
@@ -181,18 +182,20 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 **成本警示**：continuation 帶整包 context（codex resume 實測 127K tokens／fork 65K）——任務可口述就走 handoff doc，別為省一張工單續整卷。
 
+**審查工作流鏈形態**（MOS-74 實證）：review 工單預告驗證式 → judge → 修正 → `--session-id` 同 session followup——reviewer 帶自己 findings context 複驗，優於 fresh context（followup 工單零背景重複＋驗證式直接回收複用；reviewer 對自己 findings 的修正驗證比 fresh context 準）。
+
 ### 完成回報收法
 
 > **經濟學動機**：LLM 層輪詢每輪＝1+ request 且全 context 重送；push 收法等待期間 0 request、完成時恰好 1 request。輪詢只存在 bridge 進程內部（muse `wait` 內建亞秒級固定輪詢——零 LLM 成本）。
 
 **決策樹**（未載入背景的 session 單讀可執行）：
 
-1. **簡單轉發（review／critique／diagnosis）**：主 session 背景 Bash 直呼 bridge 阻塞形（`task`，家族經 `--family`）→ process exit 自動喚醒 → stdout 即 finalText；jobId 記錄不變（reviewer 交接契約欄位照舊）
-2. **長跑（>10min，xhigh 委派）＝fire-and-forget 優先**：`task --background "<prompt>"`（長 prompt 改 `--prompt-file <path>` 形態）提交 → jobId 即回 → caller 結束 turn 釋放（不掛前景、不綁 session）。**收法分流（session 是否需接續）**：session 活著且完成後要接續做事 → **背景 Bash 掛 `wait <jobId>`（首選兩段式）**——零 model request，wait exit 觸發 harness notification **自動喚醒 session 接續**；session 將結束或不在乎即時收 → 純認領制（事後任何時刻 `show <jobId>`——**完成無推送、不會自己回來**，須主動查）。finalText 由 per-job jsonl 重導出，ledger entry 只存 status／exitCode／summary。**timeout 語義（AIR-47 S3 起對外單一形，兩家族同）**：
+1. **簡單直跑（review／critique／diagnosis）**：主 session 背景 Bash 直呼 bridge 阻塞形（`task`，家族經 `--family`）→ process exit 自動喚醒 → stdout 即 finalText；jobId 記錄不變（reviewer 交接契約欄位照舊）。派發時必印 `[Bridge] family=<f> model=<m> effort=<e>`（與 in-harness `[Agent] model=…` spawn 確認對稱——派發前肉眼攔截；muse effort 口語誤讀事故即此欄位缺席所致）
+2. **長跑（>10min，xhigh 委派）＝fire-and-forget 優先**：`task --background "<prompt>"`（長 prompt 改 `--prompt-file <path>` 形態）提交 → jobId 即回 → caller 結束 turn 釋放（不掛前景、不綁 session）。**收法分流（session 是否需接續）**：session 活著且完成後要接續做事 → **背景 Bash 掛 `wait <jobId>`（首選 wait 收法）**——零 model request，wait exit 觸發 harness notification **自動喚醒 session 接續**；session 將結束或不在乎即時收 → 純認領制（事後任何時刻 `show <jobId>`——**完成無推送、不會自己回來**，須主動查）。finalText 由 per-job jsonl 重導出，ledger entry 只存 status／exitCode／summary。**timeout 語義（AIR-47 S3 起對外單一形，兩家族同）**：
    - bridge `wait <jobId>`：timeout 到期＝`process.exit(124)`——exit 124＋status 仍 running＝重掛；`--timeout 0`＝forever（長跑必帶）
    - 任一家回非 completed 終態 → `jobs/<id>.jsonl`＋working tree 對照再判（reconcileStaleRunning 可能過早標 interrupted）
    - **兩端 SessionEnd 差異（caller 在哪家 harness，決定能否跨 session 認領）**：ZCode 端 plugin hooks 不執行 → background worker（detached，脫離 caller 進程樹）跨 session 存活 → 任何 session 以 `runs`／`show` 認領（fire-and-forget 完整可用）；CC 端 SessionEnd hook 殺 running job 進程樹＋標 interrupted → holder session 必須活著 → fire-and-forget 限縮為「session 內釋放 turn」，跨 session 認領前先確認 holder 在場（事實源：`…/delegate-market/delegate/<ver>/scripts/session-lifecycle-hook.mjs`＋`hooks/hooks.json`，以 plugin cache 現版為準）
-3. **prompt 工程（codex gpt-5-4-prompting 改寫）**：官方 companion 已退役（AIR-47）——wrapper 形態不再是 ai-rules 路由引用面（plugin 快取仍在場可手動用）；歷史實證保留供參：wrapper Bash 10min 上限是約束事實、wrapper 在 runtime 未終局時提前 complete 是系統性常態（muse×2＋codex×2 均需介入實證）——預期超時的工單改走 2
+3. **prompt 工程（codex gpt-5-4-prompting 改寫）**：官方 companion 已退役（AIR-47）——wrapper 形態不再是 ai-rules 路由引用面（plugin 快取仍在場可手動用）；歷史實證保留供參（**已退役形態，僅供考古**——現行一律直跑）：wrapper Bash 10min 上限是約束事實、wrapper 在 runtime 未終局時提前 complete 是系統性常態（muse×2＋codex×2 均需介入實證）——預期超時的工單改走 2
 4. **LLM 層 fallback（罕見——原始派發無背景 Bash 掛載；前景短 arm 仍可用）**：ETA-gate 紀律——推估完成時刻前零檢查（一段 `--timeout <eta>` arm）→ 屆時單次檢查 → 未終局重掛遞減 timeout 的阻塞 wait arm（起點＝bridge 預設 5min／4min，按 ETA 緊化至 ~30s 級；每 arm 到期＝1 request）——**永不做 LLM 層定時輪詢**
 
 > **多工複用（fire-and-forget 的複用形態）**：一個 session 持 N 個 jobId 統一掃（`runs --json` sweep 後逐個 `show`／`wait` 認領）；並行 quota 語義＝同 5h window token 加總（並行買 wall-time 不省花費），實用並行上限 2-3 長任務。
@@ -210,13 +213,13 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 | 症狀 | 證據 | 處置 |
 |------|------|------|
 | transport 未啟動 | env/module 錯誤、log `MODULE_NOT_FOUND`、exit 1、jobs.json 無該 job | 可安全重派 |
-| transport 在跑、wrapper 已收 | jobs.json 狀態 running、ps 進程在 | 背景 Bash 掛阻塞 `wait` 收，禁重派（雙跑） |
-| transport 死中途、wrapper 空轉 | 進程已亡、jobs.json 停滯、無新輸出 | 機械驗收（working tree＋jobs.json 終局）＋TaskStop wrapper |
+| transport 在跑、caller 已收（jobId 在手、wait 掛載中） | jobs.json 狀態 running、ps 進程在 | 背景 Bash 掛阻塞 `wait` 收，禁重派（雙跑） |
+| transport 死中途、wait 空轉（背景 Bash 活、job 無進展） | 進程已亡、jobs.json 停滯、無新輸出 | 機械驗收（working tree＋jobs.json 終局）＋停背景 Bash job（bridge `stop <jobId>`／kill，恢復主體＝caller process） |
 
 ### 套用（三路徑都從解析表取值，不寫死絕對 model）
 
 - **external-runtime 派發前重讀本檔「完成回報收法」節**——收法演進快，禁用 session 記憶／memory desc 派發（真實案例 09-05 過期派發事故：看到改版 commit 標題 ≠ 重讀條文，舊詞 resume-to-poll 被 wrapper 契約拒絕）
-- **CC Workflow path**（ultracode；CC 端；ZCode 端＝registry 釘選）：script `agent({model})` 填 literal —— review command agent = inherit（full 為基準；保護面厚度條件成立時降 lite）；lite 類填 lite tier 對應值（查本檔解析表）
+- **CC Workflow path**（ultracode；CC 端；ZCode 端＝registry 釘選）：script `agent({model})` 填 literal —— review command agent = inherit（lite 預設；高保護面／跨邊界語義面升 full）；lite 類填 lite tier 對應值（查本檔解析表）
 - **CC Agent Tool path**（fallback）：spawn `model` param 同上
 - **ZCode path**：pins 釘在 `agents/zcode/` 定義檔 frontmatter（治理見 agents/AGENTS.md registry 段）
 

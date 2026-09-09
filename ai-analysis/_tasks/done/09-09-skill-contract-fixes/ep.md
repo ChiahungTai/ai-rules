@@ -360,3 +360,9 @@
 - 〔09-09〕S3 ✅（5 檔：triage 語義判準＋純修飾快道〔模態詞表單一源〕；docs-mode「行為控制面」單一源＋同詞引用；情境 C 去 refactor 化〔:253＋:273〕；architecture.md 脫情境欄；simple 前置掃描雙掛〔EP 分流段＋guide always-on 例外〕＋§1b 交叉引用；`僅 .md 變更` 0 殘留；deploy 3/3 綠）
 - 〔09-09〕S4 ✅（3 檔：pre-flight 先判環境〔共享樹免 commit〕；階段 1 前證據身份比對〔三等價＋fallback 全審〕；自動鏈 commit message 豁免＋弧動機文字同步；修正迴圈 PB4 證據過期標記；baseline 語義對齊；`有 uncommitted changes 是 Agent dependency` 0 殘留）
 - 〔09-09〕post-build 中段 checkpoint（S1–S4）收斂：triage＝控制面 docs-mode 全鏈；Resume 不適用（.review/main.md 屬 AIR-49）；證據比對＝fallback 全審；自審 F1–F5＋獨立 reviewer R-F1–R-F4 全修全驗（帳本 `.review/air-50.md`，無殘留）；結案段＋hook 2 跳過（S5＋未做，S2 收斂後規則）；tour 無變動跳過；metadata-sync 結案段跳過；無 commit
+- 〔09-09〕S5 ✅（3 檔：直跑改名＋wait 收法＋退役標＋transport caller 主體＋承載者硬性＋judge 三防線#2＋resume 鏈形態；followup 去未實戰；work-order 驗證式入 findings schema；`agent 轉發` 0 殘留；驗證式三處同詞；備註：EP 點名 session/job ID 與 recipe 對不上〔01a082f3 實為 codex 複審 session〕，未驗證不引用，實質照 recipe 寫）
+- 〔09-09〕S10 ✅（6 檔＋生成 4 檔：分配表 full 列清空＋script dict 同步＋roles 標籤 lite＋rule/skill lite 預設同詞＋ep-review 三處改 registry lite-verify；sync 重生成冪等，zcode pins＝glm-5.3-flash；SM-17）
+- 〔09-09〕S12 ✅（2 檔三條款：查證清單加 backlog 卡面＋bridge echo＋口語正規化；SM-19 走一遍成立）
+- 〔09-09〕S9 ✅（2 檔：P4 記 case#2〔本 session 真實軌跡＋ID 引用核對失敗事件〕n=2，窗口至 09-10 晚不定格等待；定義表加 M5 wrapper 誤置條目；P5 三裁決點彙整待收尾 user 裁決；AIR-48 結案隨本弧收尾）
+- 〔09-09〕S11 ✅（1 檔：post-build 階段 4 加 rename 反掃三步〔萃取→AGENTS.md 家族＋快 drift 檔反掃→修或記 drift〕；非 rename 弧空跳；SM-18）
+- 〔09-09〕post-build 自食收斂（S5–S12）：delta reviewer Verdict Needs-fix（S10 drift 家族：review-engine:143＋model-routing:222＋agent-review-cycle:50＋agents/AGENTS.md 四處「full 為基準」漏改）→ D-F1–D-F4 全修全驗；parser／管轄／編號／M5 語法 reviewer PASS；帳本 `.review/air-50.md` 三輪無殘留

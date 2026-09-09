@@ -50,7 +50,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 
 驗收後更新 caller 指定帳本（鏈上預設 `.review/<branch>.md`；規劃期＝EP review 區段）finding 的 `status`(格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)):`verified`(採納且通過)/ `closed`(拒絕合理)/ 維持 `open`(未通過需再修)。新引入的 Critical / Important 問題,新增 finding(狀態 `open`)。驗收基準優先用 finding 自帶**驗證式**重跑（可機械複驗）——驗證式缺席時退 LLM 對照判讀。
 
-### muse reviewer 續接驗收（委派形態；delegate-bridge ≥1.0.0——未實戰，首跑後回報修訂）
+### muse reviewer 續接驗收（已驗證形態；MOS-74：review→judge 全採納→修正→同 session `--session-id` resume followup pass 全 verified＋2 新 issue——驗證式逐條回收零摩擦）
 
 原始 review 若為 muse 委派（經 bridge——reviewer 交接契約的 jobId→ledger sessionId 即續接定址鍵），followup 可定向續接**同一 reviewer session**——帶完整審查記憶（findings 理由、讀過的檔案、考慮過又放過的 near-miss）逐項驗收，非讀檔扮演。
 

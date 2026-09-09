@@ -1,17 +1,18 @@
 ---
 id: AIR-50
 title: 開發流程契約修復＋反饋固化——codex 六斷點＋mosaic MOS-74 四條
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-08 22:02'
-updated_date: '2026-09-09 03:30'
+updated_date: '2026-09-09 04:17'
 labels:
   - docs
   - skills
 dependencies: []
 references:
-  - 'http://127.0.0.1:6421/ai-rules/_tasks/09-09-skill-contract-fixes/index.html'
-  - ai-analysis/_tasks/09-09-skill-contract-fixes/index.html
+  - >-
+    http://127.0.0.1:6421/ai-rules/_tasks/done/09-09-skill-contract-fixes/index.html
+  - ai-analysis/_tasks/done/09-09-skill-contract-fixes/index.html
 ordinal: 42000
 ---
 
@@ -35,3 +36,9 @@ ordinal: 42000
 
 〔開工 handoff 09-09 command center〕排序拍板：51 收→53 收→50 開工（本日主弧，S9 綁 AIR-48 dogfood 窗口 09-10）→54→52。開工起手式：checkout -b air-50 → In Progress → 開工雙 ref → code-reality snapshot --repo <root> --label air-50（勿跳）→ /implement（EP＋殼在本卡 references）。B 線機械段 S6/S8/S12 可派 codex 平行。收尾含 EP 收尾段 S12 三條款＋AIR-48 同弧結案。過渡紀律：本弧結案蒸餾後手動重跑 .agent-tmp/poc_muse_projection.py 刷新 muse copy 投影（AIR-54 過渡形態）。
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+S1–S5/S9–S12全落地＋三輪post-build收斂（自審F1–F5＋獨審R-F1–R-F4＋delta D-F1–D-F4全驗）＋deploy 3/3＋sync-sources綠（別弧舊殼除外）
+<!-- SECTION:FINAL_SUMMARY:END -->

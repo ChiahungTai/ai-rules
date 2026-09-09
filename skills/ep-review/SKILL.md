@@ -33,7 +33,7 @@ review 執行預設（force 獨立 / max-agents / model 預設）見 [review-eng
 
 | Workflow Phase | 說明 | Agent 數量 |
 |----------------|------|-----------|
-| Review | 平行 spawn 維度 agents（`subagent_type: "Explore"`，read-only） | ≤ max-agents |
+| Review | 平行 spawn 維度 agents（registry lite 載體 `lite-verify`——read-only 契約＋flash pin 雙確定性；user 09-09 審查層 lite 預設。禁內建 `Explore`——無 pin 繼承主模型，lite 預設落空） | ≤ max-agents |
 | Verify | must-fix findings → 1 verifier/finding | findings 數 |
 
 **啟用維度**：
@@ -62,7 +62,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 5 個 Dimensio
 
 **Agent Tool 模式**（**預設 force 獨立**；判定條件見 [review-engine](../review-engine/SKILL.md)）：
 
-主 session spawn 單一 `subagent_type: "Explore"` agent 做所有 5 維度（ep-review 特有配置，非 code-review 的 3-perspective；Explore 型別保證 read-only）。印出確認：`[EP Review Mode] effort=<ultracode|standard>, workflow=false, agent=true`
+主 session spawn 單一 registry `lite-verify` agent 做所有 5 維度（ep-review 特有配置，非 code-review 的 3-perspective；read-only 契約＋flash pin 雙確定性——禁內建 `Explore`，無 pin 會繼承主模型）。印出確認：`[EP Review Mode] effort=<ultracode|standard>, workflow=false, agent=true`
 
 ---
 
@@ -166,7 +166,7 @@ build 可能由不同 LLM session 執行，無法存取審查報告。因此：
 - **五維度覆蓋**：必須覆蓋 F1-F5
 - **審查者自證**：提出問題前必須用 Read/Grep 查證宣稱。聲稱檔案存在 → 讀它；聲稱命名衝突 → 查 import 鏈；聲稱依賴順序有問題 → 追蹤執行順序。無法查證的宣稱標注「未驗證」
 - **不實作**：審查階段不自動開始實作
-- **read-only 審查**：review agent 為 `subagent_type: "Explore"`（型別保證無 Edit/Write）— 審查階段 review agent 不修改 EP；主 session 僅於審查完成後執行回寫（見回寫原則）
+- **read-only 審查**：review agent 為 registry `lite-verify`（read-only 契約保證無 Edit/Write）— 審查階段 review agent 不修改 EP；主 session 僅於審查完成後執行回寫（見回寫原則）
 
 ---
 
