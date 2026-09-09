@@ -6,7 +6,7 @@ title: >-
 status: In Progress
 assignee: []
 created_date: '2026-09-09 21:43'
-updated_date: '2026-09-09 21:46'
+updated_date: '2026-09-09 21:50'
 labels:
   - governance
   - bundle
@@ -24,4 +24,6 @@ User 09-10 拍板方案甲：ai-rules 部署的 muse user 層自限 36,864B（�
 
 <!-- SECTION:NOTES:BEGIN -->
 〔開工 handoff 09-10 CC〕①瘦身改**源**（ai-development-guide.md＋rules/*.md）非部署產物——改後跑 scripts/deploy_agents.py 重部署＋rg 掃引用防 drift（sync-sources 紀律）；四家共用源，zcode/opencode/codex 同步瘦。②語義壓縮非截斷——已有 skill 深層的（tool-discipline/quality-constraints/acceptance-evidence）rule 面壓薄留 pointer；「易被合理化動搖」的論證保留。③gate 實作參考 :491 既有註記位（muse: 64KiB shared with project layer）——MUSE_USER_BUDGET 獨立常數超線 exit 1。④R8 清單在報告 :196 行表格（19 載體零使用掛名）；R5 併 corrections-weekly 治理腿。⑤驗收：部署檔 ≤36,864B＋四檔 cmp＋288 tests＋mosaic 串接全額 ≤65,536（40,092→36.8K 後全額 62.3K 留 3.2K 緩衝）。⑥codex advisory 進行中——建議回來 CC 轉入本 notes 續用。⑦開 branch air-66。
+
+〔codex advisory 回收 09-10 CC（job-mtumf2xo，read-only 查證）〕①止血目標上調：≥3.3KB（5% floor=減 3,318B）、佳 5KB（7.5% target=減 4,956B）——user bundle 每 byte 對所有 muse 消費 repo 重複課稅，共享層從嚴；只砍 41B＝放回懸崖邊。②水位定錨：34-35KiB operating target＋36KiB hard ceiling（user 拍板 36KiB=ceiling；5% 以下 fail/5-7.5% warn/≥7.5% healthy 三段判讀——mosaic 側腿用）。③機制分工：ai-rules 側=A' global envelope（本卡 gate 即此形態，不列舉 consumer repo——清單必漂）；mosaic 側 B 腿（commit/治理 gate 量 user+project+framing 全額）＝primary gate，歸 mosaic 治理（與 AIR-54 S6 相鄰可順接）；C 腿=bundle-watch 擴跨 repo 漂移偵測（ai-rules 週日看照擴充）。④CLAUDE.md warning 忽略確認（不為消 warning 改拓撲）。最終組合：瘦身+A' +B+C+D 原則。
 <!-- SECTION:NOTES:END -->
