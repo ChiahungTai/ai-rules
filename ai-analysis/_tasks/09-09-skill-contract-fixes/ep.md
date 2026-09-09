@@ -31,6 +31,7 @@
 - 〔09-09 dry-run 三輪＋考察閉環（含一次 1308 額度事件）〕①第一輪 RED baseline：11 checkpoint 對現況全紅（鑑別力證明）＋SM-15 對 AIR-46 真實走場綠（`.agent-tmp/dryrun/uc-sm-dryrun.md`）。②原派 2 flash 考察 agents（cross-verify-investigator——general-purpose 誤用已修正，見 memory `reference-zcode-agent-model-inheritance`）**雙雙死於 1308 五小時額度**（07:29，窗口 08:21 重置）——muse 接手完成兩份考察（`agentA-zcode-impl-review.md`／`agentB-mosaic-wt-review.md`）。③muse 吸收輪宣稱「零 EP 修訂需求」→ **codex 複審反對（4 Important＋1 Suggestion，主 session 獨立複核五組驗證公式全成立、全採納）**：I-1 bt/lab WT 曾各自提交再 rebase 匯流（reflog 實錘——「無跨 WT 作業」不成立，同檔碰撞 unverified）；I-2 tour 錨債是**既有 gate 執行缺口**非規則缺席（post-build:68 gate 在場、9aeb0609f 觸 .md 零 .tours）——交 mosaic 側追查，不加新規則不併 S9 P5；I-3 EP 定稿 commit（8aed63f2c）不能證明實作（9aeb0609f）受審——證據撤回標 unverified；I-4 AIR-46 帳本去向 unverified 不得固化為案例（撤回 S2 加句提議）；S-1 失配錨靜態可確認 ≥6 非 4、17 FAIL 組成 unverified。處置表已修正（uc-sm 第三輪）＋兩報告 errata 就地 append。**修正後「零 EP 修訂需求」成立**——dry-run 三輪關閉，開工條件恢復。
 - 〔09-09 規劃 commit＋推進圖〕規劃閉環落地 commit `4f07ad8`（17 檔：EP＋殼＋references×14＋雙卡；air-50 branch 快進至同點）。user 指示 illustrate 預計實作——殼 s2 槽裝**三線九段推進圖**（HTML 塊直寫載體——對照/層次性質、零渲染管線；出貨 gate 零命中＋template JS `cmp` 逐字一致）；hook 2 仍照原計畫補實作面圖。**開工待 user 啟動**（GLM 窗口 08:21 重置後）。
 - 〔09-09 user 裁定→**S10 新增**〕review agent 層（ep-review／code-review 審查 agents）**預設 lite（glm-5.3-flash）**——本弧四輪審查實證支撐（findings 生產層跨層品質皆高、判斷價值集中 judge 裁決層）；兼修 model-routing rule↔skill 既有 drift（骨架「full 為基準」vs skill:42 09-07 放寬）；registry pins 經 sync_agents 重生成。已決策入卡 desc ⑫。
+- 〔09-09 mosaic 反饋⑤→**S11 新增**（user 仲介，合理性查證後採納）〕rename 反掃 instruction 檔——地毯掃描量化證據（44 AGENTS.md 1173 引用平時僅 7 失效、但 5/8 P1+P2 源自兩 rename 型 EP 結案未同步）；**主 session 抽驗屬實**（`TW_STOCK_REGIME` 仍殘留 mosaic `venues/tw/AGENTS.md`＋callstack）。證據 durable 化 `references/consistency-sweep/`（4 檔——原在 mosaic .agent-tmp 7 天清掃區）。post-build 共檔鏈擴為 S1→S2→S3→S11。
 - 〔09-09 AIR-46 弧 session（`sess_88e4ceae`，user 指供）→ 接續鏈第二實證＋wrapper 定案〕三形態實測：agent 轉發跑 review（18 findings judge 逐條回源驗證全採納）／`--session-id` resume followup（F1–F10 一輪收斂、零殘留——**resume 經濟學成立**：第二輪記得自己 findings 編號措辭、只餘 delta）／**msg 118 定案：muse 腿改 Bash 直呼 bridge CLI——agent wrapper 只是載體（muse 是外部 runtime）、佔 agent slot 打 rate limit 不合理**。摩擦：agent 名錯誤（`muse-rescue` 不存在，正確＝`delegate-rescue`）。不滿意訊號：**judge 零否決×2**（18+10 全採納——sycophancy 下傳風險，三防線#2 未觸發）；15 行 docs 卡走三輪 muse＋兩次全量審＋一次 resume（**重量分級需求**——餵 S3 快道；反向警示：continuation 帶整包 context，可口述任務走 handoff doc）。結論：鏈結構有效，修 judge 否決力與重量分級非砍鏈。F7 附帶抓到 AIR-50 建卡 commit 誤落 air-46 branch（air-50 branch ref 已解）。
 - 〔09-09 user 裁定＋arch-thinking 三視角——「GLM agent 包 muse agent」確認錯誤形態〕**依賴規則**：adapter-over-adapter（bridge CLI 之上再包 subagent）——process babysitting 是 infra 職責，背景 Bash 是 harness 原生 process supervisor，wrapper 零 domain 邏輯純轉發；**bounded context**：幽靈 context（有邊界無職責）＋failure surface（名稱錯誤實證）；**use case**：消費者要 findings＋jobId——直跑零中間層即滿足，wrapper 唯一「價值」是被誤判的 600s timeout 約束（run_in_background 從頭可用）。**錯在三處**：①派發側載體語義留白（收法決策樹已直跑，但 model-routing:42 審查類段／reviewer 交接契約未明文承載者＝背景 Bash）②`delegate-rescue` agent 存在＝官方感（工具強化慣例第三層——plugin 側殘留）③「簡單轉發」標題詞彙殘留＋ZCode 無 spawn-time model 參數讓人誤以為需 agent 定義載 model（bridge `--model/--effort` flags 直達）。**bridge CLI 本身無錯**（ledger 必經是對的設計）——錯在 agent 側包裝層。修法：S5 擴充（承載者明文）＋新段 S8（delegate-bridge repo 修訂工單）。
 - 〔09-09〕**user 裁定「49 50 同一整合 EP」——對象待確認**：AIR-49 已 Done（四段全交付、011d420 落地）無殘餘；board 開著的是 **AIR-48**（In Progress——剩 P4 dogfood：3-5 session/48h 逐案四欄）＋AIR-50。推測指 **48＋50**（主題契合：agent wrapper 誤用正是 AIR-48 載體濫用統一定義表的新條目）——待 user 確認後併 EP 與卡。
@@ -64,6 +65,7 @@
 | B | S8 | （跨 repo 工單——產出 `references/delegate-bridge-redesign.md` 新檔；無 skill 編修） |
 | C | S9 | skills/memory-audit（統一定義表新條目——唯 product edit）＋任務家 09-08-carrier-misuse-definition 消費（P4 dogfood 記錄/p5 提案） |
 | 裁 | S10 | skills/model-routing（tier 段 :42＋:40 例外細節）、rules/model-routing.md（角色→tier 表）、skills/ep-review、skills/code-review（spawn 指引）、agents/roles/（code-reviewer(-primed) tier 標籤）、agents/zcode/ 經 `scripts/sync_agents.py` 重生成（生成檔不手改） |
+| B | S11 | skills/post-build（metadata-sync 段——與 S1/S2/S3 共檔序列化）；證據 `references/consistency-sweep/`（唯讀消費） |
 
 > **收尾自舉範圍＝本表與各段「修改要點」所指檔案的聯集**（codex D-A1 明文）；表為 file-level 完整清單，單一檔可多段共編（如 guide 同時是 S2 結案時點與 S3 invariant 例外面）。
 
@@ -106,6 +108,7 @@
 | SM-15 | 收斂後正常結案（happy path） | 帳本全 verified、post-build 收斂 | 結案兩步＋EP 歸檔＋SM 升級一次發布（卡 Done） | 卡 status＝Done＋結案第二步 references 已換 done/ 新址（`task view` ref 欄）＋EP 歸檔入 done/＋Capabilities ✅ 行在場＋受影響 SM 功能狀態非 📋/⚠️（muse M-F5；N-2 機械化＋codex D-A2 補完整覆蓋；重入語義由 SM-13 承載） | S2 |
 | SM-16 | 三鍵等價 delta-only（happy path） | implement 階段 4 已審同範圍＋同 revision＋同 profile | post-build 只補修正迴圈 delta＋跨段整合面（不全審） | 帳本 identity 對照可機械判（muse M-F5） | S4 |
 | SM-17 | EP/code review spawn 審查 agents | ep-review／code-review 執行 | 審查 agents 跑 lite（flash pin）；judge 仍主 session full | rg：registry pins＋skill「lite 預設」條款（user 09-09） | S10 |
+| SM-18 | rename/move/retire 型 EP 結案 | 弧含符號改名/下沉/退役 | metadata-sync 段反掃舊符號（AGENTS.md 家族＋快 drift 檔）→ 命中修或記 drift；非 rename 弧空跳 | rg：post-build 反掃條款在場；實證錨＝mosaic `TW_STOCK_REGIME` 殘留 | S11 |
 
 ## 段落劃分原則
 
@@ -286,9 +289,17 @@
   4. ep-review／code-review skills：spawn 指引註記 lite 載體——ep-review 現指定 `Explore`（內建型別**繼承主模型**，見 memory `reference-zcode-agent-model-inheritance`）→ 改為 registry 唯讀 lite 載體（lite-verify 等——read-only 契約＋flash pin 雙確定性）；code-review 模式 B 的 `agents/roles/` 引用不變（roles 定義層不綁 model——model 綁定走 pins 與 tier 標籤，見 item 3）；**skill:40 補 rule 同款「設定頁可為內建單獨釘模型、清空恢復繼承」例外細節**（judge P2——rule 單側，S10 動 tier 段順手補）
 - **驗證**：`rg "^model:" agents/zcode/code-reviewer*.md` → `glm-5.3-flash`；rule 與 skill 同詞（`rg "lite 預設" rules/model-routing.md skills/model-routing/SKILL.md` 兩處命中）；sync_agents 重跑冪等；SM-17。
 
+## S11：rename 反掃 instruction 檔——post-build metadata-sync 機械步驟（mosaic 反饋⑤）
+
+**Context**：mosaic 09-09 一致性地毯掃描（三 agents＋主 session 抽驗 12/12 屬實）量化證據——44 AGENTS.md ~1173 條引用平時僅 7 失效（基礎不漂），但 **5/8 條 P1+P2 全部源自兩個 rename/move 型 EP 結案後文檔未同步**（`TW_STOCK_REGIME`→`TW_STOCK_ANALYSIS`、`_to_pandas` 下沉等）；自述「快 drift」的藍圖檔靠人工記憶更新＝會漏的那層。根因：rename 知識只活在 EP 段落，結案流程無「拿舊符號名反掃文檔」動作。**主 session 抽驗屬實**：`TW_STOCK_REGIME` 現仍殘留於 mosaic `venues/tw/AGENTS.md`＋`callstack/condition-rendering-tags.md`（正是兩 EP 之後漂的）。證據 durable 化：`references/consistency-sweep/`（4 檔）。
+
+- **依賴**：post-build 共檔（加入序列化）；與 code-review「架構文檔 ripple 提醒」互補（提醒＝review 期 flag；本步＝結案 gate 機械收口）。
+- **修改要點**：post-build 階段 4 metadata-sync 段補機械步驟——①**rename 清單萃取**：弧 diff 萃取 rename/move/retire 舊符號（檔級 rename 用 `git diff --diff-filter=R -M`；符號級由 LLM 讀 diff 提取——弧內 diff 便宜）②**反掃**：`rg "<舊符號>"` 掃 AGENTS.md 家族（`fd -g AGENTS.md`）＋專案快 drift 檔（參數化——各 repo 藍圖層慣例不同，由專案 AGENTS.md 宣稱或 EP 攜帶清單）③**處置**：命中即修（新錨點）或顯式記 drift；零命中＝步驟完成證據。**不做全檔重驗**（成本與弧大小成正比——A 軸證明基礎命中率高，平時不漂）。非 rename/move/retire 弧＝步驟自然空跳（清單空）
+- **驗證**：SM-18；rg post-build 反掃條款在場；實證錨——mosaic `TW_STOCK_REGIME` 殘留（修法落地後該類弧結案會命中）。
+
 ## 整合策略
 
-- **執行序**：S0（gate，已完成）→ S7（已降級結案）→〔S1→S2→S3→S4 序列；S6、S8、S9、S10 與 A 線平行——S9 的定義表條目待 S5 承載者明文定稿後落〕→ 收尾。**共檔序列化（codex R4 修正＋S10 增補）**：`followup-review` 與 `review-engine` 兩檔的 S5 部分均**待 S1 完成後再動**（S1 唯一擁有 review-engine 擴欄、followup-review 帳本措辭；S5 消費驗證同詞）；**`model-routing` 同檔序列：S5（bridge 段）→ S10（tier 段）依序動**；S5 其餘檔案（work-order）與 A 線不重疊；S10 的 rules/model-routing.md／ep-review／code-review／registry 無共檔。
+- **執行序**：S0（gate，已完成）→ S7（已降級結案）→〔S1→S2→S3→S4→S11 序列（S11 排 S4 後——post-build 共檔鏈收尾）；S6、S8、S9、S10 與 A 線平行——S9 的定義表條目待 S5 承載者明文定稿後落〕→ 收尾。**共檔序列化（codex R4 修正＋S10/S11 增補）**：`post-build` 共檔鏈 S1→S2→S3→S11 依序動；`followup-review` 與 `review-engine` 兩檔的 S5 部分均**待 S1 完成後再動**（S1 唯一擁有 review-engine 擴欄、followup-review 帳本措辭；S5 消費驗證同詞）；**`model-routing` 同檔序列：S5（bridge 段）→ S10（tier 段）依序動**；S5 其餘檔案（work-order）與 A 線不重疊；S10 的 rules/model-routing.md／ep-review／code-review／registry 無共檔。
 - **全弧 rg 掃描清單**（定義源變更必掃，single-source drift 防護）：`結案兩步`（S2）、`兩段式`（S5）、`agent 轉發`（S5/S6）、`驗證式`（S1/S5 同詞）、`docs mode` 觸發判準（S3）、`uncommitted 空`（S1）、`唯一結構化防線`（S3）。
 - **部署面**：ai-development-guide.md（S2）與 rules/tool-discipline.md（S6）變更後跑 `uv run python scripts/deploy_agents.py`＋`/sync-sources`（bundle 新鮮度）；skills/CLAUDE.md 工作流索引 description 同步（收尾）。
 
