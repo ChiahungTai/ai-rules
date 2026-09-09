@@ -29,10 +29,10 @@ Workflow 執行協調：[workflow-review-pattern.md](../_common/workflow-review-
 | `/code-review feat/xxx main` | `git diff main...feat/xxx` | 審查 branch（指定 base） |
 | `/code-review <hash>` | `git diff <hash>..HEAD` + uncommitted | **任務弧**：逐段 commit 後的整弧通盤審查（hash = EP baseline commit） |
 
-**任務弧模式（逐段 commit 後的整弧審查）**：implement 的並行 pre-flight commit 與逐段檢查點會讓變更在 build 中途落地，無參調用只剩尾段殘留甚至空 diff——逐 commit 或只看 uncommitted 都會漏跨段互動（大規模刪除段只有對照抽取段才看得出是遷移不是丟失）。
+**任務弧模式（逐段 commit 後的整弧審查）**：implement 的逐段檢查點（＋isolated worktree 弧的 pre-flight commit——共享樹不預先 commit，見 implement 平行模式）會讓變更在 build 中途落地，無參調用只剩尾段殘留甚至空 diff——逐 commit 或只看 uncommitted 都會漏跨段互動（大規模刪除段只有對照抽取段才看得出是遷移不是丟失）。
 
-- **觸發**：① 明確傳 baseline hash；② 無參且 uncommitted 空/trivial 且 context EP 記有 baseline → 自動切弧模式（印 `[Code Review] mode=arc baseline=<hash>`）；空且無 EP baseline → 印 `[WARN] no diff（弧模式需 EP baseline）` 終止（fail-loud，同 post-build）
-- **baseline 來源**：EP 整合策略的 `baseline: <hash>`（記錄：execution-plan 建 EP 時；implement 階段 1 補記）——優於 merge-base 推導：同 branch 可能混入他任務 commits，拓撲邊界 ≠ 任務邊界；跨 session context 無 EP 記憶 → 從 Report Shell 殼頭部讀（任務家 `*/index.html`——探測見 [illustrate html-mode](../_common/illustrate-html-mode.md)；聲明 EP 路徑＋baseline hash——hook 1 起攜帶，機制見 [post-build](../post-build/SKILL.md) 階段 0）
+- **觸發**：① 明確傳 baseline hash；② 無參且 context EP／卡 desc 記有 baseline（或殼頭可讀）→ 自動切弧模式（印 `[Code Review] mode=arc baseline=<hash>`）；無任務 baseline → uncommitted 模式；uncommitted 亦空 → 印 `[WARN] no diff（弧模式需任務 baseline）` 終止（fail-loud，同 post-build）
+- **baseline 來源**：EP 整合策略的 `baseline: <hash>`（記錄：execution-plan 建 EP 時；implement 階段 1 補記）或卡 desc 所記（無 EP standalone 弧）——優於 merge-base 推導：同 branch 可能混入他任務 commits，拓撲邊界 ≠ 任務邊界；跨 session context 無 EP 記憶 → 從 Report Shell 殼頭部讀（任務家 `*/index.html`——探測見 [illustrate html-mode](../_common/illustrate-html-mode.md)；聲明 EP 路徑＋baseline hash——hook 1 起攜帶，機制見 [post-build](../post-build/SKILL.md) 階段 0）
 - **非本任務 commits 註明**：`<hash>..HEAD` 範圍內不屬本 EP 的 commits 列進 reviewer prompt（避免誤判 scope；diff 連續仍涵蓋它們）
 - dual-context 兩側吃同一份 diff——範圍錯則兩側同瞎，範圍判定先於 spawn
 
@@ -105,7 +105,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 - **context 差異在 spawn prompt，非 agent 定義**（ZCode subagent 自動注入 AGENTS.md，「空 context」不可能全空；可控制的是不餵 EP/架構文檔）
 - **spawn prompt 必含 CR 接線查證段（硬性）**：fresh-eyes 與 primed 皆含（registry agents＝MCP 形態；逐字照 [review-engine](../review-engine/SKILL.md)「spawn prompt 工具紀律」CR 段）
-- **delta_tour 對照（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：**僅弧模式（code 已 commit、HEAD 越過 EP baseline）產出**——spawn primed 前對當下 HEAD 跑 `code-reality snapshot --repo <repo>`（呼叫形態：`code-reality <tool> --repo <repo>`），與 EP baseline snapshot（implement 階段 1 落下；定位＝EP baseline hash8 → `<repo>-<sha8>.json`，`--label` 僅入 `_meta`）對跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo> --out-dir .agent-tmp/`（**臨時自產不持久**——不寫 `.tours/delta/`：持久版單一產點＝post-build 完成〔hook 2〕、無 post-build 弧＝implement 階段 6 fallback；`.tours/delta/` 進 git），其 `.tour` description（宣稱對照三態＋實際變動模組＋退化/跨面 pair 自動警示；json 中間產物不落盤）併入 primed 餵料——intent drift（Type A）從 LLM 推導升級為機械底稿（宣稱抽取只認特定模組路徑前綴，宣稱欄 NONE ≠ EP 無宣稱——範圍見真相源）。**HEAD == baseline（uncommitted 審查）→ 不跑**：同 sha 對跑＝零差異假陰性，且此時對 baseline sha 跑 graph 刷新＋snapshot 會以 working-tree 修改覆寫 baseline sidecar；印 `[WARN]` 退回純 LLM 對照。snapshot 報 stale WARN → 視同缺報告跳過（stale snapshot 照寫、基於舊原料）。缺 baseline snapshot 或未裝 → 跳過不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill
+- **delta_tour 對照（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：**僅弧模式（code 已 commit、HEAD 越過 EP baseline）產出**——spawn primed 前對當下 HEAD 跑 `code-reality snapshot --repo <repo>`（呼叫形態：`code-reality <tool> --repo <repo>`），與 EP baseline snapshot（implement 階段 1 落下；定位＝EP baseline hash8 → `<repo>-<sha8>.json`，`--label` 僅入 `_meta`；**snapshot 身份與 EP baseline 分開記**——消費實際存在者，snapshot 晚於 baseline〔resume 形態〕時明示對照只覆蓋該區間）對跑 `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo> --out-dir .agent-tmp/`（**臨時自產不持久**——不寫 `.tours/delta/`：持久版單一產點＝post-build 完成〔hook 2〕、無 post-build 弧＝implement 階段 6 fallback；`.tours/delta/` 進 git），其 `.tour` description（宣稱對照三態＋實際變動模組＋退化/跨面 pair 自動警示；json 中間產物不落盤）併入 primed 餵料——intent drift（Type A）從 LLM 推導升級為機械底稿（宣稱抽取只認特定模組路徑前綴，宣稱欄 NONE ≠ EP 無宣稱——範圍見真相源）。**HEAD == baseline（uncommitted 審查）→ 不跑**：同 sha 對跑＝零差異假陰性，且此時對 baseline sha 跑 graph 刷新＋snapshot 會以 working-tree 修改覆寫 baseline sidecar；印 `[WARN]` 退回純 LLM 對照。snapshot 報 stale WARN → 視同缺報告跳過（stale snapshot 照寫、基於舊原料）。缺 baseline snapshot 或未裝 → 跳過不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill
 - **無 EP 時降級規則**（dual 情境）：EP 是 primed 側的意圖合約核心；無 EP（跨 session resume、非 build 場景）→ 降級單 fresh-eyes agent 並印 `[WARN] no EP for primed context`（primed 缺 EP 仍跑 = 架構契合/完整度光譜可審、意圖對齊空轉，findings 噪音可能多於信號）
 - **findings 合併**：同 file:line 去重；**矛盾不裁決**——標 `conflict` 欄（兩方意點並列）交 `/judge-review` 裁決層；合併/衝突規則真相源見 [review-engine](../review-engine/SKILL.md)「dual-context 編排」
 - **Important+ 錨點驗證（浮出前）**：合併後的 Important+ findings 先交 lite-verify **批次**錨點驗證（file:line 存在、符號存在、引用原文屬實——清單式一次 spawn，非 per-issue）；錨點不實的 finding 退回不浮出。**驗證≠裁決**：屬實性（機械/lite）與成立性裁決（judge-review/full）分離——本模式 B 不 spawn per-issue 對抗 verifier（成本爆炸；Workflow 模式的 Critical quorum 走 [workflow-review-pattern](../_common/workflow-review-pattern.md) 分級 verify node）
@@ -175,7 +175,7 @@ Workflow 完成後回傳 `{confirmed, stats}` → Main LLM 合成 results → �
 
 ## Finding 呈現
 
-finding 預設留在審查報告/對話，供用戶 `/copy` 搬到實作 LLM（**人主導工作流**，不靠持久化追蹤）。**跨命令自動化場景**（接 `/judge-review`/`/followup-review`）才寫 `.review/<branch>.md`（Finding Record 表格，欄位見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)）—— code-review 立場 optional（接 `/judge-review`→`/followup-review` 鏈才寫）；一旦進入該鏈，judge-review/followup-review 預設讀寫持久化（它們即此「跨命令自動化場景」，故二者步驟內固定讀寫、非再條件判斷）。`/commit` 階段 6 成功後清除。
+finding 預設留在審查報告/對話，供用戶 `/copy` 搬到實作 LLM（**人主導工作流**，不靠持久化追蹤）。**跨命令自動化場景**（接 `/judge-review`/`/followup-review`）才寫 `.review/<branch>.md`（Finding Record 表格，欄位見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)，含 header identity 區塊）—— code-review 立場 optional（接 `/judge-review`→`/followup-review` 鏈才寫）；一旦進入該鏈，judge-review/followup-review 預設讀寫持久化（它們即此「跨命令自動化場景」，故二者步驟內固定讀寫、非再條件判斷）。寫入時 **Important+ 每條附驗證式**（可機械複驗的 rg 命令／pytest case——judge 裁決與 followup 驗收共用同一驗證基準）。`/commit` 階段 6 成功後清除。
 
 ```
 ## Code Review Findings — <branch>
@@ -193,7 +193,7 @@ Suggestion 級留在報告即可,不持久化(避免噪音)。
 
 ## Commit Message 產生
 
-審查完成後，基於已分析的 diff 直接產生 commit message。**格式 / 語言規範見 [commit.md](../commit/SKILL.md) 階段 4 — 單一真相源**（task #10：避免雙重定義 drift）。
+審查完成後，基於已分析的 diff 直接產生 commit message。**格式 / 語言規範見 [commit.md](../commit/SKILL.md) 階段 4 — 單一真相源**（task #10：避免雙重定義 drift）。**跨命令自動化場景（post-build 編排）略過本段**——apply 後 message 即過期，最終命名屬 `/commit`；standalone code-review 保留（便利用途）。
 
 **settings.json permission 同步檢查**（收尾步驟，AIR-42.1 遷入）：本次審查/修正新建或改名了 skill 時，檢查 `settings.json` allow-list 是否同步新增對應 skill permission——allow-list 同步是高頻漏步（skill 定義與 permission 在不同檔、無自動關聯）；機械防線＝順手跑 `/sync-sources` 的 `skill_allowlist_coverage` invariant（集合比對抓漏，2026-08-24 實例抓到 5 個漏加）。
 

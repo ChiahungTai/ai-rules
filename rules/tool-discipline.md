@@ -32,6 +32,10 @@ zsh 未引號變數不 word-split；用 `args=(--flag 1)`＋`cmd "${args[@]}"`�
 
 以下依 harness 可用機制執行，不臆造工具：pytest 背景跑（Claude run_in_background），短測試可併機械驗證命令。spawn 預設背景（ZCode 顯式 run_in_background；Claude 原生預設），Explore 背景唯讀，定義檔 background 欄位僅 Claude 有效。
 
+長命令（>10 分）背景跑是預設；spawn agent 不是繞 Bash timeout 的手段（它從不是必要手段——約束誤判實證）。
+
+真實案例：2026-09 bridge 轉發形態——以為 Bash 只能 600s（run_in_background 從頭可用）→agent 轉發形態沉澱 memory→delegate-rescue wrapper 存在讓形態顯得官方；成本＝agent 開銷＋間接層＋收斂路徑變長，無人回頭問「原約束還在嗎」。
+
 先做獨立前台工作，無前台工作就回報進行中、結束 turn 等通知；禁 TaskOutput(block=true) 長等，以免主對話被中斷時 agent 連帶 killed、產出遺失。前台/block=true 僅結果立即依賴的 <30s 短 probe。
 
 ## 閘門命令禁 pipe 到 tail/grep

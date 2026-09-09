@@ -33,7 +33,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 
 ### 無參數模式（推薦）
 
-1. **優先讀持久化 finding**：讀 `.review/<branch>.md`(或 EP review 區段)的 finding 清單；或 `/smell-detector` zoom 報告（`ai-analysis/smell-detector/<dir>/<scope>.md`，finding 帶 ID F1/F2/T1...）— 兩者皆可作為驗收 baseline（zoom 報告是 read-only 偵測器產出，finding + 建議 + 查證誠信，可直接對照驗收）
+1. **優先讀持久化 finding**：讀 caller 指定帳本（鏈上預設 `.review/<branch>.md` 工作帳本；EP Review Cycle 規劃期＝EP review 區段）的 finding 清單；或 `/smell-detector` zoom 報告（`ai-analysis/smell-detector/<dir>/<scope>.md`，finding 帶 ID F1/F2/T1...）— 兩者皆可作為驗收 baseline（zoom 報告是 read-only 偵測器產出，finding + 建議 + 查證誠信，可直接對照驗收）
 2. finding 存在 → 逐項驗收(讀修改後程式碼對照原始問題)
 3. **無持久化檔才 fallback** `git diff` + `git status` 推斷(舊行為)
 4. 變更範圍超出可推斷範圍 → 向用戶確認
@@ -48,7 +48,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 - **拒絕的建議**：讀取相關程式碼 → 對照拒絕理由 → 重新評估原始問題 → 拒絕合理標 `closed`
 - **整體品質檢查**：新引入問題掃描 + 一致性 + 完整性
 
-驗收後更新 `.review/<branch>.md`(或 EP review 區段)finding 的 `status`(格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)):`verified`(採納且通過)/ `closed`(拒絕合理)/ 維持 `open`(未通過需再修)。新引入的 Critical / Important 問題,新增 finding(狀態 `open`)。
+驗收後更新 caller 指定帳本（鏈上預設 `.review/<branch>.md`；規劃期＝EP review 區段）finding 的 `status`(格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)):`verified`(採納且通過)/ `closed`(拒絕合理)/ 維持 `open`(未通過需再修)。新引入的 Critical / Important 問題,新增 finding(狀態 `open`)。驗收基準優先用 finding 自帶**驗證式**重跑（可機械複驗）——驗證式缺席時退 LLM 對照判讀。
 
 ### muse reviewer 續接驗收（委派形態；delegate-bridge ≥1.0.0——未實戰，首跑後回報修訂）
 
@@ -58,7 +58,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Bash", "Write", "Edit"]
 
 - 語義＝**mutating 續寫**（append 進原 transcript）——多輪 followup 疊同一卷，reviewer 記得前輪驗收
 - prompt 必帶 fix commit range＋明示**重讀當前檔案**（卷內檔案狀態是修前的 stale）
-- `.review/<branch>.md` 仍是法定 findings 帳本（verified/closed/open 由主 session 更新）——session 記憶是保真度升級，非替代
+- caller 指定帳本（鏈上預設 `.review/<branch>.md`）仍是法定 findings 帳本（verified/closed/open 由主 session 更新）——session 記憶是保真度升級，非替代
 - 簡單 findings 走 fresh session 讀檔較省（續接帶整包 review context，成本高——判準見 handoff skill 邊界表）
 
 ---

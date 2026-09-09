@@ -50,13 +50,15 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 | **full** | 架構、跨模組、🔴 高風險 | 完整流程（`/spec`（純輔助·需求釐清）→ EP → `/ep-validate` → review → `/implement` → judge） |
 
 > **防濫用**：simple「不寫 EP」是跳過**規劃文檔**，非跳過品質 — 仍須 TDD + 驗證。判準機械化（檔案數 + 跨模組 + 風險等級）；**不確定歸 standard，勿把中型降級 simple**。
+>
+> **silent-corruption 前置掃描**（判 simple 前必跑——多數 simple 修復走裸任務直接實作、不載 execution-plan，掃描掛 EP 護不到主要入口，guide always-on 面同步掛）：對照 §1b 觸發條件（會計總量／風控 sizing／共用 domain service／silent-corruption path 如單位邊界／除權息／時區）——命中 → 升 standard（優先）或 simple＋輕量 invariant 聲明（受影響 invariant＋驗證式，3 行內）。
 
 > **結構性修復非 simple**（simple 邊界的機械訊號，補「🟢 低風險」誤判）：修復碰觸以下任一 → 即使單檔也歸 standard/full，至少帶 [arch-thinking](../arch-thinking/SKILL.md) 結構盤點（補償邏輯 + 跨 context 消費者）：
 > - 被 ≥2 個 context 消費的 domain service / 共用層（改語意 = 強迫所有消費者妥協）
 > - 會計總量計算（available / equity / proceeds / total / PnL）
 > - 風控、sizing、決策路徑（修錯 = 單向門，非「調參」可回）
 >
-> 這類修復 ripple 打到下游行為，TDD 綠 ≠ 結構正確（真實歷史案例：「修漏算 proceeds 的 compute」被判 simple 直接 TDD，沒拆補丁 → double-count → 風控失效；見 [arch-thinking](../arch-thinking/SKILL.md) 補償邏輯盤點）。
+> 這類修復 ripple 打到下游行為，TDD 綠 ≠ 結構正確（真實歷史案例：「修漏算 proceeds 的 compute」被判 simple 直接 TDD，沒拆補丁 → double-count → 風控失效；見 [arch-thinking](../arch-thinking/SKILL.md) 補償邏輯盤點）。觸發條件與 §1b Invariant Impact 共用（同條件不兩處各表——invariant 定義見 §1b；scope 決策在此）。
 
 ---
 
@@ -193,6 +195,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 ### 1. Context
 
 - **背景資訊**：基於需求討論（有 `/spec` 則引用其 UC/SM；無則段落自行釐清）
+- **需求邊界繼承**：有 `/spec` 時其 Always / Ask First / Never 邊界顯式入段（自包含轉述，不引用編號——段落自足原則）；無 spec 寫「無」
 - **UC 引用**：本段落實作的能力描述（如「實作 [能力描述]」）。大型變更必須引用；中型變更更新既有 UC；小型變更可不引用
 - **依賴關係**：與其他段落的依賴和整合點
 - **語義約束**：與其他段落共享的隱含假設（型別定義、命名慣例、架構決策）。無則寫「無」，有則寫「與 S{N} 共享 [具體假設]」
@@ -207,7 +210,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
 - **會計總量 / 風控 sizing / 跨 context 共用 domain service** —— 與上方「流程規模分級 → 結構性修復非 simple」重疊（scope 決策與本元素在此共用條件，非本元素獨有）
 - **silent-corruption path** —— bug 不 crash 但污染下游資料的路徑（如單位邊界 張↔股、除權息調整、時區）；不屬會計/風控但同樣 invariant-bearing。**各專案 CLAUDE.md 應標記此類 path**（標記 convention 由各專案自訂）
 
-> **為何（補 producer 端，別與既有重複）**：重疊的三類（會計/風控/domain service）已由上方 scope 決策（standard/full）+ [arch-thinking](../arch-thinking/SKILL.md) 補償邏輯盤點覆蓋；但 reviewer 仍缺一份「動到哪些 **domain invariant**」的結構化聲明——段落 0「風險假設識別」是技術未知、補償邏輯是 double-count、依賴錨點是 caller，三者都不等於「cash 守恆 / position single-writer / risk limit 是否被改動」。**silent-corruption path 更可能只觸發本元素、不觸發 scope 升級**（如單檔單位轉換 fix，scope 判 simple 但仍 invariant-bearing）→ 本元素是其唯一結構化防線。reviewer 直接驗證（不必 state reconstruction——審查主要成本是重建影響範圍，非 attention）。
+> **為何（補 producer 端，別與既有重複）**：重疊的三類（會計/風控/domain service）已由上方 scope 決策（standard/full）+ [arch-thinking](../arch-thinking/SKILL.md) 補償邏輯盤點覆蓋；但 reviewer 仍缺一份「動到哪些 **domain invariant**」的結構化聲明——段落 0「風險假設識別」是技術未知、補償邏輯是 double-count、依賴錨點是 caller，三者都不等於「cash 守恆 / position single-writer / risk limit 是否被改動」。**silent-corruption path 更可能只觸發本元素、不觸發 scope 升級**（如單檔單位轉換 fix，scope 判 simple 但仍 invariant-bearing）→ 本元素是其唯一**完整**結構化防線（簡單路徑另有輕量 invariant 聲明——見流程規模分級防濫用段；「唯一」指完整形態，非指唯一存在）。reviewer 直接驗證（不必 state reconstruction——審查主要成本是重建影響範圍，非 attention）。
 
 - **受影響 domain invariant**：本段變更動到哪些（如 cash 守恆、position single-writer、risk limit 強制、單位邊界）
 - **critical path 觸及**：money path / 跨邊界轉換 / silent-corruption path（見上方觸發定義）
@@ -266,7 +269,9 @@ EP 專屬約束：
 
 EP 產物全為 instruction/documentation 檔，或其 static HTML Report Shell（無 executable source 邏輯）時進入 docs mode —— 段落元素裁剪程式碼導向部分，驗證改為文檔與 artifact 驗證。
 
-**觸發判準**：product 變更檔案型別只允許 `.md`，或 `.md`＋static `.html` Report Shell；product scope 出現其他 executable source extension 即退出 docs mode（Python callable 掃描只可作補充證據，不是跨語言 gate）。HTML 內含互動 JS 時，EP 必須保留 browser/DOM runtime 驗證與視覺驗收，不得以 docs mode 跳過行為驗證。任務家內只服務驗收的 verifier 可列為 evidence artifact，不算 product scope，但必須在 EP 顯式列出、實際執行且不得被 production consumer 引用。純 `.py` 搬移（無邏輯改）→ docs mode + 保留 mypy/pytest baseline。
+**觸發判準**：product 變更檔案型別只允許 `.md`，或 `.md`＋static `.html` Report Shell；product scope 出現其他 executable source extension 即退出 docs mode（Python callable 掃描只可作補充證據，不是跨語言 gate）。HTML 內含互動 JS 時，EP 必須保留 browser/DOM runtime 驗證與視覺驗收，不得以 docs mode 跳過行為驗證。
+
+**行為控制面**（語義判準**單一源**——post-build triage 與此同詞，不重定義）：塑造 LLM 行為的 instruction／規範檔——AGENTS.md 家族／rules／skills／agents／commands／hooks／settings／guide（含消費端 repo 同類檔）；路徑清單僅為 hint，是否控制面以語義判（改後 AI 行為是否不同）。控制面變更即使純 `.md` 也走完整審查鏈（code-review docs-mode → judge → followup，見 post-build triage）。任務家內只服務驗收的 verifier 可列為 evidence artifact，不算 product scope，但必須在 EP 顯式列出、實際執行且不得被 production consumer 引用。純 `.py` 搬移（無邏輯改）→ docs mode + 保留 mypy/pytest baseline。
 
 **EP 元素對照**：
 
@@ -350,7 +355,7 @@ Spawn Agent（subagent_type: "Explore"），prompt 包含：
 
 ### 主 LLM — /judge-review
 
-用 Skill tool invoke `judge-review`，傳入**所有 agent 的 review findings**（合併）。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認。
+用 Skill tool invoke `judge-review`，傳入**所有 agent 的 review findings**（合併；**指定帳本＝EP review 區段**——規劃期帳本，EP Review Cycle 的決策落點）。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認。
 
 ### 主 LLM — Apply Changes
 
@@ -362,7 +367,7 @@ EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類�
 
 - 產物＝任務家 `MM-DD-<task-name>/index.html` **骨架**（零渲染管線內容——HTML 塊/表格可寫進敘事；mermaid/archify 圖**延 hook 2 一次產**，diagram 槽留 degraded 待裝；**任務家探測**見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」）——完整規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「html 報告殼」段（三層結構/內容篩選通則/敘事骨架/雙向一致性/殼生命週期掛點），此處不重述
 - **成本分級**：基礎款（複製 template [`skills/_common/illustrate-report-shell.html`](../_common/illustrate-report-shell.html)＋填 slot）**必備**；升級款（+圖）於 **hook 2** 依 [diagram-selection](../diagram-selection/SKILL.md) 選型補——按 EP 規模（多段/有結構主張）或 user 點名
-- 投影鎖定 EP 當下狀態（殼頭部聲明 **EP 路徑＋task integration baseline＋projection source**；未 commit 的 EP 用 content SHA——下游 `/post-build`/`code-review` 弧模式跨 session 可從殼讀，任務起點與投影新鮮度不混用）；badge 📋——推進時 badge 同步掛 implement 階段 5a，實作章節掛 post-build hook 2（無 post-build 弧 fallback implement 階段 6；詳 [implement](../implement/SKILL.md)）
+- 投影鎖定 EP 當下狀態（殼頭部聲明 **EP 路徑＋task integration baseline＋projection source**；未 commit 的 EP 用 content SHA——下游 `/post-build`/`code-review` 弧模式跨 session 可從殼讀，任務起點與投影新鮮度不混用）；badge 📋——推進時 badge 🟡 同步掛 implement 階段 5a（✅ 升級掛 post-build hook 2），實作章節掛 post-build hook 2（無 post-build 弧 fallback implement 階段 6；詳 [implement](../implement/SKILL.md)）
 - 交付時引導 user 開殼 review（大方向判讀用殼、批准後進 `/implement`；AI 消費仍以 md 為源）
 
 ---
@@ -376,8 +381,8 @@ EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類�
 ### 1. 模組 instruction 檔 Capabilities + Kanban 更新
 
 - 已完成 UC：在對應模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）Capabilities 表格新增一行（能力 + 入口 + ✅）
-- 卡結案（repo 有 `backlog/` 時）——**結案兩步＋弧結案蒸餾第三動**（命令合約見 [kanban-board](../kanban-board/SKILL.md)）：`backlog task edit <id> -s Done --final-summary "<一句>"` → `task edit <id> --ref "<done/ 新URL>,<相對路徑>"`（任務目錄遷 done/ 後 URL 更新），卡留 Done 欄；第三動＝本弧 memory 條目蒸餾為終態 facts；無 `backlog/` → 跳過
-- **原子操作**：Capabilities 新增 + Kanban 卡片移動必須同時完成
+- 卡結案（repo 有 `backlog/` 時；時點＝收斂後——post-build hook 2／無 post-build 弧走 implement 階段 6 fallback；5a 只做 Capabilities Built 結算）——**結案兩步＋弧結案蒸餾第三動**（命令合約見 [kanban-board](../kanban-board/SKILL.md)）：`backlog task edit <id> -s Done --final-summary "<一句>"` → `task edit <id> --ref "<done/ 新URL>,<相對路徑>"`（任務目錄遷 done/ 後 URL 更新），卡留 Done 欄；第三動＝本弧 memory 條目蒸餾為終態 facts；無 `backlog/` → 跳過
+- **原子操作**：各時點內同時完成（5a：Capabilities＋消費場景＋SM 預覽；收斂後：結案兩步＋SM 升級＋EP 歸檔＋flow-feedback 歸檔——定義見 [metadata-sync](../metadata-sync/SKILL.md) 原子性）
 - **從 EP Scenario Matrix 提煉「消費場景」**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），寫入 Capabilities 表格備註或 backlog 卡（`backlog task edit <id> --append-notes`）
 
 ### 2. SYSTEM-MAP.md 更新（如果存在）

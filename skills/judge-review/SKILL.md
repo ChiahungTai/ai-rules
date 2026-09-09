@@ -28,7 +28,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Edit"]
 **❌ 不採納**：基於錯誤假設 / 問題不存在 / 成本 > 收益 / 與專案規範衝突
 **⚠️ 需確認**：無法單方面判斷 / 需用戶決策（**僅限規模過大需開 EP、或真需用戶價值判斷** — 不當拖延藉口）
 
-> **反拖延原則**：合理就立即修，不要「之後再修」（之後 = 忘記修）。判斷 ✅ 採納（問題真實 + 解決合理 + 收益 > 成本）就當下落地，不累積待辦。⚠️ 需確認的門檻要高 — 多數「需確認」其實是合理可修，只有規模過大或真價值判斷才標。拖延症 = 用「之後再修」把合理修正變成永久遺漏。
+> **反拖延原則**：合理就立即修，不要「之後再修」（之後 = 忘記修）。判斷 ✅ 採納（問題真實 + 解決合理 + 收益 > 成本）就當下落地，不累積待辦。⚠️ 需確認的門檻要高 — 多數「需確認」其實是合理可修，只有規模過大或真價值判斷才標。拖延症 = 用「之後再修」把合理修正變成永久遺漏。**actor 邊界**：「當下落地」＝決策即時落帳本；apply 由呼叫端（implement 階段 4／user 判讀）——judge 義務＝交付可執行決策＋驗證依據，非親自實作。
 
 ---
 
@@ -53,7 +53,7 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Edit"]
 2. **查證實際程式碼**：讀取相關檔案，確認問題是否真實
 3. **第一性原理分析**：本質問題是什麼？問題真的存在嗎？解決方案合理嗎？權衡是什麼？
 4. **輸出評估報告**（格式如下）
-5. **寫入持久化**：決策更新到 finding 的 `decision`(✅/❌/⚠️)與 `status` 欄 —— ✅→`adopted`、❌→`rejected`、⚠️→`needs-confirmation`。持久化**首選 EP review 區段**（tracked，跨 session/branch 保留）；`.review/<branch>.md` 僅 local-only（已被 gitignore，跨 session 不保留，不作為決策落點）。格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)。**judge-review 不實作** —— 實作由呼叫端決定(`/implement` Phase 4 直接 apply ✅;獨立使用由用戶判讀決策清單)
+5. **寫入持久化**：決策更新到 finding 的 `decision`(✅/❌/⚠️)與 `status` 欄 —— ✅→`adopted`、❌→`rejected`、⚠️→`needs-confirmation`。帳本＝**更新呼叫端指定帳本（鏈上預設 `.review/<branch>.md`＝工作帳本；EP review 區段＝規劃期帳本，僅服務 EP Review Cycle）**。`.review` 是 local-only（gitignore；同 worktree 跨 session 保留——post-build Resume 依賴此、跨 branch/worktree 不保留；隨 commit 清除——晚到 findings 的 durable 落點由收尾殘留清單承載）。格式見 [workflow-review-pattern.md](../_common/workflow-review-pattern.md)。**judge-review 不實作** —— 實作由呼叫端決定(`/implement` Phase 4 直接 apply ✅;獨立使用由用戶判讀決策清單)
 
 ---
 
@@ -134,5 +134,5 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Edit"]
 
 ## 流程位置
 
-前置：`/code-review`（其他 AI 執行審查）
-後續：確認後實作 → `/followup-review`（Review LLM 驗收）→ `/commit`
+前置：`/code-review`（其他 AI 執行審查——findings 落 `.review` 工作帳本）
+後續：✅ 清單 apply（呼叫端）→ `/followup-review`（Review LLM 驗收，讀同帳本）→ `/commit`

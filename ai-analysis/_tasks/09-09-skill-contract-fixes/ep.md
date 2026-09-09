@@ -353,3 +353,10 @@
 ## 進度結算（段落完成時更新）
 
 （段落完成 → 標 ✅＋一句驗證證據；段落失敗 → 記錄＋阻止依賴段）
+
+- 〔09-09〕S6 ✅（muse B 線 job-mttjod8d：tool-discipline 背景跑通則＋3 層反模式案例，git diff 對帳＋4 行無 scope creep）／S8 ✅（同 job：`references/delegate-bridge-redesign.md` 工單新檔，三骨架在場）
+- 〔09-09〕S1 ✅（9 檔：rg 殘留三式 `不作為決策落點`／`uncommitted 空`／`跨 session 不保留` 0 hits；`驗證式` 在 pattern／code-review／review-engine 同詞在場〔work-order 待 S5〕；帳本 caller-指定六處同語義）
+- 〔09-09〕S2 ✅（11 檔：情境 A 拆 Built（5a）／final（收斂後）兩動＋metadata-sync 三 mode＋雙發布防護六件＋hook 2 結案段；掃描組 `結案兩步|5a 結算|--final-summary` 全 repo 逐命中時點一致〔agents/ 零命中；maintain／blueprint／context-management 無時點衝突免動〕；`deploy_agents.py` 3/3 綠；illustrate 掛點表 badge 行同步 🟡）
+- 〔09-09〕S3 ✅（5 檔：triage 語義判準＋純修飾快道〔模態詞表單一源〕；docs-mode「行為控制面」單一源＋同詞引用；情境 C 去 refactor 化〔:253＋:273〕；architecture.md 脫情境欄；simple 前置掃描雙掛〔EP 分流段＋guide always-on 例外〕＋§1b 交叉引用；`僅 .md 變更` 0 殘留；deploy 3/3 綠）
+- 〔09-09〕S4 ✅（3 檔：pre-flight 先判環境〔共享樹免 commit〕；階段 1 前證據身份比對〔三等價＋fallback 全審〕；自動鏈 commit message 豁免＋弧動機文字同步；修正迴圈 PB4 證據過期標記；baseline 語義對齊；`有 uncommitted changes 是 Agent dependency` 0 殘留）
+- 〔09-09〕post-build 中段 checkpoint（S1–S4）收斂：triage＝控制面 docs-mode 全鏈；Resume 不適用（.review/main.md 屬 AIR-49）；證據比對＝fallback 全審；自審 F1–F5＋獨立 reviewer R-F1–R-F4 全修全驗（帳本 `.review/air-50.md`，無殘留）；結案段＋hook 2 跳過（S5＋未做，S2 收斂後規則）；tour 無變動跳過；metadata-sync 結案段跳過；無 commit

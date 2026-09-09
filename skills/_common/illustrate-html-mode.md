@@ -91,7 +91,7 @@ mode B artifact 與 mode A/C city map 共用此映射（概念軸單一源；「
 | 掛點 | 時機 | 殼 | backlog 卡同步 | 主動顯示 |
 |------|------|-----|---------------|---------|
 | **hook 1** | EP 定稿（[execution-plan](../execution-plan/SKILL.md) 定稿交付） | **建殼骨架**＋計畫章節，badge 📋——骨架＝零渲染管線內容（HTML 塊/表格可），**mermaid/archify 圖不於 hook 1 產**，diagram 槽留 degraded 待裝＋殼頭標「圖待 hook 2 裝」（砍掉 hook 1 計畫圖在 hook 2 實作大改後的重投影成本）；殼頭部聲明 EP 路徑＋task integration baseline＋projection source（未 commit 用本體 content SHA；post-build/code-review 弧模式跨 session 可從殼讀） | `task edit <id> --ref "<殼URL>,<相對路徑>"`（**開工雙 ref 合約**——殼未建前的過渡 URL 指 md preview，建殼後更新） | **`open <殼URL>`**——殼建好即彈出（提前預覽骨架） |
-| **badge 推進** | [implement](../implement/SKILL.md) 階段 5a 結算 | 情境 A（全項結算）→ ✅；情境 B（中間段）→ 🟡 | 卡不動（仍 In Progress） | 不主動開——board portal 隨時點同一 URL |
+| **badge 推進** | [implement](../implement/SKILL.md) 階段 5a 結算 | 情境 A（Built 結算）→ 🟡（✅ 升級掛 hook 2 結案）；情境 B（中間段）→ 🟡 | 卡不動（仍 In Progress） | 不主動開——board portal 隨時點同一 URL |
 | **hook 2** | **post-build 完成**（commit 前最後穩定點；程序載體＝[post-build](../post-build/SKILL.md) 階段 5） | 同一殼長**實作章節**：做了什麼／驗證證據／delta 前後對照／認知誤差點＋回源連結——反映修正迴圈後**最終態**；**並產圖一次**——依 [diagram-selection](../diagram-selection/SKILL.md) 選型補 degraded 槽（hook 1 未產的渲染管線圖在此一次產）；badge ✅；並產**持久版 delta tour**（落 `.tours/delta/` 進 git） | **結案兩步＋弧結案蒸餾第三動**：`-s Done --final-summary` → `--ref` 換 `done/` 新 URL（任務目錄遷 done/ 後；卡留 Done 欄）；本弧 memory 條目蒸餾終態 facts | **`open <殼URL>`**——終態殼彈出 |
 | **fallback** | 無 post-build 弧（user 直接 `/commit`、弧終止）→ implement 階段 6 | hook 2 同款產出由 implement 階段 6 承接 | 同 hook 2 | 同 hook 2 |
 

@@ -51,7 +51,7 @@ backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 - `http URL`＝report server 上的 Report Shell／md preview 位址（**repo 慣例**——如 mosaic `http://127.0.0.1:6421/<wt>/<任務路徑>/index.html`；殼未建前的過渡形態指中央 md viewer `http://127.0.0.1:6421/viewer/_md-viewer.html?p=/<route>/<任務路徑>/ep.md`——**viewer 單一源**版控於 ai-rules `report-assets/`，`fetch(?p=)` 同源絕對路徑可渲染任一 route 的 md，raw `.md` 直連永遠是原檔；hook 1 建殼後更新為殼 URL）
 - `repo 相對路徑`＝AI session／VSCode 消費形態
 
-**結案兩步**（build 5a / post-build；URL 生命週期隨任務目錄遷 `done/` 變更）：
+**結案兩步**（收斂後——post-build hook 2／無 post-build 弧走 implement 階段 6 fallback；URL 生命週期隨任務目錄遷 `done/` 變更）：
 ```bash
 backlog task edit <id> -s Done --final-summary "<一句>"
 backlog task edit <id> --ref "<done/ 新URL>,<相對路徑>"   # --ref 整組替換

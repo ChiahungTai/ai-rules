@@ -47,12 +47,12 @@
 
 ### 變更規模分級
 
-大型跨模組/新功能：execution-plan 建卡；中型優化：更新既有能力或卡；小型 bug fix/文檔免 UC，結構性修復依 execution-plan simple 邊界判定。
+大型跨模組/新功能：execution-plan 建卡；中型優化：更新既有能力或卡；純 refactor（無新 UC）：依規模——跨檔/跨模組/改架構描述視同大型/中型（建卡/更新能力＋instruction 檔同步照跑），單檔小 tweak 才視同小型；小型 bug fix/文檔免 UC（碰單位邊界/除權息/時區/會計/風控 → 非 simple，至少附 invariant 聲明〔受影響 invariant＋驗證式〕——silent-corruption 例外），結構性修復依 execution-plan simple 邊界判定。
 
 ### 銜接機制
 
 1. execution-plan 盤點 UC，`backlog task create` 含 labels、EP 連結，建卡即 commit 以免跨 WT id 碰撞。
-2. build 階段 1：`task edit <id> -s "In Progress"`＋開工雙 ref；無 backlog/ 可跳過。階段 5a：完成 UC 的 Capabilities、`-s Done --final-summary` → `--ref` 換 done/ URL，卡留 Done 欄；EP 歸檔任務家 done/（位置見 illustrate-html-mode）。
+2. build 階段 1：`task edit <id> -s "In Progress"`＋開工雙 ref；無 backlog/ 可跳過。階段 5a：完成 UC 的 Capabilities 寫入（Built 🟡——正式 ✅ 完成宣稱時點＝收斂後結案兩步）。收斂後（post-build hook 2／無 post-build 弧走 implement 階段 6 fallback）：`-s Done --final-summary` → `--ref` 換 done/ URL，卡留 Done 欄；EP 歸檔任務家 done/（位置見 illustrate-html-mode）。
 3. post-build 在 commit 前執行 code-review → judge-review → 修正迴圈 → consistency → metadata-sync（詳 post-build skill），止步 commit 前。
 4. commit 一次納入 code＋finalization，保證同 commit；commit 本身只處理 git 提交。
 5. **任何 session 對卡做事（含 automation、結案、歸檔），第一動必須設 In Progress**，供平行 session 看見；任何 `task complete`／`archive`／清板前必跑 kanban-board 的 `scripts/backlog_precheck.sh`，exit 1 停手。

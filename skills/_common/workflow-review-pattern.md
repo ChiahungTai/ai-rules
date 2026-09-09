@@ -103,9 +103,19 @@ Review agent 回傳的 `DimensionVerdict.findings[]` 是**發現時**狀態。�
 | 欄位 | 來源 | 用途 |
 |------|------|------|
 | `id` / `title` / `severity` / `file` / `line` / `description` / `suggestion` | DimensionVerdict 沿用 | 發現本體 |
+| `驗證式` | 追蹤 | 可機械複驗命令（rg 命令／pytest case——**Important+ 必附**；judge 裁決與 followup 驗收共用同一驗證基準） |
 | `status` | 追蹤 | 生命週期見下(跨命令 join key) |
 | `source` | 追蹤 | 產生命令(由表格標題 `## <命令> Findings` 編碼,不單獨成欄) |
 | `decision` | 追蹤 | judge-review 的 ✅ / ❌ / ⚠️ |
+
+### 帳本 header identity（resume 與重複審比對鍵）
+
+帳本檔頭帶 identity 區塊（header 級、非逐條）——跨 session resume 與「implement 已審 vs post-build 再審」的去重比對都靠它：
+
+- **task baseline**：本弧任務 baseline hash（卡 desc 或 EP 整合策略所記）
+- **reviewed**：審查當下 HEAD hash
+- **uncommitted identity**：本弧 tracked diff hash＋untracked 路徑清單＋content hash（與 [work-order](work-order.md) §3 dirty identity 契約同詞）——只有 rev 會讓「untracked-only WIP 改變」場景（HEAD 未變、新檔內容變）假吻合跳審
+- **writer**：產生本清單的命令/session
 
 **status 生命週期**:
 
@@ -120,8 +130,8 @@ Review agent 回傳的 `DimensionVerdict.findings[]` 是**發現時**狀態。�
 
 | 情境 | 位置 |
 |------|------|
-| 有 EP 上下文(EP 審查、EP 驅動 build) | 回寫 EP 的 review 區段(沿用 ep-review) |
-| 無 EP(獨立 code-review / judge-review / followup-review，且要跨命令追蹤) | `.review/<branch>.md`(綁定分支,代表一次變更的 finding 清單) |
+| **工作鏈**（post-build 編排、standalone code-review→judge→followup） | `.review/<branch>.md`（工作帳本，代表一次變更的 finding 清單；**caller 指定可覆寫**） |
+| **規劃期**（EP Review Cycle——ep-review/ep-validate，EP 未歸檔） | EP review 區段（EP 5a 歸檔後結構性不可用——工作鏈一律走 `.review`） |
 
 `.review/` 為 ephemeral 工作產物,須加入 `.gitignore`;**`/commit` 階段 6 成功後清除**（commit 結算點，同 POC 生命週期）。`status` 機制靠 LLM 更新會漏，僅作提醒線索，非可靠閘門 —— 最終把關靠人（commit 確認對照 diff）。
 
@@ -132,10 +142,12 @@ Review agent 回傳的 `DimensionVerdict.findings[]` 是**發現時**狀態。�
 ```
 ## <命令> Findings — <branch 或 EP 段落>
 
-| ID | 嚴重度 | 檔案:行 | 問題 | 建議 | 狀態 | 決策 |
-|----|--------|---------|------|------|------|------|
-| F1 | 🔴 critical | src/foo.py:42 | ... | ... | open | — |
-| F2 | 🟡 important | src/bar.py:10 | ... | ... | adopted | ✅ |
+> identity: baseline=<任務 baseline hash> · reviewed=<HEAD hash> · uncommitted=<tracked diff hash>＋untracked <路徑清單＋content hash>（clean 標 none）· writer=<命令/session>
+
+| ID | 嚴重度 | 檔案:行 | 問題 | 建議 | 驗證式 | 狀態 | 決策 |
+|----|--------|---------|------|------|--------|------|------|
+| F1 | 🔴 critical | src/foo.py:42 | ... | ... | `rg "..." tests/` | open | — |
+| F2 | 🟡 important | src/bar.py:10 | ... | ... | `pytest tests/test_bar.py::test_x` | adopted | ✅ |
 ```
 
 `/copy` 場景:用戶貼此表格給外部 LLM,回饋以同格式 append 回寫。

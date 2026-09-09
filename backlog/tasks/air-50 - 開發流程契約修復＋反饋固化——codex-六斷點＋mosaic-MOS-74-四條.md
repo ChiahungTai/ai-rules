@@ -1,10 +1,10 @@
 ---
 id: AIR-50
 title: 開發流程契約修復＋反饋固化——codex 六斷點＋mosaic MOS-74 四條
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-08 22:02'
-updated_date: '2026-09-09 02:59'
+updated_date: '2026-09-09 03:30'
 labels:
   - docs
   - skills

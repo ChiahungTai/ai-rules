@@ -37,7 +37,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 **前置流程確認**（僅記錄，不因此停下）：`/spec（純輔助·需求釐清，可選）→ /execution-plan（自足，含 EP Review）→ [/ep-validate] → /implement`
 
-**docs mode 偵測**：掃描 EP 檔頭是否有 docs mode 聲明（變更全為 `.md` 且無新增/修改 `.py` callable 符號）→ 標記本 EP 為 docs mode，後續階段 2/3 依 docs mode 分支跳過 TDD/mypy/pytest，改 rg 殘留 + 一致性（完整對照見 [execution-plan](../execution-plan/SKILL.md) docs mode）。
+**docs mode 偵測**：掃描 EP 檔頭是否有 docs mode 聲明（變更全為 `.md` 且無新增/修改 `.py` callable 符號）→ 標記本 EP 為 docs mode，後續階段 2/3 依 docs mode 分支跳過 TDD/mypy/pytest，改 rg 殘留 + 一致性（完整對照見 [execution-plan](../execution-plan/SKILL.md) docs mode；「行為控制面」語義判準單一源亦在該段——本段只決定 TDD 跳過，審查深度由 post-build triage 按該判準決定，此處不重定義）。
 
 **EP 品質快掃**：
 
@@ -74,9 +74,9 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 **A/B 分流**：上述隔離僅針對**與本 EP 無關**的改動（另 session in-flight、舊功能殘留）。**與 EP 相關的 ripple / 同 session 發現的順帶修正**（如 instruction 檔同步、metadata 結算）→ 不隔離，在階段 5 自行 fold in 為 working-tree 編輯（不需 `outward-action-consent` rule（commit 場景），見階段 5a「為什麼結算在 build 不在 commit」+ autonomous-execution 🟡 黃線；commit 仍在末端 🔴 紅線 gate）。
 
-**前置：EP baseline 記錄**：EP 整合策略缺 `baseline: <hash>` 時補記當下 `git rev-parse HEAD`（= build 首個 code commit 的 parent）——`/post-build`/`/code-review` 任務弧審查的範圍邊界由 EP 攜帶，跨 session 不重新推導（見 [code-review](../code-review/SKILL.md)「任務弧模式」）。
+**前置：EP baseline 記錄**：EP 整合策略缺 `baseline: <hash>` 時補記當下 `git rev-parse HEAD`（通常＝build 首個 code commit 的 parent；resume 或 EP 後另有 commits 時＝補記當下現狀，git 弧邊界仍以該值為準——快照身份與 baseline 分開記，見下段）——`/post-build`/`/code-review` 任務弧審查的範圍邊界由 EP 攜帶，跨 session 不重新推導（見 [code-review](../code-review/SKILL.md)「任務弧模式」）。
 
-**code_reality baseline snapshot（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：一律跑（不綁「補記 baseline」條件）：`code-reality snapshot --repo <repo> --label <ep>`——錨定 build 起點 code 結構（HEAD 通常 = EP baseline；resume 或 EP 後另有 commits 時錨 build 起點現狀，git 弧邊界仍由 EP baseline hash 管轄），是 delta_tour（EP 宣稱模組 vs 實際變動對照）的 before 基準，階段 6 EP 對照歸納、`/code-review` 模式 B primed（含 `/post-build` 編排；弧模式才產出 delta_tour 對照——時點條件見模式 B）與 `/debrief` 前後差異段消費。docs mode EP 跳過（code edges 不變）；未裝跳過，不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
+**code_reality baseline snapshot（若 repo 可跑 code_reality——偵測單一真相源見 [code-reality](../code-reality/SKILL.md)）**：一律跑（不綁「補記 baseline」條件）：`code-reality snapshot --repo <repo> --label <ep>`——錨定 build 起點 code 結構（HEAD 通常 = EP baseline；resume 或 EP 後另有 commits 時錨 build 起點現狀，git 弧邊界仍由 EP baseline hash 管轄，**snapshot 身份（label/時點）與 EP baseline 分開記**——消費端〔code-review 模式 B〕對照實際存在者，snapshot 晚於 baseline 時明示覆蓋區間），是 delta_tour（EP 宣稱模組 vs 實際變動對照）的 before 基準，階段 6 EP 對照歸納、`/code-review` 模式 B primed（含 `/post-build` 編排；弧模式才產出 delta_tour 對照——時點條件見模式 B）與 `/debrief` 前後差異段消費。docs mode EP 跳過（code edges 不變）；未裝跳過，不阻擋。工具用法真相源：[code-reality](../code-reality/SKILL.md) skill。
 
 1. 讀取 Execution Plan（慣例路徑＝任務家 `<task>/ep.md`——探測：`ai-analysis/_tasks/`／`ai-analysis/_projects/<線>/tasks/`／否則 repo-root `00-tasks/`，單一源見 [illustrate html-mode](../_common/illustrate-html-mode.md)「產物位置分流」；與 Report Shell 同 task 目錄——一弧全生命檔案同處；舊 `ai-analysis/execution-plans/` 慣例退役），識別段落結構、依賴關係
 2. **backlog 卡狀態更新**（repo 有 `backlog/` 時）：EP 對應卡翻進行中——`backlog task edit <id> -s "In Progress"`（＋開工雙 ref，合約見 [kanban-board](../kanban-board/SKILL.md)）；無 `backlog/` → 容錯跳過（進行中由任務目錄存在性表達；結算在階段 5a）
@@ -100,7 +100,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 
 #### 平行模式
 
-**Pre-flight**：有 uncommitted changes 是 Agent dependency → 先 commit；branch 不正確 → 先 checkout
+**Pre-flight**：先判 execution environment——Agent 直接寫主 worktree（共享樹，本段步驟 2）→ uncommitted 變更對 Agent 可見，**不需先 commit**（未經授權 commit 禁止，見執行約束）；isolated worktree spawn（worktree 看不到 uncommitted，見 [agent-workflow](../agent-workflow/SKILL.md) Worktree 隔離）→ dependency transfer（已授權 commit 或明確快照）；branch 不正確 → 先 checkout
 
 **max-agents > 1 且有可平行段落**時：
 1. 依賴圖分層為 waves
@@ -217,7 +217,7 @@ base ① clean + ② UC-anchored + ③ Correctness 之外，extra agent 由**段
 
 #### 主 LLM — /judge-review
 
-用 Skill tool invoke `judge-review`，傳入**所有 agent 的 review findings**（合併）。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認。
+用 Skill tool invoke `judge-review`，傳入**所有 agent 的 review findings**（合併；**指定帳本＝`.review/<branch>.md` 工作帳本**——findings 與 judge 決策落盤〔含 header identity〕，供 post-build 證據身份比對與跨 session resume 消費；findings 只走 context 不落盤＝比對鍵缺席，post-build 將 fallback 全審）。評估每項：✅ 採納 / ❌ 不採納 / ⚠️ 需確認。
 
 #### 主 LLM — Apply Changes
 
@@ -248,14 +248,14 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 | 情境 | 結算 |
 |------|------|
-| **情境 A** EP 最後段、UC 全完成 | **全項結算**：Capabilities ✅ 寫入 + backlog 結案兩步＋弧結案蒸餾第三動（`-s Done --final-summary` → `--ref` 換 `done/` 新 URL，卡留 Done 欄；本弧 memory 條目蒸餾終態 facts；見 [kanban-board](../kanban-board/SKILL.md)）+ SYSTEM-MAP 結算（原子三件）+ EP 歸檔 + flow-feedback 歸檔 |
+| **情境 A** EP 最後段、UC 全完成 | **Built 結算（5a）**：Capabilities ✅ 行寫入（導航職責——正式 ✅ 完成宣稱時點仍是收斂後結案兩步，此處語義＝Built 🟡）＋ 消費場景寫入 ＋ SYSTEM-MAP 預覽（Built）；**final 結案（收斂後——post-build hook 2／無 post-build 弧走階段 6 fallback）**：backlog 結案兩步＋弧結案蒸餾第三動（`-s Done --final-summary` → `--ref` 換 `done/` 新 URL，卡留 Done 欄；本弧 memory 條目蒸餾終態 facts；見 [kanban-board](../kanban-board/SKILL.md)）＋ SYSTEM-MAP 升級 ＋ EP 歸檔 ＋ flow-feedback 歸檔 |
 | **情境 B** EP 中間段 | **預覽 only**：SYSTEM-MAP `📋→✅ Built`（不寫 ✅、不升 Verified）；loop 未收斂（達 3 輪上限）→ 阻止升級 + ⚠️ |
-| **情境 C** 純 refactor（無新 UC） | **跳過**結算 |
+| **情境 C** 小型變更（bug fix／單檔小 tweak，無新 UC） | **跳過** Capabilities／Kanban 結算（純 refactor 不自動歸此——依規模，見下方小型變更段） |
 | **情境 D** docs-mode EP（無 .py UC，EP 完成） | **EP 歸檔 only** |
 
 > **為什麼結算在 build 不在 commit**：finalization 是 working tree 編輯（改 instruction 檔 / mv EP / 搬 Kanban），不需 `outward-action-consent` rule（commit 場景）；commit 退回純 git 提交（一次帶走 code + finalization）。舊設計（commit 階段 3 內嵌）對 LLM 是建議性、會漏跑（實證：commit 歷史多個「補漏」單獨 commit）。working tree 編輯沒 commit 就不永久，跟 code 一起 stash/checkout。Kanban 搬 In-Progress/（暫時狀態）已在階段 1 完成；消費場景提煅隨 Capabilities 寫入一併落地（原「暫存供 commit 寫入」取消）。
 
-**Report Shell badge 同步**：本 EP 對應殼（任務家 `<task>/index.html`，execution-plan 定稿 hook 1 所建）存在時隨結算同步——情境 A（全項結算）→ badge ✅；情境 B（中間段）→ 🟡；無殼（hook 1 未跑）跳過不阻擋。殼掛點全貌（hook 1/2、fallback、持久 delta tour）見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」。
+**Report Shell badge 同步**：本 EP 對應殼（任務家 `<task>/index.html`，execution-plan 定稿 hook 1 所建）存在時隨結算同步——情境 A（Built 結算）→ badge 🟡；收斂後 final 結案（post-build hook 2／階段 6 fallback）→ badge ✅；情境 B（中間段）→ 🟡；無殼（hook 1 未跑）跳過不阻擋。殼掛點全貌（hook 1/2、fallback、持久 delta tour）見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」。
 
 #### 5b. 模組 instruction 檔（AGENTS.md 為主，CLAUDE.md legacy）+ architecture.md 更新（大型/中型變更）
 
@@ -270,13 +270,13 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 執行 `/audit-test` 對新增/修改的測試進行品質稽核（階段 2 已逐段檢查整合路徑覆蓋，此處複驗整體 + 其他角度如反模式、mock 健康度、測試必要性）。稽核結果附於完成報告。
 
-**小型變更**（bug fix / 純 refactor = 情境 C）：跳過 5a 結算與 5b；僅執行 5c（/audit-test）+ 5d（若 5b 動過導航文檔）。
+**小型變更**（bug fix／單檔小 tweak＝情境 C）：跳過 5a Capabilities／Kanban 結算；僅執行 5c（/audit-test）+ 5b／5d（若動過導航文檔）。**純 refactor 不以「無新 UC」判小型**——跨檔／跨模組／改架構描述的 refactor 達大型／中型規模即走 5a／5b 照跑（恰是最需架構同步的變更；規模判準見 [ai-development-guide](../../ai-development-guide.md) 變更規模分級）。
 
 #### 5d. 導航文檔 /consistency 品質閘門（大型/中型變更）
 
 > **核心原則**：導航文檔（AGENTS.md / CLAUDE.md / architecture.md / SYSTEM-MAP.md，見 [ai-development-guide](../../ai-development-guide.md) 文檔體系）任一份內部 drift 都誤導 LLM。本次修改過的導航文檔必須通過單檔自洽閘門。
 
-1. 對 5a 結算（AGENTS.md Capabilities 行 + SYSTEM-MAP 結算）、5b（AGENTS.md / architecture.md）**本次修改過**的文檔，逐一執行 `/consistency <doc>`（單檔內部自洽：術語 / 章節 / 引用 / 邏輯 / 格式）。5a 新增的 Capabilities ✅ 行在此複驗（原 commit 階段 3 的 consistency 職責併入此）。
+1. 對 5a 結算（AGENTS.md Capabilities 行 + SYSTEM-MAP 預覽）、5b（AGENTS.md / architecture.md）**本次修改過**的文檔，逐一執行 `/consistency <doc>`（單檔內部自洽：術語 / 章節 / 引用 / 邏輯 / 格式）。5a 新增的 Capabilities ✅ 行在此複驗（原 commit 階段 3 的 consistency 職責併入此）。
 2. 🔴 / 🟡 inconsistency → 修正後才算 build 收尾（不把不一致文檔留給 `/commit`）
 3. **scope 邊界**：/consistency 是單檔內部自洽，**非跨檔**。跨文檔一致性（三份互相矛盾）由 `/doc-health`（maintain Phase 3）處理，非本步驟
 
@@ -288,7 +288,7 @@ apply 後**不是一輪結束**，而是 loop 迭代收斂（self-correcting）�
 
 **EP 對照（宣稱 vs 實際差異歸納——主歸納點在此，post-build 只再提醒）**：build 現場是差異最清楚的時點（post-build/debrief 只能事後推導），兩個來源缺一不可——① **偏差記錄歸納（why）**：階段 2「EP 專屬約束」逐段累積的偏差（與 Pseudo Code 出入、疑慮、自癒 ⚠️）統一歸納，差異原因只在 build session 記得；② **機械對照（what）**：弧條件成立（HEAD 越過 EP baseline）時跑 `code-reality delta_tour`（呼叫形態與時點條件真相源見 [code-review](../code-review/SKILL.md) 模式 B；未裝/條件不符 → 標明降級）——session 歸納是 self-report，機械對照反證之（Claim→Evidence→Trust，見 [acceptance-evidence](../../rules/acceptance-evidence.md)）。歸納供 `/post-build` 收尾報告帶入與人類直接判讀；深度渲染（邊集差異+行為 delta）屬 `/debrief`。
 
-**Report Shell 實作章節 fallback（hook 2 由本階段承接——僅無 post-build 弧時）**：本弧不會跑 `/post-build`（user 直接 `/commit`、或弧在此終止）→ 實作章節＋**產圖一次**（依 [diagram-selection](../diagram-selection/SKILL.md) 選型補 degraded 槽）＋badge ✅＋**持久版 delta tour**（弧條件成立時產、落 `.tours/delta/` 進 git）在本階段產出，內容與掛點規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」；會跑 post-build → 跳過（hook 2 掛 post-build 完成點——實作章節須反映修正迴圈後**最終態**，本階段早於修正迴圈）。
+**Report Shell 實作章節 fallback（hook 2 由本階段承接——僅無 post-build 弧時）**：本弧不會跑 `/post-build`（user 直接 `/commit`、或弧在此終止）→ 實作章節＋**產圖一次**（依 [diagram-selection](../diagram-selection/SKILL.md) 選型補 degraded 槽）＋badge ✅＋**持久版 delta tour**（弧條件成立時產、落 `.tours/delta/` 進 git）在本階段產出，內容與掛點規格見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」；會跑 post-build → 跳過（hook 2 掛 post-build 完成點——實作章節須反映修正迴圈後**最終態**，本階段早於修正迴圈）。**觸發條件（收緊）**：僅 user 明示不跑 post-build 或弧在此終止才走——session 不得自行預測「本弧不跑 post-build」提前發布（預測即 PB3 換位復活）。**收斂檢查**：發布結案前按帳本完整狀態生命週期處置——`open`／`adopted` 未實作／`implemented` 未 verified 皆屬未收斂（**不得以 `open=0` 宣稱收斂**）；`needs-confirmation` 彙整報告不阻塞。**發布去重**：核對任務身份與實際結案狀態（卡已 Done／hook 2 已執行 → 跳過不重做）。**缺帳本**（`.review` 不存在）→ fail-loud 標示＋以 git／卡狀態推導，不以空集合冒充驗收通過。**並列主路徑**：fallback 與 post-build hook 2 同為結案主路徑（ZCode 弧常不跑 post-build——非降級）。**結案 gate 一律是 skill 流程步驟，禁掛 SessionEnd hook**（ZCode live hooks 僅 PreToolUse/Stop——SessionEnd 靜默 no-op）。**結案內容**（呼應 hook 2）：invoke [metadata-sync](../metadata-sync/SKILL.md) 結案段（backlog 結案兩步＋SYSTEM-MAP 升級＋EP 歸檔＋flow-feedback 歸檔）＋badge ✅。
 
 **layer 旗標（硬性 — commit 前方向提示）**：偵測本 EP 變更是否觸及**跨模組**（`git diff --name-only` top-level 模組目錄計數 ≥2；模組目錄 = 專案 bounded context 根目錄，各專案自訂）、**公開簽名變更**（階段 2 路徑覆蓋觸發）、**整合器段落**（階段 0 標記）、或 **build loop 未收斂**（階段 4 達 3 輪上限）。命中 → 完成報告必含：
 
@@ -309,7 +309,7 @@ layer 旗標（本段）與檔尾「與其他命令的協作」段的軟提醒�
 3. 每段必須 TDD（RED → GREEN → REFACTOR）—— docs mode EP 除外
 4. 每段必須獨立驗證（ruff + mypy + pytest）—— docs mode EP 除外（改 rg 殘留 + 跨檔一致性 + `/consistency`）
 5. 禁止 `from __future__ import annotations`
-6. 必須執行收尾步驟（階段 5）：大型/中型 → metadata-sync 依情境結算（5a：情境 A 全項結算 / B 預覽 / D EP 歸檔；含 Report Shell badge 同步）+ instruction 檔 / architecture.md 內容同步（5b）+ /audit-test（5c）+ /consistency 導航文檔閘門（5d，含 Capabilities 行複驗）；小型（情境 C）→ /audit-test（5c）
+6. 必須執行收尾步驟（階段 5）：大型/中型 → metadata-sync 依情境結算（5a：情境 A Built 結算 / B 預覽 / D EP 歸檔；收斂後 final 結案見階段 6 fallback；含 Report Shell badge 同步）+ instruction 檔 / architecture.md 內容同步（5b）+ /audit-test（5c）+ /consistency 導航文檔閘門（5d，含 Capabilities 行複驗）；小型（情境 C）→ /audit-test（5c）
 
 ### 禁止
 
