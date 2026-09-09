@@ -6,7 +6,7 @@
 >
 > **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser`／`backlog-cleanup` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）。
 >
-> **更新時點**：2026-09-09（AIR-54 S2——池主體遷 `/Users/ctai/Github/ai-rules/.agents/memory/`，條 1 對象路徑與跨 repo 指針同步；CronList 兩 prompt 同步換址）。2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。
+> **更新時點**：2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。2026-09-09（AIR-54 S2——池主體遷 `/Users/ctai/Github/ai-rules/.agents/memory/`，條 1 對象路徑與跨 repo 指針同步；CronList 兩 prompt 同步換址）（AIR-52——新增「外部依賴反查表」A1-A5；S1 skill 端排程解綁的對側載體）。
 
 ## ZCode Cron（3 條，ai-rules workspace）
 
@@ -24,6 +24,18 @@
 |------|------|------|
 | `com.ai-rules.backlog-browser` | `launchd` plist（`~/Library/LaunchAgents/com.ai-rules.backlog-browser.plist`） | `deploy/scripts/run-backlog-browser.sh`（`KeepAlive`），供 board Report Shell（`http://127.0.0.1:6421`） |
 | `com.ai-rules.backlog-cleanup` | `launchd` plist（`~/Library/LaunchAgents/com.ai-rules.backlog-cleanup.plist`） | `deploy/scripts/run-backlog-cleanup.sh`（`StartCalendarInterval` 每日 23:50）——Done 欄清場批次：`Done` 且 `updated_date`>30d 的卡逐卡 `backlog_precheck.sh` → `backlog task complete` → commit（`BACKLOG_CLEANUP_AGE_DAYS` 可覆寫；跨 worktree 全展開）。twin＝mosaic `com.mosaic.backlog-cleanup`（23:55，`mosaic_alpha/deploy/scripts/` 同邏輯副本） |
+
+## 外部依賴反查表（排程側 → skill/腳本消費端）
+
+> S1 解綁（AIR-52）的對側：skill 端只寫行為契約（去時刻/系統名），排程事實由排程系統＋本表承載——「誰在跑 X」從本表反查。**對帳義務**：動排程或改消費端接線時同步對應行；跨 workspace 條目（A1/A2）以記載面為準並標 provenance。
+
+| # | 排程側 | 消費端 | 契約一句 | 對帳狀態 |
+|---|--------|--------|----------|----------|
+| A1 | mosaic workspace ZCode cron「每日 23:20 report」 | daily-maintain（Phase 1-3）／standup（昨日活動節）／audit-test（週六條件段 Daily Scan） | 排程任務讀 skill 檔依規範執行、report 節由任務 append | 記載：memory `reference_periodic-task-landscape`＋mosaic memory `project-weekly-idle-tasks-status`；23:20 automationId 在 mosaic workspace CronList（本 workspace 不可見） |
+| A2 | 同 23:20 report「🌃 夜間看照」節（原 23:50 nightly-watch 併入） | memory-audit lite 配方／arch 看照／bundle 大小看照 | 治理面隨每日 report；含自動 commit | 併入記載於 memory（f681b71c9）；prompt 本體未逐字驗證（跨 workspace） |
+| A3 | launchd `com.ai-rules.backlog-cleanup`＋twin `com.mosaic.backlog-cleanup` | kanban-board 清理段——`deploy/scripts/run-backlog-cleanup.sh` → 逐卡 `skills/kanban-board/scripts/backlog_precheck.sh` → `task complete` → commit | Done>30d 清場自動腿；precheck 紅燈跳過該卡 | plist 在場＋腳本 precheck 接線已核；時刻見上表 |
+| A4 | ai-rules workspace 三 ZCode cron（上表 #1-3） | #1→memory-audit（收斂＋Inbox 消費）；#2→治理看照（自含步驟）；#3→corrections-weekly | cron prompt 引用 skill 為方法論源 | CronList 已核（automationId 見上表） |
+| A5 | 服務型 launchd（常駐非週期）：`com.mosaic.report-server`＋`com.ai-rules.backlog-browser`＋`com.mosaic.backlog-browser` | report-assets（viewer/_md-viewer 單一源，版控本 repo）＋各 repo board/report 服務（`run-report-server.sh`／`run-backlog-browser.sh`） | report URL（:6421）與 board port 的服務承載 | plist 在場已核；服務現值 `ls ~/Library/LaunchAgents/com.*` |
 
 ## 跨 repo 指針
 
