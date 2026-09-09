@@ -69,6 +69,10 @@ ai-analysis/_projects/**/diagram-*.visual-check.*.png
 .agents/memory/.muse-memory.lock
 .agents/memory/*.lock
 
+# AIR-54 跨池記憶主體（muse project memory 過渡 copy 投影→遷移後池實體）——池自帶 .git（AIR-49 池 git 化），不進本 repo 版控
+.agents/memory/
+.agents/memory-inbox/
+
 # probe scratch 備份（F5：T20 運行副產不應進庫）
 *.bak
 *.bak-*
