@@ -8,3 +8,7 @@
   - 中文目錄（`.tours/arch/資料組裝與擴充/` 等）**正常被掃描與驗證**——FAIL 行正來自中文目錄內的 tours；無零匹配症狀
 - 17 個 fails 全部為真錨債：`mosaic_alpha/datasets/future_labels.py` 已刪檔的 stale 錨（05/06.tour 多步）——corpus 債非工具 bug；屬 mosaic 側 post-build 修復閉環範圍
 - 處置：S7 降級結案——無可移交 bug（09-08 症狀可能在後續 code-reality 版本已修，或原症狀環境相依——重現僅驗證文件化 `--repo` 形態）；本紀錄留作 code-reality 版本史對照
+
+## Errata（2026-09-09，mosaic MOS-86 形態匹配重現推翻 S7 結論）
+
+S7 重現僅測絕對路徑形態，而反饋 ④ 登記的失敗形態是 `--repo .`（相對）——調用形態不匹配。形態匹配重現（mosaic 09-09，main／offline_backtesting 兩 WT）：`--repo .` → exit 1 `[FAIL] ./.tours 有 corpus 目錄但零 .tour 匹配`；`--repo /abs` → exit 0 `[OK] tour validate: 205 tours | fails=0`。「中文目錄掃描 bug」實為 code-reality 相對路徑零匹配 bug class（08-27 3150e11 已知、acceptance 僅 pin --tours-dir 軸；08-30 bdea1eb 加 loud guard 未根修）。已轉 code-reality repo 根修（user 2026-09-09 裁決）；文檔面先修——post-build SKILL 調用形態改絕對＋禁相對註記。

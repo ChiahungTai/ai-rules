@@ -74,8 +74,8 @@ findings 全空 → 報告並直接進 docs 鏈。
 1. 對每個變更的 `.md` 執行 `consistency`（[skills/consistency/SKILL.md](../consistency/SKILL.md)）；fail 項當場修再驗（**重驗範圍 = 修正觸及的檔**，非整個 docs 鏈重跑；上限同階段 3 的 3 輪）
 2. diff 觸及 Capabilities / `SYSTEM-MAP.md` / `dependency-graph.md` / `backlog/` → 執行 `metadata-sync`（[skills/metadata-sync](../metadata-sync/SKILL.md)）
 3. **rename 反掃（結案 gate 機械收口——非 rename 弧自然空跳）**：①**清單萃取**：弧 diff 萃取 rename／move／retire 舊符號（檔級 rename 用 `git diff --diff-filter=R -M`；符號級由 LLM 讀 diff 提取——弧內 diff 便宜）；②**反掃**：`rg "<舊符號>"` 掃 AGENTS.md 家族（`fd -g AGENTS.md`）＋專案快 drift 檔（參數化——各 repo 藍圖層慣例不同，由專案 AGENTS.md 宣稱或 EP 攜帶清單）；③**處置**：命中即修（新錨點）或顯式記 drift；零命中＝步驟完成證據。**不做全檔重驗**（成本與弧大小成正比；mosaic 實證基礎平時不漂，5/8 嚴重項全源自 rename 未同步）
-4. repo 有 `.tours/manifest.toml` → 跑 `code-reality tour_validate --manifest --repo .`；FAIL>0 走**修復閉環**（上限 3 輪，同階段 3 慣例），不只列入報告——只報不修讓 corpus 債滾雪球，存量 FAIL 反覆佔據後續每個收尾報告（mosaic 09-07 實證 77 FAIL 積債）：
-   - **graph 新鮮度前置**：重產前先 `code-reality build --repo .`——stale graph 帶重錨會寫出舊簽名壞錨（09-07 實證殘留 4 條根因；rebuild 冪等分鐘級，FAIL=0 時零成本）
+4. repo 有 `.tours/manifest.toml` → 跑 `code-reality tour_validate --manifest --repo "$PWD"`（**禁相對 `--repo .`**——code-reality 相對路徑零匹配 bug class 已知未根修〔mosaic MOS-86 雙 WT 重現：`--repo .` → exit 1 零匹配、絕對路徑 → exit 0〕；根修發佈後可放寬）；FAIL>0 走**修復閉環**（上限 3 輪，同階段 3 慣例），不只列入報告——只報不修讓 corpus 債滾雪球，存量 FAIL 反覆佔據後續每個收尾報告（mosaic 09-07 實證 77 FAIL 積債）：
+   - **graph 新鮮度前置**：重產前先 `code-reality build --repo "$PWD"`（build 形態防護性一致——根修後兩者皆癒）——stale graph 帶重錨會寫出舊簽名壞錨（09-07 實證殘留 4 條根因；rebuild 冪等分鐘級，FAIL=0 時零成本）
    - **觸及族重產一律經 `chain_tour`**（LLM 不手改 `.tour`）；帶 isPrimary 前門的族重產必再帶 `--primary`（漏帶＝旗標靜默掉落）
    - **curated（manifest `generator=manual`）族不覆蓋**——其 FAIL 逕落應修清單（兩鐵律單一源見 [tour-bootstrap](../tour-bootstrap/SKILL.md)「重跑語義」）
    - 重產後仍 FAIL → callstack md 幀手術（dead symbol／簽名漂移；rg 現場驗證行號與簽名）→ 再重產
