@@ -1,10 +1,10 @@
 ---
 id: AIR-52
 title: 治理同步弧——排程解綁＋registry 外部依賴反查＋跨 repo 消費端檢查＋memory B 形態跟進
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-09 01:35'
-updated_date: '2026-09-09 20:11'
+updated_date: '2026-09-09 20:51'
 labels:
   - governance
   - doc-sync
@@ -44,3 +44,9 @@ ordinal: 44000
 
 〔S4 partial done 09-10 04:15 air-52 session〕首波機械驗證：nightly-convergence.log 最新段「2026-09-09 23:41 夜間收斂（cron 排程跑）」完整收斂（AIR-54 新制首跑：流入快照 7d600ea＋波次 commit f49dd2b＋首份 bundle＋marker 清）。CronUpdate 已執行：23:40 prompt 步驟 1（盤點）／步驟 4（波段收斂觸發）gate 口徑動態化——單一源＝generator 輸出行＋exit code（自帶 A/B 形態判定），逼近線 ≥85% 以輸出實值動態計算、B 形態看常駐面；硬編 22,500/21,000/190/24,000 全移除；路徑欄維持 AIR-54 版未動；今晚 23:40 波起生效。cross-verify memory 軸＋commit 2.8 池對帳腿 _inventory.md 檢索語義已落地。**P5 仍待**：04:08 查證 air-59 尚未 ff 進 main——merge＋air-52 rebase 後套用上方備援文案，隨後 post-build 鏈＋結案兩步＋弧結案蒸餾收斂本卡。另：首波 log 缺口登記（memory-audit skill 缺「Inbox 消費」節）歸 AIR-54 收尾 session。
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+治理同步弧五段全落地：S1 排程解綁 17 處（9 skill 檔去時刻/系統名）＋S2 schedule-registry 外部依賴反查表 A1-A5＋新架構職責註記欄＋S3 acceptance-evidence 雙掃路徑集擴充＋S4 cron 動態 gate 口徑（23:40 prompt 單一源=generator 輸出行）＋P5 daily-maintain 執行者歸屬解綁口徑。post-build docs-mode 審查六 findings 全修正（.review/air-52.md——F1 config 現值記載/F2 nightly-thin 解綁/F4 B 形態條件/F5-F6 registry）。288 tests 綠；弧經 rebase onto main（registry 並存＋errata 保終態兩衝突解畢）。
+<!-- SECTION:FINAL_SUMMARY:END -->

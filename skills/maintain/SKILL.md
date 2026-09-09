@@ -56,7 +56,7 @@ binary 不存在或 build 失敗 → 記 `[WARN]` 後續行 Phase 2——graph �
 1. **各 Phase 摘要**：通過/警告/失敗統計
 2. **跨 Phase 關聯**：Phase 2 Instruction 問題 ↔ Phase 3 doc-health findings 同根因關聯
 3. **趨勢追蹤**：doc-health findings 增減、kanban 卡片流動
-4. **寫晨報檔**：若 `<project-root>/ai-analysis/daily-report/` 目錄存在，把報告寫入 `ai-analysis/daily-report/YYYY-MM-DD.md`（**同日 merge 非覆蓋**——重寫 top title + intro + 🔥/✅/📈 owned section，保留其他 op append 的外來 section；格式 + merge 規則見下方「晨報檔格式」）。目錄不存在則 skip——這是跨專案 opt-in guard，避免影響沒有晨報慣例的專案。**無待決項時仍寫檔**（內容標「✅ 無待決項」），以證明排程有跑。
+4. **寫晨報檔**：若 `<project-root>/ai-analysis/daily-report/` 目錄存在，把報告寫入 `ai-analysis/daily-report/YYYY-MM-DD.md`（**同日 merge 非覆蓋**——重寫 top title + intro + 🔥/✅/📈 owned section，保留其他 op append 的外來 section；格式 + merge 規則見下方「晨報檔格式」）。目錄不存在則 skip——這是跨專案 opt-in guard，避免影響沒有晨報慣例的專案。**無待決項時仍寫檔**（內容標「✅ 無待決項」），以證明排程有跑。**形態接線**：排程形態下 report 主體由 registry A1/A6 載體組裝時，invoker 可宣告 Phase 4 寫檔 skip（command 層接線見 [daily-maintain](../daily-maintain/SKILL.md)）——skill 層預設寫檔。
 
 ---
 

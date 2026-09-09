@@ -18,7 +18,7 @@ backlog init "<project>" --agent-instructions none
 ```
 
 - `--agent-instructions none`：不注入 CRITICAL_INSTRUCTION 區塊（與本 repo AGENTS.md 治理／元資訊禁令衝突）
-- config.yml 關鍵鍵：`statuses`（建議三欄 To Do/In Progress/Done）、`task_prefix`（repo 識別前綴，如 mosaic=`mos`、ai-rules=`air`）、`auto_commit: false`（外部 git 紀律——CLI 只改檔）、`check_active_branches: true`（多 WT repo 必開——board 唯讀顯示他 branch 已 commit 卡＋next-id 掃描跨 branch 卡防撞；untracked/staged 卡不在 branch ref 上，git 掃描天生看不見，殘餘防撞靠建卡預掃〔見命令合約建卡段〕；**ai-rules 現值 false**——09-09 起單 WT working copy 單一真相形態，id 防撞靠建卡預掃）
+- config.yml 關鍵鍵：`statuses`（建議三欄 To Do/In Progress/Done）、`task_prefix`（repo 識別前綴，如 mosaic=`mos`、ai-rules=`air`）、`auto_commit: false`（外部 git 紀律——CLI 只改檔）、`check_active_branches: true`（多 WT repo 必開——board 唯讀顯示他 branch 已 commit 卡＋next-id 掃描跨 branch 卡防撞；untracked/staged 卡不在 branch ref 上，git 掃描天生看不見，殘餘防撞靠建卡預掃〔見命令合約建卡段〕；**ai-rules 現值 false**——09-09 起單 WT working copy 單一真相形態：跨 branch 掃描關閉、無跨 WT 預掃面，id 防撞＝working copy 單一真相＋建卡 id 檢查）
 
 ## 命令合約（消費端引用本段）
 
@@ -58,7 +58,7 @@ backlog task edit <id> --ref "<done/ 新URL>,<相對路徑>"   # --ref 整組替
 ```
 **弧結案蒸餾（第三動，同時機）**：owning session 將本弧 project_/feedback_ memory 條目重寫為終態 facts——刪日期/session id/進度流水與 git 可推導內容，留決策教訓與終態結論，敘事指向 repo 檔案（EP/卡）；無相關條目明示無。規則細節＝[memory-audit](../memory-audit/SKILL.md)「寫入端紀律」（含 desc 三不）。
 
-結案後**卡留 board Done 欄**（官方預設工作流——Done 欄可見＝完成工作可見）；`task complete <id>`（搬 `completed/`）是清場動作，延後到 board 清理批次（maintain 週期）或 user 指示，不隨結案當場執行。**清理批次自動腿**：ai-rules／mosaic 每日排程跑 `deploy/scripts/run-backlog-cleanup.sh`（時刻/plist 見 ai-rules ai-analysis/schedule-registry.md 反查表）——`Done` 且 `updated_date`>30d 的卡逐卡 precheck → `task complete` → commit（`BACKLOG_CLEANUP_AGE_DAYS` 可覆寫；多 worktree 全展開，跨線訊號卡保守跳過）。CLI 原生 `backlog cleanup` 是互動式 TUI（stdin 關閉時假成功 no-op），不可用於無人值守。
+結案後**卡留 board Done 欄**（官方預設工作流——Done 欄可見＝完成工作可見）；`task complete <id>`（搬 `completed/`）是清場動作，延後到 board 清理批次（maintain 週期）或 user 指示，不隨結案當場執行。**清理批次自動腿**：ai-rules／mosaic 每日排程跑 `deploy/scripts/run-backlog-cleanup.sh`（時刻/plist 見 ai-rules ai-analysis/schedule-registry.md——launchd 表＋反查表 A3）——`Done` 且 `updated_date`>30d 的卡逐卡 precheck → `task complete` → commit（`BACKLOG_CLEANUP_AGE_DAYS` 可覆寫；多 worktree 全展開，跨線訊號卡保守跳過）。CLI 原生 `backlog cleanup` 是互動式 TUI（stdin 關閉時假成功 no-op），不可用於無人值守。
 
 **🔴 清理前跨線掃描**（凡 `task complete`／歸檔／清板之前，強制先跑；結案兩步本身不需 precheck——結案 Done 留板可見）：
 ```bash
@@ -93,7 +93,7 @@ bash <skills 根>/kanban-board/scripts/backlog_precheck.sh [卡id ...]   # skill
 | Web board | `backlog browser` | `127.0.0.1:6420`（config `default_port`）；WebSocket 雙向 live——CLI/AI 改檔→瀏覽器秒更、拖卡→frontmatter 變更 |
 | TUI | `backlog board` | 終端互動板（fs.watch live）；CJK 寬度有測試釘住，邊角字形留意 |
 
-**Web board port 慣例**：per-repo 固定 port（config `default_port` 各 repo 全域唯一——例 mosaic=6420、ai-rules=6422；**6421 保留給 report server／md viewer**）。`backlog browser` 對 port 衝突**不報錯——靜默跳下一個可用 port**（明確帶 `--port` 亦同，警告只印 stdout；無參數啟動＋default port 被佔即產生冗餘 server）。啟動三步：
+**Web board port 慣例**：per-repo 固定 port（例 mosaic=6420、ai-rules=6422——慣例值由啟動腳本 `--port` 釘住（`run-backlog-browser.sh`），config `default_port` 欄實值可能與腳本釘值不同、以腳本為準；**6421 保留給 report server／md viewer**）。`backlog browser` 對 port 衝突**不報錯——靜默跳下一個可用 port**（明確帶 `--port` 亦同，警告只印 stdout；無參數啟動＋default port 被佔即產生冗餘 server）。啟動三步：
 ```bash
 lsof -iTCP:<port> -sTCP:LISTEN -P                 # ① 先查：佔用者（lsof -p <PID> | rg cwd）cwd=同 repo → 沿用既有 server 不重啟；異 repo/異程式 → 配置衝突，停手回報
 backlog browser --no-open --port <port> &         # ② 起服務永遠帶 --port

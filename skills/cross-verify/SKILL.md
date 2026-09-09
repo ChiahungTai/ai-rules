@@ -19,7 +19,7 @@ argument-hint: "<問題> [軸:db,git,log,memory,cr,web]"
 | git | repo 歷史與工作樹 | 非 git repo |
 | db | ZCode telemetry db.sqlite（per-message modelID／session 記錄） | db 路徑不存在 |
 | log | 應用／工具 log（路徑隨問題給） | 指定檔不存在 |
-| memory | memory 池條目（形態：repo `.agents/memory/` 主體或 `~/.zcode/cli/memories/projects/<proj>/memory/`〔多為 symlink 指主體〕；**檢索入口＝池內 `_inventory.md`** 全量 desc 投影（B 形態——MEMORY.md 僅常駐定額、非全量，漏掃 _inventory.md 即漏證據；A 形態池 MEMORY.md 即全量索引、可無 _inventory.md——形態判定見 [memory-audit](../memory-audit/SKILL.md)）——`rg -i <關鍵詞> _inventory.md` 定位後 Read 條目檔 body） | 池路徑不存在 |
+| memory | memory 池條目（形態：repo `.agents/memory/` 主體或 `~/.zcode/cli/memories/projects/<proj>/memory/`〔多為 symlink 指主體〕；**檢索入口＝B 形態池 `_inventory.md`／A 形態池 MEMORY.md**——B 形態 `_inventory.md` 為全量 desc 投影、MEMORY.md 僅常駐定額（漏掃 _inventory.md 即漏證據）；A 形態池 MEMORY.md 即全量索引、可無 _inventory.md——形態判定見 [memory-audit](../memory-audit/SKILL.md)；`rg -i <關鍵詞> _inventory.md` 定位後 Read 條目檔 body） | 池路徑不存在 |
 | cr | code-reality graph（refs／callers／impact_radius） | index 缺場／MCP 未連線 |
 | web | 外部網路查證 | **未顯式點名＝軸不存在**（禁擅自加） |
 
