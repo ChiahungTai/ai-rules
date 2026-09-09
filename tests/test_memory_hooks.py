@@ -196,3 +196,24 @@ def test_underscore_prefixed_pool_file_excluded(tmp_path):
     r, lines = run_sensor(WRITE_SENSOR, payload, tmp_path)
     assert r.returncode == 0, r.stderr
     assert lines == []
+
+
+def test_watch_seed_outputs_pool_entry_watch_paths():
+    """SessionStart seed lists pool entries (excl MEMORY.md/_-prefix) as watchPaths; exits 0."""
+    import sys as _sys
+
+    r = subprocess.run(
+        [_sys.executable, str(HOOKS / "memory-watch-seed.py")],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert r.returncode == 0, r.stderr
+    payload = json.loads(r.stdout)
+    hso = payload["hookSpecificOutput"]
+    assert hso["hookEventName"] == "SessionStart"
+    paths = hso["watchPaths"]
+    assert isinstance(paths, list)
+    if paths:  # live pool present on this machine
+        assert all(p.endswith(".md") for p in paths)
+        assert not any(p.endswith("MEMORY.md") or "/_" in p for p in paths)

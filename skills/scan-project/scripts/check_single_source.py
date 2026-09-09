@@ -118,6 +118,9 @@ INVARIANTS = [
         # fresh clone 上缺場 → 這些 hook 豁免（註冊事實存在於本機設定，
         # repo 內不可驗證）；settings.json 在場時仍照常檢查
         "claude_only": ["compact-tail-inject.py"],
+        # 非 entry 的共用庫（被 sensor import，自身不是 hook 入口）——
+        # 任何機器都不該要求註冊（註冊它反而是錯的接線）
+        "exempt": ["memory_hook_common.py"],
         "note": "hooks/*.py 是「code 在、接線不在」的孤兒溫床（真實案例 "
         "2026-08-29 F8：compact-tail-inject.py 兩處註冊面皆無、從未生效——"
         "防線看起來存在，實際從未攔截）。每個 hook 腳本至少要出現在一個註冊處"
@@ -436,11 +439,14 @@ def check_hook_registration(inv: dict) -> list[tuple[str, str, str]]:
             if rel == "settings.json":
                 claude_side_present = True
     claude_only = set(inv.get("claude_only", []))
+    exempt = set(inv.get("exempt", []))
     out = []
     for hf in hook_files:
         # word-boundary 比對——純子字串會讓 a.py 被 xa.py 的註冊行誤判
         if re.search(rf"\b{re.escape(hf.name)}\b", registered):
             continue
+        if hf.name in exempt:
+            continue  # 共用庫非 hook 入口（exempt 清單＝invariant 定義顯式列舉）
         if hf.name in claude_only and not claude_side_present:
             continue  # Claude 端註冊檔 local-only：缺場機器上豁免
         out.append(

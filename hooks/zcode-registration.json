@@ -37,6 +37,19 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "process",
+            "command": "python3",
+            "args": ["/Users/ctai/Github/ai-rules/hooks/memory-write-sensor.py"],
+            "timeoutMs": 10000
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
