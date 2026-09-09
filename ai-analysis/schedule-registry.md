@@ -6,7 +6,7 @@
 >
 > **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser`／`backlog-cleanup` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）——反查表 A1/A2/A6 為 mosaic 排程的記載面例外（消費端在本 repo）。
 >
-> **更新時點**：2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。2026-09-09（AIR-54 S2——池主體遷 `/Users/ctai/Github/ai-rules/.agents/memory/`，條 1 對象路徑與跨 repo 指針同步；CronList 兩 prompt 同步換址）。2026-09-10（AIR-52——新增「外部依賴反查表」A1-A5；S1 skill 端排程解綁的對側載體）。
+> **更新時點**：2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。2026-09-09（AIR-54 S2——池主體遷 `/Users/ctai/Github/ai-rules/.agents/memory/`，條 1 對象路徑與跨 repo 指針同步；CronList 兩 prompt 同步換址）。2026-09-10（AIR-52——新增「外部依賴反查表」A1-A5；S1 skill 端排程解綁的對側載體）（AIR-54 收尾——首波驗證一次性 cron `automation-d64fd994` 已於本日晨由 CC 提前手動執行完畢：六判據全綠→`memory.bak` 刪除→cron 收除；行 4 重放劇本作廢不落表，記此存查）。
 
 ## ZCode Cron（3 條，ai-rules workspace）
 

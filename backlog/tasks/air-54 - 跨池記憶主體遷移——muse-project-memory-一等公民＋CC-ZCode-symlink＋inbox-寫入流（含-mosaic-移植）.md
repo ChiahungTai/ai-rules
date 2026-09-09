@@ -1,10 +1,10 @@
 ---
 id: AIR-54
 title: 跨池記憶主體遷移——muse project memory 一等公民＋CC/ZCode symlink＋inbox 寫入流（含 mosaic 移植）
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-09 02:47'
-updated_date: '2026-09-09 22:16'
+updated_date: '2026-09-09 22:17'
 labels:
   - memory
   - governance
@@ -12,8 +12,8 @@ labels:
 dependencies: []
 references:
   - >-
-    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/ai-analysis/_tasks/09-09-memory-spine-migration/ep.md
-  - ai-analysis/_tasks/09-09-memory-spine-migration/ep.md
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-analysis/_tasks/done/09-09-memory-spine-migration/ep.md
+  - ai-analysis/_tasks/done/09-09-memory-spine-migration/ep.md
 ordinal: 46000
 ---
 
@@ -50,3 +50,9 @@ ordinal: 46000
 
 〔CC 緊急補充 09-10——S6 基線漂移〕EP :258『muse 自建三檔』情報已過時：mosaic_alpha/.agents/memory/ 已進化為完整 B 形態治理池（_generate_index.py/_resident-set.md/_inventory.md/_audit-state.md＋數十條目，含 feedback-subagent-serial-background 等）——S6 前置處置（三檔過六問併入）須改為『既有治理池整體搬遷/對接』重新盤點，非三檔小併。已知一條漂移待修：project-memory-audit-advisory-only.md desc 稱『AIR-54 S6 主體進 repo』——S6 未收斂，宣稱過早。S6 session 動手前先 ls 池現況對帳。
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+跨池記憶主體遷移全弧閉環：S1-S5 主體進 main（63a8a19 線——repo .agents/memory/ 主體＋CC/ZCode symlink＋muse inbox hooks＋WAL/CAS）；首波驗證 09-09 23:40 六判據全綠→09-10 晨 CC 提前手動執行（memory.bak 刪除閉環＋08:30 cron 收除）；S6 mosaic 移植由收尾 session＋mosaic mos-88 分工吸收（8e33163fe：inbox hooks＋AGENTS.md 觸發器；mos-88：池 B 形態遷移結案——S6 基線漂移〔三檔→完整治理池〕經 CC 緊急警訊正確處置）；欠項：skill Inbox 消費節已補、registry 條 4 重放經判讀作廢（cron 已刪，照原 diff 重放會造週日比對 drift——改更新時點歷史記載句存查）；結案兩步＋EP 歸檔 done/＋registry 記載由 CC 補收（session 遺留三件）。
+<!-- SECTION:FINAL_SUMMARY:END -->
