@@ -137,8 +137,9 @@ CLAUDE_BASE = "https://code.claude.com"
 CLAUDE_BLOG_BASE = "https://claude.com"  # blog posts live on the marketing host
 OPENCODE_BASE = "https://opencode.ai"
 ZCODE_BASE = "https://zcode.z.ai"
-CODEX_BASE = "https://developers.openai.com"
-CODEX_LLM = "https://developers.openai.com/codex/llms.txt"  # codex-specific index
+CODEX_BASE = "https://learn.chatgpt.com"
+# Merged ChatGPT+Codex docs index; developers.openai.com/codex/* 308-redirects here.
+CODEX_LLM = "https://learn.chatgpt.com/docs/llms.txt"
 
 _CLAUDE_DOC_LINK = re.compile(r"- \[[^\]]+\]\((https?://code\.claude\.com[^)]+\.md)\)")
 # The blog index (code.claude.com/blog) links to claude.com/blog/<slug>; posts have
@@ -244,21 +245,23 @@ def fetch_zcode(page: Page) -> tuple[str, bytes]:
 
 
 _CODEX_DOC_LINK = re.compile(
-    r"\]\((https?://developers\.openai\.com/codex/[^)]+\.md)\)"
+    r"\]\((https?://learn\.chatgpt\.com/docs/[^)]+?\.md(?:\?[^)]*)?)\)"
 )
 
 
 def discover_codex() -> list[Page]:
-    # developers.openai.com exposes a codex-specific llms.txt index that lists
-    # every Codex doc page as a verbatim .md link (same scheme as claude-code).
+    # learn.chatgpt.com exposes a docs-scoped llms.txt listing every page as a
+    # verbatim .md link (same scheme as meta). developers.openai.com/codex/*
+    # 308-redirects to the new host, so the old codex-specific index is gone.
     llms = fetch_until_ok(CODEX_LLM)
     if not llms:
-        print("[WARN] codex: /codex/llms.txt unreachable; docs skipped")
+        print("[WARN] codex: /docs/llms.txt unreachable; docs skipped")
         return []
     pages: list[Page] = []
     for url in _CODEX_DOC_LINK.findall(llms):
-        # Strip base + the redundant leading "codex/" (source dir already names it).
-        rel = url.removeprefix(CODEX_BASE).lstrip("/").removeprefix("codex/")
+        url = url.split("?", 1)[0]  # ?surface= variants -> canonical page
+        # Strip base + the redundant leading "docs/" (source dir already names it).
+        rel = url.removeprefix(CODEX_BASE).lstrip("/").removeprefix("docs/")
         pages.append(Page(url, rel))
     return _dedup(pages)
 

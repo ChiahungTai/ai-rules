@@ -1,5 +1,7 @@
 # Codex GitHub Action
 
+> For the complete documentation index, see [llms.txt](https://learn.chatgpt.com/llms.txt). Markdown versions of documentation pages are available by appending `.md` to the page URL.
+
 Use the Codex GitHub Action (`openai/codex-action@v1`) to run Codex in CI/CD jobs, apply patches, or post reviews from a GitHub Actions workflow.
 The action installs the Codex CLI, starts the Responses API proxy when you provide an API key, and runs `codex exec` under the permissions you specify.
 
@@ -9,7 +11,7 @@ Reach for the action when you want to:
 - Gate changes on Codex-driven quality checks as part of your CI pipeline.
 - Run repeatable Codex tasks (code review, release prep, migrations) from a workflow file.
 
-For a CI example, see [Non-interactive mode](https://developers.openai.com/codex/noninteractive) and explore the source in the [openai/codex-action repository](https://github.com/openai/codex-action).
+For a CI example, see [Non-interactive mode](https://learn.chatgpt.com/docs/non-interactive-mode) and explore the source in the [openai/codex-action repository](https://github.com/openai/codex-action).
 
 ## Prerequisites
 

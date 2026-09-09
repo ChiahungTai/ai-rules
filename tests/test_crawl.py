@@ -101,3 +101,35 @@ def test_full_run_reports_disk_orphans(monkeypatch, tmp_path, capsys):
     assert crawl.main(["--source", "fake"]) == 0
     out = capsys.readouterr().out
     assert "[WARN]" in out and "zz-orphan.md" in out
+
+
+def test_discover_codex_matches_learn_chatgpt_index(monkeypatch):
+    """codex discovery 走 learn.chatgpt.com/docs/llms.txt（AIR-57 斷源重接）：
+    舊域名 developers.openai.com/codex 整站 308 遷移後，regex 與路徑剝離必須
+    適配新巢狀路徑（/docs/agent-configuration/rules.md → agent-configuration/rules.md）；
+    帶 ?surface= query 的 markdown link 須 canonicalize 回無 query 的頁面 URL。"""
+    assert crawl.CODEX_LLM == "https://learn.chatgpt.com/docs/llms.txt"
+    fixture = """# Codex
+- [Rules](https://learn.chatgpt.com/docs/agent-configuration/rules.md): x
+- [Memories](https://learn.chatgpt.com/docs/customization/memories.md): x
+- [Cmd](https://learn.chatgpt.com/docs/developer-commands.md?surface=cli): x
+- [Cmd ide](https://learn.chatgpt.com/docs/developer-commands.md?surface=ide): x
+- [Ide settings](https://learn.chatgpt.com/docs/developer-settings.md?surface=ide): x
+- [Manual](https://learn.chatgpt.com/docs/codex-manual.md): x
+- [Full export](https://learn.chatgpt.com/docs/llms-full.txt): ignored (.txt)
+- [Legacy](https://developers.openai.com/codex/rules.md): ignored (old host)"""
+    monkeypatch.setattr(
+        crawl, "fetch_until_ok", lambda url: fixture if url == crawl.CODEX_LLM else None
+    )
+    pages = crawl.discover_codex()
+    assert [p.relpath for p in pages] == [
+        "agent-configuration/rules.md",
+        "customization/memories.md",
+        "developer-commands.md",
+        "developer-settings.md",
+        "codex-manual.md",
+    ]
+    assert all(p.url.startswith("https://learn.chatgpt.com/docs/") for p in pages)
+    assert all(
+        "?" not in p.url for p in pages
+    )  # canonicalize 去 query；同頁 surface 變體靠 dedup 收斂

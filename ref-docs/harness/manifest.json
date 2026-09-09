@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T22:15:44+00:00",
+  "generated_at": "2026-09-09T22:51:30+00:00",
   "sources": {
     "claude-code": {
       "base": "https://code.claude.com",
@@ -1471,673 +1471,1045 @@
       ]
     },
     "codex": {
-      "base": "https://developers.openai.com",
-      "page_count": 95,
+      "base": "https://learn.chatgpt.com",
+      "generated_at": "2026-09-09T22:51:30+00:00",
+      "page_count": 148,
       "pages": [
         {
-          "url": "https://developers.openai.com/codex/agent-approvals-security.md",
+          "url": "https://learn.chatgpt.com/docs/administration.md",
+          "path": "administration.md",
+          "status": "ok",
+          "sha256": "3c76e9c514bbc1bfe8a8434cb324d71f9157acb00d771b87e966af26d9d8e130",
+          "bytes": 10354
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/agent-approvals-security.md",
           "path": "agent-approvals-security.md",
           "status": "ok",
-          "sha256": "0e4565feb798d5201c921e447b5c7c357a7715bde53f3d6f0a2a3ce0ea9493af",
-          "bytes": 30236
+          "sha256": "ddd3bca26b1055d60fdd0785440ff72583b51458cd76b72081217075bd83c111",
+          "bytes": 34367
         },
         {
-          "url": "https://developers.openai.com/codex/amazon-bedrock.md",
+          "url": "https://learn.chatgpt.com/docs/agent-configuration/agents-md.md",
+          "path": "agent-configuration/agents-md.md",
+          "status": "ok",
+          "sha256": "4a81af9eeb7597184d295ff7f142478855b0b09100d8b75c2ae1058b3dd3203f",
+          "bytes": 9150
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/agent-configuration/rules.md",
+          "path": "agent-configuration/rules.md",
+          "status": "ok",
+          "sha256": "ff6c847713a05428b7dea7beb14aeac94a27e3f01c768aff1f9ad95a6623bec2",
+          "bytes": 6261
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/agent-configuration/speed.md",
+          "path": "agent-configuration/speed.md",
+          "status": "ok",
+          "sha256": "3a25aa094eb2a65e2b0d8b61e5d8bd20aa298157a57174af65d6ae307c2e736d",
+          "bytes": 1986
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/agent-configuration/subagents.md",
+          "path": "agent-configuration/subagents.md",
+          "status": "ok",
+          "sha256": "cbc0a4581edd97d9e1d85697fd8431f8823facb77757c76f88a97179c7335fd7",
+          "bytes": 22085
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/amazon-bedrock.md",
           "path": "amazon-bedrock.md",
           "status": "ok",
-          "sha256": "700e0b975ee9ae699df004865fde1e6c605cff9048d0e884356b7eca33cd3004",
-          "bytes": 18552
+          "sha256": "ca1adf74c26e2b9ddcc6a8a9ba8423fbdc2a48c0f777b034fc6fc9300c61662a",
+          "bytes": 20299
         },
         {
-          "url": "https://developers.openai.com/codex/app-server.md",
+          "url": "https://learn.chatgpt.com/docs/app-server.md",
           "path": "app-server.md",
           "status": "ok",
-          "sha256": "86e536bad97767b28b2e1e4593d283df9fa65f082e4e80369e1a34be3990b46a",
-          "bytes": 83597
+          "sha256": "b62e81cee0ccd2ca60bed1083af110189d4b7b1369107da812a19572096a41d0",
+          "bytes": 99471
         },
         {
-          "url": "https://developers.openai.com/codex/app.md",
+          "url": "https://learn.chatgpt.com/docs/app.md",
           "path": "app.md",
           "status": "ok",
-          "sha256": "7b8e9f5312684268c19b127d4960f5d1a53bddf26a88d45117497e988a199cd0",
-          "bytes": 8439
+          "sha256": "74fc29e9457f097f1bec533b6a47cfbba16052b2fbce0400c859a740c61af54e",
+          "bytes": 3642
         },
         {
-          "url": "https://developers.openai.com/codex/app/automations.md",
-          "path": "app/automations.md",
-          "status": "ok",
-          "sha256": "a2b4118551abe0dd861486b40c238ac168b3909529dd665be7079b1b8b8305c8",
-          "bytes": 12147
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/browser.md",
-          "path": "app/browser.md",
-          "status": "ok",
-          "sha256": "dad2cc99fcf5f3796488b6f7802df3862a0495db25559b484d08e206a07137a2",
-          "bytes": 6779
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/chrome-extension.md",
-          "path": "app/chrome-extension.md",
-          "status": "ok",
-          "sha256": "f38f472639ab2afffacb5ea38bab3733070bc152cb188e0459e9e7bcf637ce42",
-          "bytes": 6980
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/commands.md",
-          "path": "app/commands.md",
-          "status": "ok",
-          "sha256": "8763b1eff14253bc5263c78286310d6f25f6850d7ab4b9f449dd10311492756f",
-          "bytes": 18121
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/computer-use.md",
-          "path": "app/computer-use.md",
-          "status": "ok",
-          "sha256": "c8436baf481e89d4223aecc290193f32bfe6b782725e154f25e8e559cd2ed7e2",
-          "bytes": 9252
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/features.md",
-          "path": "app/features.md",
-          "status": "ok",
-          "sha256": "76b6bff2ee8cfb1afe18cd78e6dea206bb7e83992c95dd2804c3bc4c6eb186f9",
-          "bytes": 18103
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/local-environments.md",
-          "path": "app/local-environments.md",
-          "status": "ok",
-          "sha256": "7524e5e9269577decfcc52303fb0a68bbcae4257cf272efe35fb05e44aa68a3d",
-          "bytes": 2365
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/review.md",
-          "path": "app/review.md",
-          "status": "ok",
-          "sha256": "07f788e403dc85bca54f48a997d8e74b7f1bf79a96d3d73b31aa8586ac60aa35",
-          "bytes": 4280
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/settings.md",
-          "path": "app/settings.md",
-          "status": "ok",
-          "sha256": "15be5bb6e77ae8abda1fa2ec67b20435404f48cec1828343a11746553b92bcf4",
-          "bytes": 6309
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/troubleshooting.md",
-          "path": "app/troubleshooting.md",
-          "status": "ok",
-          "sha256": "197ce2811a279bc0a7b4dad25fb092d1adae472ae3f4556387798753057221c0",
-          "bytes": 5677
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/windows.md",
-          "path": "app/windows.md",
-          "status": "ok",
-          "sha256": "ee3f5063cd32fa350e22b6a48f86f9557bbf7809549fb8eb668da4e81e376ad0",
-          "bytes": 9793
-        },
-        {
-          "url": "https://developers.openai.com/codex/app/worktrees.md",
-          "path": "app/worktrees.md",
-          "status": "ok",
-          "sha256": "f8be2b01b5cd68ac18d1bca2bd461cadf63504d52050c0689006288c4323a69f",
-          "bytes": 12159
-        },
-        {
-          "url": "https://developers.openai.com/codex/appshots.md",
+          "url": "https://learn.chatgpt.com/docs/appshots.md",
           "path": "appshots.md",
           "status": "ok",
-          "sha256": "0c94b5a50ffb1eca38b3c51900f182bdf0ed715a517e229f3452db277361b662",
-          "bytes": 3091
+          "sha256": "0115fae6f95c7ba6afc1d7082bbf0a82b68cddecf7b79e2366cdcd53cd736d53",
+          "bytes": 3353
         },
         {
-          "url": "https://developers.openai.com/codex/auth.md",
+          "url": "https://learn.chatgpt.com/docs/artifacts-viewer.md",
+          "path": "artifacts-viewer.md",
+          "status": "ok",
+          "sha256": "f76869a39ad7174dcd3b452c721beef26bfb37251bf4d34122f0c439964faa37",
+          "bytes": 4267
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/auth.md",
           "path": "auth.md",
           "status": "ok",
-          "sha256": "c8716f799b53288fd50d36b96111b6b7b51996a7ed1951cc46652dc1b424a9e0",
-          "bytes": 10631
+          "sha256": "66aeb6aff8c7175b87b2c09239e73ae6db808e7ef9ead29fe1e8cb48ef725c2a",
+          "bytes": 15909
         },
         {
-          "url": "https://developers.openai.com/codex/cli.md",
-          "path": "cli.md",
+          "url": "https://learn.chatgpt.com/docs/automations.md",
+          "path": "automations.md",
           "status": "ok",
-          "sha256": "1e4371e76897a943292f574e46d74eb909c93f5df13e7883856f5a627c7184d5",
-          "bytes": 3044
+          "sha256": "8171600358a44ed6dca27b61117084328503a1ec340beea771ac5b64d916d12e",
+          "bytes": 18049
         },
         {
-          "url": "https://developers.openai.com/codex/cli/features.md",
-          "path": "cli/features.md",
+          "url": "https://learn.chatgpt.com/docs/browser.md",
+          "path": "browser.md",
           "status": "ok",
-          "sha256": "650215f1085f8361cfb95ad619c6ac9ad683e334b9e6048b3f1fe0b80f2f4734",
-          "bytes": 16697
+          "sha256": "e38d702e6ea053763d2b5c4c4f2264a651ef31dd0b27dc74d4b7f7e1cd70fe34",
+          "bytes": 15824
         },
         {
-          "url": "https://developers.openai.com/codex/cli/reference.md",
-          "path": "cli/reference.md",
+          "url": "https://learn.chatgpt.com/docs/build-plugins.md",
+          "path": "build-plugins.md",
           "status": "ok",
-          "sha256": "c2609972184de40132036b462d1f4384760780454a041bfbbf67601528610bb9",
-          "bytes": 44584
+          "sha256": "abd04e3e4dd35f0fe431724aab76e70223943d02373ee8d0544c16431f98ac14",
+          "bytes": 4751
         },
         {
-          "url": "https://developers.openai.com/codex/cli/slash-commands.md",
-          "path": "cli/slash-commands.md",
+          "url": "https://learn.chatgpt.com/docs/build-skills.md",
+          "path": "build-skills.md",
           "status": "ok",
-          "sha256": "d1de22232d6429d9b76da24f8b854df329c3ab1e087c76200913cc519bd321a1",
-          "bytes": 29585
+          "sha256": "4093dba843bd333cdfe25df52cd36828b51d1a4199fdb2fcf2be1b7913063775",
+          "bytes": 10926
         },
         {
-          "url": "https://developers.openai.com/codex/cloud.md",
+          "url": "https://learn.chatgpt.com/docs/chrome-extension.md",
+          "path": "chrome-extension.md",
+          "status": "ok",
+          "sha256": "d535a00c40091670b39a20f5853333631d6672292ef2d4972229eb3c78a9a673",
+          "bytes": 10039
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/cli-customization.md",
+          "path": "cli-customization.md",
+          "status": "ok",
+          "sha256": "f6c100c19ad3527ae718a6965f2a209ae3ee7a1542e49bea78441a2a95e5f9ac",
+          "bytes": 1639
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/cloud.md",
           "path": "cloud.md",
           "status": "ok",
-          "sha256": "a5312416fe792799e049c34d5b646f9efbb089d4604a394a20377f788563870d",
-          "bytes": 2002
+          "sha256": "65980043d1b2a4bbcee8ad21d106d5a9a27678a0a71025a74eba8ed5cd2e2e46",
+          "bytes": 4175
         },
         {
-          "url": "https://developers.openai.com/codex/cloud/environments.md",
-          "path": "cloud/environments.md",
-          "status": "ok",
-          "sha256": "0fc6ed4349b4ab47f3d9ab976ca711f6864526236ff24bc065ef8e95b19ba0ab",
-          "bytes": 4364
-        },
-        {
-          "url": "https://developers.openai.com/codex/cloud/internet-access.md",
+          "url": "https://learn.chatgpt.com/docs/cloud/internet-access.md",
           "path": "cloud/internet-access.md",
           "status": "ok",
-          "sha256": "1d7acfc73de4c512b40f48114fea06cbfbaa3341622dc52f55b1c69cdae8ea99",
-          "bytes": 3774
+          "sha256": "e7a0293893989a3c6eaa090f1ea828da9949b7c0f3d99d0eab1009952ddd50f3",
+          "bytes": 3907
         },
         {
-          "url": "https://developers.openai.com/codex/codex-manual.md",
+          "url": "https://learn.chatgpt.com/docs/code-review.md",
+          "path": "code-review.md",
+          "status": "ok",
+          "sha256": "eab97281e02140eea76cb67aa81c23d34dee30cdf14605aa2d1c23dd020c2968",
+          "bytes": 8958
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/codex-manual.md",
           "path": "codex-manual.md",
           "status": "ok",
-          "sha256": "c6cab8ece947a9353cbcd1a2e79976e416d6f5ac9cfad93bc337578225dcd579",
-          "bytes": 603189
+          "sha256": "32cb8479387b2104b0b8a241e38cbe92f21fec56014fa78dc8d8776b6178c4d3",
+          "bytes": 2322529
         },
         {
-          "url": "https://developers.openai.com/codex/community/codex-for-oss.md",
-          "path": "community/codex-for-oss.md",
+          "url": "https://learn.chatgpt.com/docs/codex-sdk.md",
+          "path": "codex-sdk.md",
           "status": "ok",
-          "sha256": "4ee0991c6d1bf2a0b5ba198efb3dbfdfbd38bbe4928adfc5df54fcd239371060",
-          "bytes": 1860
+          "sha256": "2fd124fd4db1c6d9f8ac5e050f109c4d05b4008f7c9513c38da806716a4c9a05",
+          "bytes": 4561
         },
         {
-          "url": "https://developers.openai.com/codex/concepts/customization.md",
-          "path": "concepts/customization.md",
+          "url": "https://learn.chatgpt.com/docs/codex/cli.md",
+          "path": "codex/cli.md",
           "status": "ok",
-          "sha256": "4984669cb1185c2405d485dc029ab0e9aafd6c18059e3ee64a4ba4db0b06a2c6",
-          "bytes": 9271
+          "sha256": "324d08847b3bd00152e0df871dec97749fcd21613298acc299f0f3e3dfc36662",
+          "bytes": 6669
         },
         {
-          "url": "https://developers.openai.com/codex/concepts/cyber-safety.md",
-          "path": "concepts/cyber-safety.md",
+          "url": "https://learn.chatgpt.com/docs/codex/ide.md",
+          "path": "codex/ide.md",
           "status": "ok",
-          "sha256": "fd05800049945d3ba89b02e64fc724f515509c2225043278f38d987513e0544a",
-          "bytes": 4261
+          "sha256": "ffcb6485938f706bad76ad6a1a1e0ab84fc30212208fc984ac0cdd97f858d907",
+          "bytes": 4407
         },
         {
-          "url": "https://developers.openai.com/codex/concepts/sandboxing.md",
-          "path": "concepts/sandboxing.md",
+          "url": "https://learn.chatgpt.com/docs/computer-use.md",
+          "path": "computer-use.md",
           "status": "ok",
-          "sha256": "9d3eea99ac263ab2d3d499bf74182a5b9e250369e765c7fc05e01040b41e9433",
-          "bytes": 8790
+          "sha256": "0087752b68274730b1757bc94ebb56581057e843120887bbf37800e099c188ca",
+          "bytes": 10625
         },
         {
-          "url": "https://developers.openai.com/codex/concepts/sandboxing/auto-review.md",
-          "path": "concepts/sandboxing/auto-review.md",
+          "url": "https://learn.chatgpt.com/docs/config-file/config-advanced.md",
+          "path": "config-file/config-advanced.md",
           "status": "ok",
-          "sha256": "bc8b92c32ea178b6b97f3a7afcb2e7c45222d1cfb4b75b33e3b38b6acf878cd9",
-          "bytes": 7669
+          "sha256": "4c468c8a59520608aa9d3dbd617233ea1b7525c8bd93f2da751da355c881b23a",
+          "bytes": 52316
         },
         {
-          "url": "https://developers.openai.com/codex/concepts/subagents.md",
-          "path": "concepts/subagents.md",
+          "url": "https://learn.chatgpt.com/docs/config-file/config-basic.md",
+          "path": "config-file/config-basic.md",
           "status": "ok",
-          "sha256": "8db6c46df7dd476c3575e57e5972b168bae4e16730f8c20145e2de942e6e24f5",
-          "bytes": 5247
+          "sha256": "68f9a4614003f8db8e2b9469db7a375663a4a5f08c7cf8ef89a9d7d68f3f2668",
+          "bytes": 11674
         },
         {
-          "url": "https://developers.openai.com/codex/config-advanced.md",
-          "path": "config-advanced.md",
+          "url": "https://learn.chatgpt.com/docs/config-file/config-reference.md",
+          "path": "config-file/config-reference.md",
           "status": "ok",
-          "sha256": "b5df4e0abd53ed1dfc0dedb4c06641fe4b921a0d5ebbfbf5e97285496ec3af64",
-          "bytes": 45514
+          "sha256": "56a4d43fa9b656eb3197831b20c8f81ee573ad10b390b7929bb873b0ff437bdc",
+          "bytes": 112503
         },
         {
-          "url": "https://developers.openai.com/codex/config-basic.md",
-          "path": "config-basic.md",
+          "url": "https://learn.chatgpt.com/docs/config-file/config-sample.md",
+          "path": "config-file/config-sample.md",
           "status": "ok",
-          "sha256": "10b65fdf18d674f18b2ecce454f160a8523c28cb669969c748f404333fab47cf",
-          "bytes": 10232
+          "sha256": "3bf9a6b493fea77feb610643ba5372de14c098d4b507b8e27034a893e5e69a52",
+          "bytes": 31254
         },
         {
-          "url": "https://developers.openai.com/codex/config-reference.md",
-          "path": "config-reference.md",
+          "url": "https://learn.chatgpt.com/docs/config-file/environment-variables.md",
+          "path": "config-file/environment-variables.md",
           "status": "ok",
-          "sha256": "78ba655a5dc192e6828431198f3c36c6ab74bcac269ffbb619497a9ff46f8104",
-          "bytes": 80749
+          "sha256": "e9894e4e623b7d795cab340ba908e1c371b0f0d58cebf9d510b8d073a05d6dc3",
+          "bytes": 7289
         },
         {
-          "url": "https://developers.openai.com/codex/config-sample.md",
-          "path": "config-sample.md",
+          "url": "https://learn.chatgpt.com/docs/configuration.md",
+          "path": "configuration.md",
           "status": "ok",
-          "sha256": "4a68a22ac7e135305f79f398ef2a48eb33a3964321b45f90c431ba14460bac84",
-          "bytes": 28513
+          "sha256": "111269b4b4c8278dc3ab7077830cd7b9ab9b2c3a2069d9fea7fa5a80dd1dfac5",
+          "bytes": 5876
         },
         {
-          "url": "https://developers.openai.com/codex/custom-prompts.md",
+          "url": "https://learn.chatgpt.com/docs/custom-prompts.md",
           "path": "custom-prompts.md",
           "status": "ok",
-          "sha256": "1456adde32c0cfeb9aaec5c5c4413f52fb546bbefc854554c7b600c1110fe70c",
-          "bytes": 3190
+          "sha256": "603423825c9cce8da5357f8ed627ff3fe153bca5033c40661f1d2b07924b9428",
+          "bytes": 3358
         },
         {
-          "url": "https://developers.openai.com/codex/enterprise/access-tokens.md",
+          "url": "https://learn.chatgpt.com/docs/customization/computer-history.md",
+          "path": "customization/computer-history.md",
+          "status": "ok",
+          "sha256": "632ee208bc534776ccfff381143e79f8b3cd06a655b9e683d76feec3e3e3a57c",
+          "bytes": 11703
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/customization/memories.md",
+          "path": "customization/memories.md",
+          "status": "ok",
+          "sha256": "2036fdd568b9982e1760a0060618145642ce49662772985e916ab318b2b74391",
+          "bytes": 5713
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/customization/overview.md",
+          "path": "customization/overview.md",
+          "status": "ok",
+          "sha256": "d683a7472f5ac3a92652928491e75e731fa13591e7675d4aed5676a560fc1e28",
+          "bytes": 9483
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/cyber-safety.md",
+          "path": "cyber-safety.md",
+          "status": "ok",
+          "sha256": "b19e5d536cb551c40ba32c254b1ab44aca4baa66ab9589b55b09f700b8164ed9",
+          "bytes": 5126
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/cyber-safety/recommended-configuration.md",
+          "path": "cyber-safety/recommended-configuration.md",
+          "status": "ok",
+          "sha256": "0fed6fabc91553a5cff13d958d56d0906fc657852bdfeabf2f759c2030bd8e8d",
+          "bytes": 12922
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/developer-commands.md",
+          "path": "developer-commands.md",
+          "status": "ok",
+          "sha256": "675dbcc4d78e95dd3b80d4f1bc48336a627cea633f4922dbf83d99107bcd6c32",
+          "bytes": 54983
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/developer-settings.md",
+          "path": "developer-settings.md",
+          "status": "ok",
+          "sha256": "3d07208d7dc6f037a63938337930453a311248f7c4475d0e7060308fb0118409",
+          "bytes": 12788
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/developers.md",
+          "path": "developers.md",
+          "status": "ok",
+          "sha256": "f0735c824e87c62831ecad55c159199da945d986c876c03a327922b5760b27bc",
+          "bytes": 6791
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/access-tokens.md",
           "path": "enterprise/access-tokens.md",
           "status": "ok",
-          "sha256": "433b517f8fa3dc9b806784abe3968a74be6f8378621f7b23121bec101792db8f",
-          "bytes": 10034
+          "sha256": "94f260c2ed5a33492892ebec4e077edba58d24954eeb8ea8bc2cb5bb0b12e351",
+          "bytes": 13086
         },
         {
-          "url": "https://developers.openai.com/codex/enterprise/admin-setup.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/admin-plugin.md",
+          "path": "enterprise/admin-plugin.md",
+          "status": "ok",
+          "sha256": "ce8dd070ba20e11991e094b758bcd62e294ea928769fa72e59264e73eecc580e",
+          "bytes": 12912
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/admin-setup.md",
           "path": "enterprise/admin-setup.md",
           "status": "ok",
-          "sha256": "ec7392684496715b28eac55d391cc98cb16d630d736c2dd0e7a5a760daef55f8",
-          "bytes": 24170
+          "sha256": "a1c6c220a8aff19e815bc4931a5ced4d4f692f389456b5113ae04bdda2ddb6bc",
+          "bytes": 11467
         },
         {
-          "url": "https://developers.openai.com/codex/enterprise/governance.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/analytics-api.md",
+          "path": "enterprise/analytics-api.md",
+          "status": "ok",
+          "sha256": "940cbbd4722c59d8fce79249b360bca52faa8f0941f5d6ec436a51c46fa6e02f",
+          "bytes": 1802
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/apps-and-connectors.md",
+          "path": "enterprise/apps-and-connectors.md",
+          "status": "ok",
+          "sha256": "0e737c68d38c7e824cf53a25bbbc21730f22fe6d0be18ef6df62e9f795b9841b",
+          "bytes": 9569
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/chatgpt-work-cloud-security.md",
+          "path": "enterprise/chatgpt-work-cloud-security.md",
+          "status": "ok",
+          "sha256": "da3ed44b7b85d9ab33bace2c86cc3d291e58f6103918b3ac955c8eeebf4ac11c",
+          "bytes": 18143
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/chatgpt-work-local-security.md",
+          "path": "enterprise/chatgpt-work-local-security.md",
+          "status": "ok",
+          "sha256": "c6a897b9815d67f06ffb0054e484edecb2f16575d189ca7b2f4b8f1a160cbaa6",
+          "bytes": 15004
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/chatgpt-work-overview.md",
+          "path": "enterprise/chatgpt-work-overview.md",
+          "status": "ok",
+          "sha256": "cad3e6b5e95a4ccf1f18b7453fded093987d6ae79db85151ee113219cdd87406",
+          "bytes": 11590
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/chatgpt-work-usage-and-cost.md",
+          "path": "enterprise/chatgpt-work-usage-and-cost.md",
+          "status": "ok",
+          "sha256": "b0b89c69e70f5a39ed803dcfe198b332d3a27e30a4cae22a43b3632479638c95",
+          "bytes": 11347
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/compliance-api.md",
+          "path": "enterprise/compliance-api.md",
+          "status": "ok",
+          "sha256": "3e76b88cb6edb2643bece3a1775bb018e16de3346f94087d3e17a4c270a8ae72",
+          "bytes": 4545
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/governance.md",
           "path": "enterprise/governance.md",
           "status": "ok",
-          "sha256": "4f6d83de7c590dc75c7423cf8d82b152fafc2ec0d89cad49a6604a2fcd2c9d8b",
-          "bytes": 6529
+          "sha256": "f6cbf9d7a92ad9a1bfe0bf5fd3752497c15d95983b8f512f48fb23a5b5d67a8c",
+          "bytes": 5600
         },
         {
-          "url": "https://developers.openai.com/codex/enterprise/managed-configuration.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/gpts-and-sharing.md",
+          "path": "enterprise/gpts-and-sharing.md",
+          "status": "ok",
+          "sha256": "ed507ce2292a256480f157c42cb113cc0313776e9832050937628dd75316224c",
+          "bytes": 1282
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/groups-and-provisioning.md",
+          "path": "enterprise/groups-and-provisioning.md",
+          "status": "ok",
+          "sha256": "22044c75a57e50e71b0774269fbd910fb44fb86a749503b7862d38d98c536e69",
+          "bytes": 4627
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/manage-app-updates.md",
+          "path": "enterprise/manage-app-updates.md",
+          "status": "ok",
+          "sha256": "3ac8f0ab0d0bbafced7b6e31865cd3e17a988ee3d4c21457c80a6f5f0c7b8764",
+          "bytes": 7981
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/managed-configuration.md",
           "path": "enterprise/managed-configuration.md",
           "status": "ok",
-          "sha256": "1f15954b6d7b09c9bbe3b6c1b911883d7b697a07747fb196ab8d066d50212245",
-          "bytes": 24895
+          "sha256": "45c02d66ba0c9efde50b553690b127a8551d9930abcd775bef2cc363a7593e2d",
+          "bytes": 36411
         },
         {
-          "url": "https://developers.openai.com/codex/environment-variables.md",
-          "path": "environment-variables.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/plugin-management.md",
+          "path": "enterprise/plugin-management.md",
           "status": "ok",
-          "sha256": "9438ddf48834791c180c652409892f85b3a3f1504a034663ea6b11bae3ae67e2",
-          "bytes": 6260
+          "sha256": "fb07dd8faac3d9fffb06f43889d7319173002cf27bb1d538ae9ba8114756f457",
+          "bytes": 9962
         },
         {
-          "url": "https://developers.openai.com/codex/feature-maturity.md",
-          "path": "feature-maturity.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/prisma-airs.md",
+          "path": "enterprise/prisma-airs.md",
           "status": "ok",
-          "sha256": "d0065403dc0c2e0288a6a8234b1d42602d8eaeb2203cdb5f2815bcbbf59cc352",
-          "bytes": 1458
-        },
-        {
-          "url": "https://developers.openai.com/codex/github-action.md",
-          "path": "github-action.md",
-          "status": "ok",
-          "sha256": "ff8df6fc9b11056a39e6e5c522d5e9f70796ba99e7e388a524d7df09217c61da",
-          "bytes": 7082
-        },
-        {
-          "url": "https://developers.openai.com/codex/glossary.md",
-          "path": "glossary.md",
-          "status": "ok",
-          "sha256": "d016caec18e2878bbfb58ede76bdeef66085c60ff904985b199c627bdd0f5962",
-          "bytes": 25606
-        },
-        {
-          "url": "https://developers.openai.com/codex/guides/agents-md.md",
-          "path": "guides/agents-md.md",
-          "status": "ok",
-          "sha256": "33fdb8ae290dddcb61743abf8596c5f4fa1fdd384890774dfd107c3f614e1848",
-          "bytes": 8158
-        },
-        {
-          "url": "https://developers.openai.com/codex/guides/agents-sdk.md",
-          "path": "guides/agents-sdk.md",
-          "status": "ok",
-          "sha256": "55631b340b6623e915cc0c0d7c2d57860238f6ae7f6100970b548bec2debca63",
-          "bytes": 19367
-        },
-        {
-          "url": "https://developers.openai.com/codex/guides/build-ai-native-engineering-team.md",
-          "path": "guides/build-ai-native-engineering-team.md",
-          "status": "ok",
-          "sha256": "4190b9b7b3780072c8bdbda909795a0180f1da280e7f307a37314e95fdc54c42",
-          "bytes": 36600
-        },
-        {
-          "url": "https://developers.openai.com/codex/hooks.md",
-          "path": "hooks.md",
-          "status": "ok",
-          "sha256": "0000d1822441adbaae7a4193bce2bb8abc9fca44afa59e91cd6cc86d5a406eb1",
-          "bytes": 30551
-        },
-        {
-          "url": "https://developers.openai.com/codex/ide.md",
-          "path": "ide.md",
-          "status": "ok",
-          "sha256": "96180c1ffdae08ca61ddbdfe24bc3aa3d1ce6126e7b98c0b51086b7263a2d503",
-          "bytes": 6619
-        },
-        {
-          "url": "https://developers.openai.com/codex/ide/commands.md",
-          "path": "ide/commands.md",
-          "status": "ok",
-          "sha256": "ad648c6a5a2ae9d53e38e9638eadefc511bdd69f2feb8836e78f1f8c4ff684a0",
-          "bytes": 1611
-        },
-        {
-          "url": "https://developers.openai.com/codex/ide/features.md",
-          "path": "ide/features.md",
-          "status": "ok",
-          "sha256": "25163cca5f2bbe97bc2711bcd7959663774df2f075edd919b8d8bbfc9623bd43",
-          "bytes": 5845
-        },
-        {
-          "url": "https://developers.openai.com/codex/ide/settings.md",
-          "path": "ide/settings.md",
-          "status": "ok",
-          "sha256": "419803c4d5e36cd78e7e8fcf193d22b8328c909c1e4d507857417dbf25b95b28",
-          "bytes": 3892
-        },
-        {
-          "url": "https://developers.openai.com/codex/ide/slash-commands.md",
-          "path": "ide/slash-commands.md",
-          "status": "ok",
-          "sha256": "f3d5c326b54cda83e07347b205d12a7c707ad0e0627cf1f459f077b116e5e025",
-          "bytes": 1745
-        },
-        {
-          "url": "https://developers.openai.com/codex/import.md",
-          "path": "import.md",
-          "status": "ok",
-          "sha256": "d5dc5b8056aa4759c656bda05ef8b3e02efc7006e886029990522d7a9dbf6d86",
+          "sha256": "c3fb12fa96ee6e2501a529a73cfdcdc39d4d7fa7da91e36c7efbc3a1980634ed",
           "bytes": 4640
         },
         {
-          "url": "https://developers.openai.com/codex/integrations/github.md",
-          "path": "integrations/github.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/roles-and-workspace-permissions.md",
+          "path": "enterprise/roles-and-workspace-permissions.md",
           "status": "ok",
-          "sha256": "ca9717997257687a4184805a7948b2bc43ebf1b533c824d739b20788469994e9",
-          "bytes": 4096
+          "sha256": "d273f765571629166fd608ae9ce24e39ffc7231dc0f28a5849248e7a4552d611",
+          "bytes": 11837
         },
         {
-          "url": "https://developers.openai.com/codex/integrations/linear.md",
-          "path": "integrations/linear.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/service-accounts.md",
+          "path": "enterprise/service-accounts.md",
           "status": "ok",
-          "sha256": "51eea278cc117f0b254a3654be0d4856fdcb96356c9ec712e610242d4b9d32ac",
-          "bytes": 6818
+          "sha256": "49bb773edf7ed05395b0c2bba90cdaf24425447a2275f96f575b929ae871f54d",
+          "bytes": 8922
         },
         {
-          "url": "https://developers.openai.com/codex/integrations/slack.md",
-          "path": "integrations/slack.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/skills.md",
+          "path": "enterprise/skills.md",
           "status": "ok",
-          "sha256": "a8e904feb9d6308ec4b615a13841abb546c4810b123896042dc05825ba67fda0",
-          "bytes": 3735
+          "sha256": "34eaad9c024c3763e16c636723d106a5a3e9cbc724b9619215ebd62e3f2c9dfc",
+          "bytes": 3552
         },
         {
-          "url": "https://developers.openai.com/codex/learn/best-practices.md",
-          "path": "learn/best-practices.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/usage-limits.md",
+          "path": "enterprise/usage-limits.md",
           "status": "ok",
-          "sha256": "790e23bd78bffa294d4a058240c012385d599f7aeb9a0d4944e870d5cc06e5ce",
-          "bytes": 15032
+          "sha256": "62057f65bc3c3943cad0827bfbda9d6b9fc69189b48fe3eef47c0f2169340206",
+          "bytes": 1934
         },
         {
-          "url": "https://developers.openai.com/codex/mcp.md",
-          "path": "mcp.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/user-lifecycle.md",
+          "path": "enterprise/user-lifecycle.md",
           "status": "ok",
-          "sha256": "d06881257c62c1485225404604623d3750eea280a42a40e542e1c2fbdea27f92",
-          "bytes": 7951
+          "sha256": "acef6f5e856cadb2a34fd0a08074344ec18b7dd6ffa249e373860196ae499cd7",
+          "bytes": 27032
         },
         {
-          "url": "https://developers.openai.com/codex/memories.md",
-          "path": "memories.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/windows-deployment.md",
+          "path": "enterprise/windows-deployment.md",
           "status": "ok",
-          "sha256": "4f821a28faa6ffb8b12b053748d31e436103244e25c1b483c1e6eabc7f564ee8",
-          "bytes": 4208
+          "sha256": "b5ba1b1b843a2ad8f81d2d1be5d514d46d5e56f322a628de838b3575245a936c",
+          "bytes": 3822
         },
         {
-          "url": "https://developers.openai.com/codex/memories/chronicle.md",
-          "path": "memories/chronicle.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/work-admin-faq.md",
+          "path": "enterprise/work-admin-faq.md",
           "status": "ok",
-          "sha256": "63facce8dcc8c030749a7a9aa9a2df41de7788ea02a118c5fbb60dd80da72112",
-          "bytes": 7543
+          "sha256": "4a12989c3ae7f710cec97b332792fa296a5b28b197c112b026cab3e1ab5c9ca8",
+          "bytes": 29088
         },
         {
-          "url": "https://developers.openai.com/codex/models.md",
+          "url": "https://learn.chatgpt.com/docs/enterprise/workload-identity.md",
+          "path": "enterprise/workload-identity.md",
+          "status": "ok",
+          "sha256": "d66427d47a945f2443004a99e9b635704570eb4ad4950e6caa907895a89af14f",
+          "bytes": 19621
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/workspace-analytics.md",
+          "path": "enterprise/workspace-analytics.md",
+          "status": "ok",
+          "sha256": "d31b0bc4e97ea2bf5a9de11901a5ccadf7b8f93859f6ab8742f4fea4c1d63c96",
+          "bytes": 3639
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/enterprise/workspace-model-availability.md",
+          "path": "enterprise/workspace-model-availability.md",
+          "status": "ok",
+          "sha256": "1ce3c83e4d45ce4d445f9e8e59d7cb4733612725e8b45426f580a7d8e9cda867",
+          "bytes": 7838
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/environments/cloud-environment.md",
+          "path": "environments/cloud-environment.md",
+          "status": "ok",
+          "sha256": "03ed4f7994b41c37b754041f4f5e6a22d67afa3efdf7c1f05a4a8107e72e9763",
+          "bytes": 4580
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/environments/git-worktrees.md",
+          "path": "environments/git-worktrees.md",
+          "status": "ok",
+          "sha256": "9b9092c425b87140adab9df1b5a8d3cee45bf2829f9b49dfb5add2ba9345b8bb",
+          "bytes": 12838
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/environments/local-environment.md",
+          "path": "environments/local-environment.md",
+          "status": "ok",
+          "sha256": "0e2e71962295b2d2dd45e4690f41cde8183f9b53b5e472136764c3ef9b17aab7",
+          "bytes": 3278
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/environments/modes.md",
+          "path": "environments/modes.md",
+          "status": "ok",
+          "sha256": "bbcfe46a6796946e2d51db47a9412bfb207dd09574e89dba756852a1278b0b7a",
+          "bytes": 844
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/extend/mcp.md",
+          "path": "extend/mcp.md",
+          "status": "ok",
+          "sha256": "4b762127ba873b980f295c043d157e95400e92aba021d625db23d43c4b0f6ec4",
+          "bytes": 20180
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/extend/record-and-replay.md",
+          "path": "extend/record-and-replay.md",
+          "status": "ok",
+          "sha256": "1d5a8d2733e91883eee19041d57b7c1a4cb6707aa487fa31a712f9f8db3092c0",
+          "bytes": 3608
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/feature-maturity.md",
+          "path": "feature-maturity.md",
+          "status": "ok",
+          "sha256": "78f3385ec04a286cece01428dfbb5ff15bb25add550a84d782416a8697f3d3b4",
+          "bytes": 1868
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/features.md",
+          "path": "features.md",
+          "status": "ok",
+          "sha256": "5a2667ce9308f2dc212bda3a0a4d5cdf2bcecc37f7ab77801113cfe1fec28ca7",
+          "bytes": 6174
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/features/codex-micro.md",
+          "path": "features/codex-micro.md",
+          "status": "ok",
+          "sha256": "684fe75aa5be179fbcc038621743009b4160dfc4703f15ae9398dad8c3793706",
+          "bytes": 11497
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/features/voice.md",
+          "path": "features/voice.md",
+          "status": "ok",
+          "sha256": "7ea8e11f8996c5f8d5dd29c0651d4631be741125285ed6cce01366974715ebec",
+          "bytes": 5115
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/get-started-with-work.md",
+          "path": "get-started-with-work.md",
+          "status": "ok",
+          "sha256": "c6f298cc38a1e8f6c27b5dfbb02cb75526bfaa80ef160f4f2b6a262575d5bd78",
+          "bytes": 7190
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/github-action.md",
+          "path": "github-action.md",
+          "status": "ok",
+          "sha256": "42b0c3ac45fa265d54b64f621883d0ecb5b41bcca29306ae40d871e332bb5157",
+          "bytes": 7267
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/glossary.md",
+          "path": "glossary.md",
+          "status": "ok",
+          "sha256": "80bbd76496f094f3371c1b3ddfae517e42f1fcadf4a3d9229ba5c351954b2e53",
+          "bytes": 28523
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/hooks.md",
+          "path": "hooks.md",
+          "status": "ok",
+          "sha256": "d3ae147940e824fd6c92aa020b893cb39f22e9ad404859d22d2b95f33c24ae1e",
+          "bytes": 45548
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/image-generation.md",
+          "path": "image-generation.md",
+          "status": "ok",
+          "sha256": "46295d6599436d99a16cbe6c94240f6e93e005c7a9cdda92c9fd0d495f19b88b",
+          "bytes": 8864
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/image-inputs.md",
+          "path": "image-inputs.md",
+          "status": "ok",
+          "sha256": "4ab13465b69d8e33fd1aa0481d8de1920aedc46a5a3cb0cd857c8957283e01de",
+          "bytes": 2296
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/import.md",
+          "path": "import.md",
+          "status": "ok",
+          "sha256": "c9c3011794f4b669076a54daab9eef03c6e89610391b5071178301241f186aed",
+          "bytes": 5365
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/integrated-terminal.md",
+          "path": "integrated-terminal.md",
+          "status": "ok",
+          "sha256": "5ed4be9b5eb544366c53973c131f18fe38a96ed4eacf81feb93e86febd537569",
+          "bytes": 1336
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/linux/linux-app.md",
+          "path": "linux/linux-app.md",
+          "status": "ok",
+          "sha256": "ea4304e2502f6c5eb7c0fb91ef2b0dfe1014fad201737968211c629a1985ca22",
+          "bytes": 4484
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/long-running-work.md",
+          "path": "long-running-work.md",
+          "status": "ok",
+          "sha256": "b82c9a303d40c78a709b78419db9ff4e311e95fb098021149e218c1038670fec",
+          "bytes": 6517
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/mcp-server.md",
+          "path": "mcp-server.md",
+          "status": "ok",
+          "sha256": "41a78a1ba1979d2647d880ac9a7523c7ba43b3f924be3ae20f67f406328fb046",
+          "bytes": 19813
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/models.md",
           "path": "models.md",
           "status": "ok",
-          "sha256": "cd7c418aea8b2729aa34e625fea6c8e20c6cbb88ede8f06c071f4630305c32f4",
-          "bytes": 6482
+          "sha256": "6edfa6f0c45fc0cb4d63b06f09404e448dcbf1bf9cc909b71f81e27352544522",
+          "bytes": 19008
         },
         {
-          "url": "https://developers.openai.com/codex/noninteractive.md",
-          "path": "noninteractive.md",
+          "url": "https://learn.chatgpt.com/docs/non-interactive-mode.md",
+          "path": "non-interactive-mode.md",
           "status": "ok",
-          "sha256": "2bf6721391fec35734ce364006cb7369360b957d7a2d6ba8f55fc9079be6e696",
-          "bytes": 14579
+          "sha256": "5c9d25feb8fcb6bbbede69382f81c362cd3006a261feaa5c297a7fd1ed371110",
+          "bytes": 15064
         },
         {
-          "url": "https://developers.openai.com/codex/open-source.md",
+          "url": "https://learn.chatgpt.com/docs/notifications.md",
+          "path": "notifications.md",
+          "status": "ok",
+          "sha256": "1127449063b442e36829599f7932eff0a3e90ec648f0ced050a56b6a0cda8957",
+          "bytes": 3166
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/open-source.md",
           "path": "open-source.md",
           "status": "ok",
-          "sha256": "8f7899c92da97fa640797a9c0b005ab85fafb3dcf560d5653bfbfce6f732b8ba",
-          "bytes": 2620
+          "sha256": "4fed13e4bc41e326c600703ca96d8c8d2df65a04c819a964013efb4af51cddf4",
+          "bytes": 3702
         },
         {
-          "url": "https://developers.openai.com/codex/overview.md",
-          "path": "overview.md",
+          "url": "https://learn.chatgpt.com/docs/permission-modes.md",
+          "path": "permission-modes.md",
           "status": "ok",
-          "sha256": "00c3a95eed5b5b137128e111f835f5414aa10a281264b3553638a3683c92eda8",
-          "bytes": 2540
+          "sha256": "f1191f4dc5e691d7e1ac926ba85ba4b06cf487eac4f2ac4ece84bfed7c35d934",
+          "bytes": 2340
         },
         {
-          "url": "https://developers.openai.com/codex/permissions.md",
+          "url": "https://learn.chatgpt.com/docs/permissions.md",
           "path": "permissions.md",
           "status": "ok",
-          "sha256": "61ff6a6b55bd79dfd5e2801ec3e7db26def65e478e1c1278146ef2d1a52a5588",
-          "bytes": 33801
+          "sha256": "b8167951b670a34acd7065233d2e8c2a4704e27976bba6624ec12f2523ac308e",
+          "bytes": 36814
         },
         {
-          "url": "https://developers.openai.com/codex/plugins.md",
+          "url": "https://learn.chatgpt.com/docs/personalize.md",
+          "path": "personalize.md",
+          "status": "ok",
+          "sha256": "cbea8c4f692e00d1861bc632102694f01f499b277aecb35412b643010ef63f35",
+          "bytes": 2421
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/pets.md",
+          "path": "pets.md",
+          "status": "ok",
+          "sha256": "8a5ba6f90679e3b2869b58f1b512807748b48b45be225e7c4152af94775221f6",
+          "bytes": 4812
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/plugins.md",
           "path": "plugins.md",
           "status": "ok",
-          "sha256": "8b912d939a4b846b421f354067985f4d748857ae20ed8fa789cad958f80e6ec1",
-          "bytes": 6167
+          "sha256": "443e2250ec11e193fd307969c3da13e2e32dad3fe83689745bb215659eeaaf34",
+          "bytes": 12934
         },
         {
-          "url": "https://developers.openai.com/codex/plugins/build.md",
-          "path": "plugins/build.md",
-          "status": "ok",
-          "sha256": "4ee6b01fbb21c65367ea8e9a14c76030c71748f77fd65535bdcbb973f6eb5684",
-          "bytes": 20015
-        },
-        {
-          "url": "https://developers.openai.com/codex/pricing.md",
+          "url": "https://learn.chatgpt.com/docs/pricing.md",
           "path": "pricing.md",
           "status": "ok",
-          "sha256": "d54abb2fc26253d081dd103c3e65821962182c16cc346d5861446736c96df37b",
-          "bytes": 48308
+          "sha256": "716bbbbcff0d59edcf42e60decb8f472e0c3842dbf116bc9e082d3ff6cf8550f",
+          "bytes": 46945
         },
         {
-          "url": "https://developers.openai.com/codex/prompting.md",
+          "url": "https://learn.chatgpt.com/docs/projects.md",
+          "path": "projects.md",
+          "status": "ok",
+          "sha256": "45434e931cf437ea3580da7a9e1253aa4989e8a2bbf8f42ddd5ac851a6c7ae36",
+          "bytes": 13002
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/prompting.md",
           "path": "prompting.md",
           "status": "ok",
-          "sha256": "07be122341a7f89b57b9a0ec1a5a7cae5cd8d2fbcb8acfb3bc22c5e57e7b6588",
-          "bytes": 6055
+          "sha256": "14094ff89891aa445714020e19e35b2107fe4122bf67bc1ce89d132e0d1e9325",
+          "bytes": 22820
         },
         {
-          "url": "https://developers.openai.com/codex/quickstart.md",
+          "url": "https://learn.chatgpt.com/docs/quickstart.md",
           "path": "quickstart.md",
           "status": "ok",
-          "sha256": "459281f19389096b9a8f1ceac37ca7c84e9b610dc834bc86eaa1a7b09f1a91b4",
-          "bytes": 19444
+          "sha256": "b9572c5a5c84d0718201adbcccfd6dbf2803532b794b54486db3424391825031",
+          "bytes": 5928
         },
         {
-          "url": "https://developers.openai.com/codex/record-and-replay.md",
-          "path": "record-and-replay.md",
+          "url": "https://learn.chatgpt.com/docs/reference/commands.md",
+          "path": "reference/commands.md",
           "status": "ok",
-          "sha256": "d93f775603d2c2ea686bbcc806c4134749bfc7b08bf58bcbbf078b5b88863037",
-          "bytes": 3406
+          "sha256": "d061b78e320212bea5dcf747e5b8b28b773e2ebe952f6679277bb902b9e46b53",
+          "bytes": 26567
         },
         {
-          "url": "https://developers.openai.com/codex/remote-connections.md",
+          "url": "https://learn.chatgpt.com/docs/reference/settings.md",
+          "path": "reference/settings.md",
+          "status": "ok",
+          "sha256": "6afa1f7618f36794048fd4f43a03015d1b615d4dd6975d7c2ed8736dffc84e05",
+          "bytes": 4747
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/reference/troubleshooting.md",
+          "path": "reference/troubleshooting.md",
+          "status": "ok",
+          "sha256": "f081cd8867de652c0bcd189461c1e5c60075e7203517f05670fc4c953318b24d",
+          "bytes": 6062
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/remote-connections.md",
           "path": "remote-connections.md",
           "status": "ok",
-          "sha256": "42ae7a4917fbfe2babcd8575dbbb64492cf2b84d9697af6738ebd8fcf9679cea",
-          "bytes": 14001
+          "sha256": "19a79b028749cdbca6b447c91ad8d5d256ec8eaf607ccaf9c2bc0ceb4218a524",
+          "bytes": 12517
         },
         {
-          "url": "https://developers.openai.com/codex/rules.md",
-          "path": "rules.md",
+          "url": "https://learn.chatgpt.com/docs/remote.md",
+          "path": "remote.md",
           "status": "ok",
-          "sha256": "a4888d1e807734d4761ad0c0a55eba8b8b16d057d21de488b4c18f2668d598e0",
-          "bytes": 6049
+          "sha256": "f66dfd08d0d185f586030b728bd18eadfc2abf0346fe37991113ccda8bf18720",
+          "bytes": 3194
         },
         {
-          "url": "https://developers.openai.com/codex/sdk.md",
-          "path": "sdk.md",
+          "url": "https://learn.chatgpt.com/docs/sandboxing.md",
+          "path": "sandboxing.md",
           "status": "ok",
-          "sha256": "6a04d743c1cc5a87f079a752f1d8975fb20136d0cd6fe44db4cbc04a11f5a760",
-          "bytes": 3815
+          "sha256": "05ac2be95cbdbe978db2d0afa5f87467ad1798c7e0b29569cedb60eb65361a60",
+          "bytes": 11147
         },
         {
-          "url": "https://developers.openai.com/codex/security.md",
+          "url": "https://learn.chatgpt.com/docs/sandboxing/auto-review.md",
+          "path": "sandboxing/auto-review.md",
+          "status": "ok",
+          "sha256": "b7cb761a2fa5f9ce61ff39aed17cac2aa17599d1e6de04c3753d7a1bf608a45d",
+          "bytes": 13216
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security-administration.md",
+          "path": "security-administration.md",
+          "status": "ok",
+          "sha256": "b46b080caf23c247b190079f4048b135cfefaaf830f2d5e02c8f23cb8bc150f2",
+          "bytes": 4900
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security.md",
           "path": "security.md",
           "status": "ok",
-          "sha256": "2255a1d04492e41d502c5fbc3ba951a27b8d3b913ad7c3603e8145a87842adaa",
-          "bytes": 3395
+          "sha256": "9ed33a5bcbe958043034d9a4601d1d04ff3a9297da48ac35939fb32c99cd803e",
+          "bytes": 7388
         },
         {
-          "url": "https://developers.openai.com/codex/security/faq.md",
+          "url": "https://learn.chatgpt.com/docs/security/cli.md",
+          "path": "security/cli.md",
+          "status": "ok",
+          "sha256": "4c1de6a397f79d824c0ccc5d9aa6e9a22f90cba5e2d14b29b0b693a3b89aac91",
+          "bytes": 14881
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/cli/bulk-scans.md",
+          "path": "security/cli/bulk-scans.md",
+          "status": "ok",
+          "sha256": "0b2f31b0713d264151b3ff594dc00dc8762019a986d224a6cf75699ea0b0fab0",
+          "bytes": 11858
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/cli/ci.md",
+          "path": "security/cli/ci.md",
+          "status": "ok",
+          "sha256": "899786cb8d3ec9793f552c155b82daf86dc14079b425ad93e8fa5b3de826b3a9",
+          "bytes": 16326
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/cli/ci/gitlab.md",
+          "path": "security/cli/ci/gitlab.md",
+          "status": "ok",
+          "sha256": "6cee3488272fbb44cf20ad4c7e293bffa4745adfc6906c54f82e139ba5cb1fb4",
+          "bytes": 18797
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/cli/faq.md",
+          "path": "security/cli/faq.md",
+          "status": "ok",
+          "sha256": "36c1a530811088e0f8284d624606171962c7fcae1e64f76d70dae89d347d97f4",
+          "bytes": 9641
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/cli/reference.md",
+          "path": "security/cli/reference.md",
+          "status": "ok",
+          "sha256": "7935b30cb1309d9d76e706d4ac54e0103df760b94c4bc79dc5745d1158f9abb9",
+          "bytes": 44592
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/faq.md",
           "path": "security/faq.md",
           "status": "ok",
-          "sha256": "8f2dfe15ce21cb25b274710ab88e66893596c12a7cac8958f43794e1c3916609",
-          "bytes": 6525
+          "sha256": "36ecfa5f99341e58dc9fb95c58ad364d700c628ddfffd2d368c7803c0aa44c0f",
+          "bytes": 7043
         },
         {
-          "url": "https://developers.openai.com/codex/security/plugin.md",
+          "url": "https://learn.chatgpt.com/docs/security/plugin.md",
           "path": "security/plugin.md",
           "status": "ok",
-          "sha256": "124a3326b025f1402ac2182b6378bf204c426f09f0a14a1020017beac6b68dd6",
-          "bytes": 5306
+          "sha256": "5215c8143c5331e4ea975365b0c1b41fcd6ac2361a67699f5f54edf1166c940d",
+          "bytes": 8229
         },
         {
-          "url": "https://developers.openai.com/codex/security/plugin/changelog.md",
+          "url": "https://learn.chatgpt.com/docs/security/plugin/changelog.md",
           "path": "security/plugin/changelog.md",
           "status": "ok",
-          "sha256": "f1a6f7ecfb7bb9f9c543ac23cfa62e72608417b5243966da981443bd8c07e7da",
-          "bytes": 2162
+          "sha256": "3f79fe49eb121de643d1ec90351db2455285c503dbe1a311282a5ee12e89a7b6",
+          "bytes": 17001
         },
         {
-          "url": "https://developers.openai.com/codex/security/plugin/code-changes.md",
+          "url": "https://learn.chatgpt.com/docs/security/plugin/code-changes.md",
           "path": "security/plugin/code-changes.md",
           "status": "ok",
-          "sha256": "da57fec212953b02228c73bf8f6bc20fea5a665213ab6258f508000577c1c2ac",
-          "bytes": 3891
+          "sha256": "57f8098f8c437c4c91714b74b695d485a7fd662195259753d689326cdbdd3518",
+          "bytes": 15523
         },
         {
-          "url": "https://developers.openai.com/codex/security/plugin/deep-scans.md",
+          "url": "https://learn.chatgpt.com/docs/security/plugin/deep-scans.md",
           "path": "security/plugin/deep-scans.md",
           "status": "ok",
-          "sha256": "6f4dfe7a127da0253714033242d6b7bc4a26b2ad1e56261123468d6758e413ab",
-          "bytes": 3228
+          "sha256": "c2ee8ae72f255516757a38206713cf03a6b4289ba32e0e0ffd8869a737a37b36",
+          "bytes": 6869
         },
         {
-          "url": "https://developers.openai.com/codex/security/plugin/export-findings.md",
+          "url": "https://learn.chatgpt.com/docs/security/plugin/export-findings.md",
           "path": "security/plugin/export-findings.md",
           "status": "ok",
-          "sha256": "49cb55bc9787de5cde931881f9391f22a837035169a7068a60f9429d8c7ab20f",
-          "bytes": 5695
+          "sha256": "095eb2ea960ccae568750ca01f1193f4eba3ba5a70fd481a08104c209c6bef0c",
+          "bytes": 7271
         },
         {
-          "url": "https://developers.openai.com/codex/security/plugin/fix-findings.md",
+          "url": "https://learn.chatgpt.com/docs/security/plugin/fix-findings.md",
           "path": "security/plugin/fix-findings.md",
           "status": "ok",
-          "sha256": "d0a3cd0615c16a9c3c70c25007c6514df1bcff0e0408cdef606f86213b0b8811",
-          "bytes": 5309
+          "sha256": "168d2211bc0a8c7e9c13dfbb65ca69782ce011695d610213044a23c885dda4bc",
+          "bytes": 7480
         },
         {
-          "url": "https://developers.openai.com/codex/security/plugin/scans.md",
+          "url": "https://learn.chatgpt.com/docs/security/plugin/scans.md",
           "path": "security/plugin/scans.md",
           "status": "ok",
-          "sha256": "20f274ce684f810c85ff4517c889bc2f2bb722b2a54f3bb4c66810b6dd83c2e8",
-          "bytes": 4862
+          "sha256": "d633f8f295bb35d1a48f5be7cc1cdba6cf47f9a611ab149a3ac4eb8e1ba015dd",
+          "bytes": 7245
         },
         {
-          "url": "https://developers.openai.com/codex/security/plugin/triage-backlog.md",
+          "url": "https://learn.chatgpt.com/docs/security/plugin/security-hardening.md",
+          "path": "security/plugin/security-hardening.md",
+          "status": "ok",
+          "sha256": "1737b7707e9fc0dee76b5ed7fbe250ea996324883c2bb03681e12b13097bbc7c",
+          "bytes": 3150
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/plugin/triage-backlog.md",
           "path": "security/plugin/triage-backlog.md",
           "status": "ok",
-          "sha256": "2556b32d479b050739622f6a993f82914fb996028ba5ed4b8407542eefb88c09",
-          "bytes": 10928
+          "sha256": "a2d2a44e4c8b22efe57c2f75daf9c2edf90833f8779639e91b0b8c78991c78f3",
+          "bytes": 11137
         },
         {
-          "url": "https://developers.openai.com/codex/security/setup.md",
+          "url": "https://learn.chatgpt.com/docs/security/plugin/vulnerability-reports.md",
+          "path": "security/plugin/vulnerability-reports.md",
+          "status": "ok",
+          "sha256": "8c984c5e82e7d469b6e70b7f63391ca773ac87dfec1fc49956d34e09c630f294",
+          "bytes": 2947
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/plugin/workbench.md",
+          "path": "security/plugin/workbench.md",
+          "status": "ok",
+          "sha256": "8e5a1c7f15d37c095434c05f8783ede9f81aee513bab70769df8fbcc18b8aa36",
+          "bytes": 4948
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/sdk.md",
+          "path": "security/sdk.md",
+          "status": "ok",
+          "sha256": "96603bc0348825b1f0e6ef1effb8d975fcad841d2d03ec66fb4560f94cc3f958",
+          "bytes": 20004
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/security-review.md",
+          "path": "security/security-review.md",
+          "status": "ok",
+          "sha256": "5609f7f9fb67b51696c525e3fb6b77285991d7ec0dd5756ee274b177255d352b",
+          "bytes": 4544
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/security/setup.md",
           "path": "security/setup.md",
           "status": "ok",
-          "sha256": "528736050e7144aea5a9e3022d77cc0f76c6d0a813c3089aa35a194f2e0b3a3c",
-          "bytes": 5130
+          "sha256": "b4a1507b12aba6f962aa1a9f8aaefef2e4f4291f017daa22e5f9827ae7cb2815",
+          "bytes": 4805
         },
         {
-          "url": "https://developers.openai.com/codex/security/threat-model.md",
+          "url": "https://learn.chatgpt.com/docs/security/threat-model.md",
           "path": "security/threat-model.md",
           "status": "ok",
-          "sha256": "4cc0827239c67dabc95841709827e06e96b5af491857629a1a8f5fe0444c00a2",
-          "bytes": 1995
+          "sha256": "69902afec1850e6d8e5580cf4a8498fa8d000dda40b6a7ee185f18eb0a80d01a",
+          "bytes": 2188
         },
         {
-          "url": "https://developers.openai.com/codex/sites.md",
+          "url": "https://learn.chatgpt.com/docs/sites.md",
           "path": "sites.md",
           "status": "ok",
-          "sha256": "41080a4ebf38737e905978f76729e55022b7080a33d1d8c537fb4c42f06fb97b",
-          "bytes": 8990
+          "sha256": "7a7625a6528474e6708284878f3eaed471e4b1138a71dadffca1dff7612a72f9",
+          "bytes": 21054
         },
         {
-          "url": "https://developers.openai.com/codex/skills.md",
-          "path": "skills.md",
+          "url": "https://learn.chatgpt.com/docs/skills-and-plugins.md",
+          "path": "skills-and-plugins.md",
           "status": "ok",
-          "sha256": "e901f7883b203763bb35b72f53147149d2fc84497d4418a7e9bf694260c0c7ef",
-          "bytes": 9614
+          "sha256": "c9f7b761bb398e50793f2f1454be3875afeb27379bbf045d978cccc732f949ce",
+          "bytes": 4907
         },
         {
-          "url": "https://developers.openai.com/codex/speed.md",
-          "path": "speed.md",
+          "url": "https://learn.chatgpt.com/docs/third-party/github.md",
+          "path": "third-party/github.md",
           "status": "ok",
-          "sha256": "d8d29f978e73fa10f586f1ba3a17e2d3e3bd609100a9c0dd678bf649cc725f19",
-          "bytes": 1297
+          "sha256": "59631d0cd574e81b8121acecc9bb93b6bc7df5aac3a1042ad0c169d6bf0f21c7",
+          "bytes": 6546
         },
         {
-          "url": "https://developers.openai.com/codex/subagents.md",
-          "path": "subagents.md",
+          "url": "https://learn.chatgpt.com/docs/third-party/gitlab.md",
+          "path": "third-party/gitlab.md",
           "status": "ok",
-          "sha256": "bbf85a0ed997360f5021c08679956a5480fa40b76a8c2510048cc70ab20d8b62",
-          "bytes": 14171
+          "sha256": "97545bad453e5e0963386c2956d056e1bf9089ecf1a44b2abe7ced904f75fd6f",
+          "bytes": 11243
         },
         {
-          "url": "https://developers.openai.com/codex/videos.md",
-          "path": "videos.md",
+          "url": "https://learn.chatgpt.com/docs/third-party/linear.md",
+          "path": "third-party/linear.md",
           "status": "ok",
-          "sha256": "b72e3670108621ffc4ef92c40515b8c5c8749b7847954fd9ebb2b595705338f9",
-          "bytes": 1280
+          "sha256": "2790cf3bb4d2cad5f58b8320ee46c69ca3ff971f751e6117d64d55cdc5f77552",
+          "bytes": 5501
         },
         {
-          "url": "https://developers.openai.com/codex/windows.md",
-          "path": "windows.md",
+          "url": "https://learn.chatgpt.com/docs/third-party/slack.md",
+          "path": "third-party/slack.md",
           "status": "ok",
-          "sha256": "ab8a6a5054f1f651c60ae64fae90607db5617d5e748f7b927c6ce281648e2f2c",
-          "bytes": 14106
+          "sha256": "de4c6d9936752a3bd6b7fbe4ac62b301aa539b46f6a1022145d73e3cbf9c2c5b",
+          "bytes": 3782
         },
         {
-          "url": "https://developers.openai.com/codex/workflows.md",
-          "path": "workflows.md",
+          "url": "https://learn.chatgpt.com/docs/use-chatgpt.md",
+          "path": "use-chatgpt.md",
           "status": "ok",
-          "sha256": "9bd9fe21e038fc24d69d79cbd22dd33fecf07d99cc9dd180470d98313e51b4c6",
-          "bytes": 10965
+          "sha256": "02e9f54f97db70d9a7f2b72dac02958c25abfe958dd392ca9160a950047b2602",
+          "bytes": 14465
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/visualizations.md",
+          "path": "visualizations.md",
+          "status": "ok",
+          "sha256": "350ec92e6799d112ba33b4a2b625831ddb30de3b4be9f8732f6e629c02917237",
+          "bytes": 6624
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/web-search.md",
+          "path": "web-search.md",
+          "status": "ok",
+          "sha256": "06cdc532ac8c4e520b36f4cc6cba79b3b0e180f5f992dfc9e395e10cfa93a6e4",
+          "bytes": 3514
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/web.md",
+          "path": "web.md",
+          "status": "ok",
+          "sha256": "36419d3d36709754f486ec863efdc1ad4826d2a19d64f14e3e9a911469b07ec4",
+          "bytes": 4264
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/webmcp.md",
+          "path": "webmcp.md",
+          "status": "ok",
+          "sha256": "0fead1ed6106947f8d8edde5d7e2da00c0dec8bcf8fd0868c880c16e0824001d",
+          "bytes": 8306
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/whats-new.md",
+          "path": "whats-new.md",
+          "status": "ok",
+          "sha256": "71e412250358f9f4f8cdf08f0cde60cb1854caf0dafbef9481d5cd89aec20e8f",
+          "bytes": 50055
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/windows/windows-app.md",
+          "path": "windows/windows-app.md",
+          "status": "ok",
+          "sha256": "47b510077cd7d87963018fede08c03335b26b7213fad3a27e81f375bec9c66a8",
+          "bytes": 9407
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/windows/windows-sandbox.md",
+          "path": "windows/windows-sandbox.md",
+          "status": "ok",
+          "sha256": "17087bca9f9d1d5d8b5108fd548e4a85bc697af900b4ee2b065bf1f4fe602ad3",
+          "bytes": 11207
+        },
+        {
+          "url": "https://learn.chatgpt.com/docs/windows/wsl.md",
+          "path": "windows/wsl.md",
+          "status": "ok",
+          "sha256": "96e8abd54c37f44f864108c1ae20d3d1d711651e6f0b3f79e8ffd73006f286ae",
+          "bytes": 3393
         }
       ]
     },

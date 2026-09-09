@@ -11,7 +11,7 @@
 | **claude-code** | code.claude.com | `/llms.txt`（含 Docs + Changelog，給 `.md` 直連）+ `/blog` 索引 | 抓 `.md`；blog 無 `.md` 時 HTML 抽取 | `ok`（verbatim md） |
 | **opencode** | opencode.ai | `/sitemap.xml` | url 補 `.md` 結尾 | `ok`（verbatim md）；無 `.md` 匯出的頁（多為各語系 policies/references + section 根）標 `fail` |
 | **zcode** | zcode.z.ai | 從 `/cn/docs/welcome` SSR nav 抽連結（該站是 Next.js SPA，`/sitemap.xml`/`/llms.txt` 回傳假 shell，不可用） | SSR-HTML 抽取純文字 | `extracted-html`（含 sidebar nav chrome，非 verbatim） |
-| **codex** | developers.openai.com | `/codex/llms.txt`（Codex 專用 index，列 `.md` 直連） | 抓 `.md`（verbatim）；relpath 去冗餘 `codex/` 前綴 | `ok`（verbatim md） |
+| **codex** | learn.chatgpt.com | `/docs/llms.txt`（ChatGPT+Codex 合併文檔集 index，列 `.md` 直連；developers.openai.com/codex/* 已 308 導向此） | 抓 `.md`（verbatim）；relpath 去冗餘 `docs/` 前綴 | `ok`（verbatim md） |
 | **meta** | dev.meta.ai | `/docs/llms.txt`（站無 root llms.txt，index 在 `/docs/` 下） | 抓 `.md`（verbatim）；relpath 去冗餘 `docs/` 前綴 | `ok`（verbatim md） |
 
 > 五站**都不需 Playwright**：claude/opencode/codex/meta 有 markdown 端點，zcode 雖 CSR 但 doc 路由有 SSR 內容 + nav。
@@ -27,14 +27,14 @@ ref-docs/harness/
 ├── claude-code/       # docs/en/... + blog/...
 ├── opencode/          # docs/<locale>/...
 ├── zcode/             # cn/docs/...
-├── codex/             # <page>.md（relpath 去冗餘 codex/ 前綴）
+├── codex/             # <section>/<page>.md（合併文檔集區段巢狀；relpath 去冗餘 docs/ 前綴）
 └── meta/              # <page>.md（Muse Code/Model API/Glimmer；relpath 去冗餘 docs/ 前綴）
 ```
 
 ## Refresh
 
 ```bash
-uv run python ref-docs/harness/crawl.py                            # 全三站
+uv run python ref-docs/harness/crawl.py                            # 全五站
 uv run python ref-docs/harness/crawl.py --source claude-code       # 單站（merge 進既有 manifest，不 clobber 其他）
 uv run python ref-docs/harness/crawl.py --source zcode --limit 3   # smoke test
 ```

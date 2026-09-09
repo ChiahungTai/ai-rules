@@ -1,147 +1,228 @@
 # Codex Security plugin quickstart
 
-Codex Security is a security-review plugin for Codex that scans your code for
-vulnerabilities, validates plausible findings, and presents evidence and
-remediation guidance in a reviewable workspace. Use it to find security issues
-in code you own or have authorization to assess before they reach production.
+> For the complete documentation index, see [llms.txt](https://learn.chatgpt.com/llms.txt). Markdown versions of documentation pages are available by appending `.md` to the page URL.
 
-This quickstart takes you through one recommended first run: an ordinary,
-read-only scan of a local repository in the Codex app.
+Codex Security scans your code for vulnerabilities and validates plausible
+findings. For each reportable issue, it gives you the evidence and remediation
+guidance you need to review the result. Scan only code you own or have
+permission to assess.
 
-This page covers the plugin that runs in a local Codex thread. To scan a
-  connected GitHub repository in Codex web, see [Codex Security cloud
-  setup](https://developers.openai.com/codex/security/setup).
+Follow this quickstart to install the plugin and run a standard, read-only scan
+of a local repository in Codex.
+
+This page covers the Codex Security plugin in the desktop app or Codex CLI. To
+  scan a connected GitHub repository in Codex cloud, see [Codex Security cloud
+  setup](https://learn.chatgpt.com/docs/security/setup).
 
 ## Install the plugin
 
-Open the repository you want to assess in the Codex app, then install Codex
-Security:
+<ContentModeSwitch group="codex-surface" id="app">
 
-<div className="not-prose my-6">
-  <ButtonLink
-    href="codex://plugins/install/codex-security?marketplace=openai-curated"
-    color="primary"
-    variant="solid"
-    size="lg"
-    pill
-  >
-    Install the Codex Security plugin
-  </ButtonLink>
-</div>
+1. Open [Codex in the ChatGPT desktop app](https://learn.chatgpt.com/docs/app).
+2. Open **Plugins**, search for **Codex Security**, or use the button below:
 
-After installation, start a new thread in that repository. Codex loads plugins
-when the thread starts, so don't continue in a thread that was already open.
+   
+
+     <ButtonLink
+       href="codex://plugins/install/codex-security?marketplace=openai-curated"
+       color="primary"
+       variant="solid"
+       size="lg"
+       pill
+     >
+       Install the Codex Security plugin
+     </ButtonLink>
+   
+
+
+3. Confirm the plugin is enabled, then open **Security** in the sidebar.
+
+</ContentModeSwitch>
+
+<ContentModeSwitch group="codex-surface" id="cli">
+
+1. In your terminal, go to the repository you want to assess and start Codex:
+
+```bash
+   codex
+```
+
+2. Enter `/plugins`, search for **Codex Security**, and select **Install
+   plugin**.
+3. Enter `/new` to start a new chat for the repository.
+
+</ContentModeSwitch>
+
+
+
+Check the [plugin changelog](https://learn.chatgpt.com/docs/security/plugin/changelog) before you rely
+  on a feature or start a long-running scan. If **Security** doesn't appear in
+  the desktop-app sidebar, update the app and plugin and confirm that the plugin
+  is enabled.
 
 ## Run your first scan
 
-For the best scan quality, use `gpt-5.5`
-with `high` or `xhigh` reasoning effort.
+For the best scan quality, use `gpt-5.6-sol`
+with `xhigh` reasoning effort.
 
-<VideoPlayer
-  src="/videos/codex/security/scan-setup-to-findings.mp4"
-  poster="/videos/codex/security/scan-setup-to-findings-poster.webp"
-/>
+<ContentModeSwitch group="codex-surface" id="app">
+
+<figure className="not-prose my-8">
+  <CodexScreenshot
+    alt="Native Codex Security workbench showing the new scan setup before a repository scan starts"
+    lightSrc={scanOverview.src}
+    darkSrc={scanOverviewDark.src}
+    maxHeight="520px"
+  />
+  <figcaption className="mt-3 text-sm text-secondary">
+    Choose a repository and configure a new security scan before you start it.
+  </figcaption>
+</figure>
 
 <WorkflowSteps variant="headings">
 
-1. Ask for an ordinary scan
+1. Open the scan setup
 
-   Send this prompt in the new thread:
+   Select **Security** in the sidebar, open **Scans**, and select **+ Scan**.
 
-   ```text
-   Run a Codex Security scan on this repository.
-   ```
+2. Choose the codebase and scan area
 
-2. Confirm the setup
+   Select an existing repository or use another folder. Choose **Codebase**,
+   leave **Deep scan** off, and select the entire repository or one folder.
+   Confirm that the branch and revision identify the code you intended to scan.
 
-   Codex opens a setup workspace before it starts. For your first run, use these
-   settings:
-   - **Scan type:** `Codebase`
-   - **Deep scan:** Off
-   - **Scan area:** `Entire codebase`
-   - **Threat model scoping guidance:** Leave blank unless you already know a
-     specific attack vector or application area that deserves priority.
+3. Add relevant context
 
-   Confirm that **Codebase**, **Current branch**, and **Last commit** identify
-   the repository you intended to scan. Then select **Start scan**.
+   Choose the model and reasoning effort. Open **Additional context** only when
+   you need to describe a specific attack vector, security-sensitive area, or
+   repository detail that should guide the review.
 
    <figure className="not-prose my-6">
-     <div className="overflow-hidden rounded-xl border border-subtle bg-surface">
-       <img
-         src={scanSetup.src}
-         alt="Codex Security setup workspace configured to scan an entire codebase"
-         className="block h-auto w-full"
-       />
-     </div>
+     <CodexScreenshot
+       alt="Native Codex Security scan setup with additional context enabled and example attack vectors, focus areas, and security guidance"
+       lightSrc={scanSetup.src}
+       darkSrc={scanSetupDark.src}
+       maxHeight="460px"
+     />
      <figcaption className="mt-3 text-sm text-secondary">
-       Configure the scan target, scan area, branch, and optional threat model
-       guidance before starting the scan.
+       Turn on additional context to describe attack vectors, focus areas, and
+       relevant security guidance.
      </figcaption>
    </figure>
 
-3. Let the scan finish
+4. Start the scan
 
-   The scan can take time. Keep the thread running until the workspace reports
-   completion. If Codex identifies a configuration limitation, review the exact
-   limitation and proposed change before allowing it to update your
-   configuration.
+   Select **Start scan** and follow the scan phases in the Security workbench.
+   Select **View activity** to inspect the Codex task that performs the scan.
 
-4. Review the result
+5. Review the result
 
-   Use the UI to browse findings or open the generated report for a complete,
-   portable review.
+   Open the completed scan to inspect findings, coverage, and available report
+   artifacts. Use **Findings** to review issues across scans or **Repositories**
+   to inspect a repository's scan history.
 
    <figure className="not-prose my-6">
-     <div className="overflow-hidden rounded-xl border border-subtle bg-surface">
-       <img
-         src={findingsWorkspace.src}
-         alt="Completed Codex Security findings workspace for OWASP Juice Shop"
-         className="block h-auto w-full"
-       />
-     </div>
+     <CodexScreenshot
+       alt="Completed Codex Security scan showing findings in the native workbench"
+       lightSrc={findingsWorkspace.src}
+       darkSrc={findingsWorkspaceDark.src}
+       maxHeight="520px"
+     />
      <figcaption className="mt-3 text-sm text-secondary">
-       Browse findings by severity, category, directory, patch status, and
-       review status.
+       Review scan results, findings, and coverage in the Security workbench.
      </figcaption>
    </figure>
 
 </WorkflowSteps>
 
+</ContentModeSwitch>
+
+<ContentModeSwitch group="codex-surface" id="cli">
+
+<WorkflowSteps variant="headings">
+
+1. Ask for a standard scan
+
+   Send this prompt in the new chat:
+
+```text
+   Run a Codex Security scan on this repository.
+```
+
+2. Let the scan finish
+
+   Codex runs the scan in the terminal without opening a setup workspace. Keep
+   the task running until Codex reports that it is complete. If Codex identifies
+   a configuration limitation, review the limitation and the exact proposed
+   change before you approve a configuration update.
+
+3. Review the result
+
+   Review the summary in the terminal, then open the generated `report.md` for
+   the complete result.
+
+</WorkflowSteps>
+
+</ContentModeSwitch>
+
+
+
 ## What the scan creates
 
-Every completed scan opens a findings workspace. Use it to review findings and
-coverage without inspecting raw artifacts. The scan also creates:
+<ContentModeSwitch group="codex-surface" id="app">
 
-- `report.md`, a complete portable report for sharing or archiving.
+Completed scans remain available in **Scans**. Review their findings and
+coverage in the Security workbench, or inspect related findings and repository
+history in **Findings** and **Repositories**. The scan also creates the files
+below.
+
+</ContentModeSwitch>
+
+<ContentModeSwitch group="codex-surface" id="cli">
+
+Every completed scan reports a summary in the terminal and creates the files
+below.
+
+</ContentModeSwitch>
+
+
+
+- `report.md`, the primary readable entry point to the scan results.
+- `findings/<slug>/`, when detailed vulnerability reports and supporting
+  proof-of-concept files are available.
+- `hardening/`, when structural hardening guidance and supporting proposals or
+  diagrams are available.
 - Structured scan data in `scan-manifest.json`, `findings.json`, and
-  `coverage.json` for automation and integrations. You normally don't need to
-  open these files yourself.
+  `coverage.json` for automation and integrations. You can review scan results
+  without opening these files.
+
+Keep the full scan directory together when sharing or archiving results so the
+links from `report.md` continue to work.
 
 ## Choose your next workflow
 
-- [Run a standard or scoped scan](https://developers.openai.com/codex/security/plugin/scans) when you want
-  to scan a repository or one folder with the default workflow.
-- [Run a deep scan](https://developers.openai.com/codex/security/plugin/deep-scans) when you need a more
-  comprehensive scan and can wait longer for it to finish.
-- [Review code changes](https://developers.openai.com/codex/security/plugin/code-changes) when the target is
-  a pull request, commit, branch range, or working-tree patch.
-- [Triage a backlog](https://developers.openai.com/codex/security/plugin/triage-backlog) when you have
-  existing security findings to review.
-- [Fix and verify a finding](https://developers.openai.com/codex/security/plugin/fix-findings) after you
+- [Use the Security workbench](https://learn.chatgpt.com/docs/security/plugin/workbench) to manage
+  saved scans, findings, repositories, and scan activity in the desktop app.
+- [Run a scan from the CLI](https://learn.chatgpt.com/docs/security/cli) if you have beta access and
+  need a repeatable terminal workflow with structured results.
+- [Run a standard or scoped scan](https://learn.chatgpt.com/docs/security/plugin/scans) to review a
+  repository or one folder with the default workflow.
+- [Assess a first scan](https://learn.chatgpt.com/docs/security/plugin/scans#assess-a-first-scan)
+  to check the results against known issues and decide when to scan again.
+- [Run a deep scan](https://learn.chatgpt.com/docs/security/plugin/deep-scans) for a more thorough scan
+  when you can allow for a longer runtime.
+- [Review code changes](https://learn.chatgpt.com/docs/security/plugin/code-changes) to assess a pull
+  request, commit, branch range, or working-tree patch.
+- [Triage a backlog](https://learn.chatgpt.com/docs/security/plugin/triage-backlog) to review existing
+  security findings.
+- [Fix and verify a finding](https://learn.chatgpt.com/docs/security/plugin/fix-findings) after you
   accept one finding for remediation.
-- [Export or track findings](https://developers.openai.com/codex/security/plugin/export-findings) when you
-  need JSON, CSV, SARIF, an approval-gated Linear, GitHub, or Jira issue, or a
-  private draft GitHub Security Advisory.
-
-## Install from Codex CLI
-
-To install the same plugin from the CLI, start Codex in the repository and open
-the plugin browser:
-
-```text
-codex
-/plugins
-```
-
-Search for **Codex Security**, select `Install plugin`, and start a new thread.
-Then use the same first-scan prompt.
+- [Export or track findings](https://learn.chatgpt.com/docs/security/plugin/export-findings) to create
+  JSON, CSV, SARIF, an approval-gated Linear, GitHub, or Jira issue, or a private
+  draft GitHub Security Advisory.
+- [Write vulnerability reports](https://learn.chatgpt.com/docs/security/plugin/vulnerability-reports)
+  to turn supplied findings, disclosure notes, source, and PoCs into
+  self-contained reports.
+- [Propose security hardening](https://learn.chatgpt.com/docs/security/plugin/security-hardening) to
+  consider structural or architectural options based on scan results or other
+  security evidence.

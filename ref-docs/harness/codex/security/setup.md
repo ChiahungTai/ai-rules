@@ -1,16 +1,20 @@
-# Codex Security setup
+# Codex Security cloud setup
 
-This page walks you from initial access to reviewed findings and remediation pull requests in Codex Security.
+> For the complete documentation index, see [llms.txt](https://learn.chatgpt.com/llms.txt). Markdown versions of documentation pages are available by appending `.md` to the page URL.
 
-Confirm you've set up Codex Cloud first. If not, see [Codex
-  Cloud](https://developers.openai.com/codex/cloud) to get started.
+This page walks you from initial access to reviewed findings and remediation
+pull requests in Codex Security cloud.
+
+Confirm you've set up Codex cloud first. If not, see [Codex
+  cloud](https://learn.chatgpt.com/docs/cloud) to get started.
 
 ## 1. Access and environment
 
-Codex Security scans GitHub repositories connected through [Codex Cloud](https://developers.openai.com/codex/cloud).
+Codex Security cloud scans GitHub repositories connected through
+[Codex cloud](https://learn.chatgpt.com/docs/cloud).
 
-- Confirm your workspace has access to Codex Security.
-- Confirm the repository you want to scan is available in Codex Cloud.
+- Confirm your workspace has access to Codex Security cloud.
+- Confirm the repository you want to scan is available in Codex cloud.
 
 Go to [Codex environments](https://chatgpt.com/codex/settings/environments) and check whether the repository already has an environment. If it doesn't, create one there before continuing.
 
@@ -21,13 +25,17 @@ Go to [Codex environments](https://chatgpt.com/codex/settings/environments) and 
   class="my-8"
 />
 
-<div class="not-prose my-8 max-w-6xl overflow-hidden rounded-xl border border-subtle bg-surface">
-  <img
-    src={createEnvironment.src}
-    alt="Codex environments"
-    class="block h-auto w-full"
-  />
-</div>
+
+
+  
+    
+
+> Illustration: Codex environments
+
+
+  
+
+
 
 ## 2. New security scan
 
@@ -51,13 +59,17 @@ To configure a repository:
 5. Choose a **history window**. Longer windows provide more context, but backfill takes longer.
 6. Click **Create**.
 
-<div class="not-prose my-8 max-w-6xl overflow-hidden rounded-xl border border-subtle bg-surface">
-  <img
-    src={createScan.src}
-    alt="Create a security scan"
-    class="block h-auto w-full"
-  />
-</div>
+
+
+  
+    
+
+> Illustration: Create a security scan
+
+
+  
+
+
 
 ## 3. Initial scans can take a while
 
@@ -77,13 +89,17 @@ Initial scan setup is automatic and thorough. This can take a few hours. Don’t
   class="my-8"
 />
 
-<div class="not-prose my-8 max-w-6xl overflow-hidden rounded-xl border border-subtle bg-surface">
-  <img
-    src={reviewThreatModel.src}
-    alt="Threat model editor in Codex Security"
-    class="block h-auto w-full"
-  />
-</div>
+
+
+  
+    
+
+> Illustration: Threat model editor in Codex Security
+
+
+  
+
+
 
 When the initial scan finishes, open the scan and review the threat model that was generated.
 After initial findings appear, update the threat model so it matches your architecture, trust boundaries, and business context.
@@ -95,7 +111,7 @@ If you want scan results to change, you can edit the threat model with your
 After initial findings appear, revisit the model so scan guidance stays aligned with current priorities.
 Keeping it current helps Codex Security produce better suggestions.
 
-For a deeper explanation of threat models and how they affect criticality and triage, see [Improving the threat model](https://developers.openai.com/codex/security/threat-model).
+For a deeper explanation of threat models and how they affect criticality and triage, see [Improving the threat model](https://learn.chatgpt.com/docs/security/threat-model).
 
 ## 5. Review findings and patch
 
@@ -113,7 +129,13 @@ You can use two views:
 - **Recommended Findings**: an evolving top 10 list of the most critical issues in the repo
 - **All Findings**: a sortable, filterable table of findings across the repository
 
-![Recommended findings view](https://developers.openai.com/codex/security/images/aardvark_recommended_findings.png)
+
+  
+
+> Illustration: Recommended findings view
+
+
+
 
 Click a finding to open its detail page, which includes:
 
@@ -135,6 +157,6 @@ You can review each finding and create a PR directly from the finding detail pag
 
 ## Related docs
 
-- [Codex Security](https://developers.openai.com/codex/security) gives the product overview.
-- [FAQ](https://developers.openai.com/codex/security/faq) covers common questions.
-- [Improving the threat model](https://developers.openai.com/codex/security/threat-model) explains how to improve scan context and finding prioritization.
+- [Codex Security](https://learn.chatgpt.com/docs/security) gives the product overview.
+- [Codex Security cloud FAQ](https://learn.chatgpt.com/docs/security/faq) covers common cloud questions.
+- [Improving the threat model](https://learn.chatgpt.com/docs/security/threat-model) explains how to improve scan context and finding prioritization.

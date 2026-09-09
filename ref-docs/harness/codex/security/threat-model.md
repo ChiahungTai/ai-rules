@@ -1,5 +1,7 @@
 # Improving the threat model
 
+> For the complete documentation index, see [llms.txt](https://learn.chatgpt.com/llms.txt). Markdown versions of documentation pages are available by appending `.md` to the page URL.
+
 Learn what a threat model is and how editing it improves Codex Security's suggestions.
 
 ## What a threat model is
@@ -25,9 +27,9 @@ That gives Codex Security a better starting point for future scans and finding p
 
 If you want to improve the results, edit the threat model first. Use it when findings are missing the areas you care about or showing up in places you don't expect. The threat model changes future scan context.
 
-Some users copy the current threat model into Codex, have a conversation to
-  improve it based on the areas they want reviewed more closely, and then paste
-  the updated version back into the web UI.
+Some users copy the current threat model into Codex, use a chat to improve it
+  based on the areas they want reviewed more closely, and then paste the updated
+  version back into the web UI.
 
 ### Where to edit
 
@@ -35,6 +37,6 @@ To review or update the threat model, go to [Codex Security scans](https://chatg
 
 ## Related docs
 
-- [Codex Security setup](https://developers.openai.com/codex/security/setup) covers repository setup and findings review.
-- [Codex Security](https://developers.openai.com/codex/security) gives the product overview.
-- [FAQ](https://developers.openai.com/codex/security/faq) covers common questions.
+- [Codex Security cloud setup](https://learn.chatgpt.com/docs/security/setup) covers repository setup and findings review.
+- [Codex Security](https://learn.chatgpt.com/docs/security) gives the product overview.
+- [Codex Security cloud FAQ](https://learn.chatgpt.com/docs/security/faq) covers common cloud questions.

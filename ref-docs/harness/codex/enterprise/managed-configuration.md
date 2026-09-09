@@ -1,79 +1,179 @@
 # Managed configuration
 
-Enterprise admins can control local Codex behavior in two ways:
+> For the complete documentation index, see [llms.txt](https://learn.chatgpt.com/llms.txt). Markdown versions of documentation pages are available by appending `.md` to the page URL.
+
+Managed configuration controls supported local runtime behavior for covered capabilities in the ChatGPT desktop app, Codex CLI, and IDE extension. Supported requirements can differ by client and version. Managed configuration doesn't grant ChatGPT workspace access, assign seats, or replace workspace role-based access control (RBAC). Use [Roles and workspace permissions](https://learn.chatgpt.com/docs/enterprise/roles-and-workspace-permissions) for workspace feature access and this page for local runtime policy.
+
+Enterprise admins can control supported local client behavior with:
 
 - **Requirements**: admin-enforced constraints that users can't override.
-- **Managed defaults**: starting values applied when Codex launches. Users can still change settings during a session; Codex reapplies managed defaults the next time it starts.
+- **Configuration defaults**: system or cloud-managed `config.toml` settings that users can override.
+- **Legacy managed defaults**: `managed_config.toml` starting values applied when a supported client launches. Users can still change settings during a run; the client reapplies these defaults the next time it starts.
+
+## Configure plugin marketplaces and defaults
+
+Define local or Git marketplaces and plugin defaults in system `config.toml`
+or the `config.toml` section of [Managed configuration](https://chatgpt.com/codex/settings/managed-configs).
+These settings are defaults, not enforced policy.
+
+See [Configuration Reference](https://learn.chatgpt.com/docs/config-file/config-reference) for configuration keys,
+[Configuration precedence](https://learn.chatgpt.com/docs/config-file/config-basic#configuration-precedence)
+for overrides, and [repo plugin settings](https://developers.openai.com/plugins/build/plugins#enable-or-disable-a-plugin-for-a-repo)
+for project-level configuration. [Workspace GitHub import and
+sync](https://learn.chatgpt.com/docs/enterprise/plugin-management) is separate.
 
 ## Admin-enforced requirements (requirements.toml)
 
-Requirements constrain security-sensitive settings (approval policy, approvals reviewer, automatic review policy, sandbox mode, permission profiles, web search mode, managed hooks, which MCP servers users can enable, and which user-configured plugin marketplace sources they can add, install from, or refresh). When resolving configuration (for example from `config.toml`, [profile files](https://developers.openai.com/codex/config-advanced#profiles), or CLI config overrides), if a value conflicts with an enforced rule, Codex falls back to a compatible value and notifies the user. If you configure an `mcp_servers` allowlist, Codex enables an MCP server only when both its name and identity match an approved entry; otherwise, Codex disables it.
+Requirements constrain security-sensitive settings (approval policy, approvals reviewer, automatic review policy, sandbox mode, permission profiles, web search mode, managed hooks, which MCP servers users can enable, and which plugin marketplace sources they can use). When resolving configuration (for example from `config.toml`, [profile files](https://learn.chatgpt.com/docs/config-file/config-advanced#profiles), or CLI config overrides), if a value conflicts with an enforced rule, the local client falls back to a compatible value and notifies the user. If you configure an `mcp_servers` allowlist, the client enables an MCP server only when both its name and identity match an approved entry; otherwise, the client disables it.
 
-Requirements can also constrain [feature flags](https://developers.openai.com/codex/config-basic/#feature-flags) via the `[features]` table in `requirements.toml`. Note that features aren't always security-sensitive, but enterprises can pin values if desired. Omitted keys remain unconstrained.
+Requirements can also constrain [feature flags](https://learn.chatgpt.com/docs/config-file/config-basic#feature-flags) via the `[features]` table in `requirements.toml`. Note that features aren't always security-sensitive, but enterprises can pin values if desired. Omitted keys remain unconstrained.
 
-For Codex 0.138.0 or later, prefer [permission profiles](https://developers.openai.com/codex/permissions)
+For Codex 0.138.0 or later, prefer [permission profiles](https://learn.chatgpt.com/docs/permissions)
 with `allowed_permission_profiles` and managed `default_permissions`. Use
 `allowed_sandbox_modes` only for legacy deployments that still configure
 `sandbox_mode`.
 
-For the exact key list, see the [`requirements.toml` section in Configuration Reference](https://developers.openai.com/codex/config-reference#requirementstoml).
+For the exact key list, see the [`requirements.toml` section in Configuration Reference](https://learn.chatgpt.com/docs/config-file/config-reference#requirementstoml).
+
+### Migrate the retired `untrusted` approval policy
+
+Codex and ChatGPT Work no longer support `approval_policy = "untrusted"`.
+Remove it from managed defaults, legacy `managed_config.toml`, and any user,
+project, profile, or startup configuration that sets it.
+
+For interactive, read-only use, select `approval_policy = "on-request"` with a
+read-only sandbox or permission profile allowed by your managed requirements.
+Commands allowed by that sandbox can run without approval.
+
+To keep stricter command approvals, omit an explicit `approval_policy`, set
+`trust_level = "untrusted"` in the project's entry in user-level
+`~/.codex/config.toml`, and keep `untrusted` in `allowed_approval_policies`.
+This also disables project-local configuration. Setting `on-request` explicitly
+overrides that policy. See
+[Migrate from the retired `untrusted` approval policy](https://learn.chatgpt.com/docs/agent-approvals-security#migrate-from-the-retired-untrusted-approval-policy)
+for examples and security tradeoffs.
 
 ### Locations and precedence
 
-Codex checks requirement sources in this order. If the same setting appears more
-than once, the first value wins:
+Each supported local client composes requirements from lower to higher precedence:
 
-1. Cloud-managed requirements (ChatGPT Business or Enterprise)
-2. macOS managed preferences (MDM) via `com.openai.codex:requirements_toml_base64`
-3. System `requirements.toml` (`/etc/codex/requirements.toml` on Unix systems, including Linux/macOS, or `%ProgramData%\OpenAI\Codex\requirements.toml` on Windows)
+1. System `requirements.toml` (`/etc/codex/requirements.toml` on Unix systems,
+   including Linux and macOS, or `%ProgramData%\OpenAI\Codex\requirements.toml`
+   on Windows).
+2. Enterprise-managed requirements delivered in the cloud config bundle.
+3. Legacy `managed_config.toml` fields that the local client reinterprets as requirements.
+4. macOS managed preferences (MDM) delivered through
+   `com.openai.codex:requirements_toml_base64`.
 
-Codex checks these sources from top to bottom. For ordinary settings and lists,
-it uses the first value it finds. A later source can still provide a setting
-that earlier sources leave unset.
+Higher-precedence layers override ordinary scalar and list values from lower
+layers. Tables merge by key, while requirements such as rules, hooks, and
+filesystem restrictions have field-specific composition behavior. Use the
+[`requirements.toml` reference](https://learn.chatgpt.com/docs/config-file/config-reference#requirementstoml)
+for the current schema instead of assuming that every field merges the same
+way.
 
-Tables combine one entry at a time. For `allowed_permission_profiles`, a later
-source can add profile names that earlier sources don't mention. If two sources
-set the same profile name, the earlier source wins.
-
-For backwards compatibility, Codex also interprets legacy `managed_config.toml` fields `approval_policy` and `sandbox_mode` as requirements (allowing only that single value).
+For backward compatibility, supported local clients reinterpret the legacy
+`approval_policy`, `approvals_reviewer`, and `sandbox_mode` fields as
+requirements. This conversion adds compatibility choices where necessary; use
+`requirements.toml` for explicit allowlists.
 
 ### Cloud-managed requirements
 
-When you sign in with ChatGPT on a Business or Enterprise plan, Codex can also fetch admin-enforced requirements from the Codex service. This is another source of `requirements.toml`-compatible requirements. This applies across Codex surfaces, including the CLI, App, and IDE Extension.
+When a user signs in with ChatGPT on a supported plan, supported local clients
+can receive admin-enforced requirements associated with the workspace. This is
+a delivery channel for `requirements.toml`-compatible policy. It doesn't grant
+workspace access or replace workspace RBAC. Authentication requirements must be
+[managed locally](#manage-authentication-locally).
 
-#### Configure cloud-managed requirements
-
-Go to the [Codex managed-config page](https://chatgpt.com/codex/settings/managed-configs).
-
-Create a new managed requirements file using the same format and keys as `requirements.toml`.
+Open [Managed configuration](https://chatgpt.com/codex/settings/managed-configs)
+to create and assign cloud-managed requirements. For example, this policy limits
+approval and sandbox choices and prompts before a supported shell entry point
+runs:
 
 ```toml
-enforce_residency = "us"
 allowed_approval_policies = ["on-request"]
 allowed_sandbox_modes = ["read-only", "workspace-write"]
 
 [rules]
 prefix_rules = [
-  { pattern = [{ any_of = ["bash", "sh", "zsh"] }], decision = "prompt", justification = "Require explicit approval for shell entrypoints" },
+  { pattern = [{ any_of = ["bash", "sh", "zsh"] }], decision = "prompt", justification = "Require explicit approval for shell entry points" },
 ]
 ```
 
-Save the configuration. Once saved, the updated managed requirements apply immediately for matching users.
-For more examples, see [Example requirements.toml](#example-requirementstoml).
+Confirm that every managed client version supports the keys you select, and
+test the policy with a small group before an organization-wide assignment. Use
+the configuration reference for the current schema and the administration
+surface for current assignment behavior.
 
-#### Assign requirements to groups
+The service selects the enterprise-managed requirement layers that apply to the
+signed-in identity. The local client evaluates those layers with the other
+requirements sources described in [Locations and precedence](#locations-and-precedence).
+Use the current administration surface for workspace-side creation and
+assignment. Don't rely on a copied group-matching algorithm; the administration
+service owns that behavior and can change it independently of the local
+requirements format.
 
-Admins can configure different managed requirements for different user groups, and also set a default fallback requirements policy.
+For supported keys and examples, see
+[Example requirements.toml](#example-requirementstoml) and the
+[`requirements.toml` reference](https://learn.chatgpt.com/docs/config-file/config-reference#requirementstoml).
 
-If a user matches more than one group-specific rule, the first matching rule applies. Codex doesn't fill unset fields from later matching group rules.
+#### How local clients apply cloud-managed requirements
 
-For example, if the first matching group rule sets only `allowed_sandbox_modes = ["read-only"]` and a later matching group rule sets `allowed_approval_policies = ["on-request"]`, Codex applies only the first matching group rule and doesn't fill `allowed_approval_policies` from the later rule.
+When a user starts a supported local client and signs in with ChatGPT on a
+supported plan, the client first checks for a valid, identity-matched cache
+entry. If no valid entry is available, the client fetches the applicable bundle
+with retries and writes a signed cache entry on success. If the request fails or
+times out and no valid cache is available, the cloud config bundle load returns
+an error rather than silently starting without the cloud-managed requirements
+layer.
 
-#### How Codex applies cloud-managed requirements locally
+After cache resolution, the client composes the cloud requirements with the
+other requirements layers described above. A background refresh can update the
+cache for a later start; it doesn't replace the requirements already loaded
+into the current process.
 
-When a user starts Codex and signs in with ChatGPT on a Business or Enterprise plan, Codex applies managed requirements on a best-effort basis. Codex first checks for a valid, unexpired local managed requirements cache entry and uses it if available. If the cache is missing, expired, corrupted, or doesn't match the current auth identity, Codex attempts to fetch managed requirements from the service (with retries) and writes a new signed cache entry on success. If no valid cached entry is available and the fetch fails or times out, Codex continues without the managed requirements layer.
+### Confirm the admin and employee experience
 
-After cache resolution, Codex enforces managed requirements as part of the normal requirements layering described above.
+Assign a person to own each managed policy, record which users or groups should
+receive it, and document the business reason for any filesystem, network,
+approval, or permission-profile restriction.
+
+Before expanding the rollout, test an approved workflow and an intentionally
+disallowed workflow with a representative user. Verify the effective settings
+in the supported client rather than assuming a workspace role or group alone
+enforces the local restriction.
+
+### Manage authentication locally
+
+Set `allowed_login_methods`, `allowed_chatgpt_workspaces`,
+`cli_auth_credentials_store`, and `chatgpt_base_url` in the local system
+`requirements.toml` or macOS MDM requirements. Codex ignores these four fields
+in cloud-managed requirements. Local authentication requirements apply before
+credentials load and before Codex retrieves cloud policy.
+
+To require ChatGPT login to an approved workspace and store credentials in the
+OS credential store, use:
+
+```toml
+allowed_login_methods = ["chatgpt"]
+allowed_chatgpt_workspaces = ["00000000-0000-0000-0000-000000000000"]
+cli_auth_credentials_store = "keyring"
+```
+
+`allowed_login_methods` accepts `chatgpt`, `api`, or both. If omitted, this setting
+doesn't restrict login methods. If set, the list must contain at least one method.
+`api` permits API authentication, including Amazon Bedrock.
+The workspace restriction also applies to
+[Codex access tokens](https://learn.chatgpt.com/docs/enterprise/access-tokens).
+
+User-configured `forced_login_method` and `forced_chatgpt_workspace_id` must
+follow the requirements. When a user selects a workspace, it must also appear
+in the managed workspace allowlist. If no workspaces match, ChatGPT login is
+unavailable. API authentication remains available when permitted. If no login method
+is available, Codex refuses to start.
+
+See the [requirements reference](https://learn.chatgpt.com/docs/config-file/config-reference#requirementstoml)
+for credential storage modes and service URL configuration.
 
 ### Example requirements.toml
 
@@ -84,6 +184,10 @@ allowed_approval_policies = ["untrusted", "on-request"]
 allowed_sandbox_modes = ["read-only", "workspace-write"]
 ```
 
+Here, `untrusted` preserves the stricter approval behavior derived from
+`trust_level = "untrusted"`; it does not make `approval_policy = "untrusted"` a
+supported explicit setting.
+
 ### Disable Appshots
 
 To disable Appshots for managed users, set the top-level `allow_appshots` requirement:
@@ -92,27 +196,32 @@ To disable Appshots for managed users, set the top-level `allow_appshots` requir
 allow_appshots = false
 ```
 
-Codex treats only `allow_appshots = false` as disabling Appshots. If the key is omitted, Appshots remain unconstrained by requirements and use normal product availability checks. App-server clients that read effective requirements through `configRequirements/read` receive the same restriction as `allowAppshots`; an omitted or `null` `allowAppshots` value doesn't disable Appshots.
+Where Appshots are available, `allow_appshots = false` disables them. If you
+omit the key, requirements don't constrain Appshots, and normal product
+availability checks apply. App-server clients that read effective requirements
+through `configRequirements/read` receive the same restriction as
+`allowAppshots`; an omitted or `null` `allowAppshots` value doesn't disable
+Appshots.
 
 ### Disable device remote control
 
-To disable [device remote control](https://developers.openai.com/codex/remote-connections#pick-up-work-from-another-device)
+To disable [device remote control](https://learn.chatgpt.com/docs/remote-connections#pick-up-work-from-another-device)
 for managed users, set the top-level `allow_remote_control` requirement:
 
 ```toml
 allow_remote_control = false
 ```
 
-Codex treats only `allow_remote_control = false` as disabling device remote
-control. If the key is omitted, device remote control remains unconstrained by
-requirements and uses normal product availability checks. This requirement does
-not disable SSH remote connections.
+Where device remote control is supported, `allow_remote_control = false`
+disables it. If you omit the key, requirements don't constrain device remote
+control, and normal product availability checks apply. This requirement doesn't
+disable SSH remote connections.
 
 ### Control available permission profiles
 
 Use `allowed_permission_profiles` to control which built-in and custom
-[permission profiles](https://developers.openai.com/codex/permissions) users can select. This is the
-permission-profile equivalent of `allowed_sandbox_modes`; use the allowlist that
+[permission profiles](https://learn.chatgpt.com/docs/permissions) users can select. This is the
+permission-profile counterpart to `allowed_sandbox_modes`; use the allowlist that
 matches how your users select permissions.
 
 Permission-profile allowlists require Codex 0.138.0 or later. Codex 0.137.0 and
@@ -123,9 +232,9 @@ Use the permission-profile examples below only after every managed client runs a
 supporting release. Don't deploy managed custom profiles until the fleet upgrade
 is complete.
 
-When the table is present, it's the complete list of allowed profiles. Profiles
-set to `true` are allowed. Profiles that are omitted or set to `false` are
-denied, including built-ins added in future Codex versions.
+When present, the table is the complete list of allowed profiles. It allows
+profiles set to `true` and denies profiles omitted or set to `false`, including
+built-ins added in future Codex versions.
 
 #### Allow the standard profiles
 
@@ -193,9 +302,9 @@ built-in `:workspace` profile directly.
 
 #### Turn off a profile allowed by another source
 
-Permission allowlists combine by profile name. Because Codex checks cloud
-requirements before system requirements, cloud requirements can use `false` to
-turn off a profile allowed by the system file.
+Permission allowlists combine by profile name. Because cloud requirements have
+higher precedence than system requirements, cloud requirements can use `false`
+to turn off a profile allowed by the system file.
 
 Cloud requirements:
 
@@ -216,12 +325,12 @@ System requirements:
 ```
 
 Set `default_permissions` explicitly to an allowed profile. If it's omitted,
-Codex defaults to `:workspace` only when both `:workspace` and `:read-only` are
-explicitly allowed. When `allowed_permission_profiles` is absent, managed
-requirements don't restrict which profile names users can select. Every entry
-must name a built-in profile or a custom profile defined in a loaded config or
-requirements source. Define custom profiles in managed requirements when their
-behavior should be controlled centrally.
+the local runtime defaults to `:workspace` only when both `:workspace` and
+`:read-only` are explicitly allowed. When `allowed_permission_profiles` is
+absent, managed requirements don't restrict which profile names users can
+select. Every entry must name a built-in profile or a custom profile defined in
+a loaded config or requirements source. Define custom profiles in managed
+requirements to control their behavior centrally.
 
 ### Override sandbox requirements by host
 
@@ -238,13 +347,13 @@ hostname_patterns = ["*.devbox.example.com", "runner-??.ci.example.com"]
 allowed_sandbox_modes = ["read-only", "workspace-write"]
 ```
 
-Codex compares each `hostname_patterns` entry against the best-effort resolved
-host name. It prefers the fully qualified domain name when available and falls
-back to the local host name. Matching is case-insensitive; `*` matches any
-sequence of characters, and `?` matches one character.
+The local runtime compares each `hostname_patterns` entry against the
+best-effort resolved host name. It prefers the fully qualified domain name when
+available and falls back to the local host name. Matching is case-insensitive;
+`*` matches any sequence of characters, and `?` matches one character.
 
 The first matching `[[remote_sandbox_config]]` entry wins within the same
-requirements source. If no entry matches, Codex keeps the top-level
+requirements source. If no entry matches, the local runtime keeps the top-level
 `allowed_sandbox_modes`. Host name matching is for policy selection only; don't
 treat it as authenticated device proof.
 
@@ -262,7 +371,7 @@ For example, `allowed_web_search_modes = ["cached"]` prevents live web search ev
 <WarningTip>
   `[experimental_network]` is experimental and may change. Do not enable these
   requirements broadly across an enterprise deployment without validating them
-  on the Codex client versions and operating systems your users run. Windows
+  on the local client versions and operating systems your users run. Windows
   support is still limited; avoid applying this policy to Windows users unless
   you have tested it in your environment.
 </WarningTip>
@@ -271,32 +380,123 @@ Use `[experimental_network]` in `requirements.toml` when administrators should
 define network access requirements centrally. These requirements are separate
 from the user `features.network_proxy` toggle: they can configure sandbox
 networking without that feature flag, but they don't grant command network
-access when the active sandbox keeps networking off.
+access when the active sandbox keeps networking off. Set
+`experimental_network.enabled = true` to activate the managed proxy; domain
+rules alone do not make the proxy active.
 
 ```toml
-experimental_network.enabled = true
-experimental_network.allowed_domains = [
-  "api.openai.com",
-  "*.example.com",
-]
-experimental_network.denied_domains = [
-  "blocked.example.com",
-  "*.exfil.example.com",
-]
+[experimental_network]
+enabled = true
+managed_allowed_domains_only = true
+
+[experimental_network.domains]
+"api.openai.com" = "allow"
+"**.example.com" = "allow"
+"blocked.example.com" = "deny"
+"**.exfil.example.com" = "deny"
 ```
 
 Use `experimental_network.managed_allowed_domains_only = true` only when you
-also define administrator-owned `allowed_domains` and want that allowlist to be
-exclusive. If it's `true` without managed allow rules, user-added domain allow
-rules don't remain effective.
+also define administrator-owned `"allow"` entries in
+`[experimental_network.domains]` and want those rules to be exclusive. If it's
+`true` without managed allow rules, user-added domain allow rules don't remain
+effective. Do not combine the canonical `domains` map with the legacy
+`allowed_domains` or `denied_domains` lists.
+
+`*.example.com` matches subdomains only. `**.example.com` matches the apex
+domain and its subdomains. A matching deny rule wins over an allow rule.
 
 The domain syntax, local/private destination rules, deny-over-allow behavior,
 and DNS rebinding limitations are the same as the sandbox networking behavior
-described in [Agent approvals & security](https://developers.openai.com/codex/agent-approvals-security#network-isolation).
+described in [Agent approvals & security](https://learn.chatgpt.com/docs/agent-approvals-security#network-isolation).
+
+The proxy routes local commands that run inside the sandbox. Browser tools
+also check managed network denies and exclusive allowlists before accessing
+an origin; this is a separate policy check, not routing browser traffic through
+the command proxy. It doesn't filter web search, apps and connectors, MCP
+servers, native-app traffic, Codex service requests, or Codex cloud traffic.
+Use the controls for each surface:
+
+- Use `allowed_web_search_modes` to restrict web search.
+- Use `features.apps = false` to disable app and connector integrations, and
+  `features.plugins = false` to disable plugins where supported.
+- Use the managed `mcp_servers` approved list to restrict MCP servers.
+- Use feature requirements such as `browser_use`, `in_app_browser`, and
+  `computer_use` to restrict browser and computer-use capabilities.
+- Configure Codex cloud network access in its cloud environment settings.
+
+A command domain allowlist does not replace these capability-specific
+controls.
+
+### Control browser and Computer Use
+
+Use the `[browser_use]` and `[computer_use]` tables in `requirements.toml` to
+restrict supported desktop clients. Validate the policy on the client versions
+and operating systems in your deployment. A configured allow rule doesn't
+install a plugin, grant an operating-system permission, or approve an action
+that still requires review.
+
+For browser access, configure an origin policy. An origin includes the scheme,
+host, and optional port, such as `https://example.com` or
+`https://*.example.com:8443`. Don't include a path, query, or fragment. Unlike
+command-network domain rules, browser origin rules distinguish HTTP from HTTPS
+and match the port.
+
+This example restricts browser access to an approved site and prevents uploads
+and full Chrome DevTools Protocol (CDP) access there:
+
+```toml
+[browser_use]
+allow_history_access = false
+allow_global_persistent_approval = false
+
+[browser_use.default_origin_policy]
+access = "deny"
+
+[browser_use.origins."https://example.com"]
+access = "allow"
+uploads = "deny"
+downloads = "allow"
+full_cdp_access = "deny"
+persistent_approval = false
+access_approval_lifetime = "turn"
+```
+
+Matching origin rules are resolved per field. A matching deny wins; otherwise,
+the default origin policy supplies fields that matching rules don't specify.
+Local configuration can add restrictions but can't relax a managed deny.
+Network denies and exclusive managed network allowlists still apply.
+
+Set `browser_use.disable_auto_review = true` to disable automatic approval
+review for browser actions, or set `auto_review = "deny"` on an origin policy
+to restrict it for that origin. This controls approval handling; it doesn't
+disable model safety monitoring.
+
+For native apps, set a default access policy and identify permitted apps. For
+example, this macOS policy allows Calculator and prevents saved approvals:
+
+```toml
+[computer_use]
+default_app_access = "deny"
+allow_persistent_approval = false
+
+[computer_use.macos.bundle_ids]
+"com.apple.calculator" = "allow"
+```
+
+Windows policies can identify packaged apps with
+`computer_use.windows.aumids` or executables with
+`computer_use.windows.exes`. Executable rules require `publisher_name`,
+`product_name`, and `access`; `binary_name` is optional. Use the app's verified
+identity rather than its display name alone.
+
+See the [configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference#requirementstoml)
+for the complete fields and [locked-use restrictions](#restrict-locked-computer-use)
+for managed macOS devices.
 
 ### Pin feature flags
 
-You can also pin [feature flags](https://developers.openai.com/codex/config-basic/#feature-flags) for users
+You can also pin [feature flags](https://learn.chatgpt.com/docs/config-file/config-basic#feature-flags) for users
 receiving a managed `requirements.toml`:
 
 ```toml
@@ -304,40 +504,51 @@ receiving a managed `requirements.toml`:
 personality = true
 unified_exec = false
 
-# Disable specific Codex feature surfaces when needed.
+# Disable surface-specific features when needed.
 browser_use = false
 browser_use_full_cdp_access = false
+browser_use_external = false
 in_app_browser = false
+in_app_updates = false
 computer_use = false
 ```
 
-Use the canonical feature keys from `config.toml`'s `[features]` table. Codex normalizes the resulting feature set to meet these pins and rejects conflicting writes to `config.toml` or profile file feature settings.
+Use the canonical feature keys from `config.toml`'s `[features]` table for
+runtime features. The local runtime normalizes recognized features to meet these
+pins and rejects conflicting writes to `config.toml` or profile file feature
+settings.
 
 <a id="disable-codex-feature-surfaces"></a>
 
-- `in_app_browser = false` disables the in-app browser pane.
-- `browser_use = false` disables Browser Use and Browser Agent availability.
-- `browser_use_full_cdp_access = false` prevents users from enabling full CDP
-  access in Browser Developer mode.
+- `in_app_browser = false` disables the built-in browser pane.
+- `in_app_updates = false` disables the ChatGPT desktop app's own updater on
+  restart, where supported. It doesn't affect external package deployment or
+  extend support for older app versions. For setup and rollout guidance, see
+  [Manage app updates](https://learn.chatgpt.com/docs/enterprise/manage-app-updates).
+- `browser_use = false` disables Computer Use in browsers and Browser Agent availability.
+- `browser_use_full_cdp_access = false` disables full CDP access in the local
+  runtime, including Browser Developer mode, and prevents the ChatGPT desktop
+  app from enabling the corresponding setting.
+- `browser_use_external = false` disables external Browser Use.
 - `computer_use = false` disables Computer Use, Record & Replay, and related
   install or setup flows.
 
-If omitted, these features are allowed by policy, subject to normal client,
+If you omit these keys, policy allows the features, subject to normal client,
 platform, and rollout availability.
 
 ### Restrict locked computer use
 
-To prevent [Computer Use](https://developers.openai.com/codex/app/computer-use#locked-use) from operating
-after a managed Mac locks, add this requirement:
+To prevent users from enabling [Locked Use](https://learn.chatgpt.com/docs/computer-use#locked-use)
+on a managed Mac, add this requirement:
 
 ```toml
 [computer_use]
 allow_locked_computer_use = false
 ```
 
-This requirement doesn't enable Computer Use. It only prevents locked use on
-macOS. If you omit it, locked use remains unconstrained by requirements and is
-still subject to normal product availability and the user's local setting.
+This requirement removes the controls for enabling Locked Use. It doesn't
+turn off Locked Use if it's already enabled. If you omit it, normal product
+availability and the user's local setting still apply.
 
 ### Configure automatic review policy
 
@@ -346,9 +557,9 @@ to `["auto_review"]` to require automatic review, or include `"user"` when users
 can choose manual approval.
 
 Set `guardian_policy_config` to replace the tenant-specific section of the
-automatic review policy. Codex still uses the built-in reviewer template and
-output contract. Managed `guardian_policy_config` takes precedence over local
-`[auto_review].policy`.
+automatic review policy. The local runtime still uses the built-in reviewer
+template and output contract. Managed `guardian_policy_config` takes precedence
+over local `[auto_review].policy`.
 
 ```toml
 allowed_approval_policies = ["on-request"]
@@ -383,10 +594,10 @@ deny_read = [
 ]
 ```
 
-When deny-read requirements are present, Codex rejects full-access permissions
-and keeps local execution in a read-only or workspace sandbox so it can enforce
-them. On native Windows, managed `deny_read` applies to direct file tools; shell
-subprocess reads don't use this sandbox rule.
+When deny-read requirements are present, the local runtime rejects full-access
+permissions and keeps local execution in a read-only or workspace sandbox so it
+can enforce them. On native Windows, managed `deny_read` applies to direct file
+tools; shell subprocess reads don't use this sandbox rule.
 
 ### Enforce managed hooks from requirements
 
@@ -395,7 +606,7 @@ Use `[hooks]` for the hook configuration itself, and point `managed_dir` at the
 directory where your MDM or endpoint-management tooling installs the referenced
 scripts.
 
-To enforce managed hooks even for users who disabled hooks locally, pin
+To enforce managed hooks even for users who turned hooks off locally, pin
 `[features].hooks = true` alongside `[hooks]`. To skip user, project, session,
 and plugin hooks while still allowing managed hooks, set
 `allow_managed_hooks_only = true`.
@@ -423,9 +634,9 @@ statusMessage = "Checking managed Bash command"
 
 Notes:
 
-- Codex enforces the hook configuration from `requirements.toml`, but it does
-  not distribute the scripts in `managed_dir`.
-- Deliver those scripts separately with your MDM or device-management solution.
+- The local runtime enforces the hook configuration from `requirements.toml`,
+  but it doesn't distribute the scripts in `managed_dir`.
+- Deliver those scripts with your MDM or device-management solution.
 - Managed hook commands should reference absolute script paths under the
   configured managed directory.
 - `allow_managed_hooks_only = true` skips hooks from user, project, session, and
@@ -449,7 +660,9 @@ prefix_rules = [
 ]
 ```
 
-To restrict which MCP servers Codex can enable, add an `mcp_servers` approved list. For stdio servers, match on `command`; for streamable HTTP servers, match on `url`:
+To restrict which MCP servers a local client can enable, add an `mcp_servers`
+approved list. For stdio servers, match on `command`; for streamable HTTP
+servers, match on `url`:
 
 ```toml
 [mcp_servers.docs]
@@ -479,11 +692,25 @@ command rules still don't inspect `cwd`, `env`, or `env_vars`. Plugin-bundled
 MCP servers use the same identity shapes under
 `plugins.<plugin>.mcp_servers.<server>`.
 
-If `mcp_servers` is present but empty, Codex disables all MCP servers.
+If `mcp_servers` is present but empty, the local client disables all MCP servers.
+
+### Control plugin availability
+
+To turn off plugins in supported local clients, set `features.plugins` to
+`false` in `requirements.toml`:
+
+```toml
+features.plugins = false
+```
+
+This setting also applies when users sign in to Codex with an API key. See the
+[`features.plugins`
+reference](https://learn.chatgpt.com/docs/config-file/config-reference#requirementstoml) for the
+supported configuration.
 
 ### Restrict plugin marketplace sources
 
-To restrict operations on user-configured marketplace sources, set
+To restrict plugin marketplace sources, set
 `restrict_to_allowed_sources = true` and define one or more source rules:
 
 ```toml
@@ -507,24 +734,52 @@ path = "/opt/company/codex-plugins"
 Git rules match the normalized repository URL and, when present, an exact
 `ref`. Host patterns are regular expressions matched against the lowercase Git
 host; use `^` and `$` for a whole-host match. Local rules require an absolute,
-normalized path. See the [`requirements.toml` reference](https://developers.openai.com/codex/config-reference#requirementstoml)
+normalized path. See the [`requirements.toml` reference](https://learn.chatgpt.com/docs/config-file/config-reference#requirementstoml)
 for the full schema and merge behavior.
 
 These requirements reject unmatched marketplace add, plugin install, and
-configured Git marketplace refresh operations for user-configured sources.
-Codex-managed OpenAI marketplaces remain available when their source and
-reserved name match. The requirements don't filter already configured user
-marketplaces or their plugins at runtime.
+configured Git marketplace refresh operations. They also filter configured
+marketplaces and their plugins at runtime.
+
+The OpenAI-curated Git marketplaces, including the API-key catalog, must also
+match the source allowlist. To allow them, include the following Git source
+without a `ref` constraint:
+
+```toml
+[marketplaces.allowed_sources.openai_curated]
+source = "git"
+url = "https://github.com/openai/plugins.git"
+```
+
+To exclude the curated catalogs, omit that source and ensure no broader host
+rule allows it. Bundled plugins and remotely installed workspace plugins are
+separate from this curated Git source policy.
+
+These source restrictions apply only where a local client supports plugin
+marketplace operations: ChatGPT and Codex in the desktop app, and Codex CLI.
+They don't control plugin use in ChatGPT on the web or mobile, and they don't
+add plugins to the IDE extension.
 
 ## Managed defaults (`managed_config.toml`)
 
-Managed defaults merge on top of a user's local `config.toml` and take precedence over any CLI `--config` overrides, setting the starting values when Codex launches. Users can still change those settings during a session; Codex reapplies managed defaults the next time it starts.
+Managed defaults set the configuration a supported local client starts with. At
+startup, they override the user's local `config.toml` and any CLI `--config`
+overrides. Users can still change those settings during the current run, and the
+defaults apply again the next time the client starts.
 
-Make sure your managed defaults meet your requirements; Codex rejects disallowed values.
+If a managed default, macOS MDM profile, or saved configuration pins `gpt-5.4`
+or `gpt-5.4-mini` for users signed in with ChatGPT, update it before August 31, 2026. Replace `gpt-5.4` with `gpt-5.6-terra` and `gpt-5.4-mini` with
+`gpt-5.6-luna`. The OpenAI API and Codex authenticated with your own API key
+aren't affected. See [workspace model
+availability](https://learn.chatgpt.com/docs/enterprise/workspace-model-availability#prepare-for-the-gpt-54-retirement).
+
+Make sure your managed defaults meet your requirements; the local runtime
+rejects disallowed values.
 
 ### Precedence and layering
 
-Codex assembles the effective configuration in this order (top overrides bottom):
+The local runtime assembles the effective configuration in this order (top
+overrides bottom):
 
 - Managed preferences (macOS MDM; highest precedence)
 - `managed_config.toml` (system/managed file)
@@ -532,14 +787,16 @@ Codex assembles the effective configuration in this order (top overrides bottom)
 
 CLI `--config key=value` overrides apply to the base, but managed layers override them. This means each run starts from the managed defaults even if you provide local flags.
 
-Cloud-managed requirements affect the requirements layer (not managed defaults). See the Admin-enforced requirements section above for precedence.
+Cloud `config.toml` uses [normal configuration precedence](https://learn.chatgpt.com/docs/config-file/config-basic#configuration-precedence),
+not the legacy ordering above. Cloud `requirements.toml` uses
+[requirements precedence](#locations-and-precedence).
 
 ### Locations
 
 - Linux/macOS (Unix): `/etc/codex/managed_config.toml`
 - Windows/non-Unix: `~/.codex/managed_config.toml`
 
-If the file is missing, Codex skips the managed layer.
+If the file is missing, the local runtime skips the managed layer.
 
 ### macOS managed preferences (MDM)
 
@@ -550,16 +807,25 @@ On macOS, admins can push a device profile that provides base64-encoded TOML pay
   - `config_toml_base64` (managed defaults)
   - `requirements_toml_base64` (requirements)
 
-Codex parses these "managed preferences" payloads as TOML. For managed defaults (`config_toml_base64`), managed preferences have the highest precedence. For requirements (`requirements_toml_base64`), precedence follows the cloud-managed requirements order described above. The same requirements-side `[features]` table works in `requirements_toml_base64`; use canonical feature keys there as well.
+The local runtime parses these "managed preferences" payloads as TOML. For
+managed defaults (`config_toml_base64`), managed preferences have the highest
+precedence. For requirements (`requirements_toml_base64`), precedence follows
+the cloud-managed requirements order described above. The same
+requirements-side `[features]` table works in `requirements_toml_base64`; use
+canonical feature keys there as well.
 
 ### MDM setup workflow
 
-Codex honors standard macOS MDM payloads, so you can distribute settings with tooling like `Jamf Pro`, `Fleet`, or `Kandji`. A lightweight deployment looks like:
+The local runtime honors standard macOS MDM payloads, so you can distribute
+settings with tooling like `Jamf Pro`, `Fleet`, or `Kandji`. A lightweight
+deployment looks like:
 
 1. Build the managed payload TOML and encode it with `base64` (no wrapping).
 2. Drop the string into your MDM profile under the `com.openai.codex` domain at `config_toml_base64` (managed defaults) or `requirements_toml_base64` (requirements).
-3. Push the profile, then ask users to restart Codex and confirm the startup config summary reflects the managed values.
-4. When revoking or changing policy, update the managed payload; the CLI reads the refreshed preference the next time it launches.
+3. Push the profile, then ask users to restart the supported local client and
+   confirm the startup config summary reflects the managed values.
+4. When revoking or changing policy, update the managed payload; the client
+   reads the refreshed preference the next time it launches.
 
 Avoid embedding secrets or high-churn dynamic values in the payload. Treat the managed TOML like any other MDM setting under change control.
 

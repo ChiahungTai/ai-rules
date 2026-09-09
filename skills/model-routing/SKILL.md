@@ -78,7 +78,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 | 審查／判斷（review 委派） | `high` | `high` | `high` | `high` | review 工單 |
 | 深推理（判斷密集／深挖） | `max`（user 層級；定義檔設值 sticky 不達 wire——見上方但書） | `high` | `xhigh`～`ultra` | `xhigh` | muse 委派預設（09-04 定）；深推理升 `ultra` |
 
-> 可考值域：codex 接受 `none`/`minimal`/`low`/`medium`/`high`/`xhigh`（**codex plugin** 的 codex-cli-runtime skill——plugin cache 面，非本 repo 檔；repo 內鏡像 `ref-docs/harness/codex/config-sample.md` 的 config-level enum 無 `none`——companion flag 值域與 config 值域是兩個面）；`chatgpt-web/*` 例外＝slug 自帶固定 effort（light/medium/high＝display Instant/Medium/High），effort 旗標不換 browser model（值域對 web slug 無效）；muse 用 `low`/`medium`/`high`/`xhigh`/`ultra`（`ultra`＝CLI alias → provider 最高級＝API `max`）；ZCode 欄位名是 `thoughtLevel`（非 `reasoningEffort`——未知欄位靜默忽略）、user reasoningLevel 層級含 `max`；CC effort enum 以 CC runtime 為準（repo 慣用 `high`）。跨家族委派時 effort 值以**各家族解析表**為準（muse/codex 見 external-runtime family 表、in-harness 見 tier 解析表），本表只對詞彙。
+> 可考值域：codex 接受 `none`/`minimal`/`low`/`medium`/`high`/`xhigh`（**codex plugin** 的 codex-cli-runtime skill——plugin cache 面，非本 repo 檔；repo 內鏡像 `ref-docs/harness/codex/config-file/config-sample.md` 的 config-level enum 無 `none`——companion flag 值域與 config 值域是兩個面）；`chatgpt-web/*` 例外＝slug 自帶固定 effort（light/medium/high＝display Instant/Medium/High），effort 旗標不換 browser model（值域對 web slug 無效）；muse 用 `low`/`medium`/`high`/`xhigh`/`ultra`（`ultra`＝CLI alias → provider 最高級＝API `max`）；ZCode 欄位名是 `thoughtLevel`（非 `reasoningEffort`——未知欄位靜默忽略）、user reasoningLevel 層級含 `max`；CC effort enum 以 CC runtime 為準（repo 慣用 `high`）。跨家族委派時 effort 值以**各家族解析表**為準（muse/codex 見 external-runtime family 表、in-harness 見 tier 解析表），本表只對詞彙。
 
 ## lite 分工律（執行層降級條件）
 

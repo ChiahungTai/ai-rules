@@ -1,30 +1,32 @@
 # Triage a backlog
 
+> For the complete documentation index, see [llms.txt](https://learn.chatgpt.com/llms.txt). Markdown versions of documentation pages are available by appending `.md` to the page URL.
+
 Use `$codex-security:triage-finding` to review existing security findings
 against the current repository. This workflow performs a read-only static
 analysis: Codex treats each finding as an unproven claim and inspects repository
 evidence without executing the code.
 
 Run this workflow from a Codex project scoped to the repository you want to
-assess. Codex must be able to read the repository's source code. Jira, Linear,
-and GitHub connectors provide finding data, but they don't replace access to
-the source code.
+assess. Codex must be able to read the repository's source code. Jira and Linear
+connectors can provide finding data, while GitHub findings require authenticated
+GitHub REST access. Neither replaces access to the source code.
 
 Under the hood, Codex starts from the cited code or version information. It
 traces the claimed attacker-controlled source, relevant security controls,
 dangerous sink, and reachable path. It also checks the product surface and trust
-boundary, looks for counterevidence, and records proof gaps. Codex then returns
+boundary, looks for contradictory evidence, and records proof gaps. Codex then returns
 one verdict per finding and ranks the findings that need action or further
 review.
 
 This differs from `$codex-security:validation`, which can build or run code,
 create a focused test or proof of concept, or exercise a real interface to
-reproduce or disprove a finding. Use triage to classify and prioritize an
+reproduce or disprove a finding. Use triage to classify and rank an
 existing backlog. Use validation when runtime evidence could resolve a finding
 that static evidence leaves uncertain.
 
 Backlog triage starts from existing findings. To search the repository for new
-  vulnerabilities, [run a security scan](https://developers.openai.com/codex/security/plugin/scans). Triage
+  vulnerabilities, [run a security scan](https://learn.chatgpt.com/docs/security/plugin/scans). Triage
   doesn't modify the repository or implement fixes.
 
 ## Choose the findings to triage
@@ -35,7 +37,7 @@ You can supply one finding or a collection from these sources:
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Pasted or local findings | SARIF results, a CVE or GHSA, an advisory, a scanner ticket, a bug bounty report, a Codex Security finding artifact, or a plain-language vulnerability claim.                                                                                                                                                                                                                                                                                          | No connector required.                                                                                                                                                                           |
 | Jira or Linear           | Exact security or vulnerability issue URLs or identifiers, Jira JQL, or a Linear team, project, or search phrase. Codex retrieves the selected issue content before triage.                                                                                                                                                                                                                                                                            | [Jira through Atlassian Rovo](codex://plugins/plugin_connector_692de805e3ec8191834719067174a384) or [Linear](codex://plugins/plugin_asdk_app_69a089a326dc8191b32a3f2553f5be2c) with read access. |
-| GitHub                   | A repository and one finding source: code scanning, `Dependabot` vulnerabilities and malware, security advisories and private vulnerability reports, or all sources. If you don't specify a repository, Codex uses the GitHub repository attached to the current Codex project when available. GitHub Issues aren't included in the default GitHub sources; provide a specific issue or ask for GitHub Issues explicitly when you want to triage them. | [GitHub](codex://plugins/plugin_connector_1p_1a69035c238881919c4190932b2df699) with access to the selected repository and finding type.                                                          |
+| GitHub                   | A repository and one finding source: code scanning, `Dependabot` vulnerabilities and malware, security advisories and private vulnerability reports, or all sources. If you don't specify a repository, Codex uses the GitHub repository attached to the current Codex project when available. GitHub Issues aren't included in the default GitHub sources; provide a specific issue or ask for GitHub Issues explicitly when you want to triage them. | Authenticated GitHub REST access, such as `gh auth token`, `GH_TOKEN`, or `GITHUB_TOKEN`, with permission to read the selected repository and finding type.                                      |
 
 Codex keeps one result for every supplied finding, in input order, so each
 source finding stays traceable. It doesn't merge or drop findings that look
@@ -124,7 +126,7 @@ For each finding, review:
 - the affected location and component
 - the product surface and source trust level
 - the recommended next step
-- the [`$codex-security:fix-finding`](https://developers.openai.com/codex/security/plugin/fix-findings)
+- the [`$codex-security:fix-finding`](https://learn.chatgpt.com/docs/security/plugin/fix-findings)
   handoff, when the finding is `confirmed`
 
 Triage is complete when every supplied finding has one result, Codex preserves
@@ -135,7 +137,7 @@ reviewing the triage results.
 ## Next steps
 
 - `confirmed`: After a person accepts the finding for remediation, use
-  [`$codex-security:fix-finding`](https://developers.openai.com/codex/security/plugin/fix-findings) to fix and
+  [`$codex-security:fix-finding`](https://learn.chatgpt.com/docs/security/plugin/fix-findings) to fix and
   verify it. Triage prepares a prompt-ready handoff but doesn't invoke the skill
   automatically.
 - `needs_review`: If running code can resolve the proof gap, use
@@ -143,18 +145,18 @@ reviewing the triage results.
   the finding claim, affected locations, preconditions, static evidence, and
   proof gaps from the triage result:
 
-  ```text
+```text
   Use $codex-security:validation to dynamically validate finding [triage item ID or source ID] from the backlog triage result. Use the strongest realistic, bounded method, record exactly what was tested, and preserve any remaining proof gaps.
-  ```
+```
 
   Unlike triage, validation may build or run code, create a focused test or
   proof of concept, or exercise a real interface. Review the proposed commands
   before approving them and keep [Codex approval and security
-  policies](https://developers.openai.com/codex/agent-approvals-security) in place.
+  policies](https://learn.chatgpt.com/docs/agent-approvals-security) in place.
 
 - `needs_review`: If the finding depends on product policy or deployment
   context, answer the listed open questions before changing code.
 - `not_actionable`: Keep the evidence with your triage record. Codex doesn't
   automatically close or update the source ticket.
 - To look for vulnerabilities beyond the supplied backlog, [run a security
-  scan](https://developers.openai.com/codex/security/plugin/scans).
+  scan](https://learn.chatgpt.com/docs/security/plugin/scans).
