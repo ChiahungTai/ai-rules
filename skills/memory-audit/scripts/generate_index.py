@@ -312,11 +312,15 @@ def main_b_form(here, check_only, errs, entries, resident_set) -> int:
         # inventory 照寫（全量投影新鮮、不依賴清單）；MEMORY.md 保留上一份常駐面
         # （不得發布缺必要成員的子集）；--check 零副作用。
         if not check_only:
-            write_atomic(here, INVENTORY_NAME, render_index_body(
-                entries,
-                "Memory Inventory（全量投影）",
-                "本檔為 _generate_index.py 機械投影，禁手寫——全量條目住此（底線前綴不進開場）；rg 可達。",
-            ))
+            write_atomic(
+                here,
+                INVENTORY_NAME,
+                render_index_body(
+                    entries,
+                    "Memory Inventory（全量投影）",
+                    "本檔為 _generate_index.py 機械投影，禁手寫——全量條目住此（底線前綴不進開場）；rg 可達。",
+                ),
+            )
         uniq = sorted(set(unresolvable))
         print(
             "[FAIL] 常駐清單無法唯一解析（缺檔／壞 frontmatter／重名——清單 id 命中合法條目 ≠1）：\n"
@@ -357,8 +361,7 @@ def main_b_form(here, check_only, errs, entries, resident_set) -> int:
         print(
             f"[OK] {len(resident_entries)} resident, {n_chars} chars, {n_lines} lines"
             f"（B gate: {GATE_CHARS_B} chars）／_inventory.md: {len(entries)} entries, {inv_chars} chars, {inv_lines} lines"
-            "（--check 未寫入）\n"
-            + rank_counts_line(entries)
+            "（--check 未寫入）\n" + rank_counts_line(entries)
         )
         return 0
 

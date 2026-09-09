@@ -2,10 +2,11 @@
 """CC SessionStart watch-seed (AIR-56 follow-up): point the FileChanged
 watcher at the ai-rules memory pool.
 
-Why a seed script: FileChanged matcher seeds are cwd-scoped literal filenames
-and the pool lives outside every repo cwd (hooks/AGENTS.md wiring note), so
-the only way to watch the pool is a SessionStart hook returning absolute
-`watchPaths` (CC mirror hooks.md SessionStart Decision Control). This script
+Why a seed script: FileChanged matcher seeds are cwd-scoped literal filenames,
+and watchPaths must be absolute paths (CC mirror hooks.md SessionStart
+Decision Control), so the only way to watch the pool is a SessionStart hook
+returning absolute `watchPaths`. The pool lives in-repo at .agents/memory/
+(AIR-54 S1 migration) — derived __file__-relative, never from cwd. This script
 lists pool entries (top-level .md, excluding MEMORY.md and _-prefixed files —
 the same entry filter `memory_hook_common.is_pool_entry` applies, so we never
 watch files the dirty sensor would drop).
@@ -19,15 +20,16 @@ import json
 import sys
 from pathlib import Path
 
-POOL = Path.home() / ".claude" / "projects" / "-Users-ctai-Github-ai-rules" / "memory"
+# Pool main body (AIR-54): repo-internal .agents/memory/ — the CC/ZCode
+# legacy paths are symlinks onto it. Single-pool by design; cross-machine /
+# multi-pool derivation is deliberately out of scope here.
+POOL = Path(__file__).resolve().parents[1] / ".agents" / "memory"
 
 
 def watch_paths():
     if not (POOL / "MEMORY.md").is_file():
         # Pool missing is abnormal on this machine (F4a): surface on stderr
-        # instead of silently seeding an empty watch list. Cross-machine /
-        # multi-pool derivation is deliberately out of scope here — AIR-54 S2
-        # owns the path-governance redesign.
+        # instead of silently seeding an empty watch list.
         print(
             f"memory-watch-seed: pool not found at {POOL}; seeding empty watch list",
             file=sys.stderr,

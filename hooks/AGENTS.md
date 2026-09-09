@@ -22,3 +22,7 @@
 - 三家 external-runtime plugin 都有 SessionEnd 孤兒清理 hook（muse「reconcile stale jobs on start, cancel+kill on end」、codex `terminateProcessTree`、grok 同款）——CC 原生載入；**ZCode 無 SessionEnd 事件（contracts.md 定案）→ plugin 孤兒清理 hook 在 ZCode 缺席**
 - muse 側由 bridge `reconcileStaleRunning` ledger 兜底＋post-build 開工背景寫入者盤點涵蓋
 - **remediation＝ZCode app 重開（收同生命週期進程；detached 背景進程跑完自然結束、結果照落 ledger）＋`git status` 檢 working tree 半套編輯——實務成本極低（user 2026-09-05 確認），非防護缺口**
+
+## 多機移植（clone 到新機器）
+
+- 程序見 [MULTI-MACHINE.md](MULTI-MACHINE.md)；機械支援＝`setup-memory-symlinks.sh`（dry-run 預設、`.bak` 備份）＋`verify-memory-topology.sh`（只讀驗證、`--smoke` 另加 hook 往返）＋`setup-muse-hooks.sh`（本機 hooks.json 生成）。池傳輸（bundle／cp -a）與 cron 重建是手動步。

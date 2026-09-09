@@ -6,13 +6,13 @@
 >
 > **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser`／`backlog-cleanup` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）。
 >
-> **更新時點**：2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。
+> **更新時點**：2026-09-09（AIR-54 S2——池主體遷 `/Users/ctai/Github/ai-rules/.agents/memory/`，條 1 對象路徑與跨 repo 指針同步；CronList 兩 prompt 同步換址）。2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。
 
 ## ZCode Cron（3 條，ai-rules workspace）
 
 | # | automationId | cron | 職責一句 | 對象範圍 | 角色／紅線 |
 |---|--------------|------|----------|----------|------------|
-| 1 | `automation-751ecce2-a79c-4309-a79c-08486e2ee893` | `40 23 * * *`（每晚 23:40） | ai-rules memory 池收斂（輕掃／弧線預警／波段收斂＋regen）＋**檔案型清淤兜底腿已上線**（`.agent-tmp`/`.at-contexts` `mtime>7d`、`.review` `>30d`；AIR-14 L5，2026-09-03 起） | 僅 ai-rules 池 `/Users/ctai/.claude/projects/-Users-ctai-Github-ai-rules/memory/`＋repo 三 dot-area | 寫手（每夜動手）；紅線：不碰 mosaic 池、不 commit、不改 DB schema、不刪 shared |
+| 1 | `automation-751ecce2-a79c-4309-a79c-08486e2ee893` | `40 23 * * *`（每晚 23:40） | ai-rules memory 池收斂（輕掃／弧線預警／波段收斂＋regen）＋**步驟 0 inbox 消費**（AIR-54 muse 寫入流 consolidation：path contract/CAS/六問→done/rejected receipt）＋**波尾 repo 外 bundle**（`~/.agents/memory-bundles/` 輪替 7 份，G2-11）＋**檔案型清淤兜底腿已上線**（`.agent-tmp`/`.at-contexts` `mtime>7d`、`.review` `>30d`；AIR-14 L5，2026-09-03 起） | 僅 ai-rules 記憶主體 `/Users/ctai/Github/ai-rules/.agents/memory/`（AIR-54 遷移；CC/ZCode 舊徑 symlink 指此）＋`.agents/memory-inbox/`（步驟 0）＋repo 三 dot-area | 寫手（每夜動手）；紅線：不碰 mosaic 池、不 commit、不改 DB schema、不刪 shared |
 | 2 | `automation-fed036ff-17bf-4cf0-a50e-3216a7de6665` | `0 23 * * 0`（週日 23:00） | 治理看照：bundle 組成看照（`deploy_agents.py` 三部署檔 cmp）＋memory lite 稽核＋**registry/卡 ref 一致性比對已上線**（`CronList` vs 本表 drift＋raw `.md` 直連卡 ref lint；AIR-14 L8，2026-09-03 起） | ai-rules repo＋memory 池 | 審計（advisory 不動手）；禁止改 rules／memory 條目（戳記除外） |
 | 3 | `automation-370fafc5-a050-479e-b62f-9c7988d23521` | `10 23 * * 6`（週六 23:10） | 糾正模式週報＋CR 使用健檢（`corrections-weekly` skill） | ai-rules workspace | 報告；DB 唯讀、一頁、腳本失敗 2 次即止 |
 
@@ -27,7 +27,7 @@
 
 ## 跨 repo 指針
 
-- mosaic 側排程風景（含 `nightly-watch` 23:50 等）→ memory 條目 `reference_periodic-task-landscape`（池路徑：`~/.claude/projects/-Users-ctai-Github-ai-rules/memory/` 與 `~/.zcode/cli/memories/projects/ai-rules-01610fbb20315a8b/memory/` 雙池；不在則以 mosaic repo 的 `CronList` 為準）。
+- mosaic 側排程風景（含 `nightly-watch` 23:50 等）→ memory 條目 `reference_periodic-task-landscape`（主體：`/Users/ctai/Github/ai-rules/.agents/memory/`——CC/ZCode 舊徑皆 symlink 指此；不在則以 mosaic repo 的 `CronList` 為準）。
 
 ## 同步義務
 

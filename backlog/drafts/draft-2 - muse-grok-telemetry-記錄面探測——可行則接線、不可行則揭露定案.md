@@ -18,3 +18,9 @@ dependencies: []
 
 〔user 09-08 註記：全 draft 暫緩——等真的用再處理。**前置注意**：muse local memory 機制與 CC/ZCode 結構性不同（三 scope／`.agents/memory/` 命名空間／index 注入上限 48 檔／background observer 主動召回／untrusted 也載入）——telemetry 歸因設計以「muse 不用自家 memory、寫我們的池」為前提，若改走 muse 自家 memory 則此卡與歸因機制都要重新設計（詳 memory 條目 muse-memory-mechanism-divergence）〕
 <!-- SECTION:DESCRIPTION:END -->
+
+## Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+〔AIR-54 S5 標記 2026-09-09〕**探測目標已完成**：muse session 工具呼叫記錄面＝`~/.local/share/muse/sessions/<date>/<session-id>/`（session.jsonl 含 tool call 事件流；hook 事件 `hook_run_started`/`hook_run_terminal` 也在場——09-09 hooks 實驗即以此驗證）。**歸因前提已變更**：user 註記的「若改走 muse 自家 memory 則此卡與歸因機制都要重新設計」已命中——AIR-54 落地後 muse 讀 repo `.agents/memory/` 主體（project scope）、寫經 inbox（hook 攔截代存，`.agents/memory-inbox/` 的 payload JSON 即結構化寫入記錄面）。telemetry 接線若要做，輸入源已從「探測未知」變成兩個已知面（muse session.jsonl＋inbox payload）；grok 腿仍未知。本 draft 續留（接線未承諾），探測段份已了結。
+<!-- SECTION:NOTES:END -->

@@ -32,7 +32,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit"]
 
    ```bash
    uv run python /Users/ctai/Github/ai-rules/skills/memory-audit/scripts/memory_telemetry.py writes \
-     --pool ~/.claude/projects/-Users-ctai-Github-ai-rules/memory \
+     --pool /Users/ctai/Github/ai-rules/.agents/memory \
      --zcode-db ~/.zcode/cli/db/db.sqlite \
      --cc-root ~/.claude/projects/-Users-ctai-Github-ai-rules \
      --output ai-analysis/memory-telemetry/weekly-<YYYYMMDD>.json \

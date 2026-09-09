@@ -95,7 +95,7 @@
 4. add_memory 裸寫零 frontmatter——**已驗**——inbox 流的必要性依據
 5. CC 原生載入器對自身 memory 目錄為 symlink——未直接驗（**中**）：ZCode 目錄 symlink 是既有在用形態（本弧規劃 session 活證）、mosaic 三 dir 共指同 inode 既有；CC 載入器不同實作但 POSIX 語義透明——S1 程序內建（側備份＋rmdir 併發 guard＋即時三端驗證＋回滾），不做獨立先驗段
 6. generator/hook 於新路徑執行——低（review F14 源碼核實）：generator 無資產比對（glob 自身目錄、路徑無關）；byte 比對在 repo 端 `hooks/memory-index-regen.py`（`__file__`-relative 指回 repo skills/，與池位置正交）；部署副本 cp -a 後 byte 不變——S1 後真 session 覆蓋
-7. muse 48 檔清單截斷（G2-7 重寫）：**真正 gate＝recall sentinel 而非截斷順序考古**——MEMORY.md 全文注入（含 desc）＋read_memory(path) 直讀之下，截斷順序重要性存疑。S1 後實測：選一個確定落在 >48 清單外的 sentinel 條目，muse task 以**自然語言召回**（不提示 path）＋explicit `read_memory(path)` 兩測——兩過＝一等公民成立（observer 召回可達）；僅 explicit 過＝召回面受限（記錄降級）；截斷形態僅記錄。治理檔灌清單的緩解（收 `_governance/` 子目錄）保留為選項
+7. muse 48 檔清單截斷（G2-7 重寫）：**真正 gate＝recall sentinel 而非截斷順序考古**——MEMORY.md 全文注入（含 desc）＋read_memory(path) 直讀之下，截斷順序重要性存疑。S1 後實測：選一個確定落在 >48 清單外的 sentinel 條目，muse task 以**自然語言召回**（不提示 path）＋explicit `read_memory(path)` 兩測——兩過＝一等公民成立（observer 召回可達）；僅 explicit 過＝召回面受限（記錄降級）；截斷形態僅記錄。治理檔灌清單的緩解（收 `_governance/` 子目錄）保留為選項——**✅ 已驗（雙實測合成，09-09）**：①工具鏈召回**綠**（muse 15:00 腿：清單內 `_inventory.md` 直讀全量索引→定位條目→讀 body——observer 召回可達，一等公民 gate 關閉）；②注入深度**受限**（VP3 body-only canary：token 僅在 body、negative control 成立、telemetry oracle 實證 read_memory call——開場 snapshot 純回想不可達清單外條目，explicit read ✓）——**結論＝一等公民成立（工具鏈可達）；直達注入限於清單內條目**——高價值跨池知識的 desc 投影品質決定「免工具直達」面（結果記錄：池 `reference_recall-sentinel-canary.md`）
 8. muse 對 project scope 的 add_memory 行為——未驗（中；personal_project 已驗，機制應同）→ S3 實測
 9. **MEMORY.md context tax（G2-8 部分採納說明）**：muse 開場全文注入 MEMORY.md——其尺寸**已受 generator B 形態 gate 約束**（常駐面 6,000 chars，AIR-48 P3）——muse 注入的就是這份被 gate 的投影，無需新機制；gate 语义隨弧補註「兼任 muse context tax 預算」
 
@@ -169,12 +169,12 @@ UC 引用：更新「auto-memory 池治理」。依賴：S1。語義約束：**C
 ### Context
 UC 引用：實作「muse 寫入流」。依賴：S1。基礎設施：`hooks/`（跨 harness 單一源慣例）、`block-memory-index-write.py`（判準參考）、muse-hooks-findings.md（契約）。語義約束：AIR-48 三判準——本閘為**純機械導流**（攔截＋代存），語義判斷（六問/frontmatter 補全）全留 consolidation 站，閘不做語義。
 
-### 核心實作要點
-1. `hooks/muse_memory_inbox.sh`（或 .py）：讀 stdin JSON（`tool_input.content/path/scope`）→ 落 `${AGENT_MEM}-inbox/<YYYYMMDD-HHMMSS>-<path basename>`（**frontmatter 補 name stub＋raw content 原樣保存**——只加最小 provenance 標頭，語義修補留 consolidation）→ stdout 輸出 deny JSON（permissionDecisionReason＝「已代存 inbox：<檔名>；將由 consolidation 站處理入池」）
-2. `.muse/hooks.json`：PreToolUse matcher `add_memory|edit_memory` → 上述腳本（絕對路徑）
+### 核心實作要點（**本文已隨實作修訂 09-09——實作單一源＝`hooks/muse_memory_inbox.sh`；原規劃見 git history**）
+1. `hooks/muse_memory_inbox.sh`：讀 stdin JSON（`tool_input.content/path/scope`）→ 落 `.agents/memory-inbox/<TS>-<pid>-<content-hash-12>.json`（**payload＝原始 JSON 原樣**〔G2-5 定案取代原「frontmatter stub」案〕；檔名不含模型 basename；path 命中池內既有條目時附 `_inbox_meta.base_sha256`〔CAS base——T3-6：條件是 path 存在，非 tool==edit〕）→ stdout 輸出 deny JSON（CC 新式 hookSpecificOutput）。lexical gate：absolute/slash path 跳過 enrichment（deny+land 照走——T3-1/T4-2）；jq parse 失敗不殺腳本（`|| true`——否則整個導流 fail-open，review F1）
+2. `.muse/hooks.json`：PreToolUse matcher `add_memory|edit_memory` → 上述腳本（絕對路徑）——**machine-local 生成物**（`hooks/setup-muse-hooks.sh` 產、gitignore；修訂自原案：muse 要求 hook command 絕對路徑，committed hooks.json 無可攜性——結構源〔setup script〕版控）
 3. **fail-open 約束**：腳本故障＝閘開（muse 直寫主體）——腳本保持極簡（無網路、無外部依賴、`set -euo pipefail`）；edit_memory 的 deny 會擋合法編輯嗎？——**第一版全導流**（user「先 inbox 看看」），觀察誤傷率後再議 allowlist
-4. muse 對 project scope add_memory 實測（風險 8）：確認導流前路徑行為
-5. hooks.json 進 repo（版控）——gitignore 排除 inbox 不排除 hooks.json
+4. muse 對 project scope add_memory 實測（風險 8）：確認導流前路徑行為——**已驗**（VP2：project/personal_project scope 皆被 matcher 攔截導流）
+5. ~~hooks.json 進 repo（版控）~~ → **修訂（見要點 2）**：machine-local 生成物＋結構源版控；gitignore 排除 hooks.json 與 inbox
 
 ### Pseudo Code（hook 腳本核心——F3/F13/G2-5 修正版）
 ```bash
@@ -217,8 +217,8 @@ UC 引用：完成「muse 寫入流」。依賴：S3。語義約束：寫入六�
 ### 核心實作要點
 1. **掛點**：夜間收斂波第一步（波前二分之後）加 inbox 掃描段＋memory-audit skill 補「inbox 消費」小節（手動觸發路徑：本 skill session）——**S4 需在 S2 後執行**（兩處同檔面：23:40 cron prompt、SKILL.md——F6）
 2. **consolidation 前置——fail-open 第二道偵測（G2-6）**：先跑池 git `status --porcelain`＋diff 歸屬——**無 receipt 且非 CC/ZCode provenance 的變更**（=muse fail-open 直寫的形態特徵）→ quarantine 清單分類處置（git 是獨立於 hook subsystem 的訊號源——hook 全掛時系統仍有第二道訊號）
-3. **path contract（G2-2——confused deputy 防護）**：consolidation 寫主體前逐條機械檢查 payload 的 path——① project scope only ② relative＋`.md` 結尾 ③ `realpath` resolve 後仍在 `$AGENT_MEM` 內（拒 `..` escape／absolute／symlink component）④ 非 reserved（`MEMORY.md`、`_inventory.md`、`_resident-set.md`、`_generate_index.py`、`.git/`、`_` 前綴治理檔）⑤ edit 命中已存在且 frontmatter 合法的條目——**攔下的 path 是模型提出的未驗證 input，不得直接當寫入座標**
-4. **CAS（G2-3）**：edit 類比對 `_inbox_meta.base_sha256` vs 目標條目當前 hash——相等才自動套用；不等（攔截後被 CC/ZCode 改過）→ conflict queue 留人裁；add 類整併時同名已存在 → 同 conflict queue
+3. **path contract（G2-2——confused deputy 防護；**T3/T4 修訂後現況單一源＝memory-audit skill「Inbox 消費」節**）**：consolidation 寫主體前逐條機械檢查 payload 的 path——① project scope only ② **池根 basename**（禁子目錄——generator/watch-seed/索引連結只看頂層；T4-2）③ ancestry delimiter-aware（`$AGENT_MEM/` 含尾 slash 前綴；拒 `..` escape／absolute；T3-3）④ symlink component 逐段 lstat 拒絕（containment 僅必要條件；T3-2）⑤ 非 reserved（大小寫無關；`MEMORY.md`、`_inventory.md`、`_resident-set.md`、`_generate_index.py`、`.git/`、`_` 前綴治理檔）⑥ edit 命中已存在且 frontmatter 合法的條目——**攔下的 path 是模型提出的未驗證 input，不得直接當寫入座標**
+4. **CAS（G2-3；T3-6 修訂）**：操作類只以 payload 不可變 `tool_name` 判；`_inbox_meta` 出現條件是「path 命中已存在條目」非 tool==edit——`base_sha256` vs 目標條目當前 hash 相等才自動套用；不等（攔截後被 CC/ZCode 改過）→ conflict queue 留人裁；add 類整併時同名已存在 → 同 conflict queue
 5. **WAL light（G2-4，user 拍板 LIGHT）**：`new`（inbox root）→ claim（`mv` 進 `processing/`）→ `done/`|`rejected/`（receipt 一行 JSON：來源檔名/去處/時間）；`processing/` 殘留＝中斷證據——停下人判，不自動重跑；hook 端原子發布（temp+rename）保證 consolidation 不讀半檔
 6. 流程：inbox 非空 → 前置檢查（要點 2）→ 逐檔 claim → path contract → CAS → 六問 → 合格：補/修 frontmatter → 寫主體 → regen → done receipt；不合格：rejected receipt 記錄理由（任務終態/repo 可推導/未定案→去卡或棄置）
 7. cron prompt 補 inbox 步驟（AIR-52 同檔互動——已登記）
@@ -273,7 +273,7 @@ UC 引用：橫展「跨池共享記憶主體」。依賴：S1-S5 定型（ai-ru
 - **夜波尾巴補 repo 外 bundle（G2-11）**：`git -C $AGENT_MEM bundle create ~/.agents/memory-bundles/ai-rules-$(date +%F).bundle --all`＋輪替保留 7 份——刪除 `.bak` 後系統仍有 repo 外 recovery copy（池 git 本 local-only 無 remote，此為既有缺口的輕量補法；掛夜波＝零新機制）
 - S2 與 AIR-52 的 cron 同檔互動：先落地者贏、後者對帳（兩弧 UC 盤點互指已登記）
 - S3 hooks.json 進版控（repo 資產）；inbox gitignore（durable 不入版控——**逾期 inbox＝consolidation 停擺警訊非垃圾，夜掃三 dot-area 不含 `.agents/`、不靜默清**〔F5 修正——原宣稱的夜掃規則不存在〕；S4 驗證含逾期模擬）
-- baseline: 48d0590
+- baseline: 48d0590（EP 定稿時點）。**實作弧邊界澄清（09-09 收尾——review I1）**：48d0590..HEAD 含多弧 commits（AIR-50/56/51/53 已結案弧＋5a6ce2e air-57 建卡〔muse session 順產，非本弧但隨收尾 merge 進 main——commit message 已帶正確卡 id〕）；本弧 S1-S5 實作全部以 **uncommitted working tree** 形態交付、單一 commit 收斂；air-57 draft（draft-5）/air-58 卡為非本弧 untracked 項，具名 add 紀律排除。
 
 ## 收尾步驟
 
@@ -328,3 +328,31 @@ UC 引用：橫展「跨池共享記憶主體」。依賴：S1-S5 定型（ai-ru
 | G2-11 | worktree lifecycle coupling＋池 git 無 repo 外備份（既有缺口） | ✅ | 夜波尾巴 git bundle（~/.agents/memory-bundles/，輪替 7 份）——ai-rules＋mosaic |
 | G2-12 | 升版驗證需 contract suite | ✅ | SM-10 擴四契約 fixture |
 | G2-13 | 逾期檢查與 consolidation 同故障域 | ✅ | watchdog 外掛 standup/daily-maintain（S4 要點 8） |
+
+### 第五輪（09-09 收尾，post-build dual-context＋codex 跨家族，18+4 findings 全裁決）
+
+in-harness dual-context（code-reviewer-primed＋code-reviewer，lite/flash）＋codex 獨立審查（4 Important）；findings 帳本＝`.review/air-54.md`。裁決：採納 20、部分 1（setup 腳本函式合併不採——YAGNI）、記錄 1。要點級修正：hook 腳本 jq parse 失敗改 `|| true`（導流 fail-open 直放缺口——fresh F1 實證）、空 stdin guard、lexical gate 拿掉 `*..*`/`*\\*` 誤傷面、`.tmp-*` 偵測語義入 SKILL.md、池 generator 部署同步（ruff format drift）、MULTI-MACHINE cron 資料模型定案 primary-only（副機不回填 registry——codex I3）、EP S3/S4 本文隨實作修訂（hooks.json machine-local flip＋contract 現況——codex I2）、弧邊界澄清（codex I1）。verdict：pass-with-findings → findings 全 apply → followup 重驗綠。
+
+### 第三輪（09-09，跨 provider 終審＋主 session judge＋修畢）
+
+總判 Conditional Pass（架構成立、無新 P0；不關卡、不解 `.bak` gate）。7 findings：6 ✅（1 部分），judge 追加實證兩處（dirty-sensor live 未驗＋watchdog 無排程執行者——比 T3-4 原文再深一層；池全 ASCII basename——T3-7 Unicode 限縮）。修畢待關項＝今晚首波＋P5 執行者拍板。
+
+| # | finding（摘要） | 判決 | 落點 |
+|---|------|------|------|
+| T3-1（P1） | hook 在 contract 前先 dereference 未驗證 P（read/hash deputy＋大檔 fail-open） | ✅→複審仍開放→再修 | lexical gate＋尾段 symlink 跳過；複審反例 `alias/secret.md`（中間段 symlink 穿透）舊邏輯覆現成立→補 intermediate 逐段 lstat＋2 測試（alias 反例＋nested 正例），9 綠 |
+| T3-2（P1） | realpath-containment ≠ symlink-component 拒絕 | ✅ | contract 文字硬化：逐段 lstat（containment 僅必要條件） |
+| T3-3（P1） | sibling-prefix 碰撞（`memory-inbox` 誤判池內） | ✅ | delimiter-aware（尾 slash）＋`../memory-inbox/x.md` 回歸樣本 |
+| T3-4（P1） | git 第二訊號無獨立執行者；watchdog 只看 inbox age（hook 全掛時沉默） | ✅ | daily-maintain Phase 0 加 porcelain-vs-receipt 第二檢查；執行者缺口記 P5 待拍板 |
+| T3-5（P1 方法論） | 自然召回 oracle 太弱（desc 即可答對） | ✅ | sentinel 重做：body-only canary＋telemetry 讀事件 oracle＋快照缺席 negative control |
+| T3-6（P2） | meta 條件是 exists 非 tool==edit | ✅ | 行為釘測試（add 指既有亦附 meta）＋consumer 只以 tool_name 判類 |
+| T3-7（P2） | 大小寫/Unicode 檔名別名 | ⚠️ | reserved/同名比對大小寫無關化；池全 ASCII，Unicode 暫 N/A |
+
+### 第四輪（09-09，接合處審查＋主 session judge＋修畢）
+
+對象＝HEAD 上 AIR-54 未提交實作；S6／首波／P5 不重算。2 findings 全 ✅＋ruff 整潔。
+
+| # | finding（摘要） | 判決 | 落點 |
+|---|------|------|------|
+| T4-1（P1） | 異常檢查排在流入快照之後——>30min 直寫先被 `add -A && commit` 收下，偵測訊號滅失 | ✅ | 波前二分③加異常篩（receipt／hook-event／自產出三 allow，三無→quarantine＋停波待裁），走在快照提交前；驗證待首波實測 |
+| T4-2（P2） | contract 許子目錄但 generator 只掃頂層→done 卻索引不可見（隔離池 repro：exit 0、0 entries） | ✅ | 合約收緊池根 basename（子目錄明確 rejected）；hook 同步跳過含 slash enrichment（T3-1b walk 被取代、更簡）；nested 測試翻轉；池零子目錄零遷移 |
+| ruff | 測試檔 PLC0415 區域 import×3 | ✅ | import 全上頂層；`ruff check`＋`git diff --check` 綠 |
