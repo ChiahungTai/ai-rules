@@ -4,7 +4,7 @@ title: 開發流程契約修復＋反饋固化——codex 六斷點＋mosaic MOS
 status: To Do
 assignee: []
 created_date: '2026-09-08 22:02'
-updated_date: '2026-09-09 01:48'
+updated_date: '2026-09-09 02:59'
 labels:
   - docs
   - skills
@@ -32,4 +32,6 @@ ordinal: 42000
 【09-09】user 裁定 AIR-48 剩餘併入本弧（S9：P4 dogfood 窗口至 09-10＋P5 裁決點＋memory-audit 統一定義表補 wrapper 誤置條目）——本卡結案時同步結 AIR-48；air-50 branch 已重建快進至 main（開工 checkout 依新 git 慣例）
 
 〔09-09 查證補充〕references/consistency-sweep/02-airules-handoff.md（mosaic 地毯掃描反饋）的 rename 反掃任務＝本卡 S11 段已吸收（desc ⑬／SM-18／驗收⑨），勿重複開卡。狀態核實：S11 已規劃未執行——條款本體尚未寫進 skill（rg 'rename|反掃' skills/post-build/SKILL.md skills/metadata-sync/SKILL.md 零命中，09-09 機械驗證）；f7e60dc commit＝EP 擴 S11 段＋handoff 證據 durable 化，非條款落地。執行序不變（post-build 共檔鏈 S1→S2→S3→S4→S11 收尾）。另註：卡狀態顯示 To Do 但 air-50 branch 與本弧 working tree 改動在場——owning session 確認是否補切 In Progress（起手式①）。
+
+〔開工 handoff 09-09 command center〕排序拍板：51 收→53 收→50 開工（本日主弧，S9 綁 AIR-48 dogfood 窗口 09-10）→54→52。開工起手式：checkout -b air-50 → In Progress → 開工雙 ref → code-reality snapshot --repo <root> --label air-50（勿跳）→ /implement（EP＋殼在本卡 references）。B 線機械段 S6/S8/S12 可派 codex 平行。收尾含 EP 收尾段 S12 三條款＋AIR-48 同弧結案。過渡紀律：本弧結案蒸餾後手動重跑 .agent-tmp/poc_muse_projection.py 刷新 muse copy 投影（AIR-54 過渡形態）。
 <!-- SECTION:NOTES:END -->
