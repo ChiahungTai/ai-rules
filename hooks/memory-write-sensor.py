@@ -11,9 +11,10 @@ Scope contract (fail-loud, not fake coverage):
 - Bash redirects / external processes are INVISIBLE here (see
   memory-dirty-sensor.py FileChanged + the hash leg in `attribution`).
 - ZCode 3.7.7 events DO include PostToolUse (04-report measured subset);
-  CC-only scope is an AIR-56 arc decision, not a mechanism limit — a ZCode
-  registration is possible later (collector+hash is the current ZCode channel,
-  coverage boundary in AIR-56 card).
+  registered on BOTH harnesses since 2026-09-09 (CC settings.json +
+  zcode-registration.json template and live config). Payload schema drift
+  on the ZCode side is absorbed by this sensor's fail-safe filters (worst
+  case: silent no-op; coverage boundary in AIR-56 card).
 - Always exits 0: a sensor must never block or fail the tool call.
 - Hook runtime is python 3.9 — no 3.10+ syntax in this file.
 """
