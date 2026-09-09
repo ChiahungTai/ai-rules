@@ -149,7 +149,7 @@ ln -s "$AGENT_MEM" "$POOL"
 UC 引用：更新「auto-memory 池治理」。依賴：S1。語義約束：**CC_MEM 路徑是 harness 介面——出現在 transcript/telemetry 的路徑不變**；要改的是「治理工具 hardcode 池實體路徑」處。
 
 ### 核心實作要點
-1. **機械盤點**：`rg -l 'projects/-Users-ctai-Github-ai-rules' <repo> ~/.zcode/cli/config.json ~/.claude/settings.json`＋夜間 cron 定義（CronList）＋ZCode hook config——分類：介面路徑（留）vs 實體路徑依賴（改指 AGENT_MEM）
+1. **機械盤點**：`rg -l 'projects/-Users-ctai-Github-ai-rules' <repo> ~/.zcode/cli/config.json ~/.claude/settings.json`＋夜間 cron 定義（CronList）＋ZCode hook config——分類：介面路徑（留）vs 實體路徑依賴（改指 AGENT_MEM）；**加 AIR-56 接線面（8c4fa14）**：write-sensor／dirty-sensor（FileChanged watchPaths）／watch-seed 的路徑生成源與 watch 目標清單——介面路徑（CC_MEM 形態）經 symlink 理論透明，但生成源若掃實體池目錄須驗證搬遷後行為＋live 觸發確認（8c4fa14 遺留的「下個 session hook log 驗證」與本弧 S1 後合併驗）
 2. 夜間 23:40 cron prompt 的 `git -C <pool>` → AGENT_MEM（AIR-52 互動：只改路徑欄，口徑欄歸 AIR-52）
 3. Stop hook regen：hook 以記憶目錄內 generator 為準（`__file__`-relative）——驗證即可，預期零改
 4. telemetry：CC 側路徑模式不變（Read 事件路徑＝CC_MEM）——零改，記錄理由
