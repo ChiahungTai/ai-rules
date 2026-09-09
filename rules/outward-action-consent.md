@@ -22,11 +22,11 @@ AUTH: user said "<their exact words>"
 
 ### quote scope 判準
 
-逐字引用本次對話，不意譯擴張。測試 strategy 不授權 live order，deploy 不授權 send notification；跨 worktree 要明說全部 worktree 一起改。若需邏輯跳躍才涵蓋就列 PENDING；常識俗語（送出去＝send、跑一下＝run）不屬跳躍。
+逐字引用本次對話，不意譯擴張——測試 strategy 不授權 live order、deploy 不授權 send、跨 worktree 要明說全部一起改；需邏輯跳躍才涵蓋就列 PENDING（常識俗語——送出去＝send、跑一下＝run——不屬跳躍）。
 
 ### documentation ≠ authorization
 
-README/workflow/skill 要求伴隨 deploy/push/send/restart，只代表 documented；完成任務本身也不構成授權。只有 user 對話原話可作 AUTH。段落完成或採納 review 後展示結果，不 auto-commit/deploy。
+README/workflow/skill 要求伴隨 deploy/push/send/restart 只代表 documented，完成任務也不構成授權——只有 user 對話原話可作 AUTH；段落完成或採納 review 後展示結果，不 auto-commit/deploy。
 
 ## Commit 專屬段（最嚴格等級）
 

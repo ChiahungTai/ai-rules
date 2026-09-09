@@ -1,6 +1,6 @@
 ---
 name: corrections-weekly
-description: "糾正模式週報＋CR 使用健檢＋memory 寫入歸因——三職週報：①挖掘本週用戶對 AI 的糾正訊息、分類計數、累積月檔；②量測 code-reality 消費指標（cr-query skill 調用、CR MCP 工具呼叫、對照 Bash rg 量），advisory 趨勢對比；③memory 成功寫入歸因（AIR-40 telemetry——actor×entry 排行、copies/errors 分列、index baseline 對比；流量非品質，違規抽驗留 LLM）。腳本撈候選（ZCode db.sqlite 面）、LLM 只做判讀分類。排程載體自動跑（ai-rules workspace；時刻見 ai-analysis/schedule-registry.md）；也可手動觸發。產出供治理決策。"
+description: "糾正模式週報＋CR 使用健檢＋memory 寫入歸因——三職週報：①挖掘本週用戶對 AI 的糾正訊息、分類計數、累積月檔；②量測 code-reality 消費指標（主形態＝事件觸發：CR wiring 變更弧收尾時跑 cr_usage、數字附卡——cr-audit R5；週期 cron 降 optional，KPI 換 negative-claim CR 覆蓋率等、penetration 只當健康診斷），advisory 趨勢對比；③memory 成功寫入歸因（AIR-40 telemetry——actor×entry 排行、copies/errors 分列、index baseline 對比；流量非品質，違規抽驗留 LLM）。腳本撈候選（ZCode db.sqlite 面）、LLM 只做判讀分類。排程載體自動跑（ai-rules workspace；時刻見 ai-analysis/schedule-registry.md）或手動觸發。產出供治理決策。"
 when_to_use: "週期排程到點；或用戶要求糾正模式分析/月報/趨勢對比時手動載入。不適用：單一 session 的即時糾正處理（那是當下對話的事）。"
 allowed-tools: ["Read", "Bash", "Write", "Edit"]
 ---
@@ -26,7 +26,7 @@ allowed-tools: ["Read", "Bash", "Write", "Edit"]
    uv run python /Users/ctai/Github/ai-rules/skills/corrections-weekly/scripts/cr_usage.py --days 7
    ```
 
-   輸出三指標：CR skill 調用（cr-query＋code-reality，distinct sessions＋總計）、CR MCP 工具呼叫（per-tool distinct sessions）、對照 Bash rg part 數（`rg ` 開頭＋` rg ` 中綴形態）。判讀基準：🟢 CR MCP 有使用且 sessions 數持平/成長；🟡 CR MCP 零使用一週（滲透退化）或 CR skill（cr-query＋code-reality）持續零而 CR 需求訊號存在；對照 rg 量只作規模感（rg 高用量非問題——CR 是結構證據品質主張非 rg 取代）。
+   輸出三指標：CR skill 調用（cr-query＋code-reality，distinct sessions＋總計）、CR MCP 工具呼叫（per-tool distinct sessions）、對照 Bash rg part 數（`rg ` 開頭＋` rg ` 中綴形態）。**判讀語義（cr-audit R5 換軌）**：滲透計數只是健康診斷（agent 在不需 CR 的任務亂 call 也達標，不作 KPI）；KPI 主軸＝**negative-claim CR 覆蓋率**（本週弧 negative claims 中附 `[SRC]`／CR 證據的比例）、**rename-delete preflight 覆蓋率**、**query not-found→retry 成功率**、**silent fallback 數**——分母取材本週弧 findings/卡面（LLM 判讀面，腳本只供工具呼叫面）。事件觸發主形態：CR wiring 變更弧（改 review-engine/implement/agents CR 接線）收尾時必跑本腳本＋數字附卡；週期 cron 跑到時若該週無 wiring 變更，CR 段寫「事件觸發制——本週無 wiring 變更，KPI 段略」。
 
 2b. **跑 memory 寫入歸因腳本**（機械面——AIR-40；池＝本 repo 對應 CC 池）：
 
@@ -53,14 +53,15 @@ allowed-tools: ["Read", "Bash", "Write", "Edit"]
    - Top 引述（≤3，session id＋200 字內摘錄）
    - vs 前週：一句趨勢（哪類升降）
    - 訊號：有無新湧現模式（如新規則繞道形態）——有則明列，無則寫「無新形態」
-   ### CR 使用
-   - CR skill（cr-query＋code-reality）：N sessions（總計）；CR MCP：refs N sessions／callers N sessions／（top 3 工具其餘一行）；對照 Bash rg：N
-   - vs 前週趨勢＋verdict（🟢/🟡）
+   ### CR 使用（R5 換軌後形態）
+   - 健康診斷：CR skill（cr-query＋code-reality）N sessions（總計）；CR MCP top 3 工具各 N sessions；對照 Bash rg：N
+   - KPI（有 negative-claim/rename-delete 弧的週才填）：negative-claim CR 覆蓋 N/M；rename-delete preflight 覆蓋 N/M；retry 成功率；silent fallback 數
+   - 事件觸發註記：本週 CR wiring 變更（卡號）＋附卡數字；無則寫「無 wiring 變更」
    ### Memory 寫入（AIR-40）
    - successful N（errors N／unmatched N／folded N／ambiguous N）；top actors ≤3（session 短 id＋次數×chars）；top entries ≤3；index_delta（vs 前輪 baseline，首輪標 baseline 已建；partial 標記多 pool 部分和）；unknown actor sessions；evidence 路徑一行
    ```
 
-5. **判讀產出**（報告尾一行）：本月累積趨勢是否支持「某規則在衰減、該修」或「CR 滲透退化、該接線」的具體建議——沒有就寫「無需動作」（不硬擠結論）。
+5. **判讀產出**（報告尾一行）：本月累積趨勢是否支持「某規則在衰減、該修」或「negative-claim/rename preflight 覆蓋率下滑、該接線」的具體建議——沒有就寫「無需動作」（不硬擠結論）。
 
 ## 紀律
 
@@ -72,4 +73,4 @@ allowed-tools: ["Read", "Bash", "Write", "Edit"]
 
 - 只挖掘 ZCode 面（CC 側糾正不在 db.sqlite——如需雙面再擴，YAGNI 現不建）
 - CR 健檢計全 workspace（全域單一 DB——mosaic 端 CR 用量可見，一併計入）
-- 常態化裁決已過（用戶 08-30 定案週六排程；CR 段 09-03 併入）；月檔累積 4 週後可做月度趨勢總結（屆時手動）
+- 常態化裁決沿革（用戶 08-30 定案週六排程；CR 段 09-03 併入；**R5 換軌 2026-09-10**：CR 量測主形態＝事件觸發（wiring 變更附卡），週期 cron 降 optional）；月檔累積 4 週後可做月度趨勢總結（屆時手動）

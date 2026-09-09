@@ -30,8 +30,8 @@ Facade 對外部消費者有穩定 API 解耦價值；內部 modules/scripts/tes
 - 禁 TYPE_CHECKING，循環須重構解決；回傳自身/子類用 Self（cls、enter、copy 等）。
 - 禁 List/Dict/Set/Tuple/Optional/Union 舊 typing，改內建泛型與 T | None / T1 | T2。
 - typing 只 import Callable、Protocol、TypeVar、ParamSpec、Self、Any。
-- Any 限 JSON/第三方外部邊界並註明理由；使用前先查 venv 套件 py.typed 與實際 source 型別，確認無法推導才能用，禁猜一定是 Any。
+- Any 限 JSON/第三方外部邊界並註明理由——先查 venv 套件 py.typed 與 source 型別，確認無法推導才用，禁猜。
 
 ## Python 命令執行
 
-強制 uv run 前綴；禁 python/python3、PYTHONPATH=$PWD、外部 timeout/gtimeout（macOS 無此命令）。pytest 背景跑，跨命令/context 都適用；短測試批次例外依 tool-discipline。ModuleNotFoundError 先確認 uv pip install -e .。
+強制 uv run 前綴，禁 python/python3/PYTHONPATH（詳 tool-discipline）；另禁外部 timeout/gtimeout（macOS 無此命令）。pytest 背景跑；ModuleNotFoundError 先確認 uv pip install -e .。

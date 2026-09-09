@@ -119,7 +119,7 @@ def resolve_targets(home: pathlib.Path) -> list[DeployTarget]:
             home / ".config" / "muse" / "AGENTS.md",
             frozenset({"neutral"}),
             frozenset(),
-            40 * 1024,  # global-only gate；合併專案指令仍須驗 64KiB startup limit。
+            MUSE_USER_BUDGET,  # user 層自限；合併專案指令仍須驗 64KiB startup limit。
             "muse",
         ),
     ]
@@ -130,6 +130,13 @@ def resolve_targets(home: pathlib.Path) -> list[DeployTarget]:
 # 102400 on 2026-09-08). Keep the bundle under 90KiB
 # so tail rules never land in the silent-truncation zone.
 BUNDLE_MAX_BYTES = 90 * 1024
+
+# Muse startup shares 64KiB across global+project rules and loader framing;
+# the global bundle self-limits to 36KiB so a project layer (mosaic: ~24.1KiB)
+# + framing (~0.8KiB) stays under the shared line with ~3KiB buffer.
+# Broke once at 40,092B (2026-09-09, tail rules silently truncated) before
+# this budget existed.
+MUSE_USER_BUDGET = 36 * 1024
 
 # Early-warning threshold (fraction of BUNDLE_MAX_BYTES). Deploy-time visibility
 # only -- the weekly bundle-watch advisory owns per-rule composition analysis

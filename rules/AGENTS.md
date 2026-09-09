@@ -27,7 +27,7 @@ uv run python scripts/deploy_agents.py
 
 - **ZCode 實測**：截斷線 **102,400 bytes（100KiB）**，硬編碼於 `zcode.cjs`（`hIn=100*1024`，讀前 100KiB bytes 再 UTF-8 decode），**無任何 config 可調**（官方文檔亦未記載）。載入模型：只讀 user 全域（`~/.zcode/AGENTS.md`）+ workspace（cwd 往上至 project root 第一個 `AGENTS.md`）**兩檔**，各檔獨立 100KiB 預算；**不展開 `@import/@include`、不掃子目錄、不依任務類型選規則檔**。
 - **Muse delegation startup**：全域＋專案指令及包裝共用 **65,536 bytes**，超限會警告並截斷。部署器的 Muse global-only gate 留專案空間，但不保證任意 workspace 可載入；須在實際 workspace 驗合併量與 loader 警告。三端均保留全部 neutral rules；不可因 Muse 家族/headless 就假設它不改 instruction、不查符號或不需 context 紀律。任務是否允許寫入/委派由工單與可用工具決定。
-- `deploy_agents.py` 的各端 size gate 是唯一數值源（ZCode/Codex 用 `BUNDLE_MAX_BYTES`，Muse 見 `resolve_targets`），超限拒絕該端部署。撞線先精煉重複與可推導內容，或將 on-demand 細節下沉既有 skill；rule 保留執行核心與觸發 pointer，禁用整檔排除掩蓋尺寸問題。
+- `deploy_agents.py` 的各端 size gate 是唯一數值源（ZCode/Codex 用 `BUNDLE_MAX_BYTES`，Muse 用 `MUSE_USER_BUDGET`＝36KiB 自限——64KiB 共享線內留專案層＋framing 緩衝，見 `resolve_targets`），超限拒絕該端部署。撞線先精煉重複與可推導內容，或將 on-demand 細節下沉既有 skill；rule 保留執行核心與觸發 pointer，禁用整檔排除掩蓋尺寸問題。
 - 歷史教訓：部署版 141KB 時代，尾部 8 條 rules（含 tool-discipline、quality-constraints）落在截斷區靜默失效（2026-08-20 實證事故：spawn 背景規範沒載入 → 前景 spawn 被 user 插話殺掉）。**規範存在 ≠ 規範載入**。
 
 ### 部署驗證義務（deploy 跑通 ≠ 部署完成）

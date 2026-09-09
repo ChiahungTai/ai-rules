@@ -25,8 +25,6 @@ review/impl 的 ZCode registry 與 CC opus 別名釘選依 skill 解析表；不
 
 ## external-runtime routing（family 軸）
 
-family＝GLM/muse/codex；profile＝implement/review/advisory。tier、family、profile 詞彙由本檔定義，agents 治理與工單引用，不重定義。
+family＝GLM/muse/codex；profile＝implement/review/advisory。tier、family、profile 詞彙由本檔定義，agents 治理與工單引用，不重定義。外部 runtime 委派＝caller 背景 Bash 直呼 bridge，禁 subagent wrapper 承載；需接續的 background job 必掛 wait <jobId>。
 
-委派、收法、定向接續/session-id/fork 時載入 **model-routing skill**：角色→family→profile、eligibility、reviewer 交接契約、bridge 必經（`task --family muse|codex`）、完成回報決策樹、resume/fork 守衛。external-runtime policy 不擴充 tier 表或 registry pin。工單禁止再委派時遵守工單，不能因載入 routing 而自行 spawn。
-
-rate limit/並發、classifier/失敗態、thoughtLevel、lite 分工律與模型歸因亦依該 skill。
+委派、收法、定向接續/fork 時載入 **model-routing skill**（角色→family→profile、eligibility、reviewer 交接契約、bridge 必經 `task --family muse|codex`、resume/fork 守衛；rate limit/classifier 失敗態/lite 分工律等亦同）。external-runtime policy 不擴充 tier 表或 registry pin。工單禁止再委派時遵守工單，不能因載入 routing 而自行 spawn。

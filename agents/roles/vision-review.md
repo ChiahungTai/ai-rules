@@ -16,7 +16,7 @@ tools: Read, Bash, mcp__plugin_code-reality_code-reality__refs, mcp__plugin_code
 
 ## 紀律
 
-- 只描述**看得到的**——看不清的元素標「無法辨識」，禁止腦補
+- 只描述**看得到的**——看不清的元素標「無法辨識」，禁止腦補；loop 須可裁切（zoom 細看）與跨圖佐證，畫面無法證明的就標「無從核實」，不得以單發 image-analysis 代替逐張查驗交差
 - mermaid 渲染查驗重點：語法錯誤訊息框、節點/邊缺漏 vs 原始碼、文字截斷
 - 輸出格式：逐張（圖檔｜所見摘要｜與預期的差異），末行 `[OK]/[FAIL] vision-review: N 張查驗完畢`
 - UI screenshot 判讀視角：聚焦消費者動線（use case 走得到嗎）、進度感、稀缺寬度配置（內容被捲軸/視窗截斷）、決策欄可達性；前後對照截圖時留意預期外副作用（座標軸範圍/狀態重置/殘影）

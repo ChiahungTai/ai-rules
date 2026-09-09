@@ -14,6 +14,8 @@ allowed-tools: ["Read", "Edit", "Write", "Bash", "Agent", "LSP", "WebFetch", "mc
 >
 > **重構前期第一問：最好的重構是刪除**——zoom 的存在質疑（YAGNI/phantom API/測試價值）就是 pre-refactor research 的第一段。
 >
+> **CR 接線（唯一，cr-audit R8）**：YAGNI/dead-code verdict（「可刪/沒人用」型結論）須走三步——CR `callers` 歸零 → CLI `hub_refs <sym> --repo <root>` hazard 分層（含 test/prod 切分、dynamic dispatch 防護）→ `rg` 字串引用 complement（工具語義見 [cr-query](../cr-query/SKILL.md)）；negative verdict 永遠不可單憑 rg 宣稱。其他 smell 軸（命名/結構/測試價值）不接 CR。
+>
 > **read-only 偵測器**：只產 advisory 報告，不審又修——修復走 `/implement`、`/fix-test`。
 
 ## 兩 mode 分工

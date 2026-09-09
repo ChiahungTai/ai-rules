@@ -20,8 +20,8 @@ context 揮發且 quota 可能突然耗盡；真實案例：Codex 審查弧只�
 
 ## STATE.md（Last session 觀察層）
 
-定位、觀察/事實邊界、路徑、生命週期及寫入步驟見 state-md-write 共用子範本（Claude: skills/_common/state-md-write.md）。由 at/deep-work 觸發；Open failures 走 kanban，不進 STATE。
+定位與寫入步驟見 state-md-write 共用子範本（Claude: skills/_common/state-md-write.md）；由 at/deep-work 觸發（Open failures 走 kanban，不進 STATE）。
 
 ## Memory 生命周期規範（pointer）
 
-寫前載 memory-audit skill「寫入端紀律」與「載體統一定義表」：一句話都提煉不出或歸因未定，就不寫；六問、rank、尺寸、body/cluster、desc 等依該 skill。MEMORY.md 是 frontmatter 機械投影，禁手寫，條目檔是唯一寫入點；弧結案同步蒸餾終態 facts（結案兩步第三動）。
+寫前載 memory-audit skill「寫入端紀律」與「載體統一定義表」：一句話都提煉不出或歸因未定就不寫；六問/rank/尺寸/body/desc 等依該 skill。MEMORY.md 是 frontmatter 機械投影禁手寫，條目檔是唯一寫入點；弧結案同步蒸餾終態 facts（結案兩步第三動）。

@@ -64,7 +64,7 @@ extra agent 由**消費命令提供的段落風險特徵**機械觸發（非 LLM
 - 相關檔案路徑（必讀）
 - [review-engine](../review-engine/SKILL.md) 通用審查邏輯（嚴重度/信心水準/審查者自證/LSP 查證/模式判定）+ [code-review-and-quality](../code-review-and-quality/SKILL.md) 六軸方法論
 - rules-reminder 規則摘要（Agent 看不到 auto-loaded rules）
-- **CR 接線查證段（硬性）**：照 [review-engine](../review-engine/SKILL.md)「spawn prompt 工具紀律」CR 段逐字貼入（Explore＝CLI 形態）——diff 含 callable 新增/修改時每個至少跑一次 callers；callers 為空 → 互補 rg；engine 缺場 `[WARN]`＋rg fallback；無 callable 變更 → findings summary 註明 N/A
+- **CR 接線查證段（硬性）**：照 [review-engine](../review-engine/SKILL.md)「spawn prompt 工具紀律」CR 段逐字貼入（Explore＝CLI 形態；trigger-based）——diff 含 callable 新增/修改且命中觸發面（public API/介面、rename/delete、跨模組、negative claim）才必跑 callers；callers 為空 → 互補 rg；engine 缺場 `[WARN]`＋rg fallback；未命中觸發面 → findings summary 註明 N/A
 
 **① clean 額外**：明示「**不給任何 intent 提示，純讀 code 自身評估** — 哪裡怪、冗餘、缺、可疑、過度設計」
 

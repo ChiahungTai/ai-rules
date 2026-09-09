@@ -179,7 +179,7 @@ allowed-tools: ["Read", "Bash"]
 | 修改了 library 模組但只在 unit test 驗證 | Suggestion | source 在 library 層，test 只在 `tests/unit_tests/` |
 | 修改了共用模組但未跑跨模組測試 | Suggestion | 修改的模組被 ≥ 2 個 test directory 引用 |
 
-消費端驗證模式定義見 [quality-constraints](../../rules/quality-constraints.md) 的「消費端驗證模式」表格。
+消費端驗證模式定義見 [quality-constraints](../../rules/quality-constraints.md) 的「消費端驗證模式」段。
 
 ### 角度 5：漸進驗證合規
 

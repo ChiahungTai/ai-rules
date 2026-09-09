@@ -23,19 +23,9 @@ code-reality build（opt-in）    /instruction-sync                 /doc-health 
                                 品質檢查                    品質檢查 + kanban hygiene       趨勢追蹤
 ```
 
-### Phase 1: 結構圖新鮮度（code-reality，opt-in）
+### Phase 1: 結構圖新鮮度（code-reality，按需 prefetch）
 
-**步驟 1.1：判斷 opt-in**
-
-project root 有 `.code-reality.toml`（profile）或 `.code-reality/`（sidecar）任一 → opt-in；兩者皆無 → Phase 1 skip（一行帶過，不報錯）。此處偵測的是 **repo 數據面 opt-in**（toml／sidecar 在場）；binary 存在性偵測是另一件事（單一真相源見 [code-reality](../code-reality/SKILL.md) 存在性偵測）。
-
-**步驟 1.2：重建 graph**
-
-```bash
-code-reality build --repo <project-root>
-```
-
-binary 不存在或 build 失敗 → 記 `[WARN]` 後續行 Phase 2——graph 新鮮度是 nightly prefetch，查詢時 stale WARN 驅動的 lazy rebuild 是兜底（見 [cr-query](../cr-query/SKILL.md)）。
+**主路徑＝查詢時 lazy rebuild**（stale WARN 驅動，單一源見 [cr-query](../cr-query/SKILL.md)）——本 phase 的 build 只是 prefetch 優化，**可跳過不報錯**（cr-audit R8：nightly prefetch 零使用證據，降按需）。要跑時：project root 有 `.code-reality.toml`（profile）或 `.code-reality/`（sidecar）任一 → `code-reality build --repo <project-root>`；兩者皆無 → skip（一行帶過）。binary 不存在或 build 失敗 → 記 `[WARN]` 續行 Phase 2。binary 存在性偵測單一真相源見 [code-reality](../code-reality/SKILL.md)。
 
 > snapshot 快照鏈（scan_project.py 產出 `.project-snapshot.json` + diff fingerprint + 自動更新 `dependency-graph.md` + commit snapshot）已退役：機械依賴/ripple 查詢由 code-reality graph 承擔（`callers`／`hub_nodes`／`impact_radius`，見 [cr-query](../cr-query/SKILL.md)）；人工策展（Ripple 語義表、分層敘事）由 per-repo 文檔承擔（`dependency-graph.md` opt-in 人工維護，或 `architecture.md`——若該 repo 以此慣例存放 ripple 語義表）。[scan-project](../scan-project/SKILL.md) 保留為 on-demand 機械盤點／findings 工具。
 

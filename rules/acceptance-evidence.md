@@ -31,7 +31,7 @@ producer 宣稱「不影響 X」（accounting/risk/invariant）須有獨立機�
 | L5 對抗性 POC | 髒資料/已知陷阱；除權息、減資、NaN、時區、溢出 | AI 自選標的仍可能避開盲區；數據高風險 |
 | L6 人類觀察 | 看真輸出/畫面/log；需求誤解 | 疲勞、看一眼就信；單向門 |
 
-**禁用低層證據冒充高層驗收**。風險分級定深度，驗證順序及消費端模式見 [quality-constraints](quality-constraints.md)。
+**禁用低層證據冒充高層驗收**；🟢 低風險不需爬到六層（避免過度工程是內建約束），但每層都值得懷疑——L6 人類觀察會疲勞漏見，L5 POC 可能打自己畫的靶。風險分級定深度，驗證順序及消費端模式見 [quality-constraints](quality-constraints.md)。
 
 ### 證據時效性
 
@@ -42,10 +42,4 @@ producer 宣稱「不影響 X」（accounting/risk/invariant）須有獨立機�
 - A 機器自驗（L1–L3）：必要但不充分，天花板是 AI 自洽。
 - B 人類驗收（L4–L6）：外部正確性的來源；debrief/illustrate/smell-detector 已提供人類 viewport，完整 L4–L6 執行驗收仍是設計方向。
 
-獨立 context 不等於獨立智能：同家族模型共享偏誤，quorum 解不了共同盲點。人類也有疲勞/確認偏差，P0 invariant 須加 Runtime Invariant Assurance（A 機械＋B 人審＋runtime 三層），詳 acceptance-evidence skill。各層只能降低、不能消除風險。
-
-## 與既有規則的關係
-
-<!-- bundle: skip-start -->
-風險分級（ai-development-guide「驗證約束」段）決定爬到第幾層（🟢 低風險不需六層——避免過度工程是內建約束）；漸進式驗證（[quality-constraints](./quality-constraints.md) 漸進式驗證（DEPTH-MIN→SAMPLE→FULL））是 L1→L3 爬坡順序；消費端驗證模式（[quality-constraints](./quality-constraints.md)）是 L3 的具體化，本階層為它提供「為什麼」。階層降低風險、**不消除風險**——每一層都值得懷疑，包括最頂層（L6 人類觀察會疲勞漏見；L5 POC 可能打自己畫的靶）。
-<!-- bundle: skip-end -->
+獨立 context 不等於獨立智能：同家族模型共享偏誤，quorum 解不了共同盲點；人類也有疲勞/確認偏差，P0 invariant 須加 Runtime Invariant Assurance（A 機械＋B 人審＋runtime 三層，詳 acceptance-evidence skill）。各層只能降低、不能消除風險。

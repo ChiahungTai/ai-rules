@@ -4,10 +4,6 @@ harness-scope: neutral
 
 # 搜尋工具分工
 
-> **載入機制**: 本檔 source 在 ai-rules repo `rules/`；各家 harness 經全域 guide 部署載入（Claude 端另有 `~/.claude/rules/` symlink auto-load）
-
----
-
 ## 核心原則
 
 **文字搜尋用 rg、檔案搜尋用 fd（預設遵守 `.gitignore`，減少噪音）；符號/圖譜與型別面路由見 [symbol-query-routing.md](symbol-query-routing.md)。**

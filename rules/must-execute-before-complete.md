@@ -16,7 +16,7 @@ POC 是暫時產物，到所屬 EP 段落 build＋commit 為止；build 將驗�
 
 ### 例外（可跳過執行）
 
-純文檔/instruction（rules/skills 含 _common 的 md、Claude 端 wrapper；內含不可執行範例仍是文檔）、純註解、ruff 自動 import 排序。配置與可執行碼不屬純文檔。
+純文檔/instruction（rules/skills md、Claude 端 wrapper；內含不可執行範例仍是文檔）、純註解、ruff 自動 import 排序；配置與可執行碼不屬純文檔。
 
 ## 為什麼
 
