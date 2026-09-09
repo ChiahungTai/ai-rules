@@ -20,7 +20,7 @@ A graph edge (A calls B / A imports B) is a *static, parse-time fact*. It says a
 
 This skill assumes the project has the code-reality engine. Detect once per task:
 
-1. **MCP tools present** — code-reality engine tools callable (impact_radius / detect_changes / hub_nodes / bridge_nodes / list_communities / architecture_overview / list_flows / affected_flows / semantic_search / get_review_context / get_minimal_context / refs / callers / closure / audit) → engine live, use it. 兩種部署形態共用這組工具名：plugin stdio（ZCode/Claude plugin per-session spawn `code-reality-mcp --stdio`）與共享 HTTP resident（launchd `com.code-reality.mcp` `127.0.0.1:8200/mcp`，選配）。
+1. **MCP tools present** — code-reality engine tools callable (impact_radius / detect_changes / hub_nodes / bridge_nodes / list_communities / architecture_overview / list_flows / affected_flows / semantic_search / get_review_context / get_minimal_context / refs / callers / closure / audit) → engine live, use it. 兩種部署形態共用這組工具名：plugin stdio（ZCode/Claude plugin per-session spawn `code-reality-mcp --stdio`）與共享 HTTP resident（`127.0.0.1:8200/mcp`，選配——服務由 OS 服務層管理）。
 2. **Graph DB exists** — `.code-reality/graph.db` in repo root → graph present; if MCP tools absent, use CLI `code-reality graph_query <op> --repo <root>` (see Fallback).
 3. **Neither** — engine not present in this project.
 
@@ -114,7 +114,7 @@ They compose: a CRG workflow gives the steps; `cr-query` governs *how each query
 ## Reference
 
 - **CLI commands:** `code-reality --help`（graph_query 家族＋scip_refs＋graph_db build 等）
-- **code-reality MCP 接線：** stdio `code-reality-mcp --stdio`（plugin 形態）或 streamable-http `127.0.0.1:8200/mcp`（launchd `com.code-reality.mcp`）；工具呼叫一律帶 `repo_root`（不自動偵測）。舊 CRG server（com.user.crg-mcp @5555）已**完全退場**（2026-08-30：launchd 服務退場＋plist 刪＋uv tool v2.3.7 解裝；5555/launchctl 清潔態）。
+- **code-reality MCP 接線：** stdio `code-reality-mcp --stdio`（plugin 形態）或 streamable-http `127.0.0.1:8200/mcp`（共享 resident，服務由 OS 服務層管理）；工具呼叫一律帶 `repo_root`（不自動偵測）。舊 CRG server（port 5555）已**完全退場**（服務解裝；5555/launchctl 清潔態——勿再期待）。
 - **engine semantics 真相源:** ai-rules `skills/code-reality/SKILL.md`（接線語義）＋code-reality repo（`crates/AGENTS.md`＋plugin skill＝工具事實）
 - **Sibling facts discipline:** [symbol-query-routing](../../rules/symbol-query-routing.md) (symbol queries) — this skill is its graph counterpart
 - **Consumers:** [review-engine](../review-engine/SKILL.md) (change-impact lens), [arch-thinking](../arch-thinking/SKILL.md) §二 結構機械 (structure-facts lens), [execution-plan](../execution-plan/SKILL.md) 段落 0 (EP 依賴分析——ripple 宣稱工具證據 + 死路假設信號)

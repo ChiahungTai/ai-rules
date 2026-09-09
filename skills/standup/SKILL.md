@@ -1,17 +1,17 @@
 ---
 name: standup
-description: 昨日活動 digest——跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition。晨間簡報、昨日做了什麼、standup、morning briefing、跨 worktree 對話整理、session 摘要時使用。機械素材由 aggregate_sessions.py 萃取,LLM 寫敘事;輸出 body(無 `## ` header,delivery 由 invoker 決定——ZCode 23:20 定時任務 append「## 📝 昨日活動」進 daily-report,或 /standup 直接在 chat 顯示)。
+description: 昨日活動 digest——跨 worktree session 聚合 + commit/kanban/SYSTEM-MAP transition。晨間簡報、昨日做了什麼、standup、morning briefing、跨 worktree 對話整理、session 摘要時使用。機械素材由 aggregate_sessions.py 萃取,LLM 寫敘事;輸出 body(無 `## ` header,delivery 由 invoker 決定——排程載體 append「## 📝 昨日活動」進 daily-report,或 /standup 直接在 chat 顯示)。
 when_to_use: 每日晨間回顧昨日活動、跨 worktree 整理同一 main repo 的對話紀錄、產出 morning briefing、standup 晨間簡報。觸發詞:standup、晨間簡報、昨日活動、morning briefing、跨 worktree session。
 allowed-tools: ["Read", "Bash", "Glob", "Grep"]
 ---
 
 # standup skill — 昨日活動 digest
 
-產出「昨日活動 digest」**body**——跨 worktree session 敘事 + commit/kanban/SYSTEM-MAP transition。**只產 body,不加 `## ` header**(header `## 📝 昨日活動` 由 invoker 加:ZCode 23:20 定時任務 append 進 daily-report〔2026-08 起 nightly claude -p 載體退役〕;或 `/standup` 直接在 chat 顯示 body)。這是 nightly-thin(test-regression/BSR = 機器狀態層)未覆蓋的人類活動層。
+產出「昨日活動 digest」**body**——跨 worktree session 敘事 + commit/kanban/SYSTEM-MAP transition。**只產 body,不加 `## ` header**(header `## 📝 昨日活動` 由 invoker 加:排程載體 append 進 daily-report;或 `/standup` 直接在 chat 顯示 body)。這是 nightly-thin(test-regression/BSR = 機器狀態層)未覆蓋的人類活動層。
 
 ## 🔴 輸出紀律(text output 會逐字進 daily-report)
 
-排程載體(ZCode 23:20 定時任務)抓**所有 assistant text block** append 進 daily-report——**你的 text output 會逐字出現在報告裡**。因此:
+排程載體抓**所有 assistant text block** append 進 daily-report——**你的 text output 會逐字出現在報告裡**。因此:
 
 - **所有分析走 thinking + tool calls**(Bash/Read/Grep)——這些不是 text output,不會被捕獲進報告
 - **text 只 emit 一次、在最後**——完成所有分析後,一次輸出完整 body(從 `### 昨日 Commits` 開始)

@@ -35,7 +35,7 @@ allowed-tools: ["Read", "Bash"]
 |------|------|---------|------|
 | **Diff Audit** | 無參數 | uncommitted test files | pre-commit gate |
 | **Commit Audit** | `fd7a50e8` | 該 commit 的 test file 變更 | post-commit review |
-| **Daily Scan** | `--daily` | 全部 test files | 每週六排程（ZCode 23:20 定時任務週六條件段）→ append `### 🔍 audit-test` section 進 daily-report |
+| **Daily Scan** | `--daily` | 全部 test files | 週期排程（排程載體條件段）→ append `### 🔍 audit-test` section 進 daily-report |
 
 ### 掃描範圍判定
 
@@ -228,7 +228,7 @@ allowed-tools: ["Read", "Bash"]
 2. `uv add --dev mutmut`；scoped config：`[tool.mutmut]` 的 `source_paths`（copy 全 package 保 import）＋`only_mutate`（目標檔 glob）＋`pytest_add_cli_args_test_selection`（目標測試檔）
 3. `mutmut run`；記錄三數字：總耗時／mutant 總數／killed:survived
 4. **survived 必抽讀分類**（主成本在此，非機械跑）：(a) 真實測試缺口（斷言沒鎖行為/邊界）(b) equivalent mutant（語義等價，殺不死是正常的）(c) 無實務意義的極端邊界——每個附 file:line 與 mutated operator
-5. 報告：(a) 類缺口列 Critical finding（測試補強項）；清除聲明（mutants/ 目錄＋pyproject config 段＋dep＋uv.lock 還原）。**輸出落點**：open 項照既有慣例 append 進 daily report；跨 repo open 項 hub-relay 落消費端 pending-decisions inbox（mosaic 例：`ai-analysis/_inbox/pending-decisions.md`——2026-09-02 三池重構後路徑，每日 23:20 report「⏳ 待裁決」節吸收，修復可見性）
+5. 報告：(a) 類缺口列 Critical finding（測試補強項）；清除聲明（mutants/ 目錄＋pyproject config 段＋dep＋uv.lock 還原）。**輸出落點**：open 項照既有慣例 append 進 daily report；跨 repo open 項 hub-relay 落消費端 pending-decisions inbox（mosaic 例：`ai-analysis/_inbox/pending-decisions.md`——2026-09-02 三池重構後路徑，每日 report「⏳ 待裁決」節吸收，修復可見性）
 
 **成本實證**（供報價）：288 行 critical path＋68 tests＝8.2s wall、103 mutants、87.4% kill rate、13 survived 抽讀約 10 分鐘 LLM 判讀——抓到 10 個真實缺口（含 price<1 會計＋風控雙處無保護）；補強後重跑同模組＝100:3（97.1%）、殘留 3 皆 (b)(c) 類——**輪抽查基準用補強後數字，勿把已修缺口重報**（mosaic memory `project-mutation-testing-spike-t32` 有收案記錄，承接先查勿重做）。
 
@@ -360,7 +360,7 @@ fd -e py . tests/
 
 ### 步驟 10：產出報告
 
-按輸出格式模板產出報告。Daily Scan 時由排程載體（ZCode 23:20 定時任務週六條件段）直接 append `### 🔍 audit-test` section 進 daily-report（test-quality 在報告裡有自己的 section）；手動跑的 claude-sync log 落點慣例隨 claude -p 載體退役一併停用。
+按輸出格式模板產出報告。Daily Scan 時由排程載體（週期條件段）直接 append `### 🔍 audit-test` section 進 daily-report（test-quality 在報告裡有自己的 section）；手動跑的 claude-sync log 落點慣例隨 claude -p 載體退役一併停用。
 
 ---
 
@@ -369,7 +369,7 @@ fd -e py . tests/
 | 命令 | 與 /audit-test 的關係 |
 |------|---------------------|
 | `/fix-test` | 互補：fix-test 修**失敗**的測試，audit-test 偵測**通過但品質差**的測試 |
-| ZCode 23:20 定時任務（週六條件段） | Daily Scan 結果直接 append `### 🔍 audit-test` section 進 daily-report |
+| 排程載體（週期條件段） | Daily Scan 結果直接 append `### 🔍 audit-test` section 進 daily-report |
 | `/code-review` | Correctness 軸可引用 audit-test 發現 |
 | `/implement` | 段落完成後跑 audit-test 確認測試品質 |
 | `/commit` | pre-commit gate：audit-test 無 Critical 才建議 commit |

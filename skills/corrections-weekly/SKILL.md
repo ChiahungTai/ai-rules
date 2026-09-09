@@ -1,6 +1,6 @@
 ---
 name: corrections-weekly
-description: "糾正模式週報＋CR 使用健檢＋memory 寫入歸因——三職週報：①挖掘本週用戶對 AI 的糾正訊息、分類計數、累積月檔；②量測 code-reality 消費指標（cr-query skill 調用、CR MCP 工具呼叫、對照 Bash rg 量），advisory 趨勢對比；③memory 成功寫入歸因（AIR-40 telemetry——actor×entry 排行、copies/errors 分列、index baseline 對比；流量非品質，違規抽驗留 LLM）。腳本撈候選（ZCode db.sqlite 面）、LLM 只做判讀分類。每週六 23:10 排程自動跑（ai-rules workspace）；也可手動觸發。產出供治理決策。"
+description: "糾正模式週報＋CR 使用健檢＋memory 寫入歸因——三職週報：①挖掘本週用戶對 AI 的糾正訊息、分類計數、累積月檔；②量測 code-reality 消費指標（cr-query skill 調用、CR MCP 工具呼叫、對照 Bash rg 量），advisory 趨勢對比；③memory 成功寫入歸因（AIR-40 telemetry——actor×entry 排行、copies/errors 分列、index baseline 對比；流量非品質，違規抽驗留 LLM）。腳本撈候選（ZCode db.sqlite 面）、LLM 只做判讀分類。排程載體自動跑（ai-rules workspace；時刻見 ai-analysis/schedule-registry.md）；也可手動觸發。產出供治理決策。"
 when_to_use: "週期排程到點；或用戶要求糾正模式分析/月報/趨勢對比時手動載入。不適用：單一 session 的即時糾正處理（那是當下對話的事）。"
 allowed-tools: ["Read", "Bash", "Write", "Edit"]
 ---

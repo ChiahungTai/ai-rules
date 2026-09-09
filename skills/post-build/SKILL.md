@@ -83,7 +83,7 @@ findings 全空 → 報告並直接進 docs 鏈。
 
 ## 階段 5 — Report Shell refresh（hook 2——commit 前最後穩定點）
 
-**前置清理（第一腿，夜掃兜底）**：列 `.agent-tmp/` 清單（`ls .agent-tmp/`）→逐項 LLM 判「後續還用嗎」→用則保留（可 `touch` 保活）、不用當場刪＋清單入收尾報告；夜間 23:40 掃腿兜底（7 天）。
+**前置清理（第一腿，夜掃兜底）**：列 `.agent-tmp/` 清單（`ls .agent-tmp/`）→逐項 LLM 判「後續還用嗎」→用則保留（可 `touch` 保活）、不用當場刪＋清單入收尾報告；夜間掃腿兜底（7 天）。
 
 本 EP 對應殼存在（任務家 `<task>/index.html`——execution-plan 定稿 hook 1 所建）時，在收尾鏈收斂後 refresh（掛點規格單一源見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」）：
 
