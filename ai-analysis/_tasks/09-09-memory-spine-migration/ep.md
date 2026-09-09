@@ -255,11 +255,12 @@ UC 引用：更新「muse 唯讀掛載」→「受約束寫入者」。依賴：
 UC 引用：橫展「跨池共享記憶主體」。依賴：S1-S5 定型（ai-rules 為模板）。獨立可後延。
 
 ### 核心實作要點
-1. mosaic 池主體 → mosaic repo（owning 線 main worktree）`.agents/memory/`；mosaic `.gitignore`
+0. **既有形態情報（09-09 muse relay，S6 前置）**：mosaic 已有 muse 自建 `.agents/memory/`（MEMORY.md index＋`reference-infra-repo-map.md`＋`shared-memory-pool.md`——活知識，MLM 機制 09-07 user 明示）＋三 WT 目錄層 symlink 共指 main worktree 實體＋`.git/info/exclude` 排除版控。**搬遷前置處置**：muse 自建條目先合併入池主體（過六問＋frontmatter 補全）或遷 `processing/` 暫存，再進主體搬遷。**F2 降級線索**：mosaic 三 WT 目錄層 symlink 下 muse 自述注入正常（未獨立驗證——S6 實測保留，風險由「未驗」降「有實證線索」）
+1. mosaic 池主體 → mosaic repo（owning 線 main worktree）`.agents/memory/`（步驟 0 處置後進駐）；版控排除**沿用 mosaic 既有 `.git/info/exclude` 慣例**（不強推 .gitignore）
 2. mosaic 的 CC project dir（多個，多 worktree 對應）memory 逐一換 symlink 指實體
-3. 其餘 worktree 的 `.agents/memory/` → symlink 指 main worktree 實體——**F2 未驗點**：muse 拒檔案層 symlink 已實證，**目錄層**拒絕與否未驗；S6 第一步先實測（次 worktree 開 muse task read_memory 經目錄 symlink）。若目錄層也拒→**顯性降級**：muse 僅在 owning worktree 一等，次 worktree 的 muse 讀池走 read_file 絕對路徑（已驗穿透）＋AGENTS.md 註明
-4. mosaic 側 hooks.json＋AGENTS.md 同步（參數化移植）
-5. mosaic 夜間波/telemetry 路徑比照 S2；**repo 外 bundle 同步落地（G2-11）**：夜波尾巴 `git -C <mosaic 主體> bundle create ~/.agents/memory-bundles/mosaic-$(date +%F).bundle --all`（輪替保留 7 份）——補池 git local-only 的既有備份缺口＋worktree 誤刪面（owning 線 `--force` remove／清理腳本可連 inner .git 一起刪）
+3. 其餘 worktree 的 `.agents/memory/` → symlink 指 main worktree 實體（**既有 symlink 在場，驗證即可**）——F2 實測：次 worktree 開 muse task read_memory 經目錄 symlink；若目錄層也拒→**顯性降級**：muse 僅在 owning worktree 一等，次 worktree 的 muse 讀池走 read_file 絕對路徑（已驗穿透）＋AGENTS.md 註明
+4. **寫入流＝比照 inbox（user 09-09 定案——直寫 ML M 廢止）**：mosaic 09-07「所有寫入進 MLM」直寫政策隨 S6 廢止——當時是權宜（無跨池主體/hook 契約知識），今天實測下直寫＝投影斷裂（裸寫零 frontmatter→generator 跳過→跨端召回失效）＋品質閘全繞過＋無 CAS；inbox 彌補全部且 muse 自讀能力無損（read_memory(path) 直讀不靠投影）。mosaic 側 hooks.json＋AGENTS.md 同步移植；mosaic 端 muse 政策條目（memory-policy.md「所有寫入進 MLM」）同步改寫
+6. mosaic 夜間波/telemetry 路徑比照 S2；**repo 外 bundle 同步落地（G2-11）**：夜波尾巴 `git -C <mosaic 主體> bundle create ~/.agents/memory-bundles/mosaic-$(date +%F).bundle --all`（輪替保留 7 份）——補池 git local-only 的既有備份缺口＋worktree 誤刪面（owning 線 `--force` remove／清理腳本可連 inner .git 一起刪）
 
 ### 驗證策略
 - SM-12：mosaic 三端開場＋worktree 間 inode 一致性；mosaic 夜波一輪
