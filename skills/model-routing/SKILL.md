@@ -1,6 +1,6 @@
 ---
 name: model-routing
-description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/一般〕×五公司，model 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse＋glm-5.3-flash/影像＝支援影像的 model/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋lite 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、glm-5.3-flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定、定向接續、session-id、fork、workspace 守衛。
+description: Model routing 深層載體 — tier×provider 權威表（requirement 分類〔旗艦/影像/一般〕×五公司，model 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement 分配表＋dispatch 預設（harness 主軸：GLM 主力/額度現值 GLM+muse/實作預設 muse＋glm-5.3-flash/影像＝支援影像的 model/muse 跨家族審查優先/codex 預設不派）＋額度 failover＋lite 分工律（執行層降級條件＝保護面厚度、判斷密集位 full 能力檔、模型歸因紀律）＋external-runtime family→(model,effort,容量) 解析表（muse／codex 委派、工單 profile）、rate limit 並發表、thoughtLevel 但書（sticky 不達 wire #339/#306）、classifier unavailable 處置（重試≤2）＋spawn 失敗態（1301／1308／1302）＋eligibility gate／reviewer 交接契約／套用三路徑。always-on 骨架在 rules/model-routing.md；spawn 前查並發與 eligibility 時載入。觸發詞：額度現值、實作預設、並發上限、rate limit、spawn model、general-purpose、內建型別、繼承主模型、tier、thoughtLevel、reasoningEffort、classifier unavailable、1301、1308、1302、glm-5.3-flash、分工律、保護面、haiku、pins、external-runtime、委派、工單、eligibility、eligibility gate、reviewer 交接、advisory、bridge 必經、完成回報收法、收法、三態判定、定向接續、session-id、fork、workspace 守衛。
 ---
 
 # Model Routing — 解析表與 provider 事實
@@ -37,7 +37,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 **harness 主軸（user 的開發入口決定主力 model——與下方 external-runtime「角色 → family → profile 映射」同源）：**
 
-- **ZCode 開發（日常主力）**：主 session＝**GLM 5.3**（判斷/規劃/EP/judge；full-tier agent＝registry 釘 glm-5.3〔AIR-43——不隨主 session 漂移〕）；lite subagent 執行檔＝glm-5.3-flash（省成本層）
+- **ZCode 開發（日常主力）**：主 session＝**GLM 5.3**（判斷/規劃/EP/judge；full-tier agent＝registry 釘 glm-5.3〔AIR-43——不隨主 session 漂移〕）；lite subagent 執行檔＝glm-5.3-flash（省成本層）；**內建 `general-purpose`／`Explore` 非 registry——無 pin、繼承主 session 旗艦**（官方設計行為，鏡像 `ref-docs/harness/zcode/cn/docs/qa.md`），lite 角色任務誤派內建型別＝旗艦燒機械段（真實案例：AIR-50 弧考察任務兩次誤派 general-purpose 被 user 抓——「registry lite agent＝flash」不可外推到內建型別）
 - **muse code 開發（user 直用時＝該弧主力 harness）**：muse-spark-1.3 全棧——實作/審查都在該 harness 內；repo 層 AGENTS.md muse 會載入（bridge log 實證；全域 guide 的 muse 部署點未查證）
 - **審查類（ep-review／code-review 等 review agent 層）→ muse／glm-5.3-flash 皆可**（user 09-07 放寬「審查類都可以」）：跨家族第二意見仍 muse 優先（非 GLM 視角）；in-harness 審查可用 glm-5.3-flash——原「full inherit 為基準＋保護面厚度條件降 lite」門檻就此放寬；**judge 裁決層不變：固定主 session GLM 5.3**（AIR-24 三防線）；registry 釘選＝base 非強制——顯式降級＝換 lite-tier 載體或 muse（ZCode 無 spawn-time model 參數）
 - **實作（implement profile bridge 委派）＝預設 muse**（user 09-07 修訂，取代 09-05「user 指定時派」單批指示慣例）：重實作段 muse、lite 機械段 glm-5.3-flash；**CR 工具鏈 agent（cr-research 等）同收斂 muse＋glm-5.3-flash**——與「user 直在 muse code 開發」仍是兩種形態（委派 vs harness 切換）

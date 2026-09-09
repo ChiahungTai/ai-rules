@@ -109,6 +109,7 @@ markdown + YAML frontmatter，正文 = 系統提示詞。兩家必填欄位同�
 ## ZCode 限制（共用定義的邊界）
 
 - Beta 僅 user 級（無 workspace 層）；內建 `general-purpose` / `Explore` 名稱不可複用（不可建同名覆蓋檔 — Claude 端可以覆蓋 Explore，這是兩家不對稱點）
+- 內建 `general-purpose`／`Explore` **無 registry pin——繼承 spawning session 主模型**（ZCode 設計行為，官方 qa 文檔；設定頁可為內建單獨釘模型）；lite 角色任務誤派 general-purpose＝旗艦跑機械段（AIR-50 弧兩次實例）——要省成本層必派 registry lite agent
 - 子智能體內**不能再派發子智能體**（Claude 可多層巢狀——官方文檔對深度上限記載版本間不一，勿釘死數字）→ 共用的系統提示詞不可依賴「spawn 下屬 agent」
 - 定義修改不熱更新——快照在 session 啟動時建立（同 hooks 行為；2026-08-22 實測雙層快照：新檔案同 session 不進 registry、既有檔的 body 與 tools 修改同 session spawn 均不生效；重啟 app 後**續接同對話即刷新**——session id 不變但快照已更新，無需開新對話）
 - 自 v3.7.1 起子智能體預設注入 user 級 + workspace AGENTS.md（與 Claude subagents 載入 CLAUDE.md layers 對稱）

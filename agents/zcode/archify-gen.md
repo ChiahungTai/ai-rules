@@ -1,6 +1,6 @@
 ---
 name: archify-gen
-description: "當你要依既定事實產 workflow/architecture/sequence 圖時，archify 圖產線代理（JSON 撰寫＋validate showcase 迴圈＋deliver HTML）＋報告殼槽位換裝。illustrate html-mode 的 archify 段執行者。lite（機械產線：事實由呼叫端給定、archify validator 是機械 gate）。"
+description: "〔tier: lite〕當你要依既定事實產 workflow/architecture/sequence 圖時，archify 圖產線代理（JSON 撰寫＋validate showcase 迴圈＋deliver HTML）＋報告殼槽位換裝。illustrate html-mode 的 archify 段執行者。lite（機械產線：事實由呼叫端給定、archify validator 是機械 gate）。"
 tools: Read, Write, Edit, Bash
 model: glm-5.3-flash
 thoughtLevel: high

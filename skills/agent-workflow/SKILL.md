@@ -38,7 +38,7 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 > 表主體單一源：[agents/AGENTS.md](../../agents/AGENTS.md)「全生命週期 execution contract」（每段一行，欄位 schema 以該表為準）。本節是**怎麼查表 dispatch** 的消費規範；各生命週期命令（deep-work／execution-plan／implement／post-build／commit）的一行形態註記指向本節，不重抄表。
 
 1. **開段先查表**：當前 stage 的執行主體＝「主 session 直做」→ 不 spawn（判斷密集段——EP 規劃／judge 裁決／post-build 編排／commit consent，AIR-24 分工律）；spawn 類 → 取 registry name＋tier 欄
-2. **spawn 形態按 harness**：ZCode＝registry spawn（生成檔 pins 生效）；CC＝named agent（`--agent <name>`／Workflow `agentType`）——全 role 名在 claude/ registry 生成在場（未知名稱仍立即退出）；model/effort 的選擇查 [model-routing](../model-routing/SKILL.md) tier×provider 權威表（requirement→provider 格）
+2. **spawn 形態按 harness**：ZCode＝registry spawn（生成檔 pins 生效）；CC＝named agent（`--agent <name>`／Workflow `agentType`）——全 role 名在 claude/ registry 生成在場（未知名稱仍立即退出）；model/effort 的選擇查 [model-routing](../model-routing/SKILL.md) tier×provider 權威表（requirement→provider 格）；**lite／機械角色任務 spawn 型別必須是 registry 角色**——harness 內建 `general-purpose`／`Explore` 無 pin、繼承主 session 模型，lite 任務用內建型別＝旗艦燒機械段（rule 角色→tier 表內建型別列）；唯讀探察／EP Review 形態用內建 Explore 承接＝rule research/explore 列（繼承主 session 旗艦＝正確）
 3. **failure fallback 照表走**：重試 ≤2（classifier unavailable／1302）→ 顯式降級記錄（見下「spawn 失敗階梯」）；commit consent 行的 fallback 恆為「等用戶」，不可降級繞過
 4. **模型歸因抽查**（tier 欄落地驗證）：registry pin 是否真達 wire 用 per-message modelID 對帳（ZCode db.sqlite），不信 session 自述（[model-routing](../model-routing/SKILL.md) 歸因紀律）
 
@@ -226,6 +226,7 @@ Rules 檔在 session 啟動時載入，但**更新不會傳播到已 spawn 的 a
 ### Agent tool spawn 前
 
 - [ ] 已查「並發上限」表確認——以將 spawn 的 agent 所在 tier 為準（[model-routing](../model-routing/SKILL.md) 並發表）；Agent **model 依角色 tier**
+- [ ] **lite／機械角色任務 spawn 型別＝registry 角色**（內建 `general-purpose`／`Explore` 無 pin、繼承主 session 模型——lite 任務用內建型別＝旗艦跑機械段；唯讀探察／review 形態用內建 Explore 承接＝rule research/explore 列）
 - [ ] 已印出 `[Agent] model=X, max=N, current=M`
 - [ ] 當前 Agent 數量未超過上限
 - [ ] spawn 帶 `run_in_background: true`（前台僅限 <30s 短 probe——見上「Spawn 預設背景」）
