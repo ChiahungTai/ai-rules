@@ -4,7 +4,7 @@ title: 跨池記憶主體遷移——muse project memory 一等公民＋CC/ZCode
 status: Done
 assignee: []
 created_date: '2026-09-09 02:47'
-updated_date: '2026-09-09 22:17'
+updated_date: '2026-09-09 22:29'
 labels:
   - memory
   - governance
@@ -49,6 +49,8 @@ ordinal: 46000
 〔AIR-54 收尾 handoff 09-10 CC〕S1-S5 已進 main（e417693）＋首波/驗證綠＋.bak 刪。收尾段＝①S6 mosaic 移植（EP :252-284 自足：前置 muse 自建三檔過六問併入或遷 processing→主體進駐 mosaic repo .agents/memory〔owning=main WT、版控排除沿用 exclude〕→CC dir 換 symlink→次 WT symlink F2 實測〔拒則顯性降級 read_file 絕對路徑〕→hooks.json+AGENTS.md+memory-policy.md 直寫政策改寫→夜波路徑比照 S2+repo 外 bundle G2-11）②SM-12：三端開場+WT inode 一致+夜波一輪③ai-rules 欠項×2：memory-audit SKILL 補「Inbox 消費」節（源=23:40 cron prompt 步驟 0）＋registry 條 4 重放（.agent-tmp/air-54-registry-row4-*）④EP 收尾步驟 1-5＋結案兩步＋弧結案蒸餾。開場帶一句：mosaic MOS-86 源卡結案回報（mosaic 側懸掛，errata 已閉環於 ai-rules main）。勿重辯：直寫 MLM 廢止、WAL=LIGHT、CAS v1、exclude 慣例不強推 gitignore。
 
 〔CC 緊急補充 09-10——S6 基線漂移〕EP :258『muse 自建三檔』情報已過時：mosaic_alpha/.agents/memory/ 已進化為完整 B 形態治理池（_generate_index.py/_resident-set.md/_inventory.md/_audit-state.md＋數十條目，含 feedback-subagent-serial-background 等）——S6 前置處置（三檔過六問併入）須改為『既有治理池整體搬遷/對接』重新盤點，非三檔小併。已知一條漂移待修：project-memory-audit-advisory-only.md desc 稱『AIR-54 S6 主體進 repo』——S6 未收斂，宣稱過早。S6 session 動手前先 ls 池現況對帳。
+
+〔CC 快訊 09-10 給續 session（sess_a167e4c3）——執行前必讀：世界已前進〕①結案兩步＋EP 歸檔 done/＋欠項② 已由 CC 補收（2d06dbb）：欠項②處置＝**作廢重放**（cron automation-d64fd994 已於 09-10 晨提前手動執行＋刪除——照原 diff git apply 會讓 registry 記不存在的 cron 造成週日比對 drift；已改更新時點歷史記載句存查）——**禁再 git apply air-54-registry-row4-pending.diff**。②欠項① skill Inbox 節已在場（對照 cron prompt 後預期零改或小補）。③前置 gate 已解除：air-66 弧已收斂（卡 Done、WT 回 main 乾淨）。④你的正當剩餘＝EP 收尾步驟 1-6（尤其步驟 6 三端鏈路總圖＋ZCode 待辦清點——提案落 drafts/）＋弧結案蒸餾三條（muse-memory-mechanism-divergence 終態化／muse-code-cli-facts 收斂＋S6 後形態／memory-cc-alignment-diagnosis 補 mosaic 新拓撲）。⑤卡已 Done——不重跑結案兩步；你的產出（總圖/清點/蒸餾）直接落檔＋commit（message 帶 air-54）。⑥mosaic 主體 git 基線 1e3da43＋收斂 3cfb464 供對帳。
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
