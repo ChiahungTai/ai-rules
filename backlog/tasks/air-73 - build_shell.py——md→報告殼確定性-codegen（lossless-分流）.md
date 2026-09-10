@@ -1,0 +1,21 @@
+---
+id: AIR-73
+title: build_shell.py——md→報告殼確定性 codegen（lossless 分流）
+status: To Do
+assignee: []
+created_date: '2026-09-10 03:35'
+labels:
+  - tooling
+  - illustrate
+dependencies: []
+ordinal: 59000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+〔human-summary〕
+寫一個腳本把 markdown 報告自動轉成好看的網頁殼（report shell），AI 只寫 md 不再手填 HTML——mosaic 實驗已證明這是純機械轉換可行。目前：三方設計定案待開工。
+
+三方合成終案（GLM×muse×codex——.agent-tmp/illupatch-synthesis.md）：lossless vs curated 分流（task-home 殼預設 lossless 全量投影；curated 另標）；shell-ready md 契約（md 標記 section-group/diagram-assign + frontmatter task identity contract〔task_baseline/card_id 必填——codex v2 blind spot 規格化〕+ diagram_heights keyed by 穩定 identity key-set 全等鎖死 + report-type 折疊預設映射）；三級 gate（hard 六項含 ordered semantic leaves 全等〔codex 410 正式化〕/三硬約束行為面/meta completeness/確定性重跑；mutation tests 六型防同源自洽）；祖父+碰觸遷移（builder refuse overwrite 無 marker 檔；legacy-curated 維持手填）；git 政策責任反轉＋過渡條款（regeneration contract 先進 onboarding 才切 ignore）。TDD 驗收：mosaic 四材料 golden 重現（gate 全過）＋mutation cases 全紅。落點 skills/_common/（與 report-shell.html 同居）。材料：mosaic 任務目錄四產物＋ep.md :519-531。
+<!-- SECTION:DESCRIPTION:END -->
