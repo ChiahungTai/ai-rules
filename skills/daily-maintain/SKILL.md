@@ -42,7 +42,7 @@ Commit message 格式與自動 commit 範圍：見 [maintain](../maintain/SKILL.
 
 遵循 [daily-maintain skill](../maintain/SKILL.md) 的四階段流程：
 
-0. **Phase 0（watchdog 快掃，不屬 `--only` 拆分——每次執行必查）**：ai-rules workspace 檢 `.agents/memory-inbox/` root `*.json` 最舊 mtime——age >48h = consolidation 停擺警訊（與夜波不同故障域：夜波不跑看不出自己停擺），🟡 列報告；連續兩晚 >48h → 🔴 升級（報告醒目行＋建議查 nightly-convergence.log 對應晚的段落）。`processing/` 殘留同列 🔴（中斷證據）。**第二檢查（T3-4：hook 全掛＋收斂停擺雙故障）**：`git -C <主體> status --porcelain`——無對應 inbox receipt 的非 CC/ZCode provenance 變更（hook 故障直寫的形態特徵；此時 inbox 恰無新檔、age 檢查沉默）→ 🔴 quarantine 清單。**執行者歸屬（解綁後口徑）**：時刻/載體等排程事實住排程系統＋ai-rules ai-analysis/schedule-registry.md「外部依賴反查表」，本 skill 只寫行為契約、不綁時刻/系統名。自動獨立執行的成立條件＝反查表記載的排程載體常態在跑 daily-maintain；無此記載時結案口徑＝git anomaly detector exists; automatic independent execution pending（此時雙故障偵測＝夜波自檢＋人工，不得宣稱自動雙故障偵測）
+0. **Phase 0（watchdog 快掃——互動/手動執行必查；排程承載分工見 schedule-registry 反查表）**：雙池（ai-rules＋mosaic `<repo>/.agents/memory-inbox/`）root `*.json` 最舊 mtime——age >48h = consolidation 停擺警訊（與收斂波不同故障域：波次不跑看不出自己停擺），🟡 列報告；**age 訊號連續兩個排程檢查週期命中 → 🔴 升級**（僅 age 訊號；手動補跑不推進計數；報告醒目行＋建議查 nightly-convergence.log 對應段落）。`processing/` 殘留與直寫發現＝**立即 🔴**（無 streak）。**第二檢查（T3-4：hook 全掛＋收斂停擺雙故障；雙池）**：`git -C <池主體> status --porcelain`——無對應 inbox receipt 的非 CC/ZCode provenance 變更（hook 故障直寫形態特徵；此時 inbox 恰無新檔、age 檢查沉默）→ 🔴 quarantine 清單。**宣稱邊界（AIR-54 P5）**：排程承載見 ai-rules `ai-analysis/schedule-registry.md`「外部依賴反查表」；排程節奏下檢出延遲上達一個檢查週期——不得宣稱每日/即時偵測
 1. **Phase 1**: 結構圖新鮮度——按需 prefetch（cr-audit R8）：可跳過，主路徑＝查詢時 lazy rebuild（見 [maintain](../maintain/SKILL.md) Phase 1）
 2. **Phase 2**: 執行 `/instruction-sync --changed-since yesterday --recursive` → 自動修正路徑問題
 3. **Phase 3**: 執行 `/doc-health` → 自動修正 🟢 findings + kanban hygiene

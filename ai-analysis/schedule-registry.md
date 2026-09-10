@@ -6,14 +6,14 @@
 >
 > **scope**：ai-rules workspace（ZCode cron 3 條＋本 repo `backlog-browser`／`backlog-cleanup` plist）；mosaic 側排程指針→memory `reference_periodic-task-landscape`（條目名逐字）——反查表 A1/A2/A6 為 mosaic 排程的記載面例外（消費端在本 repo）。
 >
-> **更新時點**：2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。2026-09-09（AIR-54 S2——池主體遷 `/Users/ctai/Github/ai-rules/.agents/memory/`，條 1 對象路徑與跨 repo 指針同步；CronList 兩 prompt 同步換址）。2026-09-10（AIR-52——新增「外部依賴反查表」A1-A5；S1 skill 端排程解綁的對側載體）（AIR-54 收尾——首波驗證一次性 cron `automation-d64fd994` 已於本日晨由 CC 提前手動執行完畢：六判據全綠→`memory.bak` 刪除→cron 收除；行 4 重放劇本作廢不落表，記此存查）。
+> **更新時點**：2026-09-06（新增 `backlog-cleanup` plist——Done 欄清場自動腿，ai-rules＋mosaic 雙 repo）。2026-09-09（AIR-54 S2——池主體遷 `/Users/ctai/Github/ai-rules/.agents/memory/`，條 1 對象路徑與跨 repo 指針同步；CronList 兩 prompt 同步換址）。2026-09-10（AIR-52——新增「外部依賴反查表」A1-A5；S1 skill 端排程解綁的對側載體）（AIR-54 收尾——首波驗證一次性 cron `automation-d64fd994` 已於本日晨由 CC 提前手動執行完畢：六判據全綠→`memory.bak` 刪除→cron 收除；行 4 重放劇本作廢不落表，記此存查）。2026-09-10（AIR-54 P5 定案——watchdog 雙檢查併入條 2 週日看照：lite-verify 觀測 mosaic 23:20 載體六晚 report 零 Phase 0 輸出＝**無 Phase 0 執行正證據**〔健康靜默相容；23:20 prompt 段規格跨 workspace 未驗〕，A1 僅載 Phase 1-3；user 拍板先(a)後(b)→退(b)；A1 記載源 stale 指針同步修正；CronUpdate fed036ff 增段 4，升級語義＝age 訊號連續兩排程週期命中→🔴）。
 
 ## ZCode Cron（3 條，ai-rules workspace）
 
 | # | automationId | cron | 職責一句 | 對象範圍 | 角色／紅線 |
 |---|--------------|------|----------|----------|------------|
 | 1 | `automation-751ecce2-a79c-4309-a79c-08486e2ee893` | `40 23 * * *`（每晚 23:40） | ai-rules memory 池收斂（輕掃／弧線預警／波段收斂＋regen）＋**步驟 0 inbox 消費**（AIR-54 muse 寫入流 consolidation：path contract/CAS/六問→done/rejected receipt）＋**波尾 repo 外 bundle**（`~/.agents/memory-bundles/` 輪替 7 份，G2-11）＋**檔案型清淤兜底腿已上線**（`.agent-tmp`/`.at-contexts` `mtime>7d`、`.review` `>30d`；AIR-14 L5，2026-09-03 起） | 僅 ai-rules 記憶主體 `/Users/ctai/Github/ai-rules/.agents/memory/`（AIR-54 遷移；CC/ZCode 舊徑 symlink 指此）＋`.agents/memory-inbox/`（步驟 0）＋repo 三 dot-area | 寫手（每夜動手）；紅線：不碰 mosaic 池、不 commit、不改 DB schema、不刪 shared |
-| 2 | `automation-fed036ff-17bf-4cf0-a50e-3216a7de6665` | `0 23 * * 0`（週日 23:00） | 治理看照：bundle 組成看照（`deploy_agents.py` 三部署檔 cmp）＋memory lite 稽核＋**registry/卡 ref 一致性比對已上線**（`CronList` vs 本表 drift＋raw `.md` 直連卡 ref lint；AIR-14 L8，2026-09-03 起） | ai-rules repo＋memory 池 | 審計（advisory 不動手）；禁止改 rules／memory 條目（戳記除外） |
+| 2 | `automation-fed036ff-17bf-4cf0-a50e-3216a7de6665` | `0 23 * * 0`（週日 23:00） | 治理看照：bundle 組成看照（`deploy_agents.py` 三部署檔 cmp）＋memory lite 稽核＋**registry/卡 ref 一致性比對已上線**（`CronList` vs 本表 drift＋raw `.md` 直連卡 ref lint；AIR-14 L8，2026-09-03 起）＋**watchdog 雙檢查**（AIR-54 P5 定案 2026-09-10 併入：雙池 inbox age＋porcelain-vs-receipt；升級＝age 訊號連續兩排程週期命中→🔴、processing 殘留/直寫立即🔴） | ai-rules repo＋memory 池＋mosaic 池（唯讀） | 審計（advisory 不動手）；禁止改 rules／memory 條目（戳記除外） |
 | 3 | `automation-370fafc5-a050-479e-b62f-9c7988d23521` | `10 23 * * 6`（週六 23:10） | 糾正模式週報＋CR 使用健檢（`corrections-weekly` skill） | ai-rules workspace | 報告；DB 唯讀、一頁、腳本失敗 2 次即止 |
 
 > 全名照錄 `CronList` 輸出 `automationId`（非前綴），逐字比對通過。
@@ -31,7 +31,7 @@
 
 | # | 排程側 | 消費端 | 契約一句 | 對帳狀態 | 新架構職責註記（AIR-54 後） |
 |---|--------|--------|----------|----------|---------------------------|
-| A1 | mosaic workspace ZCode cron「每日 23:20 report」 | daily-maintain（Phase 1-3）／standup（昨日活動節）／audit-test（週六條件段 Daily Scan） | 排程任務讀 skill 檔依規範執行、report 節由任務 append | 記載：memory `reference_periodic-task-landscape`＋mosaic memory `project-weekly-idle-tasks-status`；23:20 automationId 在 mosaic workspace CronList（本 workspace 不可見） | 不變；保留——人類活動層 report 節＋三 skill 執行的唯一排程載體（機器狀態層＝A6） |
+| A1 | mosaic workspace ZCode cron「每日 23:20 report」 | daily-maintain（Phase 1-3）／standup（昨日活動節）／audit-test（週六條件段 Daily Scan） | 排程任務讀 skill 檔依規範執行、report 節由任務 append | 記載：memory `reference_periodic-task-landscape`＋mosaic memory `project-nightly-schedule-migration`（2026-08-30 吸收 weekly-idle-tasks-status——原指針 stale 已修）；23:20 automationId 在 mosaic workspace CronList（本 workspace 不可見） | 不變；保留——人類活動層 report 節＋三 skill 執行的唯一排程載體（機器狀態層＝A6）；**Phase 0 watchdog 承載移至 ai-rules 條 2 週日看照（AIR-54 P5 定案）——本載體六晚 report 零 Phase 0 輸出＝無執行正證據（健康靜默相容；prompt 段規格跨 workspace 未驗）** |
 | A2 | 同 23:20 report「🌃 夜間看照」節（原 23:50 nightly-watch 併入） | memory-audit lite 配方／arch 看照／bundle 大小看照 | 治理面隨每日 report；含自動 commit | 併入記載於 memory（f681b71c9）；prompt 本體未逐字驗證（跨 workspace） | 保留；配方引用的池路徑隨 AIR-54 主體同步（`.agents/memory/`） |
 | A3 | launchd `com.ai-rules.backlog-cleanup`＋twin `com.mosaic.backlog-cleanup` | kanban-board 清理段——`deploy/scripts/run-backlog-cleanup.sh` → 逐卡 `skills/kanban-board/scripts/backlog_precheck.sh` → `task complete` → commit | Done>30d 清場自動腿；precheck 紅燈跳過該卡 | plist 在場＋腳本 precheck 接線已核；時刻見上表 | 不變；保留——Done 卡清場唯一自動腿 |
 | A4 | ai-rules workspace 三 ZCode cron（上表 #1-3） | #1→memory-audit（收斂＋Inbox 消費）；#2→治理看照（自含步驟）；#3→corrections-weekly | cron prompt 引用 skill 為方法論源 | CronList 已核（automationId 見上表） | #1 職責擴充（AIR-54：＋inbox 消費＋波尾 bundle；AIR-14：＋清淤兜底）、gate 口徑已動態化（AIR-52 S4）；保留——唯一寫手腿，與 #2 審計／#3 報告角色分離 |

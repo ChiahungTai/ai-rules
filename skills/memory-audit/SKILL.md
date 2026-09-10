@@ -84,7 +84,7 @@ muse `add_memory`/`edit_memory` 經 PreToolUse hook（`hooks/muse_memory_inbox.s
 3. **path contract（寫主體前逐條機械檢查——payload 的 path 是模型未驗證 input，不得直接當寫入座標）**：① scope=project only ② 池根 basename（禁子目錄——generator／watch-seed／索引連結只看頂層，子目錄請求明確 rejected；T4-2）③ ancestry 判定必須 delimiter-aware：`realpath` 等於 `$AGENT_MEM` 或以 `$AGENT_MEM/`（含尾 slash）為前綴——純字串 startswith 會把 sibling `memory-inbox` 誤判為池內（T3-3；回歸樣本 `../memory-inbox/<合法.md>` 必擋）④ symlink component 逐段 `lstat` 拒絕——realpath-containment 只是必要條件（`alias -> 池內實目錄` 會通過 containment，仍須擋；T3-2）⑤ 非 reserved（比對大小寫無關——本機 macOS CI fs，`memory.md` 命中 `MEMORY.md`；池 basename 現全 ASCII，Unicode aliasing 暫 N/A）⑥ edit 命中已存在且 frontmatter 合法的條目。任一不過 → `rejected/` receipt 記理由
 4. **CAS（edit 類）**：操作類只以 payload 不可變 `tool_name` 判——`_inbox_meta` 出現條件是「path 命中已存在條目」而非 tool==edit（add 指既有 path 亦附 meta；T3-6）。`_inbox_meta.base_sha256` vs 目標條目當前 hash——相等才自動套用；不等（攔截後被 CC/ZCode 改過）→ conflict queue 留人裁。add 類同名已存在 → 同 conflict queue（比對大小寫無關，同⑤）
 5. **六問→寫入**：合格條目過寫入六問 → 補/修 frontmatter（name/desc/type）→ 寫主體 → regen → `done/` receipt；不合格（任務終態可推導/未定案）→ `rejected/` receipt 記理由（去卡或棄置）
-6. **逾期語義**：夜掃三 dot-area 不含 `.agents/`——逾期 inbox 不是垃圾，是 consolidation 停擺警訊；watchdog＝daily-maintain 的 oldest-inbox-age 檢查（不同故障域），連續兩晚逾期 → 🔴 升級
+6. **逾期語義**：夜掃三 dot-area 不含 `.agents/`——逾期 inbox 不是垃圾，是 consolidation 停擺警訊；watchdog＝daily-maintain Phase 0 雙檢查（不同故障域；排程承載見 schedule-registry 反查表——AIR-54 P5 週節奏），age 訊號連續兩排程週期命中 → 🔴、processing 殘留/直寫立即 🔴
 
 ### 層 4：EP/任務狀態盤點
 

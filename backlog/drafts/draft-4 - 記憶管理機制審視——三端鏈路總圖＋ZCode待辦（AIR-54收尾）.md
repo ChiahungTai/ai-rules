@@ -24,7 +24,7 @@ dependencies: []
 | ZCode | 既有 symlink→CC 舊徑→主體（雙跳，同 inode） | 直寫主體 | 三路徑同 inode 實測；真開場＝下 session 自然確認 |
 | codex（第四端） | 檔案級 Read 穿透；目錄級 rg/glob 走主體路徑（CC 舊徑需 `-L`） | 回報制，不直寫 | SM-13；AGENTS.md 觀察池路由已註明 |
 
-寫入收斂站＝consolidation（memory-audit「Inbox 消費」節）：夜波 23:40 或手動；WAL light（new→processing→done/rejected＋receipt）；path contract＋CAS＋六問；逾期 >48h 的 watchdog 檢查已寫入 daily-maintain（異故障域設計）——獨立執行者歸屬與 live 觸發驗證待 P5 拍板，不宣稱自動雙故障偵測。
+寫入收斂站＝consolidation（memory-audit「Inbox 消費」節）：夜波 23:40 或手動；WAL light（new→processing→done/rejected＋receipt）；path contract＋CAS＋六問；逾期 >48h 的 watchdog 檢查已寫入 daily-maintain Phase 0（異故障域設計）——排程承載已定（ai-rules 週日看照段 4，P5 定案 09-10）；runtime 未驗項＝09-13 首跑觀測，不宣稱每日/即時偵測。
 
 ## ZCode 待辦清點（本弧不做，僅盤點）
 
@@ -39,11 +39,11 @@ dependencies: []
 - P2（待 user 拍板）：inbox→索引 pending 區折衷（只進 `_inventory.md` rg 可達層、不進開場注入）——09-09 討論結論：常態連 MEMORY.md 否決（繞品質閘＋搶 6K context 預算）；同 session 重讀走 deny reason 路徑已夠。
 - P3 ✅（已完成 09-10，本弧蒸餾）：divergence 條目終態重寫落地，desc「終態見本條尾段」懸空指針清除。
 - P4 ✅（已完成 09-10）：S6 mosaic 移植由 mosaic session 落地（mos-88 池 B 形態遷移結案；F2 次 WT 降級 read_file 路線定案並寫入 mosaic AGENTS.md「Muse memory」節）。
-- P5（T3-4 殘餘，待 user 拍板）：watchdog 執行者——daily-maintain Phase 0 已有雙檢查（inbox age＋porcelain-vs-receipt）；AIR-52 反查表 A1 已落地（記載執行者＝mosaic workspace 23:20 cron，跨 workspace provenance 標註），殘餘＝live 觸發驗證（該 cron 是否實跑 Phase 0 雙檢查未觀測）；選項 (a) 實測確認 (b) 併入週日 23:00 治理看照（advisory 只讀，體質相合；需 ZCode 側改 prompt，不在本 session 越權範圍）。結案口徑（終審裁定）：git anomaly detector exists; automatic independent execution pending P5——不得宣稱自動雙故障偵測；P5 不必塞回 AIR-54 即可結案。
+- P5 ✅（已關閉 09-10，user 拍板先(a)後(b)）：(a) lite-verify 觀測 ❌——mosaic 23:20 載體六晚 report（含 nightly-watch 前身檔）零 Phase 0 輸出＝**無 Phase 0 執行正證據**（健康靜默相容；A1 僅載 Phase 1-3、23:20 prompt 段規格跨 workspace 未驗——codex 二輪審查降格原「從未接線」宣稱）；退 (b) 已執行——watchdog 雙檢查併入 ai-rules 週日 23:00 治理看照（CronUpdate 段 4：雙池 inbox age＋porcelain-vs-receipt；升級＝age 訊號連續兩排程週期命中→🔴、processing/直寫立即🔴、手動補跑不推進計數）＋daily-maintain Phase 0 口徑同步＋registry 條 2/A1 修訂（含 stale 指針）。runtime 未驗項＝09-13 首跑觀測。
 
 ## 終審第三輪（T3，跨 provider，Conditional Pass → 修畢待關）
 
-7 findings 裁決：T3-1 ✅（hook 未驗證 path 先 dereference→lexical gate＋4 測試）；T3-2 ✅（contract 文字硬化：per-component lstat）；T3-3 ✅（delimiter-aware＋`../memory-inbox/x.md` 回歸）；T3-4 ✅確認且深一層（dirty-sensor live 未驗＋watchdog 無執行者→Phase 0 第二檢查＋P5）；T3-5 ✅（sentinel 方法論收緊重做，見下）；T3-6 ✅（meta 條件釘測試＋文字澄清）；T3-7 ⚠️部分（大小寫無關化；池全 ASCII basename，Unicode 暫 N/A）。**複審**：T3-2/3/5/6/7 關；T3-1 仍開放（`alias/secret.md` 中間段穿透反例成立）→已補 intermediate 逐段 lstat＋2 測試（9 綠；舊邏輯覆現確認）；T3-4 維持開放＝已知殘餘 P5（文檔不得宣稱自動雙故障偵測，寫「detector exists; execution pending P5」）。
+7 findings 裁決：T3-1 ✅（hook 未驗證 path 先 dereference→lexical gate＋4 測試）；T3-2 ✅（contract 文字硬化：per-component lstat）；T3-3 ✅（delimiter-aware＋`../memory-inbox/x.md` 回歸）；T3-4 ✅確認且深一層（dirty-sensor live 未驗＋watchdog 無執行者→Phase 0 第二檢查＋P5）；T3-5 ✅（sentinel 方法論收緊重做，見下）；T3-6 ✅（meta 條件釘測試＋文字澄清）；T3-7 ⚠️部分（大小寫無關化；池全 ASCII basename，Unicode 暫 N/A）。**複審**：T3-2/3/5/6/7 關；T3-1 仍開放（`alias/secret.md` 中間段穿透反例成立）→已補 intermediate 逐段 lstat＋2 測試（9 綠；舊邏輯覆現確認）；T3-4 已關閉（P5 定案 09-10：watchdog 排程承載＝ai-rules 週日看照段 4；文檔口徑＝detector exists＋承載已接線，runtime 首跑 09-13 待觀測——不宣稱每日/即時偵測）。
 
 sentinel 重做（硬化 oracle）：新 target `reference_zcode-session-store`（開場快照 4720B 機械證實缺席＋全程未預讀）；body-only canary（2.3GB／483 sessions／tool_usage 無 input——快照＋inventory 雙缺席）答對；session.jsonl `assistant_tool_calls_committed` 有該 path 讀事件（oracle 非自述）。殘餘：fresh-session 行為對照未做（快照鑑識已做等價資訊論證，價值低）。
 
