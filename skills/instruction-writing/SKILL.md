@@ -7,6 +7,8 @@ description: Instruction file（AGENTS.md / CLAUDE.md / rules / SKILL.md）撰�
 
 > 本 skill 是 `rules/instruction-writing.md` 與 `rules/_ai-behavior-constraints.md` 的 on-demand 完整載體：rules 端保留 always-on 核心（禁止元資訊警告、雙檔模式命名、High/Low Signal 分類精簡版、single-source drift 核心句）；本檔承載完整撰寫規範、段落標題標準、導航細則、元資訊禁止行為表與第一性原理論證、文檔自洽五維檢查。
 
+若新增或修改的 instruction 目標是**改變 agent 可觀察行為**，authoring 完成後依 [instruction-testing](../instruction-testing/SKILL.md) 做風險分級行為驗證；本檔五維檢查只證明靜態自洽，不證明 agent 會照做。
+
 ## 基本原則
 
 instruction file 是給 AI 的協作指南，應專注於**核心原則**和**執行約束**，避免冗餘細節。
