@@ -1,14 +1,17 @@
 ---
 id: AIR-74
 title: 退役 archify 產線：報告殼全走手寫＋codegen，index.html 一律進版控
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-11 06:40'
-updated_date: '2026-09-11 06:40'
+updated_date: '2026-09-10 22:46'
 labels:
   - governance
   - shell-pipeline
 dependencies: []
+references:
+  - 'http://127.0.0.1:6421/ai-rules/reports/2026-09-11-test-contract-design.md'
+  - ai-analysis/reports/2026-09-11-test-contract-design.md
 ordinal: 60000
 ---
 
