@@ -13,11 +13,11 @@
 | 站 | 一句職責 | 關鍵載體 |
 | --- | --- | --- |
 | ① 想法 | 把未承諾想法留在 draft／pending 區；一旦承諾工作才由 board control plane 建立 card 與配置 id | Backlog.md draft/task、pending decisions、建卡預掃 |
-| ② 規劃 | 把 card intent 轉成可跨 session 接手的 self-contained research／spec／EP，固定 baseline、scope、已決策與驗收 | card `desc`、task home、`research.md`、`spec.md`、`ep.md` |
+| ② 規劃 | 把 card intent 轉成可跨 session 接手的 self-contained research／spec／EP，固定 baseline、scope、已決策與驗收；task-home 報告殼的 source＝shell-ready md＋meta（殼是 deterministic viewport 非手寫產物——codegen 契約見 [illustrate-html-mode](../../skills/_common/illustrate-html-mode.md)，AIR-73） | card `desc`、task home、`research.md`、`spec.md`、`ep.md`、shell-ready md |
 | ③ 開工 | 為已存在 card 建立「由哪個 branch/WT 執行、起點是哪個 baseline、session cwd 在哪」的機械身份 | `wt-open`、card `In Progress`/refs、persistent card WT、freshness check |
 | ④ 實作 | 讓 code/rules/skills/docs/EP 寫入在該工作 execution plane 內完成，避免共享 checkout 的 branch/cwd 被其他 session 改變 | card WT；免卡小修走 ephemeral WT fast-path；implement/TDD |
-| ⑤ 驗證 | 讓 claim 對上足夠獨立的 evidence；negative claim 不以單次文字搜尋冒充行為證明 | tests、integration/demo/POC、code-review、acceptance evidence |
-| ⑥ 收斂 | 把工作 review、修正並依既有 rebase→ff-only 規則吸回 owning line，再完成 session/card 收尾 | post-build、working branch、`wt-close`、finalization |
+| ⑤ 驗證 | 讓 claim 對上足夠獨立的 evidence；negative claim 不以單次文字搜尋冒充行為證明 | tests、integration/demo/POC、code-review、acceptance evidence；⚠️ [instruction-testing](../../skills/instruction-testing/SKILL.md) 承載 instruction artifact 行為驗證方法，pilot 尚未實跑 |
+| ⑥ 收斂 | 把工作 review、修正並依既有 rebase→ff-only 規則吸回 owning line，再完成 session/card 收尾；Report Shell refresh＝更新 shell-ready md→`build_shell.py` 投影→gate 自驗（AIR-73 落地前為 LLM 手填殼 legacy） | post-build、working branch、`wt-close`、finalization、`build_shell.py` |
 | ⑦ 沉澱 | 將完成能力、設計理由與真正值得跨 session 留存的事實放回正確 carrier；memory 不成為規範副本 | AGENTS/Capabilities、architecture/blueprint、memory pointer/facts |
 | ⑧ 運維 | 讓 hooks、排程、備份、清理與 fresh-machine recovery 可重建，避免 machine-local state 只存在某台機器或某次 session | hooks、schedule registry、launchd、memory bundle、onboarding runbook、code-reality |
 
@@ -368,6 +368,42 @@ L5 = AIR-63
 - O8 的 `memory-audit` 落點仍由 owning arc 裁決。
 
 WT 基建落地後，可以移除「因共享單一 checkout，所以同 repo card session 絕不能並存」這個機械限制；是否真的平行仍依 shared-file / semantic overlap 判斷，不能直接打散既有波次。
+
+## 人類 viewport 供給：產物怎麼看、放哪 — ⚠️ 架構定案；慣例句未落檔
+
+> 真相源：[viewport 供給架構裁決](../reports/2026-09-10-viewport-serving-architecture.md)（8765 事故、三方諮詢與 user 裁決全記錄）；服務機械事實＝mosaic `deploy/scripts/run-report-server.sh`（:6421 腳本，跨 repo）＋本 repo `deploy/scripts/run-backlog-browser.sh` 註解＋[schedule-registry](../schedule-registry.md) 條 A5；放置規範源＝[illustrate-html-mode](../../skills/_common/illustrate-html-mode.md)「產物位置分流」。
+
+三層分工：
+
+| 用途 | 載體 | 性質 |
+| --- | --- | --- |
+| 日常點開 artifact | VS Code 內建 Integrated Browser（右鍵 `.html` → Open in Integrated Browser，`file:` 直載） | 零 server、零埠、零擴充（VS Code 1.121 起內建） |
+| board 卡 refs／跨 repo 穩定引用／md viewer | `:6421` report-server（launchd 常駐；route：`main`/`v2`/`warrant`/`ai-rules`/`viewer`） | addressability 層——stable URL 契約，非「為了預覽而存在的 server」；讀活磁碟（未 commit 內容可達） |
+| 手改 HTML 未存檔即時刷新 | Live Preview 擴充（選配） | 內部埠隨 window 漂移；僅編輯期價值 |
+
+規則：
+
+- **臨時 server 淘汰**：session 不再自建 `http.server`——交付路徑（user 自己點開）或 :6421 URL（deep link 場景）。
+- **命名空間規則**：Live Preview／任何臨時埠 URL 永不寫進 board 卡或持久引用；持久引用只用 :6421 stable URL。
+- **artifact 慣例**：人類 viewport 產物維持自包含單檔 HTML（資產內嵌、無外部 fetch），`file:` 直開成立的前提。
+- **origin 分離**：`file:` 與 `:6421` 是不同 origin，頁內 localStorage（如主題記憶）各自保存，不作跨入口契約。
+
+放置規則（規範源在 illustrate-html-mode「產物位置分流」，此處只投影）：
+
+| 產物類型 | 位置 | 入口 |
+| --- | --- | --- |
+| 弧產物（有卡） | `ai-analysis/_tasks/<MM-DD-主題>/`；線任務 `_projects/<線>/tasks/`；完成搬同家 `done/` | `index.html`（ep/spec/殼同處） |
+| 常設 domain 導覽 | `ai-analysis/<域>/`（如 `blueprint/`） | 域名即路徑 |
+| 按需結構視覺 | repo 根 `arch-report/<主題>/` | `index.html`（渲染產物不進 git） |
+| md 沉澱 | `ai-analysis/reports/` | — |
+
+心法一句：**會動的都在 `ai-analysis/`、弧的家照日期命名、入口一律 `index.html`**（VSCode `Cmd+P` 打日期或主題詞即達；board 卡 refs 是導航主力）。
+
+新 repo onboarding：viewport 面**零步驟**（自包含慣例＋內建瀏覽器即通）；需 deep link 才加 :6421 route（opt-in，非必備件）。
+
+已取消的替代案（裁決記錄見 report §6）：:6421 擴 route 到 repo 根、route 註冊 carrier 中立化、新專案 viewport runbook——「路徑即可點開」成立後均無必要。
+
+待落檔（併既有「四小項」批）：session 交付慣例句、全域 `workbench.browser.autoReloadOnFileChange`、kanban refs 命名空間句。
 
 ## 待建基建
 

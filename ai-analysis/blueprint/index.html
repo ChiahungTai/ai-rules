@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+/* FOUC 防護：stylesheet 前恢復 persisted 主題（auto＝不設 attribute 跟系統） */
+(function(){try{var t=localStorage.getItem('shell-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();
+</script>
+<!--
+  projection identity
+  generated from ai-analysis/blueprint/AGENTS.md ＋ workflow.md ＋ onboarding.md @ 2026-09-10
+  template reference：skills/_common/illustrate-report-shell.html（殼唯一源：CSS/sidebar/hash/focus contract 沿用）
+  srcdoc 內嵌與 zoom 機制參考：mosaic marking 09-09 illustrate-build-report-shell-v2.html
+  本頁是人類 viewport（三檔的投影）；規範權威在三檔與其真相源，本頁不建立第二套規則
+-->
+<title>ai-rules 開發藍圖——工作怎麼來、在哪做、怎麼收、壞了怎麼回來</title>
+<style>
+  /* 語義 token：light-dark(淺,深)——auto 跟系統、theme-btn 可覆蓋（搬自 MOS-22.3 v2） */
+  :root{
+    color-scheme: light dark;
+    --bg:light-dark(#f6f8fa,#0d1117); --panel:light-dark(#ffffff,#161b22); --panel2:light-dark(#eff2f5,#1c2129); --border:light-dark(#d0d7de,#30363d);
+    --fg:light-dark(#1f2328,#e6edf3); --muted:light-dark(#656d76,#8b949e); --accent:light-dark(#0969da,#58a6ff); --green:light-dark(#1a7f37,#3fb950);
+    --amber:light-dark(#9a6700,#d29922); --rose:light-dark(#cf222e,#f85149); --violet:light-dark(#8250df,#bc8cff);
+    --hover:light-dark(#eaeef2,#1f242c); --success-bg:light-dark(#dafbe1,#1f6f3c33); --success-border:light-dark(#2da44e,#2ea04366);
+    --note-bg:light-dark(#fff3cd,#2d220066); --code-bg:light-dark(#eef1f4,#1b222c);
+    --scrim:rgba(0,0,0,.6);
+  }
+  html[data-theme="light"]{color-scheme:light}
+  html[data-theme="dark"]{color-scheme:dark}
+  .brand-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .theme-btn{background:var(--panel2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:12px;padding:2px 10px;cursor:pointer}
+  .theme-btn:hover{color:var(--fg);border-color:var(--accent)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--fg);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;display:flex}
+  /* ── sidebar ── */
+  nav#sidebar{width:264px;min-width:264px;background:var(--panel);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transition:width .18s ease,min-width .18s ease,padding .18s ease}
+  nav#sidebar .brand{padding:0 20px 16px;border-bottom:1px solid var(--border);white-space:normal}
+  nav#sidebar .brand .badge{display:inline-block;border-radius:12px;padding:2px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+  nav#sidebar .brand .badge.plan{background:var(--success-bg);border:1px solid var(--success-border);color:var(--green)}
+  nav#sidebar .brand .badge.progress{background:var(--note-bg);border:1px solid light-dark(#d4a72c66,#d2992266);color:var(--amber)}
+  nav#sidebar .brand .badge.done{background:var(--success-bg);border:1px solid var(--success-border);color:var(--green)}
+  nav#sidebar .brand h1{font-size:15.5px;margin-top:8px;line-height:1.45}
+  nav#sidebar .brand .meta{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.7;font-family:ui-monospace,Menlo,monospace}
+  nav#sidebar ul{list-style:none;padding:10px 0;flex:1}
+  nav#sidebar li a{display:flex;align-items:center;gap:10px;padding:9px 20px;color:var(--muted);text-decoration:none;font-size:13.5px;border-left:2px solid transparent;white-space:nowrap}
+  nav#sidebar li a .num{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--fg);background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;min-width:26px;text-align:center}
+  nav#sidebar li a:hover{color:var(--fg);background:var(--hover)}
+  nav#sidebar li a.active{color:var(--fg);background:var(--hover);border-left-color:var(--accent)}
+  nav#sidebar .backlinks{padding:14px 20px;border-top:1px solid var(--border);font-size:12px;line-height:2;white-space:nowrap}
+  nav#sidebar .backlinks a{color:var(--accent);text-decoration:none}
+  /* ── 可折疊 sidebar：nav width→0、main flex 吃滿（禁 display:none 於 nav／iframe／section 承載——殼硬約束②）── */
+  body.sidebar-collapsed nav#sidebar{width:0;min-width:0;padding-left:0;padding-right:0;border-right:0}
+  body.sidebar-collapsed main{max-width:none}
+  /* ── main ── */
+  main{flex:1;min-width:0;max-width:1480px;padding:26px 34px;overflow-y:auto}
+  section{display:none}
+  section.active{display:block}
+  section h2{font-size:20px;margin-bottom:4px}
+  section .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  section h3{font-size:14.5px;color:var(--accent);margin:18px 0 8px}
+  p,li{font-size:14px;line-height:1.75;color:var(--fg)}
+  ul.dots{list-style:none;margin:6px 0}
+  ul.dots li{padding-left:18px;position:relative;margin:4px 0}
+  ul.dots li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .cardrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:14px 0}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+  .card .t{font-size:13px;font-weight:700;margin-bottom:6px}
+  .card .t.c{color:var(--accent)}.card .t.r{color:var(--rose)}.card .t.g{color:var(--green)}.card .t.v{color:var(--violet)}.card .t.a{color:var(--amber)}
+  .card p{font-size:12.5px;color:var(--muted);line-height:1.65}
+  .tag-plan{display:inline-block;font-size:11.5px;color:var(--violet);border:1px solid #6e40c966;background:#6e40c622;border-radius:10px;padding:1px 8px;margin-left:8px;white-space:nowrap;vertical-align:middle}
+  .num-big{font-size:26px;font-weight:800;font-family:ui-monospace,Menlo,monospace}
+  .frame-wrap{margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--panel);position:relative}
+  .frame-wrap .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+  .frame-wrap .bar a{color:var(--accent);text-decoration:none}
+  .frame-wrap.static .bar{cursor:default}
+  .frame-wrap .bar{cursor:pointer}
+  .frame-wrap .bar .zoom-hint{margin-left:auto;font-size:11px;color:var(--accent);white-space:nowrap}
+  body.has-zoom::after{content:"";position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:55}
+  /* ── 放大只切 class（position:fixed 原位覆蓋），不搬 iframe DOM 節點——搬移＝detach 重掛＝srcdoc 重載 ── */
+  .frame-wrap.zoomed{position:fixed;inset:20px;z-index:60;overflow:auto;margin-top:0}
+  .frame-wrap.zoomed iframe{min-height:0;max-height:calc(100vh - 140px)}
+  .frame-wrap .zoom-toolbar{display:none;gap:8px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--border);background:var(--panel2);font-size:12px;color:var(--muted)}
+  .frame-wrap.zoomed .zoom-toolbar{display:flex;position:sticky;top:0;left:0;z-index:2;width:100%}
+  .zoom-toolbar button{background:var(--panel);color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:2px 10px;cursor:pointer;font-size:12px}
+  .zoom-toolbar button:hover{border-color:var(--accent)}
+  .zoom-toolbar input[type=range]{accent-color:var(--accent);width:160px}
+  .zoom-toolbar .zoom-label{min-width:44px;text-align:right;font-family:ui-monospace,Menlo,monospace}
+  .frame-wrap .pan-layer{display:none}
+  .frame-wrap.zoomed{cursor:grab}
+  .frame-wrap.zoomed .pan-layer{display:block;position:absolute;inset:0;z-index:1;cursor:grab;touch-action:none}
+  .frame-wrap.zoomed.panning,.frame-wrap.zoomed.panning .pan-layer{cursor:grabbing}
+  .frame-wrap.zoomed .bar{position:sticky;left:0;z-index:2;background:var(--panel)}
+  .frame-wrap .frame-body{padding:16px 18px}
+  iframe{width:100%;border:0;display:block;background:var(--panel);min-height:120px}
+  .frame-wrap.degraded .degraded-body{padding:22px 18px;font-size:13.5px;line-height:1.8;color:var(--muted)}
+  .frame-wrap.degraded .degraded-body b{color:var(--fg)}
+  .frame-wrap.degraded .degraded-body code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);background:#1b222c;border-radius:4px;padding:1px 5px}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--border);padding:7px 11px;text-align:left;vertical-align:top;line-height:1.6}
+  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px}
+  td code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);background:#1b222c;border-radius:4px;padding:1px 5px}
+  .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0}
+  .kpi .card{text-align:left}
+  .kpi .lab{font-size:11.5px;color:var(--muted)}
+  .note{border-left:3px solid var(--amber);background:#2d220066;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;line-height:1.7;margin:12px 0}
+  .src{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;line-height:1.9}
+  .src a{color:var(--accent);text-decoration:none}
+  /* ── User Story 卡（固定結構：Story→痛點→採用架構→Care→Status/Source）── */
+  .story{border:1px solid var(--border);border-left:3px solid var(--violet);background:var(--panel);border-radius:8px;padding:14px 18px;margin:16px 0}
+  .story .sh{font-size:11.5px;font-weight:700;letter-spacing:.05em;margin:12px 0 4px;color:var(--muted)}
+  .story .sh:first-child{margin-top:0}
+  .story .sh.bad{color:var(--rose)}
+  .story .sh.good{color:var(--green)}
+  .story .sh.care{color:var(--amber)}
+  .story p{font-size:13px;line-height:1.8}
+  /* ── 03 節拓撲圖（HTML block diagram：左 primary 右 card WT）── */
+  .topo-main{display:flex;gap:12px;align-items:stretch;flex-wrap:wrap;margin:14px 0 10px}
+  .topo-box{border:1px solid var(--border);border-radius:8px;padding:12px 14px;background:var(--panel);flex:1;min-width:260px}
+  .topo-box .topo-t{font-size:13px;font-weight:700;margin-bottom:2px}
+  .topo-box .topo-sub{font-size:11.5px;color:var(--muted);margin-bottom:8px;font-family:ui-monospace,Menlo,monospace}
+  .topo-box.ctrl{border-color:var(--accent)}
+  .topo-box.exec{border-color:#3a4150}
+  .topo-box.small{min-width:240px;flex:1}
+  .topo-link{display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:11px;color:var(--muted);gap:4px;min-width:120px;text-align:center}
+  .topo-link .topo-arrow{color:var(--accent);font-size:18px;line-height:1}
+  .topo-exec-col{display:flex;flex-direction:column;gap:10px;flex:1.2;min-width:300px}
+  .topo-foot{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .chip{display:inline-block;font-size:10.5px;border-radius:9px;padding:1px 8px;margin-left:8px;vertical-align:middle;white-space:nowrap;font-weight:600}
+  .chip.bad{color:var(--rose);border:1px solid #f8514966;background:#f8514918}
+  .chip.warn{color:var(--amber);border:1px solid #d2992266;background:#2d220066}
+  .chip.good{color:var(--green);border:1px solid #2ea04366;background:#1f6f3c33}
+  .jump{font-size:12px;color:var(--accent);text-decoration:none;white-space:nowrap}
+  /* ── 折疊鈕：展開態貼 sidebar 右緣垂直居中；折疊態浮出鈕固定左上 ── */
+  .collapse-tab{position:fixed;top:50%;z-index:30;width:26px;height:64px;padding:0;cursor:pointer;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-size:13px;line-height:1;border-radius:0 8px 8px 0}
+  .collapse-tab:hover{color:var(--fg);border-color:var(--accent)}
+  #collapse-btn{left:264px;transform:translateY(-50%)}
+  body.sidebar-collapsed #collapse-btn{display:none}
+  #expand-btn{left:0;top:20px;transform:none;border-radius:0 8px 8px 0;display:none}
+  body.sidebar-collapsed #expand-btn{display:block}
+</style>
+</head>
+<body>
+<button type="button" id="expand-btn" class="collapse-tab" aria-expanded="false" aria-controls="sidebar" aria-label="展開章節導覽" onclick="return setCollapsed(false,true)">›</button>
+<nav id="sidebar" aria-label="章節導覽">
+  <div class="brand">
+    <div class="brand-row">
+      <span class="badge progress">🟡 基建進行中</span>
+      <button class="theme-btn" id="theme-btn" type="button" title="切換淺色／深色（記住選擇）">主题</button>
+    </div>
+    <h1>ai-rules 開發藍圖——工作怎麼來、在哪做、怎麼收、壞了怎麼回來</h1>
+    <div class="meta">source of record：ai-analysis/blueprint/<br>AGENTS.md・workflow.md・onboarding.md</div>
+  </div>
+  <ul>
+    <li><a href="#s1" onclick="return go('s1',this)"><span class="num">01</span>五分鐘駕駛艙</a></li>
+    <li><a href="#s2" onclick="return go('s2',this)"><span class="num">02</span>一件工作的八站旅程</a></li>
+    <li><a href="#s3" onclick="return go('s3',this)"><span class="num">03</span>在哪做？誰能寫什麼？</a></li>
+    <li><a href="#s4" onclick="return go('s4',this)"><span class="num">04</span>為什麼只能一個 writer？</a></li>
+    <li><a href="#s5" onclick="return go('s5',this)"><span class="num">05</span>做完怎麼收？</a></li>
+    <li><a href="#s6" onclick="return go('s6',this)"><span class="num">06</span>機器壞了怎麼回來？</a></li>
+    <li><a href="#s7" onclick="return go('s7',this)"><span class="num">07</span>哪些已落地、哪些還沒？</a></li>
+    <li><a href="#s8" onclick="return go('s8',this)"><span class="num">08</span>這些說法從哪來？</a></li>
+    <li><a href="#s9" onclick="return go('s9',this)"><span class="num">09</span>產物怎麼看、放哪？</a></li>
+  </ul>
+  <div class="backlinks">
+    <a href="http://127.0.0.1:6420">← backlog board</a><br>
+    <a href="AGENTS.md">blueprint 導覽（AGENTS.md）</a><br>
+    <a href="workflow.md">workflow.md</a> · <a href="onboarding.md">onboarding.md</a>
+  </div>
+</nav>
+<button type="button" id="collapse-btn" class="collapse-tab" aria-expanded="true" aria-controls="sidebar" aria-label="收合章節導覽" onclick="return setCollapsed(true,true)">‹</button>
+<main>
+
+<section id="s1">
+  <h2>五分鐘駕駛艙</h2>
+  <div class="sub">五個問題回答「這套系統怎麼運轉」。標記語義：✅ 已落地運行／⚠️ 有源但未閉環／❌ target 尚未落地——設計已拍板不等於 runtime 已存在。</div>
+  <div class="frame-wrap static">
+    <div class="bar"><span>現況總覽：17 個追蹤面（明細見 07 節 capability board）</span></div>
+    <div class="frame-body">
+      <div class="kpi">
+        <div class="card"><div class="lab">追蹤面總數</div><div class="num-big">17</div></div>
+        <div class="card"><div class="lab">✅ 已落地運行</div><div class="num-big" style="color:var(--green)">4</div></div>
+        <div class="card"><div class="lab">⚠️ 半成品（有源未閉環）</div><div class="num-big" style="color:var(--amber)">6</div></div>
+        <div class="card"><div class="lab">❌ target 未落地</div><div class="num-big" style="color:var(--rose)">7</div></div>
+      </div>
+    </div>
+  </div>
+  <h3>五個問題</h3>
+  <div class="cardrow">
+    <div class="card">
+      <div class="t g">① 工作從哪來？<span class="chip good">✅</span></div>
+      <p>想法先落 draft／pending 區；一旦承諾，才由 board（Backlog.md kanban）建卡並配置 id。board 就是 control plane，卡是所有 downstream（status、refs、驗收）的錨。<br>現況：board 運轉中；single-writer 化 ❌ 待建（見 <a class="jump" href="#s4" onclick="return go2('s4')">04</a>）。</p>
+    </div>
+    <div class="card">
+      <div class="t r">② 在哪做？<span class="chip bad">❌</span></div>
+      <p>target：primary 只管 board state；寫碼改文檔進該卡的 persistent worktree；免卡小修走 ephemeral WT。<br>現況：wt-open／wt-close 未實作——過渡期仍照現行 git 慣例（primary 自 main checkout 卡 branch）執行（見 <a class="jump" href="#s3" onclick="return go2('s3')">03</a>）。</p>
+    </div>
+    <div class="card">
+      <div class="t r">③ 誰能寫什麼？<span class="chip bad">❌</span></div>
+      <p>按「這份 state 的唯一 writer 是誰」分：board metadata 只有 primary 能寫；code／rules／skills／docs 只有該卡 WT 能寫；顧問與 audit 唯讀。<br>現況：❌ target；顧問／唯讀環境 ⚠️ 現有做法可支撐、未機械化（見 <a class="jump" href="#s3" onclick="return go2('s3')">03</a>）。</p>
+    </div>
+    <div class="card">
+      <div class="t g">④ 如何收？<span class="chip good">✅</span></div>
+      <p>validate → review → commit → owning line 吸收（必要時 rebase，一律 ff-only）→ finalization → 移除 WT；顧問產出也要有收法，不許丟著等它自己回來。<br>現況：收斂 git 紀律 ✅ 現行不變；wt-close transaction ❌ target（見 <a class="jump" href="#s5" onclick="return go2('s5')">05</a>）。</p>
+    </div>
+    <div class="card">
+      <div class="t a">⑤ 機器壞了怎麼回來？<span class="chip warn">⚠️</span></div>
+      <p>六段 runbook：工具鏈 → rules/skills 部署 → hooks 接線 → 記憶池恢復 → cron/launchd 重建 → code-reality。缺可靠 source 的步驟停在缺口，不拼假 runbook。<br>現況：code-reality ✅、工具鏈 ❌、其餘 ⚠️（見 <a class="jump" href="#s6" onclick="return go2('s6')">06</a>）。</p>
+    </div>
+  </div>
+  <p class="src">投影自：<a href="workflow.md">workflow.md</a>（八站主軸・WT 形態定案）＋ <a href="onboarding.md">onboarding.md</a>（六段 runbook）＋ <a href="AGENTS.md">AGENTS.md</a>（標記語義與更新紀律）</p>
+</section>
+
+<section id="s2">
+  <h2>一件工作的八站生命週期</h2>
+  <div class="sub">從想法到運維是同一條主軸；每站有明確的 owner、載體與 handoff。節點顏色＝該站關鍵載體的現況（❌＝target 載體尚未落地，站本身仍以過渡做法運行）。</div>
+  <div class="frame-wrap">
+    <div class="bar"><span>八站主軸（想法 → 規劃 → 開工 → 實作 → 驗證 → 收斂 → 沉澱 → 運維）</span></div>
+    <iframe srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;zh-Hant&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;&lt;script src=&quot;https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js&quot;&gt;&lt;/script&gt;&lt;script&gt;mermaid.initialize({startOnLoad:false})&lt;/script&gt;&lt;/head&gt;&lt;body&gt;&lt;pre class=&quot;mermaid&quot;&gt;flowchart LR
+    A1[&quot;① 想法&lt;br/&gt;draft 留想法&lt;br/&gt;承諾才建卡配 id&quot;] --&gt; A2[&quot;② 規劃&lt;br/&gt;self-contained&lt;br/&gt;research／spec／EP&quot;]
+    A2 --&gt; A3[&quot;③ 開工&lt;br/&gt;branch／WT／baseline&lt;br/&gt;機械身份&quot;]
+    A3 --&gt; A4[&quot;④ 實作&lt;br/&gt;寫入在&lt;br/&gt;execution plane&quot;]
+    A4 --&gt; A5[&quot;⑤ 驗證&lt;br/&gt;claim 對上&lt;br/&gt;獨立 evidence&quot;]
+    A5 --&gt; A6[&quot;⑥ 收斂&lt;br/&gt;review → ff-only&lt;br/&gt;吸回 → 收尾&quot;]
+    A6 --&gt; A7[&quot;⑦ 沉澱&lt;br/&gt;能力／理由回&lt;br/&gt;正確 carrier&quot;]
+    A7 --&gt; A8[&quot;⑧ 運維&lt;br/&gt;hooks／排程／備份&lt;br/&gt;可重建&quot;]
+    classDef ok fill:#10b981,color:#000000
+    classDef warn fill:#f59e0b,color:#000000
+    classDef bad fill:#ef4444,color:#ffffff
+    class A1,A2,A7 ok
+    class A5,A6,A8 warn
+    class A3,A4 bad&lt;/pre&gt;&lt;/body&gt;&lt;/html&gt;" title="八站生命週期" style="height:360px;min-height:360px"></iframe>
+  </div>
+  <table>
+    <thead><tr><th>站</th><th>一句職責</th><th>關鍵載體</th><th>現況</th></tr></thead>
+    <tbody>
+      <tr><td>① 想法</td><td>未承諾想法留 draft／pending；承諾才由 board control plane 建卡配 id</td><td><code>Backlog.md</code> draft/task、建卡預掃</td><td>✅</td></tr>
+      <tr><td>② 規劃</td><td>card intent 轉成可跨 session 接手的 self-contained spec／EP（固定 baseline、scope、已決策、驗收）</td><td><code>ep.md</code>、task home、shell-ready md</td><td>✅（殼 codegen AIR-73 前為 LLM 手填殼）</td></tr>
+      <tr><td>③ 開工</td><td>為已存在 card 建立 branch／WT／baseline／cwd 的機械身份</td><td><code>wt-open</code>、In Progress refs、freshness check</td><td>❌ wt-open 未實作；現行＝起手式＋primary checkout 卡 branch</td></tr>
+      <tr><td>④ 實作</td><td>寫入在該工作的 execution plane 內完成</td><td>card persistent WT；免卡小修 ephemeral fast-path</td><td>❌ target；現行＝共享 primary checkout</td></tr>
+      <tr><td>⑤ 驗證</td><td>claim 對上足夠獨立的 evidence；negative claim 不以單次文字搜尋冒充</td><td>tests、integration、code-review、acceptance evidence</td><td>⚠️ instruction-testing pilot 尚未實跑</td></tr>
+      <tr><td>⑥ 收斂</td><td>review、修正、依 rebase→ff-only 吸回 owning line，再收尾</td><td>post-build、<code>wt-close</code>、finalization</td><td>⚠️ git 紀律 ✅ 現行；wt-close／殼 refresh 未機械化</td></tr>
+      <tr><td>⑦ 沉澱</td><td>完成能力、設計理由、跨 session 事實放回正確 carrier；memory 不成規範副本</td><td>AGENTS/Capabilities、architecture/blueprint、memory pointer</td><td>✅</td></tr>
+      <tr><td>⑧ 運維</td><td>hooks、排程、備份、清理、fresh-machine recovery 可重建</td><td>hooks、schedule registry、memory bundle、runbook</td><td>⚠️ 六段 runbook 有缺口（見 06）</td></tr>
+    </tbody>
+  </table>
+  <div class="note">八站是整體敘事，不取代各 skill 的細部 workflow。免 UC 的小型 fix 可以不建卡，但仍須有明確 execution plane、validation 與收斂路徑。</div>
+  <p class="src">投影自：<a href="workflow.md">workflow.md</a>「八站主軸」節</p>
+</section>
+
+<section id="s3">
+  <h2>在哪做？誰能寫什麼？</h2>
+  <div class="sub">control plane 與 execution plane 的分界按「寫入責任」，不是按任務時間或大小。判斷核心只有一個問題：這份 state 的唯一 writer 是誰。</div>
+  <div class="topo-main">
+    <div class="topo-box ctrl">
+      <div class="topo-t">PRIMARY checkout<span class="chip bad">❌ target 未落地</span></div>
+      <div class="topo-sub">control plane</div>
+      <ul class="dots">
+        <li>board／card control state：id allocation、status、refs、final summary</li>
+        <li><code>backlog browser</code> 固定從 primary cwd 啟動（board 唯一 working-copy owner）</li>
+        <li>建立／結束 execution WT 的 helper 從這裡發起，single-writer lock 序列化</li>
+      </ul>
+    </div>
+    <div class="topo-link">
+      <div>建立／重用 WT<br><span class="topo-arrow">→</span></div>
+      <div><span class="topo-arrow">←</span><br>execution plane 可讀 card state，<br>不寫 board runtime metadata</div>
+    </div>
+    <div class="topo-exec-col">
+      <div class="topo-box exec">
+        <div class="topo-t">card WT A<span class="chip bad">❌ target</span></div>
+        <div class="topo-sub">1 card = 1 branch = 1 persistent worktree</div>
+        <ul class="dots">
+          <li>code／rules／skills／docs／EP／tests／scripts 的寫入都在這裡</li>
+          <li>writer＋reviewer 指向同一份工作狀態：共讀、按流程串行寫</li>
+          <li><code>.agents/memory</code>、<code>.agents/memory-inbox</code> symlink → primary canonical（❌ 接線未建）</li>
+        </ul>
+      </div>
+      <div class="topo-box exec">
+        <div class="topo-t">card WT B …<span class="chip bad">❌ target</span></div>
+        <div class="topo-sub">同一 topology；跨 session 接續重用同一 WT</div>
+      </div>
+    </div>
+  </div>
+  <div class="topo-foot">
+    <div class="topo-box small">
+      <div class="topo-t">免卡小修 → ephemeral WT fast-path<span class="chip bad">❌ target</span></div>
+      <div class="topo-sub">修改＋驗證＋收斂後移除；scope 擴大即停 fast-path、升正式卡</div>
+    </div>
+    <div class="topo-box small">
+      <div class="topo-t">顧問／跨卡 audit → read-only checkout 或 ephemeral WT<span class="chip warn">⚠️ 可支撐未機械化</span></div>
+      <div class="topo-sub">不改變 active writer 的 cwd／branch；跨 repo 回各 repo 自己的 topology</div>
+    </div>
+  </div>
+  <div class="note"><b>過渡條款（現在怎麼跑）</b>：WT 基建弧落地前，repo AGENTS.md 現行 git 慣例仍是 runtime authority——卡開工在 primary 自 <code>main</code> checkout 卡 branch、收尾 ff-only 吸回。target 章節不得被當成已存在的行为；過渡期禁止混合兩種 lifecycle（primary 已切卡 branch 又建同卡 persistent WT）。</div>
+
+  <div class="story">
+    <div class="sh">User Story ①——多 session 共享 WT 打架</div>
+    <p>身為同時開著多個 session 的人，我希望別的 session 不會把我腳下的 branch 拉走。</p>
+    <div class="sh bad">❌ 實際痛點（真實事故）</div>
+    <p>多個 session 共享同一個 primary checkout——一個 session 做 <code>git checkout</code> 切 branch，其他 session 的 cwd／branch 當場被換掉。WT workflow 裁決報告背景記載「checkout 中途被切」，同型故障還有 relay 過時×6、外卡落錯 branch×3；workflow.md 的結論：「因共享單一 checkout，所以同 repo card session 絕不能並存」。</p>
+    <div class="sh good">✅ 採用架構</div>
+    <p>1 card = 1 branch = 1 persistent worktree：branch 承載工作生命週期，WT path 承載穩定執行位置；同卡跨 session 重用同一 WT；writer 與 reviewer 指向同一份工作狀態（共用 identity＝可共讀、按流程串行寫）。</p>
+    <div class="sh care">Care（為什麼要管）</div>
+    <p>branch／cwd 是 session 的隱形地基，被別人動了，「我以為我在哪」的全部假設失效——這是 ③開工站斷點最多的根因。</p>
+    <div class="sh">Status / Source</div>
+    <p class="src">❌ target 尚未落地——<a href="workflow.md">workflow.md</a>「Worktree 形態定案」「過渡條款」；事故記載：ai-analysis/reports/2026-09-10-wt-workflow-decision.md 背景。</p>
+  </div>
+  <p class="src">投影自：<a href="workflow.md">workflow.md</a>「Worktree 形態定案」「寫入責任決策樹」「過渡條款」節</p>
+</section>
+
+<section id="s4">
+  <h2>為什麼 board 只能有一個 writer？</h2>
+  <div class="sub">board 的 runtime metadata（task id、status、refs、final summary）如果有多個 writer，id 撞號與狀態互踩只是時間問題。</div>
+
+  <div class="story">
+    <div class="sh">User Story ②——開卡撞號兩次</div>
+    <p>身為同時推進多張卡的人，我希望每次建卡拿到的 id 唯一，不用事後清場。</p>
+    <div class="sh bad">❌ 實際痛點（真實事故）</div>
+    <p>卡撞號×2——WT workflow 裁決報告背景記載的實際事故。根因：多 WT repo 各自掃描 id，其他 branch 的 committed 卡與 working-copy 裡未提交的卡互相看不到；<code>backlog/config.yml</code> 至今仍是 <code>check_active_branches: false</code>（已實核）。</p>
+    <div class="sh good">✅ 採用架構</div>
+    <p>board single-writer：<code>backlog browser</code> 固定從 primary control plane 啟動；<code>backlog/tasks</code> runtime metadata 只有 control plane 是 writer；card WT 不直接執行會改 card runtime state 的 <code>backlog task edit/create/complete</code>；<code>check_active_branches: true</code> 做跨 branch discovery；建卡保留跨 WT filesystem max-id 預掃，補 untracked／staged 卡的盲區；id／status／ref／finalization 經 control-plane helper 在 repo-local lock 下執行。</p>
+    <div class="sh care">Care（為什麼要管）</div>
+    <p>id 是卡的機械身份。撞號之後「哪張卡是真相」變成考古題，board 的全部下游（status、refs、precheck、Capabilities 結算）跟著錯。</p>
+    <div class="sh">Status / Source</div>
+    <p class="src">❌ target 尚未落地——<a href="workflow.md">workflow.md</a>「Board single-writer」節；事故記載：ai-analysis/reports/2026-09-10-wt-workflow-decision.md 背景。</p>
+  </div>
+
+  <h3>為什麼打開 config flag 不夠</h3>
+  <ul class="dots">
+    <li><code>check_active_branches</code> 只解 <b>cross-branch discovery</b>：讓多 WT repo 看得見其他 branch 已 commit 的卡。</li>
+    <li>working-copy 裡的 local card 仍可能遮住其他 branch 的同 id 狀態——flag 取代不了 single-writer ownership。</li>
+    <li>untracked／staged 的建卡 flag 看不到——所以 max-id 預掃要保留，兩層各補一塊盲區。</li>
+  </ul>
+  <div class="note">control-plane metadata 若要自動 commit，必須同步對齊 outward-action consent；現行規則特赦的只有建卡 commit，status／ref／finalization commit 的授權不由 blueprint 自行擴張。</div>
+  <p class="src">投影自：<a href="workflow.md">workflow.md</a>「Board single-writer」節</p>
+</section>
+
+<section id="s5">
+  <h2>做完怎麼收？</h2>
+  <div class="sub">收斂序列沿用既有 git 紀律——WT target 改的是 working-directory ownership，不改 trunk-based convergence。finalization 不先於 convergence。</div>
+  <ol>
+    <li><b>execution plane 內完成工作</b>：work → validate → review → 修正 → commit（commit consent 不因 WT helper 自動失效）。</li>
+    <li><b>wt-close preflight</b>：重取 control-plane lock，驗 WT／branch identity、working tree 無未處理變更、commits 與 scope 相符、owning line 新變更未使 baseline 假設失效。</li>
+    <li><b>owning line 吸收</b>：owning line 沒前進 → ff-only candidate；已前進 → rebase working branch onto owning line → 再 ff-only absorb；ff-only 仍失敗 → 停下查原因。</li>
+    <li><b>finalization</b>：git convergence 成功後，primary control plane 才 status → Done、寫 final summary、完成態 refs、Capabilities／metadata 結算、值得保存的事實按 memory-audit 蒸餾。</li>
+    <li><b>移除 execution plane</b>：刪 card WT、刪已被完整吸收的 branch、<code>git worktree list</code>＋ancestry 最終確認、釋放 lock。</li>
+  </ol>
+  <ul class="dots">
+    <li>鐵律：trunk／owning line 不被 rebase、不 force；不以 merge commit 迴避 ff-only 失敗。</li>
+    <li>任一步失敗都要保留可判斷的 branch／WT／control state；不得靠刪 WT 製造表面完成。</li>
+    <li>board <code>Done</code> 表示工作已被 owning line 接收——不先於 convergence。</li>
+    <li><b>relay freshness 不因 WT 化免除</b>：relay 是接手說明不是 repository truth；card baseline 對 current owning line／HEAD 的比對照做，baseline 後有新 commit 先判是否碰 scope。</li>
+  </ul>
+
+  <div class="story">
+    <div class="sh">User Story ③——顧問結果要有收法</div>
+    <p>身為派出顧問（external runtime）的 caller，我希望顧問的產出有明確收法，不會停在背景工作裡沒人認領。</p>
+    <div class="sh bad">❌ 實際痛點</div>
+    <p>（保守敘述——本卡的事實源不在 blueprint 三檔內，收法記載於 WT workflow 裁決報告）顧問產出走 bridge 背景工作、落到暫存輸出檔；caller 必須主動收回（wait／認領）並固化，產出不會自己進入決策流。裁決報告即一次收回實例：雙顧問全文經 <code>.agent-tmp/bridge-{muse,codex}-wt-out.txt</code> 收回後固化進裁決。</p>
+    <div class="sh good">✅ 採用架構</div>
+    <p>顧問結果收回是 caller 的收斂責任：背景工作掛 wait、產出落 repo 內暫存區（禁 /tmp）、由 caller 認領並固化進 report／blueprint；「做完怎麼收」的序列裡沒有「丟著等它自己回來」這一步。唯讀／顧問 session 的執行環境依 03 節 routing（read-only checkout 或 ephemeral WT）。</p>
+    <div class="sh care">Care（為什麼要管）</div>
+    <p>收斂站的鐵律是每份產出都有唯一收斂路徑；顧問產出若無收法，⑥收斂出現斷鏈——做了研究、下了決策依據卻消失。</p>
+    <div class="sh">Status / Source</div>
+    <p class="src">⚠️ 現有做法可支撐、尚未統一機械化——<a href="workflow.md">workflow.md</a>「唯讀／顧問 session」節；收法規範源：<a href="../../rules/model-routing.md">rules/model-routing.md</a>＋model-routing skill「完成回報收法」（wait&lt;jobId&gt;／認領制）；裁決報告僅為本弧事故背景。</p>
+  </div>
+  <p class="src">投影自：<a href="workflow.md">workflow.md</a>「<code>wt-close</code>：目標 transaction」「收斂序列」「Relay freshness check 保留」節</p>
+</section>
+
+<section id="s6">
+  <h2>機器壞了怎麼回來？</h2>
+  <div class="sub">從「硬碟壞掉、只剩 repo 與外部備份」重建的六段 runbook。標記語義：✅ repo 已有可依循的現行 source／⚠️ 核心形態有源但缺 setup 或 recovery pointer／❌ 沒有足以可靠重建的 source。缺可靠 source 的步驟停在缺口，不從舊機現況或歷史 report 拼假 runbook。</div>
+
+  <div class="story">
+    <div class="sh">User Story ④——硬碟壞了重建</div>
+    <p>身為這套系統唯一的擁有者，我希望硬碟壞了之後，靠 repo 加外部備份能把工作環境重建回來。</p>
+    <div class="sh bad">❌ 實際痛點</div>
+    <p>一般 <code>git clone</code> 帶不回的東西比想像多：memory pool 是 local-only Git state（只複製 markdown 不算恢復）；ZCode cron prompt 在 local DB、repo 無 verbatim 重建源；Claude settings 含 secret 不入版控。「目前這台機器上已經有」本身不是 fresh-machine recovery 證據。</p>
+    <div class="sh good">✅ 採用架構</div>
+    <p>六段 runbook（下圖順序即依賴順序），每段明列現有支撐與缺口；prerequisite probe 任一缺失即停止 runbook，不反推安裝命令。</p>
+    <div class="sh care">Care（為什麼要管）</div>
+    <p>八站的⑧運維就是這一節：狀態外部化只對「可重建的狀態」成立——runbook 的 ✅ 只給「可從 source 重建並驗證」的面。</p>
+    <div class="sh">Status / Source</div>
+    <p class="src">部分可重建（⚠️）——<a href="onboarding.md">onboarding.md</a> 全檔＋「Fresh-machine 完成 gate」節（code-reality ✅、記憶池主鏈 ✅、工具鏈 ❌、其餘 ⚠️；逐面見 07 節）。</p>
+  </div>
+
+  <div class="frame-wrap">
+    <div class="bar"><span>六段重建依賴順序（節點色＝該段現況）</span></div>
+    <iframe srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;zh-Hant&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;&lt;script src=&quot;https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js&quot;&gt;&lt;/script&gt;&lt;script&gt;mermaid.initialize({startOnLoad:false})&lt;/script&gt;&lt;/head&gt;&lt;body&gt;&lt;pre class=&quot;mermaid&quot;&gt;flowchart TB
+    R1[&quot;1. 工具鏈 ❌&lt;br/&gt;只有 prerequisite probe&lt;br/&gt;缺統一安裝 runbook&quot;] --&gt; R2[&quot;2. rules＋skills 部署 ⚠️&lt;br/&gt;deploy_agents.py 有源&lt;br/&gt;symlink bootstrap 缺集中程序&quot;]
+    R2 --&gt; R3[&quot;3. hooks 接線 ⚠️&lt;br/&gt;ZCode／Muse 同 repo ✅&lt;br/&gt;CC secret recovery pointer 缺&quot;]
+    R3 --&gt; R4[&quot;4. 記憶池恢復 ⚠️&lt;br/&gt;bundle 主鏈 ✅&lt;br/&gt;spine／new-pool 待定義&quot;]
+    R4 --&gt; R5[&quot;5. cron＋launchd ⚠️&lt;br/&gt;inventory 在&lt;br/&gt;prompt verbatim source 缺&quot;]
+    R5 --&gt; R6[&quot;6. code-reality ✅&lt;br/&gt;uv tool install＋build&lt;br/&gt;即可重建&quot;]
+    classDef ok fill:#10b981,color:#000000
+    classDef warn fill:#f59e0b,color:#000000
+    classDef bad fill:#ef4444,color:#ffffff
+    class R4,R6 ok
+    class R2,R3,R5 warn
+    class R1 bad&lt;/pre&gt;&lt;/body&gt;&lt;/html&gt;" title="fresh-machine 六段重建" style="height:560px;min-height:560px"></iframe>
+  </div>
+  <table>
+    <thead><tr><th>段</th><th>現況</th><th>已有支撐</th><th>缺口</th></tr></thead>
+    <tbody>
+      <tr><td>1 工具鏈</td><td>❌</td><td>prerequisite probe 清單（git/bash/jq/python3/uv/node/npm/backlog）</td><td>統一 fresh-machine 安裝 runbook；任一缺失即停止</td></tr>
+      <tr><td>2 rules＋skills 部署</td><td>⚠️</td><td><code>deploy_agents.py</code>（非 Claude bundle ✅）；各 symlink topology 已記載</td><td>Claude guide/rules、agents、skills symlink 的集中 bootstrap＋verify</td></tr>
+      <tr><td>3 hooks 接線</td><td>⚠️</td><td>ZCode user-level merge 範本 ✅；Muse 同 repo <code>setup-muse-hooks.sh</code> ✅</td><td>CC settings 的 secret recovery pointer；Muse 新 repo adoption contract（❌）</td></tr>
+      <tr><td>4 記憶池恢復</td><td>⚠️（主鏈）</td><td>bundle clone、symlink setup（dry-run＋--apply）、topology verifier＋smoke——主鏈 ✅</td><td>memory-spine 備份定義 ⚠️；新 repo 建 pool bootstrap ⚠️</td></tr>
+      <tr><td>5 cron＋launchd</td><td>⚠️</td><td>schedule-registry 職責 projection；backlog-browser plist 有 tracked source</td><td>cron prompt verbatim source；cleanup plist tracked source；enable/verify runbook</td></tr>
+      <tr><td>6 code-reality</td><td>✅</td><td><code>uv tool install</code> 三件＋<code>code-reality build --repo</code>；新 repo onboarding 四步</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p class="src">投影自：<a href="onboarding.md">onboarding.md</a> 全檔（現況判定與缺口清單逐節對應）</p>
+</section>
+
+<section id="s7">
+  <h2>哪些已落地、哪些還沒？</h2>
+  <div class="sub">17 個追蹤面的現況 board。鐵律：設計已拍板不等於 runtime 已存在；report 固化決策與證據，凡宣稱「現在會怎樣」仍須回查目前 config／script／Git 狀態；缺口列入 blueprint 只是待建項（TODO 不自動升格），承諾仍進 Backlog.md／EP。</div>
+  <table>
+    <thead><tr><th>#</th><th>追蹤面</th><th>target 一句話</th><th>現況</th><th>依據</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>收斂 git 紀律</td><td>rebase→ff-only 吸回 owning line；trunk 不 rebase 不 force</td><td>✅ 現行</td><td>workflow.md「收斂序列」</td></tr>
+      <tr><td>2</td><td>開工 freshness check</td><td>card baseline／relay claim 對 current HEAD 機械驗證</td><td>✅ 現行</td><td>workflow.md「Relay freshness check 保留」</td></tr>
+      <tr><td>3</td><td>記憶池 primary canonical</td><td><code>.agents/memory</code>＋<code>memory-inbox</code> 實體 canonical、CC/ZCode/Muse 接線</td><td>✅</td><td>workflow.md「記憶池拓撲」</td></tr>
+      <tr><td>4</td><td>唯讀／顧問 session 環境</td><td>read-only checkout／ephemeral WT，不擾 active writer</td><td>⚠️</td><td>workflow.md「唯讀／顧問 session」</td></tr>
+      <tr><td>5</td><td>primary＝control plane</td><td>primary 只寫 board/card control state；<code>backlog browser</code> 固定從 primary 啟動</td><td>❌ target</td><td>workflow.md「Primary checkout」</td></tr>
+      <tr><td>6</td><td>card persistent WT</td><td>1 card = 1 branch = 1 persistent worktree</td><td>❌ target</td><td>workflow.md「Card worktree」</td></tr>
+      <tr><td>7</td><td>免卡小修 ephemeral fast-path</td><td>小型免 UC 工作用 ephemeral WT，擴大即升正式卡</td><td>❌ target</td><td>workflow.md「免卡小修」</td></tr>
+      <tr><td>8</td><td>board single-writer</td><td>lock＋<code>check_active_branches: true</code>＋max-id 預掃</td><td>❌ target（現值 <code>false</code>）</td><td>workflow.md「Board single-writer」＋<code>backlog/config.yml:13</code></td></tr>
+      <tr><td>9</td><td>wt-open／wt-close transaction</td><td>open：lock→建/重用 WT→baseline 驗證→接 shared state；close：preflight→收斂→finalization→移除</td><td>❌ 未實作</td><td>workflow.md「<code>wt-open</code>／<code>wt-close</code>」</td></tr>
+      <tr><td>10</td><td>card WT 記憶池 symlink 接線</td><td>兩條 symlink 指向 primary canonical；Muse hook 接線二選一由基建弧裁決</td><td>❌ target</td><td>workflow.md「Card WT 接線」</td></tr>
+      <tr><td>11</td><td>fresh-machine 工具鏈</td><td>空機可照 runbook 裝到 prerequisite probe 全過</td><td>❌</td><td>onboarding.md 第 1 節</td></tr>
+      <tr><td>12</td><td>rules/skills 部署</td><td>bundle 生成＋各端 symlink 集中 bootstrap＋verify</td><td>⚠️</td><td>onboarding.md 第 2 節</td></tr>
+      <tr><td>13</td><td>hooks 接線</td><td>ZCode/CC/Muse setup＋verify；CC secret 有 recovery pointer</td><td>⚠️</td><td>onboarding.md 第 3 節</td></tr>
+      <tr><td>14</td><td>記憶池恢復</td><td>pool／links／hooks／bundle 可重建；spine 與 new-pool 有定義</td><td>⚠️（主鏈 ✅）</td><td>onboarding.md 第 4 節</td></tr>
+      <tr><td>15</td><td>cron／launchd 重建</td><td>prompt/plist 有 reconstruction source，可 load 並對帳 runtime</td><td>⚠️</td><td>onboarding.md 第 5 節</td></tr>
+      <tr><td>16</td><td>code-reality</td><td>binary＋repo graph 可從 source 重建</td><td>✅</td><td>onboarding.md 第 6 節</td></tr>
+      <tr><td>17</td><td>人類 viewport 供給</td><td>三層：內建瀏覽器日視圖（<code>file:</code> 零 server）＋:6421 穩定引用＋Live Preview 選配；session 交付路徑不開臨時 server</td><td>⚠️ 架構定案、常駐層運行中；慣例句未落檔</td><td>workflow.md「人類 viewport 供給」＋viewport 架構裁決</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>過渡條款</b>：target（#5–#10）由同一個 WT 基建弧整體收斂；落地時同步改版 repo AGENTS.md「git 慣例」與 kanban 消費接線，完成前以現行規則執行、不得混合兩種 lifecycle。基建落地後「同 repo card session 絕不能並存」的機械限制才可移除——是否真平行仍依 shared-file／semantic overlap 判斷，不直接打散既有六線波次（L1→L3→L2→L4→L5 主序列，L6 跨 repo 真平行）。</div>
+  <p class="src">投影自：<a href="workflow.md">workflow.md</a>「待建基建」「六線波次」＋<a href="onboarding.md">onboarding.md</a>「Fresh-machine 完成 gate」</p>
+</section>
+
+<section id="s8">
+  <h2>這些說法從哪來？</h2>
+  <div class="sub">本頁是三檔的投影。三檔各自不是終點——它們向下指向真相源（正式裁決 report、repo 慣例、scripts、skills），更新觸發與 drift 速度也各不相同。</div>
+  <table>
+    <thead><tr><th>檔</th><th>真相源（who owns the facts）</th><th>drift 速度</th><th>負責合成的跨域敘事</th></tr></thead>
+    <tbody>
+      <tr><td><a href="workflow.md">workflow.md</a></td><td>WT 形態與責任邊界→<a href="../reports/2026-09-10-wt-workflow-decision.md">WT workflow 正式裁決報告</a>；git/branch 收斂語義→repo AGENTS.md「git 慣例」＋kanban-board；八站→<a href="../reports/2026-09-10-holistic-design-review.md">整體設計審視</a>；O1–O8 與波次→<a href="../blueprint-execution-order-0910.md">執行順序藍圖</a>；②⑥站殼 codegen→illustrate 三方終案＋mosaic 試驗附錄（跨 repo pointer）；viewport 供給→<a href="../reports/2026-09-10-viewport-serving-architecture.md">viewport 架構裁決</a>＋mosaic run-report-server.sh（跨 repo）＋schedule-registry 條 A5＋illustrate-html-mode 放置分流</td><td>中；WT 基建落地期偏快</td><td>八站生命週期、primary/card-WT 責任分界、board single-writer、memory 拓撲、open/close transaction、波次與 freshness invariant、viewport 供給三層與放置規則</td></tr>
+      <tr><td><a href="onboarding.md">onboarding.md</a></td><td>MULTI-MACHINE.md＋<code>deploy_agents.py</code>＋rules 部署契約＋agents registry 契約＋UC6/7 dry run 清單；排程輔助→schedule-registry；code-reality 安裝語義→code-reality skill</td><td>中；machine-local 接線改動時快</td><td>從空機器恢復的六段 runbook 與現有支撐／缺口</td></tr>
+      <tr><td><a href="AGENTS.md">AGENTS.md</a></td><td>本表＋更新紀律本身（真相源映射的單一源）</td><td>—</td><td>誰在什麼觸發下、以什麼紀律重編哪一檔</td></tr>
+    </tbody>
+  </table>
+  <h3>回源紀律（判讀本頁時的防偽條款）</h3>
+  <ul class="dots">
+    <li><b>消化重編，非局部 patch</b>：source 變了就重寫受影響段落，不留下前後兩種架構。</li>
+    <li><b>✅⚠️❌ 對 source 負責</b>：已落地／部分 substrate／尚無執行面三級，設計拍板不等於 runtime 存在。</li>
+    <li><b>不以 report 歷史當 runtime 現況</b>：report 固化決策與證據；「現在會怎樣」要回查 config／script／Git。</li>
+    <li><b>詳細規則以連結回源取代正文複製</b>：CLI 細節、branch 規則、hook schema、排程事實、memory-audit 判準由各自 source 擁有。</li>
+    <li><b>對齊覆核有觸發條件</b>：git 慣例、kanban 契約、wt-open/close、memory 接線、deploy、排程、code-reality、UC dry run、八站任一站 owner/IO、viewport 供給層變——十類事件任一發生才重編，不做定期重寫。</li>
+  </ul>
+
+  <div class="card">
+    <div class="t v">mosaic 搬運工願景（optional——未承諾的 forward-looking 卡）<span class="chip warn">願景非現況</span></div>
+    <p>終點想像：user 不再當 worktree 間的人肉搬運工——一個 command center session 一次推進多張卡，每卡一個 WT、WT 內多 agent（寫手＋審查者）協同，進度／結論／異常彙整到 board。mosaic 雙卡並行 POC 已驗證核心可行（8/8 全過），承諾池：AIR-71（未開工）。依 blueprint 紀律：這是待建項不是已承諾項，不因列入本頁而升格。</p>
+    <p class="src">事實源：backlog/tasks/air-71 卡（User 09-10 願景＋POC 實證）；跨 repo 素材：blueprint AGENTS.md 映射表的 mosaic 試驗附錄 pointer。</p>
+  </div>
+  <p class="src">投影自：<a href="AGENTS.md">AGENTS.md</a>「各檔真相源映射」「更新紀律」「對齊覆核觸發」節</p>
+</section>
+
+<section id="s9">
+  <h2>產物怎麼看、放哪找？</h2>
+  <div class="sub">人類 viewport 的供給與放置。分工一句話：日常點開用 VSCode 內建瀏覽器（零 server）；要穩定引用（board 卡連結）才用 :6421 常駐；手改即時預覽才是 Live Preview 的位置。</div>
+  <div class="cardrow">
+    <div class="card">
+      <div class="t g">日常點開——內建 Integrated Browser<span class="chip good">✅</span></div>
+      <p>右鍵任何自包含 HTML（report shell／blueprint／arch-report）→「Open in Integrated Browser」，直接載本地 <code>file:</code> 資源——零 server、零埠、零擴充依賴（VS Code 1.121 起內建）。session 的義務只剩：交付路徑。</p>
+    </div>
+    <div class="card">
+      <div class="t g">穩定引用——:6421 常駐<span class="chip good">✅</span></div>
+      <p>launchd report-server（panel serve）提供 stable URL 給 board 卡 refs、md viewer 與跨 repo deep link；讀活磁碟——未 commit 的 WT 內容直接可達。它是 addressability 層，不是「為了預覽而存在的 server」。</p>
+    </div>
+    <div class="card">
+      <div class="t a">手改熱刷新——Live Preview（選配）<span class="chip warn">選配</span></div>
+      <p>唯一殘餘價值＝未存檔 buffer 即時刷新。內部 server 埠隨 window 漂移（3000→3001…），生命週期綁 VSCode——埠永不寫進持久引用。</p>
+    </div>
+  </div>
+
+  <div class="story">
+    <div class="sh">User Story ⑤——預覽搶埠連環事故</div>
+    <p>身為多 session 作業的人，我希望看產物不需要搶埠，也不會殺到別人的預覽。</p>
+    <div class="sh bad">❌ 實際痛點（真實事故）</div>
+    <p>舊殭屍 <code>http.server</code> 佔 8765 擋住進行中 session 綁埠；第三個 session 誤判殭屍砍掉後，活 session 隨即搶到 8765——臨時 server 無埠治理、無生命週期，活過 VSCode、活過 session 跨 session 佔埠，撞埠與殭屍是必然不是偶然。</p>
+    <div class="sh good">✅ 採用架構</div>
+    <p>臨時 server 全面淘汰：session 交付改「給路徑」（user 點開）或 :6421 URL（deep link）；日常預覽零 server（內建瀏覽器 <code>file:</code> 直載）；唯一常駐＝:6421（stable 契約）。曾評估的替代案——:6421 擴 route 到 repo 根、route carrier 中立化、新專案 viewport runbook——「路徑即可點開」成立後全部取消。</p>
+    <div class="sh care">Care（為什麼要管）</div>
+    <p>埠是隱形共享資源；命名空間一旦漂移（Live Preview 埠隨 window 漂、臨時埠無人登記），寫進卡上的連結就是斷鏈。</p>
+    <div class="sh">Status / Source</div>
+    <p class="src">⚠️ 架構定案＋常駐層運行中；慣例句（禁臨時 server／命名空間）與全域設定未落檔——<a href="workflow.md">workflow.md</a>「人類 viewport 供給」＋<a href="../reports/2026-09-10-viewport-serving-architecture.md">viewport 架構裁決</a>。</p>
+  </div>
+
+  <h3>放在哪：目錄規則（「開心目錄」定案的投影）</h3>
+  <table>
+    <thead><tr><th>產物類型</th><th>位置</th><th>入口</th></tr></thead>
+    <tbody>
+      <tr><td>弧產物（有卡）</td><td><code>ai-analysis/_tasks/&lt;MM-DD-主題&gt;/</code>；線任務 <code>_projects/&lt;線&gt;/tasks/</code>；完成搬同家 <code>done/</code></td><td><code>index.html</code>（ep/spec/殼同處）</td></tr>
+      <tr><td>常設 domain 導覽</td><td><code>ai-analysis/&lt;域&gt;/</code>（如 <code>blueprint/</code>）</td><td>域名即路徑</td></tr>
+      <tr><td>按需結構視覺</td><td>repo 根 <code>arch-report/&lt;主題&gt;/</code></td><td><code>index.html</code>（渲染產物不進 git）</td></tr>
+      <tr><td>md 沉澱</td><td><code>ai-analysis/reports/</code></td><td>—</td></tr>
+    </tbody>
+  </table>
+  <div class="note">一句話心法：<b>會動的都在 <code>ai-analysis/</code>、弧的家照日期命名、入口一律 <code>index.html</code></b>——VSCode <code>Cmd+P</code> 打日期或主題詞即達；board 卡 refs 是導航主力。放置規範源＝illustrate-html-mode「產物位置分流」。</div>
+  <ul class="dots">
+    <li><b>命名空間規則</b>：Live Preview／臨時埠 URL 永不寫進 board 卡或任何持久引用；持久引用只用 :6421。</li>
+    <li><b>origin 分離</b>：<code>file:</code> 與 :6421 是不同 origin——頁內 localStorage（如主題記憶）兩邊各自保存，不共享。</li>
+    <li><b>全域設定（待做）</b>：<code>workbench.browser.autoReloadOnFileChange: true</code>——AI 落盤後，開著的頁自動刷新。</li>
+    <li><b>新 repo onboarding</b>：viewport 面零步驟（自包含單檔＋內建瀏覽器即通）；要 deep link 才加 :6421 route（opt-in）。</li>
+  </ul>
+  <p class="src">投影自：<a href="workflow.md">workflow.md</a>「人類 viewport 供給」＋<a href="../reports/2026-09-10-viewport-serving-architecture.md">viewport 架構裁決</a>（事故時間線、三方諮詢與取消項全記錄）</p>
+</section>
+
+</main>
+<script>
+/* ── 主題系統（搬自 MOS-22.3 v2：三態 auto/light/dark＋FOUC＋iframe 內 mermaid 重渲染跟隨）── */
+var THEME_KEY='shell-theme';
+function effectiveTheme(){
+  var o=document.documentElement.dataset.theme;
+  if(o)return o;
+  return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
+}
+function renderFrame(f,theme,gen){
+  var doc=null,w=null;
+  try{doc=f.contentDocument;w=f.contentWindow;}catch(e){return;}
+  if(!doc)return;
+  /* 隱藏 section 的 iframe 量寬為 0/病態 viewBox（display:none race）——只渲染可見 frame，隱藏者待 go() 切節後渲染 */
+  if(!f.closest('main section.active'))return;
+  var els=doc.querySelectorAll('pre.mermaid');
+  if(!els.length)return;
+  if(!w.mermaid){setTimeout(function(){if(gen===f._renderGen)renderFrame(f,theme,gen);},150);return;}
+  if(!f._mmdSrc){f._mmdSrc=Array.prototype.map.call(els,function(e){return e.textContent;});}
+  Array.prototype.forEach.call(els,function(e,i){
+    e.removeAttribute('data-processed');
+    if(f._mmdSrc[i]!=null)e.textContent=f._mmdSrc[i];
+  });
+  try{
+    w.mermaid.initialize({startOnLoad:false,theme:theme==='dark'?'dark':'default',securityLevel:'loose'});
+    w.mermaid.run({nodes:els}).then(function(){if(gen===f._renderGen)fitFrame(f,false);}).catch(function(e){});
+  }catch(e){}
+}
+function syncFrames(){
+  var eff=effectiveTheme();
+  var override=document.documentElement.dataset.theme;
+  document.querySelectorAll('.frame-wrap iframe').forEach(function(f){
+    var doc=null;
+    try{doc=f.contentDocument;}catch(e){return;}
+    if(!doc)return;
+    if(override)doc.documentElement.style.colorScheme=override;
+    else doc.documentElement.style.removeProperty('color-scheme');
+    f._renderGen=(f._renderGen||0)+1;
+    renderFrame(f,eff,f._renderGen);
+  });
+}
+function setTheme(t){
+  if(t==='auto')delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme=t;
+  try{
+    if(t==='auto')localStorage.removeItem(THEME_KEY);
+    else localStorage.setItem(THEME_KEY,t);
+  }catch(e){}
+  syncThemeButton();
+  syncFrames();
+}
+function syncThemeButton(){
+  var b=document.getElementById('theme-btn');
+  if(!b)return;
+  var o=document.documentElement.dataset.theme;
+  b.textContent=o==='light'?'☀️ 淺色':(o==='dark'?'🌙 深色':'🖥️ 自動');
+}
+function cycleTheme(){
+  var o=document.documentElement.dataset.theme;
+  setTheme(!o?'light':(o==='light'?'dark':'auto'));
+}
+function go(id,el){
+  var section=document.getElementById(id);
+  if(!section||!section.matches('main section'))return false;
+  document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
+  section.classList.add('active');
+  document.querySelectorAll('#sidebar li a').forEach(a=>a.classList.remove('active'));
+  if(el)el.classList.add('active');
+  history.replaceState(null,'','#'+id);
+  fitVisibleFrames();
+  return false;
+}
+/* 正文內跳章：復用 go()，highlight 落到對應 sidebar link */
+function go2(id){
+  return go(id,document.querySelector('#sidebar li a[href="#'+id+'"]'));
+}
+/* ── iframe 高度自適應：srcdoc 同源，可讀 contentDocument 內 svg 實測高；隱藏章節量測為 0 時跳過，切章後重 fit ── */
+function fitFrame(f,zoom){
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return;}
+  if(!doc)return;
+  styleInnerDoc(f);
+  var svg=doc.querySelector('svg');
+  if(!svg)return;
+  if(zoom&&svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.width>0){
+    f.style.width=Math.ceil(svg.viewBox.baseVal.width+32)+'px';
+    requestAnimationFrame(function(){setFrameHeight(f);});
+    return;
+  }
+  f.style.width='';
+  setFrameHeight(f);
+}
+function setFrameHeight(f){
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return;}
+  if(!doc)return;
+  var svg=doc.querySelector('svg');
+  if(!svg)return;
+  var r=svg.getBoundingClientRect();
+  if(r.height<2)return;
+  f.style.height=Math.ceil(r.height+24)+'px';
+  f.style.minHeight='0px';
+  var wrap=f.closest('.frame-wrap');
+  if(wrap&&wrap.classList.contains('zoomed')){
+    var bar=wrap.querySelector('.bar');
+    var avail=wrap.clientHeight-(bar?bar.getBoundingClientRect().height:0);
+    var fh=f.getBoundingClientRect().height;
+    f.style.marginTop=Math.max(0,Math.floor((avail-fh)/2))+'px';
+  }else{
+    f.style.marginTop='';
+  }
+}
+function fitWithRetry(f,zoom,tries,prevH){
+  tries=tries||0;
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return;}
+  var svg=doc&&doc.querySelector('svg');
+  var h=svg?svg.getBoundingClientRect().height:0;
+  if(svg&&h>=2&&Math.abs(h-(prevH||0))<1){fitFrame(f,zoom);return;}
+  if(tries<50)setTimeout(function(){fitWithRetry(f,zoom,tries+1,h);},100);
+}
+function fitVisibleFrames(){
+  document.querySelectorAll('main section.active .frame-wrap iframe').forEach(function(f){
+    /* 切節後首 fit 前先確保該 frame 已渲染（隱藏期間 renderFrame 被 active guard 擋下） */
+    var doc=null;
+    try{doc=f.contentDocument;}catch(e){}
+    var need=doc&&doc.querySelectorAll('pre.mermaid').length&&(!doc.querySelector('svg')||!f._mmdSrc);
+    if(need){f._renderGen=(f._renderGen||0)+1;renderFrame(f,effectiveTheme(),f._renderGen);}
+    else fitFrame(f,false);
+  });
+}
+function styleInnerDoc(f){
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return;}
+  if(!doc||doc.getElementById('shell-fit'))return;
+  var st=doc.createElement('style');
+  st.id='shell-fit';
+  /* Canvas 跟 contentDocument 的 color-scheme 走（父頁 syncFrames 已 per-frame 覆蓋）——父頁不維護第三份 palette */
+  st.textContent='html,body{margin:0;padding:10px;color-scheme:light dark;background:Canvas;}pre.mermaid{margin:0;}pre.mermaid:not([data-processed]){visibility:hidden;}';
+  (doc.head||doc.documentElement).appendChild(st);
+}
+function setZoom(w,on){
+  document.querySelectorAll('.frame-wrap.zoomed').forEach(function(o){
+    o.classList.remove('zoomed');
+    o._scale=null;
+    var f=o.querySelector('iframe');
+    if(f){f.style.marginTop='';f.style.width='';applyScale(o,'fit');}
+  });
+  document.body.classList.toggle('has-zoom',!!on);
+  if(on&&w){
+    w.classList.add('zoomed');
+    w._scale=1;
+    applyScale(w,1);
+    syncToolbar(w);
+  }
+}
+function nativeW(f){
+  if(f._nw>0)return f._nw;
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return 0;}
+  var svg=doc&&doc.querySelector('svg');
+  var w=(svg&&svg.viewBox&&svg.viewBox.baseVal)?svg.viewBox.baseVal.width:0;
+  if(w>0)f._nw=w;
+  return w;
+}
+function applyScale(w,mode){
+  var f=w.querySelector('iframe');
+  if(!f)return;
+  if(mode==='fit'){
+    w._scale=null;
+    f.style.width='';
+    requestAnimationFrame(function(){setFrameHeight(f);});
+  }else{
+    var s=Math.min(3,Math.max(0.5,mode));
+    w._scale=s;
+    var nw=nativeW(f);
+    if(nw>0)f.style.width=Math.ceil(nw*s+32)+'px';
+    requestAnimationFrame(function(){setFrameHeight(f);});
+  }
+  syncToolbar(w);
+}
+function syncToolbar(w){
+  var tb=w.querySelector('.zoom-toolbar');
+  if(!tb)return;
+  var label=tb.querySelector('.zoom-label');
+  var slider=tb.querySelector('input[type=range]');
+  if(w._scale==null){if(label)label.textContent='適寬';if(slider)slider.value='100';}
+  else{if(label)label.textContent=Math.round(w._scale*100)+'%';if(slider)slider.value=String(Math.round(w._scale*100));}
+}
+function buildViewer(w){
+  var bar=w.querySelector('.bar');
+  var f=w.querySelector('iframe');
+  if(!bar||!f)return;
+  var layer=document.createElement('div');
+  layer.className='pan-layer';
+  w.appendChild(layer);
+  var tb=document.createElement('div');
+  tb.className='zoom-toolbar';
+  tb.innerHTML='<button type="button" data-z="out">－</button>'
+    +'<input type="range" min="50" max="300" step="10" value="100" aria-label="縮放比例">'
+    +'<button type="button" data-z="in">＋</button>'
+    +'<button type="button" data-z="one">1:1</button>'
+    +'<button type="button" data-z="fit">適寬</button>'
+    +'<span class="zoom-label">100%</span>';
+  bar.after(tb);
+  tb.addEventListener('click',function(e){
+    var b=e.target.closest('button');
+    if(!b)return;
+    var k=b.getAttribute('data-z');
+    if(k==='fit')applyScale(w,'fit');
+    else if(k==='one')applyScale(w,1);
+    else if(k==='in')applyScale(w,(w._scale||1)*1.25);
+    else if(k==='out')applyScale(w,(w._scale||1)/1.25);
+  });
+  var slider=tb.querySelector('input[type=range]');
+  slider.addEventListener('input',function(){applyScale(w,Number(slider.value)/100);});
+  layer.addEventListener('pointerdown',function(e){
+    w._pan={x:e.clientX,y:e.clientY,l:w.scrollLeft,t:w.scrollTop,moved:false};
+    w.classList.add('panning');
+    try{layer.setPointerCapture(e.pointerId);}catch(err){}
+  });
+  layer.addEventListener('pointermove',function(e){
+    if(!w._pan)return;
+    var dx=e.clientX-w._pan.x,dy=e.clientY-w._pan.y;
+    if(Math.abs(dx)+Math.abs(dy)>3)w._pan.moved=true;
+    w.scrollLeft=w._pan.l-dx;
+    w.scrollTop=w._pan.t-dy;
+  });
+  ['pointerup','pointercancel'].forEach(function(ev){
+    layer.addEventListener(ev,function(){w._pan=null;w.classList.remove('panning');});
+  });
+  layer.addEventListener('wheel',function(e){
+    e.preventDefault();
+    w.scrollLeft+=e.deltaX||e.deltaY;
+    w.scrollTop+=(e.deltaX?0:e.deltaY);
+  },{passive:false});
+}
+var SIDEBAR_KEY='illustrate-shell-sidebar-collapsed';
+function setCollapsed(c,moveFocus){
+  document.body.classList.toggle('sidebar-collapsed',!!c);
+  try{localStorage.setItem(SIDEBAR_KEY,c?'1':'0');}catch(e){}
+  var sidebar=document.getElementById('sidebar');
+  sidebar.toggleAttribute('inert',!!c);
+  if(c)sidebar.setAttribute('aria-hidden','true');else sidebar.removeAttribute('aria-hidden');
+  document.querySelectorAll('#collapse-btn,#expand-btn').forEach(function(b){
+    b.setAttribute('aria-expanded',String(!c));
+  });
+  if(moveFocus)document.getElementById(c?'expand-btn':'collapse-btn').focus();
+  return false;
+}
+(function init(){
+  // 折疊態先於首屏恢復（只改 nav 寬度，不碰 iframe/section——不觸發重載）
+  var c=false;
+  try{c=localStorage.getItem(SIDEBAR_KEY)==='1';}catch(e){}
+  if(c)setCollapsed(true);
+  // hash restore 優先；無 hash 時首屏＝首個含 .frame-wrap 的章節（.degraded 計入），都無則首章（殼硬約束①／AIR-14）
+  // 本頁 s1 的現況總覽 frame 是文件序第一個 .frame-wrap，故無 hash 載入即落 s1 駕駛艙
+  var h=location.hash.slice(1);
+  var candidate=h&&document.getElementById(h);
+  var target=(candidate&&candidate.matches('main section'))?h:null;
+  if(!target){
+    var framed=document.querySelector('main section .frame-wrap');
+    target=framed?framed.closest('section').id:document.querySelector('main section').id;
+  }
+  var link=document.querySelector('#sidebar li a[href="#'+target+'"]');
+  go(target,link);
+  // 每個 iframe 載入後對可見者 fit；隱藏章節的在 go() 切章時補 fit（隱藏 frame 量測=塌陷 race，禁）
+  document.querySelectorAll('.frame-wrap iframe').forEach(function(f){
+    f.addEventListener('load',function(){
+      if(!f.closest('main section.active'))return;
+      fitWithRetry(f,false);
+      try{
+        f.contentDocument.addEventListener('click',function(){
+          var w=f.closest('.frame-wrap');
+          if(w&&!w.classList.contains('zoomed'))setZoom(w,true);
+        });
+        f.contentDocument.addEventListener('keydown',function(e){
+          if(e.key==='Escape')setZoom(null,false);
+        });
+      }catch(e){}
+    });
+  });
+  fitVisibleFrames();
+  window.addEventListener('resize',fitVisibleFrames);
+  // 點擊 .bar 放大／還原（無 iframe 的 static 框不掛）；ESC 還原；每框建大圖檢視列＋拖拽層
+  document.querySelectorAll('.frame-wrap:not(.degraded):not(.static)').forEach(function(w){
+    var bar=w.querySelector('.bar');
+    if(!bar||!w.querySelector('iframe'))return;
+    buildViewer(w);
+    var hint=document.createElement('span');
+    hint.className='zoom-hint';
+    hint.textContent='⤢ 點擊圖面或標題列放大 / ESC 還原';
+    bar.appendChild(hint);
+    bar.addEventListener('click',function(){setZoom(w,!w.classList.contains('zoomed'));});
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')setZoom(null,false);});
+})();
+/* 主題鈕綁定＋首載：渲染可見 iframe（srcdoc 內 mermaid 已改 startOnLoad:false，統一由父頁按 effectiveTheme 渲染）＋按鈕同步 */
+(function(){
+  var b=document.getElementById('theme-btn');
+  if(b)b.addEventListener('click',cycleTheme);
+  syncThemeButton();
+  setTimeout(syncFrames,80);
+  /* bfcache/scroll-restore 蓋掉 hash 初始顯示時重跑 deep link */
+  window.addEventListener('pageshow',function(e){
+    if(e.persisted){var h=location.hash.slice(1);if(h&&document.getElementById(h))go2(h);}
+  });
+  /* auto 態下系統主題變更→mermaid 圖跟隨重渲染 */
+  if(window.matchMedia){
+    try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',function(){if(!document.documentElement.dataset.theme)syncFrames();});}catch(e){}
+  }
+})();
+</script>
+</body>
+</html>

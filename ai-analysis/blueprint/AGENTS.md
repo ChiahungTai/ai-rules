@@ -6,7 +6,7 @@
 
 | 檔案 | 真相源 | drift 速度 | 本檔負責合成 | 更新觸發 |
 | --- | --- | --- | --- | --- |
-| [workflow.md](workflow.md) | WT 形態與責任邊界以 [WT workflow 正式裁決報告](../reports/2026-09-10-wt-workflow-decision.md) 為準；git/branch 收斂語義以 repo AGENTS.md「git 慣例」與 kanban-board 為準；八站主軸取自 [整體設計審視](../reports/2026-09-10-holistic-design-review.md)；O1–O8 與波次取自 [執行順序藍圖](../blueprint-execution-order-0910.md) | 中；WT 基建落地期偏快 | 八站生命週期、primary/card-WT 責任分界、board single-writer、memory 拓撲、open/close transaction、波次與 freshness invariant | WT/branch 慣例、kanban ownership、memory topology、session 開收流程、O1–O8 衝突或波次裁決改變 |
+| [workflow.md](workflow.md) | WT 形態與責任邊界以 [WT workflow 正式裁決報告](../reports/2026-09-10-wt-workflow-decision.md) 為準；git/branch 收斂語義以 repo AGENTS.md「git 慣例」與 kanban-board 為準；八站主軸取自 [整體設計審視](../reports/2026-09-10-holistic-design-review.md)；O1–O8 與波次取自 [執行順序藍圖](../blueprint-execution-order-0910.md)；②⑥站殼 codegen 取自 [illustrate 三方終案](../../.agent-tmp/illupatch-synthesis.md)（固化後改指正式 report）＋mosaic [試驗附錄](../../../Github/mosaic_alpha/ai-analysis/_projects/marking/tasks/09-09-tree-registry-compiler/ep.md)（跨 repo pointer）；viewport 供給以 [viewport 架構裁決](../reports/2026-09-10-viewport-serving-architecture.md) 為準，服務機械事實＝mosaic run-report-server.sh（跨 repo）＋schedule-registry 條 A5＋illustrate-html-mode 放置分流 | 中；WT 基建落地期偏快 | 八站生命週期、primary/card-WT 責任分界、board single-writer、memory 拓撲、open/close transaction、波次與 freshness invariant、viewport 供給三層與放置規則 | WT/branch 慣例、kanban ownership、memory topology、session 開收流程、O1–O8 衝突或波次裁決、殼產線（codegen/手填 legacy）改變、viewport 供給層（:6421 路由／launchd 服務／preview 慣例）改變 |
 | [onboarding.md](onboarding.md) | [MULTI-MACHINE.md](../../hooks/MULTI-MACHINE.md)＋[deploy_agents.py](../../scripts/deploy_agents.py)＋[rules 部署契約](../../rules/AGENTS.md)＋[agents registry 契約](../../agents/AGENTS.md)＋fresh-machine / new-repo dry run [UC6/7 清單](../reports/2026-09-10-dryrun-uc67.md)。排程現況由 [schedule-registry.md](../schedule-registry.md) 輔助，code-reality 安裝語義由 [code-reality skill](../../skills/code-reality/SKILL.md) 提供 | 中；machine-local 接線改動時快 | 從空機器恢復 ai-rules 所需的六段 runbook，以及現有支撐與缺口 | deploy 目標、skills/agents symlink、hooks 接線、memory 備份拓撲、cron/launchd、code-reality 安裝或 UC6/7 dry run 結果改變 |
 
 正式裁決 report 提供 architecture decision；暫存顧問輸出只作形成裁決時的 evidence，不承擔 blueprint 的長期真相源。
@@ -34,6 +34,7 @@
 7. code-reality 安裝／bootstrap／repo profile 流程改變。
 8. 新一輪 UC dry run 發現現有 runbook 無法從空機器或新 repo 走通。
 9. 大型 workflow arc 收斂，並且它改變八站任一站的 owner、輸入、輸出或 handoff。
+10. `:6421` 路由、launchd 服務（report-server／backlog-browser）或 viewport／preview 慣例改變。
 
 ## 對齊覆核流程
 
