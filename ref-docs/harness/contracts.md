@@ -22,7 +22,7 @@
 - **`CLAUDE.md` 三家分歧**：Claude 原生讀；OpenCode 作 fallback 讀；**ZCode 不讀**（僅 onboarding 一次性遷移）（`agents.md:49`）；Muse Code 同目錄 `AGENTS.md` 優先於 `CLAUDE.md`（Muse Code `muse-code/configuration.md:41`）。
 - **`.agents/` 開放標準**：OpenCode（`.agents/skills/`、`~/.agents/skills/`）與 ZCode（`.agents/mcp.json`）皆當相容路徑掃；Claude 鏡像未提及（`opencode/skills.md:13`、`zcode/mcp-services.md:64`）；Muse Code 亦掃 `~/.agents/skills` 與 `<repo>/.agents/skills/`（Muse Code `muse-code/extending.md:60`）。
 - **`SKILL.md` 三家一致**（同 Agent Skills 標準），frontmatter 豐富度差異大：Claude 最豐、OpenCode 最精簡（5 欄）、ZCode 範例 2 欄；Muse Code 四源且跨 harness 自動發現 `~/.claude/skills`/`~/.codex/skills`（Muse Code `muse-code/extending.md:57,60`）。
-- **Hook**：Claude 有；ZCode 3.7.7+ 實測支援 user-level hooks（`~/.zcode/cli/config.json`，stdin 含 Claude snake_case alias，腳本零改動可攜；專案層 hooks 被整體忽略、事件無 Notification/SessionEnd）；OpenCode 鏡像內未提及 hook（佐證：zcode.z.ai/cn/docs/hooks；實測紀錄 [04-multi-harness機制對照 §7 修訂](../../ai-analysis/reports/superpowers/04-multi-harness機制對照.md)）；Muse Code 13 事件且跑沙箱外（Muse Code `muse-code/extending.md:89,94`）。
+- **Hook**：Claude 有；ZCode 3.7.7+ 實測支援 user-level hooks（`~/.zcode/cli/config.json`，stdin 含 Claude snake_case alias，腳本零改動可攜；專案層 hooks 被整體忽略、事件無 Notification/SessionEnd）；OpenCode 鏡像內未提及 hook（佐證：zcode.z.ai/cn/docs/hooks；實測紀錄 [04-multi-harness機制對照 §7 修訂](../../ai-analysis/reports/_done/superpowers/04-multi-harness機制對照.md)）；Muse Code 13 事件且跑沙箱外（Muse Code `muse-code/extending.md:89,94`）。
 - **Subagent 定義同構**：兩家皆 markdown + YAML frontmatter（`name`/`description` 必填，正文 = 系統提示詞）；user 目錄載入點 `~/.claude/agents/`、`~/.zcode/agents/` 皆為目錄掃描 → symlink 部署可行。ZCode 為 Beta：僅 user 級、不可巢狀派發、自訂 tools 清單排除 MCP 工具（Claude 支援 `mcp__` patterns）、未知 frontmatter 欄位靜默忽略；Muse Code 容量 8-64＋per-child worktree isolation 拒絕不回落（Muse Code `muse-code/extending.md:21,33`）。
 
 ## 功能對照（2026-08-14 實查：線上文檔 + 本 session 實測）
@@ -69,4 +69,4 @@ rg -a -o '.{0,100}YD=200,GF=25000.{0,60}' ~/.local/share/claude/versions/$(ls -t
 
 ## 對 ai-rules 的啟示
 
-ai-rules 現為 CLAUDE.md 體系。要真正跨 harness，最小可攜單位是 **`AGENTS.md`**（兩家原生讀、第三家可 import）；`SKILL.md` 內容格式可攜但**語意不可攜**（ai-rules 的 skills 深度綁 `/build`、`/commit`、`.kanban/` 等 Claude 工作流）。Hook 在 ZCode 3.7.7+ 已有對等物（user-level config hooks，stdin 相容 Claude snake_case）——腳本可跨 harness 共用，僅註冊 config per-harness（且無目錄載入點，不能用 symlink 部署）；OpenCode 走 plugin lifecycle 對應（`tool.execute.before` ≈ CC `PreToolUse`，需改寫 JS/TS plugin，見 [03-OpenCode退路.md](../../ai-analysis/reports/superpowers/03-OpenCode退路.md)）。
+ai-rules 現為 CLAUDE.md 體系。要真正跨 harness，最小可攜單位是 **`AGENTS.md`**（兩家原生讀、第三家可 import）；`SKILL.md` 內容格式可攜但**語意不可攜**（ai-rules 的 skills 深度綁 `/build`、`/commit`、`.kanban/` 等 Claude 工作流）。Hook 在 ZCode 3.7.7+ 已有對等物（user-level config hooks，stdin 相容 Claude snake_case）——腳本可跨 harness 共用，僅註冊 config per-harness（且無目錄載入點，不能用 symlink 部署）；OpenCode 走 plugin lifecycle 對應（`tool.execute.before` ≈ CC `PreToolUse`，需改寫 JS/TS plugin，見 [03-OpenCode退路.md](../../ai-analysis/reports/_done/superpowers/03-OpenCode退路.md)）。

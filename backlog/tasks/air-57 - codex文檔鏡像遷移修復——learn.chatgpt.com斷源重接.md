@@ -42,7 +42,7 @@ ordinal: 49000
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-〔開工 handoff 09-10 CC〕①branch：git checkout -b air-57（自 main，WT 現乾淨）。②入口：uv run python ref-docs/harness/crawl.py --source codex（discover+sha256 增量+manifest 單一工具，AGENTS.md 記載）。③現場：09-09 寫壞的 manifest 已 git checkout 還原（HEAD 乾淨）；95 個舊平面檔在磁碟未動——遷移步驟 2 的素材。④陷阱重申（卡內已記）：use-cases/llms.txt 官方自帶 404 勿踩；llms-full.txt/codex-manual.md 輔助源不取代逐頁鏡像。⑤chronicle 掃描面：ref-docs/harness/contracts.md＋ai-analysis/reports/superpowers/04 報告＋rg 全 repo。⑥驗收四條 AC 逐項附機械證據（sha256 抽查用 shasum -a 256 對線上 curl）。⑦收斂：post-build（docs-mode——crawl.py 是 .py，code 鏈跑 ruff+pytest 面）＋結案兩步＋蒸餾。
+〔開工 handoff 09-10 CC〕①branch：git checkout -b air-57（自 main，WT 現乾淨）。②入口：uv run python ref-docs/harness/crawl.py --source codex（discover+sha256 增量+manifest 單一工具，AGENTS.md 記載）。③現場：09-09 寫壞的 manifest 已 git checkout 還原（HEAD 乾淨）；95 個舊平面檔在磁碟未動——遷移步驟 2 的素材。④陷阱重申（卡內已記）：use-cases/llms.txt 官方自帶 404 勿踩；llms-full.txt/codex-manual.md 輔助源不取代逐頁鏡像。⑤chronicle 掃描面：ref-docs/harness/contracts.md＋ai-analysis/reports/_done/superpowers/04 報告＋rg 全 repo。⑥驗收四條 AC 逐項附機械證據（sha256 抽查用 shasum -a 256 對線上 curl）。⑦收斂：post-build（docs-mode——crawl.py 是 .py，code 鏈跑 ruff+pytest 面）＋結案兩步＋蒸餾。
 
 build baseline: 4f8e1e6（air-57 branch 起點；09-10 impl session 補記）
 
