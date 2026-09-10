@@ -162,6 +162,7 @@
     <li><a href="#s7" onclick="return go('s7',this)"><span class="num">07</span>哪些已落地、哪些還沒？</a></li>
     <li><a href="#s8" onclick="return go('s8',this)"><span class="num">08</span>這些說法從哪來？</a></li>
     <li><a href="#s9" onclick="return go('s9',this)"><span class="num">09</span>產物怎麼看、放哪？</a></li>
+    <li><a href="#s10" onclick="return go('s10',this)"><span class="num">10</span>測試怎麼驗？agent 怎麼分？</a></li>
   </ul>
   <div class="backlinks">
     <a href="http://127.0.0.1:6420">← backlog board</a><br>
@@ -176,12 +177,12 @@
   <h2>五分鐘駕駛艙</h2>
   <div class="sub">五個問題回答「這套系統怎麼運轉」。標記語義：✅ 已落地運行／⚠️ 有源但未閉環／❌ target 尚未落地——設計已拍板不等於 runtime 已存在。</div>
   <div class="frame-wrap static">
-    <div class="bar"><span>現況總覽：17 個追蹤面（明細見 07 節 capability board）</span></div>
+    <div class="bar"><span>現況總覽：18 個追蹤面（明細見 07 節 capability board）</span></div>
     <div class="frame-body">
       <div class="kpi">
-        <div class="card"><div class="lab">追蹤面總數</div><div class="num-big">17</div></div>
+        <div class="card"><div class="lab">追蹤面總數</div><div class="num-big">18</div></div>
         <div class="card"><div class="lab">✅ 已落地運行</div><div class="num-big" style="color:var(--green)">4</div></div>
-        <div class="card"><div class="lab">⚠️ 半成品（有源未閉環）</div><div class="num-big" style="color:var(--amber)">6</div></div>
+        <div class="card"><div class="lab">⚠️ 半成品（有源未閉環）</div><div class="num-big" style="color:var(--amber)">7</div></div>
         <div class="card"><div class="lab">❌ target 未落地</div><div class="num-big" style="color:var(--rose)">7</div></div>
       </div>
     </div>
@@ -416,7 +417,7 @@
 
 <section id="s7">
   <h2>哪些已落地、哪些還沒？</h2>
-  <div class="sub">17 個追蹤面的現況 board。鐵律：設計已拍板不等於 runtime 已存在；report 固化決策與證據，凡宣稱「現在會怎樣」仍須回查目前 config／script／Git 狀態；缺口列入 blueprint 只是待建項（TODO 不自動升格），承諾仍進 Backlog.md／EP。</div>
+  <div class="sub">18 個追蹤面的現況 board。鐵律：設計已拍板不等於 runtime 已存在；report 固化決策與證據，凡宣稱「現在會怎樣」仍須回查目前 config／script／Git 狀態；缺口列入 blueprint 只是待建項（TODO 不自動升格），承諾仍進 Backlog.md／EP。</div>
   <table>
     <thead><tr><th>#</th><th>追蹤面</th><th>target 一句話</th><th>現況</th><th>依據</th></tr></thead>
     <tbody>
@@ -437,6 +438,7 @@
       <tr><td>15</td><td>cron／launchd 重建</td><td>prompt/plist 有 reconstruction source，可 load 並對帳 runtime</td><td>⚠️</td><td>onboarding.md 第 5 節</td></tr>
       <tr><td>16</td><td>code-reality</td><td>binary＋repo graph 可從 source 重建</td><td>✅</td><td>onboarding.md 第 6 節</td></tr>
       <tr><td>17</td><td>人類 viewport 供給</td><td>三層：內建瀏覽器日視圖（<code>file:</code> 零 server）＋:6421 穩定引用＋Live Preview 選配；session 交付路徑不開臨時 server</td><td>⚠️ 架構定案、常駐層運行中；慣例句未落檔</td><td>workflow.md「人類 viewport 供給」＋viewport 架構裁決</td></tr>
+      <tr><td>18</td><td>測試契約與驗證分工</td><td>EP 測試規劃段凍結 TC＋challenge（高風險）＋same-writer RED 三栓＋audit 軸A／review 軸B＋test-gen=P0 最後手段；研究層 cr-research 升 full</td><td>⚠️ v3.1 架構定案（三方裁決）；六檔 skill 未落檔</td><td>workflow.md「測試契約與驗證分工」＋測試契約裁決 v3.1</td></tr>
     </tbody>
   </table>
   <div class="note"><b>過渡條款</b>：target（#5–#10）由同一個 WT 基建弧整體收斂；落地時同步改版 repo AGENTS.md「git 慣例」與 kanban 消費接線，完成前以現行規則執行、不得混合兩種 lifecycle。基建落地後「同 repo card session 絕不能並存」的機械限制才可移除——是否真平行仍依 shared-file／semantic overlap 判斷，不直接打散既有六線波次（L1→L3→L2→L4→L5 主序列，L6 跨 repo 真平行）。</div>
@@ -449,7 +451,7 @@
   <table>
     <thead><tr><th>檔</th><th>真相源（who owns the facts）</th><th>drift 速度</th><th>負責合成的跨域敘事</th></tr></thead>
     <tbody>
-      <tr><td><a href="workflow.md">workflow.md</a></td><td>WT 形態與責任邊界→<a href="../reports/2026-09-10-wt-workflow-decision.md">WT workflow 正式裁決報告</a>；git/branch 收斂語義→repo AGENTS.md「git 慣例」＋kanban-board；八站→<a href="../reports/2026-09-10-holistic-design-review.md">整體設計審視</a>；O1–O8 與波次→<a href="../blueprint-execution-order-0910.md">執行順序藍圖</a>；②⑥站殼 codegen→illustrate 三方終案＋mosaic 試驗附錄（跨 repo pointer）；viewport 供給→<a href="../reports/2026-09-10-viewport-serving-architecture.md">viewport 架構裁決</a>＋mosaic run-report-server.sh（跨 repo）＋schedule-registry 條 A5＋illustrate-html-mode 放置分流</td><td>中；WT 基建落地期偏快</td><td>八站生命週期、primary/card-WT 責任分界、board single-writer、memory 拓撲、open/close transaction、波次與 freshness invariant、viewport 供給三層與放置規則</td></tr>
+      <tr><td><a href="workflow.md">workflow.md</a></td><td>WT 形態與責任邊界→<a href="../reports/2026-09-10-wt-workflow-decision.md">WT workflow 正式裁決報告</a>；git/branch 收斂語義→repo AGENTS.md「git 慣例」＋kanban-board；八站→<a href="../reports/2026-09-10-holistic-design-review.md">整體設計審視</a>；O1–O8 與波次→<a href="../blueprint-execution-order-0910.md">執行順序藍圖</a>；②⑥站殼 codegen→illustrate 三方終案＋mosaic 試驗附錄（跨 repo pointer）；viewport 供給→<a href="../reports/2026-09-10-viewport-serving-architecture.md">viewport 架構裁決</a>＋mosaic run-report-server.sh（跨 repo）＋schedule-registry 條 A5＋illustrate-html-mode 放置分流；測試契約與 agent 分工→<a href="../reports/2026-09-11-test-contract-design.md">測試契約裁決 v3.1</a></td><td>中；WT 基建落地期偏快</td><td>八站生命週期、primary/card-WT 責任分界、board single-writer、memory 拓撲、open/close transaction、波次與 freshness invariant、viewport 供給三層與放置規則、測試契約與驗證分工、agent 分工原則</td></tr>
       <tr><td><a href="onboarding.md">onboarding.md</a></td><td>MULTI-MACHINE.md＋<code>deploy_agents.py</code>＋rules 部署契約＋agents registry 契約＋UC6/7 dry run 清單；排程輔助→schedule-registry；code-reality 安裝語義→code-reality skill</td><td>中；machine-local 接線改動時快</td><td>從空機器恢復的六段 runbook 與現有支撐／缺口</td></tr>
       <tr><td><a href="AGENTS.md">AGENTS.md</a></td><td>本表＋更新紀律本身（真相源映射的單一源）</td><td>—</td><td>誰在什麼觸發下、以什麼紀律重編哪一檔</td></tr>
     </tbody>
@@ -460,7 +462,7 @@
     <li><b>✅⚠️❌ 對 source 負責</b>：已落地／部分 substrate／尚無執行面三級，設計拍板不等於 runtime 存在。</li>
     <li><b>不以 report 歷史當 runtime 現況</b>：report 固化決策與證據；「現在會怎樣」要回查 config／script／Git。</li>
     <li><b>詳細規則以連結回源取代正文複製</b>：CLI 細節、branch 規則、hook schema、排程事實、memory-audit 判準由各自 source 擁有。</li>
-    <li><b>對齊覆核有觸發條件</b>：git 慣例、kanban 契約、wt-open/close、memory 接線、deploy、排程、code-reality、UC dry run、八站任一站 owner/IO、viewport 供給層變——十類事件任一發生才重編，不做定期重寫。</li>
+    <li><b>對齊覆核有觸發條件</b>：git 慣例、kanban 契約、wt-open/close、memory 接線、deploy、排程、code-reality、UC dry run、八站任一站 owner/IO、viewport 供給層、測試契約／agent 分級變——十一類事件任一發生才重編，不做定期重寫。</li>
   </ul>
 
   <div class="card">
@@ -520,6 +522,58 @@
     <li><b>新 repo onboarding</b>：viewport 面零步驟（自包含單檔＋內建瀏覽器即通）；要 deep link 才加 :6421 route（opt-in）。</li>
   </ul>
   <p class="src">投影自：<a href="workflow.md">workflow.md</a>「人類 viewport 供給」＋<a href="../reports/2026-09-10-viewport-serving-architecture.md">viewport 架構裁決</a>（事故時間線、三方諮詢與取消項全記錄）</p>
+</section>
+
+<section id="s10">
+  <h2>測試怎麼驗？agent 怎麼分工？</h2>
+  <div class="sub">測試契約×驗證分工 v3.1——user 三輪挑戰＋muse/codex 三輪複驗的定案。⚠️ 架構已定案≠已落地：六檔 skill 未改前 runtime 仍走現行流程。</div>
+  <div class="cardrow">
+    <div class="card">
+      <div class="t g">設計原則</div>
+      <p><b>Family separation 放在 judgment boundary，不放在 every authorship boundary</b>——獨立性買在「審規格」（challenge）與「審結構」（review），不買在「把 oracle 抄成 pytest」（oracle 凍結後翻譯者近乎不重要）。</p>
+    </div>
+    <div class="card">
+      <div class="t c">契約層（先做、全量）</div>
+      <p>EP top-level「測試規劃」段在<b>實作段落前</b>凍結 TC（oracle 含 predicate-ID 拆分）——oracle 獨立性由「EP 作者↔實作者本來就跨家族」兌現。</p>
+    </div>
+    <div class="card">
+      <div class="t v">綠燈的可信度從哪來</div>
+      <p>same-writer RED 的污染用<b>三栓</b>補償：RED receipt 落檔存證／digest 凍結（GREEN 不得靜默改 frozen test）／基線跑法（baseline 上必須紅）。 GREEN 側買「跑得動」，契約＋審查買「<b>綠了能信</b>」。</p>
+    </div>
+  </div>
+  <div class="frame-wrap">
+    <div class="bar"><span>v3.1 管線（簡版——全圖見 ai-analysis/test-contract）</span></div>
+    <iframe srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;zh-Hant&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;&lt;script src=&quot;https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js&quot;&gt;&lt;/script&gt;&lt;script&gt;mermaid.initialize({startOnLoad:false})&lt;/script&gt;&lt;/head&gt;&lt;body&gt;&lt;pre class=&quot;mermaid&quot;&gt;flowchart TB
+    EP[&quot;EP·凍結 TC&lt;br/&gt;（實作段落前面）&quot;] --&gt; CH{&quot;高風險／P0？&quot;}
+    CH -- 是 --&gt; CHL[&quot;跨家族 challenge&lt;br/&gt;blind derive→reveal＋抓漏&quot;]
+    CHL -- &quot;oracle 錯&quot; --&gt; AM[&quot;EP amendment&lt;br/&gt;（judge／人類；實作前最便宜）&quot;]
+    CH -- 否 --&gt; RED[&quot;實作家族照凍結 TC 寫 RED&lt;br/&gt;（單一 model·context 連續）&quot;]
+    CHL -- 過 --&gt; RED
+    AM --&gt; RED
+    RED --&gt; G3[&quot;RED 三 gate＋digest 凍結&lt;br/&gt;receipt／基線跑法&quot;]
+    G3 --&gt; GRN[&quot;GREEN→REFACTOR&lt;br/&gt;frozen test 唯讀&quot;]
+    GRN --&gt; AUD[&quot;audit-test 軸A（機械）&lt;br/&gt;predicate 對帳／圓形依賴／mock↔evidence&quot;]
+    AUD --&gt; CRV[&quot;code-review 軸B（架構面）&lt;br/&gt;拓撲vs blast radius／evidence fidelity&quot;]
+    CRV --&gt; J[&quot;judge-review＋修正迴圈&lt;br/&gt;（現行機制）&quot;]
+    classDef ok fill:#10b981,color:#000000
+    classDef warn fill:#f59e0b,color:#000000
+    classDef bad fill:#ef4444,color:#ffffff
+    class EP,J ok
+    class CHL,AUD,CRV warn
+    class RED,G3,GRN,AM bad&lt;/pre&gt;&lt;/body&gt;&lt;/html&gt;" title="v3.1 管線簡版" style="height:480px;min-height:480px"></iframe>
+  </div>
+  <h3>agent 分工原則：判斷密集 vs 機械可驗</h3>
+  <table>
+    <thead><tr><th>任務</th><th>層</th><th>理由</th></tr></thead>
+    <tbody>
+      <tr><td>EP 段落 0 全域研究（風險假設識別／可複用判斷）</td><td><b>full</b>（cr-research 升級——落檔隨卡）</td><td>淺研究「自信但薄」→EP 重造既有／漏致命假設；研究省的 token ≪ 錯 EP 的重工</td></tr>
+      <tr><td>機械子腿（逐字引用、CR 查詢執行、驗證跑測）</td><td>lite 可承接</td><td>可驗證（quotes／path:line／exit code）；作為 full 研究者的下游查詢，不獨立出研究結論</td></tr>
+      <tr><td>judge／amendment／最終驗收宣稱</td><td><b>主 session full 不可降級</b></td><td>這些在決定「什麼算正確」</td></tr>
+      <tr><td>test-gen（跨家族寫手）</td><td><b>P0 最後手段</b>（啟用條件預寫死）</td><td>oracle 凍結後翻譯者近乎不重要——AIR-70 幽靈答案反轉</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>dispatch 經濟學</b>：下一步需要的是「它自己做過的事」就 session resume；需要的是「策展最小輸入」就 fresh（獨立性任務永遠 fresh——challenge 強制 fresh）。MVP＝seeded fault-injection（注入已知壞樣，量 challenge 偵測率＋review 架構軸偵測率＋defect routing correctness，過線標準預凍結）。</div>
+  <p class="src">投影自：<a href="workflow.md">workflow.md</a>「測試契約與驗證分工」＋<a href="../reports/2026-09-11-test-contract-design.md">測試契約裁決 v3.1</a>（三輪挑戰與複驗全記錄）；全圖與路由表：<a href="../test-contract/index.html">ai-analysis/test-contract</a></p>
 </section>
 
 </main>

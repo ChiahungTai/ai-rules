@@ -13,10 +13,10 @@
 | 站 | 一句職責 | 關鍵載體 |
 | --- | --- | --- |
 | ① 想法 | 把未承諾想法留在 draft／pending 區；一旦承諾工作才由 board control plane 建立 card 與配置 id | Backlog.md draft/task、pending decisions、建卡預掃 |
-| ② 規劃 | 把 card intent 轉成可跨 session 接手的 self-contained research／spec／EP，固定 baseline、scope、已決策與驗收；task-home 報告殼的 source＝shell-ready md＋meta（殼是 deterministic viewport 非手寫產物——codegen 契約見 [illustrate-html-mode](../../skills/_common/illustrate-html-mode.md)，AIR-73） | card `desc`、task home、`research.md`、`spec.md`、`ep.md`、shell-ready md |
+| ② 規劃 | 把 card intent 轉成可跨 session 接手的 self-contained research／spec／EP，固定 baseline、scope、已決策與驗收；task-home 報告殼的 source＝shell-ready md＋meta（殼是 deterministic viewport 非手寫產物——codegen 契約見 [illustrate-html-mode](../../skills/_common/illustrate-html-mode.md)，AIR-73）；**top-level 測試規劃段在實作段落前凍結 TC（v3.1 定案，落檔隨測試契約卡）** | card `desc`、task home、`research.md`、`spec.md`、`ep.md`、shell-ready md、測試規劃段 |
 | ③ 開工 | 為已存在 card 建立「由哪個 branch/WT 執行、起點是哪個 baseline、session cwd 在哪」的機械身份 | `wt-open`、card `In Progress`/refs、persistent card WT、freshness check |
 | ④ 實作 | 讓 code/rules/skills/docs/EP 寫入在該工作 execution plane 內完成，避免共享 checkout 的 branch/cwd 被其他 session 改變 | card WT；免卡小修走 ephemeral WT fast-path；implement/TDD |
-| ⑤ 驗證 | 讓 claim 對上足夠獨立的 evidence；negative claim 不以單次文字搜尋冒充行為證明 | tests、integration/demo/POC、code-review、acceptance evidence；⚠️ [instruction-testing](../../skills/instruction-testing/SKILL.md) 承載 instruction artifact 行為驗證方法，pilot 尚未實跑 |
+| ⑤ 驗證 | 讓 claim 對上足夠獨立的 evidence；negative claim 不以單次文字搜尋冒充行為證明；**測試驗證分工＝契約消費（frozen TC）＋provenance 三栓＋軸A 機械審計／軸B 架構審查（v3.1 定案，落檔隨測試契約卡）** | tests、integration/demo/POC、code-review、acceptance evidence、TC＋audit/review 雙軸；⚠️ [instruction-testing](../../skills/instruction-testing/SKILL.md) 承載 instruction artifact 行為驗證方法，pilot 尚未實跑 |
 | ⑥ 收斂 | 把工作 review、修正並依既有 rebase→ff-only 規則吸回 owning line，再完成 session/card 收尾；Report Shell refresh＝更新 shell-ready md→`build_shell.py` 投影→gate 自驗（AIR-73 落地前為 LLM 手填殼 legacy） | post-build、working branch、`wt-close`、finalization、`build_shell.py` |
 | ⑦ 沉澱 | 將完成能力、設計理由與真正值得跨 session 留存的事實放回正確 carrier；memory 不成為規範副本 | AGENTS/Capabilities、architecture/blueprint、memory pointer/facts |
 | ⑧ 運維 | 讓 hooks、排程、備份、清理與 fresh-machine recovery 可重建，避免 machine-local state 只存在某台機器或某次 session | hooks、schedule registry、launchd、memory bundle、onboarding runbook、code-reality |
@@ -404,6 +404,25 @@ WT 基建落地後，可以移除「因共享單一 checkout，所以同 repo ca
 已取消的替代案（裁決記錄見 report §6）：:6421 擴 route 到 repo 根、route 註冊 carrier 中立化、新專案 viewport runbook——「路徑即可點開」成立後均無必要。
 
 待落檔（併既有「四小項」批）：session 交付慣例句、全域 `workbench.browser.autoReloadOnFileChange`、kanban refs 命名空間句。
+
+## 測試契約與驗證分工 — ⚠️ 架構定案（三方裁決 v3.1），六檔落檔待建卡
+
+> 真相源：[測試契約×驗證分工裁決](../reports/2026-09-11-test-contract-design.md)（user 三輪挑戰＋muse/codex 三輪 session-resume 複驗全記錄；人類 viewport＝ai-analysis/test-contract）。本節是規範投影；**設計已定案≠已落地**——六檔 skill 未改前，runtime 仍走現行流程。
+
+**設計原則**：family separation 放在 **judgment boundary**，不放在 every authorship boundary——獨立性買在「審規格」（challenge）與「審結構」（review），不買在「把 oracle 抄成 pytest」（oracle 凍結後翻譯者近乎不重要）。
+
+分工形態：
+
+- **契約層（② 規劃站）**：EP top-level「測試規劃」段放在**實作段落之前**（文件順序＝時間順序）——TC（claim／Given/When／oracle〔predicate-ID 拆分〕／oracle_source／evidence class／uncovered）在任何人寫實作碼前凍結。oracle 獨立性由「EP 作者↔實作者本來就跨家族」兌現。
+- **挑戰層（高風險＋P0 強制）**：pre-RED challenge＝跨家族 advisory、fresh context、**blind derive→reveal**（先自行推 oracle 再比對，防錨定）＋completeness（抓漏場景）；必產 falsifiable 探針。oracle 錯→EP amendment（authority 四分：user intent→人類）。
+- **實作層（same-writer）**：實作家族（單一 model、context 連續）照凍結 TC 寫 RED→GREEN→REFACTOR；**provenance 三栓**——RED receipt 落檔存證（非中途 commit）／gate 過後 contract-test digest 凍結／基線跑法（baseline 上必須紅）。撞牆走 **mutation authority gate**（想改哪側 truth→有沒有 authority；改 TC oracle 必經 amendment，「實作現況」永遠不是證據）。
+- **審計層（軸A 機械）**：audit-test——TC↔test predicate 對帳／mock↔evidence class／oracle 圓形依賴／receipt＋digest 驗證／基線跑法／fixture provenance／路徑覆蓋反查。
+- **審查層（軸B 架構面）**：/code-review 跨 session dual-context 加一軸——整體測試邏輯 vs diff 結構（拓撲 vs blast radius／層級平衡／符號≠路徑／evidence fidelity／shared dependency／耦合面）；翻譯忠實度明寫不歸它。
+- **routing**：`test-gen`＝**P0 最後手段**（啟用條件預寫死：MVP 證明防線擋不住 fixture fidelity 級穿透才啟用）——AIR-70 幽靈角色答案反轉。
+
+**agent 分工原則（判斷密集 vs 機械可驗）**：探索／研究不派 lite——EP 段落 0 全域研究（可複用盤點＋**風險假設識別**）是判斷密集位，`cr-research` 升 **full**；淺研究「自信但薄」→EP 重造既有／漏致命假設，研究省的 token 遠小於錯 EP 的重工。機械子腿（逐字引用、CR 查詢執行）仍可 flash 承接——作為 full 研究者的下游查詢，不獨立出研究結論。
+
+**MVP（卡內第一步）**：seeded fault-injection（Lane A oracle mutant 考 challenge／Lane B 六類架構 mutant 考 audit＋review），量 recall＋誤報＋attribution accuracy＋defect routing correctness，過線標準預凍結。修改面六檔＋研究鏈清單見 report §5。
 
 ## 待建基建
 

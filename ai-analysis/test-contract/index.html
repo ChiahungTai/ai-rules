@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+/* FOUC 防護：stylesheet 前恢復 persisted 主題（auto＝不設 attribute 跟系統） */
+(function(){try{var t=localStorage.getItem('shell-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();
+</script>
+<!--
+  projection identity
+  主題：測試契約×家族分離——三方諮詢（GLM 主 session＋muse＋codex 兩輪）最終結論
+  產出：2026-09-11 陪審 session（Viewport 架構弧同 session 延伸）
+  template reference：skills/_common/illustrate-report-shell.html（殼唯一源：CSS/sidebar/hash/focus contract 沿用；骨架取自 blueprint/index.html 同源殼）
+  本頁是人類 viewport（結論投影）；規範權威在對話裁決與後續卡片/skill 落檔，本頁不建立第二套規則
+  類型：決策 viewport（committed——ai-analysis/test-contract/，與裁決 report 同域）
+-->
+<title>測試契約×家族分離——最終結論：流程與修改清單</title>
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:light-dark(#f6f8fa,#0d1117); --panel:light-dark(#ffffff,#161b22); --panel2:light-dark(#eff2f5,#1c2129); --border:light-dark(#d0d7de,#30363d);
+    --fg:light-dark(#1f2328,#e6edf3); --muted:light-dark(#656d76,#8b949e); --accent:light-dark(#0969da,#58a6ff); --green:light-dark(#1a7f37,#3fb950);
+    --amber:light-dark(#9a6700,#d29922); --rose:light-dark(#cf222e,#f85149); --violet:light-dark(#8250df,#bc8cff);
+    --hover:light-dark(#eaeef2,#1f242c); --success-bg:light-dark(#dafbe1,#1f6f3c33); --success-border:light-dark(#2da44e,#2ea04366);
+    --note-bg:light-dark(#fff3cd,#2d220066); --code-bg:light-dark(#eef1f4,#1b222c);
+    --scrim:rgba(0,0,0,.6);
+  }
+  html[data-theme="light"]{color-scheme:light}
+  html[data-theme="dark"]{color-scheme:dark}
+  .brand-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .theme-btn{background:var(--panel2);border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:12px;padding:2px 10px;cursor:pointer}
+  .theme-btn:hover{color:var(--fg);border-color:var(--accent)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--fg);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;display:flex}
+  nav#sidebar{width:264px;min-width:264px;background:var(--panel);border-right:1px solid var(--border);padding:20px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden;transition:width .18s ease,min-width .18s ease,padding .18s ease}
+  nav#sidebar .brand{padding:0 20px 16px;border-bottom:1px solid var(--border);white-space:normal}
+  nav#sidebar .brand .badge{display:inline-block;border-radius:12px;padding:2px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+  nav#sidebar .brand .badge.plan{background:var(--success-bg);border:1px solid var(--success-border);color:var(--green)}
+  nav#sidebar .brand h1{font-size:15.5px;margin-top:8px;line-height:1.45}
+  nav#sidebar .brand .meta{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.7;font-family:ui-monospace,Menlo,monospace}
+  nav#sidebar ul{list-style:none;padding:10px 0;flex:1}
+  nav#sidebar li a{display:flex;align-items:center;gap:10px;padding:9px 20px;color:var(--muted);text-decoration:none;font-size:13.5px;border-left:2px solid transparent;white-space:nowrap}
+  nav#sidebar li a .num{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--fg);background:var(--panel2);border:1px solid var(--border);border-radius:5px;padding:1px 6px;min-width:26px;text-align:center}
+  nav#sidebar li a:hover{color:var(--fg);background:var(--hover)}
+  nav#sidebar li a.active{color:var(--fg);background:var(--hover);border-left-color:var(--accent)}
+  nav#sidebar .backlinks{padding:14px 20px;border-top:1px solid var(--border);font-size:12px;line-height:2;white-space:nowrap}
+  nav#sidebar .backlinks a{color:var(--accent);text-decoration:none}
+  body.sidebar-collapsed nav#sidebar{width:0;min-width:0;padding-left:0;padding-right:0;border-right:0}
+  body.sidebar-collapsed main{max-width:none}
+  main{flex:1;min-width:0;max-width:1480px;padding:26px 34px;overflow-y:auto}
+  section{display:none}
+  section.active{display:block}
+  section h2{font-size:20px;margin-bottom:4px}
+  section .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+  section h3{font-size:14.5px;color:var(--accent);margin:18px 0 8px}
+  p,li{font-size:14px;line-height:1.75;color:var(--fg)}
+  ul.dots{list-style:none;margin:6px 0}
+  ul.dots li{padding-left:18px;position:relative;margin:4px 0}
+  ul.dots li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .cardrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:14px 0}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+  .card .t{font-size:13px;font-weight:700;margin-bottom:6px}
+  .card .t.c{color:var(--accent)}.card .t.r{color:var(--rose)}.card .t.g{color:var(--green)}.card .t.v{color:var(--violet)}.card .t.a{color:var(--amber)}
+  .card p{font-size:12.5px;color:var(--muted);line-height:1.65}
+  .chip{display:inline-block;font-size:10.5px;border-radius:9px;padding:1px 8px;margin-left:8px;vertical-align:middle;white-space:nowrap;font-weight:600}
+  .chip.bad{color:var(--rose);border:1px solid #f8514966;background:#f8514918}
+  .chip.warn{color:var(--amber);border:1px solid #d292266;background:#2d220066}
+  .chip.good{color:var(--green);border:1px solid #2ea04366;background:#1f6f3c33}
+  .frame-wrap{margin-top:14px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--panel);position:relative}
+  .frame-wrap .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+  .frame-wrap .bar{cursor:pointer}
+  .frame-wrap .bar .zoom-hint{margin-left:auto;font-size:11px;color:var(--accent);white-space:nowrap}
+  body.has-zoom::after{content:"";position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:55}
+  .frame-wrap.zoomed{position:fixed;inset:20px;z-index:60;overflow:auto;margin-top:0}
+  .frame-wrap.zoomed iframe{min-height:0;max-height:calc(100vh - 140px)}
+  .frame-wrap .zoom-toolbar{display:none;gap:8px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--border);background:var(--panel2);font-size:12px;color:var(--muted)}
+  .frame-wrap.zoomed .zoom-toolbar{display:flex;position:sticky;top:0;left:0;z-index:2;width:100%}
+  .zoom-toolbar button{background:var(--panel);color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:2px 10px;cursor:pointer;font-size:12px}
+  .zoom-toolbar button:hover{border-color:var(--accent)}
+  .zoom-toolbar input[type=range]{accent-color:var(--accent);width:160px}
+  .zoom-toolbar .zoom-label{min-width:44px;text-align:right;font-family:ui-monospace,Menlo,monospace}
+  .frame-wrap .pan-layer{display:none}
+  .frame-wrap.zoomed{cursor:grab}
+  .frame-wrap.zoomed .pan-layer{display:block;position:absolute;inset:0;z-index:1;cursor:grab;touch-action:none}
+  .frame-wrap.zoomed.panning,.frame-wrap.zoomed.panning .pan-layer{cursor:grabbing}
+  .frame-wrap.zoomed .bar{position:sticky;left:0;z-index:2;background:var(--panel)}
+  .frame-wrap .frame-body{padding:16px 18px}
+  iframe{width:100%;border:0;display:block;background:var(--panel);min-height:120px}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--border);padding:7px 11px;text-align:left;vertical-align:top;line-height:1.6}
+  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px}
+  td code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);background:#1b222c;border-radius:4px;padding:1px 5px}
+  .note{border-left:3px solid var(--amber);background:#2d220066;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;line-height:1.7;margin:12px 0}
+  .src{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;line-height:1.9}
+  .src a{color:var(--accent);text-decoration:none}
+  .collapse-tab{position:fixed;top:50%;z-index:30;width:26px;height:64px;padding:0;cursor:pointer;background:var(--panel2);border:1px solid var(--border);color:var(--muted);font-size:13px;line-height:1;border-radius:0 8px 8px 0}
+  .collapse-tab:hover{color:var(--fg);border-color:var(--accent)}
+  #collapse-btn{left:264px;transform:translateY(-50%)}
+  body.sidebar-collapsed #collapse-btn{display:none}
+  #expand-btn{left:0;top:20px;transform:none;border-radius:0 8px 8px 0;display:none}
+  body.sidebar-collapsed #expand-btn{display:block}
+</style>
+</head>
+<body>
+<button type="button" id="expand-btn" class="collapse-tab" aria-expanded="false" aria-controls="sidebar" aria-label="展開章節導覽" onclick="return setCollapsed(false,true)">›</button>
+<nav id="sidebar" aria-label="章節導覽">
+  <div class="brand">
+    <div class="brand-row">
+      <span class="badge plan">📋 諮詢定案</span>
+      <button class="theme-btn" id="theme-btn" type="button" title="切換淺色／深色（記住選擇）">主题</button>
+    </div>
+    <h1>測試契約×家族分離——最終結論：流程與修改清單</h1>
+    <div class="meta">ai-analysis/test-contract/<br>三方：GLM 主 session＋muse＋codex（兩輪）</div>
+  </div>
+  <ul>
+    <li><a href="#s1" onclick="return go('s1',this)"><span class="num">01</span>一句話結論</a></li>
+    <li><a href="#s2" onclick="return go('s2',this)"><span class="num">02</span>核心流程</a></li>
+    <li><a href="#s3" onclick="return go('s3',this)"><span class="num">03</span>階段×model 路由表</a></li>
+    <li><a href="#s4" onclick="return go('s4',this)"><span class="num">04</span>裁定與成本防線</a></li>
+    <li><a href="#s5" onclick="return go('s5',this)"><span class="num">05</span>修改清單與 MVP</a></li>
+    <li><a href="#s6" onclick="return go('s6',this)"><span class="num">06</span>來源與未定案</a></li>
+  </ul>
+  <div class="backlinks">
+    <a href="http://127.0.0.1:6420">← backlog board</a><br>
+    諮詢全文：.agent-tmp/test-*-consult.md<br>
+    （7 天清理區——落卡時固化）
+  </div>
+</nav>
+<button type="button" id="collapse-btn" class="collapse-tab" aria-expanded="true" aria-controls="sidebar" aria-label="收合章節導覽" onclick="return setCollapsed(true,true)">‹</button>
+<main>
+
+<section id="s1">
+  <h2>一句話結論</h2>
+  <div class="sub">user 原始問題：「不同家族寫實作跟測試」vs「EP 先寫測試規劃」——三方收斂：兩者互補，且嚴格分先後。</div>
+  <div class="cardrow">
+    <div class="card">
+      <div class="t c">第一層：EP 測試契約（先做、全量）</div>
+      <p>top-level「測試規劃」段放在<b>實作段落前面</b>——TC（claim／Given/When／oracle／oracle_source／evidence class）在任何人寫實作碼之前凍結。oracle 獨立性由「EP 作者（GLM）↔ 實作者（Muse）本來就跨家族」兌現。</p>
+    </div>
+    <div class="card">
+      <div class="t v">第二層：判讀邊界獨立（高風險段）</div>
+      <p>兩道便宜防線：<b>pre-RED challenge</b>（跨家族 blind derive 審 oracle＋抓漏場景）＋ <b>code-review 架構軸</b>（整體測試邏輯 vs diff 結構）。same-writer RED 的風險改由「凍結 oracle＋RED provenance＋digest 凍結＋架構審查」管理。</p>
+    </div>
+    <div class="card">
+      <div class="t g">設計原則（codex r3 定調）</div>
+      <p><b>Family separation 放在 judgment boundary，不放在 every authorship boundary</b>——獨立性買在「審規格」（challenge）與「審結構」（review），不買在「把 oracle 抄成 pytest」（翻譯≈機械，誰翻都一樣）。</p>
+    </div>
+  </div>
+  <div class="note"><b>第三家族寫手＝P0 最後手段</b>（非高風險預設）：啟用條件預寫死——MVP fault-injection 證明 challenge＋review 擋不住 fixture fidelity 級穿透才啟用。原本「Codex 寫 RED」的三家族方案在 r3 被兩家共同降階：oracle 凍結後翻譯者是谁近乎不重要。</div>
+  <p class="src">決策鏈：user 提案（家族分離 vs EP 測試規劃段）→ 三方初輪（契約先/分離後）→ user 澄清（top-level、實作前）→ 融合版＋implement 拆段追問 → 本頁定案。</p>
+</section>
+
+<section id="s2">
+  <h2>核心流程</h2>
+  <div class="sub">高風險段的完整 TDD 管線（低風險段＝左上分支，維持現行 same-writer TDD 不變）。</div>
+  <div class="frame-wrap">
+    <div class="bar"><span>v3.1 定案管線：契約凍結 → challenge → same-writer RED（三 gate＋digest 凍結）→ GREEN → 機械審計 → 架構審查 → judge</span></div>
+    <iframe srcdoc="&lt;!DOCTYPE html&gt;&lt;html lang=&quot;zh-Hant&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;UTF-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;&lt;script src=&quot;https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js&quot;&gt;&lt;/script&gt;&lt;script&gt;mermaid.initialize({startOnLoad:false})&lt;/script&gt;&lt;/head&gt;&lt;body&gt;&lt;pre class=&quot;mermaid&quot;&gt;flowchart TB
+    EP[&quot;EP·GLM full&lt;br/&gt;凍結 TC（在實作段落前面）&quot;]
+    EP --&gt; CH{&quot;boolean classifier&lt;br/&gt;高風險／P0 invariant？&quot;}
+    CH -- 否 --&gt; TDD[&quot;same-writer TDD&lt;br/&gt;照凍結 TC 寫（全段預設）&quot;]
+    CH -- 是 --&gt; CHL[&quot;跨家族 advisory·fresh context&lt;br/&gt;blind oracle derivation→reveal 比對&lt;br/&gt;＋completeness（漏了哪條場景）&quot;]
+    CHL -- &quot;oracle 錯／漏&quot; --&gt; AMD[&quot;judge／人類裁定→EP amendment&lt;br/&gt;（實作前最便宜）&quot;]
+    CHL -- 過 --&gt; RED
+    AMD --&gt; RED
+    TDD --&gt; RED[&quot;實作家族·單一 model·context 連續&lt;br/&gt;照凍結 TC 寫 RED&quot;]
+    RED --&gt; G3[&quot;RED 三 gate（當場驗）：&lt;br/&gt;STRUCT_OK／SEM_OK／BEFORE_GREEN&lt;br/&gt;＋contract-test digest 凍結&quot;]
+    G3 -- &quot;紅得不對&quot; --&gt; RED
+    G3 -- 過 --&gt; MAG{&quot;GREEN 撞牆：&lt;br/&gt;想改哪側 truth？&lt;br/&gt;（mutation authority gate）&quot;}
+    MAG -- &quot;production code&quot; --&gt; GRN[&quot;GREEN→REFACTOR&lt;br/&gt;（frozen contract test 唯讀）&quot;]
+    MAG -- &quot;test 側&quot; --&gt; FT[&quot;先證明 test≠TC&lt;br/&gt;／fix-test Type D&quot;]
+    MAG -- &quot;TC oracle&quot; --&gt; L4[&quot;停 GREEN→judge＋amendment&lt;br/&gt;（實作現況非證據）&quot;]
+    FT --&gt; GRN
+    L4 --&gt; RED
+    GRN --&gt; AUD[&quot;audit-test（同 session·機械）：&lt;br/&gt;predicate 對帳／mock↔evidence class&lt;br/&gt;oracle 圓形依賴／RED receipt＋digest／基線跑法&quot;]
+    AUD --&gt; CRV[&quot;code-review（跨 session dual-context）：&lt;br/&gt;軸B——拓撲 vs blast radius／層級平衡／符號≠路徑&lt;br/&gt;evidence fidelity／shared dependency／耦合面&quot;]
+    CRV --&gt; JUDGE[&quot;judge-review＋修正迴圈&lt;br/&gt;（現行機制）&quot;]
+    classDef glmf fill:#8250df,color:#ffffff
+    classDef lite fill:#0969da,color:#ffffff
+    classDef adv fill:#10b981,color:#000000
+    classDef muse fill:#f59e0b,color:#000000
+    class EP,JUDGE glmf
+    class AUD lite
+    class CHL,AMD adv
+    class RED,GRN,FT muse&lt;/pre&gt;&lt;/body&gt;&lt;/html&gt;" title="v3.1 定案管線" style="height:720px;min-height:720px"></iframe>
+  </div>
+  <ul class="dots">
+    <li><b>五個絕不外派點</b>（主 session full）：階段 0 風險分級、canonical TC 語義變更、RED 語義 gate、contract-gap 裁定、完成報告最終驗收宣稱——「這些不是執行工作，是在決定什麼算正確」。</li>
+    <li><b>RED provenance 三栓</b>（r3 共識，防 test-after 劇場化與 silent mutation）：① <b>RED receipt</b>（TC-ID＋production baseline 身份＋contract-test digest＋failing predicate——<b>落檔存證非中途 git commit</b>，implement 禁中途 commit 不變）；② RED 過 gate 後 <b>contract-test digest 凍結</b>——GREEN/REFACTOR 不得靜默改 frozen test，要改必經 mutation authority gate；③ <b>基線跑法</b>——新測試跑在 pre-change baseline 上必須紅（在 baseline 綠＝vacuous，直接退回）。</li>
+    <li><b>「實作現況」禁作契約證據</b>：amendment 只接受獨立源（domain invariant／reference truth／differential／metamorphic／real fixture 行為）；fix-test Type B/E（涉 expected 語義）＝TC escalation signal，不直接改測試。</li>
+  </ul>
+  <div class="note"><b>讀圖須知</b>：圖的<b>不變項是角色結構</b>——EP/TC 作者、challenge（advisory）、實作者（單一 model）、機械審計、架構審查、judge。節點上標的家族是<b>現值舉例</b>；家族→model 解析<b>單一源＝model-routing</b>，workflow 檔只寫角色/profile 詞彙、不綁家族。</div>
+  <p class="src">節點色＝現值舉例（紫=GLM full／藍=GLM lite 機械／綠=跨家族 advisory／琥珀=實作家族）。低風險分支照樣走凍結 TC 的 same-writer TDD——分離只買在判讀邊界。</p>
+</section>
+
+<section id="s3">
+  <h2>/implement 階段×model 路由表</h2>
+  <div class="sub">muse 與 codex 路由表合併（一致處直接收斂；分歧見 04 節裁定）。原則：判斷權重留主 session；生成但受約束才外派；機械執行走 lite；judge 永不降級。</div>
+  <table>
+    <thead><tr><th>步驟</th><th>路由</th><th>理由</th></tr></thead>
+    <tbody>
+      <tr><td>階段 0 EP 快檢（風險分級／整合器標記）</td><td><b>主 session full</b></td><td>誤判向下游傳播整條驗證鏈；治理判斷非生成</td></tr>
+      <tr><td>階段 1 baseline／kanban／orchestrate</td><td><b>主 session</b></td><td>對外狀態擁有權不可代理</td></tr>
+      <tr><td>階段 1 LSP 查證／fixture 盤點／<b>Test Context Pack 生成</b></td><td>主 session 或 in-harness lite</td><td>機械蒐證；Pack 供所有 test writer 重用（省重掃 repo）</td></tr>
+      <tr><td>階段 2 RED 寫作（全段——v3.1 已不分高低風險派不同寫手）</td><td><b>實作家族自己照凍結 TC 寫</b>（test-first；獨立性由「oracle 是 EP 作者（跨家族）寫的」保證）</td><td>翻譯≈機械，誰翻不重要；context 連續＝cache 友善</td></tr>
+      <tr><td>RED 三 gate（STRUCT_OK／SEM_OK／BEFORE_GREEN）＋digest 凍結</td><td>STRUCT/SEM <b>機械下沉</b>（lite/audit-test 可驗）＋主 session 抽讀 flagged case；BEFORE_GREEN＝<b>receipt 存在性檢查</b></td><td>writer=implementer 後自證無效——改由機械＋主 session 驗；當場驗非事後考古</td></tr>
+      <tr><td>pre-RED challenge（高風險＋P0 強制）</td><td><b>跨家族 advisory·fresh context</b>（家族≠EP 作者家族；blind derive→reveal＋completeness）</td><td>oracle 級錯誤唯一便宜攔截點；錨定防護靠 blind derive</td></tr>
+      <tr><td>階段 2 GREEN＋REFACTOR</td><td><b>實作家族（implement profile）</b></td><td>frozen contract test 唯讀（digest 凍結）；white-box tests 同作者自由新增</td></tr>
+      <tr><td>階段 3 全量驗證執行＋收 log</td><td>in-harness <b>lite</b></td><td>deterministic evidence collection；缺測試退階段 2 不現場補</td></tr>
+      <tr><td>階段 4 三視角 review agents</td><td>lite（code-reviewer 預設）；高保護面升 full</td><td>判讀既有碼已實證可行</td></tr>
+      <tr><td>階段 4 judge-review／collision 分診</td><td><b>主 session full 不可降級</b></td><td>裁決層；外派＝球員兼裁判換球衣</td></tr>
+      <tr><td>階段 5 audit-test（軸A 機械對帳——v3.1 大幅擴充）</td><td>lite（read-only）＋主 session 判讀</td><td>TC↔test predicate 對帳／mock↔evidence class／<b>oracle 圓形依賴掃描</b>／RED receipt＋digest 驗證／<b>基線跑法</b>／路徑覆蓋反查</td></tr>
+      <tr><td>post-build /code-review（<b>軸B 測試架構面</b>——v3.1 新維度）</td><td><b>跨 session dual-context（現行機制）</b>，可跨家族第二意見</td><td>軸B 六項：拓撲 vs blast radius／層級平衡／符號≠路徑／<b>evidence fidelity</b>／<b>shared dependency</b>／耦合面；翻譯忠實度不歸它（prompt 明寫，看到只轉交 audit-test）</td></tr>
+      <tr><td>階段 5 metadata-sync／instruction 同步</td><td><b>主 session</b></td><td>治理檔單一寫入者</td></tr>
+      <tr><td>階段 6 完成報告（宣稱 vs 實際）</td><td><b>主 session full 絕不外派</b></td><td>第一手證據責任；外包即自報不可信</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="s4">
+  <h2>裁定與成本防線</h2>
+  <div class="sub">r3 複驗的共識補強（v3→v3.1 差集——兩家同向收斂），加上 user cache 顧慮轉化的成本防線。</div>
+  <h3>r3 共識補強（v3→v3.1 差集——兩家同向）</h3>
+  <table>
+    <thead><tr><th>補強</th><th>muse r3</th><th>codex r3</th><th>收斂</th></tr></thead>
+    <tbody>
+      <tr><td><b>RED provenance</b></td><td>RED commit 排序＋基線跑法</td><td>RED receipt（baseline 身份＋test digest＋failing pytest receipt）＋<b>digest 凍結</b></td><td><b>三栓</b>：receipt 落檔存證（非中途 commit——implement 禁中途 commit 不變）＋digest 凍結（GREEN 不得靜默改 frozen test）＋基線跑法（baseline 上必須紅）</td></tr>
+      <tr><td><b>fixture 寫實性</b></td><td>fixture 來源標記（replay／真DB／inline）；inline×real-boundary 強制人審</td><td>命名為 <b>Evidence fidelity</b> 軸——「測試建立的世界是否保留 TC 依賴的現實性質」；reviewer 必須開 fixture body</td><td>兩者都取：機械標記下沉 audit-test，判讀進軸B（穿透集最大宗——名稱 mock 數斷言全漂亮、semantic fidelity 已塌）</td></tr>
+      <tr><td><b>oracle 放水／圓形依賴</b></td><td>凍結式 vs 實際斷言<b>逐字 diff</b>（容忍度／Non-goal 擴張）</td><td><b>non-circularity</b>：expected 不得呼叫 production helper／同源 algorithm（tautological oracle）</td><td>都進 audit-test 機械掃——兩家各自點名的獨立穿透面</td></tr>
+      <tr><td><b>challenge 防錨定</b></td><td>必產 falsifiable 探針（空集/邊界/時間/dtype）——「看起來對」＝沒跑完；家族≠EP 作者＋fresh</td><td><b>blind derive→reveal</b>（先自行推 oracle 再比對）＋<b>completeness</b>（SM 有 A/B/C、TC 只寫 A/B 要抓 C 缺）＋amendment authority 細分（invariant 可證偽→judge；user intent→人類）</td><td>codex protocol 為殼＋muse 探針要求為驗收；authority 表照 codex 四分</td></tr>
+      <tr><td><b>四 lane 縮編</b></td><td>縮兩 lane（implementer 自修迴圈＋lane 4 amendment）</td><td><b>mutation authority gate</b>——「想改哪側 truth？有沒有 authority？」四行表；fix-test B/E＝TC escalation</td><td>codex 框架（表最薄、職能最清）；底層診斷複用 /fix-test A–E 不另建 taxonomy</td></tr>
+      <tr><td><b>MVP 設計</b></td><td>fault-injection 跑歷史碼（~3 agent call）；過線標準預凍結</td><td>Lane A/B seeded corpus＋<b>attribution accuracy</b>（防「每題都建議再確認」假 recall）＋<b>defect routing correctness</b>（各司其職非人人越權抓）</td><td>codex 實驗設計＋muse 過線標準；詳 05 節</td></tr>
+    </tbody>
+  </table>
+  <div class="note">muse 點名的穿透集根因值得單獨記住：v3 用 cache 友善換了<b>污染</b>——同 context 連寫 RED→GREEN 正是 instruction-testing 禁止同 session 連跑的原因（rationalization 污染）。這筆交易可以做，provenance 三栓就是補償。</div>
+  <h3>成本防線（cache 顧慮 → 設計內建）</h3>
+  <ul class="dots">
+    <li><b>觸發即節流</b>：classifier 命中才拆（會計總量／風控 sizing／持久化寫路徑／跨 context 接線／時間語義／公開 API／silent-corruption）——量少是設計的一部分。</li>
+    <li><b>Test Context Pack</b>：階段 1 預生成 compact 慣例包（fixture/conftest/marker/介面面/real-fake 邊界），所有 test writer 重用——省的正是重複掃 repo 的 cache miss。</li>
+    <li><b>輸入 hard cap＋session resume</b>：RED 工單輸入包寫死上限；collision 退回走 <code>--session-id</code> 續用原 context（迴圈內 cache 保住）。</li>
+    <li><b>量測入 MVP</b>：額度消耗實測為收斂訊號——稅太重則降級「只 P0 invariant 面啟用」或停在契約層。</li>
+  </ul>
+  <div class="note">成本量級（兩家共識的誠實版）：每拆一段 ≈ 多一個中小型 implementation subtask（RED 工單 0.5–1× 該段 GREEN——結構推估無實測）；昂貴的不是 pytest 幾行，是第二家族重建 testing conventions／fixture topology／public surface。<b>RED 外派永遠更貴——買的是獨立性，不是省錢。</b>真正適合外派省 token 的是機械腿（驗證執行／對帳／review evidence＝lite）。</div>
+</section>
+
+<section id="s5">
+  <h2>修改清單與 MVP</h2>
+  <div class="sub">落檔範圍＝六檔（大型跨模組弧，建卡走 execution-plan）；契約層可先行（便宜）。MVP 先手工跑一弧再動 workflow 文檔。</div>
+  <h3>修改清單（v3.1——六檔）</h3>
+  <table>
+    <thead><tr><th>#</th><th>檔</th><th>動什麼</th><th>層</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>execution-plan</code> skill</td><td>top-level「測試規劃」段規格：TC 格式（<b>含 predicate-ID 拆分</b>——SEM gate 機械對帳用）／凍結語義／amendment 附錄（authority 四分：invariant 可證偽→judge／新 evidence→judge／user intent→人類／來源矛盾→人類）＋§4 退化為自足抄本</td><td><b>契約層（先做）</b></td></tr>
+      <tr><td>2</td><td><code>implement</code> skill</td><td>兩行：<b>RED receipt</b>（TC-ID＋baseline 身份＋test digest＋failing predicate 落檔）＋<b>三 gate 當場驗</b>（STRUCT／SEM 機械＋BEFORE_GREEN=receipt 存在）＋digest 凍結——防 test-after 劇場化的唯一排序栓</td><td>provenance 層</td></tr>
+      <tr><td>3</td><td><code>code-review</code> skill</td><td><b>軸B 測試架構面</b>六項：覆蓋拓撲 vs blast radius／層級平衡／符號≠路徑／<b>evidence fidelity</b>／<b>shared failure dependency</b>／耦合面；prompt 明寫「翻譯忠實度不歸你」（看到轉交 audit-test）</td><td>review 層</td></tr>
+      <tr><td>4</td><td><code>audit-test</code> skill</td><td>軸A 機械對帳擴充：TC↔test predicate mapping／mock↔evidence class／<b>oracle 圓形依賴</b>／RED receipt＋digest 驗證／<b>基線跑法</b>／fixture provenance 標記／路徑覆蓋反查</td><td>機械層</td></tr>
+      <tr><td>5</td><td><code>fix-test</code> skill</td><td>互掛：<b>mutation authority gate</b>（想改哪側 truth→有沒有 authority）＋Type B/E（涉 expected 語義）＝TC escalation signal 不直接改測試</td><td>裁定層</td></tr>
+      <tr><td>6</td><td><code>model-routing</code> rule</td><td>test-gen role 標 <b>P0 最後手段</b>，啟用條件預寫死（MVP 證明防線擋不住 fixture fidelity 級穿透才啟用）——AIR-70 結案語意反轉：幽靈的答案不是常設角色而是「降階+條件化」</td><td>routing 層</td></tr>
+    </tbody>
+  </table>
+  <h3>MVP（seeded fault-injection，不跑 live——~3 agent call 量級）</h3>
+  <ol style="padding-left:20px;line-height:2">
+    <li>挑一段已完成的歷史高風險碼（有 frozen TC 最好；沒有補 3–5 條迷你 TC）</li>
+    <li><b>Lane A（考 challenge）</b>：4 clean＋4 oracle mutant（sign/方向、單位、邊界、漏 invariant 項）——各走 blind-derive→reveal protocol</li>
+    <li><b>Lane B（考 audit＋review）</b>：六類 test 架構 mutant（只 unit 無 integration／mock 掉 real boundary／fixture 拿掉關鍵性質／expected 吃 production helper／symbol 有 hit 但 consumer path 未走／RED 後偷改斷言）</li>
+    <li>量：<b>recall＋誤報率＋attribution accuracy</b>（不只說可疑、要指出正確 predicate）＋<b>defect routing correctness</b>（機械軸→audit、結構判斷→review、oracle→challenge，各司其職）</li>
+    <li><b>過線標準預凍結</b>（判分條件先寫死再看輸出——instruction-testing 原則）：例 challenge ≥3/4 且誤報 ≤1；review 至少多抓 1 個機械抓不到的，否則軸B 重設計</li>
+  </ol>
+  <ul class="dots">
+    <li><b>誠實邊界</b>：fault-injection 量的是「防線對已知壞樣的靈敏度」，非「對未知 oracle 錯的靈敏度」——過了 MVP 只證明防線不是擺設，不證明 production 有效。個位數樣本只判 discriminating power。</li>
+    <li><b>啟用第三家族的實證條件</b>：MVP 顯示 fixture fidelity／shared assumption／silent test mutation 仍大量穿透 → 「第三家族 RED author」升回 P0 fallback；否則不付常態成本。</li>
+  </ul>
+  <h3>AIR-70 關係</h3>
+  <div class="note">本設計仍解 `impl/test-gen` 幽靈角色——但 r3 後答案反轉：<b>test-gen 不必成為常設角色</b>（lifecycle 缺 stage 的解法＝test 的獨立性由 oracle 層＋review 層分擔），僅以「P0 最後手段＋預寫死的啟用條件」入 lifecycle 表。AIR-70 的一致性修復照舊範圍結案，本弧結論 materialize 回其一項。</div>
+</section>
+
+<section id="s6">
+  <h2>來源與未定案</h2>
+  <div class="sub">三方兩輪諮詢的證據鏈與誠實聲明——本頁是結論投影，未定案項留給 MVP 實測。</div>
+  <h3>證據鏈</h3>
+  <table>
+    <thead><tr><th>輪</th><th>參與</th><th>產出</th><th>bridge job</th></tr></thead>
+    <tbody>
+      <tr><td>初輪</td><td>muse xhigh＋codex web/high</td><td>契約先分離後；slot 形態；review→寫測試外推不成立；四 lane；MVP=契約升級</td><td>mtw29l54／mtw29l7v</td></tr>
+      <tr><td>追問（top-level 版）</td><td>codex（muse 撞額度一次）</td><td>凍結 oracle 非 §4 整段；oracle independence &gt; family independence；窄面分離</td><td>mtw2eeyp(failed)→併入下輪</td></tr>
+      <tr><td>追問（implement 拆段）</td><td>muse＋codex 各自 session resume</td><td>三家族路由表／VALID_RED／progress-based 迴圈／Test Context Pack／AIR-70 定位</td><td>mtw2l446／mtw2l46l</td></tr>
+      <tr><td><b>v3 複驗（user 兩輪挑戰後）</b></td><td>muse＋codex 同 session r3</td><td><b>兩家同向同意 v3 方向</b>——muse 六必改（穿透集＋三栓＋evidence fidelity＋放水 diff）／codex 四必改（receipt＋digest 凍結＋blind derive＋oracle 圓形依賴）→ 合成 v3.1</td><td>mtw3fpc1／mtw3fpea</td></tr>
+    </tbody>
+  </table>
+  <h3>未定案（MVP 實測後定）</h3>
+  <ul class="dots">
+    <li>第三家族 RED author 啟用與否——MVP fixture fidelity 穿透率決定（啟用條件已預寫死）</li>
+    <li>challenge 實測 recall／誤報／attribution（blind-derive protocol 是設計推論，未跑過）</li>
+    <li>RED receipt 的落地形態（任務家檔 vs `.review/` 帳本——與現行 review 帳本機制的整合點）</li>
+    <li>基線跑法的執行成本（pre-change baseline 取得：stash/checkout/worktree 形態）</li>
+  </ul>
+  <h3>誠實聲明</h3>
+  <ul class="dots">
+    <li>三方全屬 <b>A 軸靜態推理</b>（結構推論＋repo 引證），未經 pilot 實證——依 acceptance-evidence 天花板，不宣稱 production 有效。</li>
+    <li>「跨家族寫測試比 review 難」是任務結構推論＋mock/filter trap 間接證據，非本 repo 直接實證。</li>
+    <li>classifier 完備性未驗證——建議每季回看誤判修清單。</li>
+  </ul>
+  <p class="src">諮詢 prompt：.agent-tmp/test-family-separation-consult.md／test-contract-followup-muse.md／test-implement-routing-followup.md；裁決過程見本 session 對話；落卡時固化進 reports/。</p>
+</section>
+
+</main>
+<script>
+var THEME_KEY='shell-theme';
+function effectiveTheme(){
+  var o=document.documentElement.dataset.theme;
+  if(o)return o;
+  return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';
+}
+function renderFrame(f,theme,gen){
+  var doc=null,w=null;
+  try{doc=f.contentDocument;w=f.contentWindow;}catch(e){return;}
+  if(!doc)return;
+  if(!f.closest('main section.active'))return;
+  var els=doc.querySelectorAll('pre.mermaid');
+  if(!els.length)return;
+  if(!w.mermaid){setTimeout(function(){if(gen===f._renderGen)renderFrame(f,theme,gen);},150);return;}
+  if(!f._mmdSrc){f._mmdSrc=Array.prototype.map.call(els,function(e){return e.textContent;});}
+  Array.prototype.forEach.call(els,function(e,i){
+    e.removeAttribute('data-processed');
+    if(f._mmdSrc[i]!=null)e.textContent=f._mmdSrc[i];
+  });
+  try{
+    w.mermaid.initialize({startOnLoad:false,theme:theme==='dark'?'dark':'default',securityLevel:'loose'});
+    w.mermaid.run({nodes:els}).then(function(){if(gen===f._renderGen)fitFrame(f,false);}).catch(function(e){});
+  }catch(e){}
+}
+function syncFrames(){
+  var eff=effectiveTheme();
+  var override=document.documentElement.dataset.theme;
+  document.querySelectorAll('.frame-wrap iframe').forEach(function(f){
+    var doc=null;
+    try{doc=f.contentDocument;}catch(e){return;}
+    if(!doc)return;
+    if(override)doc.documentElement.style.colorScheme=override;
+    else doc.documentElement.style.removeProperty('color-scheme');
+    f._renderGen=(f._renderGen||0)+1;
+    renderFrame(f,eff,f._renderGen);
+  });
+}
+function setTheme(t){
+  if(t==='auto')delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme=t;
+  try{
+    if(t==='auto')localStorage.removeItem(THEME_KEY);
+    else localStorage.setItem(THEME_KEY,t);
+  }catch(e){}
+  syncThemeButton();
+  syncFrames();
+}
+function syncThemeButton(){
+  var b=document.getElementById('theme-btn');
+  if(!b)return;
+  var o=document.documentElement.dataset.theme;
+  b.textContent=o==='light'?'☀️ 淺色':(o==='dark'?'🌙 深色':'🖥️ 自動');
+}
+function cycleTheme(){
+  var o=document.documentElement.dataset.theme;
+  setTheme(!o?'light':(o==='light'?'dark':'auto'));
+}
+function go(id,el){
+  var section=document.getElementById(id);
+  if(!section||!section.matches('main section'))return false;
+  document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
+  section.classList.add('active');
+  document.querySelectorAll('#sidebar li a').forEach(a=>a.classList.remove('active'));
+  if(el)el.classList.add('active');
+  history.replaceState(null,'','#'+id);
+  fitVisibleFrames();
+  return false;
+}
+function fitFrame(f,zoom){
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return;}
+  if(!doc)return;
+  styleInnerDoc(f);
+  var svg=doc.querySelector('svg');
+  if(!svg)return;
+  if(zoom&&svg.viewBox&&svg.viewBox.baseVal&&svg.viewBox.baseVal.width>0){
+    f.style.width=Math.ceil(svg.viewBox.baseVal.width+32)+'px';
+    requestAnimationFrame(function(){setFrameHeight(f);});
+    return;
+  }
+  f.style.width='';
+  setFrameHeight(f);
+}
+function setFrameHeight(f){
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return;}
+  if(!doc)return;
+  var svg=doc.querySelector('svg');
+  if(!svg)return;
+  var r=svg.getBoundingClientRect();
+  if(r.height<2)return;
+  f.style.height=Math.ceil(r.height+24)+'px';
+  f.style.minHeight='0px';
+  var wrap=f.closest('.frame-wrap');
+  if(wrap&&wrap.classList.contains('zoomed')){
+    var bar=wrap.querySelector('.bar');
+    var avail=wrap.clientHeight-(bar?bar.getBoundingClientRect().height:0);
+    var fh=f.getBoundingClientRect().height;
+    f.style.marginTop=Math.max(0,Math.floor((avail-fh)/2))+'px';
+  }else{
+    f.style.marginTop='';
+  }
+}
+function fitWithRetry(f,zoom,tries,prevH){
+  tries=tries||0;
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return;}
+  var svg=doc&&doc.querySelector('svg');
+  var h=svg?svg.getBoundingClientRect().height:0;
+  if(svg&&h>=2&&Math.abs(h-(prevH||0))<1){fitFrame(f,zoom);return;}
+  if(tries<50)setTimeout(function(){fitWithRetry(f,zoom,tries+1,h);},100);
+}
+function fitVisibleFrames(){
+  document.querySelectorAll('main section.active .frame-wrap iframe').forEach(function(f){
+    var doc=null;
+    try{doc=f.contentDocument;}catch(e){}
+    var need=doc&&doc.querySelectorAll('pre.mermaid').length&&(!doc.querySelector('svg')||!f._mmdSrc);
+    if(need){f._renderGen=(f._renderGen||0)+1;renderFrame(f,effectiveTheme(),f._renderGen);}
+    else fitFrame(f,false);
+  });
+}
+function styleInnerDoc(f){
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return;}
+  if(!doc||doc.getElementById('shell-fit'))return;
+  var st=doc.createElement('style');
+  st.id='shell-fit';
+  st.textContent='html,body{margin:0;padding:10px;color-scheme:light dark;background:Canvas;}pre.mermaid{margin:0;}pre.mermaid:not([data-processed]){visibility:hidden;}';
+  (doc.head||doc.documentElement).appendChild(st);
+}
+function setZoom(w,on){
+  document.querySelectorAll('.frame-wrap.zoomed').forEach(function(o){
+    o.classList.remove('zoomed');
+    o._scale=null;
+    var f=o.querySelector('iframe');
+    if(f){f.style.marginTop='';f.style.width='';applyScale(o,'fit');}
+  });
+  document.body.classList.toggle('has-zoom',!!on);
+  if(on&&w){
+    w.classList.add('zoomed');
+    w._scale=1;
+    applyScale(w,1);
+    syncToolbar(w);
+  }
+}
+function nativeW(f){
+  if(f._nw>0)return f._nw;
+  var doc=null;
+  try{doc=f.contentDocument;}catch(e){return 0;}
+  var svg=doc&&doc.querySelector('svg');
+  var w=(svg&&svg.viewBox&&svg.viewBox.baseVal)?svg.viewBox.baseVal.width:0;
+  if(w>0)f._nw=w;
+  return w;
+}
+function applyScale(w,mode){
+  var f=w.querySelector('iframe');
+  if(!f)return;
+  if(mode==='fit'){
+    w._scale=null;
+    f.style.width='';
+    requestAnimationFrame(function(){setFrameHeight(f);});
+  }else{
+    var s=Math.min(3,Math.max(0.5,mode));
+    w._scale=s;
+    var nw=nativeW(f);
+    if(nw>0)f.style.width=Math.ceil(nw*s+32)+'px';
+    requestAnimationFrame(function(){setFrameHeight(f);});
+  }
+  syncToolbar(w);
+}
+function syncToolbar(w){
+  var tb=w.querySelector('.zoom-toolbar');
+  if(!tb)return;
+  var label=tb.querySelector('.zoom-label');
+  var slider=tb.querySelector('input[type=range]');
+  if(w._scale==null){if(label)label.textContent='適寬';if(slider)slider.value='100';}
+  else{if(label)label.textContent=Math.round(w._scale*100)+'%';if(slider)slider.value=String(Math.round(w._scale*100));}
+}
+function buildViewer(w){
+  var bar=w.querySelector('.bar');
+  var f=w.querySelector('iframe');
+  if(!bar||!f)return;
+  var layer=document.createElement('div');
+  layer.className='pan-layer';
+  w.appendChild(layer);
+  var tb=document.createElement('div');
+  tb.className='zoom-toolbar';
+  tb.innerHTML='<button type="button" data-z="out">－</button>'
+    +'<input type="range" min="50" max="300" step="10" value="100" aria-label="縮放比例">'
+    +'<button type="button" data-z="in">＋</button>'
+    +'<button type="button" data-z="one">1:1</button>'
+    +'<button type="button" data-z="fit">適寬</button>'
+    +'<span class="zoom-label">100%</span>';
+  bar.after(tb);
+  tb.addEventListener('click',function(e){
+    var b=e.target.closest('button');
+    if(!b)return;
+    var k=b.getAttribute('data-z');
+    if(k==='fit')applyScale(w,'fit');
+    else if(k==='one')applyScale(w,1);
+    else if(k==='in')applyScale(w,(w._scale||1)*1.25);
+    else if(k==='out')applyScale(w,(w._scale||1)/1.25);
+  });
+  var slider=tb.querySelector('input[type=range]');
+  slider.addEventListener('input',function(){applyScale(w,Number(slider.value)/100);});
+  layer.addEventListener('pointerdown',function(e){
+    w._pan={x:e.clientX,y:e.clientY,l:w.scrollLeft,t:w.scrollTop,moved:false};
+    w.classList.add('panning');
+    try{layer.setPointerCapture(e.pointerId);}catch(err){}
+  });
+  layer.addEventListener('pointermove',function(e){
+    if(!w._pan)return;
+    var dx=e.clientX-w._pan.x,dy=e.clientY-w._pan.y;
+    if(Math.abs(dx)+Math.abs(dy)>3)w._pan.moved=true;
+    w.scrollLeft=w._pan.l-dx;
+    w.scrollTop=w._pan.t-dy;
+  });
+  ['pointerup','pointercancel'].forEach(function(ev){
+    layer.addEventListener(ev,function(){w._pan=null;w.classList.remove('panning');});
+  });
+  layer.addEventListener('wheel',function(e){
+    e.preventDefault();
+    w.scrollLeft+=e.deltaX||e.deltaY;
+    w.scrollTop+=(e.deltaX?0:e.deltaY);
+  },{passive:false});
+}
+var SIDEBAR_KEY='illustrate-shell-sidebar-collapsed';
+function setCollapsed(c,moveFocus){
+  document.body.classList.toggle('sidebar-collapsed',!!c);
+  try{localStorage.setItem(SIDEBAR_KEY,c?'1':'0');}catch(e){}
+  var sidebar=document.getElementById('sidebar');
+  sidebar.toggleAttribute('inert',!!c);
+  if(c)sidebar.setAttribute('aria-hidden','true');else sidebar.removeAttribute('aria-hidden');
+  document.querySelectorAll('#collapse-btn,#expand-btn').forEach(function(b){
+    b.setAttribute('aria-expanded',String(!c));
+  });
+  if(moveFocus)document.getElementById(c?'expand-btn':'collapse-btn').focus();
+  return false;
+}
+(function init(){
+  var c=false;
+  try{c=localStorage.getItem(SIDEBAR_KEY)==='1';}catch(e){}
+  if(c)setCollapsed(true);
+  var h=location.hash.slice(1);
+  var candidate=h&&document.getElementById(h);
+  var target=(candidate&&candidate.matches('main section'))?h:null;
+  if(!target){
+    var framed=document.querySelector('main section .frame-wrap');
+    target=framed?framed.closest('section').id:document.querySelector('main section').id;
+  }
+  var link=document.querySelector('#sidebar li a[href="#'+target+'"]');
+  go(target,link);
+  document.querySelectorAll('.frame-wrap iframe').forEach(function(f){
+    f.addEventListener('load',function(){
+      if(!f.closest('main section.active'))return;
+      fitWithRetry(f,false);
+      try{
+        f.contentDocument.addEventListener('click',function(){
+          var w=f.closest('.frame-wrap');
+          if(w&&!w.classList.contains('zoomed'))setZoom(w,true);
+        });
+        f.contentDocument.addEventListener('keydown',function(e){
+          if(e.key==='Escape')setZoom(null,false);
+        });
+      }catch(e){}
+    });
+  });
+  fitVisibleFrames();
+  window.addEventListener('resize',fitVisibleFrames);
+  document.querySelectorAll('.frame-wrap:not(.degraded):not(.static)').forEach(function(w){
+    var bar=w.querySelector('.bar');
+    if(!bar||!w.querySelector('iframe'))return;
+    buildViewer(w);
+    var hint=document.createElement('span');
+    hint.className='zoom-hint';
+    hint.textContent='⤢ 點擊圖面或標題列放大 / ESC 還原';
+    bar.appendChild(hint);
+    bar.addEventListener('click',function(){setZoom(w,!w.classList.contains('zoomed'));});
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')setZoom(null,false);});
+})();
+(function(){
+  var b=document.getElementById('theme-btn');
+  if(b)b.addEventListener('click',cycleTheme);
+  syncThemeButton();
+  setTimeout(syncFrames,80);
+  window.addEventListener('pageshow',function(e){
+    if(e.persisted){var h=location.hash.slice(1);if(h&&document.getElementById(h))go2(h);}
+  });
+  if(window.matchMedia){
+    try{window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',function(){if(!document.documentElement.dataset.theme)syncFrames();});}catch(e){}
+  }
+})();
+</script>
+</body>
+</html>
