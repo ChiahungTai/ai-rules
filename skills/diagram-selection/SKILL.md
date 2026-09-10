@@ -1,7 +1,7 @@
 ---
 name: diagram-selection
-description: "畫圖前選載體的判準與跨載體共性慣例——mermaid／HTML 塊圖／archify／表格／domain 渲染器。觸發詞：選圖、畫圖工具、圖表選型、何時用 archify、mermaid vs archify、載體選擇、report shell 補圖、換形態、vision 判讀契約、圖表渲染管線。判準四問（邊有無通道／交錯度／是否圖論問題／成本軸）＋vision 三段式契約＋渲染/判讀分離。"
-when_to_use: "任何要畫圖的時刻——/illustrate 選輸出模式、EP/殼規劃期圖型分派、report shell 補圖、vision 批量判讀派發前。archify 是最後手段（user 裁示），選型預設 mermaid／HTML 塊。"
+description: "畫圖前選載體的判準與跨載體共性慣例——mermaid／HTML 塊圖／表格／domain 渲染器。觸發詞：選圖、畫圖工具、圖表選型、載體選擇、report shell 補圖、換形態、vision 判讀契約、圖表渲染管線。判準四問（邊有無通道／交錯度／是否圖論問題／成本軸）＋vision 三段式契約＋渲染/判讀分離。"
+when_to_use: "任何要畫圖的時刻——/illustrate 選輸出模式、EP/殼規劃期圖型分派、report shell 補圖、vision 批量判讀派發前。選型預設 mermaid／HTML 塊（舊互動圖渲染產線已退役，AIR-74）。"
 ---
 
 # Diagram Selection — 畫圖載體選型與產線共性
@@ -10,10 +10,10 @@ when_to_use: "任何要畫圖的時刻——/illustrate 選輸出模式、EP/殼
 
 ## 判準四問（順序回答）
 
-1. **邊有沒有結構化通道？** 時間軸（sequence）、線性管線（flowchart LR）、狀態轉移（stateDiagram）、層次/泳道柵格（layer/lanes）是天然通道——邊沿通道走零交錯。有通道 → mermaid 一次可成（層次柵格通道只有 archify 結構容器提供——互動/規模需要時才走，見下「最後手段」段）。
+1. **邊有沒有結構化通道？** 時間軸（sequence）、線性管線（flowchart LR）、狀態轉移（stateDiagram）、層次/泳道柵格（HTML 塊 grid/layer）是天然通道——邊沿通道走零交錯。有通道 → mermaid 一次可成（層次柵格通道由 HTML 塊承載）。
 2. **交錯度多高？** 自由 node-link（邊要自己找路、交錯不可避免）是 auto-layout 死穴——user 判決錨：「如果圖的物件線條要交錯太複雜，不好用」。決策流程的**分支匯流是臨界**（分支少 mermaid 勉強、再多換載體）。
 3. **是不是圖論問題？** 層次對照、前後比較、分類學——內容本質沒有 edge routing 需求 → **HTML 塊（div/flex/grid）或表格**，不是圖的東西別硬畫圖。
-4. **成本軸**：mermaid 宣告式 1 輪；archify LLM 產線高一至兩個數量級（~10 輪量級/圖、單圖十分鐘級、時間絕大多數耗在 LLM 生成——鑑識錨：AIR-30 任務弧材料）；domain 資料圖機械渲染秒級。小圖的資訊密度撐不起 LLM 產線成本。
+4. **成本軸**：mermaid 宣告式 1 輪；HTML 塊零渲染管線；domain 資料圖機械渲染秒級。小圖的資訊密度撐不起額外渲染管線成本。
 
 ## 載體對照（實證版）
 
@@ -26,24 +26,19 @@ when_to_use: "任何要畫圖的時刻——/illustrate 選輸出模式、EP/殼
 | mermaid `flowchart TB` 自由 | 小型組件圖 | ≤8 節點勉強（永遠殘留小 crossing）；畫前先問能否換形態；~3 輪 |
 | **HTML 塊圖**（殼內 div/flex/grid） | 層次架構/多分支決策/前後對照 | 零渲染管線、殼原生一體；「不是圖論問題」的結構首選；色彩語義可承載（如 rose=痛點/green=改善） |
 | **表格** | 分類學/型別對照 | class 圖第一層答案：型別｜職責｜依賴比繼承圖好讀好維護 |
-| **archify** | 見下「最後手段」段 | 無通道大圖＋互動導航才值回成本 |
 | **domain 渲染器**（如 mosaic kchart） | 真實資料綁定圖（K 棒/行情） | 機械渲染（秒級、確定性、與 token 脫鉤）＋LLM 只在判讀端——複用單位是「圖形契約」lib＋領域薄殼，不是成品圖 |
 | **刪邊/降文字記載** | 交錯度超標的取捨 | 第三選項（不是只有換工具/硬畫二選一）——取捨顯式記錄在圖備註/卡，事實不丟 |
 
-**class 圖兩層判準**：先問是不是圖論問題（型別對照→表格）；真是繼承網且需要圖→archify（mermaid classDiagram 實證難用——多向交錯無通道可救）。
+**class 圖兩層判準**：先問是不是圖論問題（型別對照→表格）；真是繼承網也優先表格＋刪邊記載（mermaid classDiagram 實證難用——多向交錯無通道可救）。
 
 ## 換形態設計招（比換工具有效）
 
 1. **組件圖 → sequence**：多數「組件關係」真實問題是「執行時誰呼叫誰」＝時序，畫成 sequence 立刻有通道
-2. **自由 flowchart → 分層**：節點按依賴方向分 layer/subgraph——archify architecture 的本質
+2. **自由 flowchart → 分層**：節點按依賴方向分 layer/subgraph（HTML 塊 grid）——分層架構圖的本質
 3. **class 圖 → 表格**：繼承/組合列欄位
 4. **低價值邊先砍**：backward/交叉邊移除、語義沉到 sublabel 或 cards，比硬繞 via 便宜
 
-## archify 使用前提（最後手段——user 裁示「非必要不用」）
-
-只有命中**獨有價值**才上：①互動導航（pan/zoom/search/focus、節點護照、點擊回源）②大規模依賴網 ③無通道大圖需要防交錯結構容器（layer/lanes 柵格）＋validate 佈局 gate。命中 → 走 [illustrate-html-mode](../_common/illustrate-html-mode.md) 委派產線（含止損分層與輪數 guard）；未命中 → 上面對照表選輕載體。**規律型圖硬用 archify＝浪費 validate 迴圈**（AIR-29 實證）。
-
-## 跨載體共性慣例池（三弧同構：archify 線/kchart 線/事件分析線各自獨立收斂）
+## 跨載體共性慣例池（多弧同構：圖表渲染線/kchart 線/事件分析線各自獨立收斂）
 
 **vision 判讀契約（三段式）**——派 vision-review 判讀圖時 prompt 必含：①逐張結構化輸出（一行固定欄位）②**誠實段**（目視分不出來明說、無從判斷不腦補）③跨案觀察段。配套：**每 agent ≤10-15 張**（超過 token 爆炸）；**抽樣錨定全樣本**——只看輸家（或贏家）子集的 vision 結論是倖存者偏差，會被全樣本數字反駁；產出要能**回數字驗證**（機械綠/parse OK ≠ 渲染 OK ≠ 佈局可讀——vision 是後兩層唯一防線）。
 
@@ -68,7 +63,6 @@ when_to_use: "任何要畫圖的時刻——/illustrate 選輸出模式、EP/殼
 | 要做什麼 | 去哪 |
 |---------|------|
 | mermaid 渲染配方（style 規範/mmdc 管線/殼內嵌 lazy render） | [mermaid](../mermaid/SKILL.md) |
-| 殼整合（嵌圖形態/hook 時間點/輪數 guard/重生） | [illustrate-html-mode](../_common/illustrate-html-mode.md) |
-| archify 產線紀律（validate 迴圈/止損/author 期前移） | [archify-gen](../../agents/roles/archify-gen.md) role |
+| 殼整合（嵌圖形態/hook 時間點/重生） | [illustrate-html-mode](../_common/illustrate-html-mode.md) |
 | UI 驗收編排（三鏈/截圖量測/盲判 spawn/pytest 沉澱） | [ui-visual-verify](../ui-visual-verify/SKILL.md) |
 | domain 判讀契約實例（K 線三證據層/七項清單） | [kbar-form-analysis](../kbar-form-analysis/SKILL.md) |

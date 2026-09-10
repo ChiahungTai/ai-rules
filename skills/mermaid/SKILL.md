@@ -63,7 +63,7 @@ allowed-tools:
 
 ### 源與產物
 
-`.mmd` 源隨殼任務家進 git（與 archify JSON IR 對位）；`diagram-*.svg` 渲染產物不進（一命令再生）——git 慣例單一源見 [illustrate-html-mode](../_common/illustrate-html-mode.md)。
+`.mmd` 源隨殼任務家進 git；`diagram-*.svg` 渲染產物不進（一命令再生）——git 慣例單一源見 [illustrate-html-mode](../_common/illustrate-html-mode.md)。
 
 ## 範例
 

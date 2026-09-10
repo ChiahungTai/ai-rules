@@ -97,15 +97,15 @@ MD 模式與 Console 模式的關鍵差異：
 - 多層次展開而非精簡摘要
 - 自動儲存為 `ai-analysis/reports/` 下的檔案
 
-## 範例 4: HTML 展示級輸出（archify，opt-in）
+## 範例 4: HTML 報告殼輸出（opt-in）
 
 ```bash
 /illustrate html @src/components/     # mode B：artifact 選型 → 概念→載體映射（判準見 diagram-selection）
-/illustrate html 微服務架構            # mode D：主題 → archify 渲染
+/illustrate html 微服務架構            # mode D：主題 → 報告殼（mermaid/HTML 塊）
 /illustrate html @ai-analysis/_tasks/<task>/ep.md  # Report Shell：EP 導讀殼（@任務家/<task>/ep.md——repo 任務家探測見「html 報告殼」段）
 ```
 
 產出形態（細節見 [illustrate-html-mode.md](illustrate-html-mode.md)）：
-- grounding 事實 → typed JSON IR（`sources` 證據路徑）→ archify `validate → deliver → visual-check` → 自包含互動 HTML（主題切換/搜尋/focus/Present）
-- 輸出 `arch-report/<主題>/`（repo root；每次任務一個子目錄，入口 `index.html`）；JSON IR 進 git（再生源頭），HTML/截圖依 .gitignore 排除
-- archify 缺場/壞場或輪數 guard 超限 → 降級 MD Mermaid＋回報
+- grounding 事實 → 殼（template 複製＋填 slot）＋章節敘事＋mermaid 圖（srcdoc lazy render／`diagram-*.svg`）或 HTML 塊
+- 殼 `index.html` 落任務家（流程 brief）或 `ai-analysis/<域>/`（按需視覺/決策 viewport），**進 git**；`.mmd` 源進 git、`diagram-*` 渲染產物不進
+- 渲染工具缺場 → 降級 MD Mermaid＋回報

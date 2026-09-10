@@ -455,7 +455,7 @@ def test_atomic_write_leaves_no_partial_file_on_error(repo: Path, monkeypatch):
     assert list(target.parent.glob(".*.tmp")) == []
 
 
-# --- 真樹 snapshot（U-8）：10-role 集合與每名唯一 requirement 入庫釘住 ---
+# --- 真樹 snapshot（U-8）：9-role 集合與每名唯一 requirement 入庫釘住（AIR-74 退役渲染 agent 後 10→9） ---
 
 
 def test_real_tree_map_snapshot():
@@ -465,7 +465,7 @@ def test_real_tree_map_snapshot():
     lines = table.splitlines()
     roles = {line.split("\t")[0]: line.split("\t")[1] for line in lines[1:]}
     assert roles == sync.ROLE_REQUIREMENTS
-    assert len(roles) == 10
+    assert len(roles) == 9
     assert all(
         line.split("\t")[2] == "yes" and line.split("\t")[3] == "yes"
         for line in lines[1:]

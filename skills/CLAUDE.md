@@ -51,7 +51,7 @@
 - `/post-build` — build 後收尾鏈編排（diff triage → code 鏈 [dual-context code-review → judge-review → 修正迴圈] → docs 鏈 [consistency → metadata-sync → tour corpus 修復閉環] → 殼 refresh [hook 2：實作章節＋產圖一次＋badge ✅＋持久 delta tour] → 收尾報告；止步於 /commit 前）
 - `/code-review` — 深層思考六軸代碼審查（含 axis 3 結構 = arch 吸收，top-down；UC 覆蓋度；中型以上 dual-context 雙審查者：fresh-eyes + primed）
 - `/debrief` — AI 改動理解簡報（layer 3，行動後，**深度選配**——日常判斷材料由任務家殼實作章節吸收〔post-build hook 2〕，本命令＝模組/檔案級深挖）：七段倒金字塔——意圖／行為黑盒子（行為 vs 純結構判定；docs 變更渲染 behavior delta）／前後差異／分組檔案地圖／波及缺口／驗證證據（demo-checklist，NONE 逼問+清單完整性）／認知誤差點；無參數＝任務弧優先（有 baseline→弧模式；無 baseline→uncommitted；皆空→HEAD~1 兜底）；`--ep` 方向確認已移除（改人讀 Report Shell + /ep-review）
-- `/illustrate` — 結構 viewport + 技術圖解（SA/SD artifact menu：call graph / sequence / class slice / data-flow / boundary；city map / drill / drift detection；console / md / html〔archify 展示級，opt-in〕）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build drift detection，見上圖），結構能力調 arch-thinking skill
+- `/illustrate` — 結構 viewport + 技術圖解（SA/SD artifact menu：call graph / sequence / class slice / data-flow / boundary；city map / drill / drift detection；console / md / html〔報告殼，opt-in〕）+ **4 mode 導向**（設計決策 / 理解既有 / 審查驗證 / 溝通傳達）；核心流程三 checkpoint（pre-EP 軟 gate / post-EP / post-build drift detection，見上圖），結構能力調 arch-thinking skill
 - `/followup-review` — 審查者回頭驗收實作結果
 - `/commit` — Commit 入口（lint 閘門 → POC/Demo 處置＋finalization 對帳〔2.8：半套歸檔偵測、memory 池對帳腿、「commit 確認」pre-commit 無 hash 結算〕 → message → 確認）；finalization（5a Built 結算＋收斂後結案）已在 build 內完成，commit 前可跑 `/metadata-sync` 更新
 - `/metadata-sync` — metadata finalization（三 mode：build 階段 5a Built 結算／收斂後結案（hook 2／階段 6 fallback invoke）/ standalone 補漏——commit 前更新或事後補漏，偵測漏掉的 Capabilities/Kanban/SYSTEM-MAP/arch/EP 歸檔/flow-feedback，確認後修補；`--check` 僅報告不執行）
@@ -142,7 +142,7 @@
 - `tour-bootstrap` — repo 導覽建置程序（Chain 場景／Delta 時間層，地圖層 Overview 視重複度盤點退役；優先序裁定＝corpus 前門與動線；`.tour` 語言契約——CodeTour 消費端正則決定的 line/pattern/tour link/file link 規則；機械驗證清單＋AI 不代終審停點；建在 code-reality 工具層之上，斷點③已解——callstack 生成走 blueprint-bootstrap）
 - `blueprint-bootstrap` — blueprint 知識庫建置程序（人讀合成視角 scaffold：骨架＋半滿＋🤖/👤 狀態標記＋誘導問題＋治理模板；**callstack 場景敘事生成＝斷點③解法**——重複度盤點前置→鏈枚舉→逐幀實證→coverage 稽核→findings，產出餵 tour-bootstrap 場景層；既有 blueprint 走 audit 模式不重建；位置＝instruction-init 之上、tour-bootstrap 之下）
 - `mermaid` — pragmatism-first Mermaid 圖表生成（theme 無關設計：禁 init、fill+color 成對跨主題可讀；殼內嵌配方：mmdc 管線＋CDN lazy render＋無縫一體）
-- `diagram-selection` — 畫圖前選載體的判準與跨載體共性（判準四問：通道/交錯/是否圖論問題/成本軸；載體對照 mermaid/HTML 塊/archify/表格/domain 渲染器；archify=最後手段；vision 三段式契約＋分批上限＋全樣本錨定；渲染/判讀分離）
+- `diagram-selection` — 畫圖前選載體的判準與跨載體共性（判準四問：通道/交錯/是否圖論問題/成本軸；載體對照 mermaid/HTML 塊/表格/domain 渲染器；vision 三段式契約＋分批上限＋全樣本錨定；渲染/判讀分離）
 - `rules-reminder` — 常被違反的規則（rg/fd、無 `#`、`uv run`、無 `$` 展開、獨立呼叫批次化、改檔前先 Read）
 - `llm-output-convention` — 雙通道輸出細則載體（reference skill：print tag 全表〔[OK]/[WARN]/[FAIL]/[LOG]/[ACTION]/[progress]〕、print/Logger 慣例細則與閉環、stdlib logging 與框架 Logger 並存、遷移注意；rule 端留核心原則＋Namespace——rule+skill 分層控制 bundle 尺寸）
 - `symbol-query-routing` — 符號查詢路由深層參考（reference skill：LSP operation 速查表、驗證 workflow/輸出格式、rg 陷阱案例群、方法論限制 loopback、Agent prompt 工具指定模板、跨 harness 載體對照、workspace staleness/reindex 處置；rule 留 cr-first 路由/任務啟動 gate 核心——rule+skill 分層控制 bundle 尺寸）

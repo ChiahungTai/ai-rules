@@ -96,7 +96,7 @@ Task (visualization-specialist): 根據 Console / MD / html 模式生成對應�
 - MD 模式：skill: "mermaid" 生成專業圖表
   - 流程圖、類圖、時序圖、架構圖
   - 確保 Dark/Light 模式相容
-- HTML 模式（opt-in）：specialist 產 grounding 事實，最終渲染走 [illustrate-html-mode.md](illustrate-html-mode.md)（archify 委派）
+- HTML 模式（opt-in）：specialist 產 grounding 事實，最終渲染走 [illustrate-html-mode.md](illustrate-html-mode.md)（報告殼模式）
 ```
 
 ### 階段 3：結果整合

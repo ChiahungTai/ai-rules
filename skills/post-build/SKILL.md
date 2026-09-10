@@ -87,8 +87,8 @@ findings 全空 → 報告並直接進 docs 鏈。
 
 本 EP 對應殼存在（任務家 `<task>/index.html`——execution-plan 定稿 hook 1 所建）時，在收尾鏈收斂後 refresh（掛點規格單一源見 [illustrate html-mode](../_common/illustrate-html-mode.md)「殼生命週期掛點」）：
 
-1. **實作章節生長**（同一殼的第二幕；內容＝殼規格「敘事骨架變體」實作完成報告列）：做了什麼（分組檔案地圖）／驗證證據（命令+exit code）／delta 前後對照（archify compare，有圖時）／認知誤差點＋回源連結——**反映修正迴圈後最終態**（排在階段 3 修正迴圈之後，正是為此）
-2. **產圖一次**：hook 1 骨架未產的渲染管線圖（mermaid/archify）在此補 degraded 槽——選型依 [diagram-selection](../diagram-selection/SKILL.md)、嵌法依 [mermaid](../mermaid/SKILL.md) 殼內嵌段／archify-gen 換裝（HTML 塊/表格屬敘事內容、hook 1 已可寫）；內容凍結後一次產，避免計畫圖重投影
+1. **實作章節生長**（同一殼的第二幕；內容＝殼規格「敘事骨架變體」實作完成報告列）：做了什麼（分組檔案地圖）／驗證證據（命令+exit code）／delta 前後對照（有圖時）／認知誤差點＋回源連結——**反映修正迴圈後最終態**（排在階段 3 修正迴圈之後，正是為此）
+2. **產圖一次**：hook 1 骨架未產的渲染管線圖（mermaid）在此補 degraded 槽——選型依 [diagram-selection](../diagram-selection/SKILL.md)、嵌法依 [mermaid](../mermaid/SKILL.md) 殼內嵌段（HTML 塊/表格屬敘事內容、hook 1 已可寫）；內容凍結後一次產，避免計畫圖重投影
 3. **badge**（收斂後 ✅——implement 5a 同步的是 🟡，此處驗證後升級 ✅；中間段殘留 → 維持 🟡）
 4. **持久版 delta tour 單一產點**：弧條件成立（HEAD 越過 EP baseline、a/b snapshot 在場且非 stale——時點條件真相源見 [code-review](../code-review/SKILL.md) 模式 B）→ `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo>` 落 `.tours/delta/`（**進 git**，commit 時納入）；未裝/條件不符 → 殼實作章節標明降級，不阻擋
 5. 殼不存在（hook 1 未跑、EP 建於舊慣例）→ 跳過並於收尾報告標明

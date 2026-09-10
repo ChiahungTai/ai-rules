@@ -61,7 +61,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 |---|---|
 | full | （空——judge／EP 規劃／post-build 編排是主 session 職責非 role；review agent 層已 lite 化，user 09-09） |
 | vision | vision-review |
-| lite | archify-gen, code-reviewer, code-reviewer-primed, cr-research, cross-verify-investigator, impl-lite, lite-verify, mem-distill, spec-miner |
+| lite | code-reviewer, code-reviewer-primed, cr-research, cross-verify-investigator, impl-lite, lite-verify, mem-distill, spec-miner |
 
 > 判斷密集位（judge 裁決／EP 規劃／post-build 編排）不是 role——**主 session 直做**（AIR-24 分工律）；「非 full＋max effort 補償＝未驗證路徑」。新 role 須在此表登記 requirement——缺登記＝`sync_agents.py` fail loud（防靜默 unpinned 上線）。
 

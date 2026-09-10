@@ -45,7 +45,6 @@ agents/
 | post-build 編排 | 主 session 直做（判斷密集） | — | full | — | 收尾鏈：code-review（dual-context）→judge-review→修正→consistency→metadata-sync→殼 refresh | — |
 | 機械驗證／consistency gate | spawn | lite-verify | lite | zcode | 查證清單→逐項機械證據（rg 命中／exit code／file:line） | 失敗家系處置（註 a）→主 session 跑組合命令 |
 | 視覺驗收 | spawn | vision-review | vision | zcode | 圖檔→逐張 verdict | 失敗家系處置（註 a）→標「未驗證」（禁主 session 直讀圖） |
-| archify 圖渲染 | spawn | archify-gen | lite | zcode | 機械底稿→workflow/architecture/sequence 圖＋HTML＋殼槽位換裝（**只接 archify 圖**——mermaid/HTML 塊不派此 agent，由主 session 產，mmdc 是機械 CLI；選型判準 diagram-selection skill） | 失敗家系處置（註 a）→主 session 手產＋vision 驗收照跑 |
 | 多源查證 | spawn | cross-verify-investigator | lite | zcode | 問題＋軸清單→交叉對帳 verdict＋unverified | 軸源缺場→該軸 unverified 不阻斷（skills/cross-verify） |
 | commit preparation | 主 session（對帳可 spawn） | lite-verify（finalization 對帳） | lite | zcode | working tree→對帳清單＋訊息草稿 | 主 session 直做 |
 | **commit consent＋執行** | **主 session 互動（永遠；任何 dispatch 不覆蓋）** | — | full | — | 草稿＋變更摘要→用戶確認→git commit | —（outward-action-consent rule；autonomous 紅線清單例外見該 rule） |
@@ -53,18 +52,17 @@ agents/
 
 - **commit 拆兩半**：preparation（finalization 對帳、訊息草擬——agent 可做）＋consent gate（主 session 互動——永遠，contract 表其他行不覆蓋此行）
 - **註 a（spawn 失敗態家系——重試語義單一源）**：見 model-routing skill「spawn 失敗態辨識」——1302／classifier unavailable 重試≤2；1301 禁同 prompt 重試；1308 等窗口重置（重置前重派無效）；429 走 backoff／降並發。**禁把「重試≤2」泛化到全失敗類**（實例：1308 重派只會再敗）
-- **CC dispatch**：本表 registry name 欄的全名在兩 registry 皆生成在場——CC `--agent <name>` 全 10 名可用；未知名稱仍立即退出（反向守衛）
+- **CC dispatch**：本表 registry name 欄的全名在兩 registry 皆生成在場——CC `--agent <name>` 全 9 名可用；未知名稱仍立即退出（反向守衛）
 
 ### registry projection map
 
-> 跨 harness 可用性的**機械對帳源＝`uv run python scripts/sync_agents.py --map`**（輸出 role／requirement／zcode／claude 四欄表）；本節文字表是導覽副本，drift 以 --map 為準。生成後全 10 role 在兩 registry 皆在場（roles/ 單一源→雙投影）。
+> 跨 harness 可用性的**機械對帳源＝`uv run python scripts/sync_agents.py --map`**（輸出 role／requirement／zcode／claude 四欄表）；本節文字表是導覽副本，drift 以 --map 為準。生成後全 9 role 在兩 registry 皆在場（roles/ 單一源→雙投影；舊互動圖渲染 agent 已隨其產線退役刪除，AIR-74）。
 
 | agent | requirement | zcode | claude | 備註 |
 |-------|-------------|-------|--------|------|
 | code-reviewer | lite | ✅ | ✅ | claude 拷貝 tools 減 CR MCP 行（生成器承載的已知分歧） |
 | code-reviewer-primed | lite | ✅ | ✅ | 同上 |
 | cross-verify-investigator | lite | ✅ | ✅ | 軸＝prompt 參數（AIR-28 S3）；**去 MCP 化**（tools 不掛 CR MCP 全名——cr 軸走 CLI，避免 spawn 綁死「CR plugin 在啟動快照在場」，見下方 tools 清單陷阱） |
-| archify-gen | lite | ✅ | ✅ | — |
 | cr-research | lite | ✅ | ✅ | — |
 | impl-lite | lite | ✅ | ✅ | **範式但書**：其 tools 行含 `Grep`/`Glob`——ZCode 靜默忽略死欄（見「tools 清單陷阱」），新定義不照抄，文字/檔案搜尋走 Bash rg/fd |
 | lite-verify | lite | ✅ | ✅ | — |

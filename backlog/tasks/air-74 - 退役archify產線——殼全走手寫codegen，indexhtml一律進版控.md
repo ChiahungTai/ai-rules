@@ -23,14 +23,14 @@ ordinal: 60000
 
 〔baseline〕ai-rules main cb75342（2026-09-11）
 
-〔已決策勿重辯〕user 09-11 拍板「拔掉 archify」——證據：fd -I 補掃證實 ignored 區僅 3 個 archify 歷史目錄（archify-integration-flow／illustrate-html-mode-flow／rules-deployment，渲染產物＋visual-check 截圖）；lite-verify 19/19 在庫 html 全手寫殼（12-71KB，零 ≥500KB archify 肥檔）；殼的未來＝AIR-73 codegen 投影非 archify 渲染。移除面八項：①illustrate-html-mode 刪 archify 段（偵測／deliver 重生／archify-gen tier／JSON IR 慣例——.mmd 源保留餵 mermaid）＋放置學改寫（arch-report 退役→authored 殼進 ai-analysis committed home）②illustrate SKILL HTML 模式改「殼＋mermaid srcdoc」、刪 archify 降級分支③diagram-selection 刪 archify 列（mermaid／HTML 塊二擇）④agents 治理鏈：roles/archify-gen.md 刪→sync_agents.py（pin dict line 31 移除）重生成→model-routing skill lite 角色表移除→agents/AGENTS.md dispatch matrix 行 48＋registry 表行 67 移除⑤.gitignore 50-54 arch-report 區塊移除（先清遺留再放寬；任務家 diagram-*.html 條目＝mermaid 渲染慣例、不動）⑥遺留：3 個 archify 歷史目錄本地刪除（歷史已由 done 任務家承載）；arch-report/ 清空後目錄移除（test-family-routing 已於 cb75342 遷 ai-analysis/test-contract/）⑦blueprint 連動：s9 放置表「按需結構視覺→arch-report」列改寫、workflow viewport 節放置表同步⑧部署：skills 走 symlink 即時傳播（mosaic 消費端殼試驗走手寫 v2 非 archify，低風險）；視覺驗收（visual-check/vision）慣例獨立於 archify、保留。
+〔已決策勿重辯〕user 09-11 拍板「拔掉 archify」＋「任務家 diagram-* 條目整段也拔」——證據：fd -I 補掃證實 ignored 區僅 3 個 archify 歷史目錄（archify-integration-flow／illustrate-html-mode-flow／rules-deployment，渲染產物＋visual-check 截圖）；lite-verify 19/19 在庫 html 全手寫殼（12-71KB，零 ≥500KB archify 肥檔）；任務家被擋的 diagram-*.html 主體＝720KB×5 archify 遺物（mermaid srcdoc 形態不產 diagram 檔）；svg 渲染 8 檔共 130KB（無 bloat 顧慮）；殼的未來＝AIR-73 codegen 投影非 archify 渲染。移除面：①illustrate-html-mode 全文重寫（刪偵測/deliver 重生/archify-gen tier/JSON IR 慣例/輪數 guard/drift compare/Authoring 紀律與教訓——.mmd 源保留餵 mermaid；放置學改寫＝按需視覺/決策 viewport→ai-analysis/<域>/）②illustrate SKILL HTML 模式改「殼＋mermaid srcdoc」③diagram-selection 刪 archify 列④agents 治理鏈：roles/archify-gen 刪→sync_agents pin dict 移除→registry 重生成→model-routing lite 表＋agents/AGENTS.md dispatch/registry 行移除⑤.gitignore：arch-report 區塊＋任務家 diagram-* 八條**整段拔除**——殼/.mmd/mermaid 渲染全進版控⑥遺物處置：3 個 archify 目錄（含 tracked JSON IR 檔——隨慣例退役刪）＋720KB 渲染 html×5＋visual-check html×3＋png×12 本地刪；svg×5 tracked 收編⑦blueprint s9/s10 放置表改寫＋theme 修復（td code/.note/chip.warn 硬編碼→light-dark token，對齊 MOS-22.3 reference；test-contract 同步修＋一處 border 色 typo）⑧部署：skills symlink 即時傳播；vision 驗收慣例獨立保留。
 
 〔驗收〕
 - `rg -i "archify" skills/ agents/ scripts/ .gitignore` 零命中（歸檔歷史 ai-analysis/{_tasks,archive,flow-feedback} 不動）
-- `sync_agents.py` 重新生成後 registry 無 archify-gen（兩端）；model-routing 角色→requirement 表無此列
-- `fd -I -e html .`（尊重 gitignore 態）＝ `fd -e html .`（no-ignore 態）——兩態一致＝無 html 再被 ignore
-- 全 repo `git status` 乾淨、arch-report/ 目錄不存在、289 tests passed（pre-commit gate）
-- blueprint index s9/s10 與 workflow 放置表無 arch-report 殘留指標
+- `sync_agents.py --map` 兩 registry 無 archify-gen；model-routing 角色→requirement 表無此列
+- fd 兩態一致：`fd -e html` ＝ `fd -I -e html`（20=20）、`fd -e svg` ＝ `fd -I -e svg`（5=5）——無 html/svg 再被 ignore；arch-report/ 不存在
+- blueprint/test-contract 殼淺色態無硬編碼深底（td code/.note 用 var token）；殼 zoom/ESC/圖面點擊放大 Playwright 實測過
+- 全 repo `git status` 乾淨（svg 收編與 JSON IR 刪除入 commit）、289 tests passed（pre-commit gate）
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Implementation Notes

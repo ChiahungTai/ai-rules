@@ -96,15 +96,15 @@
   iframe{width:100%;border:0;display:block;background:var(--panel);min-height:120px}
   .frame-wrap.degraded .degraded-body{padding:22px 18px;font-size:13.5px;line-height:1.8;color:var(--muted)}
   .frame-wrap.degraded .degraded-body b{color:var(--fg)}
-  .frame-wrap.degraded .degraded-body code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);background:#1b222c;border-radius:4px;padding:1px 5px}
+  .frame-wrap.degraded .degraded-body code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);background:var(--code-bg);border-radius:4px;padding:1px 5px}
   table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
   th,td{border:1px solid var(--border);padding:7px 11px;text-align:left;vertical-align:top;line-height:1.6}
   th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px}
-  td code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);background:#1b222c;border-radius:4px;padding:1px 5px}
+  td code{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--accent);background:var(--code-bg);border-radius:4px;padding:1px 5px}
   .kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0}
   .kpi .card{text-align:left}
   .kpi .lab{font-size:11.5px;color:var(--muted)}
-  .note{border-left:3px solid var(--amber);background:#2d220066;padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;line-height:1.7;margin:12px 0}
+  .note{border-left:3px solid var(--amber);background:var(--note-bg);padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;line-height:1.7;margin:12px 0}
   .src{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;line-height:1.9}
   .src a{color:var(--accent);text-decoration:none}
   /* ── User Story 卡（固定結構：Story→痛點→採用架構→Care→Status/Source）── */
@@ -129,7 +129,7 @@
   .topo-foot{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px}
   .chip{display:inline-block;font-size:10.5px;border-radius:9px;padding:1px 8px;margin-left:8px;vertical-align:middle;white-space:nowrap;font-weight:600}
   .chip.bad{color:var(--rose);border:1px solid #f8514966;background:#f8514918}
-  .chip.warn{color:var(--amber);border:1px solid #d2992266;background:#2d220066}
+  .chip.warn{color:var(--amber);border:1px solid #d2992266;background:var(--note-bg)}
   .chip.good{color:var(--green);border:1px solid #2ea04366;background:#1f6f3c33}
   .jump{font-size:12px;color:var(--accent);text-decoration:none;white-space:nowrap}
   /* ── 折疊鈕：展開態貼 sidebar 右緣垂直居中；折疊態浮出鈕固定左上 ── */
@@ -510,7 +510,7 @@
     <tbody>
       <tr><td>弧產物（有卡）</td><td><code>ai-analysis/_tasks/&lt;MM-DD-主題&gt;/</code>；線任務 <code>_projects/&lt;線&gt;/tasks/</code>；完成搬同家 <code>done/</code></td><td><code>index.html</code>（ep/spec/殼同處）</td></tr>
       <tr><td>常設 domain 導覽</td><td><code>ai-analysis/&lt;域&gt;/</code>（如 <code>blueprint/</code>）</td><td>域名即路徑</td></tr>
-      <tr><td>按需結構視覺</td><td>repo 根 <code>arch-report/&lt;主題&gt;/</code></td><td><code>index.html</code>（渲染產物不進 git）</td></tr>
+      <tr><td>按需視覺／決策 viewport</td><td><code>ai-analysis/&lt;域&gt;/</code>（如 <code>blueprint/</code>、<code>test-contract/</code>）</td><td><code>index.html</code>（<b>進 git</b>——AIR-74 起 arch-report 退役、殼一律版控）</td></tr>
       <tr><td>md 沉澱</td><td><code>ai-analysis/reports/</code></td><td>—</td></tr>
     </tbody>
   </table>

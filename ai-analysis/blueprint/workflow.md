@@ -394,7 +394,7 @@ WT 基建落地後，可以移除「因共享單一 checkout，所以同 repo ca
 | --- | --- | --- |
 | 弧產物（有卡） | `ai-analysis/_tasks/<MM-DD-主題>/`；線任務 `_projects/<線>/tasks/`；完成搬同家 `done/` | `index.html`（ep/spec/殼同處） |
 | 常設 domain 導覽 | `ai-analysis/<域>/`（如 `blueprint/`） | 域名即路徑 |
-| 按需結構視覺 | repo 根 `arch-report/<主題>/` | `index.html`（渲染產物不進 git） |
+| 按需視覺／決策 viewport | `ai-analysis/<域>/`（如 `blueprint/`、`test-contract/`——AIR-74 起 arch-report 退役） | `index.html`（進 git） |
 | md 沉澱 | `ai-analysis/reports/` | — |
 
 心法一句：**會動的都在 `ai-analysis/`、弧的家照日期命名、入口一律 `index.html`**（VSCode `Cmd+P` 打日期或主題詞即達；board 卡 refs 是導航主力）。
