@@ -165,7 +165,7 @@
     <li><a href="#s10" onclick="return go('s10',this)"><span class="num">10</span>測試怎麼驗？agent 怎麼分？</a></li>
   </ul>
   <div class="backlinks">
-    <a href="http://127.0.0.1:6420">← backlog board</a><br>
+    <span>← backlog board（VSCode Backlog Cards）</span><br>
     <a href="AGENTS.md">blueprint 導覽（AGENTS.md）</a><br>
     <a href="workflow.md">workflow.md</a> · <a href="onboarding.md">onboarding.md</a>
   </div>
@@ -259,7 +259,7 @@
       <div class="topo-sub">control plane</div>
       <ul class="dots">
         <li>board／card control state：id allocation、status、refs、final summary</li>
-        <li><code>backlog browser</code> 固定從 primary cwd 啟動（board 唯一 working-copy owner）</li>
+        <li>board 唯一 working-copy owner＝primary 的 <code>backlog/tasks/*.md</code>（UI 載體可替換——browser 常駐已退役 09-11）</li>
         <li>建立／結束 execution WT 的 helper 從這裡發起，single-writer lock 序列化</li>
       </ul>
     </div>
@@ -320,7 +320,7 @@
     <div class="sh bad">❌ 實際痛點（真實事故）</div>
     <p>卡撞號×2——WT workflow 裁決報告背景記載的實際事故。根因：多 WT repo 各自掃描 id，其他 branch 的 committed 卡與 working-copy 裡未提交的卡互相看不到；<code>backlog/config.yml</code> 至今仍是 <code>check_active_branches: false</code>（已實核）。</p>
     <div class="sh good">✅ 採用架構</div>
-    <p>board single-writer：<code>backlog browser</code> 固定從 primary control plane 啟動；<code>backlog/tasks</code> runtime metadata 只有 control plane 是 writer；card WT 不直接執行會改 card runtime state 的 <code>backlog task edit/create/complete</code>；<code>check_active_branches: true</code> 做跨 branch discovery；建卡保留跨 WT filesystem max-id 預掃，補 untracked／staged 卡的盲區；id／status／ref／finalization 經 control-plane helper 在 repo-local lock 下執行。</p>
+    <p>board single-writer：board state 唯一 working copy＝primary 的 <code>backlog/tasks/*.md</code>；<code>backlog/tasks</code> runtime metadata 只有 control plane 是 writer；card WT 不直接執行會改 card runtime state 的 <code>backlog task edit/create/complete</code>；<code>check_active_branches: true</code> 做跨 branch discovery；建卡保留跨 WT filesystem max-id 預掃，補 untracked／staged 卡的盲區；id／status／ref／finalization 經 control-plane helper 在 repo-local lock 下執行。</p>
     <div class="sh care">Care（為什麼要管）</div>
     <p>id 是卡的機械身份。撞號之後「哪張卡是真相」變成考古題，board 的全部下游（status、refs、precheck、Capabilities 結算）跟著錯。</p>
     <div class="sh">Status / Source</div>
@@ -408,7 +408,7 @@
       <tr><td>2 rules＋skills 部署</td><td>⚠️</td><td><code>deploy_agents.py</code>（非 Claude bundle ✅）；各 symlink topology 已記載</td><td>Claude guide/rules、agents、skills symlink 的集中 bootstrap＋verify</td></tr>
       <tr><td>3 hooks 接線</td><td>⚠️</td><td>ZCode user-level merge 範本 ✅；Muse 同 repo <code>setup-muse-hooks.sh</code> ✅</td><td>CC settings 的 secret recovery pointer；Muse 新 repo adoption contract（❌）</td></tr>
       <tr><td>4 記憶池恢復</td><td>⚠️（主鏈）</td><td>bundle clone、symlink setup（dry-run＋--apply）、topology verifier＋smoke——主鏈 ✅</td><td>memory-spine 備份定義 ⚠️；新 repo 建 pool bootstrap ⚠️</td></tr>
-      <tr><td>5 cron＋launchd</td><td>⚠️</td><td>schedule-registry 職責 projection；backlog-browser plist 有 tracked source</td><td>cron prompt verbatim source；cleanup plist tracked source；enable/verify runbook</td></tr>
+      <tr><td>5 cron＋launchd</td><td>⚠️</td><td>schedule-registry 職責 projection（board browser 常駐 09-11 退役，plist 已移除）</td><td>cron prompt verbatim source；cleanup plist tracked source；enable/verify runbook</td></tr>
       <tr><td>6 code-reality</td><td>✅</td><td><code>uv tool install</code> 三件＋<code>code-reality build --repo</code>；新 repo onboarding 四步</td><td>—</td></tr>
     </tbody>
   </table>
@@ -425,7 +425,7 @@
       <tr><td>2</td><td>開工 freshness check</td><td>card baseline／relay claim 對 current HEAD 機械驗證</td><td>✅ 現行</td><td>workflow.md「Relay freshness check 保留」</td></tr>
       <tr><td>3</td><td>記憶池 primary canonical</td><td><code>.agents/memory</code>＋<code>memory-inbox</code> 實體 canonical、CC/ZCode/Muse 接線</td><td>✅</td><td>workflow.md「記憶池拓撲」</td></tr>
       <tr><td>4</td><td>唯讀／顧問 session 環境</td><td>read-only checkout／ephemeral WT，不擾 active writer</td><td>⚠️</td><td>workflow.md「唯讀／顧問 session」</td></tr>
-      <tr><td>5</td><td>primary＝control plane</td><td>primary 只寫 board/card control state；<code>backlog browser</code> 固定從 primary 啟動</td><td>❌ target</td><td>workflow.md「Primary checkout」</td></tr>
+      <tr><td>5</td><td>primary＝control plane</td><td>primary 只寫 board/card control state；board state 唯一 working copy＝primary（UI 載體可替換）</td><td>❌ target</td><td>workflow.md「Primary checkout」</td></tr>
       <tr><td>6</td><td>card persistent WT</td><td>1 card = 1 branch = 1 persistent worktree</td><td>❌ target</td><td>workflow.md「Card worktree」</td></tr>
       <tr><td>7</td><td>免卡小修 ephemeral fast-path</td><td>小型免 UC 工作用 ephemeral WT，擴大即升正式卡</td><td>❌ target</td><td>workflow.md「免卡小修」</td></tr>
       <tr><td>8</td><td>board single-writer</td><td>lock＋<code>check_active_branches: true</code>＋max-id 預掃</td><td>❌ target（現值 <code>false</code>）</td><td>workflow.md「Board single-writer」＋<code>backlog/config.yml:13</code></td></tr>

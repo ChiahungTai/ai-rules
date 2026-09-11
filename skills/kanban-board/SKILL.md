@@ -48,7 +48,7 @@ backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 
 （採卡 branch 的 repo 在 ⑤ 之後另有 **⑥ checkout 卡 branch**——規則源＝該 repo AGENTS.md「git 慣例」節；通用起手式恆五步，⑥ 是 repo 層擴充）
 
-**開工 metadata 即 commit（user 09-11 特赦）**：起手式 ①⑤ 的 backlog 檔變更（In Progress＋雙 refs）隨後立即 commit **僅 `backlog/`**（message `chore(backlog): <id> 開工…`）——卡狀態是跨 WT 可見性契約，未 commit 平行 session 看不見；例外條款單一源＝[outward-action-consent](../../rules/outward-action-consent.md)「Commit 專屬段」③；Capabilities／程式碼結算物不隨此例外。
+**開工 metadata 即 commit（user 09-11 特赦）**：起手式 ①⑤ 的 backlog 檔變更（In Progress＋雙 refs）隨後立即 commit **僅 `backlog/`**（message `chore(backlog): <id> 開工…`）——卡狀態是跨 WT 可見性契約，未 commit 平行 session 看不見；例外條款單一源＝[outward-action-consent](../../rules/outward-action-consent.md)「Commit 專屬段」②；Capabilities／程式碼結算物不隨此例外。
 
 **🔴 雙 ref 內建合約**：references 只對 http(s) 前綴渲染可點連結（`TaskDetailsModal.tsx:1362-1375`）——**相對路徑單獨出現＝board 上不可點＝錯誤形態**。兩值都要掛：
 - `http URL`＝report server 上的 Report Shell／md preview 位址（**repo 慣例**——如 mosaic `http://127.0.0.1:6421/<wt>/<任務路徑>/index.html`；殼未建前的過渡形態指中央 md viewer `http://127.0.0.1:6421/viewer/_md-viewer.html?p=/<route>/<任務路徑>/ep.md`——**viewer 單一源**版控於 ai-rules `report-assets/`，`fetch(?p=)` 同源絕對路徑可渲染任一 route 的 md，raw `.md` 直連永遠是原檔；hook 1 建殼後更新為殼 URL）
@@ -59,7 +59,7 @@ backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 backlog task edit <id> -s Done --final-summary "<一句>"
 backlog task edit <id> --ref "<done/ 新URL>,<相對路徑>"   # --ref 整組替換
 ```
-**結案 metadata commit 特赦（user 09-11，條件授權鏈）**：結案兩步＋其 commit（僅 `backlog/`＋結算搬移檔、**同 commit**）在 **precheck 綠（跨線掃描 exit 0）** 時免逐次確認——機械守門替代人確認（例外條款④，autonomous session 同條件可執行）；條件不滿足 → 走確認 gate。註：precheck 在此是特赦的守門條件，非結案兩步本身的新要求（「結案兩步不需 precheck」現狀不變）。
+**結案 metadata commit 特赦（user 09-11，條件授權鏈）**：結案兩步＋其 commit（僅 `backlog/`＋結算搬移檔、**同 commit**）在 **precheck 綠（跨線掃描 exit 0）** 時免逐次確認——機械守門替代人確認（例外條款③，autonomous session 同條件可執行）；條件不滿足 → 走確認 gate。註：precheck 在此是特赦的守門條件，非結案兩步本身的新要求（「結案兩步不需 precheck」現狀不變）。
 
 **弧結案蒸餾（第三動，同時機）**：owning session 將本弧 project_/feedback_ memory 條目重寫為終態 facts——刪日期/session id/進度流水與 git 可推導內容，留決策教訓與終態結論，敘事指向 repo 檔案（EP/卡）；無相關條目明示無。規則細節＝[memory-audit](../memory-audit/SKILL.md)「寫入端紀律」（含 desc 三不）。
 
@@ -93,17 +93,14 @@ bash <skills 根>/kanban-board/scripts/backlog_precheck.sh [卡id ...]   # skill
 
 ## UI 入口
 
-| 形態 | 命令 | 說明 |
-|------|------|------|
-| Web board | `backlog browser` | `127.0.0.1:6420`（config `default_port`）；WebSocket 雙向 live——CLI/AI 改檔→瀏覽器秒更、拖卡→frontmatter 變更 |
-| TUI | `backlog board` | 終端互動板（fs.watch live）；CJK 寬度有測試釘住，邊角字形留意 |
+board server **常駐已退役**（09-11 三方裁定：state ownership 在 primary 的 `backlog/tasks/*.md`，UI 載體可替換——launchd/plist/固定埠治理一併移除）：
 
-**Web board port 慣例**：per-repo 固定 port（例 mosaic=6420、ai-rules=6422——慣例值由啟動腳本 `--port` 釘住（`run-backlog-browser.sh`），config `default_port` 欄實值可能與腳本釘值不同、以腳本為準；**6421 保留給 report server／md viewer**）。`backlog browser` 對 port 衝突**不報錯——靜默跳下一個可用 port**（明確帶 `--port` 亦同，警告只印 stdout；無參數啟動＋default port 被佔即產生冗餘 server）。啟動三步：
-```bash
-lsof -iTCP:<port> -sTCP:LISTEN -P                 # ① 先查：佔用者（lsof -p <PID> | rg cwd）cwd=同 repo → 沿用既有 server 不重啟；異 repo/異程式 → 配置衝突，停手回報
-backlog browser --no-open --port <port> &         # ② 起服務永遠帶 --port
-lsof -iTCP:<port> -sTCP:LISTEN -P | rg backlog    # ③ 驗證實際綁的 port——靜默 fallback 下 exit 0 ≠ 綁對 port
-```
+| 形態 | 命令／載體 | 說明 |
+|------|------|------|
+| **VSCode extension（主力）** | `chtai.backlog-cards`（activity bar 巡覽＋點卡詳情＋references 直達：`.md`→編輯器、`.html`→瀏覽器、http→外部） | 唯讀 browse；workspace 含 `backlog/config.yml` 自動啟用 |
+| TUI 快照 | `backlog board` | 終端 markdown 三欄板，即開即退；CJK 寬度留意 |
+| AI 面 | CLI（現行）／`backlog mcp`（stdio MCP） | 直讀寫 md，零 server |
+| 瀏覽器（on-demand 後備） | `backlog browser --no-open --port <port> &` | CLI 內建子命令，隨叫隨開、用完 Ctrl+C；**port 衝突靜默跳下一個可用埠——起後 `lsof -iTCP:<port> -sTCP:LISTEN -P` 驗證實際綁埠**；6421 保留給 report server 勿佔 |
 
 ## 與官方工作流的差異宣告（兩條）
 
