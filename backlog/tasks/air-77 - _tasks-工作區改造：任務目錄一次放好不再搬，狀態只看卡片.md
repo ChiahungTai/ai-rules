@@ -4,7 +4,7 @@ title: _tasks 工作區改造：任務目錄一次放好不再搬，狀態只看
 status: To Do
 assignee: []
 created_date: '2026-09-11 22:51'
-updated_date: '2026-09-11 22:52'
+updated_date: '2026-09-11 22:58'
 labels:
   - structure
   - migration
@@ -35,4 +35,13 @@ ordinal: 63000
 
 <!-- SECTION:NOTES:BEGIN -->
 mosaic 腿（跨 repo）：handoff 已產出交 mosaic 側自行派工——評估 _projects/<線>/tasks/ 同型慣例跟進或分岔；ai-rules 側不 wait mosaic，兩腿獨立結算。
+
+〔09-12 設計修訂：user 重申維持 _archived 遷移（動機＝目錄整潔優先，mosaic_alpha 目錄混亂為反面印證）；glm 凍結案已知悉不採，代價與 mitigation 併入如下〕
+① 遷移範圍：done/ 26 弧＋AIR-45 兩已閉弧 → _tasks/_archived/；_archived/ 放墓碑 README（legacy frozen、生命週期唯一源＝卡 status、新弧落 YYYY-MM/ 永不搬）；空 done/ 目錄移除
+② 30 張 completed 卡 references 的 done/ 路徑機械批次改寫為 _archived/，rg 全掃驗證零殘留（歷史卡只改路徑不改內容，git 保留歷史）
+③ 無卡弧豁免條款：免 UC 小修／研究弧無卡，天生即終態，目錄即全部事實，不參與 lifecycle 追蹤——防原則被合理繞過
+④ 弧 refs 出生即寫（路徑生而恆定）；kanban 結案補寫 refs 退化為可選
+⑤ supersession（弧目錄）＝就地墓碑（檔頭 superseded-by 指標），不搬——零搬移貫徹
+⑥ EP 待裁：月內弧命名終局形態——主題-only（glm 指日期雙重編碼為長期醜態）vs 保留 MM-DD 前綴；開工時定並寫入慣例文件
+⑦ 證據源註記：glm 載具（bridge --family glm）實跑 GLM-5.3-Flash 非 5.3 旗艦；codex＝chatgpt-web/high
 <!-- SECTION:NOTES:END -->
