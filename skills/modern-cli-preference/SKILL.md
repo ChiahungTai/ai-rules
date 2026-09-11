@@ -7,6 +7,8 @@ description: "搜尋工具陷阱細則載體（reference skill）——fd/rg 旗
 
 > 本 skill 是 `rules/modern-cli-preference.md` 的 on-demand 深層載體：rule 端保留 always-on 核心分工句（文字搜尋 rg／檔案搜尋 fd＋符號路由 pointer），陷阱目錄在本檔——**寫 rg/fd/git pathspec 命令前載入**。
 
+Claude Code 對 `find -exec`/`grep -r` 有系統層硬限制，`fd`/`rg` 預設可 auto-allow；其他 harness 無此限制，但 fd/rg 的語法與噪音優勢通用。
+
 ## fd/rg 陷阱（基礎語法是原生知識，此處只列會誤導的）
 
 - **fd pattern 匹配檔名不是路徑**：搜尋特定目錄用 `fd . <dir>`；`fd src/` 是搜尋檔名含 `src/` 的檔案非搜尋 src/ 目錄

@@ -7,6 +7,10 @@ description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限�
 
 > 本 skill 是 `rules/acceptance-evidence.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（證據獨立性、Claim→Evidence→Trust、L1-L6 階層、A/B 軸分工）；本檔承載審查/規劃/測試策略工作流才需要的深層論證、失敗案例與設計方向。兩者同一概念體系，分層載入。
 
+## 證據時效性與 A/B 軸限制
+
+重構後必須重新確認測試仍驗原意；過時但綠、被改成迎合實作、行為已無關的測試都會給虛假信心。A 軸機器自驗（L1–L3）必要但不充分，天花板是 AI 自洽；B 軸人類驗收（L4–L6）提供外部正確性。獨立 context 不等於獨立智能，同家族模型仍可能共享偏誤；人類亦有疲勞與確認偏差。P0 invariant 因此要以 A 軸機械、B 軸人審、Runtime Invariant Assurance 三層共同守衛；任何一層只能降風險，不能消除風險。
+
 ## Claim 群的真實案例（rule 端舉證義務的案例載體）
 
 > rule 端「Claim→Evidence→Trust」段列同型 claim 群與舉證義務（always-on 核心）；本段承載對應**真實案例**（失敗教訓案例屬 Low Noise 保留例外，須含「真實案例」marker）。

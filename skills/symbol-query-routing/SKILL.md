@@ -28,6 +28,11 @@ description: 符號查詢路由深層參考 — LSP operation 速查表（自 ru
 4. **Report precise locations** — 每個 finding 附 `file:line`
 5. **Cross-verify** — 結果非預期時用 Read 交叉確認
 
+## 重構與 diagnostics 查證義務
+
+- rename、改簽名或回傳型別前必查全呼叫點：首選 code-reality refs/callers；缺場用 LSP `findReferences`。rg 可能漏動態引用，不可單獨作完整性證據。
+- 編輯後驗證順序：Edit → ruff → `check_file` 即時診斷 → mypy 權威完整型別檢查 → pytest；diagnostics 不取代 mypy。Claude 編輯後自動推送 diagnostics 時同 turn 修正，其他 harness 主動觸發。
+
 （驗證輸出 4 段格式——State question / Show operation / file:line finding / ✅❌ conclusion——見下方專段）
 
 ## 反例群：rg 的陷阱（符號查詢 + 依賴枚舉）
@@ -88,7 +93,7 @@ task prompt 寫「若有 LSP 工具可用...無 LSP 則用 rg」是**提醒確�
 | harness | LSP 機制 | 呼叫方式 |
 |---------|---------|---------|
 | Claude Code | 原生 plugin set（pyright/rust-analyzer/clangd/gopls/jdtls/...）| `LSP` tool（native，非 MCP），參數 `operation`/`filePath`/`line`/`character` |
-| ZCode | 無原生 → 用自建 `lsp-python` MCP server（mosaic_alpha `tools/lsp_mcp/server.py` 參考實作；per-project workspace） | **單一 `mcp__lsp-python__lsp(operation=...)` tool**（CC-aligned dispatch：operation 值 camelCase 對齊 CC `LSP` tool，如 `goToDefinition`/`findReferences`/`hover`/...；hybrid input position + symbol_name fallback；`character` 非 `column`） |
+| ZCode | 無原生 → 現行：符號走 cr index（`pyrefly-index`／SCIP）、型別走 `code-reality-lsp-bridge`（lsp-python MCP 2026-08-28 起停擺，見下「現況」註） | 舊形態（歷史）：單一 `mcp__lsp-python__lsp(operation=...)` tool（mosaic_alpha `tools/lsp_mcp/server.py` 參考實作；CC-aligned dispatch） |
 | OpenCode | 原生 LSP（官方文檔說有，未實測） | 原生 tool |
 | 未來無 native 的 harness | 用 MCP server 支援 | mosaic_alpha `lsp-python` 為 reference impl（per-project http server） |
 

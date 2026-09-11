@@ -62,6 +62,12 @@ description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 rep
 
 **不可互代**：接線 guard 廉價擋高頻接線 regression；真實邊界昂貴擋跨層 schema / 展開失敗。命名含 `_integration` 但純邏輯仍留 unit_tests（依依賴判斷，不看名稱）。
 
+## 接線覆蓋與漸進驗證
+
+symbol 出現在測試不代表新參數、接線或組合真的被驅動：新 public 參數/注入點必測既有符號＋新參數組合；全是 `guard=None` 不涵蓋 guard 注入，可用 `rg "<param>=" tests/` 查接線。registry 新成員須斷言 auto-discovery membership（如 `list_*_classes()`）；per-class 測試不證明已註冊。整合器型變更仍須同時有接線 guard＋真實邊界測試。
+
+驗證採 DEPTH-MIN→SAMPLE→FULL：每次修改先以 3–5 個多分支案例做 MIN，至少含一個已知易錯案例；穩定後 SAMPLE，再到風險要求的 FULL。任何階段失敗都先分析/修正並回 MIN，禁修改後直接 FULL 或 FULL 失敗後盲重跑。風險分級決定最終深度，漸進順序決定如何抵達。
+
 ## 與 test-driven-development 邊界
 
 - [test-driven-development](../test-driven-development/SKILL.md)：RED/GREEN **流程** + Test Classification（單元 / 整合 / 外部 API 分類）。

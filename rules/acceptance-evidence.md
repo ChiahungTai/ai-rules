@@ -6,11 +6,11 @@ harness-scope: neutral
 
 ## 核心原則:證據獨立性
 
-證據強度取決於來源是否獨立於被驗證物。AI 同寫 test＋impl 共享理解，可能忠實實現同一個錯誤前提；綠燈只證明自洽。認知誤差、EP 預見極限、Intent Drift、filter trap、L3 實例及 runtime assurance 見 acceptance-evidence skill。
+證據強度取決於來源是否獨立於被驗證物。AI 同寫 test＋impl 共享理解，可能忠實實現同一錯誤前提；綠燈只證明自洽。認知誤差、Intent Drift、filter trap、L3 實例、證據時效性、A/B 軸限制及 runtime assurance 見 acceptance-evidence skill。
 
 ### Claim→Evidence→Trust(no-impact claim 校驗)
 
-producer 宣稱「不影響 X」（accounting/risk/invariant）須有獨立機械證據（diff、rg 殘留、LSP references），否則只是共享 mental model drift 的 self-report；誠實自述也不能取代查證。其他 claim 類型見 acceptance-evidence skill。
+producer 宣稱「不影響 X」（accounting/risk/invariant）須有獨立機械證據（diff、rg 殘留、LSP references）；self-report 不能取代查證。其他 claim 類型見 acceptance-evidence skill。
 
 <!-- bundle: skip-start -->
 - **數字/清單類 claim**（計數、規模、盤點）:寫進文檔前用獨立計數命令（`rg | wc -l` / `rg -c`）核對完整輸出，不靠印象或截斷結果人工數——AI 寫盤點清單易憑印象混入/漏掉成員（真實案例：consumers 數 41 誤寫 20，因 `rg | head -20` 截斷）。
@@ -24,22 +24,11 @@ producer 宣稱「不影響 X」（accounting/risk/invariant）須有獨立機�
 
 | 層 | 證據與覆蓋 | 限制/風險 |
 |---|---|---|
-| L1 靜態 | type check/ruff/ast.parse；語法、型別 | 機械執行；低風險 |
-| L2 單元 | unit test（含 mock）；函式邏輯 | 最易同義反覆、mock 假設即 bug；中風險 |
-| L3 整合 | 真 DB/跨模組 fixture；組合、FK、擴散 | 仍可能 mock 關鍵邊界；中風險 |
-| L4 可執行 demo | 真腳本/資料；API 幻覺、第三方真實行為 | 可能只挑 happy path；外部依賴高風險 |
-| L5 對抗性 POC | 髒資料/已知陷阱；除權息、減資、NaN、時區、溢出 | AI 自選標的仍可能避開盲區；數據高風險 |
-| L6 人類觀察 | 看真輸出/畫面/log；需求誤解 | 疲勞、看一眼就信；單向門 |
+| L1 靜態 | type check/ruff/ast.parse；語法、型別 | 低風險 |
+| L2 單元 | unit test（含 mock）；函式邏輯 | mock 假設可能即 bug |
+| L3 整合 | 真 DB/跨模組 fixture；組合/FK/擴散 | 仍可能 mock 關鍵邊界 |
+| L4 可執行 demo | 真腳本/資料；API/第三方真實行為 | 可能只挑 happy path |
+| L5 對抗性 POC | 髒資料/已知陷阱：除權息、NaN、時區、溢出等 | AI 仍可能避開盲區 |
+| L6 人類觀察 | 真輸出/畫面/log；需求理解 | 疲勞、確認偏差 |
 
-**禁用低層證據冒充高層驗收**；🟢 低風險不需爬到六層（避免過度工程是內建約束），但每層都值得懷疑——L6 人類觀察會疲勞漏見，L5 POC 可能打自己畫的靶。風險分級定深度，驗證順序及消費端模式見 [quality-constraints](quality-constraints.md)。
-
-### 證據時效性
-
-重構後必須重新確認測試仍驗原意；過時但綠、被改成迎合實作、行為已無關的測試，都會給虛假信心。
-
-## A / B 雙軸分工
-
-- A 機器自驗（L1–L3）：必要但不充分，天花板是 AI 自洽。
-- B 人類驗收（L4–L6）：外部正確性的來源；debrief/illustrate/smell-detector 已提供人類 viewport，完整 L4–L6 執行驗收仍是設計方向。
-
-獨立 context 不等於獨立智能：同家族模型共享偏誤，quorum 解不了共同盲點；人類也有疲勞/確認偏差，P0 invariant 須加 Runtime Invariant Assurance（A 機械＋B 人審＋runtime 三層，詳 acceptance-evidence skill）。各層只能降低、不能消除風險。
+**禁用低層證據冒充高層驗收**；低風險不必爬滿六層，風險分級決定深度。驗證順序/消費端模式見 [quality-constraints](quality-constraints.md)；證據時效、A（L1–L3）/B（L4–L6）分工、同家族共同盲點與 P0 三層守衛見 acceptance-evidence skill。

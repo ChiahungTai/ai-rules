@@ -6,11 +6,11 @@ harness-scope: neutral
 
 ## 完整交付標準
 
-方向明確就做到可用：完整核心功能、相關測試、邊界處理與文檔同步。完成後檢查變更所在及上層 AGENTS.md 的架構/API/模組職責描述，必要時同步（含 Claude 端 wrapper）。方案需選擇、需求不明或風險需裁決時請示。
+方向明確就做到可用：核心功能、相關測試、邊界處理、文檔同步；完成後檢查變更所在與上層 AGENTS.md 的架構/API/職責描述，必要時同步（含 Claude wrapper）。需方案選擇、需求不明或風險裁決時請示。
 
 ## 數據完整性優先（Crash-Only Design）
 
-損壞數據比缺失更危險。無效輸入、溢出、轉型/解析失敗立即崩潰，禁吞錯續行或修補損壞輸入；檢查非空、必要欄位、NaN、inf。
+損壞數據比缺失更危險。無效輸入、溢出、轉型/解析失敗立即崩潰，禁吞錯續行或修補損壞輸入；驗非空、必要欄位、NaN、inf。
 
 - 狀態外部化（DB/隊列），操作等冪、服務無狀態；停止即崩潰、恢復即初始化。
 - 適用量化交易、高頻、實時風控、批次；不適用長會話、複雜 UI 狀態、UX 優先互動。
@@ -18,28 +18,22 @@ harness-scope: neutral
 
 ### 誤用警告：crash-only 不是「graceful 不修」的藉口
 
-crash-only 是 graceful 意外失敗的後備保證，不豁免可預期的整合 bug、配置錯誤或合約違反——真實案例：ReplayHost SIGTERM 失敗曾被以 crash-only 跳過；正解是 TDD red（xfail strict）釘住 graceful 目標，另開 EP 修復。
+crash-only 只保證意外失敗後可恢復，不豁免可預期的整合 bug、配置或合約錯誤。真實案例：ReplayHost SIGTERM 失敗曾被以 crash-only 跳過；正解是 TDD red（xfail strict）釘 graceful 目標再修。
 
 ## 主動揭露錯誤（Fail Loud）
 
-未確認成功、跳過步驟/案例/驗證、migration 跳記錄、未驗邊界，都須明列限制，不得報完成或全通過；隔離單元綠燈不代表功能完成。每個功能須有可執行範例；API 必須實際呼叫，邊界處理必須驗證。
+未確認成功、跳過步驟/案例/驗證、migration 跳記錄、未驗邊界都須明列限制，禁報完成/全通過；隔離單元綠燈不代表功能完成。功能須有可執行例，API 實際呼叫，邊界實驗。
 
 ### 消費端驗證模式
 
-先定位主要消費者，在其完整流程實跑（scoring/ranking 用 watchlist 真資料；除權息用真股票日/週/月 K——silent-corruption 高危區；DB 改動跑 fetch→transform→write→read）。共用模組變更須驗整個受影響目錄；**測試集必須機械反查，不憑目錄直覺**：code-reality `impact_radius`／`scip_refs --callers`，或 `rg "<符號>" tests/ -l`。
+先定位主要消費者並跑完整流程（scoring/ranking 用 watchlist 真資料；除權息用真股票日/週/月 K；DB 改動跑 fetch→transform→write→read）。共用模組驗整個影響面；**測試集須機械反查，不憑目錄直覺**：code-reality `impact_radius`/`scip_refs --callers` 或 `rg "<符號>" tests/ -l`。
 
-### 符號覆蓋 vs 整合路徑覆蓋
-
-symbol 出現在測試不代表新參數/接線/組合被驅動（證據分層見 [acceptance-evidence](acceptance-evidence.md)）。
-
-- 新 public 參數/注入點必測既有符號＋新參數組合；全部 `guard=None` 不涵蓋 guard 注入。用 `rg "<param>=" tests/` 查接線，無命中須補查/補測。
-- registry 新成員須斷言 auto-discovery membership（如 `list_*_classes()`）；per-class 測試不證明已註冊。
-- 整合器型變更須載入 validation-strategy skill：三條件判定、mock 循環論證、接線 guard＋真實邊界兩層整合測試，缺一即缺口。
+symbol 命中不等於新參數/接線/組合被驅動；整合器型變更的 public 注入、registry membership、接線 guard＋真實邊界兩層測試細則見 **validation-strategy skill**（證據分層見 [acceptance-evidence](acceptance-evidence.md)）。
 
 ## 漸進式驗證（DEPTH-MIN→SAMPLE→FULL）
 
-每次修改先 MIN（3–5 個多分支案例，至少一個已知易錯案例）；邏輯穩定再 SAMPLE；兩者過才 FULL。任一失敗先分析、修正、重回 MIN；禁修改後直跑全量或 FULL 失敗盲重跑。風險分級定驗到多深（guide「驗證約束」），漸進順序定如何抵達；高風險需 FULL，仍從 MIN 起。
+一律 DEPTH-MIN→SAMPLE→FULL；失敗先分析/修正並回 MIN，禁改後直跑 FULL 或失敗盲重跑。風險分級決定最終深度；3–5 案、已知陷阱等細則見 validation-strategy skill。
 
 ## 多步驟任務檢查點
 
-跨檔重構、多段實作或三步以上修改，每個重要步驟回報已完成/已驗證/剩餘事項；無法精確描述進度或不確定前步正確時停下釐清，禁盲續。
+跨檔重構、多段或三步以上修改，每個重要步驟回報完成/驗證/剩餘；無法精確描述或不確定前步正確時停下釐清，禁盲續。

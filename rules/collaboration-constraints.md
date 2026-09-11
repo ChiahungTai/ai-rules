@@ -6,15 +6,15 @@ harness-scope: neutral
 
 ## 理解優先實作
 
-需求不明先複述理解、列可能解讀並澄清，不猜測實作；疑問彙整一次問，避免每次往返重送 context。非硬 gate 的確認集中完成報告；commit、破壞性、單向門依 [outward-action-consent](outward-action-consent.md)。
+需求不明先複述理解、列可能解讀並澄清，禁猜測實作；疑問一次彙整（避每次往返重送 context）。非硬 gate 的確認集中到完成報告；commit、破壞性、單向門依 [outward-action-consent](outward-action-consent.md)。
 
 ## 事實查證原則
 
-分析結論須依實際程式碼，附 path:line＋具體特徵，不以 LLM 經驗代替證據；「X 支援/不做 Y」即使只在概覽或順口一句也須查證，事後自審共享原盲點，不能代替獨立證據（見 [acceptance-evidence](acceptance-evidence.md)）。AGPL 可研究行為/設計，禁搬碼或逐行翻譯，實作對自己的規格寫；fork/divergent 依賴的 state-dependent 行為查本地 runtime/`.venv/` source，upstream 文檔不代表 fork。
+分析結論須依實際程式碼，附 path:line＋具體特徵；任何「X 支援/不做 Y」都須查證，自審不能取代獨立證據（見 [acceptance-evidence](acceptance-evidence.md)）。AGPL 可研究行為/設計，禁搬碼或逐行翻譯，實作對自己的規格寫；fork/divergent 依賴的 state-dependent 行為查本地 runtime/`.venv/` source，upstream 文檔不代表 fork。
 
 ### 破壞性選擇的查證觸發
 
-刪除/整併看似等價的無測試檔案，先查 README 權威指名、Capabilities 入口、git 活躍度與內容完整性＋backlog 卡是否提及或依賴，不憑檔名選；存活檔只有路徑修正而無內容吸收是刪錯訊號，停下重判。（真實案例：standup 誤刪，恢復事實只記在卡 desc，原清單不含卡面）
+刪/併看似等價的無測試檔前，查 README 權威指名、Capabilities、git 活躍度/內容完整性及 backlog 依賴，禁憑檔名選；存活檔只改路徑卻沒吸收內容是刪錯訊號，停下重判。真實案例：standup 恢復事實只在卡 desc，原清單漏卡面而誤刪。
 
 ## 具體明確表達
 
@@ -22,15 +22,15 @@ harness-scope: neutral
 
 ## 接收建議與回饋（反 Sycophancy）
 
-建議先查證再評估，不盲目同意或用感謝取代修正：READ→UNDERSTAND→VERIFY against codebase→EVALUATE→RESPOND→IMPLEMENT。核對技術適用、既有功能與決策；查不了明說，錯誤建議附理由反對，成立就簡述修正——盲改指標公式會靜默污染回測。YAGNI（刪）與 filter trap（驗證不能刪）判別見 acceptance-evidence skill。
+建議先 READ→UNDERSTAND→VERIFY codebase→EVALUATE→RESPOND→IMPLEMENT；核對適用性、既有功能與決策。查不了明說；錯誤建議附理由反對，成立就修——盲改指標會靜默污染回測。YAGNI（刪）與 filter trap（驗證不能刪）見 acceptance-evidence skill。
 
 ## 工作目錄紀律
 
-- 不 cd 其他 repo；以 harness Primary working directory 為準。跨 repo 用完整路徑（或 `git -C`），避免改錯 worktree。
-- 他人未提交變更預設不相關，不審不改不順手修；commit 只 add 指名檔。**目標檔已有他人變更或同區域不同改法才是停下確認的機械衝突訊號**，否則各自進行。
+- 不 cd 其他 repo；以 Primary working directory 為準，跨 repo 用完整路徑或 `git -C`。
+- 他人未提交變更預設不相關，不審不改；commit 只 add 指名檔。**僅目標檔已有他人變更或同區域不同改法才是停下確認的機械衝突訊號**。
 
 ## Agent 派發與產出回收
 
-跨 repo 寫入由主 session 負責（spawn 前確認 worktree 能力，優先目標 repo session；agent 寫不進目標就寫當前 repo由主 session 回收，禁把責任丟給受限 agent）。spawned/automation session 只在卡的 owning WT 操作（按各 repo 線 tag↔WT 判定，不能判定回報主 session；真實案例：owning=main 的卡被監控 session 錯誤結案，因對方規則未載入）。
+跨 repo 寫入由主 session 負責；spawn 前確認 worktree 能力，優先目標 repo session，agent 寫不進目標就回報主 session，禁把責任丟給受限 agent。spawned/automation 只在卡 owning WT 操作；不能判定就回報。真實案例：監控 session 因規則未載入，誤結 owning=main 的卡。
 
-會寫檔的 agent prompt 必注入：①禁 /tmp，產出留當前 repo/worktree；②寫不進指定路徑回報「環境限制：我寫不進 X」，不可退到 /tmp；③暫存集中 `.agent-tmp/`（post-build 清理；夜掃兜底——`.agent-tmp/`/`.at-contexts/` 7d、`.review/` 30d）。
+寫檔 agent prompt 必注入：①禁 /tmp，產出留當前 repo/worktree；②寫不進指定路徑就回報「環境限制：我寫不進 X」，不可退 /tmp；③暫存集中 `.agent-tmp/`（post-build 清；夜掃兜底 `.agent-tmp/`/`.at-contexts/` 7d、`.review/` 30d）。
