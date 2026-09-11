@@ -85,7 +85,7 @@ ep_type（implementation/blueprint）是「**寫哪種 EP**」；本段是「**�
    - **自動建卡**（EP 產出後執行）：
      1. 收集 EP 中所有「新增 UC」（UC 盤點 → 新增 UC 表格中的 📋 項目）
      2. 對照既有卡，篩出**缺少卡的能力**（已含去重命中 → 跳過）
-     3. 逐能力 `backlog task create "<標題>" -l <labels> -d "<目標一句>（蒸餾自 EP 總覽：baseline／已決策勿重辯／驗收——desc gate 三必有，見 [kanban-board](../kanban-board/SKILL.md)）"`；為 EP 整體另建一張追蹤卡（命令合約與**開工雙 ref 規則**見 [kanban-board](../kanban-board/SKILL.md)——卡 references 必須同時掛 http URL＋repo 相對路徑，相對路徑單獨出現＝board 上不可點＝錯誤形態）
+     3. 逐能力 `backlog task create "<標題>" -l <labels> -d "<目標一句>（蒸餾自 EP 總覽：baseline／已決策勿重辯／驗收——desc gate 三必有，見 [kanban-board](../kanban-board/SKILL.md)）"`；為 EP 整體另建一張追蹤卡（命令合約與**開工雙 ref 規則**見 [kanban-board](../kanban-board/SKILL.md)——卡 references 只掛 repo 相對路徑（EP 必備，有殼並列 shell 路徑），不掛 http URL）
      - desc「已決策」段可含風險面屬性標註（「寫入契約首改」「跨文件交叉推導」「無保護面新能力」）——後續 handoff「建議執行 tier」的輸入
      4. **建卡（批次）即 commit**：`git add backlog/ && git commit -m "chore(backlog): <卡id…>"`——跨 WT id 防撞靠卡及時進 branch ref；此形態 user 已裁定免逐次確認（例外條款見 [outward-action-consent](../../rules/outward-action-consent.md)「Commit 專屬段」；命令合約見 [kanban-board](../kanban-board/SKILL.md)）
    - 無 `backlog/` 目錄時：提醒 user `backlog init --agent-instructions none`（**禁**再教 `mkdir .kanban/`——`.kanban/` 舊制已退役；`--agent-instructions none` 避免注入與本 repo AGENTS.md 治理衝突的 CRITICAL_INSTRUCTION 區塊）；repo 不採 board 制 → 卡片動作整項跳過
@@ -381,7 +381,7 @@ EP review 修訂寫回後（定稿），生成 **task brief**——EP 的人類�
 ### 1. 模組 instruction 檔 Capabilities + Kanban 更新
 
 - 已完成 UC：在對應模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）Capabilities 表格新增一行（能力 + 入口 + ✅）
-- 卡結案（repo 有 `backlog/` 時；時點＝收斂後——post-build hook 2／無 post-build 弧走 implement 階段 6 fallback；5a 只做 Capabilities Built 結算）——**結案兩步＋弧結案蒸餾第三動**（命令合約見 [kanban-board](../kanban-board/SKILL.md)）：`backlog task edit <id> -s Done --final-summary "<一句>"` → `task edit <id> --ref "<done/ 新URL>,<相對路徑>"`（任務目錄遷 done/ 後 URL 更新），卡留 Done 欄；第三動＝本弧 memory 條目蒸餾為終態 facts；無 `backlog/` → 跳過
+- 卡結案（repo 有 `backlog/` 時；時點＝收斂後——post-build hook 2／無 post-build 弧走 implement 階段 6 fallback；5a 只做 Capabilities Built 結算）——**結案兩步＋弧結案蒸餾第三動**（命令合約見 [kanban-board](../kanban-board/SKILL.md)）：`backlog task edit <id> -s Done --final-summary "<一句>"` → `task edit <id> --ref "<done/ EP 相對路徑>[,<shell 相對路徑>]"`（任務目錄遷 done/ 後路徑更新），卡留 Done 欄；第三動＝本弧 memory 條目蒸餾為終態 facts；無 `backlog/` → 跳過
 - **原子操作**：各時點內同時完成（5a：Capabilities＋消費場景＋SM 預覽；收斂後：結案兩步＋SM 升級＋EP 歸檔＋flow-feedback 歸檔——定義見 [metadata-sync](../metadata-sync/SKILL.md) 原子性）
 - **從 EP Scenario Matrix 提煉「消費場景」**（大型/中型變更）：將矩陣中所有引用該 UC 的場景，提煉成自包含一句話描述（不引用 EP/SM 編號），寫入 Capabilities 表格備註或 backlog 卡（`backlog task edit <id> --append-notes`）
 

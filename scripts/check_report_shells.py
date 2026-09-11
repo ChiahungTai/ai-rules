@@ -2,7 +2,7 @@
 """Report Shell provenance lint（ai-analysis 任務家殼的回源完整性）。
 
 殼是 source 的 projection（illustrate-html-mode「投影鎖定與 stale 標記」＋
-kanban-board 結案兩步 `--ref` 換 done/ URL）——本 lint 把三類已發生的失真
+kanban-board 結案兩步 `--ref` 換 done/ 路徑）——本 lint 把三類已發生的失真
 變機械閘門（codex 09-06 全 repo 審查 I-7）：
 1. 同殼宣告多個互斥 projection SHA（一殼只能有一個 current identity）；
 2. projection SHA 與同目錄 ep.md 的 content SHA 不符（stale projection）；
