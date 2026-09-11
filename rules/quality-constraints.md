@@ -26,9 +26,7 @@ crash-only 只保證意外失敗後可恢復，不豁免可預期的整合 bug�
 
 ### 消費端驗證模式
 
-先定位主要消費者並跑完整流程（scoring/ranking 用 watchlist 真資料；除權息用真股票日/週/月 K；DB 改動跑 fetch→transform→write→read）。共用模組驗整個影響面；**測試集須機械反查，不憑目錄直覺**：code-reality `impact_radius`/`scip_refs --callers` 或 `rg "<符號>" tests/ -l`。
-
-symbol 命中不等於新參數/接線/組合被驅動；整合器型變更的 public 注入、registry membership、接線 guard＋真實邊界兩層測試細則見 **validation-strategy skill**（證據分層見 [acceptance-evidence](acceptance-evidence.md)）。
+先定位主要消費者並跑完整流程；測試集範圍不可憑目錄直覺，須機械反查。工具命令、symbol 命中≠接線被驅動、整合器型兩層測試等細則見 **validation-strategy skill**「整合器型變更判定」「接線覆蓋與漸進驗證」「消費端驗證模式」段（證據分層見 [acceptance-evidence](acceptance-evidence.md)）。
 
 ## 漸進式驗證（DEPTH-MIN→SAMPLE→FULL）
 

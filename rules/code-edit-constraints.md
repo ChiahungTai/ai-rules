@@ -50,45 +50,11 @@ harness-scope: claude-specific
 
 ### 連續 Edit 失敗處理
 
-連續兩次 Edit 同一檔案失敗時：
-1. **停止重試**：不要用相同的 old_string 再試
-2. **重新 Read**：讀取檔案確認當前狀態
-3. **確認 old_string**：確保匹配的文字確實存在於檔案中
+Edit 失敗的完整處置階梯（re-Read → 停止盲試 → repr 唯讀診斷 → 縮小 old_string → Write 覆寫）見 [tool-discipline.md](tool-discipline.md)「Edit 失敗處置階梯」（neutral canonical）。Claude API 行為備註：跨行匹配含多位元組字元（中文等）可能失敗，即使 `old_string` 精確——縮小 old_string 只匹配目標周圍的 ASCII 部分可避開。
 
 ### 連續同類錯誤處理
 
 寫出的程式碼反覆出現同類錯誤時，必須停下改變策略：
 
-- **連續 2 次 Edit 失敗** → 停下改用 Write 工具整檔覆寫
 - **連續 3 次同類語法/邏輯錯誤** → 停下，用 `uv run python -c "compile(...)"` 或 `uv run ruff check` 驗證，確認修正方向正確後再繼續
 - **禁止盲目重試**：不改變策略的反覆嘗試是浪費時間
-
-### Edit 失敗時的降級策略
-
-Edit 工具在跨行匹配含多位元組字元（中文等）時可能失敗，即使 `old_string` 精確。
-
-**降級順序**：
-1. **縮小 old_string** — 只匹配目標周圍的 ASCII 部分，避開多位元組字元
-2. **Write 工具覆寫** — Read 取得完整內容，修改後 Write 整檔覆寫
-3. **不使用 sed/Python 替換** — sed 不理解程式碼或 Markdown 語法，批次替換常破壞縮排、誤改字串/註解、毀損多行結構。禁止用 sed 修改 `.py`、`.md`、YAML/JSON/TOML。唯一允許：過濾日誌輸出、處理純文字資料流（不修改原始檔）
-
-```markdown
-## ✅ Write 降級流程
-# 1. Read file → 取得完整內容
-# 2. 在 context 中修改目標段落
-# 3. Write file → 寫回完整檔案
-```
-
----
-
-## 編輯前自檢清單
-
-在進行程式碼編輯前確認：
-- [ ] 已讀取目標檔案（Edit 前必須 Read）
-- [ ] `old_string` 從 Read 輸出精確複製
-- [ ] 連續編輯同一檔案時，每次 Edit 前重新 Read
-- [ ] Edit 連續失敗時，改用 Write 整檔覆寫
-- [ ] 已嘗試編輯現有檔案而非創建新檔案
-- [ ] 如果需要破壞性變更，確認不影響外部整合
-- [ ] 架構改進有測試保護
-- [ ] replace_all 改名後，rg 確認無子串誤改（如 `rg "SyncSync"` 查雙重重複）

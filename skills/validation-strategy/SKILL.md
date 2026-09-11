@@ -1,6 +1,6 @@
 ---
 name: validation-strategy
-description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 replay >>> live、驗證放 scripts/、不重驗 package 已驗證的部分、整合器型變更判定（三條件＋mock 循環論證＋兩層整合測試：接線 guard＋真實邊界）。用於 build/commit 驗證段決定測試類型與方式。觸發詞：e2e、replay、驗證策略、測試類型、live、不重驗 package、驗證放哪、交易驗證、回放、整合器型、真實邊界、整合測試、mock。
+description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 replay >>> live、驗證放 scripts/、不重驗 package 已驗證的部分、整合器型變更判定（三條件＋mock 循環論證＋兩層整合測試：接線 guard＋真實邊界）、消費端驗證模式（完整流程＋測試集機械反查）。用於 build/commit 驗證段決定測試類型與方式。觸發詞：e2e、replay、驗證策略、測試類型、live、不重驗 package、驗證放哪、交易驗證、回放、整合器型、真實邊界、整合測試、mock、消費端、機械反查。
 ---
 
 # Validation Strategy — 驗證策略紀律
@@ -68,6 +68,12 @@ symbol 出現在測試不代表新參數、接線或組合真的被驅動：新 
 
 驗證採 DEPTH-MIN→SAMPLE→FULL：每次修改先以 3–5 個多分支案例做 MIN，至少含一個已知易錯案例；穩定後 SAMPLE，再到風險要求的 FULL。任何階段失敗都先分析/修正並回 MIN，禁修改後直接 FULL 或 FULL 失敗後盲重跑。風險分級決定最終深度，漸進順序決定如何抵達。
 
+## 消費端驗證模式（消費端上下文驗）
+
+先定位主要消費者並跑完整流程：scoring/ranking 用 watchlist 真資料；除權息用真股票日/週/月 K；DB 改動跑 fetch→transform→write→read。共用模組驗整個影響面。
+
+**測試集須機械反查，不憑目錄直覺**：查「哪些測試覆蓋某符號」用 code-reality `impact_radius`／`scip_refs --callers`，或 `rg "<符號>" tests/ -l`——禁憑目錄位置推斷測試歸屬。
+
 ## 與 test-driven-development 邊界
 
 - [test-driven-development](../test-driven-development/SKILL.md)：RED/GREEN **流程** + Test Classification（單元 / 整合 / 外部 API 分類）。
@@ -78,7 +84,7 @@ symbol 出現在測試不代表新參數、接線或組合真的被驅動：新 
 ## 與既有邊界
 
 - [acceptance-evidence](../../rules/acceptance-evidence.md) L3-L5：證據**強度**階層（整合 / 可執行 / 對抗）。本 skill 是**選擇**紀律（引用階層，非重述）。
-- [quality-constraints](../../rules/quality-constraints.md) 消費端驗證：在消費端上下文驗。本 skill 提供「怎麼驗」的類型選擇。
+- [quality-constraints](../../rules/quality-constraints.md) 消費端驗證：rule 留 invariant（先定位主要消費者＋測試集機械反查），細則與工具命令在本 skill「整合器型變更判定」「接線覆蓋與漸進驗證」「消費端驗證模式」段。
 
 ## 不適用
 

@@ -14,8 +14,9 @@ harness-scope: claude-specific
 
 - `python -c` 禁止寫註解 — AI 自用驗證、不需給人看；多行換行後 `#` 會觸發權限提示（CLI 無法判斷跨行註解是否被注入惡意內容）
 - 禁止 `$VAR`、`$(cmd)` 等 shell 展開（觸發 simple_expansion / command_subshell / subshell 偵測）。需要變數時用具體值或寫 `.py` 檔案
+- zsh 陣列 recipe（`args=(--flag 1)`＋`cmd "${args[@]}"`——tool-discipline 教的正確寫法）在 Claude Bash **不適用**：靜態分析器直接攔截（實測攔截訊息逐字：`Contains shell syntax (array) that cannot be statically analyzed`），非權限提示可核准；動態 flags 需求改用 tool-discipline 的替代路徑（分支組合／`--flag=1`／寫 .py）
 
-口訣：`#` 是毒藥、`$` 是禁區、需要變數就寫 `.py`。
+口訣：`#` 是毒藥、`$` 是禁區、陣列是禁區、需要變數就寫 `.py`。
 
 ## 例外與降級
 

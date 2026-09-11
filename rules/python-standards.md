@@ -34,4 +34,4 @@ Facade 對外部消費者有穩定 API 解耦價值；內部 modules/scripts/tes
 
 ## Python 命令執行
 
-強制 uv run 前綴，禁 python/python3/PYTHONPATH（詳 tool-discipline）；另禁外部 timeout/gtimeout（macOS 無此命令）。pytest 背景跑；ModuleNotFoundError 先確認 uv pip install -e .。
+Python 命令執行（uv run 強制、pytest 背景跑、PYTHONPATH 禁令、timeout 禁令）單一源＝[tool-discipline.md](tool-discipline.md)。

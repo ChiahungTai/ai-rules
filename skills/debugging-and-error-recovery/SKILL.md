@@ -87,6 +87,8 @@ Narrow down which layer: UI, API, database, build tooling, external service, or 
 
 **症狀層 ≠ bug 層**：症狀出現在某層（如 display 顯示錯），不代表 bug 就在該層 —— 直覺往 data 層挖（datetime 值算錯？），可能全對、bug 其實在 render 層。**先驗症狀對應的 data 值**（秒級 diagnostic log，如印 `new_dt` vs `prev_dt`）：值對 → 轉 render/formatter 層；值錯 → 才深入值計算路徑。display 類症狀尤其危險（直覺往 data 找，但顯示問題常在 render）—— 先驗值（秒級成本）再決定方向，避免過度投資錯誤假說。
 
+**環境/依賴錯誤速查**：`ModuleNotFoundError` 先確認 `uv pip install -e .`（package 未以 editable 安裝）；已安裝仍失敗續依 Localize 流程查 import path／package config／誤刪 module——不得僅由 exception type 判定非 code bug（反例：刪錯 consumer 的 runtime `ModuleNotFoundError` 是 code bug）。
+
 **符號查詢預設用 LSP，rg 只做文字/字串**（找 class/def/引用/呼叫端 → LSP first；找字串內容/註解/config → rg）：
 
 - 「誰建立/引用這個符號？」→ LSP `findReferences`（100% 涵蓋；rg 可能 truncated/漏動態引用）

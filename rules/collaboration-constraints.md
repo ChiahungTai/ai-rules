@@ -33,4 +33,4 @@ harness-scope: neutral
 
 跨 repo 寫入由主 session 負責；spawn 前確認 worktree 能力，優先目標 repo session，agent 寫不進目標就回報主 session，禁把責任丟給受限 agent。spawned/automation 只在卡 owning WT 操作；不能判定就回報。真實案例：監控 session 因規則未載入，誤結 owning=main 的卡。
 
-寫檔 agent prompt 必注入：①禁 /tmp，產出留當前 repo/worktree；②寫不進指定路徑就回報「環境限制：我寫不進 X」，不可退 /tmp；③暫存集中 `.agent-tmp/`（post-build 清；夜掃兜底 `.agent-tmp/`/`.at-contexts/` 7d、`.review/` 30d）。
+寫檔 agent prompt 必注入三條（禁 /tmp／寫不進就回報／暫存集中 `.agent-tmp/`）；完整條文見 **agent-workflow skill** 自檢清單「Agent tool spawn 前」。
