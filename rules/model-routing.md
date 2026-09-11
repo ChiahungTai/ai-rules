@@ -27,4 +27,6 @@ review/impl 的 ZCode registry 與 CC 別名釘選依 skill 解析表；本 rule
 
 family＝GLM/muse/codex；profile＝implement/review/advisory。tier/family/profile 詞彙由本檔定義，其他載體只引用。外部 runtime 由 caller 背景 Bash 直呼 bridge，禁 subagent wrapper；需接續的 background job 必掛 `wait <jobId>`。
 
+codex `chatgpt-web` 池（webgpt）專責 review／規劃，禁大型實作／大 payload 單發——單則訊息上限遠小於窗口，超限單發 turn-0 即死（4 筆 ledger 實證見 skill webgpt 專節）；**僅段落級評估確認可完成才派**（派發前提，非例外條款）。額度池分帳（`wham/usage` 看不見 web 池）與五類固定失敗態的處置見 skill。
+
 委派、收法、定向接續/fork 時必載 **model-routing skill**：role→family→profile、eligibility、reviewer handoff、bridge 必經 `task --family muse|codex`、resume/fork、rate limit/classifier failure 與 lite 分工都在其中。external-runtime policy 不擴充 tier/pin；工單禁再委派時不得因載入 routing 自行 spawn。
