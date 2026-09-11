@@ -348,11 +348,20 @@ Capabilities 表每行（能力 | 入口 | 狀態）須帶可檢索 desc，文�
 | **加入統計資訊** | 行數/字數是快照，每次修改都過時 | AI 被誤導，以為程式碼很小 |
 | **加入版本號** | AI 不關心 v1.0 → v2.0 | 浪費 token，無實質資訊 |
 | **模組描述標版號** | 如 `ClassName（v3: ...）`必然過時 | 功能性描述始終準確 |
-| **加入更新日期** | AI 只需要「當前」規則 | 干擾核心內容 |
+| **加入更新日期** | AI 只需要「當前」規則（boundary 例外見下方「日期標記邊界」） | 干擾核心內容 |
 | **加入 Changelog** | 歷史變更應放 CHANGELOG.md | 文檔膨脹 |
 | **作者資訊** | 除非有特殊意義 | 無聊且干擾 |
 | **寫入可推導內容** | API 簽名、參數表、欄位列表可從程式碼直接推導 | 浪費 token，降低 signal/noise ratio |
 | **完整程式碼範例 (>5 行)** | 應精簡為一句話描述 + 源碼引用 | 文檔膨脹，維護成本高 |
+
+#### 日期標記邊界：檔案履歷禁、state 快照可
+
+兩類日期分開裁決——**會腐爛的陳述才標日期**：
+
+- **可標（YYYY-MM-DD 全格式）**：①truth 隨外部狀態腐爛的 state 快照（額度現值、容量實值——時效誠實標記，防 stale 偽裝現況）；②同處多修訂並存需裁決（新壓舊錨點）
+- **禁標**：純 policy 決策 provenance（保留「user 拍板／裁定／定案」字樣，歷史交 git log）、實驗 provenance（歷史以 AIR-id／repo-observed 錨點承載）、失敗履歷（保留「真實案例」marker）、檔案履歷／Changelog
+
+> 💡 **原理**：日期不能讓內容正確，只標記不確定性——到處標會稀釋「注意時效」信號；policy 不隨時間腐爛（只被新決策取代），歷史歸 git log。
 
 ### ✅ 正確的 AI 行為
 
@@ -360,7 +369,7 @@ Capabilities 表每行（能力 | 入口 | 狀態）須帶可檢索 desc，文�
 
 ### 執行約束
 
-- **撰寫** instruction 檔（AGENTS.md source；Claude 端另有 CLAUDE.md wrapper）：不加入任何元資訊區塊、不統計行數字數、不標版本日期、專注「當前有效」的規則
+- **撰寫** instruction 檔（AGENTS.md source；Claude 端另有 CLAUDE.md wrapper）：不加入任何元資訊區塊、不統計行數字數、不標版本號／檔案更新日期（日期標記依上方 boundary 裁決）、專注「當前有效」的規則
 - **修改** instruction 檔：移除發現的元資訊（不保留）、不添加新元資訊（即使其他檔案有）、用 instruction-clean 驗證（Claude: `/instruction-clean`；跨 harness 用各家清理工具或人工檢查）
 
 ### 自檢清單
