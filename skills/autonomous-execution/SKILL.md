@@ -37,7 +37,7 @@ Methodology for autonomous implementation when user should not be disturbed. All
 |------|------|
 | 檔案刪除（不可逆） | `rm -rf`、`find -delete`、`git clean -fd` |
 | Git 遠端 / 歷史破壞 | `git push --force`、`git reset --hard`、影響共享 history 的 `git rebase` |
-| Git commit | `git commit`（[outward-action-consent](../../rules/outward-action-consent.md) commit 段的免確認例外〔backlog 建卡、ruff 自動修改〕僅限互動 session——autonomous session 所有 commit 需用戶確認，半夜自主跑亦不例外） |
+| Git commit | `git commit`（[outward-action-consent](../../rules/outward-action-consent.md) commit 段的免確認例外〔清單見該段，此處不枚舉〕僅限互動 session——autonomous session 所有 commit 需用戶確認，半夜自主跑亦不例外） |
 | 系統層變更 | `sudo *`、`brew uninstall`、`chmod` 系統路徑、`osascript`（macOS 自動化） |
 | 外部服務狀態 | `docker rm`、`docker stop`、DB `DROP`/`DELETE`、redis `FLUSHDB` |
 | 語意型紅線（既有） | 刪除 API、修改 DB schema、變更外部整合介面、安全邏輯、付費操作 |

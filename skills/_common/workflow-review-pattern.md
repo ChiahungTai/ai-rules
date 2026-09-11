@@ -38,7 +38,7 @@ Workflow tool 的優勢：
 兩級 verify node（分級＝成本對齊風險；錨點屬實性與成立性裁決分離）：
 
 - **第一級：錨點批次驗證（Important+ 全 findings，浮出前）**：合併各維度 findings 後，**單一 lite agent 批次**驗證錨點屬實性（file:line 存在、符號存在、引用原文屬實）——非 per-issue spawn（成本爆炸）。錨點不實的 finding 退回不浮出。**驗證≠裁決**：屬實性（機械/lite）與成立性（judge-review 層）分離
-- **第二級：Critical 對抗 quorum**：對錨點屬實的 Critical findings spawn 驗證 agent 嘗試**推翻（refute）**——**3 verifier + ≥2/3 確認** → finding 保留；非 Critical 不跑對抗 verifier（直接保留，交 Main LLM judge-review 最終判斷）
+- **第二級：Critical 對抗 quorum**：對錨點屬實的 Critical findings spawn 驗證 agent 嘗試**推翻（refute）**——**3 verifier + ≥2/3 確認** → finding 保留；非 Critical 不跑對抗 verifier（Important 仍須先過第一級錨點閘，通過後直接保留；Suggestion 不進錨點閘；終判交 Main LLM judge-review）
 - **compliance vs judgment 分流**：compliance 類維度（機械規則對照，如 instruction 檔合規）是 recall 問題——冗餘 agent 有益；judgment 類維度是 bias 問題——需 context 差異（dual-context 變體，見 review-engine 執行預設點 6），quorum 對共同盲點無效（[acceptance-evidence](../../rules/acceptance-evidence.md) A/B 軸）。兩者不互斥，按維度性質配
 
 ---
@@ -170,7 +170,7 @@ export const meta = {
 
 const REVIEW_SCHEMA = { /* DimensionVerdict schema */ }
 const VERIFY_SCHEMA = { /* VerifyVerdict schema */ }
-// review command agent = 主 session（inherit，品質閘門需強度＝full tier——CC 端語義；ZCode 端 review spawn 走 registry pin（full＝glm-5.3，AIR-43），見 rules/model-routing.md 角色 tier 表 + review-engine「review 執行預設」）
+// review command agent = lite 預設（user 09-09 拍板：findings 生產層已實證；高保護面/跨邊界語義面才升 full）——CC 端 sonnet 別名、ZCode 端 registry pin（lite＝glm-5.3-flash）；judge 層恆為主 session full（AIR-24）。見 rules/model-routing.md 角色 tier 表 + review-engine「review 執行預設」）
 // author 時依當前 session 填對的 literal（下為 sonnet session 範例 → inherit = sonnet）
 const REVIEW_MODEL = 'sonnet'
 
@@ -198,7 +198,7 @@ const reviews = await parallel(
 // Phase 2: Verify (only Critical findings)
 // ⚠️ 可自訂：各命令可調整 verifier 數量和 quorum 門檻
 //   預設：Critical → 3 verifier + 2/3 quorum
-//   輕量（如 /ep-review）：must-fix → 1 verifier/finding
+//   輕量（如 /ep-review）：important（輕量別名 must-fix）→ 1 verifier/finding
 //   在此修改 verifier 數量：Array.from({length: N}, ...)
 // Phase 2a: 錨點批次驗證（Important+ 浮出前；單一 lite agent，非 per-issue）
 phase('Verify')

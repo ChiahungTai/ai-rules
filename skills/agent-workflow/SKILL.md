@@ -69,7 +69,8 @@ ZCode 的 Agent tool **預設前台**（阻塞主對話）——前台 spawn 期
 - **spawn 帶 `run_in_background: true`**（Claude 2.1.198+ 已預設背景免動作）；spawn 後主對話回報「進行中」即結束 turn，agent 完成的通知會自動接手
 - 例外（前台）：結果是當前步驟立即依賴且預期 <30s 的短 probe
 - 為什麼（兩面）：前台 = 對話卡死 + 使用者 steer 即殺 agent；背景 = 使用者可繼續對話、steer 不影響 agent、通知後無縫接手——token 帳等價（接手時 context 重送都一次、cache TTL 看壁鐘與 turn 結構無關）
-- 詳細規範（pytest 背景跑等）單一源在 [tool-discipline](../../rules/tool-discipline.md)「背景執行」
+- pytest 與預期 >10 分鐘命令預設背景跑；短測試可併機械驗證。spawn agent 不能拿來繞 Bash timeout——真實案例：誤以為 Bash 只能 600s 而加 bridge wrapper，實際 `run_in_background` 從頭可用，代價是 agent 開銷、間接層與收斂路徑變長。
+- 先做可獨立的前台工作；沒有就回報進行中並結束 turn 等通知。禁背景阻塞長等（各 harness 機制名不同；主對話被中斷時 agent 會連帶 killed、產出遺失）；前台短等待只限結果立即依賴的 <30s probe。
 
 ### Subagent 產出格式：schema 嚴格度（raw material vs deliverable）
 
@@ -159,7 +160,7 @@ Scope Fence（上）擋機械任務 agent「順手重構」scope 外區塊，但
 - **accept**：擴大 scope——**需用戶/EP 確認，非自主擴大**（與 scope fence「不擴大」一致）；**自主模式（deep-work 半夜跑）用戶不可得 → accept 預設降級為 defer**（建 Backlog 卡 + completion report 標記待用戶確認，對齊 [autonomous-execution](../autonomous-execution/SKILL.md) 紅線 git commit 自主處置）
 - **decline**：明確不值得，丟棄（記錄原因，避免重複發現）
 
-**建卡**（defer 時）：用 [kanban-board](../kanban-board/SKILL.md) 卡片模板（標題 / 目標 / 相關 / 驗收標準——欄位名對齊模板，不在此重複定義）。依賴關係在「備註」欄標 `[blocked-by: <當前任務>]`（blockedBy 非標準欄位，見 kanban-board 模板）。
+**建卡**（defer 時）：用 [kanban-board](../kanban-board/SKILL.md) 卡片模板（建卡欄位＝標題／目標一句／驗收條件——欄位名對齊該模板，不在此重複定義；開工時依 kanban 起手式用 `--ref` 補 references）。依賴關係在「備註」欄標 `[blocked-by: <當前任務>]`（備註行約定；kanban 模板無此標準欄）。
 
 **防氾濫三層**：
 

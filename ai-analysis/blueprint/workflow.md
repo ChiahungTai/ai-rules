@@ -33,7 +33,7 @@
 
 - primary 固定承擔 owning line／trunk 的 control-plane checkout，不供一般實作 session 任意切 working branch。
 - primary 的 repo 寫入職責限於 board/card control state：task id allocation、status、refs、final summary 與同類 runtime metadata。
-- `backlog browser` 固定從 primary cwd 啟動，使 board 有唯一 working-copy owner。
+- board 唯一 working-copy owner＝primary 的 `backlog/tasks/*.md`（state ownership）；UI 載體可替換（VSCode extension 主力／TUI／`backlog browser` on-demand），不設常駐、不定義 ownership。
 - code、rules、skills、一般 docs、EP、test、script 的工作寫入走 execution plane。
 - 建立／結束 execution WT 的 helper 從 control plane 發起，並用 lock 序列化 board state 變更。
 
@@ -173,7 +173,7 @@ Muse hook 接線的實作策略由 WT 基建弧在兩案中選一並驗證：
 目標 invariant：
 
 - backlog/config.yml 使用 `check_active_branches: true`，讓多 WT repo 能發現其他 branch 已 commit card，並讓 cross-branch id 掃描生效。
-- `backlog browser` 從 primary control plane 啟動。
+- board UI 載體不設常駐（VSCode extension 為主 viewport；`backlog browser` on-demand 後備）。
 - `backlog/tasks` runtime metadata 只有 control plane 是 writer。
 - card WT 不直接執行會修改 card runtime state 的 `backlog task edit/create/complete`。
 - 建卡 id allocation、開工 status/ref、收尾 finalization 經 control-plane helper，在 repo-local single-writer lock 下執行。
@@ -371,7 +371,7 @@ WT 基建落地後，可以移除「因共享單一 checkout，所以同 repo ca
 
 ## 人類 viewport 供給：產物怎麼看、放哪 — ⚠️ 架構定案；慣例句未落檔
 
-> 真相源：[viewport 供給架構裁決](../reports/2026-09-10-viewport-serving-architecture.md)（8765 事故、三方諮詢與 user 裁決全記錄）；服務機械事實＝mosaic `deploy/scripts/run-report-server.sh`（:6421 腳本，跨 repo）＋本 repo `deploy/scripts/run-backlog-browser.sh` 註解＋[schedule-registry](../schedule-registry.md) 條 A5；放置規範源＝[illustrate-html-mode](../../skills/_common/illustrate-html-mode.md)「產物位置分流」。
+> 真相源：[viewport 供給架構裁決](../reports/2026-09-10-viewport-serving-architecture.md)（8765 事故、三方諮詢與 user 裁決全記錄）；服務機械事實＝mosaic `deploy/scripts/run-report-server.sh`（:6421 腳本，跨 repo）＋[kanban-board](../../skills/kanban-board/SKILL.md)「UI 入口」＋[schedule-registry](../schedule-registry.md) 條 A5（board browser 常駐 09-11 退役，`run-backlog-browser.sh` 已刪）；放置規範源＝[illustrate-html-mode](../../skills/_common/illustrate-html-mode.md)「產物位置分流」。
 
 三層分工：
 
