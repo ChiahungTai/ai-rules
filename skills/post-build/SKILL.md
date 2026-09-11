@@ -73,15 +73,23 @@ findings 全空 → 報告並直接進 docs 鏈。
 
 1. 對每個變更的 `.md` 執行 `consistency`（[skills/consistency/SKILL.md](../consistency/SKILL.md)）；fail 項當場修再驗（**重驗範圍 = 修正觸及的檔**，非整個 docs 鏈重跑；上限同階段 3 的 3 輪）
 2. diff 觸及 Capabilities / `SYSTEM-MAP.md` / `dependency-graph.md` / `backlog/` → 執行 `metadata-sync`（[skills/metadata-sync](../metadata-sync/SKILL.md)）
-3. **rename 反掃（結案 gate 機械收口——非 rename 弧自然空跳）**：①**清單萃取**：弧 diff 萃取 rename／move／retire 舊符號（檔級 rename 用 `git diff --diff-filter=R -M`；符號級由 LLM 讀 diff 提取——弧內 diff 便宜）；②**反掃**：`rg "<舊符號>"` 掃 AGENTS.md 家族（`fd -g AGENTS.md`）＋專案快 drift 檔（參數化——各 repo 藍圖層慣例不同，由專案 AGENTS.md 宣稱或 EP 攜帶清單）；③**處置**：命中即修（新錨點）或顯式記 drift；零命中＝步驟完成證據。**不做全檔重驗**（成本與弧大小成正比；mosaic 實證基礎平時不漂，5/8 嚴重項全源自 rename 未同步）
-
-**政策翻轉擴充（同 gate——retire／政策句改寫／定義源新增列節弧；他類弧空跳）**：retire 翻轉可留原名改語義，舊符號 rg 掃不出來（實證三類）。四段式（candidate 偵測與語義裁決分離——揉在一起會 false-skip）：①**機械 candidate detector**（先跑，便宜）：`git diff --diff-filter=D` 刪檔清單＋新增列／節存在性＋定義源載體變動（何為定義源依 instruction-writing 單一源規則；叠加階段 4 表頭「僅 `.md` 變更」前置過濾）；candidate 空＝空跳（證據）。②**LLM 萃取**（candidate 非空才做）：舊主張／新約束／consumer concept（＝引用該政策句主張的下游陳述）；全判無政策影響才空跳。③**委派既有機制**（不重定義 scan）：定義源變更 → instruction-writing single-source scan（`rg "<單一關鍵詞>"` 全引用＋逐檔 triage）；blueprint 在場 → 讀其 AGENTS 真相源映射／更新觸發；否則原 gate 的 project AGENTS／EP fast-drift list；`rg "<定義源關鍵詞>"` catch-all 封底（含 `skills/` 在內全部 `.md`）。④**處置**：`update`（改新政策／新錨）／`historical`（刻意留的退役說明；provenance 依載體規則——instruction 檔禁日期，用現行狀態＋source／report／git pointer；report／backlog 可帶時間）／`no-change`（證據足才用）／`unverified`（證據不足：跨 repo consumer／讀不到 source／語義歧義——**不視為收斂**，報告帶未驗 consumer／原因）。**rg 命中≠待修**；零命中＝完成證據。成本原則：非相關弧只付 candidate detection；不做全檔重驗
-4. repo 有 `.tours/manifest.toml` → 跑 `code-reality tour_validate --manifest --repo .`；FAIL>0 走**修復閉環**（上限 3 輪，同階段 3 慣例），不只列入報告——只報不修讓 corpus 債滾雪球，存量 FAIL 反覆佔據後續每個收尾報告（mosaic 09-07 實證 77 FAIL 積債）：
+3. **rename 反掃（結案 gate 機械收口——非 rename 弧自然空跳）**：①清單萃取（`git diff --diff-filter=R -M` 檔級＋LLM 讀 diff 提取符號級）；②反掃 `rg "<舊符號>"` 掃 AGENTS.md 家族＋專案快 drift 檔；③命中即修或記 drift；零命中＝完成證據。
+4. **政策翻轉 consumer-propagation gate**：retire／政策句改寫弧跑[下方 gate](#政策翻轉-consumer-propagation-gateair-75)；candidate 空＝空跳（證據）。他類弧空跳。
+5. repo 有 `.tours/manifest.toml` → 跑 `code-reality tour_validate --manifest --repo .`；FAIL>0 走**修復閉環**（上限 3 輪，同階段 3 慣例），不只列入報告——只報不修讓 corpus 債滾雪球，存量 FAIL 反覆佔據後續每個收尾報告（mosaic 09-07 實證 77 FAIL 積債）：
    - **graph 新鮮度前置**：重產前先 `code-reality build --repo .`——stale graph 帶重錨會寫出舊簽名壞錨（09-07 實證殘留 4 條根因；rebuild 冪等分鐘級，FAIL=0 時零成本）
    - **觸及族重產一律經 `chain_tour`**（LLM 不手改 `.tour`）；帶 isPrimary 前門的族重產必再帶 `--primary`（漏帶＝旗標靜默掉落）
    - **curated（manifest `generator=manual`）族不覆蓋**——其 FAIL 逕落應修清單（兩鐵律單一源見 [tour-bootstrap](../tour-bootstrap/SKILL.md)「重跑語義」）
    - 重產後仍 FAIL → callstack md 幀手術（dead symbol／簽名漂移；rg 現場驗證行號與簽名）→ 再重產
    - 最終殘留列收尾報告「tour corpus 應修清單」＋閉環統計（重產 N 族／手術 N 檔）；工具語義見 [code-reality](../code-reality/SKILL.md)
+
+### 政策翻轉 consumer-propagation gate（AIR-75）
+
+> 觸發：retire／政策句改寫／定義源新增列節弧（他類弧空跳——階段 4 主表第 4 點 candidate 空＝空跳）。retire 翻轉可留原名改語義，舊符號 rg 掃不出來（實證三類）。**第二個獨立消費者出現時晉升 `_common/policy-reversal-gate.md`**（三方共識 09-11）。成本原則：非相關弧只付 candidate detection；不做全檔重驗。
+
+- **① Detect（機械 candidate detector——先跑，便宜）**：`git diff --diff-filter=D` 刪檔清單＋新增列／節存在性＋定義源載體變動（何為定義源依 instruction-writing 單一源規則；叠加階段 4 表頭「僅 `.md` 變更」前置過濾）。
+- **② Extract（LLM 萃取——candidate 非空才做）**：舊主張／新約束／consumer concept（＝引用該政策句主張的下游陳述）；全判無政策影響才空跳。
+- **③ Delegate（委派既有機制——不重定義 scan）**：定義源變更 → instruction-writing single-source scan；blueprint 在場 → 讀其 AGENTS 真相源映射／更新觸發；否則 rename 反掃的 project AGENTS／EP fast-drift list；`rg` catch-all 封底。
+- **④ Dispose（處置四值）**：`update`（改新政策／新錨）／`historical`（刻意留的退役說明；provenance 規則見 instruction-writing）／`no-change`（證據足才用）／`unverified`（證據不足——**不視為收斂**，報告帶未驗 consumer／原因）。**rg 命中≠待修**；零命中＝完成證據。
 
 ## 階段 5 — Report Shell refresh（hook 2——commit 前最後穩定點）
 

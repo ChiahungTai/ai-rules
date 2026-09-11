@@ -16,8 +16,8 @@
 | ② 規劃 | 把 card intent 轉成可跨 session 接手的 self-contained research／spec／EP，固定 baseline、scope、已決策與驗收；task-home 報告殼的 source＝shell-ready md＋meta（殼是 deterministic viewport 非手寫產物——codegen 契約見 [illustrate-html-mode](../../skills/_common/illustrate-html-mode.md)，AIR-73）；**top-level 測試規劃段在實作段落前凍結 TC（v3.1 定案，落檔隨測試契約卡）** | card `desc`、task home、`research.md`、`spec.md`、`ep.md`、shell-ready md、測試規劃段 |
 | ③ 開工 | 為已存在 card 建立「由哪個 branch/WT 執行、起點是哪個 baseline、session cwd 在哪」的機械身份 | `wt-open`、card `In Progress`/refs、persistent card WT、freshness check |
 | ④ 實作 | 讓 code/rules/skills/docs/EP 寫入在該工作 execution plane 內完成，避免共享 checkout 的 branch/cwd 被其他 session 改變 | card WT；免卡小修走 ephemeral WT fast-path；implement/TDD |
-| ⑤ 驗證 | 讓 claim 對上足夠獨立的 evidence；negative claim 不以單次文字搜尋冒充行為證明；**測試驗證分工＝契約消費（frozen TC）＋provenance 三栓＋軸A 機械審計／軸B 架構審查（v3.1 定案，落檔隨測試契約卡）** | tests、integration/demo/POC、code-review、acceptance evidence、TC＋audit/review 雙軸；⚠️ [instruction-testing](../../skills/instruction-testing/SKILL.md) 承載 instruction artifact 行為驗證方法，pilot 尚未實跑 |
-| ⑥ 收斂 | 把工作 review、修正並依既有 rebase→ff-only 規則吸回 owning line，再完成 session/card 收尾；Report Shell refresh＝更新 shell-ready md→`build_shell.py` 投影→gate 自驗（AIR-73 落地前為 LLM 手填殼 legacy） | post-build、working branch、`wt-close`、finalization、`build_shell.py` |
+| ⑤ 驗證 | 讓 claim 對上足夠獨立的 evidence；negative claim 不以單次文字搜尋冒充行為證明；**測試驗證分工＝契約消費（frozen TC）＋provenance 三栓＋軸A 機械審計／軸B 架構審查（v3.1 定案，落檔隨測試契約卡）**；**外部實作委派帶 `--yolo`（user 09-11 拍板 implement 一律）＋liveness ticker 防卡住（model-routing skill）** | tests、integration/demo/POC、code-review、acceptance evidence、TC＋audit/review 雙軸、yolo＋ticker；⚠️ [instruction-testing](../../skills/instruction-testing/SKILL.md) 承載 instruction artifact 行為驗證方法，pilot 尚未實跑 |
+| ⑥ 收斂 | 把工作 review、修正並依既有 rebase→ff-only 規則吸回 owning line，再完成 session/card 收尾；Report Shell refresh＝更新 shell-ready md→`build_shell.py` 投影→gate 自驗（AIR-73 落地前為 LLM 手填殼 legacy）；**政策翻轉 consumer-propagation gate（AIR-75）——retire／政策句改寫弧的殘留偵測與傳播收口（post-build skill）** | post-build、working branch、`wt-close`、finalization、`build_shell.py`、policy-reversal gate |
 | ⑦ 沉澱 | 將完成能力、設計理由與真正值得跨 session 留存的事實放回正確 carrier；memory 不成為規範副本 | AGENTS/Capabilities、architecture/blueprint、memory pointer/facts |
 | ⑧ 運維 | 讓 hooks、排程、備份、清理與 fresh-machine recovery 可重建，避免 machine-local state 只存在某台機器或某次 session | hooks、schedule registry、launchd、memory bundle、onboarding runbook、code-reality |
 
@@ -404,6 +404,13 @@ WT 基建落地後，可以移除「因共享單一 checkout，所以同 repo ca
 已取消的替代案（裁決記錄見 report §6）：:6421 擴 route 到 repo 根、route 註冊 carrier 中立化、新專案 viewport runbook——「路徑即可點開」成立後均無必要。
 
 待落檔（併既有「四小項」批）：session 交付慣例句、全域 `workbench.browser.autoReloadOnFileChange`、kanban refs 命名空間句。
+
+## 結構治理待建項 — ⚠️ 已定案待落檔
+
+三方結構重構諮詢（muse＋codex，2026-09-11）定案：
+
+- **③ commit 粒度互補規則**（codex 版）：「不同 root cause 若可獨立 revert 且各自保持 repository invariant，應拆 commit；同 root cause 的 source＋consumer synchronization 必須同 commit」——現行 commit skill「同根因同 commit」的互補面，防多主題一顆。落點＝commit skill。
+- **④ bundle warning-zone ratchet**（codex 版）：muse 36KiB gate 的 85% warning zone 已在場（deploy_agents.py），但缺防「每次小增直到撞牆」的機械防線——**壓力區（≥warning threshold）時 working-tree bundle 若比 baseline/HEAD 淨增長即 fail**，輸出 per-rule byte delta；縮小或持平放行。落點＝deploy_agents.py＋tests。
 
 ## 測試契約與驗證分工 — ⚠️ 架構定案（三方裁決 v3.1），六檔落檔待建卡
 

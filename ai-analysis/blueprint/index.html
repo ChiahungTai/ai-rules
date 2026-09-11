@@ -177,12 +177,12 @@
   <h2>五分鐘駕駛艙</h2>
   <div class="sub">五個問題回答「這套系統怎麼運轉」。標記語義：✅ 已落地運行／⚠️ 有源但未閉環／❌ target 尚未落地——設計已拍板不等於 runtime 已存在。</div>
   <div class="frame-wrap static">
-    <div class="bar"><span>現況總覽：18 個追蹤面（明細見 07 節 capability board）</span></div>
+    <div class="bar"><span>現況總覽：19 個追蹤面（明細見 07 節 capability board）</span></div>
     <div class="frame-body">
       <div class="kpi">
-        <div class="card"><div class="lab">追蹤面總數</div><div class="num-big">18</div></div>
+        <div class="card"><div class="lab">追蹤面總數</div><div class="num-big">19</div></div>
         <div class="card"><div class="lab">✅ 已落地運行</div><div class="num-big" style="color:var(--green)">4</div></div>
-        <div class="card"><div class="lab">⚠️ 半成品（有源未閉環）</div><div class="num-big" style="color:var(--amber)">7</div></div>
+        <div class="card"><div class="lab">⚠️ 半成品（有源未閉環）</div><div class="num-big" style="color:var(--amber)">8</div></div>
         <div class="card"><div class="lab">❌ target 未落地</div><div class="num-big" style="color:var(--rose)">7</div></div>
       </div>
     </div>
@@ -417,7 +417,7 @@
 
 <section id="s7">
   <h2>哪些已落地、哪些還沒？</h2>
-  <div class="sub">18 個追蹤面的現況 board。鐵律：設計已拍板不等於 runtime 已存在；report 固化決策與證據，凡宣稱「現在會怎樣」仍須回查目前 config／script／Git 狀態；缺口列入 blueprint 只是待建項（TODO 不自動升格），承諾仍進 Backlog.md／EP。</div>
+  <div class="sub">19 個追蹤面的現況 board。鐵律：設計已拍板不等於 runtime 已存在；report 固化決策與證據，凡宣稱「現在會怎樣」仍須回查目前 config／script／Git 狀態；缺口列入 blueprint 只是待建項（TODO 不自動升格），承諾仍進 Backlog.md／EP。</div>
   <table>
     <thead><tr><th>#</th><th>追蹤面</th><th>target 一句話</th><th>現況</th><th>依據</th></tr></thead>
     <tbody>
@@ -439,6 +439,7 @@
       <tr><td>16</td><td>code-reality</td><td>binary＋repo graph 可從 source 重建</td><td>✅</td><td>onboarding.md 第 6 節</td></tr>
       <tr><td>17</td><td>人類 viewport 供給</td><td>三層：內建瀏覽器日視圖（<code>file:</code> 零 server）＋:6421 穩定引用＋Live Preview 選配；session 交付路徑不開臨時 server</td><td>⚠️ 架構定案、常駐層運行中；慣例句未落檔</td><td>workflow.md「人類 viewport 供給」＋viewport 架構裁決</td></tr>
       <tr><td>18</td><td>測試契約與驗證分工</td><td>EP 測試規劃段凍結 TC＋challenge（高風險）＋same-writer RED 三栓＋audit 軸A／review 軸B＋test-gen=P0 最後手段；研究層 cr-research 升 full</td><td>⚠️ v3.1 架構定案（三方裁決）；六檔 skill 未落檔</td><td>workflow.md「測試契約與驗證分工」＋測試契約裁決 v3.1</td></tr>
+      <tr><td>19</td><td>政策翻轉 gate＋結構治理</td><td>AIR-75 consumer-propagation gate（post-build）；--yolo 通則＋liveness ticker（model-routing）；③ commit 粒度互補＋④ bundle ratchet 待落檔</td><td>⚠️ gate＋yolo 已落地 skill；③④已定案待落檔</td><td>workflow.md「結構治理待建項」＋post-build skill＋model-routing skill</td></tr>
     </tbody>
   </table>
   <div class="note"><b>過渡條款</b>：target（#5–#10）由同一個 WT 基建弧整體收斂；落地時同步改版 repo AGENTS.md「git 慣例」與 kanban 消費接線，完成前以現行規則執行、不得混合兩種 lifecycle。基建落地後「同 repo card session 絕不能並存」的機械限制才可移除——是否真平行仍依 shared-file／semantic overlap 判斷，不直接打散既有六線波次（L1→L3→L2→L4→L5 主序列，L6 跨 repo 真平行）。</div>
