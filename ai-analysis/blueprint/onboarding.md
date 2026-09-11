@@ -345,12 +345,12 @@ schedule-registry responsibility projection
 
 schedule registry 已記載本 repo 相關：
 
-- backlog browser
+- backlog browser（常駐已退役 09-11——plist 移除；board UI 走 extension／on-demand）
 - backlog cleanup
 
 UC dry run 的 evidence：
 
-- backlog-browser plist 有 tracked source。
+- backlog-browser plist 有 tracked source（dry-run 當時；09-11 退役已移除——現無）。
 - backlog-cleanup plist 當時在 machine 上存在，但未找到 tracked source；已有既有工作承接該缺口（AIR-70 F1）。
 - repo 缺現行、完整的 launchctl enable/bootstrap verification runbook。
 
@@ -370,7 +370,7 @@ plist source
 
 - `CronList` 與 verbatim prompt source／registry 對帳。
 - launchd service 已 load。
-- backlog browser 實際可提供 board。
+- backlog browser 常駐不重建（已退役；on-demand `backlog browser` 可 smoke，不要求 plist／load）。
 - cleanup service 可定位 script 與 precheck。
 - memory nightly writer 指到新機器 canonical pool/inbox。
 - 非 primary machine 不把自己的 automation identity 回寫 primary registry。
