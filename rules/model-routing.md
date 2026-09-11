@@ -18,7 +18,7 @@ tier 是 requirement 能力檔：full＝旗艦、vision＝影像、lite＝一般
 | spec-miner / lite-verify / cross-verify-investigator / render / cron 機械段 | lite；read-only 查證，缺源標 unverified、不腦補 |
 | mem-distill | lite 寫入型；只在 prompt 清單內 Read→Write；hook 不攔 subagent，靠 prompt 守範圍 |
 | vision-review | vision；本地 Read、remote 先落地；MCP 白名單只列已連線 server，CR per-session 可掛 |
-| research / explore | 內建 Explore 繼承主模型，釘 lite 可選非必要；全域研究用 registry cr-research（ZCode lite＋CR 白名單） |
+| research / explore | 內建 Explore 繼承主模型，釘 lite 可選非必要；全域研究用 registry cr-research（**v3.1 已裁升 full**，落檔隨 AIR-76）＋CR 白名單 |
 | harness 內建 general-purpose / Explore | 無 pin、繼承主模型；機械/lite 工作派對應 registry，禁假設內建預設便宜 |
 
 review/impl 的 ZCode registry 與 CC 別名釘選依 skill 解析表；本 rule 不維護 model 值。
