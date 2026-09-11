@@ -4,7 +4,7 @@ title: 多工調度中心：一次開多張卡、各自 worktree、AI agents 並
 status: To Do
 assignee: []
 created_date: '2026-09-10 01:50'
-updated_date: '2026-09-10 04:53'
+updated_date: '2026-09-11 02:17'
 labels:
   - governance
   - agents
@@ -25,4 +25,6 @@ User 09-10 願景：一個 command center session 一次控制多卡（各卡對
 
 <!-- SECTION:NOTES:BEGIN -->
 〔架構師輪擴充 09-10——三方終裁吸收（.agent-tmp/architect-os-notes.md 三方終裁節）〕B 段 fleet 規範擴充四項：①can_run(work_order) preflight——dispatch 前硬 capability 查詢（harness×provider×model×snapshot×tools/MCP×sandbox×quota）選 executor＋記 routing reason；②execution process table/lease——agent/job 掛 execution identity（card/revision tuple/parent/status 含 orphaned）＋fault class retry/backpressure/reap orphan；③fault domain 分類×五欄（detection/retryability/state residue/self-heal owner/escalation）——含『規則被忽略』fault 類（registry 缺 type/MCP 快照缺工具實證歸類）；④observability 掛 execution identity——desired/actual/terminal/health-cost 四問＋token/duration 彙整（metadata 已有從未彙整）。A 題兩原語（enforcement level 分級＋lifecycle reconciliation 六 gate）為組件級結構債——本卡範圍判定：reconciliation 的 dispatch/wt-open 兩 gate 屬本卡；全六 gate+enforcement 分級另議（blueprint 待落定案）。
+
+〔09-11 補〕stuck detection＝架構師輪「execution identity 觀測（desired/actual/terminal/health-cost 四問）」的 runtime 腿：delegated agents 卡住偵測（liveness 訊號＝目標目錄寫入停滯＋spool 凍結組合，禁單看 CPU——model-bound 低 CPU 正常）。素材＝delegate-bridge 2026-09-11 實證（muse sandbox×測試孤兒行程 wedge 40min；memory muse-build-round-ops）；過渡治理＝model-routing skill「完成回報收法」liveness ticker 條（caller 端，背景 Bash 自動喚醒）；工具層根治（jobs.json heartbeat／wait --stuck-alert）＝delegate-bridge roadmap。
 <!-- SECTION:NOTES:END -->
