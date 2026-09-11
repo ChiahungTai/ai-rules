@@ -56,7 +56,7 @@ when_to_use: "任何要畫圖的時刻——/illustrate 選輸出模式、EP/殼
 
 **載體限制顯式登記**——渲染端已知限制（避讓缺失/座標裁切/合成事件釘不住）寫進 instruction 檔方法論限制段，不是每次重踩。
 
-**git policy**——源進 git、渲染產物不進、一命令再生（條目詳 [illustrate-html-mode](../_common/illustrate-html-mode.md) git 段，單一源）。
+**git policy**——源＋殼＋svg 渲染全進 git（AIR-74；條目詳 [illustrate-html-mode](../_common/illustrate-html-mode.md) git 段，單一源）。
 
 ## 邊界與指針（配方不重述）
 

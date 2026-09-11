@@ -2,7 +2,7 @@
 name: illustrate
 
 description: "圖解技術概念、架構設計或流程 + 結構 viewport（SA/SD artifact menu：call graph/sequence/class slice/data-flow/boundary；city map/drill/drift detection，三時點 pre-EP/post-EP/post-build）。可指定 @目錄或 @檔案讓 AI 先讀再圖解，支援 console（即時）、md（寫檔）和 html（report shell 報告殼＋mermaid——AI 文檔產物〔EP/實作報告/@module/@dir〕的人類 viewport，opt-in）三種輸出模式。"
-when_to_use: "Illustrate technical concepts, architecture, or processes. Also structure viewport via SA/SD artifact menu (boundary/data-flow/call-graph/sequence/class-slice) + drift detection at pre-EP / post-EP / post-build. Supports console (ASCII), md (Mermaid), and html (report shell + mermaid — human viewport for EP plan / implementation report / module / dir walkthroughs, opt-in) output. Regenerate shells/diagrams from tracked .mmd sources when asked. Use with @dir or @file for code-based explanations."
+when_to_use: "Illustrate technical concepts, architecture, or processes. Also structure viewport via SA/SD artifact menu (boundary/data-flow/call-graph/sequence/class-slice) + drift detection at pre-EP / post-EP / post-build. Supports console (ASCII), md (Mermaid), and html (report shell + mermaid — human viewport for EP plan / implementation report / module / dir walkthroughs, opt-in) output. Regenerate diagrams from tracked .mmd sources when asked (shells are authored, not regenerated). Use with @dir or @file for code-based explanations."
 ---
 
 # /illustrate — 智能圖解系統
@@ -139,7 +139,7 @@ mode A flag 邊界 / smell 時，給兩條行動路徑 + 取捨，**不替 user 
 |------|------|-------|
 | city map / dep weight / 重用枚舉 / LSP 查證 | `arch-thinking` skill | ✅ 已沉（跨 illustrate/code-review/ep-review 共用）|
 | 假設驗證矩陣（EP 審查）| `illustrate-deep-analysis.md` | ❌ 留（illustrate 特有）|
-| 語義 diff / 缺口 | 本體（無參數行為）| ❌ 留（簡單 + 特有）|
+| 語義 diff / 缺口（無參數改動理解） | `debrief`（無參數委派，單一源在 debrief）| ✅ 已沉 |
 | use cases + 情境矩陣分析 | `illustrate-analysis.md` | ❌ 留（分析步驟，特有）|
 | drill / Phase 2 互動 | `illustrate-structure-viewport.md` | ❌ 留（mode A 互動）|
 | call graph（函數級）資料生成 | `arch-thinking` skill §二 | ✅ 已沉（跨 illustrate/code-review/ep-review）|

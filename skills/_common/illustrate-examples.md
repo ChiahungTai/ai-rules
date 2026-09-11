@@ -107,5 +107,5 @@ MD 模式與 Console 模式的關鍵差異：
 
 產出形態（細節見 [illustrate-html-mode.md](illustrate-html-mode.md)）：
 - grounding 事實 → 殼（template 複製＋填 slot）＋章節敘事＋mermaid 圖（srcdoc lazy render／`diagram-*.svg`）或 HTML 塊
-- 殼 `index.html` 落任務家（流程 brief）或 `ai-analysis/<域>/`（按需視覺/決策 viewport），**進 git**；`.mmd` 源進 git、`diagram-*` 渲染產物不進
+- 殼 `index.html` 落任務家（流程 brief）或 `ai-analysis/<域>/`（按需視覺/決策 viewport），**進 git**；`.mmd` 源＋`diagram-*` 渲染（svg）全進 git（AIR-74）
 - 渲染工具缺場 → 降級 MD Mermaid＋回報

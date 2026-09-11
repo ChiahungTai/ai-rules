@@ -32,10 +32,10 @@ mode B artifact 與 mode A/C city map 共用此映射（概念軸單一源；「
   左 sidebar＝章節順序，點章節切主區
   主區＝該章節文字精華＋該章節該看的圖
       ↓ iframe srcdoc（mermaid lazy render）或 HTML 塊直寫
-視圖素材層（mermaid 圖引擎——每張圖=一個視圖，diagram-<type>.svg / srcdoc 內嵌）
+視圖素材層（mermaid 圖引擎——每張圖=一個視圖，diagram-<name>.svg / srcdoc 內嵌）
 ```
 
-- **殼結構/視覺/互動單一源＝template [`skills/_common/illustrate-report-shell.html`](./illustrate-report-shell.html)，建殼＝複製＋填 slot**（slot：title/badge/meta/nav/section-content/diagram/backlinks/source；首屏 active、sidebar 折疊、hash restore 自帶；主題三態 light-dark token 慣例），入口命名 `index.html`、圖命名 `diagram-<type>.html`；殼的未來＝AIR-73 `build_shell.py` md→殼 deterministic codegen（落地前為手寫殼 legacy）
+- **殼結構/視覺/互動單一源＝template [`skills/_common/illustrate-report-shell.html`](./illustrate-report-shell.html)，建殼＝複製＋填 slot**（slot：title/badge/meta/nav/section-content/diagram/backlinks/source；首屏 active、sidebar 折疊、hash restore 自帶；主題三態 light-dark token 慣例），入口命名 `index.html`、圖命名 `diagram-<name>.svg`；殼的未來＝AIR-73 `build_shell.py` md→殼 deterministic codegen（落地前為手寫殼 legacy）
 - **消費單位是章節不是圖**——多圖並列無導覽＝亂（實證）；每章節只放該章該看的圖
 - **首屏 active 與嵌入參數由 template 擁有**（首個含圖章節規則＋AIR-14 實證見 template 檔頭註解三條硬約束）——建殼不重推導、不手改首屏指向
 - **殼嵌圖三形態**（同殼可混用，按圖選載體——判準見 [diagram-selection](../diagram-selection/SKILL.md)）：inline SVG（預設產物 **≤1/頁**——mmdc id 碰撞；**帶唯一 `-I <svgId>` 可多張**，見 [mermaid](../mermaid/SKILL.md) 陷阱 5）／iframe＋`diagram-*.svg` 檔（其餘 mermaid）／iframe srcdoc lazy render（mermaid code 內嵌、主題跟隨——blueprint/test-contract 殼先例）／HTML 塊直寫殼內（層次/對照，零渲染管線）；外框統一 frame-wrap（標題列＋zoom/ESC 檢視器）。**無縫一體準則**：同主題（殼 dark → 圖 dark chrome）、透明底、同字體、尺寸自適應——mermaid 配方（mmdc `-t dark -b transparent`／CDN lazy render）見 [mermaid](../mermaid/SKILL.md) 殼內嵌段
@@ -65,7 +65,7 @@ mode B artifact 與 mode A/C city map 共用此映射（概念軸單一源；「
 
 - **流程性 brief（EP 計畫導讀＋實作完成結果）→ 任務家（task home）下 `MM-DD-<task-name>/`**（目錄名**無年份、無 ep-/impl- 前綴**——活躍弧停留短；完結弧 task 目錄**整目錄**搬同家歸檔層——repo 慣例探測 `done/` 扁平或 `_done/<YYYY>/` 年分層，皆無建 `done/`；年份僅由年分層形態承接；歸檔目錄判定單一源見 [metadata-sync](../metadata-sync/SKILL.md) EP 歸檔項）。**任務家探測（2026-09-02 三池重構定案，各 skill 放置規則共用本源）**：`<repo>/ai-analysis/_tasks/` 在場 → 雜項任務家＝它（**線任務另居 `ai-analysis/_projects/<線>/tasks/`**——session 從線 context 來時；完成→同線 `done/`）；否則 repo-root `00-tasks/`（`00-` 前綴 VSCode/`ls` 排最前）。spec（`spec.md`）與 EP 本體（`ep.md`）同 task 目錄——一弧全生命檔案同處。與 debrief（文字簡報）/delta tour（行級走讀）三層互補：殼=high-level 圖形、debrief=模組/檔案文字、tour=行級；殼實作章節吸收日常判斷材料，debrief 為深度選配
 - **按需性視覺產物（codebase 架構/module 現況/目錄導覽）與決策 viewport → `ai-analysis/<域>/`**（與裁決 report 同域——先例：`blueprint/`、`test-contract/`）；**殼 `index.html` 進 git**（authored 殼不可再生——AIR-74 定案；舊 repo-root 渲染目錄慣例已退役）
-- git 慣例**同一原則、條目隨任務家**：`.mmd` 源進 git；mermaid 渲染產物不進（`diagram-*.html/svg/png`——gitignore 條目隨任務家路徑 `ai-analysis/{_tasks,_projects}/**/diagram-*` 或 `00-tasks/**/diagram-*`）；殼 `index.html` 一律進（排過寬 `**/*.html` 會連殼一起 ignore——規格↔實作分歧實證：殼蒸發死鏈）
+- git 慣例**同一原則、條目隨任務家**：`.mmd` 源＋殼 `index.html`＋mermaid 渲染（svg）全進 git（AIR-74——舊「渲染產物不進」慣例已取消）；殼 `index.html` 一律進（排過寬 `**/*.html` 會連殼一起 ignore——規格↔實作分歧實證：殼蒸發死鏈）
 
 **殼生命週期掛點（自動產生雙掛點＋fallback）**——修「掛弧後（commit 後）的產物在 session context 耗盡時必死」：掛點全落在 commit **前**的穩定點。**backlog 卡同步與主動顯示隨掛點聯動**（命令合約＝[kanban-board](../kanban-board/SKILL.md)；「顯示」走 report server URL——與卡上連結同一條，server 未開 fallback `open <絕對路徑>`）。
 
@@ -76,7 +76,7 @@ mode B artifact 與 mode A/C city map 共用此映射（概念軸單一源；「
 | **hook 2** | **post-build 完成**（commit 前最後穩定點；程序載體＝[post-build](../post-build/SKILL.md) 階段 5） | 同一殼長**實作章節**：做了什麼／驗證證據／delta 前後對照／認知誤差點＋回源連結——反映修正迴圈後**最終態**；**並產圖一次**——依 [diagram-selection](../diagram-selection/SKILL.md) 選型補 degraded 槽；badge ✅；並產**持久版 delta tour**（落 `.tours/delta/` 進 git） | **結案兩步＋弧結案蒸餾第三動**：`-s Done --final-summary` → `--ref` 換 `done/` 新 URL（任務目錄遷 done/ 後；卡留 Done 欄）；本弧 memory 條目蒸餾終態 facts | **`open <殼URL>`**——終態殼彈出 |
 | **fallback** | 無 post-build 弧（user 直接 `/commit`、弧終止）→ implement 階段 6 | hook 2 同款產出由 implement 階段 6 承接 | 同 hook 2 | 同 hook 2 |
 
-**共通必備**：狀態 badge（📋 計畫／🟡 進行中／✅ 完成——與全域 UC 狀態標記同符號語義）；計畫 vs 既有顯式區分（計畫物 tag「S<N> 計畫中」——並列無區分＝誤導）；回源連結（本體檔案路徑＋baseline commit）；**board 反向連結**（repo 有 backlog board 時，殼頭部 nav 加 `http://127.0.0.1:6420`——best-effort）；**EP（.md）http 連結形態**（:6421 掛載帶 route 前綴——ai-rules=`/ai-rules/`、URL **不含** `ai-analysis/` 段；.md 連結一律 viewer 形態 `/viewer/_md-viewer.html?p=/<route>/<repo 相對路徑>`，raw 直連會被週日卡 ref lint 旗標）——精確合約見 kanban-board 雙 ref 行；狀態隨本體結算更新、本體歸檔殼隨之（殼服務本體生命期）。
+**共通必備**：狀態 badge（📋 計畫／🟡 進行中／✅ 完成——與全域 UC 狀態標記同符號語義）；計畫 vs 既有顯式區分（計畫物 tag「S<N> 計畫中」——並列無區分＝誤導）；回源連結（本體檔案路徑＋baseline commit）；**board 反向連結已取消**（board 無 HTTP 位址——09-11 常駐退役；殼頭部可標「← backlog board（VSCode Backlog Cards）」提示文字、不帶 URL）；**EP（.md）http 連結形態**（:6421 掛載帶 route 前綴——ai-rules=`/ai-rules/`、URL **不含** `ai-analysis/` 段；.md 連結一律 viewer 形態 `/viewer/_md-viewer.html?p=/<route>/<repo 相對路徑>`，raw 直連會被週日卡 ref lint 旗標）——精確合約見 kanban-board 雙 ref 行；狀態隨本體結算更新、本體歸檔殼隨之（殼服務本體生命期）。
 
 **雙向一致性（html ↔ md——user 勘正：「同一個 md 每個人理解都不一樣，AI 跟人有理解差異正常，但是大方向不要錯」）**：
 
@@ -91,12 +91,12 @@ mode B artifact 與 mode A/C city map 共用此映射（概念軸單一源；「
 
 - **輸出位置**：任務家（流程 brief）或 `ai-analysis/<域>/`（按需視覺/決策 viewport）——見「產物位置分流」；入口 HTML 命名 **`index.html`**、mermaid 源 `diagram-<name>.mmd`、渲染產物 `diagram-<name>.svg`；`--output <path>` 自訂路徑尊崇（track 與否使用者決定）
 - **目錄即索引**：不建 index——kebab 檔名自描述；手維護 index 是 drift-prone 清單（同 skills/CLAUDE.md 索引教訓），量大再考慮機械投影生成（YAGNI）
-- **git 分工（⚖️ 源與殼進 git、渲染產物不進、一命令再生——單一源，per-repo 可覆蓋）**：**`.mmd` 源＋殼 `index.html`＋visual-check receipt 進 git**；mermaid 渲染產物（`diagram-*.html/svg/png`）不進——本地在盤、分享時複製出檔、fresh clone 用 `.mmd` 源＋一命令再生
+- **git 分工（⚖️ 源＋殼＋svg 渲染全進 git——單一源，per-repo 可覆蓋）**：**`.mmd` 源＋殼 `index.html`＋mermaid 渲染（svg）＋visual-check receipt 全進 git**（AIR-74）；`.mmd` 仍可重渲染 svg，但輸出 tracked——「可重渲染」≠「不追蹤」
 - **html→md 雙輸出**：同主題先 html 後要 md 沉澱 → 從同一 grounding 事實再渲染 Mermaid；md 是 source of record
 
 ## 重生（regeneration）
 
-**觸發**：user 說「**重生報告殼**」（全量）或「重生 `<主題>`」（單目錄）；fresh clone 後；`git clean -Xf` 清掉渲染產物後。
+**觸發**：user 說「**重生報告殼**」（全量）或「重生 `<主題>`」（單目錄）；svg 損毀／工具版本變更後的修復性重渲染（svg 已 tracked：fresh clone 自帶、`git clean -Xf` 清不掉）。
 
 **程序**（對每個含 `.mmd` 源的殼目錄——任務家 `*/` 與 `ai-analysis/<域>/`）：
 
