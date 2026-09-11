@@ -14,7 +14,7 @@
 |---|--------------|------|----------|----------|------------|
 | 1 | `automation-751ecce2-a79c-4309-a79c-08486e2ee893` | `40 23 * * *`（每晚 23:40） | ai-rules memory 池收斂（輕掃／弧線預警／波段收斂＋regen）＋**步驟 0 inbox 消費**（AIR-54 muse 寫入流 consolidation：path contract/CAS/六問→done/rejected receipt）＋**波尾 repo 外 bundle**（`~/.agents/memory-bundles/` 輪替 7 份，G2-11）＋**檔案型清淤兜底腿已上線**（`.agent-tmp`/`.at-contexts` `mtime>7d`、`.review` `>30d`；AIR-14 L5，2026-09-03 起） | 僅 ai-rules 記憶主體 `/Users/ctai/Github/ai-rules/.agents/memory/`（AIR-54 遷移；CC/ZCode 舊徑 symlink 指此）＋`.agents/memory-inbox/`（步驟 0）＋repo 三 dot-area | 寫手（每夜動手）；紅線：不碰 mosaic 池、不 commit、不改 DB schema、不刪 shared |
 | 2 | `automation-fed036ff-17bf-4cf0-a50e-3216a7de6665` | `0 23 * * 0`（週日 23:00） | 治理看照：bundle 組成看照（`deploy_agents.py` 三部署檔 cmp）＋memory lite 稽核＋**registry/卡 ref 一致性比對已上線**（`CronList` vs 本表 drift＋raw `.md` 直連卡 ref lint；AIR-14 L8，2026-09-03 起）＋**watchdog 雙檢查**（AIR-54 P5 定案 2026-09-10 併入：雙池 inbox age＋porcelain-vs-receipt；升級＝age 訊號連續兩排程週期命中→🔴、processing 殘留/直寫立即🔴） | ai-rules repo＋memory 池＋mosaic 池（唯讀） | 審計（advisory 不動手）；禁止改 rules／memory 條目（戳記除外） |
-| 3 | `automation-370fafc5-a050-479e-b62f-9c7988d23521` | `10 23 * * 6`（週六 23:10） | 糾正模式週報＋CR 使用健檢（`corrections-weekly` skill） | ai-rules workspace | 報告；DB 唯讀、一頁、腳本失敗 2 次即止 |
+| 3 | `automation-370fafc5-a050-479e-b62f-9c7988d23521` | `10 23 * * 6`（週六 23:10） | 糾正模式週報＋CR 使用健檢（`corrections-weekly` skill；CR 健檢主形態已轉事件觸發＝post-build 階段 4「CR wiring telemetry checkpoint」，AIR-67 弧B——本 cron 腿僅週期健康診斷） | ai-rules workspace | 報告；DB 唯讀、一頁、腳本失敗 2 次即止 |
 
 > 全名照錄 `CronList` 輸出 `automationId`（非前綴），逐字比對通過。
 
