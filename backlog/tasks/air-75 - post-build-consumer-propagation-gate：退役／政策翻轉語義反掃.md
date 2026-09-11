@@ -1,12 +1,17 @@
 ---
 id: AIR-75
 title: post-build consumer-propagation gate：退役／政策翻轉語義反掃
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-11 03:39'
+updated_date: '2026-09-11 03:55'
 labels:
   - governance
 dependencies: []
+references:
+  - >-
+    http://127.0.0.1:6421/viewer/_md-viewer.html?p=/ai-rules/skills/post-build/SKILL.md
+  - skills/post-build/SKILL.md
 ordinal: 61000
 ---
 
