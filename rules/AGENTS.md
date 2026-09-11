@@ -66,7 +66,7 @@ frontmatter `harness-scope:` 是**單一真相源**（每條 rule 自帶）。`d
 | `code-edit-constraints` | 🔴 claude-specific | Claude Edit/Write 工具 API（old_string 精確匹配 / 多位元組降級）|
 | `model-routing` | 🟢 neutral | 跨 harness subagent 模型分層骨架（角色→tier 表＋兩跳原則＋詞彙定義；映射/閘門/契約/套用與解析表在 model-routing skill） |
 
-**default = neutral**：通用知識預設跨 harness — 新 rule 不標 scope 即進 bundle。Claude 專屬 rule 需顯式標 `harness-scope: claude-specific` 才被排除。`deploy_agents.py` 的斷 ref 檢測會阻塞任何 neutral rule 引用 claude-specific rule 的 deploy（強制修 ref 或重劃 scope）。目前 neutral 16 條、claude-specific 2 條（bash-hard-rules / code-edit-constraints）。已下沉 skill 的 rule（self-consistency 五維檢查、context7 MCP 查詢——內容在 instruction-writing skill／context7 skill；design-thinking 輸出格式、model-routing 解析表、llm-output-convention 細則、modern-cli 陷阱目錄等同模式分層）。
+**default = neutral**：通用知識預設跨 harness — 新 rule 不標 scope 即進 bundle。Claude 專屬 rule 需顯式標 `harness-scope: claude-specific` 才被排除。`deploy_agents.py` 的斷 ref 檢測會阻塞任何 neutral rule 引用 claude-specific rule 的 deploy（強制修 ref 或重劃 scope）。已下沉 skill 的 rule（self-consistency 五維檢查、context7 MCP 查詢——內容在 instruction-writing skill／context7 skill；design-thinking 輸出格式、model-routing 解析表、llm-output-convention 細則、modern-cli 陷阱目錄等同模式分層）。
 
 ## Rule 寫作原則
 
