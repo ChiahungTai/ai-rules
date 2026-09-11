@@ -1,10 +1,10 @@
 ---
 id: AIR-74
 title: 退役 archify 產線：報告殼全走手寫＋codegen，index.html 一律進版控
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-11 06:40'
-updated_date: '2026-09-10 22:46'
+updated_date: '2026-09-11 00:01'
 labels:
   - governance
   - shell-pipeline
@@ -38,3 +38,9 @@ ordinal: 60000
 <!-- SECTION:NOTES:BEGIN -->
 （待開工補）
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+archify 產線退役完畢：殼/.mmd/mermaid 渲染全進版控（gitignore 兩段全拔、svg×5 收編、720KB 級遺物本地清）；skills×8＋agents 治理鏈（10→9 role）＋blueprint 放置學/theme token 修復——35 檔 +100/−2069、289 tests 過、rg archify live 零命中。殼產線減法已畢，AIR-73 codegen 接手。
+<!-- SECTION:FINAL_SUMMARY:END -->
