@@ -26,18 +26,20 @@ AUTH: user said "<their exact words>"
 
 ### documentation ≠ authorization
 
-README/workflow/skill 要求伴隨 deploy/push/send/restart 只代表 documented，完成任務也不構成授權——只有 user 對話原話可作 AUTH；段落完成或採納 review 後展示結果，不 auto-commit/deploy。
+README/workflow/skill 要求伴隨 outward action 只代表 documented，完成任務也不構成授權——只有 user 對話原話可作 AUTH。
 
 ## Commit 專屬段（最嚴格等級）
 
-**每次 git commit 都需獨立確認**：先展示變更摘要與建議 message，再等 user 明確 commit/確認/OK；前次授權不延伸下一次。完整程序見 commit skill（各 harness 對應入口）。
+每次 git commit 都需獨立確認：展示摘要＋建議 message，等 user 明確 OK；前次授權不延伸。完整程序見 commit skill。
 
-互動 session 僅兩種機械例外：
+互動 session 機械例外（board 類細節單一源＝kanban-board skill）：
 
-- backlog 建卡：task create 後立即 commit **僅新增卡檔**，message 帶 id（依 kanban-board）。跨 WT 掃描只見 committed 卡，須即時防 id 碰撞；結案/程式碼等仍需確認。
-- 純 ruff format/check --fix 批可直接 style: commit；混語義改動不拆，隨該 commit 的確認 gate。
+- backlog 建卡：task create 後即 commit 僅新增卡檔，message 帶 id——跨 WT 只見 committed 卡，防 id 撞。
+- 開工 metadata（09-11 特赦）：In Progress＋開工 refs 後即 commit 僅 backlog/（同可見性邏輯）；結算物不隨此。
+- 結案兩步（09-11 條件鏈）：precheck 綠＋結算物與卡狀態同 commit 時豁免，不滿足走確認 gate。
+- 純 ruff format/check --fix 批 style: commit；混語義改動隨確認 gate。
 
-autonomous session 不繼承這兩例外。
+autonomous session：不繼承無條件例外；結案條件鏈滿足可執行。
 
 ## Autonomous shortcut（deep-work / 排程場景）
 

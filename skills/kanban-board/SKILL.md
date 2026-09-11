@@ -48,6 +48,8 @@ backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 
 （採卡 branch 的 repo 在 ⑤ 之後另有 **⑥ checkout 卡 branch**——規則源＝該 repo AGENTS.md「git 慣例」節；通用起手式恆五步，⑥ 是 repo 層擴充）
 
+**開工 metadata 即 commit（user 09-11 特赦）**：起手式 ①⑤ 的 backlog 檔變更（In Progress＋雙 refs）隨後立即 commit **僅 `backlog/`**（message `chore(backlog): <id> 開工…`）——卡狀態是跨 WT 可見性契約，未 commit 平行 session 看不見；例外條款單一源＝[outward-action-consent](../../rules/outward-action-consent.md)「Commit 專屬段」③；Capabilities／程式碼結算物不隨此例外。
+
 **🔴 雙 ref 內建合約**：references 只對 http(s) 前綴渲染可點連結（`TaskDetailsModal.tsx:1362-1375`）——**相對路徑單獨出現＝board 上不可點＝錯誤形態**。兩值都要掛：
 - `http URL`＝report server 上的 Report Shell／md preview 位址（**repo 慣例**——如 mosaic `http://127.0.0.1:6421/<wt>/<任務路徑>/index.html`；殼未建前的過渡形態指中央 md viewer `http://127.0.0.1:6421/viewer/_md-viewer.html?p=/<route>/<任務路徑>/ep.md`——**viewer 單一源**版控於 ai-rules `report-assets/`，`fetch(?p=)` 同源絕對路徑可渲染任一 route 的 md，raw `.md` 直連永遠是原檔；hook 1 建殼後更新為殼 URL）
 - `repo 相對路徑`＝AI session／VSCode 消費形態
@@ -57,6 +59,8 @@ backlog task edit <id> --ref "<http URL>,<repo 相對路徑>"
 backlog task edit <id> -s Done --final-summary "<一句>"
 backlog task edit <id> --ref "<done/ 新URL>,<相對路徑>"   # --ref 整組替換
 ```
+**結案 metadata commit 特赦（user 09-11，條件授權鏈）**：結案兩步＋其 commit（僅 `backlog/`＋結算搬移檔、**同 commit**）在 **precheck 綠（跨線掃描 exit 0）** 時免逐次確認——機械守門替代人確認（例外條款④，autonomous session 同條件可執行）；條件不滿足 → 走確認 gate。註：precheck 在此是特赦的守門條件，非結案兩步本身的新要求（「結案兩步不需 precheck」現狀不變）。
+
 **弧結案蒸餾（第三動，同時機）**：owning session 將本弧 project_/feedback_ memory 條目重寫為終態 facts——刪日期/session id/進度流水與 git 可推導內容，留決策教訓與終態結論，敘事指向 repo 檔案（EP/卡）；無相關條目明示無。規則細節＝[memory-audit](../memory-audit/SKILL.md)「寫入端紀律」（含 desc 三不）。
 
 結案後**卡留 board Done 欄**（官方預設工作流——Done 欄可見＝完成工作可見）；`task complete <id>`（搬 `completed/`）是清場動作，延後到 board 清理批次（maintain 週期）或 user 指示，不隨結案當場執行。**清理批次自動腿**：ai-rules／mosaic 每日排程跑 `deploy/scripts/run-backlog-cleanup.sh`（時刻/plist 見 ai-rules ai-analysis/schedule-registry.md——launchd 表＋反查表 A3）——`Done` 且 `updated_date`>30d 的卡逐卡 precheck → `task complete` → commit（`BACKLOG_CLEANUP_AGE_DAYS` 可覆寫；多 worktree 全展開，跨線訊號卡保守跳過）。CLI 原生 `backlog cleanup` 是互動式 TUI（stdin 關閉時假成功 no-op），不可用於無人值守。

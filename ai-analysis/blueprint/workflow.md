@@ -182,7 +182,7 @@ Muse hook 接線的實作策略由 WT 基建弧在兩案中選一並驗證：
 
 目前 backlog/config.yml 仍是 `check_active_branches: false`。
 
-control-plane metadata 若需要自動 commit，基建弧必須同步對齊 outward-action consent；現行規則明確特赦的是建卡 commit，blueprint 不自行把授權擴張到 status/ref/finalization commits。
+control-plane metadata commit 授權（user 09-11 裁定）：建卡＋開工 metadata 特赦；結案兩步 metadata 走條件授權鏈（precheck 綠＋結算物與卡狀態同 commit）——單一源＝outward-action-consent「Commit 專屬段」，blueprint 不另行擴張。
 
 ## `wt-open` / `wt-close`：目標 transaction — ❌ 尚未實作
 

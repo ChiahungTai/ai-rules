@@ -333,7 +333,7 @@
     <li>working-copy 裡的 local card 仍可能遮住其他 branch 的同 id 狀態——flag 取代不了 single-writer ownership。</li>
     <li>untracked／staged 的建卡 flag 看不到——所以 max-id 預掃要保留，兩層各補一塊盲區。</li>
   </ul>
-  <div class="note">control-plane metadata 若要自動 commit，必須同步對齊 outward-action consent；現行規則特赦的只有建卡 commit，status／ref／finalization commit 的授權不由 blueprint 自行擴張。</div>
+  <div class="note">control-plane metadata commit 授權（user 09-11 裁定）：建卡＋開工 metadata 特赦、結案兩步走條件鏈（precheck 綠＋結算物同 commit）——單一源＝outward-action-consent「Commit 專屬段」。</div>
   <p class="src">投影自：<a href="workflow.md">workflow.md</a>「Board single-writer」節</p>
 </section>
 
