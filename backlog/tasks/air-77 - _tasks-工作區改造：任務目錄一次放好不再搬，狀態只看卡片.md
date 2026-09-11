@@ -4,7 +4,7 @@ title: _tasks 工作區改造：任務目錄一次放好不再搬，狀態只看
 status: To Do
 assignee: []
 created_date: '2026-09-11 22:51'
-updated_date: '2026-09-11 22:58'
+updated_date: '2026-09-11 23:04'
 labels:
   - structure
   - migration
@@ -44,4 +44,6 @@ mosaic 腿（跨 repo）：handoff 已產出交 mosaic 側自行派工——評�
 ⑤ supersession（弧目錄）＝就地墓碑（檔頭 superseded-by 指標），不搬——零搬移貫徹
 ⑥ EP 待裁：月內弧命名終局形態——主題-only（glm 指日期雙重編碼為長期醜態）vs 保留 MM-DD 前綴；開工時定並寫入慣例文件
 ⑦ 證據源註記：glm 載具（bridge --family glm）實跑 GLM-5.3-Flash 非 5.3 旗艦；codex＝chatgpt-web/high
+
+〔09-12 補裁決〕卡 notes ⑥ 結案：月內弧命名終局形態＝保留 MM-DD 前綴，即 _tasks/2026-09/<MM-DD-主題>/——user 拍板；glm「日期雙重編碼」意見已知悉不採。慣例文件同步時寫明此終局形態。另：Done/completed 兩階段行為查證（backlog CLI 源碼）未完成，卡平面後續想法擱置不擴張。
 <!-- SECTION:NOTES:END -->
