@@ -4,7 +4,7 @@ title: _tasks 工作區改造：任務目錄一次放好不再搬，狀態只看
 status: To Do
 assignee: []
 created_date: '2026-09-11 22:51'
-updated_date: '2026-09-11 23:04'
+updated_date: '2026-09-11 23:18'
 labels:
   - structure
   - migration
@@ -46,4 +46,6 @@ mosaic 腿（跨 repo）：handoff 已產出交 mosaic 側自行派工——評�
 ⑦ 證據源註記：glm 載具（bridge --family glm）實跑 GLM-5.3-Flash 非 5.3 旗艦；codex＝chatgpt-web/high
 
 〔09-12 補裁決〕卡 notes ⑥ 結案：月內弧命名終局形態＝保留 MM-DD 前綴，即 _tasks/2026-09/<MM-DD-主題>/——user 拍板；glm「日期雙重編碼」意見已知悉不採。慣例文件同步時寫明此終局形態。另：Done/completed 兩階段行為查證（backlog CLI 源碼）未完成，卡平面後續想法擱置不擴張。
+
+〔09-12 查證結案〕Done/completed 兩階段行為經 lite-verify 源碼＋runtime 雙證據裁決：user 主張成立——Done＝board 可見終態（檔留 tasks/），task complete＝手動 cleanup 封存（completed/，board/list/search 全隱形），官方 help 明言僅供 cleanup/archive 用，上游 repo 自身留 165 張 Done 卡在 tasks/。先前顧問「Done 留 tasks/＝漂移」宣稱不成立；「廢 task complete」後續卡想法撤銷。board 過濾憑目錄成員資格非 status 欄；backlog CLI 只讀 backlog/ 樹，與本卡（ai-analysis/_tasks）零接觸。
 <!-- SECTION:NOTES:END -->
