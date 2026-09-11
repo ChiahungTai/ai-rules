@@ -8,7 +8,7 @@ allowed-tools: ["Read", "Bash"]
 
 # code-reality 工具鏈（meta 層，Rust carrier）
 
-> **受眾邊界（雙源分治，2026-08-29 拆遷 EP）**：CR plugin skill（`~/Github/code-reality/plugin/skills/code-reality/SKILL.md`，隨發版、plugin ≥0.1.6）＝**工具事實與坑的 standalone 真相源**（刷鏈時序、refs 密度語義、fallback 坑、profile schema＋authoring、口徑限制、boundary 假設）；本檔＝**生態操作真相源**（何時跑、接線、紀律、生態教訓收編）。同名 skill 並存時：操作依據本檔，工具細節以 plugin 版為準。
+> **受眾邊界（雙源分治）**：CR plugin skill（`~/Github/code-reality/plugin/skills/code-reality/SKILL.md`，隨發版）＝**工具事實與坑的 standalone 真相源**（刷鏈時序、refs 密度語義、fallback 坑、profile schema＋authoring、口徑限制、boundary 假設）；本檔＝**生態操作真相源**（何時跑、接線、紀律、生態教訓收編）。同名 skill 並存時：操作依據本檔，工具細節以 plugin 版為準。
 
 工具住獨立 repo `~/Github/code-reality`（Rust carrier；repos 之上的 meta 層——**repo 事實歸 repo**，工具層不內建任何 repo 特例；binary 安裝見存在性偵測）。**呼叫形態**（從任意 repo cwd）：
 
@@ -16,9 +16,9 @@ allowed-tools: ["Read", "Bash"]
 code-reality <tool> --repo <repo-root> [args]
 ```
 
-**存在性偵測（單一真相源——implement／code-review／debrief 三檔存在性述語直接引用；post-build 經 code-review 模式 B 間接）**：repo root 有 `.code-reality.toml`，或 `code-reality snapshot --help` exit 0。**安裝單層＝uv（PyPI wheels；npm embedded face 已退役——registry 凍結 0.3.1 僅 deprecation grace，非候選）**：手動主面 `uv tool install code-reality`＋`pyrefly-producer`＋`code-reality-lsp-bridge`（免 Rust toolchain、落 `~/.local/bin`；rust-analyzer 仍系統依賴 `rustup component add rust-analyzer`；一次性用 `uvx code-reality <tool>`）；**plugin wrapper 首 session 自動 bootstrap**——`.mcp.json` wrapper 對 `--version` 做 plugin pin 前綴比對，missing/stale 即 `uv tool install --force code-reality==<pin>` 三 dist exact pin（MCP／CLI 同步釘 plugin 版）、無 uv loud 127＋指引、`CODE_REALITY_BOOTSTRAP=off`＝dev cargo-HEAD 機逃逸；**cargo＝developer face**（checkout 開發機 `cargo install --path ~/Github/code-reality/crates/code-reality`）。**dev 機＝cargo 權威（構造保證，2026-08-29 三殼實證）**——`~/.zshenv` 一行 cargo-first：terminal＝live rc；CC＝per-session 快照（新 session 自癒）；ZCode＝per-app 快照（重啟自癒）——一般呼叫即 cargo HEAD 面，無需 workaround。wrapper bootstrap 落的 uv-pinned 五顆續存 `~/.local/bin`（GUI 啟動 wrapper 場景與消費者預設面）——**需 pinned release 行為時全路徑呼 `~/.local/bin/code-reality`**（或 `uvx`）。權威面分歧窗口＝快照齡（v0.6.1 起 stale WARN 只在 dev cargo face 橋接，見下）。binary 查證在當下殼 `command -v`＋`--version` 直讀、勿跨殼假定。安裝/wrapper 細節真相源＝CR `plugin/README.md`。**新舊自報（v0.6.1 起 dev-face gated＋crates-relevant，leaf crate `cr-freshness` 單一源）**：`--version` 帶嵌入 rev（`<pkg>+<rev>`）；stale WARN 僅當執行檔位於 `$CARGO_HOME/bin`（dev cargo face）時啟用——**uv pin 面（`~/.local/bin`）從此靜默，plugin pin 是消費端唯一版本權威**；且僅 `crates/` 有實質 diff 才 WARN（HEAD 領先但 docs-only commit 不跳；git 無法解析的 rev 保守 WARN；dev 面 uncommitted `crates/` edits 恆 WARN）。binary 查證標準程序＝`--version` 直讀 rev。未裝 → 消費端跳過不阻擋（既有降級語義）。
+**存在性偵測（單一真相源——implement／code-review／debrief 三檔存在性述語直接引用；post-build 經 code-review 模式 B 間接）**：repo root 有 `.code-reality.toml`，或 `code-reality snapshot --help` exit 0。**安裝單層＝uv（PyPI wheels；npm embedded face 已退役，registry relic 僅 deprecation grace，非候選）**：手動主面 `uv tool install code-reality`＋`pyrefly-producer`＋`code-reality-lsp-bridge`（免 Rust toolchain、落 `~/.local/bin`；rust-analyzer 仍系統依賴 `rustup component add rust-analyzer`；一次性用 `uvx code-reality <tool>`）；**plugin wrapper 首 session 自動 bootstrap**——`.mcp.json` wrapper 對 `--version` 做 plugin pin 前綴比對，missing/stale 即 `uv tool install --force code-reality==<pin>` 三 dist exact pin（MCP／CLI 同步釘 plugin 版）、無 uv loud 127＋指引、`CODE_REALITY_BOOTSTRAP=off`＝dev cargo-HEAD 機逃逸；**cargo＝developer face**（checkout 開發機 `cargo install --path ~/Github/code-reality/crates/code-reality`）。**dev 機＝cargo 權威（構造保證，三殼實證）**——`~/.zshenv` 一行 cargo-first：terminal＝live rc；CC＝per-session 快照（新 session 自癒）；ZCode＝per-app 快照（重啟自癒）——一般呼叫即 cargo HEAD 面，無需 workaround。wrapper bootstrap 落的 uv-pinned 五顆續存 `~/.local/bin`（GUI 啟動 wrapper 場景與消費者預設面）——**需 pinned release 行為時全路徑呼 `~/.local/bin/code-reality`**（或 `uvx`）。權威面分歧窗口＝快照齡（stale WARN 只在 dev cargo face 橋接，見下）。binary 查證在當下殼 `command -v`＋`--version` 直讀、勿跨殼假定。安裝/wrapper 細節真相源＝CR `plugin/README.md`。**新舊自報（dev-face gated＋crates-relevant，leaf crate `cr-freshness` 單一源）**：`--version` 帶嵌入 rev（`<pkg>+<rev>`）；stale WARN 僅當執行檔位於 `$CARGO_HOME/bin`（dev cargo face）時啟用——**uv pin 面（`~/.local/bin`）從此靜默，plugin pin 是消費端唯一版本權威**；且僅 `crates/` 有實質 diff 才 WARN（HEAD 領先但 docs-only commit 不跳；git 無法解析的 rev 保守 WARN；dev 面 uncommitted `crates/` edits 恆 WARN）。binary 查證標準程序＝`--version` 直讀 rev。未裝 → 消費端跳過不阻擋（既有降級語義）。
 
-**MCP 面（ZCode plugin，v0.6.0 起 21 工具）**：符號面 `refs`／`callers`／`closure`／`audit` 對應 CLI `scip_refs` 家族——**CLI 無 `refs`/`callers` 子命令**，符號查詢 CLI 形態＝`code-reality scip_refs <symbol> --repo <repo>`（`--callers`／`--closure [--depth N]` 旗標）；graph_query 家族（`impact_radius`／`detect_changes`／`hub`／communities／flows…）MCP 與 CLI `graph_query <op>` 雙面；**資料面四工具 `build`／`snapshot`／`delta_tour`／`project` MCP face 在場（v0.6.0）——session 內驅動資料面 MCP 優先，CLI 形態留給無白名單 spawn prompt 與腳本**。instruction 引用工具名時標注面別（MCP `refs` vs CLI `scip_refs`）。
+**MCP 面（ZCode plugin）**：符號面 `refs`／`callers`／`closure`／`audit` 對應 CLI `scip_refs` 家族——**CLI 無 `refs`/`callers` 子命令**，符號查詢 CLI 形態＝`code-reality scip_refs <symbol> --repo <repo>`（`--callers`／`--closure [--depth N]` 旗標）；graph_query 家族（`impact_radius`／`detect_changes`／`hub`／communities／flows…）MCP 與 CLI `graph_query <op>` 雙面；**資料面 `build`／`snapshot`／`delta_tour`／`project` MCP face 在場——session 內驅動資料面 MCP 優先，CLI 形態留給無白名單 spawn prompt 與腳本**。instruction 引用工具名時標注面別（MCP `refs` vs CLI `scip_refs`）。
 
 ## 何時跑（程序接線）
 
@@ -39,13 +39,13 @@ code-reality <tool> --repo <repo-root> [args]
 
 | 工具 | 職責 |
 |------|------|
-| `build` | **數據面一鍵傘形**（v0.4.0 起）：偵測語言面→spawn producer（`pyrefly-index`／`rust-analyzer scip <repo 目錄>`）→in-process `graph_db build`＋`ensure_indexes`；`--producer rust／python` 顯式覆蓋；mixed repo 兩腿 cat-merge＝單一雙語言 graph；陷阱已守衛——scip 需傳**目錄**非 Cargo.toml（後者 exit 0 空輸出）、<128B 空索引擋 |
+| `build` | **數據面一鍵傘形**：偵測語言面→spawn producer（`pyrefly-index`／`rust-analyzer scip <repo 目錄>`）→in-process `graph_db build`＋`ensure_indexes`；`--producer rust／python` 顯式覆蓋；mixed repo 兩腿 cat-merge＝單一雙語言 graph；陷阱已守衛——scip 需傳**目錄**非 Cargo.toml（後者 exit 0 空輸出）、<128B 空索引擋 |
 | `snapshot` | graph module-edge 導出（讀自有 `.code-reality/graph.db`）＋commit 錨定 sidecar（冪等；`_meta` 慣例） |
 | `hub_refs` | hub symbol 廣度（callers/callees 按目錄、test/prod 切分）＋hazard 分層安全網（常駐 AST 級＋static_prod ≤ 2 觸發 rg 級 dynamic dispatch 偵測，規則在 `hazard` 模組——防「0 refs 可刪」誤判；`--hazard` 強制全掃、`--json` 含 `hazard_findings` 欄）；⚠️ CLI 面無 stale guard——過期 index 上照跑，判讀前先看 `[SRC]` 行 |
 | `runtime_edges` | viztracer trace → 逐函式 runtime 邊 |
 | `boundary_build`／`boundary` | pyo3 宣告↔`.pyi` 合約 sidecar build／查詢 |
 | `delta_tour`／`chain_tour` | delta_tour＝snapshot 對 diff→tour＋**EP 宣稱對照**（三態＋實際變動模組＋退化/跨面 pair 自動警示）；`--out-dir` 為 **cwd-relative 非 repo-relative**（落點在執行 cwd 的 `.tours/delta/`）；chain_tour＝callstack md→tours（upsert `.tours/manifest.toml`）；`.tour` 契約——渲染消費者 CodeTour |
-| `project`（v0.5.0） | **投影圖 orchestrator**（EP 規劃期專用）：`--repo <repo> --plan <plan.toml>`——plan 同層 `sources/` 假想碼→overlay SCIP 鑄造→cat-merge 真實 index→投影面查詢（規劃新符號反向鏈 callers＋claims 三態 `HOLE`〔有 DEF 零呼叫邊＝未驗證假設〕/`MISSING`〔宣稱符號不存在〕/`WIRED`）；輸出帶 `[projected]` 標籤＝**宣告非證據**；前置＝真實 index 在場（先 `code-reality build --repo`）；消費接線＝execution-plan 段落 0（EP 作者）＋ep-review F3（判讀）——分工與防洗衣陷阱語義見 [cr-query](../cr-query/SKILL.md) |
+| `project` | **投影圖 orchestrator**（EP 規劃期專用）：`--repo <repo> --plan <plan.toml>`——plan 同層 `sources/` 假想碼→overlay SCIP 鑄造→cat-merge 真實 index→投影面查詢（規劃新符號反向鏈 callers＋claims 三態 `HOLE`〔有 DEF 零呼叫邊＝未驗證假設〕/`MISSING`〔宣稱符號不存在〕/`WIRED`）；輸出帶 `[projected]` 標籤＝**宣告非證據**；前置＝真實 index 在場（先 `code-reality build --repo`）；消費接線＝execution-plan 段落 0（EP 作者）＋ep-review F3（判讀）——分工與防洗衣陷阱語義見 [cr-query](../cr-query/SKILL.md) |
 | `tour_validate`／`tour_upgrade`／`tour_manifest` | corpus 治理：機械驗證（link 鍵／錨三態／manifest source）／舊格式遷移（pattern 補全＋cross-ref 活化，dry-run 預設）／manifest 讀寫 |
 | `graph_audit` | 自有 graph.db **Rust 完整度稽核**——D1 同型別多 impl 風險掃描（per-block ≥2，非交集）＋D2 rust-analyzer symbols 對帳（kind 含 Test）；graph rebuild／rebase 大跳後跑 |
 | `sidecar_migrate` | 舊 home slot → in-repo 搬遷（`~/.mosaic` 退役過渡橋；缺索引錯誤自動提示） |
@@ -98,7 +98,7 @@ registry = "CONDITION_REGISTRY"
 evidence = "mosaic_alpha/conditions/discovery.py:149"   # 可選——註冊鏈證據顯示用
 ```
 
-**無 profile fallback、authoring 程序四步（判斷 module 規則→exclude 目錄粒度帶斜線→scan_root 僅 pyo3 對帳 repo→smoke 驗證）、`hazard_registry` 欄位語義＝CR plugin skill 真相源**（英文通用版，吸收自本檔 A7＋D8 收尾 0.1.7）；示例塊為生態內領域形態參考。
+**無 profile fallback、authoring 程序四步（判斷 module 規則→exclude 目錄粒度帶斜線→scan_root 僅 pyo3 對帳 repo→smoke 驗證）、`hazard_registry` 欄位語義＝CR plugin skill 真相源**（英文通用版，吸收自本檔 A7＋D8 收尾）；示例塊為生態內領域形態參考。
 
 ## 口徑限制（宣稱抽取——delta_tour `--ep`）
 

@@ -165,7 +165,7 @@ Workflow 審查協調：[workflow-review-pattern.md](../_common/workflow-review-
 **Writer/Reviewer 分離**：用獨立 Agent context 做品質閘門，避免主 LLM 審查自己的 code。
 review 執行預設（force 獨立 / max-agents 預設 3 / model 預設 / 3-perspective）見 [review-engine](../review-engine/SKILL.md)「review 執行預設」—— 本段僅定義 build 特有流程。**3-perspective**（① clean + ② UC-anchored + ③ Correctness，多樣性 > 數量）完整設計見 [agent-review-cycle.md](../_common/agent-review-cycle.md)。
 
-> **code-reality（若在場）**：Agent Review 的 wiring 驗證（新/改 symbol 的消費端接對沒）用 callers 查詢；段 impact 驗證用 `impact_radius`；「沒影響 X」的 claim 機械反證用 code-reality（graph 是 L1 機械證據，補強 Claim→Evidence→Trust，見階段 3 整合路徑檢查）。**review agent spawn prompt 必含 CR 接線查證段（硬性——單一源 [review-engine](../review-engine/SKILL.md)「spawn prompt 工具紀律」；build review agents＝`Explore` 無 CR MCP 白名單 → CLI 形態）**；主 session 自行查詢 **MCP 優先**（MCP `callers`／`impact_radius`；資料面 `build`／`snapshot`／`delta_tour`／`project` MCP face 同在，v0.6.0 起）。分工 + GATE 見 [cr-query](../cr-query/SKILL.md)。
+> **code-reality（若在場）**：Agent Review 的 wiring 驗證（新/改 symbol 的消費端接對沒）用 callers 查詢；段 impact 驗證用 `impact_radius`；「沒影響 X」的 claim 機械反證用 code-reality（graph 是 L1 機械證據，補強 Claim→Evidence→Trust，見階段 3 整合路徑檢查）。**review agent spawn prompt 必含 CR 接線查證段（硬性——單一源 [review-engine](../review-engine/SKILL.md)「spawn prompt 工具紀律」；build review agents＝`Explore` 無 CR MCP 白名單 → CLI 形態）**；主 session 自行查詢 **MCP 優先**（MCP `callers`／`impact_radius`；資料面 `build`／`snapshot`／`delta_tour`／`project` MCP face 同在）。分工 + GATE 見 [cr-query](../cr-query/SKILL.md)。
 
 #### Step 1: 確認 max-agents
 

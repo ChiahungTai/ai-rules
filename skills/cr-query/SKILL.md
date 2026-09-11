@@ -73,7 +73,7 @@ Two facts backends, complementary not competing:
 | "architectural hotspots / chokepoints" | `hub_nodes` / `bridge_nodes` (CLI: `graph_query hub` / `bridge`) |
 | "module clusters / coupling" | `list_communities` / `get_community` / `architecture_overview` (CLI: `graph_query communities` / `arch_overview`；`get_community` MCP-only) |
 | "is X dead code" | `callers` 歸零＋CLI `hub_refs <sym> --repo <root>` hazard 分層（含 test/prod 切分）——「0 refs 可刪」前必跑安全網 |
-| EP 規劃期投影（整合器型/跨模組 EP） | MCP `project`（v0.6.0 起）或 CLI `code-reality project --repo <repo> --plan <plan.toml>`——overlay 鑄造＋投影面查詢：規劃新符號反向鏈＋claims 三態（`HOLE`/`MISSING`/`WIRED`）；輸出帶 `[projected]` 標籤＝**宣告非證據**（洗衣陷阱防護）；操作/語義真相源 [code-reality](../code-reality/SKILL.md) 工具表；EP 接線見 [execution-plan](../execution-plan/SKILL.md) 段落 0。**觀察窗**（cr-audit R8）：零正面案例期，不擴接線面，首個實證後再評估常態化 |
+| EP 規劃期投影（整合器型/跨模組 EP） | MCP `project` 或 CLI `code-reality project --repo <repo> --plan <plan.toml>`——overlay 鑄造＋投影面查詢：規劃新符號反向鏈＋claims 三態（`HOLE`/`MISSING`/`WIRED`）；輸出帶 `[projected]` 標籤＝**宣告非證據**（洗衣陷阱防護）；操作/語義真相源 [code-reality](../code-reality/SKILL.md) 工具表；EP 接線見 [execution-plan](../execution-plan/SKILL.md) 段落 0。**觀察窗**（cr-audit R8）：零正面案例期，不擴接線面，首個實證後再評估常態化 |
 | "find symbol by concept/keyword" | `semantic_search` (keyword face；embeddings 未採用) or rg |
 
 ## 受影響測試集 → test files 標準配方（修改檔 → 受影響 test files）
