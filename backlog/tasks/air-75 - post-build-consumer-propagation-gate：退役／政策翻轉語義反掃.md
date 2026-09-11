@@ -1,10 +1,10 @@
 ---
 id: AIR-75
 title: post-build consumer-propagation gate：退役／政策翻轉語義反掃
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-11 03:39'
-updated_date: '2026-09-11 03:55'
+updated_date: '2026-09-11 04:07'
 labels:
   - governance
 dependencies: []
@@ -26,3 +26,9 @@ ordinal: 61000
 - [ ] #1 本日四類specimen（commit特赦枚舉／illustrate政策／onboarding／continuation）回放全命中，有 disposition
 - [ ] #2 現有 rename gate 行為不退化
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+consumer-propagation gate 落 post-build 4.3（四段式：機械 candidate→LLM 萃取→委派既有機制→四態處置）；四 specimen 回放全過；rename 零退化
+<!-- SECTION:FINAL_SUMMARY:END -->
