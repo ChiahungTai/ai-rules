@@ -4,6 +4,7 @@ title: bridge glm 委派檔位規則入 model-routing——派工必帶 --model�
 status: To Do
 assignee: []
 created_date: '2026-09-11 23:38'
+updated_date: '2026-09-11 23:43'
 labels:
   - model-routing
   - bridge
@@ -29,3 +30,15 @@ ordinal: 64000
 - [ ] #3 enum 反查完成（muse/codex/--family 二值假設全掃）；agents/ 零改由反查證明
 - [ ] #4 時序證據：M1 弧 commit 在前＋post-M1 skill 形態 re-read 記錄
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+〔09-12 v2 工單修訂（源 delegate-bridge f821ca7 同 baseline、事實面翻新，含 file:line）——修訂原決策②③④、新增兩毒型〕
+◆撤銷：原②「d4 default pin 落地前連 lite 都要顯式 --model」——前提消失：bridge 已 pin（glm.rs:39 DEFAULT_MODEL=sonnet），裸委派確定性落 flash。修訂後核心規則＝full-tier（judge/EP 規劃/重型裁量）必帶 --model opus；flash 段（機械/研究/findings）可不帶。禁裸 full-tier 委派不變。
+◆修訂③審計語義：effectiveModel 於 job finalize 才落帳——running 中 runs 顯示 - 屬正常非未 stage；原「carrier effectiveModel 不具證明力」句撤銷（v1 live 觀察係 mid-run 誤讀）。
+◆擴充④flag 表面（glm.rs:1010-1031 validate_flags，exit 2 fail-loud）：拒收 --trust-workspace/--steps/--yolo/--effort/--allow-workspace-switch/--network；收 --model/--background/--caller-session/--json/--resume＋positional prompt。「--trust-workspace --steps 800」形＝muse 專用，glm 照抄即炸——skills 內 bridge 委派範例須標 family 差異。
+◆新增毒型A（fail-silent，最危險）：glm 載具恆 --mode plan（唯讀，R4 安全決策）——寫入型工單派 glm＝status=completed 但零檔案落地（live 實證：EP 規劃輪）。「GLM 寫」目前只有 orchestrator 直做；寫入型一律走 muse。專節重點標。
+◆新增毒型B（三家族通用）：bridge spawn 面 one-shot、child stdin 恆 null（task.rs:610）——muse MSP turn/steer、codex turn/steer+queue、zcode app-server session/send 的 protocol 級 steer bridge 全不可達。操作語義：委派出去不能改道，只能 stop 殺了重派。muse/codex row 同步帶此句（通用事實非 glm 專屬）。
+◆不變：落點（family 表 glm row＋專節）、rules/ 零改動、resume/fork 表不加 row（v2 收單含 --resume 但 session identity 連續性仍未證——維持 unverified 句）、兩弧時序（M1 後 re-read post-M1 形態再開工）、arc home legacy 頂層（AIR-77 遷移時搬）、enum 反查、驗收三 invariant（full→opus／lite→可不帶或 sonnet／unsupported flags 零送出——第二項依 v2 放寬）。
+<!-- SECTION:NOTES:END -->
