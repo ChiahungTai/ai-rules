@@ -7,12 +7,15 @@ run_in_background: true——同一個 call 內生效，不拒絕、不重派。
 所有事件旁錄 .agent-tmp/zcode-agent-gate.jsonl（省略形態取證＋行為審計）。
 fail-open：任何內部錯誤靜默原樣放行，禁干擾派發。
 """
+
 import json
 import os
 import sys
 from datetime import datetime, timezone
 
 LOG = "/Users/ctai/Github/ai-rules/.agent-tmp/zcode-agent-gate.jsonl"
+
+RB_LABEL = {"<ABSENT>": "absent", True: "true", False: "false"}
 
 
 def main() -> None:
@@ -22,7 +25,11 @@ def main() -> None:
     except json.JSONDecodeError:
         event = {"_parse_error": True}
     tool_input = event.get("tool_input")
-    rb = tool_input.get("run_in_background", "<ABSENT>") if isinstance(tool_input, dict) else "<NO_DICT>"
+    rb = (
+        tool_input.get("run_in_background", "<ABSENT>")
+        if isinstance(tool_input, dict)
+        else "<NO_DICT>"
+    )
     action = "pass_through"
     output = None
     if (
@@ -33,7 +40,7 @@ def main() -> None:
     ):
         new_input = dict(tool_input)
         new_input["run_in_background"] = True
-        action = "rewrite_from_absent" if rb == "<ABSENT>" else f"rewrite_from_{rb}"
+        action = "rewrite_from_" + RB_LABEL.get(rb, str(rb).lower())
         output = {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
@@ -42,19 +49,25 @@ def main() -> None:
                 "updatedInput": new_input,
             }
         }
-    record = {
-        "_ts": datetime.now(timezone.utc).isoformat(),
-        "tool_name": event.get("tool_name"),
-        "tool_input_keys": sorted(tool_input.keys()) if isinstance(tool_input, dict) else None,
-        "run_in_background": rb,
-        "gate_action": action,
-        "session_id": event.get("session_id"),
-    }
-    os.makedirs(os.path.dirname(LOG), exist_ok=True)
-    with open(LOG, "a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
     if output:
+        # rewrite 先輸出——audit 失敗不得連帶丟掉本次 enforcement
         print(json.dumps(output, ensure_ascii=False))
+    try:
+        record = {
+            "_ts": datetime.now(timezone.utc).isoformat(),  # noqa: UP017 — ZCode 以系統 python3（3.9）呼叫本 hook，datetime.UTC 要 3.11+
+            "tool_name": event.get("tool_name"),
+            "tool_input_keys": sorted(tool_input.keys())
+            if isinstance(tool_input, dict)
+            else None,
+            "run_in_background": rb,
+            "gate_action": action,
+            "session_id": event.get("session_id"),
+        }
+        os.makedirs(os.path.dirname(LOG), exist_ok=True)
+        with open(LOG, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        pass  # audit 只 lose log 本身；rewrite 已輸出不受影響
 
 
 if __name__ == "__main__":
