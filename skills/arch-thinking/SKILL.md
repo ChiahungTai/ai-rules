@@ -11,7 +11,7 @@ description: 架構設計、clean architecture、分層依賴、bounded context�
 
 本 skill 的能力（視角 + 機械）**不決定受眾** — 渲染心智模型給人判讀（`/illustrate`，人類 viewport / B 軸）、產機器 finding（`/code-review` axis 3，A 軸）、結構審查（`/ep-review` F3）都由**消費命令**決定，本 skill 刻意中性。
 
-**載體中性**：方法論**綁角色、不綁家族** — implementer（設計決策）與 reviewer（結構審查）讀同一份，執行家族（in-harness agent／external-runtime 委派工單）只是載體，雙家族互換實作／審查角色時方法論零改動。機械段 fuel 階梯按執行環境取可用層：external runtime 無 LSP／MCP 面 → 取 rg + code-reality CLI 查詢面（在場時；缺場＝rg degraded＋報告標 `[WARN]`）；接線細則由派發工單「工具接線」承載（[work-order](../_common/work-order.md) §7），本 skill 不寫家族版操作教學。
+**載體中性**：方法論**綁角色、不綁家族** — implementer（設計決策）與 reviewer（結構審查）讀同一份，執行家族（in-harness agent／external-runtime 委派工單）只是載體，跨家族互換實作／審查角色時方法論零改動。機械段 fuel 階梯按執行環境取可用層：external runtime 無 LSP／MCP 面 → 取 rg + code-reality CLI 查詢面（在場時；缺場＝rg degraded＋報告標 `[WARN]`）；接線細則由派發工單「工具接線」承載（[work-order](../_common/work-order.md) §7），本 skill 不寫家族版操作教學。
 
 > 三層次區隔（合併檔內不重疊）：**受眾／載體中性**（本段）= 對消費命令與執行家族的中性承諾；**與既有 skill 邊界**（§四）= 對其他 skill 的職責分工；**不適用 / 不做**（§五）= 場景排除（不適用）+ 職責邊界（不做）。
 

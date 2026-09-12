@@ -1,10 +1,10 @@
 ---
 id: AIR-78
 title: bridge glm 委派檔位規則入 model-routing——派工必帶 --model，禁裸委派防靜默落 flash
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-11 23:38'
-updated_date: '2026-09-12 05:20'
+updated_date: '2026-09-12 06:01'
 labels:
   - model-routing
   - bridge
@@ -27,12 +27,12 @@ ordinal: 64000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 family 表 glm row＋glm 專節落地（值域／native 檔位政策／審計語義（含 ledger model/effectiveModel 兩欄例外條款）／resume-fork unverified 句）
-- [ ] #2 三 invariant 機械驗證：full→`--model GLM-5.3`、lite→`--model GLM-5.3-Flash`（呼叫端顯式 tier→native 映射，bridge 不代解）、unsupported flags 零送出
-- [ ] #3 enum 反查完成（muse/codex/--family 二值假設全掃）；agents/ 零改由反查證明
-- [ ] #4 時序證據：M1 弧 commit 在前＋post-M1 skill 形態 re-read 記錄
-- [ ] #5 vocabulary invariant 進全域 guide Model Routing 段（always-on）：prose/doctrine 一律 native ID；CC 詞彙僅限 CC harness 接線；bridge 委派一律 native；禁 native+alias 複合
-- [ ] #6 機械 guard 入 instruction/doc 檢查鏈：compound-slug lint＋bridge 委派範例掃 `--model opus|sonnet` 殘留（alias 退役後這些字串＝bug）
+- [x] #1 family 表 glm row＋glm 專節落地（值域／native 檔位政策／審計語義（含 ledger model/effectiveModel 兩欄例外條款）／resume-fork unverified 句）
+- [x] #2 三 invariant 機械驗證：full→`--model GLM-5.3`、lite→`--model GLM-5.3-Flash`（呼叫端顯式 tier→native 映射，bridge 不代解）、unsupported flags 零送出
+- [x] #3 enum 反查完成（muse/codex/--family 二值假設全掃）；agents/ 零改由反查證明
+- [x] #4 時序證據：M1 弧 commit 在前＋post-M1 skill 形態 re-read 記錄
+- [x] #5 vocabulary invariant 進全域 guide Model Routing 段（always-on）：prose/doctrine 一律 native ID；CC 詞彙僅限 CC harness 接線；bridge 委派一律 native；禁 native+alias 複合
+- [x] #6 機械 guard 入 instruction/doc 檢查鏈：compound-slug lint＋bridge 委派範例掃 `--model opus|sonnet` 殘留（alias 退役後這些字串＝bug）
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -60,3 +60,9 @@ ordinal: 64000
 
 〔09-12 晚——delegate-bridge 2.0.3（39b6964）handoff 承接：AC#1 family 面先行落地〕model-routing skill 已補 glm（bridge）family row＋glm 專節（native-ID-only、裸委派預設 GLM-5.3-Flash、--write-mode edit、flag 面、ledger 語義、resume unverified 句）。**2.0.3 事實修正先前裁定**：①毒型A（glm 恆唯讀、寫入一律走 muse）過時——寫入委派＝--write-mode edit（headless 唯一寫檔檔位）、build 反而收緊為唯讀；②alias fail 形態＝exit 1 terminal failure entry（非 exit 2）；③裸委派語義再修＝預設落 GLM-5.3-Flash（非 error）——v3「呼叫端顯式映射」收斂為「呼叫端擁映射（tier 表即映射），bridge 不代解但 default 落 flash」。**剩餘 AC 待 user 觸發**：#5 vocabulary invariant 進全域 guide、#6 compound-slug guard 入檢查鏈、#3 enum 反查（muse/codex/--family 二值假設全掃）。另 rules-reminder relay closure 已裁定 N/A by design（[fg] 屬 orchestrator 側 Agent 派發語義，歸 tool-discipline＋agent-workflow，皆已同步；rules-reminder 職掌 Bash 命令紀律）。
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+glm bridge 委派檔位規則入 model-routing——family 表 glm row＋專節五條（native-ID-only VR-1/write-mode edit/flag 面/ledger effectiveModel 身份/resume unverified）、vocabulary invariant 進全域 guide、bridge_model_vocab 機械 guard（--family 行級 gate＋compound-slug 掃）、enum 反查 9+2 處（含 root AGENTS delegate-bridge 段、跨家族解析表補 glm）；雙審（codex job-mtxyjb0l＋flash code-reviewer）4🟡2ℹ️+1🟡5🟢 全採納修正；360 passed、deploy 3/3、活面掃描零殘留
+<!-- SECTION:FINAL_SUMMARY:END -->

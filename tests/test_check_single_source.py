@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 
+import pytest
 from conftest import load_module
 
 css = load_module("skills/scan-project/scripts/check_single_source.py")
@@ -520,9 +521,18 @@ def _write_vocab_source(tmp_path):
     )
 
 
+def _write_scan_skeleton(tmp_path):
+    """建齊 invariant 的 scan entries——避免 dead-entry findings 污染計數斷言。"""
+    _write_vocab_source(tmp_path)
+    for entry in ("ai-development-guide.md", "AGENTS.md"):
+        (tmp_path / entry).write_text("ok\n", encoding="utf-8")
+    for d in ("rules", "agents", "hooks"):
+        (tmp_path / d).mkdir(exist_ok=True)
+
+
 def test_vocab_cc_flag_form_detected(tmp_path, monkeypatch):
     """AIR-78 AC#6：bridge `--model sonnet/opus` 殘留（VR-1 後＝bug）被抓。"""
-    _write_vocab_source(tmp_path)
+    _write_scan_skeleton(tmp_path)
     (tmp_path / "skills" / "guide.md").write_text(
         '派發：task --family glm --model sonnet -- "p"', encoding="utf-8"
     )
@@ -535,8 +545,7 @@ def test_vocab_cc_flag_form_detected(tmp_path, monkeypatch):
 
 def test_vocab_compound_slug_detected(tmp_path, monkeypatch):
     """vocabulary invariant：native＋alias 複合 slug 被抓（不分大小寫）。"""
-    _write_vocab_source(tmp_path)
-    (tmp_path / "rules").mkdir()
+    _write_scan_skeleton(tmp_path)
     (tmp_path / "rules" / "x.md").write_text(
         "錯誤示範 --model GLM-5.3-sonnet", encoding="utf-8"
     )
@@ -548,8 +557,7 @@ def test_vocab_compound_slug_detected(tmp_path, monkeypatch):
 
 def test_vocab_cc_frontmatter_and_table_legal(tmp_path, monkeypatch):
     """CC 自身接線不誤報：`model: opus` frontmatter 形與 tier 表管道相鄰合法。"""
-    _write_vocab_source(tmp_path)
-    (tmp_path / "agents").mkdir(parents=True)
+    _write_scan_skeleton(tmp_path)
     (tmp_path / "agents" / "role.md").write_text(
         "---\nmodel: opus\n---\nbody", encoding="utf-8"
     )
@@ -561,10 +569,82 @@ def test_vocab_cc_frontmatter_and_table_legal(tmp_path, monkeypatch):
 
 
 def test_vocab_source_anchor_missing_critical(tmp_path, monkeypatch):
-    """定義源 drift 自檢：契約錨點（must_contain_any）缺席＝critical。"""
+    """定義源 drift 自檢：契約錨點（must_contain_all）缺席＝critical。"""
     d = tmp_path / "skills" / "model-routing"
     d.mkdir(parents=True)
     (d / "SKILL.md").write_text("（契約被洗掉的 drifted 內容）", encoding="utf-8")
     monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
     findings = css.check_forbidden_pattern(_vocab_inv())
     assert any(f[1] == "critical" and "native-ID-only" in f[2] for f in findings)
+
+
+@pytest.mark.parametrize(
+    ("line", "hit"),
+    [
+        ("task --family glm --model sonnet -- x", True),
+        (
+            "task --family glm --model Opus -- x",
+            True,
+        ),  # mixed case（VR-1 canonicalize 不分大小寫）
+        ("task --family codex --model='SONNET' -- x", True),  # =/quote/case 形
+        ("claude --model opus -p x", False),  # CC CLI 自身接線（vocabulary 句明文允許）
+        ("model: opus", False),  # frontmatter 形
+        ("| lite | glm-5.3-flash | sonnet（CC 詞彙面） | haiku |", False),  # tier 表
+        ("觸發詞：opus、sonnet、haiku", False),  # description 觸發詞列舉
+    ],
+)
+def test_vocab_flag_gate_matrix(tmp_path, monkeypatch, line, hit):
+    """flag 形＝行級 gate（同行 --family 才算 bridge 面）＋case-insensitive（C-1/F4/F5）。"""
+    _write_scan_skeleton(tmp_path)
+    (tmp_path / "skills" / "guide.md").write_text(line + "\n", encoding="utf-8")
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    findings = [
+        f for f in css.check_forbidden_pattern(_vocab_inv()) if "guide.md" in f[2]
+    ]
+    assert bool(findings) is hit
+
+
+@pytest.mark.parametrize(
+    ("line", "hit"),
+    [
+        ("--model GLM-5.3-sonnet", True),  # native-first 複合
+        ("--model sonnet-glm-5.3", True),  # alias-first 複合
+        ("旗艦＝GLM-5.3；lite 用 sonnet（CC 詞彙面）", False),  # prose 相鄰非複合 token
+    ],
+)
+def test_vocab_compound_matrix(tmp_path, monkeypatch, line, hit):
+    _write_scan_skeleton(tmp_path)
+    (tmp_path / "rules" / "x.md").write_text(line + "\n", encoding="utf-8")
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    findings = [f for f in css.check_forbidden_pattern(_vocab_inv()) if "x.md" in f[2]]
+    assert bool(findings) is hit
+
+
+def test_vocab_anchor_partial_missing_critical(tmp_path, monkeypatch):
+    """must_contain_all 語義：只缺一個錨點也 critical（C-2——欄位名與 gate 語義一致）。"""
+    _write_scan_skeleton(tmp_path)
+    (tmp_path / "skills" / "model-routing" / "SKILL.md").write_text(
+        "glm 契約：--model native-ID-only", encoding="utf-8"
+    )
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    findings = css.check_forbidden_pattern(_vocab_inv())
+    assert len(findings) == 1
+    assert findings[0][1] == "critical"
+    assert "GLM-5.3-Flash" in findings[0][2]
+
+
+def test_vocab_source_file_absent_important(tmp_path, monkeypatch):
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    findings = css.check_forbidden_pattern(_vocab_inv())
+    assert len(findings) == 1
+    assert findings[0][1] == "important"
+    assert "source 檔不存在" in findings[0][2]
+
+
+def test_vocab_dead_scan_entry_important(tmp_path, monkeypatch):
+    """scan entry 路徑死掉＝guard 面縮小，不得靜默（F6）。"""
+    _write_vocab_source(tmp_path)
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    findings = css.check_forbidden_pattern(_vocab_inv())
+    dead = [f for f in findings if "scan entry 不存在" in f[2]]
+    assert dead, "死 entry 應各發一條 important"

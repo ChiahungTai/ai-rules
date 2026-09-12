@@ -27,6 +27,6 @@ review/impl 的 ZCode registry 與 CC 別名釘選依 skill 解析表；本 rule
 
 ## external-runtime routing（family 軸）
 
-family＝GLM/muse/codex；profile＝implement/review/advisory。tier/family/profile 詞彙由本檔定義，其他載體只引用。
+family＝GLM/muse/codex（GLM 含 bridge `glm` 與 in-harness 兩 transport）；profile＝implement/review/advisory。tier/family/profile 詞彙由本檔定義，其他載體只引用。
 
 委派、收法、定向接續/fork 時必載 **model-routing skill**：family→(model, effort, 容量) 解析表、webgpt 使用約束與失敗態（含背景 Bash 直呼 bridge、禁 subagent wrapper、background job 掛 `wait <jobId>`）、eligibility、reviewer handoff、bridge 必經 `task --family muse|codex|glm`、resume/fork、rate limit/classifier failure 與 lite 分工都在其中。external-runtime policy 不擴充 tier/pin；工單禁再委派時不得因載入 routing 自行 spawn。

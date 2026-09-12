@@ -155,7 +155,7 @@ INVARIANTS = [
         "id": "bridge_model_vocab",
         "type": "forbidden_pattern",
         "source": "skills/model-routing/SKILL.md",
-        "must_contain_any": ["native-ID-only", "GLM-5.3-Flash"],
+        "must_contain_all": ["native-ID-only", "GLM-5.3-Flash"],
         "scan": [
             "ai-development-guide.md",
             "AGENTS.md",
@@ -166,7 +166,8 @@ INVARIANTS = [
         ],
         "forbid": [
             {
-                "pattern": r"--model[ =]+['\"]?(sonnet|opus)\b",
+                "pattern": r"(?i)--model[ =]+['\"]?(sonnet|opus)\b",
+                "gate": r"(?i)--family",
                 "why": "bridge --model 只收 native ID（VR-1，AIR-78）——CC 詞彙字串＝bug",
             },
             {
@@ -176,8 +177,9 @@ INVARIANTS = [
         ],
         "note": "AIR-78 AC#6 機械 guard：alias 退役（d4 VR-1）後 bridge 委派範例的 "
         "CC 詞彙殘留＝bug。CC harness 自身接線（tier 表 CC 詞彙欄、`model: opus` "
-        "frontmatter 形）不在此列——掃的是 `--model` flag 形與 native＋alias 複合 "
-        "slug；歸檔面（ai-analysis、ref-docs）不掃。",
+        "frontmatter／CC CLI invocation 形）不在此列——flag 形以同行 `--family` "
+        "gate 限定在 bridge 語境；compound-slug 無 gate（任何複合皆錯）；歸檔面"
+        "（ai-analysis、ref-docs）不掃。錨點＝must_contain_all（逐一缺席各 critical）。",
     },
 ]
 
@@ -321,18 +323,13 @@ def check_source_contains(inv: dict) -> list[tuple[str, str, str]]:
     return []
 
 
-def _iter_scan_files(scan: list[str]):
-    """scan 清單 → 檔案迭代：目錄取底下全部 .md（排除暫存/鏡像），檔案直接yield。"""
-    for entry in scan:
-        p = REPO_ROOT / entry
-        if p.is_dir():
-            yield from sorted(p.rglob("*.md"))
-        elif p.exists():
-            yield p
-
-
 def check_forbidden_pattern(inv: dict) -> list[tuple[str, str, str]]:
-    """forbidden_pattern：掃 instruction 活面的禁用字串（單一源契約的殘留 guard）。"""
+    """forbidden_pattern：掃 instruction 活面的禁用字串（單一源契約的殘留 guard）。
+
+    行級匹配：pattern 與選配 gate（同時命中同一行才算）——gate 用於把 flag 形
+    限定在可辨識的委派語境（如 `--family` 在場），避免誤中合法 CC CLI 形。
+    錨點檢查＝must_contain_all 語義（每個 token 缺席各發一條 critical）。
+    """
     if inv.get("type") != "forbidden_pattern":
         return []
     findings: list[tuple[str, str, str]] = []
@@ -340,26 +337,42 @@ def check_forbidden_pattern(inv: dict) -> list[tuple[str, str, str]]:
     if not src.exists():
         return [(inv["id"], "important", f"source 檔不存在: {inv['source']}")]
     src_text = read_text(src)
-    for token in inv.get("must_contain_any", []):
+    for token in inv.get("must_contain_all", []):
         if token not in src_text:
             findings.append(
                 (inv["id"], "critical", f"{inv['source']} 缺契約錨點: {token}")
             )
     compiled = [
-        (re.compile(spec["pattern"]), spec["why"]) for spec in inv.get("forbid", [])
+        (
+            re.compile(spec["pattern"]),
+            re.compile(spec["gate"]) if spec.get("gate") else None,
+            spec["why"],
+        )
+        for spec in inv.get("forbid", [])
     ]
-    for f in _iter_scan_files(inv.get("scan", [])):
-        text = read_text(f)
-        for pat, why in compiled:
-            m = pat.search(text)
-            if m:
-                findings.append(
-                    (
-                        inv["id"],
-                        "important",
-                        f"{rel(f)}: 禁用字串 {m.group(0)!r} —— {why}",
-                    )
-                )
+    for entry in inv.get("scan", []):
+        p = REPO_ROOT / entry
+        if p.is_dir():
+            files = sorted(p.rglob("*.md"))
+        elif p.exists():
+            files = [p]
+        else:
+            findings.append(
+                (inv["id"], "important", f"scan entry 不存在（guard 面縮小）: {entry}")
+            )
+            continue
+        for f in files:
+            for lineno, line in enumerate(read_text(f).splitlines(), 1):
+                for pat, gate, why in compiled:
+                    m = pat.search(line)
+                    if m and (gate is None or gate.search(line)):
+                        findings.append(
+                            (
+                                inv["id"],
+                                "important",
+                                f"{rel(f)}:{lineno}: 禁用字串 {m.group(0)!r} —— {why}",
+                            )
+                        )
     return findings
 
 
