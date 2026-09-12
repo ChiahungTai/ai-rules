@@ -3,10 +3,10 @@ id: AIR-80
 title: >-
   ai-lifecycle tour 整合——ai-rules 側生態固化（demand-driven delta＋manifest
   provenance＋intent-level CLI＋reanchor 契約）
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-09-12 06:25'
-updated_date: '2026-09-12 06:45'
+updated_date: '2026-09-12 06:46'
 labels:
   - tours
   - integration
@@ -32,3 +32,9 @@ ordinal: 66000
 <!-- SECTION:NOTES:BEGIN -->
 〔09-12 結算〕七項全落地：①post-build hook2 ask-once（輻射 implement 階段6 fallback/code-review 模式B/tour-bootstrap/html-mode hook2 row）；②manifest provenance（tour-bootstrap 契約節＋code-reality [[delta_arc]] rows）；③tour materialize <arcId> intent-level CLI（code-reality 6ec95f5——snapshot pair sha8 fail-loud 解析、同 arcId 覆蓋同 tourPath）；④delta_tour tour-level ref=<after commit>；⑤chain_tour x-codeReality.symbol（真 SCIP symbol 三錨點帶出）；⑥tour_validate 移出 docs-only（post-build 新「Tour corpus gate」general finalization 節）；⑦消費端改指 ai-lifecycle（tour-bootstrap vsix 退役/post-build 報告 AI Tours 句/html-mode 殼連結+refs 附 delta tour）。驗證：code-reality cargo test 全 workspace 綠＋live smoke（air-78 弧 32 steps materialize、ref 帶全 sha、manifest row 齊）；ai-rules 殘留掃描＝舊「持久版單一產點/裝 vsix/階段4步驟3」引用全同步。緩議兩項如卡面（alias 子系統/fallback 統計）。
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+ai-lifecycle tour 整合 ai-rules 側七項固化——demand-driven delta（hook2 ask-once）、manifest provenance（arcId canonical）、tour materialize intent-level CLI、delta_tour ref、chain_tour x-codeReality.symbol、tour_validate 去 docs-only、消費端指 ai-lifecycle；cargo 全綠＋live smoke（32-step 首個 materialize）；code-reality 側 6ec95f5
+<!-- SECTION:FINAL_SUMMARY:END -->
