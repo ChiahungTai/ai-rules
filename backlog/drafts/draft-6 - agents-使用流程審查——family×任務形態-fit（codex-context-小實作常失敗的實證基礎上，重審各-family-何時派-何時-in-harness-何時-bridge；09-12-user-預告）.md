@@ -11,3 +11,4 @@ dependencies: []
 ---
 
 
+09-12 實證素材（架構討論 session，UC 故事審查工單 job-mtyfmclu-fgeu75）：codex webgpt（chatgpt-web/high）read-only 審查工單中，**單一 pattern 查證（test -f／rg 單詞）8/8 全通、alternation 多 pattern 查證 3/3 全失真**（宣稱 rg 查無，機械複驗全推翻——contract 實存於 5 處）；bridge log 並列 rmcp transport worker fatal 連發（codex runtime 工具層降級佐證）。假說：codex shell 對 `|` 引號處理使 pattern 截斷，殘缺 pattern 查無被當「repo 查無」寫成 findings。含義：webgpt 形態的「機械查證」宣稱不可直接採信，查無型結論須獨立複驗；工單驗證命令宜避 alternation 或要求逐 pattern 分跑。
