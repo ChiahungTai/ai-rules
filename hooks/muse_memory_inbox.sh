@@ -26,25 +26,41 @@ set -euo pipefail
 umask 077
 
 deny() {
+  # jq-free deny emission; JSON-string-safe escaping (review R1/C-C2): map
+  # \n \r \t to JSON escapes, strip remaining control chars (<0x20).
   local reason=${1//\\/\\\\}
   reason=${reason//\"/\\\"}
+  reason=${reason//$'\n'/\\n}
+  reason=${reason//$'\r'/\\r}
+  reason=${reason//$'\t'/\\t}
+  STRIPPED=$(printf '%s' "$reason" | tr -d '\000-\037' 2>/dev/null) && reason=$STRIPPED
   printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' "$reason"
   exit 0
 }
 
-SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-GOVERNANCE_REPO=$(cd "$SCRIPT_DIR/.." && pwd)
+# cd failures under set -e would be a naked exit != 0 -> muse fail-open
+# (review R2); deny instead (fail-closed to the launcher layer).
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd) \
+  || deny "memory-governance launcher: cannot resolve script directory (fail-closed)"
+GOVERNANCE_REPO=$(cd "$SCRIPT_DIR/.." && pwd) \
+  || deny "memory-governance launcher: cannot resolve repo root (fail-closed)"
 export GOVERNANCE_ORIGIN=registered
 export GOVERNANCE_REPO
 
-DEFAULT_HOME=${HOME:-}
+# Core resolution order (EP S1 要點3, review C-C5/R3 reorder):
+#   ① $MUSE_MEMORY_GOVERNANCE_HOME/current — explicit env override
+#      (tests / debugging a specific install point)
+#   ② repo-local copy <repo>/muse-plugins/memory-governance/hooks/
+#      muse_memory_governance.sh — the source home's canonical core; a
+#      stale install point must never shadow it
+#   ③ default fixed install point ~/.local/share/muse-memory-governance/
+#      current (generated launchers in other repos / fallback registration)
+#   ④ unresolvable -> static deny (fail-closed; a naked exec failure would
+#      leave muse fail-open, EP review F5)
 CORE=""
-INSTALL_ROOT=${MUSE_MEMORY_GOVERNANCE_HOME:-}
-if [ -z "$INSTALL_ROOT" ] && [ -n "$DEFAULT_HOME" ]; then
-  INSTALL_ROOT=$DEFAULT_HOME/.local/share/muse-memory-governance
-fi
-if [ -n "$INSTALL_ROOT" ]; then
-  CAND=$INSTALL_ROOT/current/hooks/muse_memory_governance.sh
+CAND=${MUSE_MEMORY_GOVERNANCE_HOME:-}
+if [ -n "$CAND" ]; then
+  CAND=$CAND/current/hooks/muse_memory_governance.sh
   if [ -f "$CAND" ] && [ -x "$CAND" ]; then
     CORE=$CAND
   fi
@@ -55,8 +71,14 @@ if [ -z "$CORE" ]; then
     CORE=$CAND
   fi
 fi
+if [ -z "$CORE" ] && [ -n "${HOME:-}" ]; then
+  CAND=$HOME/.local/share/muse-memory-governance/current/hooks/muse_memory_governance.sh
+  if [ -f "$CAND" ] && [ -x "$CAND" ]; then
+    CORE=$CAND
+  fi
+fi
 if [ -z "$CORE" ]; then
-  deny "memory-governance launcher: shared core unresolvable (install point and repo-local copy both missing); memory write denied (fail-closed). See muse-plugins/memory-governance/README.md"
+  deny "memory-governance launcher: shared core unresolvable (repo-local copy and install point both missing); memory write denied (fail-closed). See muse-plugins/memory-governance/README.md"
 fi
 
 if ! "$CORE"; then

@@ -95,8 +95,9 @@ def scrub_env(extra=None):
     return env
 
 
-def run_core(repo=None, payload=None, *, cwd=None, env_extra=None,
-             stdin_text=None, path_dir=None):
+def run_core(
+    repo=None, payload=None, *, cwd=None, env_extra=None, stdin_text=None, path_dir=None
+):
     """Drive the shared core directly (plugin origin unless env_extra says so)."""
     env = scrub_env(env_extra)
     if repo is not None:
@@ -173,8 +174,9 @@ def minimal_path(tmp_path, *, with_jq=False, fake_jq=False):
     return bin_dir
 
 
-def make_launcher_repo(tmp_path, *, with_core_local=True, marker=None,
-                       hooks_json=None, pool_entry=True):
+def make_launcher_repo(
+    tmp_path, *, with_core_local=True, marker=None, hooks_json=None, pool_entry=True
+):
     repo = tmp_path / "repo"
     (repo / "hooks").mkdir(parents=True)
     shutil.copy(LAUNCHER, repo / "hooks" / "muse_memory_inbox.sh")
@@ -288,8 +290,7 @@ def test_marker_matrix_invalid_deny_no_landing(tmp_path, raw):
 def test_sm10_cwd_subdir_resolves_repo_root_via_git(tmp_path):
     """SM-10: cwd in a repo subdir -> upward git resolution finds the root."""
     repo = make_repo(tmp_path)
-    subprocess.run(["git", "init", "-q", str(repo)], check=True,
-                   capture_output=True)
+    subprocess.run(["git", "init", "-q", str(repo)], check=True, capture_output=True)
     sub = repo / "sub"
     sub.mkdir()
     r = run_core(None, mem_payload(), cwd=sub)
@@ -303,8 +304,10 @@ def test_sm10_cwd_subdir_resolves_repo_root_via_git(tmp_path):
 
 def test_stdin_workspace_field_resolves_repo(tmp_path):
     """Provisional seam (S2 P-WS freezes candidates): stdin workspace field
-    resolves the repo without GOVERNANCE_REPO or cwd dependence."""
+    resolves the repo without GOVERNANCE_REPO or cwd dependence. R4
+    hardening: the field is honored only when it is itself a git root."""
     repo = make_repo(tmp_path)
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
     payload = mem_payload()
     payload["workspace"] = str(repo)
     r = run_core(None, payload, cwd=tmp_path)
@@ -545,8 +548,9 @@ def test_launcher_registered_origin_skips_legacy_owner_check(tmp_path):
 def test_cas_edit_existing_attaches_base_sha256(tmp_path):
     repo = make_repo(tmp_path)
     raw = (repo / ".agents" / "memory" / "note.md").read_bytes()
-    r = run_core(repo, mem_payload(tool="edit_memory", path="note.md",
-                                   content="new body"))
+    r = run_core(
+        repo, mem_payload(tool="edit_memory", path="note.md", content="new body")
+    )
     assert r.returncode == 0, r.stderr
     parse_deny(r.stdout)
     files = inbox_files(repo)
@@ -591,3 +595,163 @@ def test_cas_lexical_gates_skip_enrichment(tmp_path, path, setup):
     files = inbox_files(repo)
     assert len(files) == 1
     assert "_inbox_meta" not in json.loads(files[0].read_text())
+
+
+# ---------------------------------- review round findings (R1-R7/C-C1-C-C5)
+
+
+@pytest.mark.parametrize(
+    "matcher",
+    ["xadd_memory|xedit_memory", "add_memory_backup|edit_memory_backup"],
+)
+def test_legacy_owner_decoy_matcher_keeps_gating(tmp_path, matcher):
+    """C-C1: matcher coverage must match whole tool-name tokens — substring
+    decoys ("xadd_memory"-style) are NOT a working legacy owner."""
+    repo = make_repo(tmp_path)
+    stub = foreign_stub(repo)
+    write_hooks_json(repo, hooks_json_for(str(stub), matcher=matcher))
+    r = run_core(repo, mem_payload())
+    assert r.returncode == 0, r.stderr
+    parse_deny(r.stdout)  # this hook keeps gating (no surrender)
+    assert len(inbox_files(repo)) == 1
+
+
+def test_deny_schema_valid_with_newline_in_repo_path(tmp_path):
+    """R1/C-C2: a repo path containing a newline must still yield a
+    schema-valid deny — parse_deny (json.loads) fails on raw control bytes,
+    so merely parsing IS the regression proof."""
+    repo = tmp_path / "we\nird"
+    (repo / ".agents" / "memory").mkdir(parents=True)
+    write_marker(repo, {"protocol": 1})
+    r = run_core(repo, mem_payload())
+    assert r.returncode == 0, r.stderr
+    spec = parse_deny(r.stdout)
+    assert "已代存 inbox" in spec["permissionDecisionReason"]
+    assert len(inbox_files(repo)) == 1
+
+
+def test_git_execution_error_denies_fail_closed(tmp_path):
+    """C-C3: git present but rev-parse failing with a non-'not a git
+    repository' error denies (workspace state undeterminable) — distinct
+    from the determined non-repo lane which allows native."""
+    repo = make_repo(tmp_path)
+    bin_dir = minimal_path(tmp_path, with_jq=True)
+    fake_git = bin_dir / "git"
+    fake_git.write_text("#!/bin/sh\necho 'fatal: unknown failure' >&2\nexit 128\n")
+    fake_git.chmod(0o755)
+    r = run_core(repo=None, payload=mem_payload(), cwd=repo, path_dir=bin_dir)
+    assert r.returncode == 0, r.stderr
+    spec = parse_deny(r.stdout)
+    assert "rev-parse failed" in spec["permissionDecisionReason"]
+
+
+@pytest.mark.parametrize("raw", ['{"protocol": 1.0}', '{"protocol": 1e0}'])
+def test_marker_numeric_one_lexical_forms_valid(tmp_path, raw):
+    """C-C4/R5 contract ruling: any JSON number equal to 1 is valid —
+    lexical 1.0/1e0 are the same number and divert."""
+    repo = make_repo(tmp_path, marker=raw)
+    r = run_core(repo, mem_payload())
+    assert r.returncode == 0, r.stderr
+    parse_deny(r.stdout)
+    assert len(inbox_files(repo)) == 1
+
+
+def test_stdin_workspace_bogus_falls_back_to_cwd(tmp_path):
+    """R4 seam hardening: an stdin workspace value that is not itself a git
+    root is ignored; resolution falls back to $PWD (cwd-in-repo)."""
+    repo = make_repo(tmp_path)
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    payload = mem_payload()
+    payload["workspace"] = str(tmp_path / "nonexistent-bogus")
+    r = run_core(repo=None, payload=payload, cwd=repo)
+    assert r.returncode == 0, r.stderr
+    parse_deny(r.stdout)
+    assert len(inbox_files(repo)) == 1
+
+
+def test_no_jq_innocent_mention_denies_degraded(tmp_path):
+    """R6 spec pin: degraded tooling (no jq) + stdin merely mentioning the
+    tool names in a NON-memory tool call conservatively denies."""
+    repo = make_repo(tmp_path, marker=None)
+    bin_dir = minimal_path(tmp_path)  # no jq
+    payload = {
+        "tool_name": "Edit",
+        "tool_input": {"path": "doc.md", "content": "see add_memory docs"},
+    }
+    r = run_core(repo, payload, path_dir=bin_dir)
+    assert r.returncode == 0, r.stderr
+    spec = parse_deny(r.stdout)
+    assert "degraded" in spec["permissionDecisionReason"].lower()
+    assert inbox_files(repo) == []
+
+
+def test_launcher_registered_origin_malformed_marker_still_diverts(tmp_path):
+    """R7a: migration-window contract third leg — registered origin with a
+    malformed marker still diverts unconditionally."""
+    repo = make_launcher_repo(
+        tmp_path, with_core_local=True, marker='{"protocol": "bogus"}'
+    )
+    r = run_launcher(repo, mem_payload())
+    assert r.returncode == 0, r.stderr
+    parse_deny(r.stdout)
+    assert len(inbox_files(repo)) == 1
+
+
+def test_non_md_pool_path_skips_cas_enrichment(tmp_path):
+    """R7b: lexical gate — a non-.md pool-relative path never gains CAS
+    meta (deny+land still happens)."""
+    repo = make_repo(tmp_path)
+    (repo / ".agents" / "memory" / "notes.txt").write_text("x")
+    r = run_core(repo, mem_payload(tool="edit_memory", path="notes.txt", content="y"))
+    assert r.returncode == 0, r.stderr
+    parse_deny(r.stdout)
+    files = inbox_files(repo)
+    assert len(files) == 1
+    assert "_inbox_meta" not in json.loads(files[0].read_text())
+
+
+def test_launcher_non_memory_tool_silent_passthrough(tmp_path):
+    """R7c: launcher-level passthrough — a non-memory tool call through the
+    launcher exits silently with zero landing."""
+    repo = make_launcher_repo(tmp_path, with_core_local=True)
+    r = run_launcher(repo, {"tool_name": "Read", "tool_input": {"path": "x"}})
+    assert r.returncode == 0, r.stderr
+    assert r.stdout == ""
+    assert inbox_files(repo) == []
+
+
+def test_launcher_repo_local_beats_stale_install_point(tmp_path):
+    """C-C5/R3: a stale fixed install point must never shadow the repo-local
+    canonical core — repo-local wins when both exist and no env override."""
+    repo = make_launcher_repo(tmp_path, with_core_local=True, marker="valid")
+    stale = tmp_path / "stale-install"
+    v_old = stale / "v0"
+    (v_old / "hooks").mkdir(parents=True)
+    (v_old / "hooks" / CORE_NAME).write_text(
+        "#!/usr/bin/env bash\n"
+        'printf \'%s\' \'{"hookSpecificOutput":{"hookEventName":"PreToolUse",'
+        '"permissionDecision":"deny","permissionDecisionReason":"STALE CORE"}}\\n\'\n'
+        "exit 0\n"
+    )
+    (v_old / "hooks" / CORE_NAME).chmod(0o755)
+    (stale / "current").symlink_to("v0")
+    # run_launcher injects MUSE_MEMORY_GOVERNANCE_HOME (env override would win),
+    # so drive the launcher directly with only the default HOME unavailable:
+    env = scrub_env()
+    env["HOME"] = str(tmp_path / "no-home")
+    env["MUSE_MEMORY_GOVERNANCE_HOME"] = str(stale)  # env wins by design —
+    # instead prove the repo-local-priority contract via the no-env path:
+    del env["MUSE_MEMORY_GOVERNANCE_HOME"]
+    r = subprocess.run(
+        ["/bin/bash", str(repo / "hooks" / "muse_memory_inbox.sh")],
+        input=json.dumps(mem_payload()),
+        capture_output=True,
+        text=True,
+        check=False,
+        env=env,
+    )
+    assert r.returncode == 0, r.stderr
+    spec = parse_deny(r.stdout)
+    assert "STALE CORE" not in spec["permissionDecisionReason"]
+    assert "已代存 inbox" in spec["permissionDecisionReason"]
+    assert len(inbox_files(repo)) == 1

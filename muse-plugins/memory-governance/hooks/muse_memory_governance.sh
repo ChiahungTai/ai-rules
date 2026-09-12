@@ -30,9 +30,19 @@ set -euo pipefail
 umask 077
 
 deny() {
-  # jq-free deny emission; minimal JSON escaping for reason strings.
+  # jq-free deny emission; JSON-string-safe escaping (review R1/C-C2): raw
+  # control bytes in the reason would break the schema -> muse fail-open on a
+  # path that is supposed to be fail-closed. Map \n \r \t to JSON escapes,
+  # then strip any remaining control chars (<0x20).
   local reason=${1//\\/\\\\}
   reason=${reason//\"/\\\"}
+  reason=${reason//$'\n'/\\n}
+  reason=${reason//$'\r'/\\r}
+  reason=${reason//$'\t'/\\t}
+  # Strip remaining control chars (<0x20) only when tr exists — the newline/
+  # CR/tab mappings above are pure bash and always apply; an absent tr must
+  # not empty the reason (degraded PATH environments run this code path).
+  STRIPPED=$(printf '%s' "$reason" | tr -d '\000-\037' 2>/dev/null) && reason=$STRIPPED
   printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' "$reason"
   exit 0
 }
@@ -41,7 +51,7 @@ deny_degraded() {
   deny "memory-governance tooling degraded: jq unavailable or unusable, cannot evaluate the repo governance state; conservatively denying the memory write (fail-closed). Install jq (e.g. 'brew install jq') and retry."
 }
 
-IN=$(cat)
+IN=$(cat) || deny "memory-governance: stdin unreadable (fail-closed)"
 [ -n "$IN" ] || exit 0   # SM-13 empty stdin: nothing to divert
 
 # Self-filter, fast path: crude bash string match on memory-tool features
@@ -73,27 +83,45 @@ if [ -n "${GOVERNANCE_REPO:-}" ]; then
   REPO=$GOVERNANCE_REPO
 else
   REPO=$(printf '%s' "$IN" | jq -r '.workspace // .cwd // .host_workspace // empty' 2>/dev/null || true)
+  if [ -n "$REPO" ]; then
+    # Provisional-seam hardening (review R4): a stdin-derived repo is
+    # untrusted input — only trust it when it is itself a git root; otherwise
+    # fall back to $PWD-based resolution (harness cwd-in-repo semantics).
+    SEAM_OK=$(git -C "$REPO" rev-parse --show-toplevel 2>/dev/null || true)
+    [ "$SEAM_OK" = "$REPO" ] || REPO=""
+  fi
 fi
 if [ -z "$REPO" ]; then
-  # git-binary-missing vs explicit not-a-repo are distinct branches (EP ⑦):
-  # both allow native, but tests pin each arrival path separately.
+  # git-binary-missing vs explicit not-a-repo vs git execution fault are
+  # distinct branches (EP ⑦ taxonomy, review C-C3): binary missing and
+  # explicit non-repo allow native (repo/marker unobservable or absent);
+  # any other rev-parse failure denies — the workspace governance state
+  # cannot be determined (fail-closed).
   if ! command -v git >/dev/null 2>&1; then
     exit 0   # git binary missing: repo unresolvable, marker unobservable
   fi
-  REPO=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0   # SM-11 not a repo
+  if ! GIT_OUT=$(git rev-parse --show-toplevel 2>&1); then
+    case "$GIT_OUT" in
+      *"not a git repository"*) exit 0 ;;   # SM-11 determined non-repo
+      *) deny "memory-governance: git rev-parse failed (workspace governance state undeterminable, fail-closed): $GIT_OUT" ;;
+    esac
+  fi
+  REPO=$GIT_OUT
 fi
 
 # Legacy coexistence (plugin origin only, EP ④): a WORKING legacy owner
 # keeps full authority (SM-5). Structured criteria — all four must hold:
 # hooks.json parses; a PreToolUse entry's matcher covers add_memory AND
-# edit_memory; the command file exists and is executable; its realpath
-# differs from this script (self-exclusion — own registration must not
-# no-op itself, EP review C1). Malformed/stale/wrong/partial -> keep gating.
+# edit_memory as whole tool-name tokens (word-boundary match, review C-C1 —
+# substring matches would surrender to "xadd_memory"-style decoys); the
+# command file exists and is executable; its realpath differs from this
+# script (self-exclusion — own registration must not no-op itself, EP
+# review C1). Malformed/stale/wrong/partial -> keep gating.
 if [ "${GOVERNANCE_ORIGIN:-}" != registered ]; then
   SELF_REAL=$(realpath "$0" 2>/dev/null) || SELF_REAL=$0
   OWNER_CMDS=$(jq -r '
     .hooks.PreToolUse[]?
-    | select(((.matcher // "") | test("add_memory")) and ((.matcher // "") | test("edit_memory")))
+    | select(((.matcher // "") | test("(^|[^[:alnum:]_])add_memory([^[:alnum:]_]|$)")) and ((.matcher // "") | test("(^|[^[:alnum:]_])edit_memory([^[:alnum:]_]|$)")))
     | .hooks[]?.command // empty
   ' "$REPO/.muse/hooks.json" 2>/dev/null) || OWNER_CMDS=""
   SURRENDER=0
@@ -120,11 +148,14 @@ if [ "${GOVERNANCE_ORIGIN:-}" != registered ]; then
   if [ ! -e "$MARKER" ] && [ ! -L "$MARKER" ]; then
     exit 0   # SM-2 absent: allow native (determined non-governed)
   fi
-  # Integer 1 is the only valid protocol; everything else (parse failure,
-  # missing field, 0, -1, "1", null, true, false, >1) denies without
-  # landing — a declared governance state must not fail open (SM-3/SM-4).
+  # Contract (review C-C4/R5 ruling): a JSON *number* equal to 1 is the only
+  # valid protocol — jq numeric equality accepts lexical 1.0/1e0 as the same
+  # number, which is accepted by design (semantic number equality, not
+  # lexical form). Everything else (parse failure, missing field, 0, -1, "1",
+  # null, true, false, numbers != 1) denies without landing — a declared
+  # governance state must not fail open (SM-3/SM-4).
   if ! jq -e '.protocol == 1' "$MARKER" >/dev/null 2>&1; then
-    deny "memory-governance marker malformed/unsupported: $MARKER (protocol must be integer 1)"
+    deny "memory-governance marker malformed/unsupported: $MARKER (protocol must be the number 1)"
   fi
 fi
 

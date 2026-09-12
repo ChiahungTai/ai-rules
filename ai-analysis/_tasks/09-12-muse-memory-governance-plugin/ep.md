@@ -419,6 +419,8 @@ S1（code＋tests，一 commit）→ S2（probe 證據，一 commit）→ S3（�
 
 ## EP Review Findings
 
+> **code review 追加輪（09-12，implement 後）**：雙腿 codex（job-mtxsd4ap-3arlpw）＋GLM-5.3-Flash code-reviewer——2🔴＋4🟡＋4ℹ️ 全採納並已修正（deny 控制字元完備 escape／matcher word-boundary／git 故障分流／cd-cat 防護／stdin seam git-root 對帳／解析序 env→repo-local→固定點／protocol 契約鬆綁為 JSON number 1／補 12 測試）；帳本＝`.review/air-79.md`；343 passed。live 腿 parked 不變。
+
 > 雙審（user 指定鏈）：C 腿＝codex chatgpt-web/high（bridge job-mtxq1dxw-zxv0we，7🔴＋3🟡＋1ℹ️，判定「需修正後重新審查」）；M 腿原排 muse-spark-1.3 因額度 429（窗口 09-14 重置，job-mtxq1dvu failed-usage）改由 user 指定 GLM-5.3-Flash——registry code-reviewer（1🔴＋6🟡＋3ℹ️，判定「有條件執行」）。Judge（主 session GLM-5.3）：**全數採納**——legacy no-op 自我抵消由兩腿獨立命中（cross-family blind spot 校驗有效）。legacy no-op 根因、activation invariant、bootstrap failure taxonomy、可逆 handoff、fallback 凍結、控制面盤點修正已分別回寫對應段落（狀態 implemented）；正向確認項記錄不動。
 
 | ID | 嚴重度 | EP 段落 | 問題 | 建議 | 狀態 |

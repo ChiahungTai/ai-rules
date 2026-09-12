@@ -12,7 +12,7 @@ per-repo marker 檔＝`.agents/memory-governance.json`：
 | marker 狀態 | 行為 |
 |---|---|
 | absent | 不攔（native write，零攔截零落地） |
-| `{"protocol": 1}`（integer 1，唯一合法值） | 導流 inbox＋deny |
+| `{"protocol": 1}`（JSON number 等於 1——lexical `1.0`/`1e0` 同數可接受） | 導流 inbox＋deny |
 | 其餘一切（parse 失敗／缺欄／`0`／`-1`／`"1"`／`null`／`true`／`false`／`>1`） | deny＋報錯，**不落地** |
 
 - governed repo 內閘的任何內部故障（jq 故障、寫入失敗）→ deny（fail-closed）。
@@ -51,10 +51,13 @@ marker 的 worktree 視為 ungoverned。
 
 repo 本地 launcher 的核心解析序：
 
-1. `MUSE_MEMORY_GOVERNANCE_HOME`（預設 `~/.local/share/muse-memory-governance`）下
-   `current` symlink → `hooks/muse_memory_governance.sh`
+1. `MUSE_MEMORY_GOVERNANCE_HOME` 下 `current` symlink → `hooks/muse_memory_governance.sh`
+   （顯式 env override——測試／診斷特定安裝點用）
 2. repo 本地副本 `<repo>/muse-plugins/memory-governance/hooks/muse_memory_governance.sh`
-3. 雙失敗 → launcher 自行 static deny（fail-closed，不留裸 exec 失敗）
+   （source home 的 canonical core——stale 安裝點不得遮蔽它）
+3. 預設固定安裝點 `~/.local/share/muse-memory-governance/current`（他 repo 生成 launcher／
+   fallback registration 用）
+4. 全部不可解析 → launcher 自行 static deny（fail-closed，不留裸 exec 失敗）
 
 換版＝新版目錄寫入後原子換指（tmp symlink + rename，避免換指瞬間斷鏈）：
 
@@ -66,9 +69,12 @@ mv -f ~/.local/share/muse-memory-governance/current.tmp \
 
 ## Health check
 
-- `muse plugins list`：plugin 在冊且 capability 已 approve。
-- marker：`.agents/memory-governance.json` 存在且 `protocol` 為 integer 1。
+- `muse plugins list`：plugin 在冊（注意：list **不暴露 per-capability approve 狀態**——
+  approval 面靠下行行為 smoke 驗證）。
+- marker：`.agents/memory-governance.json` 存在且 `protocol` 為 JSON number 1。
 - 固定安裝點（若使用）：`current` symlink 可解析且目標 `hooks/muse_memory_governance.sh` 可執行。
+- **跨副本一致性**：repo 本地副本／固定安裝點／plugin cache 三份核心的 sha256 應一致
+  （cache 以 reinstall 對齊；不一致＝入口依賴哪份副本、行為就依哪個版本——先對齊再除錯）。
 - 行為 smoke：governed repo 呼叫 `add_memory` 應得 deny＋inbox receipt 檔；
   ungoverned repo 應零攔截；marker 改壞後同呼叫應 deny 且無新檔。
 
