@@ -163,7 +163,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 > **review／advisory 形態條款**（read-only 委派——external second-opinion review、[state-review](../state-review/SKILL.md) 深審腿、advisory 掃描）：以 ①②⑤＋三條專屬判定——**read-only transport**（flag 或工單紅線承載，產出＝findings/報告）、**跨家族成立**（委派對象與 caller 相異家族——external 視角是派發理由本身）、**可重現輸出**（findings 附錨點＋驗收設計，in-family judge 可機械重現）。條件③④（單一 writer／implementation loop 主價值）是 **implement 形態專屬**，不得用以擋 review 形態——否則跨家族審查腿結構性不可達（真實案例：state-review 深審腿依原條文④被擋）。
 >
-> **跨家族解析表**（未指定 family 時；顯式指定與 caller 同 family → fail-loud）：GLM／ZCode caller → muse；codex caller → muse；**muse caller → fail-loud**——相異家族僅剩 codex 可選，而 codex explicit-only 不因解析繞過：**停下要求 user 選擇**——顯式 `--family codex`，或明示接受同家族 degraded review（caller-harness full dual-context 承接＋記錄）；禁解析層自選降級。
+> **跨家族解析表**（未指定 family 時；顯式指定與 caller 同 family → fail-loud）：GLM／ZCode caller → muse；codex caller → muse；glm caller → muse；**muse caller → fail-loud**——相異家族僅剩 codex／glm 可選，而兩者皆 explicit-only 不因解析繞過：**停下要求 user 選擇**——顯式 `--family codex` 或 `--family glm`，或明示接受同家族 degraded review（caller-harness full dual-context 承接＋記錄）；禁解析層自選降級。
 
 > sandbox-error 禁以 `--yolo` 賭重試（父層沙箱不可越權重試）；分類走 auth-failed／environment，修因後重派。
 
@@ -176,7 +176,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 ### flag profile → spawn 參數（external-runtime）
 
-> 本表為 flag 具體值單一源（registry 側只留 thin forwarder 治理原則，見 `agents/AGENTS.md`）。bridge 未暴露的 flag 以工單紅線承載（見 `skills/_common/work-order.md`），暴露後改 flag；roadmap 記錄在 delegate-bridge 側。表列 `muse task`／`codex task` 為語義縮寫——實體命令＝`delegate-bridge.mjs task [--family muse|codex]`（Muse 家族 CLI 相容不變）。
+> 本表為 flag 具體值單一源（registry 側只留 thin forwarder 治理原則，見 `agents/AGENTS.md`）。bridge 未暴露的 flag 以工單紅線承載（見 `skills/_common/work-order.md`），暴露後改 flag；roadmap 記錄在 delegate-bridge 側。表列 `muse task`／`codex task` 為語義縮寫——實體命令＝`delegate-bridge.mjs task [--family muse|codex|glm]`（Muse 家族 CLI 相容不變）。
 
 | profile | family | spawn 參數 | 說明 |
 |---------|--------|------------|------|
@@ -187,7 +187,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 | review | muse | `muse review --json`（bridge `review` 子命令——**git-diff 審查工具**：`--base <ref>` 定 diff 範圍；非文件審查形態——EP 等文件審查走 `task`＋read-only 紅線，`--schema` flag 不存在〔bridge 0.2.5 實測〕） | diff 審查產出 verdict |
 | review | codex | `codex review --json`（bridge `--family codex`——`--output-schema` 注入＝verdict schema 原生機制，POC 實證） | 同上，codex 形態 |
 
-**bridge 必經（雙家族委派唯一入口）**：委派 muse／codex 跑 repo 任務一律經 bridge 入口（上表列＝`delegate-bridge.mjs` 子命令的抽象形態，`--family` 選家族），禁直呼 `muse exec`／`codex exec` 或其他繞過 bridge 的入口。**派發前正規化**：user 對話中的模型／檔位口語詞（flash／max…）不是值——派發前經 family 表正規化為 `--model`／`--effort` 顯式旗標；非表內詞＝查表觸發訊號，禁猜測直接套用（flash 對 muse 非合法 effort 值，本身就是該查表的訊號）——bridge 落 per-repo `.delegate-bridge/jobs.json` ledger（jobId／sessionId／status／text／family 欄；v1.0.0 前舊 ledger dir 相容雙讀、id 去重——新者勝），非 bridge 入口的產出 ledger 查無，事後只能從副作用側考古（真實案例：mosaic post-build 鏈同鏈兩段 muse 委派一走 bridge 一繞道，繞道段收尾不可考）。完成回報攜帶 ledger jobId（reviewer 交接契約欄位）；委派了外部 runtime 而 jobId 缺席＝入口違規，補查或標明。
+**bridge 必經（external-runtime 家族委派唯一入口——muse／codex／glm 三家）**：委派外部 runtime 跑 repo 任務一律經 bridge 入口（上表列＝`delegate-bridge.mjs` 子命令的抽象形態，`--family` 選家族），禁直呼 `muse exec`／`codex exec` 或其他繞過 bridge 的入口。**派發前正規化**：user 對話中的模型／檔位口語詞（flash／max…）不是值——派發前經 family 表正規化為 `--model`／`--effort` 顯式旗標；非表內詞＝查表觸發訊號，禁猜測直接套用（flash 對 muse 非合法 effort 值，本身就是該查表的訊號）——bridge 落 per-repo `.delegate-bridge/jobs.json` ledger（jobId／sessionId／status／text／family 欄；v1.0.0 前舊 ledger dir 相容雙讀、id 去重——新者勝），非 bridge 入口的產出 ledger 查無，事後只能從副作用側考古（真實案例：mosaic post-build 鏈同鏈兩段 muse 委派一走 bridge 一繞道，繞道段收尾不可考）。完成回報攜帶 ledger jobId（reviewer 交接契約欄位）；委派了外部 runtime 而 jobId 缺席＝入口違規，補查或標明。
 
 ### session 定向接續（`--session-id` resume／fork；L4 實測）
 

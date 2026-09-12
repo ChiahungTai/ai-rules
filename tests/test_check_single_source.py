@@ -503,3 +503,68 @@ def test_shell_provenance_script_missing_important(tmp_path, monkeypatch):
     findings = css.check_shell_provenance(_shell_inv())
     assert len(findings) == 1
     assert findings[0][1] == "important"
+
+
+# ------------------------------------------- bridge_model_vocab（AIR-78 AC#6）
+
+
+def _vocab_inv():
+    return next(i for i in css.INVARIANTS if i["id"] == "bridge_model_vocab")
+
+
+def _write_vocab_source(tmp_path):
+    d = tmp_path / "skills" / "model-routing"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text(
+        "glm 契約：--model native-ID-only；預設 GLM-5.3-Flash", encoding="utf-8"
+    )
+
+
+def test_vocab_cc_flag_form_detected(tmp_path, monkeypatch):
+    """AIR-78 AC#6：bridge `--model sonnet/opus` 殘留（VR-1 後＝bug）被抓。"""
+    _write_vocab_source(tmp_path)
+    (tmp_path / "skills" / "guide.md").write_text(
+        '派發：task --family glm --model sonnet -- "p"', encoding="utf-8"
+    )
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    findings = css.check_forbidden_pattern(_vocab_inv())
+    assert len(findings) == 1
+    assert findings[0][1] == "important"
+    assert "sonnet" in findings[0][2]
+
+
+def test_vocab_compound_slug_detected(tmp_path, monkeypatch):
+    """vocabulary invariant：native＋alias 複合 slug 被抓（不分大小寫）。"""
+    _write_vocab_source(tmp_path)
+    (tmp_path / "rules").mkdir()
+    (tmp_path / "rules" / "x.md").write_text(
+        "錯誤示範 --model GLM-5.3-sonnet", encoding="utf-8"
+    )
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    findings = css.check_forbidden_pattern(_vocab_inv())
+    assert len(findings) == 1
+    assert "複合" in findings[0][2] or "slug" in findings[0][2]
+
+
+def test_vocab_cc_frontmatter_and_table_legal(tmp_path, monkeypatch):
+    """CC 自身接線不誤報：`model: opus` frontmatter 形與 tier 表管道相鄰合法。"""
+    _write_vocab_source(tmp_path)
+    (tmp_path / "agents").mkdir(parents=True)
+    (tmp_path / "agents" / "role.md").write_text(
+        "---\nmodel: opus\n---\nbody", encoding="utf-8"
+    )
+    (tmp_path / "skills" / "tier.md").write_text(
+        "| lite | glm-5.3-flash | sonnet（CC 詞彙面） | haiku |", encoding="utf-8"
+    )
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    assert css.check_forbidden_pattern(_vocab_inv()) == []
+
+
+def test_vocab_source_anchor_missing_critical(tmp_path, monkeypatch):
+    """定義源 drift 自檢：契約錨點（must_contain_any）缺席＝critical。"""
+    d = tmp_path / "skills" / "model-routing"
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text("（契約被洗掉的 drifted 內容）", encoding="utf-8")
+    monkeypatch.setattr(css, "REPO_ROOT", tmp_path)
+    findings = css.check_forbidden_pattern(_vocab_inv())
+    assert any(f[1] == "critical" and "native-ID-only" in f[2] for f in findings)

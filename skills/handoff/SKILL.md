@@ -26,7 +26,7 @@ allowed-tools:
 | `/handoff` | **空間分工**：交另一個 session/provider | 主 session 在忙 / 要第二意見 / 跨 repo |
 | 定向接續（`--session-id` resume/fork） | **context 接力**：對方 runtime 載入完整對話記憶續問 | 需對方記得整段對話（追問/糾偏/深挖）——成本警示：帶整包 context（codex resume 127K／fork 65K 實測） |
 
-要「自己之後繼續」→ `/at`；要「別人現在接」→ `/handoff`；要「對方帶著完整對話記憶接」→ 定向接續（判準：任務可口述 → handoff doc；需對方記得整段對話才值得續卷成本）。通道現值：兩家族皆經 bridge（muse＝`task --session-id`，跨 workspace 加 `--allow-workspace-switch`；codex＝`task --family codex --session-id`，原卷不動查詢走 `codex exec fork` raw CLI）、CC 未驗——語義矩陣與守衛處置見 [model-routing](../model-routing/SKILL.md)「session 定向接續」。
+要「自己之後繼續」→ `/at`；要「別人現在接」→ `/handoff`；要「對方帶著完整對話記憶接」→ 定向接續（判準：任務可口述 → handoff doc；需對方記得整段對話才值得續卷成本）。通道現值：muse／codex 兩家族經 bridge（muse＝`task --session-id`，跨 workspace 加 `--allow-workspace-switch`；codex＝`task --family codex --session-id`，原卷不動查詢走 `codex exec fork` raw CLI）；glm 定向接續未證（見 model-routing glm 專節 resume unverified 句）、CC 未驗——語義矩陣與守衛處置見 [model-routing](../model-routing/SKILL.md)「session 定向接續」。
 
 > **STATE.md 非交接選項**：STATE.md（Last session 觀察，每 session 覆寫）不是命令、非 `/at`/`/handoff` 替代。`/at` resume 時讀它補 observation（寫入步驟見 [state-md-write](../_common/state-md-write.md)）；交接決策仍是 `/at` vs `/handoff` 二選一。
 

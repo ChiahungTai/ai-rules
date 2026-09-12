@@ -151,6 +151,34 @@ INVARIANTS = [
         "（生成物與源不一致——手改生成物或漏跑 sync）；generator 缺席＝important"
         "（單一源宣稱欠了機械閘門）。",
     },
+    {
+        "id": "bridge_model_vocab",
+        "type": "forbidden_pattern",
+        "source": "skills/model-routing/SKILL.md",
+        "must_contain_any": ["native-ID-only", "GLM-5.3-Flash"],
+        "scan": [
+            "ai-development-guide.md",
+            "AGENTS.md",
+            "rules/",
+            "skills/",
+            "agents/",
+            "hooks/",
+        ],
+        "forbid": [
+            {
+                "pattern": r"--model[ =]+['\"]?(sonnet|opus)\b",
+                "why": "bridge --model 只收 native ID（VR-1，AIR-78）——CC 詞彙字串＝bug",
+            },
+            {
+                "pattern": r"(?i)\b(?:glm[\w.\-]*(?:sonnet|opus)|(?:sonnet|opus)[\w.\-]*glm)",
+                "why": "禁 native＋alias 複合 slug（vocabulary invariant，AIR-78 AC#5）",
+            },
+        ],
+        "note": "AIR-78 AC#6 機械 guard：alias 退役（d4 VR-1）後 bridge 委派範例的 "
+        "CC 詞彙殘留＝bug。CC harness 自身接線（tier 表 CC 詞彙欄、`model: opus` "
+        "frontmatter 形）不在此列——掃的是 `--model` flag 形與 native＋alias 複合 "
+        "slug；歸檔面（ai-analysis、ref-docs）不掃。",
+    },
 ]
 
 
@@ -291,6 +319,48 @@ def check_source_contains(inv: dict) -> list[tuple[str, str, str]]:
             )
         ]
     return []
+
+
+def _iter_scan_files(scan: list[str]):
+    """scan 清單 → 檔案迭代：目錄取底下全部 .md（排除暫存/鏡像），檔案直接yield。"""
+    for entry in scan:
+        p = REPO_ROOT / entry
+        if p.is_dir():
+            yield from sorted(p.rglob("*.md"))
+        elif p.exists():
+            yield p
+
+
+def check_forbidden_pattern(inv: dict) -> list[tuple[str, str, str]]:
+    """forbidden_pattern：掃 instruction 活面的禁用字串（單一源契約的殘留 guard）。"""
+    if inv.get("type") != "forbidden_pattern":
+        return []
+    findings: list[tuple[str, str, str]] = []
+    src = REPO_ROOT / inv["source"]
+    if not src.exists():
+        return [(inv["id"], "important", f"source 檔不存在: {inv['source']}")]
+    src_text = read_text(src)
+    for token in inv.get("must_contain_any", []):
+        if token not in src_text:
+            findings.append(
+                (inv["id"], "critical", f"{inv['source']} 缺契約錨點: {token}")
+            )
+    compiled = [
+        (re.compile(spec["pattern"]), spec["why"]) for spec in inv.get("forbid", [])
+    ]
+    for f in _iter_scan_files(inv.get("scan", [])):
+        text = read_text(f)
+        for pat, why in compiled:
+            m = pat.search(text)
+            if m:
+                findings.append(
+                    (
+                        inv["id"],
+                        "important",
+                        f"{rel(f)}: 禁用字串 {m.group(0)!r} —— {why}",
+                    )
+                )
+    return findings
 
 
 def _main_worktree() -> Path | None:
@@ -680,6 +750,7 @@ def main() -> int:
         findings += check_classification(inv)
         findings += check_coverage(inv)
         findings += check_source_contains(inv)
+        findings += check_forbidden_pattern(inv)
         findings += check_deploy_freshness(inv)
         findings += check_hook_registration(inv)
         findings += check_zcode_live_parity(inv)

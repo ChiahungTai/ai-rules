@@ -8,6 +8,8 @@ subagent 的 model/effort 由角色需求決定，不依主 session 模型。兩
 
 tier 是 requirement 能力檔：full＝旗艦、vision＝影像、lite＝一般；旗艦資格、升降級、坐位與歸因見 skill。
 
+model 詞彙（user 裁定）：prose/doctrine 一律 native ID（GLM-5.3、GLM-5.3-Flash）；CC 詞彙（sonnet/opus）僅限 CC harness 自身接線；bridge 委派一律 native ID——glm `--model GLM-5.3`／`GLM-5.3-Flash`（alias 已退役：fail-closed terminal failure）；**禁 native＋alias 複合表達**。機械 guard＝sync-sources `bridge_model_vocab` invariant。
+
 ## 角色 → tier
 
 | 角色 | tier 與約束 |
@@ -27,4 +29,4 @@ review/impl 的 ZCode registry 與 CC 別名釘選依 skill 解析表；本 rule
 
 family＝GLM/muse/codex；profile＝implement/review/advisory。tier/family/profile 詞彙由本檔定義，其他載體只引用。
 
-委派、收法、定向接續/fork 時必載 **model-routing skill**：family→(model, effort, 容量) 解析表、webgpt 使用約束與失敗態（含背景 Bash 直呼 bridge、禁 subagent wrapper、background job 掛 `wait <jobId>`）、eligibility、reviewer handoff、bridge 必經 `task --family muse|codex`、resume/fork、rate limit/classifier failure 與 lite 分工都在其中。external-runtime policy 不擴充 tier/pin；工單禁再委派時不得因載入 routing 自行 spawn。
+委派、收法、定向接續/fork 時必載 **model-routing skill**：family→(model, effort, 容量) 解析表、webgpt 使用約束與失敗態（含背景 Bash 直呼 bridge、禁 subagent wrapper、background job 掛 `wait <jobId>`）、eligibility、reviewer handoff、bridge 必經 `task --family muse|codex|glm`、resume/fork、rate limit/classifier failure 與 lite 分工都在其中。external-runtime policy 不擴充 tier/pin；工單禁再委派時不得因載入 routing 自行 spawn。
