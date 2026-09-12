@@ -31,7 +31,7 @@ Edit 失敗 → 先 re-Read 取得當前狀態；第二次同型 not found 後�
 
 ## 背景執行
 
-pytest/長命令、spawn agent 背景執行：spawn **一律明帶 `run_in_background: true`**（各端皆安全；ZCode 原生預設前台——省略即前台阻塞主對話，user 插話中斷會連帶殺 agent），spawn 後回報進行中即結束 turn 等完成通知；背景等待禁長等（行為契約見 **agent-workflow skill「Spawn 預設背景」**）；<30s 前台短 probe 例外與「spawn 不可繞 Bash timeout」真實案例已下沉同處；依 harness 機制執行，禁臆造工具。
+pytest/長命令、spawn agent 背景執行：spawn **一律明帶 `run_in_background: true`**（各端皆安全；ZCode 原生預設前台——省略即前台阻塞主對話，user 插話中斷會連帶殺 agent），spawn 後回報進行中即結束 turn 等完成通知；**ZCode 端 Agent 派發有背景 gate（rewrite 式）：省略參數不再等於前景——自動補背景，真要前景須 prompt 開頭帶 `[fg]`**；背景等待禁長等（行為契約見 **agent-workflow skill「Spawn 預設背景」**）；<30s 前台短 probe 例外（現須配 `[fg]` 逃生口）與「spawn 不可繞 Bash timeout」真實案例已下沉同處；依 harness 機制執行，禁臆造工具。
 
 ## 閘門命令禁 pipe 到 tail/grep
 

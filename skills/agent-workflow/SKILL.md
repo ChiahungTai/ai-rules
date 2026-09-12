@@ -68,7 +68,8 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 ZCode 的 Agent tool **預設前台**（阻塞主對話）——前台 spawn 期間使用者無法插話，steering 訊息只能中斷、連帶殺掉 agent。因此：
 
 - **spawn 帶 `run_in_background: true`**（Claude 2.1.198+ 已預設背景免動作）；spawn 後主對話回報「進行中」即結束 turn，agent 完成的通知會自動接手
-- 例外（前台）：結果是當前步驟立即依賴且預期 <30s 的短 probe
+- **背景 gate（ZCode 已上線）**：省略或 `run_in_background != true` 的 Agent 派發被 PreToolUse hook 以 allow＋updatedInput 自動補成背景（rewrite 式零浪費，fail-open）——**省略參數不再等於前景**；真要前景（含 <30s 短 probe 例外）須 prompt 前 200 字帶 `[fg]` 機械子串。機制細節（audit log、per-session 啟動快照限制）見 `hooks/AGENTS.md`「Agent 背景 gate」
+- 例外（前台）：結果是當前步驟立即依賴且預期 <30s 的短 probe，**且 prompt 帶 `[fg]`**
 - 為什麼（兩面）：前台 = 對話卡死 + 使用者 steer 即殺 agent；背景 = 使用者可繼續對話、steer 不影響 agent、通知後無縫接手——token 帳等價（接手時 context 重送都一次、cache TTL 看壁鐘與 turn 結構無關）
 - pytest 與預期 >10 分鐘命令預設背景跑；短測試可併機械驗證。spawn agent 不能拿來繞 Bash timeout——真實案例：誤以為 Bash 只能 600s 而加 bridge wrapper，實際 `run_in_background` 從頭可用，代價是 agent 開銷、間接層與收斂路徑變長。
 - 先做可獨立的前台工作；沒有就回報進行中並結束 turn 等通知。禁背景阻塞長等（各 harness 機制名不同；主對話被中斷時 agent 會連帶 killed、產出遺失）；前台短等待只限結果立即依賴的 <30s probe。
@@ -231,7 +232,7 @@ Rules 檔在 session 啟動時載入，但**更新不會傳播到已 spawn 的 a
 - [ ] **lite／機械角色任務 spawn 型別＝registry 角色**（內建 `general-purpose`／`Explore` 無 pin、繼承主 session 模型——lite 任務用內建型別＝旗艦跑機械段；唯讀探察／review 形態用內建 Explore 承接＝rule research/explore 列）
 - [ ] 已印出 `[Agent] model=X, max=N, current=M`
 - [ ] 當前 Agent 數量未超過上限
-- [ ] spawn 帶 `run_in_background: true`（前台僅限 <30s 短 probe——見上「Spawn 預設背景」）
+- [ ] spawn 帶 `run_in_background: true`（前台僅限 <30s 短 probe **且 prompt 帶 `[fg]`**——見上「Spawn 預設背景」；省略參數已被 gate 自動轉背景）
 - [ ] Prompt 包含足夠 context + 相對路徑 + rules-reminder 規則摘要（Agent 看不到 auto-loaded rules，必須在 prompt 開頭明確寫入：多行 `python -c` 禁 `#` 註解、`rg`/`fd` 取代 `grep`/`find`、`uv run` 前綴 Python、禁止 `sed` 修改 `.py/.md`、禁止 `$` shell 展開、輸出繁體中文、獨立工具呼叫同 block 批次發、改檔前先 Read）
 - [ ] **寫檔類 agent** prompt 必注入三條：①禁 /tmp，產出留當前 repo/worktree；②寫不進指定路徑就回報「環境限制：我寫不進 X」，不可退 /tmp；③暫存集中 `.agent-tmp/`（post-build 清；夜掃兜底 `.agent-tmp/`/`.at-contexts/` 7d、`.review/` 30d）
 - [ ] **若任務涉及 mock / PropertyMock / fixture**：prompt 主動注入專案 `tests/AGENTS.md`（legacy `tests/CLAUDE.md`）的 mock 規範段落摘要（agent 不會自己讀專案 instruction 檔，必須主動注入；見上方「Rule Freshness」）

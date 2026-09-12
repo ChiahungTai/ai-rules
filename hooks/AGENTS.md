@@ -9,6 +9,14 @@
 - **plugin 升級＝路徑維護點**：plugin cache 版號路徑漂移會使範本內 muse/codex 條目的絕對路徑過時——plugin 升級時同步更新路徑
 - **grok-build 未安裝**：安裝後照 muse/codex 條目形態補第三條 SessionEnd（其 cache 的 `scripts/session-lifecycle-hook.mjs` 同款）
 
+## Agent 背景 gate（ZCode）
+
+- `zcode_agent_background_gate.py`（PreToolUse，matcher `Agent`——官方語法兼容 `Agent`/`Task` alias）：ZCode Agent tool 原生預設前台，本 gate 把省略或 `run_in_background != true` 的派發以 `allow`＋`updatedInput` 補成背景——同一 call 生效、不拒絕不重派（deny 式才浪費一趟 request）。逃生口＝prompt 前 200 字含 `[fg]` 機械子串（user 確認要前景時用）；fail-open（任何內部錯誤靜默原樣放行）；全事件旁錄 `.agent-tmp/zcode-agent-gate.jsonl`（省略形態取證＋行為審計，post-build 清理自然收走）
+- 配套：`rules/tool-discipline.md`「背景執行」＝prompt 層一律明帶 `run_in_background: true`（gate 失效／未註冊機器的 defense-in-depth）；`agents/AGENTS.md`「背景執行」＝agent 定義一律 `background: true`（Claude 端原生強制；ZCode 忽略此欄位，由本 gate 承接）
+- 限制：hooks 是 per-session 啟動快照——註冊／改 script 後須新 session 才生效；`updatedInput` 是完整替換物件（原 keys 必須照抄，gate 已處理）
+- 實證（2026-09-12）：新 session 省略參數派發 → log `rewrite_from_absent`、主對話零阻塞、agent 以背景完成通知收尾
+- `zcode_agent_probe.py` 已刪——取證功能由 gate 的旁錄 log 吸收
+
 ## memory sensors（AIR-56，CC-only）
 
 - `memory-write-sensor.py`（PostToolUse，matcher `Edit|Write`）：成功後才記 actor 證據→ `$MEMORY_HOOK_LOG`（預設 `~/.local/share/ai-rules/memory-hook-events.jsonl`）。池判定＝父目錄含 MEMORY.md。
