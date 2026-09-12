@@ -3,10 +3,10 @@ id: AIR-79
 title: >-
   muse memory 寫入閘道升級 user-scope plugin——一次安裝全 repo
   生效（muse-memory-governance，AIR-54 續弧）
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-12 01:34'
-updated_date: '2026-09-12 02:00'
+updated_date: '2026-09-12 02:11'
 labels:
   - memory-governance
   - muse-plugin
