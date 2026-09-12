@@ -1,0 +1,9 @@
+version = 1
+
+[[delta_arc]]
+arcId = "air-78"
+base = "beb86429"
+cardId = "AIR-78"
+quality = "degraded"
+target = "11fd0d73"
+tourPath = ".tours/delta/air-78.tour"

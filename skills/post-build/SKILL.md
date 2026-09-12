@@ -3,7 +3,7 @@ name: post-build
 when_to_use: "After /implement (or any substantial change set) to orchestrate the review chain automatically: diff triage decides which sub-chains run."
 argument-hint: "無參數；自動 triage（uncommitted 或 EP baseline 任務弧）"
 allowed-tools: ["Read", "Grep", "Glob", "Bash", "Edit", "Write", "Agent"]
-description: build 後收尾鏈編排 — code-review → judge-review → 修正迴圈 → consistency → metadata-sync → tour corpus 修復閉環 → Report Shell refresh（hook 2：實作章節＋產圖一次＋badge ✅＋持久 delta tour）一次觸發。只做編排與 diff triage，方法論真相源在各被編排命令/skill。觸發詞：build 後收尾、post-build、收尾鏈、review chain 自動化、commit 前收尾。
+description: build 後收尾鏈編排 — code-review → judge-review → 修正迴圈 → consistency → metadata-sync → tour corpus gate（general finalization）→ Report Shell refresh（hook 2：實作章節＋產圖一次＋badge ✅；持久 delta tour＝ask-once 預設略過）一次觸發。只做編排與 diff triage，方法論真相源在各被編排命令/skill。觸發詞：build 後收尾、post-build、收尾鏈、review chain 自動化、commit 前收尾。
 ---
 
 # post-build — build 後收尾鏈編排
@@ -75,13 +75,7 @@ findings 全空 → 報告並直接進 docs 鏈。
 2. diff 觸及 Capabilities / `SYSTEM-MAP.md` / `dependency-graph.md` / `backlog/` → 執行 `metadata-sync`（[skills/metadata-sync](../metadata-sync/SKILL.md)）
 3. **rename 反掃（結案 gate 機械收口——非 rename 弧自然空跳）**：①清單萃取（`git diff --diff-filter=R -M` 檔級＋LLM 讀 diff 提取符號級）；②反掃 `rg "<舊符號>"` 掃 AGENTS.md 家族＋專案快 drift 檔；③命中即修或記 drift；零命中＝完成證據。
 4. **政策翻轉 consumer-propagation gate**：retire／政策句改寫弧跑[下方 gate](#政策翻轉-consumer-propagation-gateair-75)；candidate 空＝空跳（證據）。他類弧空跳。
-5. repo 有 `.tours/manifest.toml` → 跑 `code-reality tour_validate --manifest --repo .`；FAIL>0 走**修復閉環**（上限 3 輪，同階段 3 慣例），不只列入報告——只報不修讓 corpus 債滾雪球，存量 FAIL 反覆佔據後續每個收尾報告（mosaic 09-07 實證 77 FAIL 積債）：
-   - **graph 新鮮度前置**：重產前先 `code-reality build --repo .`——stale graph 帶重錨會寫出舊簽名壞錨（09-07 實證殘留 4 條根因；rebuild 冪等分鐘級，FAIL=0 時零成本）
-   - **觸及族重產一律經 `chain_tour`**（LLM 不手改 `.tour`）；帶 isPrimary 前門的族重產必再帶 `--primary`（漏帶＝旗標靜默掉落）
-   - **curated（manifest `generator=manual`）族不覆蓋**——其 FAIL 逕落應修清單（兩鐵律單一源見 [tour-bootstrap](../tour-bootstrap/SKILL.md)「重跑語義」）
-   - 重產後仍 FAIL → callstack md 幀手術（dead symbol／簽名漂移；rg 現場驗證行號與簽名）→ 再重產
-   - 最終殘留列收尾報告「tour corpus 應修清單」＋閉環統計（重產 N 族／手術 N 檔）；工具語義見 [code-reality](../code-reality/SKILL.md)
-6. **CR wiring telemetry checkpoint（AIR-67 弧B；與第 4 點 AIR-75 分軸——政策傳播 vs 行為量測）**：diff 觸及 CR 接線載體（`rules/symbol-query-routing.md`、`skills/cr-query/`、`agents/roles/*`、`skills/_common/work-order.md` §7、review-engine／implement 等 skill 的 CR 接線段）→ 收尾報告必附 `uv run python /Users/ctai/Github/ai-rules/skills/corrections-weekly/scripts/cr_usage.py --days <弧天數>` 輸出（三源計數見 [corrections-weekly](../corrections-weekly/SKILL.md)）。**checkpoint＝基線數字，非 effectiveness proof**——接線已改≠行為已形成，後續真實 review/job 樣本才是判讀面（corrections-weekly 週期承載）。candidate 空＝空跳（證據）。
+5. **CR wiring telemetry checkpoint（AIR-67 弧B；與第 4 點 AIR-75 分軸——政策傳播 vs 行為量測）**：diff 觸及 CR 接線載體（`rules/symbol-query-routing.md`、`skills/cr-query/`、`agents/roles/*`、`skills/_common/work-order.md` §7、review-engine／implement 等 skill 的 CR 接線段）→ 收尾報告必附 `uv run python /Users/ctai/Github/ai-rules/skills/corrections-weekly/scripts/cr_usage.py --days <弧天數>` 輸出（三源計數見 [corrections-weekly](../corrections-weekly/SKILL.md)）。**checkpoint＝基線數字，非 effectiveness proof**——接線已改≠行為已形成，後續真實 review/job 樣本才是判讀面（corrections-weekly 週期承載）。candidate 空＝空跳（證據）。
 
 ### 政策翻轉 consumer-propagation gate（AIR-75）
 
@@ -101,10 +95,20 @@ findings 全空 → 報告並直接進 docs 鏈。
 1. **實作章節生長**（同一殼的第二幕；內容＝殼規格「敘事骨架變體」實作完成報告列）：做了什麼（分組檔案地圖）／驗證證據（命令+exit code）／delta 前後對照（有圖時）／認知誤差點＋回源連結——**反映修正迴圈後最終態**（排在階段 3 修正迴圈之後，正是為此）
 2. **產圖一次**：hook 1 骨架未產的渲染管線圖（mermaid）在此補 degraded 槽——選型依 [diagram-selection](../diagram-selection/SKILL.md)、嵌法依 [mermaid](../mermaid/SKILL.md) 殼內嵌段（HTML 塊/表格屬敘事內容、hook 1 已可寫）；內容凍結後一次產，避免計畫圖重投影
 3. **badge**（收斂後 ✅——implement 5a 同步的是 🟡，此處驗證後升級 ✅；中間段殘留 → 維持 🟡）
-4. **持久版 delta tour 單一產點**：弧條件成立（HEAD 越過 EP baseline、a/b snapshot 在場且非 stale——時點條件真相源見 [code-review](../code-review/SKILL.md) 模式 B）→ `code-reality delta_tour <a> <b> --ep <ep.md> --repo <repo>` 落 `.tours/delta/`（**進 git**，commit 時納入）；未裝/條件不符 → 殼實作章節標明降級，不阻擋
+4. **持久版 delta tour＝ask-once（demand-driven，AIR-80）**：弧條件成立（HEAD 越過 EP baseline、a/b snapshot 在場且非 stale——時點條件真相源見 [code-review](../code-review/SKILL.md) 模式 B）→ 收尾報告「⚠️ 待用戶確認」清單增列「delta tour：產生／略過？」——**預設略過**（user 實證常常產生沒在看；ai-lifecycle 整合弧定案 demand-driven）。user 選產生 → `code-reality tour materialize <arcId>`（intent-level CLI——snapshot pair／EP gate／`--primary` 由 CLI 自組 recipe，語義單一源見 [code-reality](../code-reality/SKILL.md)；arcId＝materialization canonical key）落 `.tours/delta/`（**進 git**，commit 時納入）＋manifest provenance row（欄位契約見 tour-bootstrap）；略過／未確認 → **保留 inputs**（baseline snapshot pair 不清）供日後補產；未裝/條件不符 → 殼實作章節標明 delta 未產（非降級——demand 驅動下不產是正常態）
 5. 殼不存在（hook 1 未跑、EP 建於舊慣例）→ 跳過並於收尾報告標明
 
 > **為什麼掛這裡**：實作章節要反映修正迴圈後最終態——鏈中任何一步都可能改 code，只有此點是最終態；且這是 commit 前最後穩定點——掛弧後（commit 後）的產物在 session context 耗盡時必死（三弧實證：弧後敘事——debrief／corpus 重產／delta tour——全滅）。
+
+## Tour corpus gate（general finalization——不限 `.md` 弧；AIR-80 修正）
+
+> 原掛階段 4 docs 鏈下＝bug：純 code 變更時 tour 漂移不會被驗（ai-lifecycle 整合弧定案移出）。任何弧收尾（code／docs 皆然）、repo 有 `.tours/manifest.toml` → 跑 `code-reality tour_validate --manifest --repo .`；FAIL>0 走**修復閉環**（上限 3 輪，同階段 3 慣例），不只列入報告——只報不修讓 corpus 債滾雪球，存量 FAIL 反覆佔據後續每個收尾報告（mosaic 09-07 實證 77 FAIL 積債）：
+
+- **graph 新鮮度前置**：重產前先 `code-reality build --repo .`——stale graph 帶重錨會寫出舊簽名壞錨（09-07 實證殘留 4 條根因；rebuild 冪等分鐘級，FAIL=0 時零成本）
+- **觸及族重產一律經 `chain_tour`**（LLM 不手改 `.tour`）；帶 isPrimary 前門的族重產必再帶 `--primary`（漏帶＝旗標靜默掉落）
+- **curated（manifest `generator=manual`）族不覆蓋**——其 FAIL 逕落應修清單（兩鐵律單一源見 [tour-bootstrap](../tour-bootstrap/SKILL.md)「重跑語義」）
+- 重產後仍 FAIL → callstack md 幀手術（dead symbol／簽名漂移；rg 現場驗證行號與簽名）→ 再重產
+- 最終殘留列收尾報告「tour corpus 應修清單」＋閉環統計（重產 N 族／手術 N 檔）；工具語義見 [code-reality](../code-reality/SKILL.md)
 
 ## 結案（收斂點——invoke metadata-sync 結案段）
 
@@ -117,7 +121,8 @@ findings 全空 → 報告並直接進 docs 鏈。
 - code 鏈：findings N（✅N/❌N/⚠️N）、修正 N 項、followup <通過|未收斂(殘留清單)>
 - muse 委派（鏈內有派 muse 時才列）：jobId＋status 清單（經 bridge 入口）；ledger 查無的 muse 產出標「未經 bridge，副作用側考古」
 - EP 對照：delta_tour=<機械底稿|LLM 對照|無（原因：uncommitted 模式/小變更）>——宣稱觸及 vs 實際變動模組、unexplained 差異項
-- 殼 refresh（hook 2）：<完成（badge ✅＋持久 delta tour 落點＝任務家殼）|跳過（原因：無殼/條件不符）>
+- 殼 refresh（hook 2）：<完成（badge ✅；delta tour＝已產（落點＋arcId）｜略過（user 裁定，inputs 保留）｜條件不符）|跳過（原因：無殼）>
+- 已產 delta tour 時附註：AI Tours 視圖（ai-lifecycle）可走讀本弧——殼實作章節已連結 `.tours/delta/`
 - docs 鏈：consistency N 檔（pass N / fail-fixed N）、metadata-sync <跑/跳過>、tour corpus <PASS|閉環後 PASS（重產 N 族/手術 N 檔）|應修清單 N 條>
 - callstack 菜單（repo 有 `ai-analysis/blueprint/callstack-plan.md` 時）：積壓 N 條待生成（機械＝plan **成鏈行數**（①-③ 軌行；④ scripts/索引行不計）− `callstack/` 既有 md 數）——報庫存不催行動，生成＝獨立觸發＋報價（blueprint-bootstrap）
 - smell=<建議 zoom 的 dir|無>——訊號源＝階段 1/2 findings 中「疑似 AI 亂加／junk／scope creep」類 finding 所指目錄。**triage 訊號非鏈內調用**：人類看到再決定開 viewport session 跑 [smell-detector](../smell-detector/SKILL.md) zoom（受眾分離——smell-detector 是軌道②人類 viewport，不進本鏈自動跑；baseline/onboarding 盤點屬週期需求，不掛 post-build）

@@ -8,9 +8,15 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 # Repo Tour Bootstrap（repo 導覽建置程序）
 
-一句話：使用者說「**幫我 bootstrap 這個 repo 的 tour**」→ 產出走讀 corpus（地圖層視重複度盤點；場景＋時間層）→ 使用者「**走讀**」它（裝 CodeTour vsix，panel 點開即走）。
+一句話：使用者說「**幫我 bootstrap 這個 repo 的 tour**」→ 產出走讀 corpus（地圖層視重複度盤點；場景＋時間層）→ 使用者「**走讀**」它（ai-lifecycle 的 AI Tours 視圖——CodeTour fork player 已被吸收，fork vsix 退役；panel 點開即走）。
 
-**分層**：工具層＝[code-reality](../code-reality/SKILL.md)（chain_tour／delta_tour CLI、repo profile）；本 skill＝程序層（工具的編排、`.tour` 語言契約、驗證、停點設計）。能力命名體系：Repo Tour Bootstrap（能力）／Overview·Chain·Delta Tour（三層產物）／Walkthrough 走讀（消費）。**基數鏈**：一份 callstack md → N 場景 → N 條 tour → 一族（同目錄）——md 與 tour 非一對一，呈現各自獨立（md 給人讀、corpus 受 player 正則約束），唯一耦合是資料流邊（chain_tour 以檔名為錨）。**delta 層不在本程序產出**——由 `delta_tour` CLI 產出（持久版單一產點＝post-build 完成〔hook 2〕、無 post-build 弧＝implement 階段 6 fallback；`.tours/delta/` 進 git），bootstrap 只負責其目錄版控契約（步驟 1）。
+**分層**：工具層＝[code-reality](../code-reality/SKILL.md)（chain_tour／delta_tour CLI、repo profile）；本 skill＝程序層（工具的編排、`.tour` 語言契約、驗證、停點設計）。能力命名體系：Repo Tour Bootstrap（能力）／Overview·Chain·Delta Tour（三層產物）／Walkthrough 走讀（消費）。**基數鏈**：一份 callstack md → N 場景 → N 條 tour → 一族（同目錄）——md 與 tour 非一對一，呈現各自獨立（md 給人讀、corpus 受 player 正則約束），唯一耦合是資料流邊（chain_tour 以檔名為錨）。**delta 層不在本程序產出**——由 `delta_tour` CLI 產出（持久版產點＝post-build hook 2 **ask-once**〔demand-driven——user 確認才產，預設略過〕、無 post-build 弧＝implement 階段 6 fallback 同語義；產生入口＝intent-level `code-reality tour materialize <arcId>`；`.tours/delta/` 進 git），bootstrap 只負責其目錄版控契約（步驟 1）。
+
+## manifest provenance 契約（delta materialization——AIR-80）
+
+- **`arcId`＝materialization canonical key**；`cardId` 只是 join 屬性（一卡可多弧——以 arcId 對齊不以卡對齊）。
+- 每次 materialize 落一列：`{arcId, cardId, base commit, target commit, EP 路徑, quality: full|degraded}`；已 materialize 的 row **保留不刪**——補 `tourPath` 指向產物，消費端靠 row 尋回已產 tour（重產＝補新 row 或更新同 arcId row，非清單重建）。
+- 消費端（ai-lifecycle）**容忍式讀取**：欄缺席＝無觸發 UI，不 fail。
 
 ## 前置偵測（決定 corpus 形態）
 
@@ -22,10 +28,10 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 ## 程序（五步）
 
-1. **盤點**：`.tours/` 現況、文檔源（root／模組 AGENTS.md 群、架構文檔、SYSTEM-MAP）、`.gitignore` 對 `.tours` 的契約；manifest `generator` 非 `chain_tour`（現值域＝`manual`）rows＝**curated 資產**——重產前逐列提示保留／重寫決策（勿盲目覆蓋；M1 實證）。⚠ **arch 進版控是契約變更**（預設 `.tours/` 常被整目錄排除）——改 `.tours/` → `.tours/delta/`（delta 層**進版控**——弧的行級理解產物非暫態快照，post-build hook 2 產出）＋前例補追蹤，`git check-ignore` 雙向驗證，需用戶知情。
+1. **盤點**：`.tours/` 現況、文檔源（root／模組 AGENTS.md 群、架構文檔、SYSTEM-MAP）、`.gitignore` 對 `.tours` 的契約；manifest `generator` 非 `chain_tour`（現值域＝`manual`）rows＝**curated 資產**——重產前逐列提示保留／重寫決策（勿盲目覆蓋；M1 實證）。⚠ **arch 進版控是契約變更**（預設 `.tours/` 常被整目錄排除）——改 `.tours/` → `.tours/delta/`（delta 層**進版控**——弧的行級理解產物非暫態快照，post-build hook 2 ask-once 產出）＋前例補追蹤，`git check-ignore` 雙向驗證，需用戶知情。
 2. **場景層**（有 callstack 文檔才做）：`code-reality chain_tour <md> --repo <repo> --out-dir <repo>/.tours/arch/<族名>/`（`--primary` 見「優先序裁定」；<族名>＝**人類標題**——中文／中英混合皆可，panel 標題的職責＝讓人一眼決定要不要進去看；與 md 檔名（英文 slug 供 grep/CLI）解耦，僅 manifest sources 連結——**族名不帶軌別前綴**（軌分類住 README 地圖/plan）、推薦動線族加數字前綴亦見「優先序裁定」）。**收錄語義**：每份 callstack md 落地一族，收錄子集屬策展決策（初稿停點裁定）——M1 實證：全量 16 族 97 條落地、策展核心族 byte-identical 重現。zsh 變數不 word-split——動態 flags 用陣列 `args=(--flag 1); cmd "${args[@]}"`、固定參數直接寫明（通用條目見 tool-discipline rule「zsh 動態 flag 組合」）。驗收：產出檔數＝文檔場景數（場景＝含樹狀幀的 code block）；重錨分佈統計記錄；每條抽樣 ≤5 步 `line`+`pattern` 與源碼 def 對齊。0-step tour（描述殼）保留但勿連入。
 3. **地圖層（先做重複度盤點，再判受眾，再選步錨）**：**重複度盤點＝是否做 overview 的前置裁決**——比對潛在 overview 與既有文檔源：模組步是否＝文檔模組導航表的逐步慢讀、文檔錨步邊際值（落地所見 − description 所述）是否≈0、（若已有雙版——audit 時點才可盤）版間錨點重複度；**事後退役同等有效**（mosaic 即先產後盤退役）。高重複（repo 已有強導航文檔群）→ **地圖層退役**：前門改 chain `--primary`＋目錄前綴群序（見「優先序裁定」），省 curated 維護稅；低重複 → 續做，判受眾：受眾＝**冷啟動新手**（clone 即讀）→ 分層步**錨模組 AGENTS.md h1**、description＝職責一句＋file link（文檔是新手的自然入口）；受眾＝**理解程式碼**（含 repo 主人走讀）→ 分層步**錨真實源碼**（入口函式／註冊點／核心機制，`line`+`pattern` 雙錨，講這段程式碼做什麼、上下游是誰），文檔退 file link——**文檔索引對 repo 主人是零價值**。骨架＝開場（contents 步無檔）＋分層 4–6 步＋資料入口 1–2 步（代表檔雙錨）＋場景目錄步（tour link）＋開發工作流步＋收尾；長版可選（30–40 步、`00b - `）。**宣稱紀律：description 每個實質宣稱可追溯到文檔或源碼**（防 AI 造假敘事），不自行發明。
-4. **`.tour` 語言契約**（消費端 CodeTour 的正則決定，寫錯＝死鏈）：
+4. **`.tour` 語言契約**（消費端 player 正則決定——現行 player＝ai-lifecycle 吸收的 CodeTour fork，寫錯＝死鏈）：
    - `line` = **1-based**（player 內部 −1）
    - `pattern` = literal-ish regex（`^…$` 行錨定；行漂移時 pattern 最近命中校正，零命中顯性標未驗證）
    - **tour link**＝`[顯示名][匹配鍵#N]`（顯示名可省——單方括號也是合法形式，正是下條誤判的源頭）；markdown `( )` 形式被排除＝死鏈；**匹配鍵**＝title 剝 `^#?\d+\s-` 前綴**且在第一個 ASCII `-` 截斷**（`getTourTitle` 的 `split("-")[1]` quirk——title body 避 ASCII 連字號，撞鍵時 link 落第一條）
@@ -48,14 +54,14 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 
 ## 停點設計
 
-初稿產出即**停**——AI 不代終審（敘事品質是使用者策展職責）；使用者裝 vsix 邊走邊改；策展定稿後重跑機械驗證（編輯會引入壞 link／壞 JSON，走查只暴露走到的步）。收尾**預設不產 `.tours/README.md`**——panel 群序＋manifest 清單＋本 skill（契約／CLI）已承擔其全部內容，使用者不讀；僅當有 panel 外的 repo 專屬 gotcha 才立檔。
+初稿產出即**停**——AI 不代終審（敘事品質是使用者策展職責）；使用者走讀邊看邊改（ai-lifecycle AI Tours 視圖）；策展定稿後重跑機械驗證（編輯會引入壞 link／壞 JSON，走查只暴露走到的步）。收尾**預設不產 `.tours/README.md`**——panel 群序＋manifest 清單＋本 skill（契約／CLI）已承擔其全部內容，使用者不讀；僅當有 panel 外的 repo 專屬 gotcha 才立檔。
 
 ## 重跑語義（三模式——repo 已有 corpus 時）
 
 | 模式 | 觸發 | 行為 |
 |---|---|---|
 | **fresh** | 無 corpus／用戶明示重建 | 走五步程序 |
-| **audit** | 有 corpus（**預設**） | 跑 `tour_validate --manifest` 產報告，**不改任何檔**（bootstrap/audit 恆唯讀——FAIL 修復閉環程序單一源＝[post-build](../post-build/SKILL.md) 階段 4 步驟 3） |
+| **audit** | 有 corpus（**預設**） | 跑 `tour_validate --manifest` 產報告，**不改任何檔**（bootstrap/audit 恆唯讀——FAIL 修復閉環程序單一源＝[post-build](../post-build/SKILL.md)「Tour corpus gate」節） |
 | **migrate** | 格式舊（line-only 錨／純文字 cross-ref） | `tour_upgrade --dry-run` 先看報告，用戶點頭才 `--apply` |
 
 判定：`.tours/` 無 tour→fresh；有 corpus 無 manifest→audit（提示 migrate 若格式舊）；有 manifest→audit 為預設。
