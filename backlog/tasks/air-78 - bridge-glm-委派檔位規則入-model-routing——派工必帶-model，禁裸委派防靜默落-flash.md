@@ -1,7 +1,7 @@
 ---
 id: AIR-78
 title: bridge glm 委派檔位規則入 model-routing——派工必帶 --model，禁裸委派防靜默落 flash
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-11 23:38'
 updated_date: '2026-09-12 05:20'
@@ -10,6 +10,8 @@ labels:
   - bridge
   - governance
 dependencies: []
+references:
+  - skills/model-routing/SKILL.md
 ordinal: 64000
 ---
 
