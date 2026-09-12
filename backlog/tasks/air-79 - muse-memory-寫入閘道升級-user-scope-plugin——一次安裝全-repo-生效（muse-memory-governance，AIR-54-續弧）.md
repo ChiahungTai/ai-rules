@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-09-12 01:34'
-updated_date: '2026-09-12 01:42'
+updated_date: '2026-09-12 02:00'
 labels:
   - memory-governance
   - muse-plugin
@@ -28,3 +28,9 @@ ordinal: 65000
 
 〔驗收：cutover gates 全過才切（handoff 定案）——①explicit versioned marker 落地②legacy 共存 no-op 實證③direct＋bridge headless 雙 live activation probe（untrusted suppress 與 bridge plugin-registry 讀取路徑目前 UNKNOWN）④每 tool-call spawn overhead 量測在 budget 內（event-only 無 matcher＝每次 tool call 都 spawn bash+jq）⑤upgrade re-approval probe（approve v1→reinstall v2 不重 approve→hook 是否仍 fire；若重置，headless＝靜默 fail-open 直寫 canonical，須做成 setup health check）。EP 需含四 live probe 段落（marker 檔名/位置與 protocol handshake 欄位／stdin host workspace 欄位／approve-vs-content-hash binding／overhead 量測設計）。首批 cutover 標的＝ai-rules（mosaic_alpha 側 S6 移植由 mosaic 承接）。EP 規劃 M＋C 雙審（codex 已有一輪 advisory 不豁免）。probe scratch 於 EP build+commit 時清除。〕
 <!-- SECTION:DESCRIPTION:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+〔09-12 EP 雙審結算〕M 腿 muse-spark-1.3 額度 429（job-mtxq1dvu，窗口 09-14）→ user 指定 GLM-5.3-Flash registry code-reviewer 接腿；C 腿 codex chatgpt-web/high（job-mtxq1dxw-zxv0we）。兩腿 8🔴＋7🟡＋5ℹ️，judge 全數採納回寫 EP（legacy no-op 自我偵測迴圈＝兩腿獨立命中的關鍵根因；activation/in-hook 兩層 invariant；jq-free deny；可逆 handoff；fallback 現在凍結；控制面盤點修正 blueprint×3＋.gitignore）。EP 修訂版待 commit；實作未開工——等 user 觸發。
+<!-- SECTION:NOTES:END -->
