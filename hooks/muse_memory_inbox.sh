@@ -1,62 +1,65 @@
 #!/usr/bin/env bash
-# muse memory inbox hook (AIR-54 S3): PreToolUse gate for add_memory/edit_memory.
+# muse memory inbox hook — thin launcher (AIR-79 S1; mechanism origin AIR-54).
 #
-# Intercepts muse memory writes, saves the raw tool_input JSON to the inbox
-# (atomic temp+rename), and denies with the inbox location — consolidation
-# (memory-audit skill, nightly wave) applies frontmatter/six-question checks
-# before pool entry. Pure mechanical diversion: no semantic decisions here.
+# Intercepts muse memory writes, saves the raw tool_input JSON to the repo
+# inbox (atomic temp+rename), and denies with the inbox location — the gate
+# semantics live in the shared governance core; consolidation (memory-audit
+# skill, nightly wave) applies frontmatter/six-question checks before pool
+# entry. Pure mechanical diversion: no semantic decisions here.
 #
-# Contract (09-09 experiments, .agent-tmp/muse-hooks-findings.md):
-# - stdin: {"tool_name": "...", "tool_input": {scope, path, content}}
-# - deny via CC-style hookSpecificOutput; reason is non-empty (required).
-# - muse is fail-open on hook failure (exit != 0 or bad schema -> tool runs):
-#   keep this script minimal and dependency-light (bash + coreutils + jq).
-# - For edit_memory payloads with an existing pool target, attach
-#   _inbox_meta.base_sha256 so consolidation can do CAS (delayed lost update).
-# - File name = timestamp + pid + content hash (no model-supplied basename).
+# This shim is the registered-origin wrapper kept during the migration
+# window: it resolves the shared core, then hands over with
+# GOVERNANCE_ORIGIN=registered (core diverts unconditionally — identical
+# gate semantics to the pre-refactor legacy hook, so pre-marker repos keep
+# their gate) and GOVERNANCE_REPO pinned to this repo root (explicit, zero
+# stdin/$PWD dependence — EP review F8).
+#
+# Core resolution order (EP S1 要點3, 09-12 開工修訂):
+#   ① $MUSE_MEMORY_GOVERNANCE_HOME (default ~/.local/share/muse-memory-
+#      governance) under the `current` symlink -> hooks/muse_memory_governance.sh
+#   ② repo-local copy <repo>/muse-plugins/memory-governance/hooks/
+#      muse_memory_governance.sh (deployment-window fallback — present in
+#      the plugin source home)
+#   ③ both unresolvable -> static deny (fail-closed; a naked exec failure
+#      would leave muse fail-open, EP review F5)
 set -euo pipefail
 umask 077
 
-REPO=$(cd "$(dirname "$0")/.." && pwd)
-INBOX="$REPO/.agents/memory-inbox"
+deny() {
+  local reason=${1//\\/\\\\}
+  reason=${reason//\"/\\\"}
+  printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s"}}\n' "$reason"
+  exit 0
+}
 
-IN=$(cat)
-[ -n "$IN" ] || exit 0   # empty stdin: nothing to divert (no landing, no deny)
-TS=$(date +%Y%m%d-%H%M%S)
-SUM=$(printf '%s' "$IN" | shasum -a 256 | cut -c1-12)
-OUT="$INBOX/${TS}-$$-${SUM}.json"
-TMP="$INBOX/.tmp-${TS}-$$-${SUM}"
-mkdir -p "$INBOX"
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+GOVERNANCE_REPO=$(cd "$SCRIPT_DIR/.." && pwd)
+export GOVERNANCE_ORIGIN=registered
+export GOVERNANCE_REPO
 
-PAYLOAD="$IN"
-# jq parse failure must NOT kill the script (set -e) — that turns the whole
-# diversion fail-open (muse would write straight into the pool). P falls
-# back to empty -> no-enrichment path -> deny+land still happens (review F1).
-P=$(printf '%s' "$IN" | jq -r '.tool_input.path // empty' 2>/dev/null || true)
-# T3-1 lexical gate: P is unverified model input — never dereference it
-# before this gate. Absolute / parent-escape / backslash / non-.md /
-# symlink targets skip CAS enrichment (deny+land still happens below,
-# so the gate itself stays fail-open for the diversion function).
-SAFE_P=""
-case "$P" in
-  *.md)
-    # T4-2: consolidation 只收池根 basename（generator/watch-seed 只看頂層）——
-    # 含 slash 的子目錄請求跳過 enrichment（deny+land 照走，合約端明確 rejected）。
-    # absolute/slash 已覆蓋全部 escape 面；`..` 與 `\` 在無 slash 時是合法 basename
-    # 字元、無路徑語義（review F3——誤傷 `note..md` 類既有條目的 CAS）。
-    case "$P" in /*|*/*) : ;; *) SAFE_P="$P" ;; esac
-    ;;
-esac
-# 單段 basename 無 intermediate component——T3-1b 的逐段 walk 已被 slash 規則取代；
-# 尾段 symlink（foo.md -> 站外）仍由 [ ! -L ] 擋。
-if [ -n "$SAFE_P" ] \
-  && [ -f "$REPO/.agents/memory/$SAFE_P" ] \
-  && [ ! -L "$REPO/.agents/memory/$SAFE_P" ]; then
-  H=$(shasum -a 256 "$REPO/.agents/memory/$SAFE_P" | cut -d' ' -f1)
-  PAYLOAD=$(jq -c --arg p "$SAFE_P" --arg h "$H" \
-    '. + {_inbox_meta:{base_path:$p, base_sha256:$h}}' <<<"$IN")
+DEFAULT_HOME=${HOME:-}
+CORE=""
+INSTALL_ROOT=${MUSE_MEMORY_GOVERNANCE_HOME:-}
+if [ -z "$INSTALL_ROOT" ] && [ -n "$DEFAULT_HOME" ]; then
+  INSTALL_ROOT=$DEFAULT_HOME/.local/share/muse-memory-governance
+fi
+if [ -n "$INSTALL_ROOT" ]; then
+  CAND=$INSTALL_ROOT/current/hooks/muse_memory_governance.sh
+  if [ -f "$CAND" ] && [ -x "$CAND" ]; then
+    CORE=$CAND
+  fi
+fi
+if [ -z "$CORE" ]; then
+  CAND=$GOVERNANCE_REPO/muse-plugins/memory-governance/hooks/muse_memory_governance.sh
+  if [ -f "$CAND" ] && [ -x "$CAND" ]; then
+    CORE=$CAND
+  fi
+fi
+if [ -z "$CORE" ]; then
+  deny "memory-governance launcher: shared core unresolvable (install point and repo-local copy both missing); memory write denied (fail-closed). See muse-plugins/memory-governance/README.md"
 fi
 
-printf '%s' "$PAYLOAD" > "$TMP" && mv "$TMP" "$OUT"
-
-jq -nc --arg p "$OUT" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:("已代存 inbox: "+$p+"（consolidation 站將處理入池）")}}'
+if ! "$CORE"; then
+  deny "memory-governance launcher: shared core failed (exit != 0); memory write denied (fail-closed)"
+fi
+exit 0

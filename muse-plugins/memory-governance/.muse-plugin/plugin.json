@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "name": "muse-memory-governance",
+  "compat": {
+    "manifestDir": ".muse-plugin"
+  },
+  "capabilities": {
+    "hooks": [
+      {
+        "id": "memory-inbox",
+        "event": "PreToolUse",
+        "command": ["hooks/muse_memory_governance.sh"],
+        "timeout_ms": 10000
+      }
+    ]
+  }
+}

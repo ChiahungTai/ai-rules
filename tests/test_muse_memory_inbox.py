@@ -15,12 +15,24 @@ from pathlib import Path
 
 HOOKS = Path(__file__).resolve().parents[1] / "hooks"
 INBOX_HOOK = HOOKS / "muse_memory_inbox.sh"
+CORE_HOOK = (
+    Path(__file__).resolve().parents[1]
+    / "muse-plugins"
+    / "memory-governance"
+    / "hooks"
+    / "muse_memory_governance.sh"
+)
 
 
 def make_repo(tmp_path, with_entry=True):
     repo = tmp_path / "repo"
     (repo / "hooks").mkdir(parents=True)
     shutil.copy(INBOX_HOOK, repo / "hooks" / "muse_memory_inbox.sh")
+    # AIR-79: the launcher resolves the shared core via its repo-local
+    # fallback — give the tmp repo a copy at the same relative path.
+    core_dir = repo / "muse-plugins" / "memory-governance" / "hooks"
+    core_dir.mkdir(parents=True)
+    shutil.copy(CORE_HOOK, core_dir / "muse_memory_governance.sh")
     pool = repo / ".agents" / "memory"
     pool.mkdir(parents=True)
     if with_entry:
