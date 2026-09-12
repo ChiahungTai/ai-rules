@@ -1,0 +1,231 @@
+{
+ "title": "air-79-80 變更導覽",
+ "description": "⚠️ 跨 graph 世代警示——before/after 跨 graph 世代（before 2026-09-12T10:12:06.264351+08:00／after 2026-09-12T21:07:03.512778+08:00；raw edges 896→896）——graph.db 曾在兩次 snapshot 之間重建，檔案集收縮可能是重建造成而非真實刪檔（phantom 刪檔風險）；delta 僅供參考，建議重建後雙端重 snapshot。不擋執行。\n\nbefore `beb86429` → after `11fd0d73`：+0/−0 模組邊、7 新檔、2 改名、22 修改、0 刪檔。\n\n**EP 宣稱**：NONE（未提供 --ep）。\n實際變動模組（供判讀）：無\n\n之後每步一個變動檔（修改錨第一個 hunk、新檔錨第一個宣告行）。",
+ "steps": [
+  {
+   "file": ".agents/memory-governance.json",
+   "line": 1,
+   "title": "弧總覽：beb86429 → 11fd0d73",
+   "description": "⚠️ 跨 graph 世代警示——before/after 跨 graph 世代（before 2026-09-12T10:12:06.264351+08:00／after 2026-09-12T21:07:03.512778+08:00；raw edges 896→896）——graph.db 曾在兩次 snapshot 之間重建，檔案集收縮可能是重建造成而非真實刪檔（phantom 刪檔風險）；delta 僅供參考，建議重建後雙端重 snapshot。不擋執行。\n\nbefore `beb86429` → after `11fd0d73`：+0/−0 模組邊、7 新檔、2 改名、22 修改、0 刪檔。\n\n**EP 宣稱**：NONE（未提供 --ep）。\n實際變動模組（供判讀）：無\n\n之後每步一個變動檔（修改錨第一個 hunk、新檔錨第一個宣告行）。",
+   "pattern": "^[ \\t]*\\{\"protocol\":\\ 1\\}[ \\t]*$"
+  },
+  {
+   "file": ".agents/memory-governance.json",
+   "line": 1,
+   "title": "＋新檔 memory-governance.json",
+   "description": ".agents/memory-governance.json · 模組 `.agents`\ncommit: feat(cutover): AIR-79 S4-lite——ai-rules marker 落地（governance 宣告，進版控）＋plugin install/approve 常駐＋雙路 offline 驗證（plugin-origin 對 working legacy 讓位＝SM-5 疊窗態證實；registered-origin 導流收據落地）；live 腿 L1-L6 user 09-12 豁免（額度 429），legacy .muse/hooks.json 保留為過渡註冊——移除條件＝額度重置後首次 live 驗證（恢復程序 poc/poc_activation.md）",
+   "pattern": "^[ \\t]*\\{\"protocol\":\\ 1\\}[ \\t]*$"
+  },
+  {
+   "file": "ai-analysis/_tasks/done/09-12-muse-memory-governance-plugin/poc/poc_activation.md",
+   "line": 1,
+   "title": "＋新檔 poc_activation.md",
+   "description": "ai-analysis/_tasks/done/09-12-muse-memory-governance-plugin/poc/poc_activation.md · 模組 `ai-analysis`\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過",
+   "pattern": "^[ \\t]*\\#\\ AIR\\-79\\ S2/S3\\ probe\\ 證據（09\\-12）[ \\t]*$"
+  },
+  {
+   "file": "backlog/tasks/air-80 - ai-lifecycle-tour-整合——ai-rules-側生態固化（demand-driven-delta＋manifest-provenance＋intent-level-CLI＋reanchor-契約）.md",
+   "line": 1,
+   "title": "＋新檔 air-80 - ai-lifecycle-tour-整合——ai-rules-側生態固化（demand-driven-delta＋manifest-provenance＋intent-level-CLI＋reanchor-契約）.md",
+   "description": "backlog/tasks/air-80 - ai-lifecycle-tour-整合——ai-rules-側生態固化（demand-driven-delta＋manifest-provenance＋intent-level-CLI＋reanchor-契約）.md · 模組 `backlog`\ncommit: chore(backlog): AIR-80 ai-lifecycle tour 整合 ai-rules 側固化——七項 handoff 承接建卡",
+   "pattern": "^[ \\t]*\\-\\-\\-[ \\t]*$"
+  },
+  {
+   "file": "muse-plugins/memory-governance/.muse-plugin/plugin.json",
+   "line": 1,
+   "title": "＋新檔 plugin.json",
+   "description": "muse-plugins/memory-governance/.muse-plugin/plugin.json · 模組 `muse-plugins`\ncommit: feat(probe): AIR-79 S2/S3 offline 腿結算——install schema 實證修 manifest（version/description 必填、timeout_ms 不支援）；harness 全流程綠（divert＋deny＋effects blocked）；gate ② offline 對照（owner no-op／malformed 不讓位）；overhead script 軸 7ms/50ms 在 budget；P-UPGRADE 靜態半（list 不暴露 approve、update 警告復現）；fixture object-form 陷阱記載；machine 復原 no plugins；live 腿 L1-L6 parked 等 09-14 額度重置（range 內共 2 commits）",
+   "pattern": "^[ \\t]*\\{[ \\t]*$"
+  },
+  {
+   "file": "muse-plugins/memory-governance/README.md",
+   "line": 1,
+   "title": "＋新檔 README.md",
+   "description": "muse-plugins/memory-governance/README.md · 模組 `muse-plugins`\ncommit: fix(plugin): AIR-79 code-review 雙腿回寫——deny 控制字元完備 escape（換行路徑不再破 schema→fail-open；兩腿獨立命中 R1/C-C2）、legacy-owner matcher word-boundary（xadd_memory 型 decoy 不再誤讓位）、git rev-parse 故障分流（非 not-a-repo 錯誤 fail-closed）、cd/cat set-e 防護、stdin seam git-root 對帳硬化、launcher 解析序 env→repo-local→固定點（stale 安裝點不遮蔽 canonical）、protocol 契約鬆綁 JSON number 1；+12 測試（343 passed）；帳本 .review/air-79.md（gitignored 工作帳本）；codex job-mtxsd4ap＋flash code-reviewer，judge GLM-5.3 全採納（range 內共 2 commits）",
+   "pattern": "^[ \\t]*\\#\\ muse\\-memory\\-governance[ \\t]*$"
+  },
+  {
+   "file": "muse-plugins/memory-governance/hooks/muse_memory_governance.sh",
+   "line": 1,
+   "title": "＋新檔 muse_memory_governance.sh",
+   "description": "muse-plugins/memory-governance/hooks/muse_memory_governance.sh · 模組 `muse-plugins`\ncommit: fix(plugin): AIR-79 code-review 雙腿回寫——deny 控制字元完備 escape（換行路徑不再破 schema→fail-open；兩腿獨立命中 R1/C-C2）、legacy-owner matcher word-boundary（xadd_memory 型 decoy 不再誤讓位）、git rev-parse 故障分流（非 not-a-repo 錯誤 fail-closed）、cd/cat set-e 防護、stdin seam git-root 對帳硬化、launcher 解析序 env→repo-local→固定點（stale 安裝點不遮蔽 canonical）、protocol 契約鬆綁 JSON number 1；+12 測試（343 passed）；帳本 .review/air-79.md（gitignored 工作帳本）；codex job-mtxsd4ap＋flash code-reviewer，judge GLM-5.3 全採納（range 內共 2 commits）",
+   "pattern": "^[ \\t]*\\#!/usr/bin/env\\ bash[ \\t]*$"
+  },
+  {
+   "file": "tests/test_muse_memory_governance_plugin.py",
+   "line": 47,
+   "title": "＋新檔 test_muse_memory_governance_plugin.py",
+   "description": "tests/test_muse_memory_governance_plugin.py · 模組 `tests`\ncommit: fix(plugin): AIR-79 code-review 雙腿回寫——deny 控制字元完備 escape（換行路徑不再破 schema→fail-open；兩腿獨立命中 R1/C-C2）、legacy-owner matcher word-boundary（xadd_memory 型 decoy 不再誤讓位）、git rev-parse 故障分流（非 not-a-repo 錯誤 fail-closed）、cd/cat set-e 防護、stdin seam git-root 對帳硬化、launcher 解析序 env→repo-local→固定點（stale 安裝點不遮蔽 canonical）、protocol 契約鬆綁 JSON number 1；+12 測試（343 passed）；帳本 .review/air-79.md（gitignored 工作帳本）；codex job-mtxsd4ap＋flash code-reviewer，judge GLM-5.3 全採納（range 內共 2 commits）\n\n錨：第 47 行。",
+   "pattern": "^[ \\t]*def\\ write_marker\\(repo,\\ value\\):[ \\t]*$"
+  },
+  {
+   "file": "ai-analysis/_tasks/done/09-12-muse-memory-governance-plugin/ep.md",
+   "line": 1,
+   "title": "→改名 ep.md",
+   "description": "ai-analysis/_tasks/done/09-12-muse-memory-governance-plugin/ep.md · 模組 `ai-analysis`\n改名自 `ai-analysis/_tasks/09-12-muse-memory-governance-plugin/ep.md`。\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過",
+   "pattern": "^[ \\t]*\\#\\ muse\\ memory\\ inbox\\ gate\\ 升級\\ user\\-scope\\ plugin（AIR\\-79，AIR\\-54\\ 續弧）[ \\t]*$"
+  },
+  {
+   "file": "ai-analysis/_tasks/done/09-12-muse-memory-governance-plugin/index.html",
+   "line": 1,
+   "title": "→改名 index.html",
+   "description": "ai-analysis/_tasks/done/09-12-muse-memory-governance-plugin/index.html · 模組 `ai-analysis`\n改名自 `ai-analysis/_tasks/09-12-muse-memory-governance-plugin/index.html`。\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過",
+   "pattern": "^[ \\t]*<!DOCTYPE\\ html>[ \\t]*$"
+  },
+  {
+   "file": ".gitignore",
+   "line": 66,
+   "title": "M修改 .gitignore",
+   "description": ".gitignore · 模組 `.gitignore`\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過\n\n錨：第 66 行。",
+   "pattern": "^[ \\t]*\\#\\ muse\\ hooks\\.json＝machine\\-local（AIR\\-79\\ plugin\\ 化後為過渡期\\ legacy\\ 註冊，live\\ 驗證後退役；重建成腳本＝hooks/setup\\-muse\\-hooks\\.sh）[ \\t]*$"
+  },
+  {
+   "file": "AGENTS.md",
+   "line": 107,
+   "title": "M修改 AGENTS.md",
+   "description": "AGENTS.md · 模組 `AGENTS.md`\ncommit: fix(routing): AIR-78 雙審回寫＋結案——guard regex 行級 --family gate＋(?i)（CC CLI claude --model opus 不誤報、mixed-case 不漏報）、must_contain_all 語義正名、state-review 正文補 glm 出口＋摘要句消歧、wait timeout 殘留「兩家族同」→全 family 共用、rules family 句 GLM transport 消歧、arch-thinking/索引「雙家族互換」→跨家族、dead scan entry fail-loud、測試矩陣擴充（flag gate 7-case＋compound 3-case＋anchor 三態＋source-absent＋dead-entry）；root AGENTS.md delegate-bridge 段三家族＋glm 計費面；卡六 AC 全勾＋Done＋precheck 綠（③條件鏈）；codex job-mtxyjb0l＋flash code-reviewer，judge GLM-5.3 全採納；360 passed、deploy 3/3（range 內共 2 commits）\n\n錨：第 107 行。",
+   "pattern": "^[ \\t]*\\-\\ delegate\\-bridge\\ —\\ \\*\\*三家族委派\\ bridge\\*\\*\\ plugin（muse＋codex＋glm，`task\\ \\-\\-family\\ muse\\|codex\\|glm`；ZCode/CC\\ 雙端\\ marketplace\\ 發佈），\\*\\*住獨立\\ repo\\ `\\~/Github/delegate\\-bridge`（非本\\ repo\\ 目錄）\\*\\*；消費形態\\ plugin\\ agent（`delegate\\-rescue`\\ 委派、`delegate:delegate\\-runtime`\\ skills）＋\\ bridge\\ CLI；計費鐵則＝muse\\ 純訂閱\\ 5h\\ 窗口（無\\ API\\ key\\ 面）、codex\\ ChatGPT\\ 訂閱載具（bridge\\ 剝\\ `OPENAI_API_KEY`\\ 防\\ API\\-key\\ 計費翻轉）、glm＝GLM\\ provider\\ 帳號面（native\\-ID\\-only，見\\ model\\-routing\\ glm\\ 專節）；預設模型\\ pin\\ 與\\ task\\ 預設\\ effort\\ 現值見\\ model\\-routing\\ skill\\ 解析表（單一源，不在此\\ materialize）；muse\\ CLI\\ 事實真相源\\ \\[memory\\ reference_muse\\-code\\-cli\\-facts\\]、codex\\ raw\\ CLI\\ 事實\\ \\[memory\\ reference_codex\\-cli\\-exec\\-facts\\]、委派細節真相源\\ repo\\ `docs/`[ \\t]*$"
+  },
+  {
+   "file": "agents/AGENTS.md",
+   "line": 28,
+   "title": "M修改 AGENTS.md",
+   "description": "agents/AGENTS.md · 模組 `agents`\ncommit: feat(routing): AIR-78 剩餘 AC 落地——AC#5 vocabulary invariant 入 rules/model-routing.md（native ID 為準、CC 詞彙僅限 CC 接線、bridge 一律 native、禁複合 slug）；AC#6 機械 guard＝check_single_source 新增 bridge_model_vocab forbidden_pattern invariant（--model sonnet/opus 殘留掃＋compound-slug 掃，CC frontmatter/tier 表形不誤報）＋4 測試；AC#3 enum 反查 8 處修正（rules/skill 的 --family muse|codex→+glm、跨家族解析表補 glm caller 與 codex/glm 顯式選項、bridge 必經雙家族→三家、agents 原則句、state-review hint、handoff 通道現值、work-order 兩處）；deploy 3/3 再生；347 passed；掃描 evidence：agents/ 僅 :28 一處屬 bridge family 語義（其餘『兩家』＝ZCode/Claude harness 對句合法）\n\n錨：第 28 行。",
+   "pattern": "^[ \\t]*\\-\\ \\*\\*原則\\*\\*：external\\-runtime\\ 家族（muse／codex／glm）不新增特化\\ agent\\ 定義檔；任務以工單為介面派發，profile\\ 決定\\ spawn\\ 參數。[ \\t]*$"
+  },
+  {
+   "file": "ai-analysis/blueprint/index.html",
+   "line": 409,
+   "title": "M修改 index.html",
+   "description": "ai-analysis/blueprint/index.html · 模組 `ai-analysis`\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過\n\n錨：第 409 行。",
+   "pattern": "^[ \\t]*<tr><td>3\\ hooks\\ 接線</td><td>⚠️</td><td>ZCode\\ user\\-level\\ merge\\ 範本\\ ✅；Muse\\ user\\-scope\\ plugin（memory\\-governance）＋marker\\ ✅（AIR\\-79）</td><td>CC\\ settings\\ 的\\ secret\\ recovery\\ pointer；Muse\\ 新\\ repo\\ adoption\\ contract（marker\\ 模式\\ ✅）</td></tr>[ \\t]*$"
+  },
+  {
+   "file": "ai-analysis/blueprint/onboarding.md",
+   "line": 180,
+   "title": "M修改 onboarding.md",
+   "description": "ai-analysis/blueprint/onboarding.md · 模組 `ai-analysis`\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過\n\n錨：第 180 行。",
+   "pattern": "^[ \\t]*\\#\\#\\#\\ 3\\.2\\ Muse\\ memory\\ 閘\\ —\\ ✅\\ user\\-scope\\ plugin（AIR\\-79）＋repo\\ 隨行\\ marker[ \\t]*$"
+  },
+  {
+   "file": "ai-analysis/blueprint/workflow.md",
+   "line": 164,
+   "title": "M修改 workflow.md",
+   "description": "ai-analysis/blueprint/workflow.md · 模組 `ai-analysis`\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過\n\n錨：第 164 行。",
+   "pattern": "^[ \\t]*Muse\\ hook\\ 接線策略已由\\ AIR\\-79\\ 落地：user\\-scope\\ plugin\\ `muse\\-memory\\-governance`＋repo\\ marker\\ 三態（install/approve\\ 每機一次，marker\\ 隨\\ repo\\ 走）——「每\\ WT\\ 生成\\ hooks\\.json」與「參數化生成」兩案的共同後繼形態；過渡期\\ legacy\\ 註冊（launcher\\ 顯式傳\\ repo\\ root）仍在場，live\\ 驗證後退役。[ \\t]*$"
+  },
+  {
+   "file": "backlog/tasks/air-78 - bridge-glm-委派檔位規則入-model-routing——派工必帶-model，禁裸委派防靜默落-flash.md",
+   "line": 4,
+   "title": "M修改 air-78 - bridge-glm-委派檔位規則入-model-routing——派工必帶-model，禁裸委派防靜默落-flash.md",
+   "description": "backlog/tasks/air-78 - bridge-glm-委派檔位規則入-model-routing——派工必帶-model，禁裸委派防靜默落-flash.md · 模組 `backlog`\ncommit: fix(routing): AIR-78 雙審回寫＋結案——guard regex 行級 --family gate＋(?i)（CC CLI claude --model opus 不誤報、mixed-case 不漏報）、must_contain_all 語義正名、state-review 正文補 glm 出口＋摘要句消歧、wait timeout 殘留「兩家族同」→全 family 共用、rules family 句 GLM transport 消歧、arch-thinking/索引「雙家族互換」→跨家族、dead scan entry fail-loud、測試矩陣擴充（flag gate 7-case＋compound 3-case＋anchor 三態＋source-absent＋dead-entry）；root AGENTS.md delegate-bridge 段三家族＋glm 計費面；卡六 AC 全勾＋Done＋precheck 綠（③條件鏈）；codex job-mtxyjb0l＋flash code-reviewer，judge GLM-5.3 全採納；360 passed、deploy 3/3（range 內共 3 commits）\n\n錨：第 4 行。",
+   "pattern": "^[ \\t]*status:\\ Done[ \\t]*$"
+  },
+  {
+   "file": "backlog/tasks/air-79 - muse-memory-寫入閘道升級-user-scope-plugin——一次安裝全-repo-生效（muse-memory-governance，AIR-54-續弧）.md",
+   "line": 6,
+   "title": "M修改 air-79 - muse-memory-寫入閘道升級-user-scope-plugin——一次安裝全-repo-生效（muse-memory-governance，AIR-54-續弧）.md",
+   "description": "backlog/tasks/air-79 - muse-memory-寫入閘道升級-user-scope-plugin——一次安裝全-repo-生效（muse-memory-governance，AIR-54-續弧）.md · 模組 `backlog`\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過（range 內共 2 commits）\n\n錨：第 6 行。",
+   "pattern": "^[ \\t]*status:\\ Done[ \\t]*$"
+  },
+  {
+   "file": "hooks/AGENTS.md",
+   "line": 37,
+   "title": "M修改 AGENTS.md",
+   "description": "hooks/AGENTS.md · 模組 `hooks`\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過\n\n錨：第 37 行。",
+   "pattern": "^[ \\t]*\\-\\ 程序見\\ \\[MULTI\\-MACHINE\\.md\\]\\(MULTI\\-MACHINE\\.md\\)；機械支援＝`setup\\-memory\\-symlinks\\.sh`（dry\\-run\\ 預設、`\\.bak`\\ 備份）＋`verify\\-memory\\-topology\\.sh`（只讀驗證、`\\-\\-smoke`\\ 另加\\ hook\\ 往返）。muse\\ memory\\ 閘＝user\\-scope\\ plugin\\ `muse\\-memory\\-governance`（source\\ home\\ `muse\\-plugins/memory\\-governance/`，AIR\\-79——install/approve\\ 見其\\ README）；過渡期\\ legacy\\ 註冊\\ `\\.muse/hooks\\.json`→`hooks/muse_memory_inbox\\.sh`\\ launcher\\ 仍在場優先接管（`setup\\-muse\\-hooks\\.sh`\\ 為其重建腳本），live\\ 驗證後一併退役。池傳輸（bundle／cp\\ \\-a）與\\ cron\\ 重建是手動步。[ \\t]*$"
+  },
+  {
+   "file": "hooks/MULTI-MACHINE.md",
+   "line": 25,
+   "title": "M修改 MULTI-MACHINE.md",
+   "description": "hooks/MULTI-MACHINE.md · 模組 `hooks`\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過\n\n錨：第 25 行。",
+   "pattern": "^[ \\t]*\\#\\#\\#\\ 3\\.\\ Muse\\ memory\\ 閘（AIR\\-79\\ plugin\\ 化）[ \\t]*$"
+  },
+  {
+   "file": "hooks/muse_memory_inbox.sh",
+   "line": 2,
+   "title": "M修改 muse_memory_inbox.sh",
+   "description": "hooks/muse_memory_inbox.sh · 模組 `hooks`\ncommit: fix(plugin): AIR-79 code-review 雙腿回寫——deny 控制字元完備 escape（換行路徑不再破 schema→fail-open；兩腿獨立命中 R1/C-C2）、legacy-owner matcher word-boundary（xadd_memory 型 decoy 不再誤讓位）、git rev-parse 故障分流（非 not-a-repo 錯誤 fail-closed）、cd/cat set-e 防護、stdin seam git-root 對帳硬化、launcher 解析序 env→repo-local→固定點（stale 安裝點不遮蔽 canonical）、protocol 契約鬆綁 JSON number 1；+12 測試（343 passed）；帳本 .review/air-79.md（gitignored 工作帳本）；codex job-mtxsd4ap＋flash code-reviewer，judge GLM-5.3 全採納（range 內共 2 commits）\n\n錨：第 2 行。",
+   "pattern": "^[ \\t]*\\#\\ muse\\ memory\\ inbox\\ hook\\ —\\ thin\\ launcher\\ \\(AIR\\-79\\ S1;\\ mechanism\\ origin\\ AIR\\-54\\)\\.[ \\t]*$"
+  },
+  {
+   "file": "rules/model-routing.md",
+   "line": 11,
+   "title": "M修改 model-routing.md",
+   "description": "rules/model-routing.md · 模組 `rules`\ncommit: fix(routing): AIR-78 雙審回寫＋結案——guard regex 行級 --family gate＋(?i)（CC CLI claude --model opus 不誤報、mixed-case 不漏報）、must_contain_all 語義正名、state-review 正文補 glm 出口＋摘要句消歧、wait timeout 殘留「兩家族同」→全 family 共用、rules family 句 GLM transport 消歧、arch-thinking/索引「雙家族互換」→跨家族、dead scan entry fail-loud、測試矩陣擴充（flag gate 7-case＋compound 3-case＋anchor 三態＋source-absent＋dead-entry）；root AGENTS.md delegate-bridge 段三家族＋glm 計費面；卡六 AC 全勾＋Done＋precheck 綠（③條件鏈）；codex job-mtxyjb0l＋flash code-reviewer，judge GLM-5.3 全採納；360 passed、deploy 3/3（range 內共 2 commits）\n\n錨：第 11 行。",
+   "pattern": "^[ \\t]*model\\ 詞彙（user\\ 裁定）：prose/doctrine\\ 一律\\ native\\ ID（GLM\\-5\\.3、GLM\\-5\\.3\\-Flash）；CC\\ 詞彙（sonnet/opus）僅限\\ CC\\ harness\\ 自身接線；bridge\\ 委派一律\\ native\\ ID——glm\\ `\\-\\-model\\ GLM\\-5\\.3`／`GLM\\-5\\.3\\-Flash`（alias\\ 已退役：fail\\-closed\\ terminal\\ failure）；\\*\\*禁\\ native＋alias\\ 複合表達\\*\\*。機械\\ guard＝sync\\-sources\\ `bridge_model_vocab`\\ invariant。[ \\t]*$"
+  },
+  {
+   "file": "skills/CLAUDE.md",
+   "line": 108,
+   "title": "M修改 CLAUDE.md",
+   "description": "skills/CLAUDE.md · 模組 `skills`\ncommit: fix(routing): AIR-78 雙審回寫＋結案——guard regex 行級 --family gate＋(?i)（CC CLI claude --model opus 不誤報、mixed-case 不漏報）、must_contain_all 語義正名、state-review 正文補 glm 出口＋摘要句消歧、wait timeout 殘留「兩家族同」→全 family 共用、rules family 句 GLM transport 消歧、arch-thinking/索引「雙家族互換」→跨家族、dead scan entry fail-loud、測試矩陣擴充（flag gate 7-case＋compound 3-case＋anchor 三態＋source-absent＋dead-entry）；root AGENTS.md delegate-bridge 段三家族＋glm 計費面；卡六 AC 全勾＋Done＋precheck 綠（③條件鏈）；codex job-mtxyjb0l＋flash code-reviewer，judge GLM-5.3 全採納；360 passed、deploy 3/3\n\n錨：第 108 行。",
+   "pattern": "^[ \\t]*\\-\\ `arch\\-thinking`\\ —\\ Clean\\ Architecture\\ \\+\\ DDD\\ 設計視角\\ \\+\\ 結構機械（分層依賴/bounded\\ context/use\\ case\\ 驅動\\[含共用層外溢\\]；city\\ map\\ /\\ dep\\ weight\\ /\\ Pattern\\ Radar\\ /\\ domain\\ grounding\\ /\\ LSP\\ 查證\\ /\\ 補償邏輯盤點\\ /\\ call\\ graph（函數級）/\\ type\\ structure（contract\\ slice）/\\ data\\-flow（靜態骨架）；視角非模板；受眾／載體中性——方法論綁角色不綁家族，跨家族互換零改動；與\\ api\\-and\\-interface\\-design\\ 分工）[ \\t]*$"
+  },
+  {
+   "file": "skills/_common/work-order.md",
+   "line": 3,
+   "title": "M修改 work-order.md",
+   "description": "skills/_common/work-order.md · 模組 `skills`\ncommit: feat(routing): AIR-78 剩餘 AC 落地——AC#5 vocabulary invariant 入 rules/model-routing.md（native ID 為準、CC 詞彙僅限 CC 接線、bridge 一律 native、禁複合 slug）；AC#6 機械 guard＝check_single_source 新增 bridge_model_vocab forbidden_pattern invariant（--model sonnet/opus 殘留掃＋compound-slug 掃，CC frontmatter/tier 表形不誤報）＋4 測試；AC#3 enum 反查 8 處修正（rules/skill 的 --family muse|codex→+glm、跨家族解析表補 glm caller 與 codex/glm 顯式選項、bridge 必經雙家族→三家、agents 原則句、state-review hint、handoff 通道現值、work-order 兩處）；deploy 3/3 再生；347 passed；掃描 evidence：agents/ 僅 :28 一處屬 bridge family 語義（其餘『兩家』＝ZCode/Claude harness 對句合法）\n\n錨：第 3 行。",
+   "pattern": "^[ \\t]*>\\ 共享子範本——foreign\\ runtime（delegate\\-bridge\\ `task\\ \\-\\-family\\ muse\\|codex\\|glm`）共用；skill\\ 間引用＋主\\ session\\ 直接填寫。prompt\\ 為任務本文，禁含委派語言（muse\\-in\\-muse\\ EPERM\\ 教訓）。本檔定義十節硬欄位，缺一不可；消費端填寫時逐節落實，空缺＝未就緒。[ \\t]*$"
+  },
+  {
+   "file": "skills/arch-thinking/SKILL.md",
+   "line": 14,
+   "title": "M修改 SKILL.md",
+   "description": "skills/arch-thinking/SKILL.md · 模組 `skills`\ncommit: fix(routing): AIR-78 雙審回寫＋結案——guard regex 行級 --family gate＋(?i)（CC CLI claude --model opus 不誤報、mixed-case 不漏報）、must_contain_all 語義正名、state-review 正文補 glm 出口＋摘要句消歧、wait timeout 殘留「兩家族同」→全 family 共用、rules family 句 GLM transport 消歧、arch-thinking/索引「雙家族互換」→跨家族、dead scan entry fail-loud、測試矩陣擴充（flag gate 7-case＋compound 3-case＋anchor 三態＋source-absent＋dead-entry）；root AGENTS.md delegate-bridge 段三家族＋glm 計費面；卡六 AC 全勾＋Done＋precheck 綠（③條件鏈）；codex job-mtxyjb0l＋flash code-reviewer，judge GLM-5.3 全採納；360 passed、deploy 3/3\n\n錨：第 14 行。",
+   "pattern": "^[ \\t]*\\*\\*載體中性\\*\\*：方法論\\*\\*綁角色、不綁家族\\*\\*\\ —\\ implementer（設計決策）與\\ reviewer（結構審查）讀同一份，執行家族（in\\-harness\\ agent／external\\-runtime\\ 委派工單）只是載體，跨家族互換實作／審查角色時方法論零改動。機械段\\ fuel\\ 階梯按執行環境取可用層：external\\ runtime\\ 無\\ LSP／MCP\\ 面\\ →\\ 取\\ rg\\ \\+\\ code\\-reality\\ CLI\\ 查詢面（在場時；缺場＝rg\\ degraded＋報告標\\ `\\[WARN\\]`）；接線細則由派發工單「工具接線」承載（\\[work\\-order\\]\\(\\.\\./_common/work\\-order\\.md\\)\\ §7），本\\ skill\\ 不寫家族版操作教學。[ \\t]*$"
+  },
+  {
+   "file": "skills/handoff/SKILL.md",
+   "line": 29,
+   "title": "M修改 SKILL.md",
+   "description": "skills/handoff/SKILL.md · 模組 `skills`\ncommit: feat(routing): AIR-78 剩餘 AC 落地——AC#5 vocabulary invariant 入 rules/model-routing.md（native ID 為準、CC 詞彙僅限 CC 接線、bridge 一律 native、禁複合 slug）；AC#6 機械 guard＝check_single_source 新增 bridge_model_vocab forbidden_pattern invariant（--model sonnet/opus 殘留掃＋compound-slug 掃，CC frontmatter/tier 表形不誤報）＋4 測試；AC#3 enum 反查 8 處修正（rules/skill 的 --family muse|codex→+glm、跨家族解析表補 glm caller 與 codex/glm 顯式選項、bridge 必經雙家族→三家、agents 原則句、state-review hint、handoff 通道現值、work-order 兩處）；deploy 3/3 再生；347 passed；掃描 evidence：agents/ 僅 :28 一處屬 bridge family 語義（其餘『兩家』＝ZCode/Claude harness 對句合法）\n\n錨：第 29 行。",
+   "pattern": "^[ \\t]*要「自己之後繼續」→\\ `/at`；要「別人現在接」→\\ `/handoff`；要「對方帶著完整對話記憶接」→\\ 定向接續（判準：任務可口述\\ →\\ handoff\\ doc；需對方記得整段對話才值得續卷成本）。通道現值：muse／codex\\ 兩家族經\\ bridge（muse＝`task\\ \\-\\-session\\-id`，跨\\ workspace\\ 加\\ `\\-\\-allow\\-workspace\\-switch`；codex＝`task\\ \\-\\-family\\ codex\\ \\-\\-session\\-id`，原卷不動查詢走\\ `codex\\ exec\\ fork`\\ raw\\ CLI）；glm\\ 定向接續未證（見\\ model\\-routing\\ glm\\ 專節\\ resume\\ unverified\\ 句）、CC\\ 未驗——語義矩陣與守衛處置見\\ \\[model\\-routing\\]\\(\\.\\./model\\-routing/SKILL\\.md\\)「session\\ 定向接續」。[ \\t]*$"
+  },
+  {
+   "file": "skills/memory-audit/SKILL.md",
+   "line": 78,
+   "title": "M修改 SKILL.md",
+   "description": "skills/memory-audit/SKILL.md · 模組 `skills`\ncommit: docs(sync): AIR-79 S5 控制面同步＋結案——Muse memory 段改寫（user-scope plugin＋marker 三態＋過渡 legacy 註冊）、memory-audit Inbox 承載句、hooks/AGENTS＋MULTI-MACHINE、blueprint 三檔（onboarding §3.2/§4.3、workflow 接線決議落定、index.html）、.gitignore 註釋；殼 refresh（badge ✅＋實作結算章節）；EP 終態註記＋任務家歸檔 done/；卡 Done＋final-summary；precheck 綠（③條件鏈）；活面殘留掃描綠＋consistency 六維過\n\n錨：第 78 行。",
+   "pattern": "^[ \\t]*muse\\ `add_memory`/`edit_memory`\\ 經\\ PreToolUse\\ 閘（承載＝user\\-scope\\ plugin\\ `muse\\-memory\\-governance`〔AIR\\-79——install＋approve\\ 一次，marker\\ repo\\ 生效；repo\\ opt\\-in＝`\\.agents/memory\\-governance\\.json`\\ 三態〕；過渡期\\ legacy\\ 註冊\\ `\\.muse/hooks\\.json`→launcher\\ `hooks/muse_memory_inbox\\.sh`\\ 仍在場優先接管，live\\ 驗證後退役）代存\\ `\\.agents/memory\\-inbox/`（payload＝原始\\ JSON；path\\ 命中池內既有條目者附\\ `_inbox_meta\\.base_sha256`——T3\\-6：與\\ tool\\ 名無關，add\\ 指既有\\ path\\ 亦附）——本節＝入池站。觸發：夜波（波前二分之後、收斂步驟之前）或手動（本\\ skill\\ session）。\\*\\*閘是純機械導流，語義判斷（六問/frontmatter\\ 補全）全在本站\\*\\*。[ \\t]*$"
+  },
+  {
+   "file": "skills/model-routing/SKILL.md",
+   "line": 3,
+   "title": "M修改 SKILL.md",
+   "description": "skills/model-routing/SKILL.md · 模組 `skills`\ncommit: fix(routing): AIR-78 雙審回寫＋結案——guard regex 行級 --family gate＋(?i)（CC CLI claude --model opus 不誤報、mixed-case 不漏報）、must_contain_all 語義正名、state-review 正文補 glm 出口＋摘要句消歧、wait timeout 殘留「兩家族同」→全 family 共用、rules family 句 GLM transport 消歧、arch-thinking/索引「雙家族互換」→跨家族、dead scan entry fail-loud、測試矩陣擴充（flag gate 7-case＋compound 3-case＋anchor 三態＋source-absent＋dead-entry）；root AGENTS.md delegate-bridge 段三家族＋glm 計費面；卡六 AC 全勾＋Done＋precheck 綠（③條件鏈）；codex job-mtxyjb0l＋flash code-reviewer，judge GLM-5.3 全採納；360 passed、deploy 3/3（range 內共 3 commits）\n\n錨：第 3 行。",
+   "pattern": "^[ \\t]*description:\\ Model\\ routing\\ 深層載體\\ —\\ tier×provider\\ 權威表（requirement\\ 分類〔旗艦/影像/一般〕×五公司，model\\ 值單一源）＋旗艦資格條款（五項）／坐位註記＋role→requirement\\ 分配表＋dispatch\\ 預設（harness\\ 主軸：GLM\\ 主力/額度現值\\ GLM\\+muse\\+codex（帳號切換後恢復）/實作預設\\ muse＋glm\\-5\\.3\\-flash/影像＝支援影像的\\ model/muse\\ 跨家族審查優先/codex\\ 預設不派——chatgpt\\-web\\ webgpt\\ 顯式形態（high＝旗艦、web\\ 訊息額度\\ pool））＋額度\\ failover＋lite\\ 分工律（執行層降級條件＝保護面厚度、判斷密集位\\ full\\ 能力檔、模型歸因紀律）＋external\\-runtime\\ family→\\(model,effort,容量\\)\\ 解析表（muse／codex／glm\\-bridge\\ 委派、工單\\ profile）、glm\\ bridge\\ 契約（native\\-ID\\-only＋write\\-mode\\ edit＋ledger\\ effectiveModel\\ 身份）、rate\\ limit\\ 並發表、thoughtLevel\\ 但書（sticky\\ 不達\\ wire\\ \\#339/\\#306）、classifier\\ unavailable\\ 處置（重試≤2）＋spawn\\ 失敗態（1301／1308／1302）＋webgpt\\ 使用約束（chatgpt\\-web\\ 池三條）與五類失敗態＋eligibility\\ gate／reviewer\\ 交接契約／套用三路徑。always\\-on\\ 骨架在\\ rules/model\\-routing\\.md；spawn\\ 前查並發與\\ eligibility\\ 時載入。觸發詞：額度現值、實作預設、並發上限、rate\\ limit、spawn\\ model、general\\-purpose、內建型別、繼承主模型、tier、thoughtLevel、reasoningEffort、classifier\\ unavailable、1301、1308、1302、glm\\-5\\.3\\-flash、分工律、保護面、haiku、pins、external\\-runtime、委派、工單、chatgpt\\-web、webgpt、glm\\ bridge、native\\-only、write\\-mode、GLM\\-5\\.3\\-Flash、effectiveModel、額度池、wham、ran\\ out\\ of\\ room、Codex\\ Native2、eligibility、eligibility\\ gate、reviewer\\ 交接、advisory、bridge\\ 必經、完成回報收法、收法、三態判定、定向接續、session\\-id、fork、workspace\\ 守衛。[ \\t]*$"
+  },
+  {
+   "file": "skills/scan-project/scripts/check_single_source.py",
+   "line": 154,
+   "title": "M修改 check_single_source.py",
+   "description": "skills/scan-project/scripts/check_single_source.py · 模組 `skills`\ncommit: fix(routing): AIR-78 雙審回寫＋結案——guard regex 行級 --family gate＋(?i)（CC CLI claude --model opus 不誤報、mixed-case 不漏報）、must_contain_all 語義正名、state-review 正文補 glm 出口＋摘要句消歧、wait timeout 殘留「兩家族同」→全 family 共用、rules family 句 GLM transport 消歧、arch-thinking/索引「雙家族互換」→跨家族、dead scan entry fail-loud、測試矩陣擴充（flag gate 7-case＋compound 3-case＋anchor 三態＋source-absent＋dead-entry）；root AGENTS.md delegate-bridge 段三家族＋glm 計費面；卡六 AC 全勾＋Done＋precheck 綠（③條件鏈）；codex job-mtxyjb0l＋flash code-reviewer，judge GLM-5.3 全採納；360 passed、deploy 3/3（range 內共 2 commits）\n\n錨：第 154 行。",
+   "pattern": "^[ \\t]*\\{[ \\t]*$"
+  },
+  {
+   "file": "skills/state-review/SKILL.md",
+   "line": 5,
+   "title": "M修改 SKILL.md",
+   "description": "skills/state-review/SKILL.md · 模組 `skills`\ncommit: fix(routing): AIR-78 雙審回寫＋結案——guard regex 行級 --family gate＋(?i)（CC CLI claude --model opus 不誤報、mixed-case 不漏報）、must_contain_all 語義正名、state-review 正文補 glm 出口＋摘要句消歧、wait timeout 殘留「兩家族同」→全 family 共用、rules family 句 GLM transport 消歧、arch-thinking/索引「雙家族互換」→跨家族、dead scan entry fail-loud、測試矩陣擴充（flag gate 7-case＋compound 3-case＋anchor 三態＋source-absent＋dead-entry）；root AGENTS.md delegate-bridge 段三家族＋glm 計費面；卡六 AC 全勾＋Done＋precheck 綠（③條件鏈）；codex job-mtxyjb0l＋flash code-reviewer，judge GLM-5.3 全採納；360 passed、deploy 3/3（range 內共 2 commits）\n\n錨：第 5 行。",
+   "pattern": "^[ \\t]*argument\\-hint:\\ \"\\[\\-\\-family\\ muse\\|codex\\|glm\\]（顯式指定深審家族；未指定＝依\\ caller\\ 解析\\*\\*相異\\*\\*家族——非\\ muse\\ caller→muse、muse\\ caller→fail\\-loud\\ 要求顯式指定；解析表單一源在\\ model\\-routing\\ review/advisory\\ 條款）\"[ \\t]*$"
+  },
+  {
+   "file": "tests/test_check_single_source.py",
+   "line": 6,
+   "title": "M修改 test_check_single_source.py",
+   "description": "tests/test_check_single_source.py · 模組 `tests`\ncommit: fix(routing): AIR-78 雙審回寫＋結案——guard regex 行級 --family gate＋(?i)（CC CLI claude --model opus 不誤報、mixed-case 不漏報）、must_contain_all 語義正名、state-review 正文補 glm 出口＋摘要句消歧、wait timeout 殘留「兩家族同」→全 family 共用、rules family 句 GLM transport 消歧、arch-thinking/索引「雙家族互換」→跨家族、dead scan entry fail-loud、測試矩陣擴充（flag gate 7-case＋compound 3-case＋anchor 三態＋source-absent＋dead-entry）；root AGENTS.md delegate-bridge 段三家族＋glm 計費面；卡六 AC 全勾＋Done＋precheck 綠（③條件鏈）；codex job-mtxyjb0l＋flash code-reviewer，judge GLM-5.3 全採納；360 passed、deploy 3/3（range 內共 2 commits）\n\n錨：第 6 行。",
+   "pattern": "^[ \\t]*import\\ pytest[ \\t]*$"
+  },
+  {
+   "file": "tests/test_muse_memory_inbox.py",
+   "line": 18,
+   "title": "M修改 test_muse_memory_inbox.py",
+   "description": "tests/test_muse_memory_inbox.py · 模組 `tests`\ncommit: feat(plugin): AIR-79 S1 muse-memory-governance 共享核心＋launcher＋42 測試——決策序（crude/precise self-filter、repo 解析分流、structured legacy-owner 讓位、marker 三態 integer-1 唯一 valid、inbox containment、fail-closed divert）；registered origin 無條件 divert（遷移窗契約，10 legacy 測試零改動）；jq-free deny；launcher 解析序 env→repo 副本→fail-closed deny；impl-lite 執行＋主 session 獨立重跑 52/52 驗收；EP 偏差裁定回寫\n\n錨：第 18 行。",
+   "pattern": "^[ \\t]*CORE_HOOK\\ =\\ \\([ \\t]*$"
+  }
+ ],
+ "ref": "11fd0d73369beee592917d7645471c113c47eaa1"
+}
