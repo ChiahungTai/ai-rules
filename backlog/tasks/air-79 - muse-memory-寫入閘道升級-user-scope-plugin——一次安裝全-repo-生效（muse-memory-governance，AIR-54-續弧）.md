@@ -6,11 +6,14 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-09-12 01:34'
+updated_date: '2026-09-12 01:42'
 labels:
   - memory-governance
   - muse-plugin
   - hooks
 dependencies: []
+references:
+  - ai-analysis/_tasks/09-12-muse-memory-governance-plugin/ep.md
 ordinal: 65000
 ---
 
