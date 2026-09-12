@@ -4,7 +4,7 @@ title: bridge glm 委派檔位規則入 model-routing——派工必帶 --model�
 status: To Do
 assignee: []
 created_date: '2026-09-11 23:38'
-updated_date: '2026-09-11 23:48'
+updated_date: '2026-09-12 00:00'
 labels:
   - model-routing
   - bridge
@@ -43,4 +43,6 @@ ordinal: 64000
 ◆不變：落點（family 表 glm row＋專節）、rules/ 零改動、resume/fork 表不加 row（v2 收單含 --resume 但 session identity 連續性仍未證——維持 unverified 句）、兩弧時序（M1 後 re-read post-M1 形態再開工）、arc home legacy 頂層（AIR-77 遷移時搬）、enum 反查、驗收三 invariant（full→opus／lite→可不帶或 sonnet／unsupported flags 零送出——第二項依 v2 放寬）。
 
 〔09-12 補裁決——sonnet 語源查證（glm.rs:50-51,442-455 源碼實查）〕sonnet/opus 與 GLM 無本質關聯——係 bridge 自 V1 JS 原型沿用的內部別名慣例（借 Anthropic 檔位詞彙）；解析順序＝裸委派→DEFAULT_MODEL sonnet→alias 表轉原生 id→才 stage 給 carrier；alias 表外值 pass-through 且不分大小寫——原生名 --model GLM-5.3／--model glm-5.3-flash 直接可用（僅擋非 GLM 模型）。zcode provider table（~/.zcode/v2/config.json）全為原生名鍵、零 sonnet/opus 鍵。**instruction 層詞彙裁決：原生名為 canonical**（full＝--model GLM-5.3、lite＝裸或 --model GLM-5.3-Flash，與 in-harness registry pin 詞彙一致）；sonnet/opus 降為「存在的別名」記載（辨識用不推薦）。user 09-12 提問促成此查證。
+
+〔09-12 詞彙邊界裁定（user）〕glm family 詞彙面＝原生名專用：full＝--model GLM-5.3、lite＝裸（bridge 內建預設落 flash）或 --model GLM-5.3-Flash。sonnet/opus 係 CC 詞彙，禁混入 glm family 指引（opus 要用就走 CC）；bridge 內部 alias 映射（glm.rs MODEL_ALIASES）屬 delegate-bridge 實現細節，住該 repo docs、不進 ai-rules doctrine——與 CC 接線抽樣化同一原則（詞彙面進規範、接線 machine-local）。修正先前「sonnet/opus 降為存在的別名記載」條款：連別名記載都不留。驗收不變：full 派單必產 --model GLM-5.3（非 opus）。
 <!-- SECTION:NOTES:END -->
