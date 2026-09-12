@@ -6,7 +6,7 @@ title: >-
 status: Done
 assignee: []
 created_date: '2026-09-12 06:25'
-updated_date: '2026-09-12 07:33'
+updated_date: '2026-09-12 08:38'
 labels:
   - tours
   - integration
@@ -33,6 +33,8 @@ ordinal: 66000
 〔09-12 結算〕七項全落地：①post-build hook2 ask-once（輻射 implement 階段6 fallback/code-review 模式B/tour-bootstrap/html-mode hook2 row）；②manifest provenance（tour-bootstrap 契約節＋code-reality [[delta_arc]] rows）；③tour materialize <arcId> intent-level CLI（code-reality 6ec95f5——snapshot pair sha8 fail-loud 解析、同 arcId 覆蓋同 tourPath）；④delta_tour tour-level ref=<after commit>；⑤chain_tour x-codeReality.symbol（真 SCIP symbol 三錨點帶出）；⑥tour_validate 移出 docs-only（post-build 新「Tour corpus gate」general finalization 節）；⑦消費端改指 ai-lifecycle（tour-bootstrap vsix 退役/post-build 報告 AI Tours 句/html-mode 殼連結+refs 附 delta tour）。驗證：code-reality cargo test 全 workspace 綠＋live smoke（air-78 弧 32 steps materialize、ref 帶全 sha、manifest row 齊）；ai-rules 殘留掃描＝舊「持久版單一產點/裝 vsix/階段4步驟3」引用全同步。緩議兩項如卡面（alias 子系統/fallback 統計）。
 
 〔09-12 codex 審回寫（job-mty0ythj：1🔴5🟡1ℹ️ NO-GO→全採納修正）〕🔴C1 ask-once 斷鏈＝兩階段契約（tour register 持久化 pending row→materialize 補 tourPath；略過路徑 row 在場＝ai-lifecycle 可觸發；register/註冊形 materialize 立即 dump、失敗不抹 row）；C2 EP 雙語義＝FS 絕對（claims）/tour 錨 repo-relative 分離（repo-外 EP 不作 step anchor）；C3 7碼 short sha＝rev-parse --verify 解析成 full sha 再查 snapshot；C4 stale gate 進 materialize 本體（_meta.stale 非空 fail-loud）；C5 dogfood 弧身分錯（beb86429..11fd0d73 實跨 AIR-79+80）＝產物收回；C6 run() e2e 兩條入 s8（register→materialize 全鏈＋stale rejection＋overwrite＋7碼註冊）；C7 delta row＝tool-owned full replace 契約明寫（tour-bootstrap）。cargo 全綠。修訂後 post-build ask-once 段＝register+materialize 兩步。
+
+〔09-12 codex 四輪審查終判 GO（job-mty4qzws）〕收斂史：一輪 1🔴5🟡1ℹ️（ask-once 斷鏈/EP 雙語義/7碼 sha/stale gate/dogfood 身分/e2e 缺/row 契約）→ 全修；二輪 N1 EP provenance 冪等＋N2 flag silent-drop → 修；三輪 N1 殘項 dotdot escape（normalize）→ 修＋flake（並行 git macOS tempdir 物件 ENOENT，與被測碼無關）以 E2E_LOCK 序列化；四輪 symlink escape（realpath containment，resolve_existing）→ 修。終判：s8 8/8、workspace 綠（skip http sandbox 阻斷項）、GO。〔程序備忘〕AIR-80 commits 直落 main 未開卡 branch——軟失敗依 repo 慣例不回頭搬；code-reality 側 6ec95f5→277ed24→f258730→2329a26 四顆。〔緩議不變〕rename alias 子系統、player DocumentSymbol fallback。
 <!-- SECTION:NOTES:END -->
 
 ## Final Summary
