@@ -21,6 +21,10 @@ PreToolUse hook（matcher Edit|Write|NotebookEdit）: memory 寫入治理（兩�
    - 條目檔膨脹 >12,000 chars → 擋（Write 看 content 全長；Edit 只擋
      「變大且超限」方向——收斂型編輯放行，不卡 audit 收縮既有肥檔）。
      超額內容多屬 repo 可推導（EP 進度/git log），該住 EP 檔而非 memory。
+③ 放置閘（2026-09-13）——新建條目（檔不存在）非阻斷 stderr 注入六問指針
+   （memory-audit skill「hook 擴充」①設計；弧收案慣性 09-11/09-12 兩晚
+   project_ 類新流入 87.5% 違 Q1 實證——結案蒸餾掛點攔不到「收案當下新寫」，
+   提醒須在寫入瞬間；機械觸發禁語義偵測）。
 Self-gating：同目錄無 _generate_index.py 的專案不攔（裝 script 即 opt-in）。
 對應 rule: rules/context-management.md「Memory 生命周期規範」。
 覆蓋邊界：僅攔 Edit/Write 工具面的 file_path——Bash redirect（echo >>/tee）不攔
@@ -69,6 +73,14 @@ SESS_RE = re.compile(
 )  # desc 禁 session id（09-10 M2 實作；sess_ 前綴高特異，碰撞≈零）
 # 共同邊界（三 pattern 同界）：CJK 緊貼（`案93715…` 無空白）因 \b／Unicode \w
 # 含 CJK 而漏——歸夜間掃尾，不擴邊界。
+PLACEMENT_REMINDER = (
+    "[放置閘] 新條目——先過寫入六問 Q1：任務終態→卡/report（不進池）；"
+    "repo 可推導→不寫；確定的跨 session user/專案事實才進池。"
+    "六問＋載體統一定義表＝memory-audit skill「寫入端紀律」。（提醒不判斷）"
+)  # ③ 放置閘（memory-audit skill「hook 擴充」①設計）：新建條目 stderr 注入六問
+#   指針，非阻斷。動機＝弧收案 session 慣性實證（09-11/09-12 兩晚 project_ 類
+#   新流入 87.5% 違 Q1——收案當下新寫，結案蒸餾掛點攔不到，提醒須在寫入瞬間）。
+#   機械觸發＝檔不存在（與 NEW_ENTRY_LIMIT 同判準），禁語義偵測「收案語境」。
 
 
 def is_index_violation(file_path: str, has_generator: bool) -> bool:
@@ -150,6 +162,10 @@ def main() -> None:
     if not is_entry_file(file_path, has_generator):
         sys.exit(0)
     target = Path(file_path)
+    cur_len = len(target.read_text(encoding="utf-8")) if target.exists() else 0
+    # ③ 放置閘（非阻斷提醒——不 exit 2，寫入照常進行）
+    if cur_len == 0:
+        print(PLACEMENT_REMINDER, file=sys.stderr)
     if tool == "Write":
         content = tool_input.get("content", "") or ""
         desc = extract_desc(content)
@@ -183,7 +199,7 @@ def main() -> None:
                 file=sys.stderr,
             )
             sys.exit(2)
-        cur = len(target.read_text(encoding="utf-8")) if target.exists() else 0
+        cur = cur_len
         if cur == 0 and len(content) > NEW_ENTRY_LIMIT:
             print(
                 f"[Hook Blocked] 新建條目 {len(content):,} chars > {NEW_ENTRY_LIMIT:,}——寫入當下就該是蒸後形。\n"

@@ -1225,3 +1225,61 @@ def test_block_memory_inventory_write_blocked():
     assert block_memory.is_index_violation("/x/memory/_inventory.md", True)
     assert block_memory.is_index_violation("_inventory.md", True)
     assert not block_memory.is_index_violation("/x/memory/_inventory.md", False)
+
+
+# ---------------------------------------------------------------------------
+# block-memory-index-write：③放置閘（新建條目非阻斷提醒——弧收案慣性實證）
+# ---------------------------------------------------------------------------
+
+
+def test_placement_gate_new_entry_reminded_but_allowed(tmp_path):
+    """新建條目（檔不存在）→ stderr 注入六問指針＋exit 0（提醒不判斷、寫入照常）。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "brand-new.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content=(
+                "---\nname: brand-new\ndescription: 合規短述一行鉤子\n"
+                "metadata:\n  type: project\n---\n一句話事實。\n"
+            ),
+        )
+    )
+    assert r.returncode == 0
+    assert "放置閘" in r.stderr
+    assert "Hook Blocked" not in r.stderr
+
+
+def test_placement_gate_existing_entry_no_reminder(tmp_path):
+    """既有條目加段（多數寫入形態）→ 不觸發提醒（噪音可控）。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "proj-000.md"
+    r = run_hook(hook_payload("Edit", target, old_string="body", new_string="body2"))
+    assert r.returncode == 0
+    assert "放置閘" not in r.stderr
+
+
+def test_placement_gate_fires_before_hard_block(tmp_path):
+    """新建＋desc 超限：提醒先印、硬閘後擋（exit 2）——兩訊息並存。"""
+    pool = make_pool(tmp_path, n=1)
+    target = pool / "fat-desc.md"
+    r = run_hook(
+        hook_payload(
+            "Write",
+            target,
+            content="---\nname: fat-desc\ndescription: " + "長" * 130 + "\n---\nx\n",
+        )
+    )
+    assert r.returncode == 2
+    assert "放置閘" in r.stderr
+    assert "description" in r.stderr
+
+
+def test_placement_gate_no_generator_silent(tmp_path):
+    """self-gating：無 generator 目錄 → 靜默放行（不提醒）。"""
+    nogen = tmp_path / "nogen"
+    nogen.mkdir()
+    r = run_hook(hook_payload("Write", nogen / "new.md", content="x"))
+    assert r.returncode == 0
+    assert "放置閘" not in r.stderr

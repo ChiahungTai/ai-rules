@@ -170,7 +170,7 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 
 P1 實證：正確載體**同等可達**（specimen writer 同 session 本來就在寫卡/EP——濫用是習慣非距離被迫；頻率數字見任務家 p1-taxonomy）；hook 在已實裝面完全有效（索引直寫與 desc 長度閘的攔截紀錄——量化見鑑識報告；09-09 寫入面重放交叉驗證＝誤傷實質為零）。設計＝在寫入瞬間把指針距離歸零：
 
-- **hook 擴充（推薦）**：①放置閘——Write/Edit 落 memory/*.md 且標的為新建（檔不存在）時，stderr 注入一行「新條目：任務終態→卡；repo 可推導→不寫；確定的 user/專案事實才進池——六問＋載體統一定義表」。提醒不判斷——無擋/放決策，假確定性風險零；既有條目加段（多數寫入形態）不觸發，噪音可控。②desc 內容閘（上表 M2——可直接硬擋）。③stale-collision 訊息擴充（上表 M3）。
+- **hook 擴充**：①放置閘（**已上線** `hooks/block-memory-index-write.py`）——Write/Edit 落 memory/*.md 且標的為新建（檔不存在）時，stderr 注入一行「新條目：任務終態→卡；repo 可推導→不寫；確定的 user/專案事實才進池——六問＋載體統一定義表」。提醒不判斷——無擋/放決策，假確定性風險零；既有條目加段（多數寫入形態）不觸發，噪音可控。**為何在寫入瞬間**：弧收案 session 慣性實證——連兩晚 project_ 類新流入 87.5% 違 Q1，且皆「收案當下新寫」，結案蒸餾掛點（敘述性條文）攔不到掛點執行後才新寫的條目（真實案例）。②desc 內容閘（上表 M2——已上線硬擋）。③stale-collision 訊息擴充（上表 M3，待做）。
 - **提示層（既有，維持不加碼）**：rules/context-management.md 開場指針＋desc 文法五條已覆蓋。
 - **工具層（不做）**：memory 寫入是 harness auto 行為非 CLI 入口，包裝不可行；卡側 backlog CLI 已在場。
 
