@@ -22,7 +22,7 @@
 
 ## UC-Driven Development
 
-功能先定義 Use Case。AGENTS.md Capabilities＝已完成能力索引，backlog＝承諾池；操作/refs/precheck 單一源為 kanban-board skill。
+功能先定義 Use Case。AGENTS.md Capabilities＝已完成能力索引，backlog＝承諾池；操作/refs/precheck 單一源為 kanban-board skill。多卡優先序可由 project blueprint dependency graph 決定（backbone），未被支撐的卡走 kanban triage。
 
 文檔：AGENTS.md（Claude 以 CLAUDE.md wrapper）＝導航/完成能力 what/where；architecture.md＝why；SYSTEM-MAP.md＝跨域現狀；dependency-graph.md＝人工依賴/ripple 地圖（機械查詢交 code-reality）；backlog/＝任務卡。長文按需 link，禁全量 transclude。
 

@@ -78,6 +78,8 @@ bash <skills 根>/kanban-board/scripts/backlog_precheck.sh [卡id ...]   # skill
 - 機械消費：`--json`（**僅 list/view/task/search 四指令支援**）
 - 想法池：`backlog draft create "<想法>"` → Drafts 頁累積 → 拍板 `backlog draft promote <id>`（想法→承諾）
 
+**backbone triage（user 拍板）**：優先序 backbone 由 project blueprint 決定（target 形態＋收斂序列，見 `ai-analysis/blueprint/`）；未被 backbone 支撐的 To Do 卡須定期 triage——升主線候選／demote → draft／archive，To Do 池只留近期可開工承諾。
+
 **遠期卡治理（draft vs archive vs Icebox）**（實證 2026-09-03，例：mosaic `MOS-2/3/7 → DRAFT-1/2/3` 後 `To Do: MOS-10/16 + Done 7`；決策見 [Backlog.md 治理設計](../../ai-analysis/_tasks/done/09-03-backlog-governance-design/design.md)）：
 | 情境 | 動作 | 命令 | 版面效果 |
 |------|------|------|----------|

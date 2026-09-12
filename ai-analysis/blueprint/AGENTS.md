@@ -20,6 +20,7 @@
 - **退役制**：被新藍圖完整吸收、已無獨立查閱價值的舊 blueprint 文件搬入 `_done/`，檔頭指出由哪個現行文件取代；不讓舊版與新版並列成雙真相。
 - **不以 report 歷史當 runtime 現況**：report 固化決策與證據；凡宣稱「現在會怎樣」，仍須回查目前 config、script、skill 或 Git 狀態。
 - **TODO 不自動升格**：缺口被列入 blueprint 只是待建項，不代表已承諾實作；承諾仍進 Backlog.md／EP。
+- **Priority backbone（user 拍板）**：blueprint 的 target 形態與收斂序列（六線波次等）決定主線做什麼與順序；backlog 仍是承諾單一源——backbone 選卡不改變承諾建卡流程，未被 backbone 支撐的卡照 kanban-board「遠期卡治理」triage 面處置。
 
 ## 對齊覆核觸發
 
