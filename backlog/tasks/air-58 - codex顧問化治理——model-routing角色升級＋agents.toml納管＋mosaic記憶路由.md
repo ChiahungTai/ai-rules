@@ -4,7 +4,7 @@ title: codex顧問化治理——model-routing角色升級＋agents.toml納管�
 status: To Do
 assignee: []
 created_date: '2026-09-09 21:45'
-updated_date: '2026-09-09 21:45'
+updated_date: '2026-09-11 20:44'
 labels:
   - codex
   - model-routing
@@ -37,6 +37,12 @@ S4 決策記錄（無改動）：bridge 工單饋入 codex memory 生成＝保�
 - [ ] #3 mosaic 側 AGENTS.md 觀察池路由段落地（AIR-54 mosaic 移植後形態；handoff brief 已開給 center），codex session 實測讀得到池
 - [ ] #4 S4 決策與 knob 記錄歸檔（卡或 model-routing/memory-audit 引用面擇一）
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+〔09-12 註〕AC#1「擴 sweet spot 備註（webgpt 觀察期語意）」已被 09-11 webgpt 三條使用約束裁定實質涵蓋（rules/model-routing.md external-runtime 段＋skill webgpt 專節已落檔，commit e9b12e3）——開工時 AC#1 改為一致性檢查：確認 dispatch 段 sweet spot 備註與 webgpt 專節無矛盾即可，勿重寫（裁定紀錄＝memory feedback_quota-failover-policy 09-11 段）
+<!-- SECTION:NOTES:END -->
 
 ## Final Summary
 
