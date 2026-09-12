@@ -15,7 +15,9 @@ allowed-tools: ["Read", "Bash", "Write", "Edit", "Grep", "Glob"]
 ## manifest provenance 契約（delta materialization——AIR-80）
 
 - **`arcId`＝materialization canonical key**；`cardId` 只是 join 屬性（一卡可多弧——以 arcId 對齊不以卡對齊）。
-- 每次 materialize 落一列：`{arcId, cardId, base commit, target commit, EP 路徑, quality: full|degraded}`；已 materialize 的 row **保留不刪**——補 `tourPath` 指向產物，消費端靠 row 尋回已產 tour（重產＝補新 row 或更新同 arcId row，非清單重建）。
+- **兩階段**：`tour register`（pending row 立即持久化——ask-once 略過路徑）→ `tour materialize`（row 補 `tourPath`）。row 缺席＝消費端無觸發 UI（ask-once 略過仍必須 register 的原因）。
+- 每次 materialize 落一列：`{arcId, cardId, base commit, target commit, EP 路徑, quality: full|degraded}`；已 materialize 的 row **保留不刪**——`tourPath` 指向產物，消費端靠 row 尋回已產 tour（同 arcId 重產＝覆蓋同 tourPath，歷史交 git）。
+- **delta row＝tool-owned authoritative full replace**（以 arcId 鍵整列替換）：重新 register/materialize 未帶的 optional 欄（cardId/ep）會被清掉、未知欄不保留——人工策展欄請放 `[tour.*]` row（unknown-key roundtrip 保護只涵蓋該層）。
 - 消費端（ai-lifecycle）**容忍式讀取**：欄缺席＝無觸發 UI，不 fail。
 
 ## 前置偵測（決定 corpus 形態）
