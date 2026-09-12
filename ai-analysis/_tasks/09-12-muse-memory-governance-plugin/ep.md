@@ -167,7 +167,7 @@
       - **無法判定層**（jq 缺失導致無法 parse tool_name/marker，且 crude bash 字串比對命中 memory-tool 特徵）→ printf 靜態 deny＋reason「governance tooling degraded」（無法評估 opt-out 時保守拒絕；jq 缺失屬機器異常，修復指引入 reason）。
       - git binary 缺失（無法解析 repo、看不到 marker）→ allow（等同不可解析；機器無 git 時 muse workspace 概念本就不成立）——與「rev-parse 明確 not-a-repo」同走 exit 0，但測試分開釘（兩種到達路徑不同）。
 3. **legacy wrapper 過渡（origin-mode 機制）**：`hooks/muse_memory_inbox.sh` 改為薄 launcher——`GOVERNANCE_ORIGIN=registered GOVERNANCE_REPO=<絕對路徑（dirname $0/..）> exec <共享腳本>`。共享腳本見 `GOVERNANCE_ORIGIN=registered` → **跳過 ②③④**（repo 顯式給定；自己的註冊不得自我 no-op；**marker 檢查也跳過——registered 閘無條件 divert，等同改造前 legacy 行為**。〔S1 實作裁定：原設計「marker 三態保留」會使 S1→S4 marker commit 前的 registered 閘靜默消失——重演 C1 根因；遷移窗契約以「與改造前 legacy 行為等價」為準，既有 10 個 legacy 測試零改動通過即此契約的機械證據〕）。**wrapper 的共享腳本解析序**（不得寫死 content-sha cache 路徑——腳本迭代即斷鏈→exec 失敗→exit≠0→fail-open）：①`MUSE_MEMORY_GOVERNANCE_HOME` env（測試注入用，預設 `~/.local/share/muse-memory-governance`）下 `current` symlink；②**repo 本地副本** `<repo>/muse-plugins/memory-governance/hooks/muse_memory_governance.sh`（部署窗回退——S1 commit 到 S4 install 之間固定安裝點尚未存在，repo 副本必在）；③雙失敗 → wrapper 自行 printf 靜態 deny（fail-closed 延伸到 launcher 層），禁裸 exec 失敗。此機制同時服務 fallback per-repo registration（見整合策略）——wrapper 化後遷移窗（S1 commit→S4 marker commit）閘語義不變。〔09-12 開工修訂：解析序加 repo 本地回退＋env override——原設計在部署窗會 deny-all（固定安裝點未存在）且測試無法隔離 machine 路徑；偏差屬實作落差修正〕
-4. **manifest**（nested `.muse-plugin/`，exactly-one 規則）——欄位內聯（原 probe p2/ 已吸收）：`{"schemaVersion":1, "name":"muse-memory-governance", "compat":{"manifestDir":".muse-plugin"}, "capabilities":{"hooks":[{"id":"memory-inbox","event":"PreToolUse","command":["hooks/muse_memory_governance.sh"],"timeout_ms":<值 build 時定>}]}}`——deny 需同步結果，**禁 `async`**。
+4. **manifest**（nested `.muse-plugin/`，exactly-one 規則）——欄位（**install 實證修正**：`version`/`description` 必填、`timeout_ms` 不支援——見 `poc/poc_activation.md` O1）：`{"schemaVersion":1, "name":"muse-memory-governance", "version":"0.1.0", "description":"…", "compat":{"manifestDir":".muse-plugin"}, "capabilities":{"hooks":[{"id":"memory-inbox","event":"PreToolUse","command":["hooks/muse_memory_governance.sh"]}]}}`——deny 需同步結果，**禁 `async`**。
 
 ### Pseudo Code
 
@@ -388,10 +388,12 @@ rg 殘留掃描（scoped，排除 ref-docs/reports/done/backlog）→ 活面 0; 
 | Gate | 內容 | 證據來源 |
 |---|---|---|
 | ① | explicit versioned marker 落地（`.agents/memory-governance.json`＋`protocol:1`） | S1+S4 |
-| ② | legacy 共存 no-op 實證 | S1 單元＋S2 live |
-| ③ | direct＋bridge headless 雙 live activation（untrusted suppress 形態一併記錄） | S2 |
-| ④ | per-tool-call spawn overhead 在 budget 內 | S3 |
-| ⑤ | upgrade re-approval 語義確定（fire 續存或 health check 攔截） | S3 |
+| ② | legacy 共存 no-op 實證 | S1 單元✓＋offline harness 對照✓（poc O4：working owner→no-op／malformed→不讓位）；live 腿 parked |
+| ③ | direct＋bridge headless 雙 live activation（untrusted suppress 形態一併記錄） | S2——**parked**（muse 額度 429，2026-09-14T00:00Z 重置；offline harness 腿已綠＝poc O2/O3） |
+| ④ | per-tool-call spawn overhead 在 budget 內 | script 軸✓（early-exit ≈7ms、divert ≈50ms，20-run）；runtime 軸 parked |
+| ⑤ | upgrade re-approval 語義確定（fire 續存或 health check 攔截） | 靜態半✓（poc O7：list 不暴露 approve 欄位→欄位式健檢死路；update 後 review 警告復現）；live 腿 parked |
+
+> **Park 狀態（09-12）**：live 腿 L1-L6 全部停在 muse 額度窗口（恢復程序見 `poc/poc_activation.md`）；S4 cutover 需 gate ③⑤ live 證據——弧停在 S2/S3 live 段，S1 已結算（03376b5）。
 
 ### Fallback 判定點與形態（決策⑨——細節現在凍結，不留「fallback 時定案」）
 

@@ -1,6 +1,8 @@
 {
   "schemaVersion": 1,
   "name": "muse-memory-governance",
+  "version": "0.1.0",
+  "description": "PreToolUse gate diverting muse add_memory/edit_memory into the repo memory inbox under a versioned marker contract",
   "compat": {
     "manifestDir": ".muse-plugin"
   },
@@ -9,8 +11,7 @@
       {
         "id": "memory-inbox",
         "event": "PreToolUse",
-        "command": ["hooks/muse_memory_governance.sh"],
-        "timeout_ms": 10000
+        "command": ["hooks/muse_memory_governance.sh"]
       }
     ]
   }
