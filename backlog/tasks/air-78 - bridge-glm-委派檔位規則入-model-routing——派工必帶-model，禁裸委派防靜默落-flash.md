@@ -4,7 +4,7 @@ title: bridge glm 委派檔位規則入 model-routing——派工必帶 --model�
 status: To Do
 assignee: []
 created_date: '2026-09-11 23:38'
-updated_date: '2026-09-12 00:00'
+updated_date: '2026-09-12 09:32'
 labels:
   - model-routing
   - bridge
@@ -16,7 +16,7 @@ ordinal: 64000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-〔human-summary〕把「bridge 派工給 glm 家族必須明確指定模型檔位（lite 用 sonnet、旗艦用 opus）」寫進 model-routing skill——裸委派會靜默落到 flash 版且帳本查不出實際檔位。設計已與 codex 聯合定案，等 M1 瘦身弧落地後開工。
+〔human-summary〕把「bridge 派工給 glm 家族必須用原生 model 名指定檔位（旗艦 GLM-5.3、省額度 GLM-5.3-Flash）」寫進 model-routing skill 與全域 guide 詞彙規則——bridge alias 層已退役，混用 CC 詞彙（sonnet/opus）派 glm 會直接被拒。設計 v3 定案（09-12 晚），動工暫停等 user 觸發。
 
 〔baseline：ai-rules 93b5c5a〕
 〔已決策勿重辯：①落點＝skill external-runtime family 表加 glm row＋3 行 glm 專節（倣 webgpt 模式）；rules/ 零改動（M1 下沉後 rule 只剩詞彙＋必載條款，family enum 已含 GLM）②檔位語義：sonnet→flash 別名、opus→GLM-5.3 旗艦；lite 派 --model sonnet、full-tier 派 --model opus；裸委派禁止作為 routing contract（09-12 實測落 flash＋ledger effectiveModel null 無證明力）——delegate-bridge d4 default pin 落地前連 lite 都要顯式 --model（codex 收緊：provenance 論證）③審計語義：以 dispatch/requested model flag 為 authoritative evidence；carrier effectiveModel 現不具證明力④唯讀 carrier v1（寫入走 muse）＋--effort/--steps/--yolo 不適用——放專節不放表（表不塞肥）⑤resume/fork 定向接續表不加 glm row（session identity 連續性未證）——專節明寫 resume/fork semantics unverified; do not infer continuation support from muse/codex⑥in-harness 對照句寫條件式：「若 in-harness full dispatch 會繼承 Flash，則 full-tier GLM 工作改走 bridge --model opus」——AIR-76 落地後條件自然失效不留歷史特例⑦時序：嚴格兩弧兩 commit——M1 下沉弧完整落地並 re-read post-M1 skill 實際形態後才開工（root cause 不同：M1 收斂既有真相、本弧新增 family runtime contract，acceptance boundary 與 review identity 不同）⑧arc home 依當下已部署 task topology（legacy 頂層），AIR-77 遷移時搬——不提前走 YYYY-MM/（script depth 假設未翻轉＝false-green 風險：script 成功退出卻沒掃到新弧）；不在本弧順手修 scanner（第三 root cause 不混弧）。源工單＝delegate-bridge f821ca7 跨 repo 交接〕
@@ -25,10 +25,12 @@ ordinal: 64000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 family 表 glm row＋3 行專節落地（值域／檔位政策／審計語義／resume-fork unverified 句）
-- [ ] #2 三 invariant 機械驗證：full→--model opus、lite→--model sonnet、unsupported flags 零送出
+- [ ] #1 family 表 glm row＋glm 專節落地（值域／native 檔位政策／審計語義（含 ledger model/effectiveModel 兩欄例外條款）／resume-fork unverified 句）
+- [ ] #2 三 invariant 機械驗證：full→`--model GLM-5.3`、lite→`--model GLM-5.3-Flash`（呼叫端顯式 tier→native 映射，bridge 不代解）、unsupported flags 零送出
 - [ ] #3 enum 反查完成（muse/codex/--family 二值假設全掃）；agents/ 零改由反查證明
 - [ ] #4 時序證據：M1 弧 commit 在前＋post-M1 skill 形態 re-read 記錄
+- [ ] #5 vocabulary invariant 進全域 guide Model Routing 段（always-on）：prose/doctrine 一律 native ID；CC 詞彙僅限 CC harness 接線；bridge 委派一律 native；禁 native+alias 複合
+- [ ] #6 機械 guard 入 instruction/doc 檢查鏈：compound-slug lint＋bridge 委派範例掃 `--model opus|sonnet` 殘留（alias 退役後這些字串＝bug）
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -45,4 +47,12 @@ ordinal: 64000
 〔09-12 補裁決——sonnet 語源查證（glm.rs:50-51,442-455 源碼實查）〕sonnet/opus 與 GLM 無本質關聯——係 bridge 自 V1 JS 原型沿用的內部別名慣例（借 Anthropic 檔位詞彙）；解析順序＝裸委派→DEFAULT_MODEL sonnet→alias 表轉原生 id→才 stage 給 carrier；alias 表外值 pass-through 且不分大小寫——原生名 --model GLM-5.3／--model glm-5.3-flash 直接可用（僅擋非 GLM 模型）。zcode provider table（~/.zcode/v2/config.json）全為原生名鍵、零 sonnet/opus 鍵。**instruction 層詞彙裁決：原生名為 canonical**（full＝--model GLM-5.3、lite＝裸或 --model GLM-5.3-Flash，與 in-harness registry pin 詞彙一致）；sonnet/opus 降為「存在的別名」記載（辨識用不推薦）。user 09-12 提問促成此查證。
 
 〔09-12 詞彙邊界裁定（user）〕glm family 詞彙面＝原生名專用：full＝--model GLM-5.3、lite＝裸（bridge 內建預設落 flash）或 --model GLM-5.3-Flash。sonnet/opus 係 CC 詞彙，禁混入 glm family 指引（opus 要用就走 CC）；bridge 內部 alias 映射（glm.rs MODEL_ALIASES）屬 delegate-bridge 實現細節，住該 repo docs、不進 ai-rules doctrine——與 CC 接線抽樣化同一原則（詞彙面進規範、接線 machine-local）。修正先前「sonnet/opus 降為存在的別名記載」條款：連別名記載都不留。驗收不變：full 派單必產 --model GLM-5.3（非 opus）。
+
+〔09-12 晚 增量 v3（user 定案，取代稍早 transport-vocabulary 版本）——scope 擴編＋alias 層退役〕
+◆①vocabulary invariant 進全域 guide Model Routing 段（always-on）——推翻原決策①「rules/ 零改動」：「Model references use native IDs in prose/doctrine (GLM-5.3, GLM-5.3-Flash)；CC 詞彙（sonnet/opus）僅限 CC harness 自身接線；bridge 委派一律 native ID——glm `--model GLM-5.3`／`GLM-5.3-Flash`（alias 已由 delegate-bridge d4 VR-1 退役→exit 2）；never compose a native name with an alias」。
+◆②glm 檔位規則 native 版：full-tier 經 bridge＝`--family glm --model GLM-5.3`；省額度＝`--model GLM-5.3-Flash`；**呼叫端負責 tier→native 映射（bridge 不再代解**——d4 VR-1 alias 退役後 DEFAULT_MODEL（alias）不復存在，v2「bridge 已 pin、裸委派確定性落 flash、lite 可不帶」條款隨之失效——habits 漂移歸 doctrine 層改動，便宜）。
+◆③ledger transport-token 例外條款：`model`＝caller 原始拼法、`effectiveModel`＝concrete native（parsed-success attestation）；analytics 鍵＝`(family, model, effectiveModel)`、身份認 `effectiveModel`；兩欄不合并。
+◆④機械 guard：instruction/doc 檢查鏈加 compound-slug lint（native+alias 複合表達）＋bridge 委派範例掃 `--model opus|sonnet` 殘留（d4 落地後這些字串＝bug）。
+◆⑤alias 層處置修訂：不再「歸 delegate-bridge 內部」——**已退役**（d4 VR-1，exit 2）；CC 詞彙邊界照舊。
+◆時序狀態：M1（95831fb）已落地、post-M1 skill 形態已 re-read（09-12 本 session——skill 現形態含 22de4cb CC 詞彙面抽象化）；開工 metadata 已落 air-78 branch（ed80177：In Progress＋ref）；**動工暫停——user 09-12「先不要動工，要動工我會跟你說」**，恢復時在 air-78 branch 續行（先 rebase main 吸收本卡修訂）。
 <!-- SECTION:NOTES:END -->
