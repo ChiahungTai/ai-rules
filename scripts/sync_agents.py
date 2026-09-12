@@ -49,7 +49,7 @@ ZCODE_PINS: dict[str, tuple[str, str]] = {
 }
 
 # CC 端部署預設（別名層——值抄 skill 權威表 Anthropic 欄首 token，check_parity
-# 對其 guard）。別名可攜：env 映射（ANTHROPIC_DEFAULT_*）切 provider 時 alias
+# 對其 guard）。別名可攜：背後接線（machine-local，不進 doctrine）變更時 alias
 # 直接可用、免重釘。effort＝CC spawn-time enum 非 frontmatter，故僅 model。
 CLAUDE_PINS: dict[str, str] = {"full": "opus"}
 

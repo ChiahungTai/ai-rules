@@ -13,9 +13,9 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 | tier（requirement） | zai | Anthropic | OpenAI | xai | meta |
 |---|---|---|---|---|---|
-| **full**（旗艦） | `glm-5.3`（旗艦釘選，AIR-43——inherit 洞修補）〔repo-observed；wire 首例已實證——AIR-43 S3 遙測 model_id='glm-5.3'〕 | opus＝**env 別名直達 glm-5.3**〔z.ai 端點 `ANTHROPIC_DEFAULT_OPUS_MODEL`，GLM 額度非 Anthropic 訂閱——CC 可派；repo-observed〕 | sol high／max〔**預設不派**——額度最少〕；`chatgpt-web/high`〔旗艦，user 拍板——ChatGPT web 訊息額度（webgpt bridge 獨立 pool，語義見 family 表）；顯式指定才派；repo-observed〕 | fabel〔**未訂閱禁派**〕 | muse-spark-1.3（effort xhigh 起） |
-| **vision**（影像） | glm-5.3-flash（多模✓ 已實戰）〔repo-observed〕 | 〔別名層未定視覺映射——影像需求 CC 端暫不派〕 | 〔預設不派〕 | 〔未訂閱＋本機未安裝〕 | muse-spark-1.3 `--image`✓〔repo-observed〕 |
-| **lite**（一般） | glm-5.3-flash〔repo-observed〕 | sonnet／haiku＝env 別名直達 glm-5.3-flash〔同上定義源；地板 sonnet 級——haiku 別名同名款可用〕 | terra high+（**luna 排除，基本不用**）〔**預設不派**〕；`chatgpt-web/medium`〔web pool——同 full 行 chatgpt-web/high 條款〕 | 〔未訂閱禁派〕 | —（與旗艦同體；額度貴，非省成本預設） |
+| **full**（旗艦） | `glm-5.3`（旗艦釘選，AIR-43——inherit 洞修補）〔repo-observed；wire 首例已實證——AIR-43 S3 遙測 model_id='glm-5.3'〕 | opus〔CC 詞彙面；背後接線 machine-local 不進 doctrine——user 訂閱變更自換〕 | sol high／max〔**預設不派**——額度最少〕；`chatgpt-web/high`〔旗艦，user 拍板——ChatGPT web 訊息額度（webgpt bridge 獨立 pool，語義見 family 表）；顯式指定才派；repo-observed〕 | fabel〔**未訂閱禁派**〕 | muse-spark-1.3（effort xhigh 起） |
+| **vision**（影像） | glm-5.3-flash（多模✓ 已實戰）〔repo-observed〕 | 〔影像需求 CC 端暫不派〕 | 〔預設不派〕 | 〔未訂閱＋本機未安裝〕 | muse-spark-1.3 `--image`✓〔repo-observed〕 |
+| **lite**（一般） | glm-5.3-flash〔repo-observed〕 | sonnet（預設）／haiku〔CC 詞彙面；接線 machine-local 同 full 行〕 | terra high+（**luna 排除，基本不用**）〔**預設不派**〕；`chatgpt-web/medium`〔web pool——同 full 行 chatgpt-web/high 條款〕 | 〔未訂閱禁派〕 | —（與旗艦同體；額度貴，非省成本預設） |
 
 > 證據狀態標註：repo-observed（本機實測）＞official-doc（官方文檔，非本機 L4）＞first-real-usage-pending（首例實戰待補）。
 
@@ -39,11 +39,11 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 - **ZCode 開發（日常主力）**：主 session＝**GLM 5.3**（判斷/規劃/EP/judge；full-tier agent＝registry 釘 glm-5.3〔AIR-43——不隨主 session 漂移〕）；lite subagent 執行檔＝glm-5.3-flash（省成本層）；**內建 `general-purpose`／`Explore` 非 registry——無 pin、繼承主 session 旗艦**（官方設計行為，鏡像 `ref-docs/harness/zcode/cn/docs/qa.md`；例外：ZCode 設定頁可為內建型別單獨釘模型，清空恢復繼承）——lite 角色任務誤派內建型別＝旗艦燒機械段（真實案例：AIR-50 弧考察任務兩次誤派 general-purpose 被 user 抓——「registry lite agent＝flash」不可外推到內建型別）
 - **muse code 開發（user 直用時＝該弧主力 harness）**：muse-spark-1.3 全棧——實作/審查都在該 harness 內；repo 層 AGENTS.md muse 會載入（bridge log 實證；全域 guide 的 muse 部署點未查證）
-- **審查類（ep-review／code-review 等 review agent 層）→ lite 預設（glm-5.3-flash；user 裁定）**：findings 生產層跨家族/跨層品質已實證，判斷價值集中 judge 裁決層；跨家族第二意見仍 muse 優先（非 GLM 視角）；升 full 條件＝高保護面／跨邊界語義面（保護面厚度反轉為升級觸發）；**judge 裁決層不變：固定主 session GLM 5.3**（AIR-24 三防線）；dual-family 鏈 judge 全採納（零否決）時顯性自查三防線#2（sycophancy 下傳——AIR-46 實證零否決×2 未觸發）；外部 runtime 委派承載者＝主 session 背景 Bash（禁 subagent wrapper——見 reviewer 交接契約「承載者」）；registry 釘選＝base 非強制——顯式升級＝換 full-tier 載體（高保護面／跨邊界語義面）；跨家族第二意見換 muse（ZCode 無 spawn-time model 參數）
+- **審查類（ep-review／code-review 等 review agent 層）→ lite 預設（user 裁定；ZCode/GLM 主軸＝glm-5.3-flash、CC 端＝sonnet 詞彙——依 harness 查 tier 表）**：findings 生產層跨家族/跨層品質已實證，判斷價值集中 judge 裁決層；跨家族第二意見仍 muse 優先（非 GLM 視角）；升 full 條件＝高保護面／跨邊界語義面（保護面厚度反轉為升級觸發）；**judge 裁決層不變：固定主 session 旗艦（ZCode 主軸＝GLM 5.3，AIR-24 三防線）**；dual-family 鏈 judge 全採納（零否決）時顯性自查三防線#2（sycophancy 下傳——AIR-46 實證零否決×2 未觸發）；外部 runtime 委派承載者＝主 session 背景 Bash（禁 subagent wrapper——見 reviewer 交接契約「承載者」）；registry 釘選＝base 非強制——顯式升級＝換 full-tier 載體（高保護面／跨邊界語義面）；跨家族第二意見換 muse（ZCode 無 spawn-time model 參數）
 - **實作（implement profile bridge 委派）＝預設 muse**（user 修訂拍板）：重實作段 muse、lite 機械段 glm-5.3-flash；**CR 工具鏈 agent（cr-research 等）同收斂 muse＋glm-5.3-flash**——與「user 直在 muse code 開發」仍是兩種形態（委派 vs harness 切換）
 - **影像需求（vision tier）＝需「支援影像的 model」，現值＝glm-5.3-flash**（user 拍板「影像目前都用 flash」——選它因 5.3 flash 原生多模，非因 lite tier；非所有 lite 款都具影像能力）——muse `--image` 是能力備註（上表），非現值路由
 - **codex（OpenAI）→ 預設不派**（帳號切換後額度已恢復——不派屬 ad-hoc 政策非額度因素）——僅 user 顯式指定（例：「codex sol max」；顯式指定多一種形態：`chatgpt-web/*` 走 web 訊息額度 pool，例「codex web high」→ `chatgpt-web/high` 旗艦）。**webgpt 形態專責 review／規劃、禁大型實作**（三條使用約束與失敗態處置見 External-runtime 段 webgpt 專節）。定性甜蜜點實證：control-plane／docs 形態 repo 的全 repo 狀態對抗深審（[/state-review](../state-review/SKILL.md) 的候選家族之一）——產出與 in-family 盲點正交（權威模型／事務完整性／provenance 類問題）；本行是能力備註，不構成取消顯式指定授權
-- **CC（Anthropic 端點）→ env 別名直達 GLM，可派**（user 拍板：`ANTHROPIC_BASE_URL`＝z.ai 相容端點，`opus`→glm-5.3、`sonnet`/`haiku`→glm-5.3-flash——走 GLM 額度非 Anthropic 訂閱；定義源 settings.json `ANTHROPIC_DEFAULT_*`，與 agent-workflow Step 1 表同步維護）；Anthropic 直訂閱仍未訂、xai 未訂閱禁派
+- **CC（Anthropic 詞彙面）→ sonnet／haiku／opus 可派**（user 拍板）；背後接線＝machine-local（user 維護，訂閱變更自換），規範層不記載；Anthropic 直訂閱未訂、xai 未訂閱禁派
 
 **額度 failover（僅撞牆時）**：GLM 撞 1308（錯誤訊息含重置時間戳）→ muse 承接執行段；muse 亦乾 → 等 reset（`/at`）或 user 裁定硬跑；任何降級必顯式記錄（AIR-13）
 
@@ -51,8 +51,8 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 | tier | harness 填法 |
 |---|---|
-| lite／vision | ZCode：`model: glm-5.3-flash`＋`thoughtLevel: high※`（pins 由 sync_agents 生成，非 authoring）；CC：**用 CC 自己的模型詞彙**——預設 inherit（主 session）、lite 點名 `sonnet` 別名（env 映射層直達 glm-5.3-flash，見 settings.json `ANTHROPIC_DEFAULT_*`）——dispatch 不綁實體 backend id；**地板＝sonnet/terra 級（haiku／luna 基本不用，user 裁定）** |
-| full | ZCode：`model: glm-5.3`＋`thoughtLevel: high`（AIR-43 釘選）；CC：`model: opus` 別名釘選（AIR-44——**別名可攜**：env 映射切 provider〔glm-5.3↔真 opus↔fabel 端點〕時 alias 直接可用、免重釘；lite/vision 維持省略 inherit） |
+| lite／vision | ZCode：`model: glm-5.3-flash`＋`thoughtLevel: high※`（pins 由 sync_agents 生成，非 authoring）；CC：**用 CC 自己的模型詞彙**——預設 inherit（主 session）、lite 點名 `sonnet`——dispatch 不綁實體 backend id（背後接線 machine-local，不進 doctrine）；**預設＝sonnet／terra 級（haiku／luna 基本不用，user 裁定；inherit 鏈下 parent 低於此級時顯式點名 sonnet）** |
+| full | ZCode：`model: glm-5.3`＋`thoughtLevel: high`（AIR-43 釘選）；CC：`model: opus` 別名釘選（AIR-44——**別名可攜**：背後接線變更時 alias 直接可用、免重釘；lite/vision 維持省略 inherit） |
 | ccr 模式（未啟用） | `Fusion/<tier>`；啟用時 pins 只換值、角色/tier 不動 |
 
 ## role → requirement（tier）分配表
@@ -65,7 +65,7 @@ description: Model routing 深層載體 — tier×provider 權威表（requireme
 
 > 判斷密集位（judge 裁決／EP 規劃／post-build 編排）不是 role——**主 session 直做**（AIR-24 分工律）；「非 full＋max effort 補償＝未驗證路徑」。新 role 須在此表登記 requirement——缺登記＝`sync_agents.py` fail loud（防靜默 unpinned 上線）。
 
-> ZCode 注意：`thoughtLevel` 綁具體 model（inherit 時不生效）；欄位名**不是** `reasoningEffort`——未知欄位靜默忽略。**※ thoughtLevel 但書**：sticky user reasoningLevel 在場時（user-scope `local_setting`），定義的 thoughtLevel **不達 wire**——telemetry `variant` 記 user 層級而非定義值（兩數據點：lite-verify＋vision-review 定義 `high` 皆記 `max`，sticky `max` 在場、主 session rows 同 max）。**model pin 不受影響**（frontmatter model 字串逐字到 wire——vision-review 首筆遙測實證）。full 釘選後（AIR-43）定義 thoughtLevel 進入本但書管轄（sticky 在場記 user 值）——model 軸同樣不受影響。**flip 實驗已跑（AIR-44）**：直寫 `local_setting` DB 改 user level→`low` 後同 session spawn 釘選 agent（定義 `high`）——variant 仍＝`max`（舊快取值，非新 user 值亦非定義值）：①定義值 silent no-op 確認；②spawn 不逐次重讀 local_setting（app 層快取 session 起始值）；「UI 層動態改是否傳播」DB 實驗無法回答（UI 可能同寫記憶體＋DB），user UI 級實驗殘餘——對應**已知 open bug 家族**（zai-org/feedback #339「thought-level changes silently discarded after first selection」＋#306 reasoning effort injection 缺陷；EN/cn 文檔一致、用法無誤）。CC 注意：enum 別名（sonnet/haiku/opus）在 GLM provider 由 provider 別名表解析到對應 GLM 模型。
+> ZCode 注意：`thoughtLevel` 綁具體 model（inherit 時不生效）；欄位名**不是** `reasoningEffort`——未知欄位靜默忽略。**※ thoughtLevel 但書**：sticky user reasoningLevel 在場時（user-scope `local_setting`），定義的 thoughtLevel **不達 wire**——telemetry `variant` 記 user 層級而非定義值（兩數據點：lite-verify＋vision-review 定義 `high` 皆記 `max`，sticky `max` 在場、主 session rows 同 max）。**model pin 不受影響**（frontmatter model 字串逐字到 wire——vision-review 首筆遙測實證）。full 釘選後（AIR-43）定義 thoughtLevel 進入本但書管轄（sticky 在場記 user 值）——model 軸同樣不受影響。**flip 實驗已跑（AIR-44）**：直寫 `local_setting` DB 改 user level→`low` 後同 session spawn 釘選 agent（定義 `high`）——variant 仍＝`max`（舊快取值，非新 user 值亦非定義值）：①定義值 silent no-op 確認；②spawn 不逐次重讀 local_setting（app 層快取 session 起始值）；「UI 層動態改是否傳播」DB 實驗無法回答（UI 可能同寫記憶體＋DB），user UI 級實驗殘餘——對應**已知 open bug 家族**（zai-org/feedback #339「thought-level changes silently discarded after first selection」＋#306 reasoning effort injection 缺陷；EN/cn 文檔一致、用法無誤）。CC 注意：enum 別名（sonnet/haiku/opus）＝CC 詞彙面 token；背後解析 machine-local，不進 doctrine。
 
 ## effort 家族對譯表（跨 runtime 詞彙對照）
 

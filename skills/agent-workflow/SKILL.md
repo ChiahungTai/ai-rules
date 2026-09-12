@@ -48,17 +48,18 @@ Claude Code 官方四個**首類並行方法**（[官方比較](https://code.cla
 
 ### 並發控制：自適應模型偵測
 
-**Step 1**：從系統提示詞的 model 資訊判斷當前 GLM 模型：
+**Step 1**：從系統提示詞的 model 資訊判斷當前模型的 tier 歸屬（雙詞彙面——CC＝sonnet/haiku/opus、ZCode/GLM＝原生名）：
 
-| 系統提示詞中的模型 ID | 對應模型 | GLM 模型（env 映射現值） |
-|---------------------|---------|---------|
-| `claude-opus-*` | opus | **glm-5.3**（旗艦） |
-| `claude-sonnet-*` / `claude-haiku-*` | sonnet／haiku | **glm-5.3-flash** |
-| `glm-5.3-flash` | — | glm-5.3-flash（5.3 世代 lite 層） |
+| 系統提示詞中的模型 ID | tier 歸屬 |
+|---------------------|---------|
+| `claude-opus-*` | opus（full） |
+| `claude-sonnet-*` / `claude-haiku-*` | sonnet／haiku（lite） |
+| `glm-5.3`（無 `-flash` 後綴） | 旗艦（full） |
+| `glm-5.3-flash` | lite |
 
-> env 映射定義源＝`~/.claude/settings.json` `ANTHROPIC_DEFAULT_{OPUS,SONNET,HAIKU}_MODEL`（z.ai 相容端點 `ANTHROPIC_BASE_URL`，`[1m]` 後綴＝context 變體標記）——本表值抄該處，改 env 時同步此表〔repo-observed 2026-09-08〕。舊值（glm-4.7／glm-5.1／glm-5-turbo）為前世代 env 映射，已退役。
+> CC 詞彙面的背後接線＝machine-local（user 維護，訂閱變更自換）——本表只記詞彙面→tier 歸屬，接線變更不需同步本表；GLM 原生名即 ZCode 實載 model id（非接線細節）。
 
-**Step 2**：查「rate limit 與並發上限」表得**並發上限**——以**將 spawn 的 agent 所在 tier** 為準（lite tier agent 查 glm-5.3-flash 列；與主 session 同 tier 的 spawn 才用 Step 1 偵測結果）（單一源 — 本檔不自帶數字，避免 provider 改限額時這裡 drift；表在 [model-routing skill](../model-routing/SKILL.md)）。
+**Step 2**：查「rate limit 與並發上限」表得**並發上限**——以**將 spawn 的 agent 所在 tier** 為準（spawn 模型詞彙對應列——sonnet/haiku/opus 查「haiku / sonnet / opus」列；與主 session 同 tier 的 spawn 才用 Step 1 偵測結果）（單一源 — 本檔不自帶數字，避免 provider 改限額時這裡 drift；表在 [model-routing skill](../model-routing/SKILL.md)）。
 
 **spawn Agent 前必須印出確認**：`[Agent] model=<依 model-routing 角色 tier>, max=N, current=M`
 

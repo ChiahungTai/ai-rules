@@ -311,7 +311,7 @@ review 執行預設（force 獨立 / max-agents / model 預設）見 [review-eng
 
 ### Step 1: 偵測模型 → 查表
 
-從系統提示詞偵測 GLM 模型，查 [model-routing 並發表](../model-routing/SKILL.md) 決定 max-agents。
+從系統提示詞偵測當前模型（雙詞彙面——CC＝sonnet/haiku/opus、ZCode/GLM＝`glm-5.3`／`glm-5.3-flash` 原生名；偵測法見 [agent-workflow](../agent-workflow/SKILL.md)「並發控制」Step 1；CC 背後接線 machine-local），查 [model-routing 並發表](../model-routing/SKILL.md) 決定 max-agents。
 印出確認：`[Review Agent] model=X, max=N`
 
 ### Step 2: Adaptive Agent 數量

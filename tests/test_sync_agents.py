@@ -330,8 +330,8 @@ def test_parity_claude_pin_alias_matches_anthropic_column(tmp_path: Path):
     real = (REPO_ROOT / sync.PARITY_SOURCE).read_text(encoding="utf-8")
     skill.write_text(
         real.replace(
-            "opus＝**env 別名直達 glm-5.3**",
-            "sonnet＝**env 別名直達 glm-5.3**",
+            "opus〔CC 詞彙面",
+            "sonnet〔CC 詞彙面",
         ),
         encoding="utf-8",
     )

@@ -10,7 +10,7 @@ agents/
             #   thoughtLevel 鍵——正文 prose 豁免；body：①目標 ②做法 ③角色特定節〔紀律/方法論等，
             #   skills 引用 inline 散在 body〕）
   zcode/    # 生成物（~/.zcode/agents → 此）：roles 投影＋部署預設 pins（lite/vision/full 帶 model+thoughtLevel）
-  claude/   # 生成物（~/.claude/agents → 此）：roles 投影（full 帶 model: opus 別名釘選〔AIR-44——env 映射可攜〕；lite/vision 省略 model；tools 減 CR MCP 行）
+  claude/   # 生成物（~/.claude/agents → 此）：roles 投影（full 帶 model: opus 別名釘選〔AIR-44——別名可攜，接線變更免重釘〕；lite/vision 省略 model；tools 減 CR MCP 行）
 ```
 
 - **「指定哪個 harness 用哪些 agent」＝role 出現在哪些 registry**（機制，非命名紀律）。**registry 內是實檔拷貝**——理由＝per-harness frontmatter 差異需整檔分歧（zcode pins／claude 減 CR MCP 行），symlink 是整檔單位無法承載差異。ZCode loader 可載入 file-level symlink（2026-09-06 新 session 對照實驗：symlink／實檔探針皆載入，推翻 08-29「檔案 symlink 靜默不載」舊判決——舊判決疑為快照過期混淆）；hardlink 被 clone 破壞不可用，symlink 為 git 原生追蹤
@@ -77,7 +77,7 @@ agents/
 | harness | provider 綁定 | 調用形態 | role 來源 | evidence status |
 |---------|--------------|---------|-----------|----------------|
 | zcode | zai | registry spawn（背景；快照制——新 session 載入） | `agents/zcode/` 生成檔（pins＝部署預設） | repo-observed |
-| cc（Claude Code） | zai（**本機配置**——CC 當前掛 GLM backend；原生家 Anthropic 未訂閱，訂閱後視性價比重配） | `--agent <name> --bg` named-agent＋Agent tool（spawn-time model/effort） | `agents/claude/` 生成檔 | repo-observed（2.1.261 實測：named-agent 可用、未知名稱即退出；session 跑 glm-5.3） |
+| cc（Claude Code） | CC 詞彙面（sonnet/haiku/opus）——背後接線 machine-local（user 維護）；原生家 Anthropic 未訂閱，訂閱後 user 自換 | `--agent <name> --bg` named-agent＋Agent tool（spawn-time model/effort） | `agents/claude/` 生成檔 | repo-observed（2.1.261 實測：named-agent 可用、未知名稱即退出） |
 | muse code | meta | **雙身分**：user 直用開發 harness（該弧主力，muse-spark-1.3 全棧）＋ ZCode 端 bridge 工單委派（`task`／`review`，必經） | 直用＝repo AGENTS.md 載入（全域部署點未查證）；委派＝roles/ body 填工單 Role contract（work-order §2） | repo-observed |
 | codex | OpenAI | **經 delegate-bridge `task --family codex` 工單**（AIR-47 吸收；raw CLI 語義留 memory reference） | 同上 | repo-observed |
 | grok-build | xai | 工單（同族委派 plugin 形態） | 同上 | **未安裝**·dispatch contract 未證實〔hooks/AGENTS.md〕——引用前先查證，不得假設可用 |
