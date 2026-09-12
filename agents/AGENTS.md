@@ -102,7 +102,7 @@ markdown + YAML frontmatter，正文 = 系統提示詞。兩家必填欄位同�
 
 ### 背景執行
 
-長任務角色（review / research 類）建議 frontmatter 加 `background: true` — Claude 端強制始終背景執行（即使主 agent 需要結果）。ZCode **不認識此欄位**（靜默忽略）— ZCode 端背景化是 spawn 端行為：官方文檔僅說前台/後台由主 Agent 自行決定（無 UI 開關、無參數記載），Agent tool 的 `run_in_background: true` 參數為 runtime 實測有效（2026-08-14 session：背景 spawn 成功、主對話未阻塞）。
+**新增 agent 定義一律 frontmatter 帶 `background: true`**（user 明確確認要前景才可省）。既有長任務角色（review / research 類）補齊此欄位 — Claude 端強制始終背景執行（即使主 agent 需要結果）。ZCode **不認識此欄位**（靜默忽略）— ZCode 端背景化是 spawn 端行為：官方文檔僅說前台/後台由主 Agent 自行決定（無 UI 開關、無參數記載），Agent tool 的 `run_in_background: true` 參數為 runtime 實測有效（2026-08-14 session：背景 spawn 成功、主對話未阻塞）。
 
 ## ZCode 限制（共用定義的邊界）
 
