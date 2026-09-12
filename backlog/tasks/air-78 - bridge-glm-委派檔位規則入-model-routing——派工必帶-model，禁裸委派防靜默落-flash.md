@@ -4,7 +4,7 @@ title: bridge glm 委派檔位規則入 model-routing——派工必帶 --model�
 status: To Do
 assignee: []
 created_date: '2026-09-11 23:38'
-updated_date: '2026-09-12 09:32'
+updated_date: '2026-09-12 05:20'
 labels:
   - model-routing
   - bridge
@@ -55,4 +55,6 @@ ordinal: 64000
 ◆④機械 guard：instruction/doc 檢查鏈加 compound-slug lint（native+alias 複合表達）＋bridge 委派範例掃 `--model opus|sonnet` 殘留（d4 落地後這些字串＝bug）。
 ◆⑤alias 層處置修訂：不再「歸 delegate-bridge 內部」——**已退役**（d4 VR-1，exit 2）；CC 詞彙邊界照舊。
 ◆時序狀態：M1（95831fb）已落地、post-M1 skill 形態已 re-read（09-12 本 session——skill 現形態含 22de4cb CC 詞彙面抽象化）；開工 metadata 已落 air-78 branch（ed80177：In Progress＋ref）；**動工暫停——user 09-12「先不要動工，要動工我會跟你說」**，恢復時在 air-78 branch 續行（先 rebase main 吸收本卡修訂）。
+
+〔09-12 晚——delegate-bridge 2.0.3（39b6964）handoff 承接：AC#1 family 面先行落地〕model-routing skill 已補 glm（bridge）family row＋glm 專節（native-ID-only、裸委派預設 GLM-5.3-Flash、--write-mode edit、flag 面、ledger 語義、resume unverified 句）。**2.0.3 事實修正先前裁定**：①毒型A（glm 恆唯讀、寫入一律走 muse）過時——寫入委派＝--write-mode edit（headless 唯一寫檔檔位）、build 反而收緊為唯讀；②alias fail 形態＝exit 1 terminal failure entry（非 exit 2）；③裸委派語義再修＝預設落 GLM-5.3-Flash（非 error）——v3「呼叫端顯式映射」收斂為「呼叫端擁映射（tier 表即映射），bridge 不代解但 default 落 flash」。**剩餘 AC 待 user 觸發**：#5 vocabulary invariant 進全域 guide、#6 compound-slug guard 入檢查鏈、#3 enum 反查（muse/codex/--family 二值假設全掃）。另 rules-reminder relay closure 已裁定 N/A by design（[fg] 屬 orchestrator 側 Agent 派發語義，歸 tool-discipline＋agent-workflow，皆已同步；rules-reminder 職掌 Bash 命令紀律）。
 <!-- SECTION:NOTES:END -->
