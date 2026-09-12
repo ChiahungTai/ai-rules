@@ -4,6 +4,7 @@
 
 ## zcode-registration.json 維護語義
 
+- **hook 執行環境＝OS 預設 python3（CommandLineTools 3.9）**：ZCode.app（GUI 行程）spawn hooks，PATH 不含 user shell 的 pyenv/uv shim——bare `python3` 解析到 `/usr/bin/python3`；hook 腳本**禁 3.10+ 語法**（repo pyproject 宣告 py312，ruff auto-fix 會把新語法修進 hook——真實案例：UP017 `datetime.UTC` 在 3.9 ImportError，functional 複驗攔下）；改 hook 後必以 bare `python3` 實跑複驗，不可只信 ruff 綠
 - **merge 方式**：取 `events` 子樹 merge 進 config 的 `hooks:` 鍵下，`_comment` 鍵不隨行
 - **SessionEnd 條目＝範本預載、ZCode 端未 merge**：merge 閘門＝`ref-docs/harness/contracts.md` 的 ZCode hooks 事件表**出現 SessionEnd**（當前無——初測 3.7.7，子集實測見 04 報告 §207）；閘門開後對 zcode hooks 文檔事件表複核一次才 merge 進 config
 - **plugin 升級＝路徑維護點**：plugin cache 版號路徑漂移會使範本內 muse/codex 條目的絕對路徑過時——plugin 升級時同步更新路徑
