@@ -177,19 +177,18 @@ source：[zcode-registration.json](../../hooks/zcode-registration.json)、[hooks
 
 核心 invariant 是「merge hooks 子樹」，不是「以 registration template 重建完整 config」。
 
-### 3.2 Muse project hooks — ✅ ai-rules 同 repo 換機可重建
+### 3.2 Muse memory 閘 — ✅ user-scope plugin（AIR-79）＋repo 隨行 marker
 
-source：[setup-muse-hooks.sh](../../hooks/setup-muse-hooks.sh)
+source：[muse-plugins/memory-governance/](../../muse-plugins/memory-governance/)（README＝install/approve/health 操作）
 
-執行：
+執行（每機一次）：
 
 ```
-hooks/setup-muse-hooks.sh
+muse plugins install <repo>/muse-plugins/memory-governance --scope user
+muse plugins approve muse-memory-governance
 ```
 
-script 依目前 repo path 產生 machine-local `.muse/hooks.json`，避免把機器絕對路徑 commit 進 repo。
-
-clone 或 repo path 改變後重跑。
+repo opt-in marker＝`.agents/memory-governance.json`（`{"protocol": 1}`，進版控隨 repo 走）—— absent＝不攔、valid＝導流 inbox＋deny、壞掉＝deny 報錯（禁 fail-open）。過渡期 legacy `.muse/hooks.json`（`setup-muse-hooks.sh` 重建）為後備註冊，live 驗證後退役。
 
 ### 3.3 Muse 新 repo opt-in — ❌
 
@@ -257,11 +256,9 @@ hooks/setup-memory-symlinks.sh --apply
 - CC project directory 尚未存在時 fail loud；先從 repo 開一次 CC session，再重跑。
 - ZCode path 經 CC memory path 最終解析到 canonical pool。
 
-### 4.3 生成 Muse hooks — ✅
+### 4.3 Muse memory 閘 — ✅
 
-```
-hooks/setup-muse-hooks.sh
-```
+同 §3.2（user-scope plugin install＋approve；marker 隨 repo 走，無 per-WT 步驟）。
 
 ### 4.4 驗證 topology — ✅
 
@@ -284,7 +281,7 @@ hooks/verify-memory-topology.sh --smoke
 - ZCode double-hop。
 - 三腿 `MEMORY.md` 同 inode。
 - generator `--check`。
-- `.muse/hooks.json` command 可執行。
+- 過渡期 `.muse/hooks.json` command 可執行（legacy 註冊退役後此項由 plugin 健檢取代）。
 - smoke 模式額外驗 Muse write gate deny + inbox landed，再清 probe。
 
 ### 4.5 Memory spine — ⚠️

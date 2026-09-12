@@ -63,7 +63,7 @@ ref-docs/*.pdf
 .agents/memory/
 .agents/memory-inbox/
 
-# muse hooks.json 是 machine-local 生成物（絕對路徑無可攜性）——結構源＝hooks/setup-muse-hooks.sh，clone/搬家後重跑
+# muse hooks.json＝machine-local（AIR-79 plugin 化後為過渡期 legacy 註冊，live 驗證後退役；重建成腳本＝hooks/setup-muse-hooks.sh）
 .muse/hooks.json
 
 # probe scratch 備份（F5：T20 運行副產不應進庫）

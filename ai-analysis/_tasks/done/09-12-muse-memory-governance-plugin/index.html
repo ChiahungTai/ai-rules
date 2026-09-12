@@ -80,14 +80,15 @@
 <button type="button" id="expand-btn" class="collapse-tab" aria-expanded="false" aria-controls="sidebar" aria-label="展開章節導覽" onclick="return setCollapsed(false,true)">›</button>
 <nav id="sidebar" aria-label="章節導覽">
   <div class="brand">
-    <span class="badge plan">📋 計畫</span>
+    <span class="badge done">✅ 完成</span>
     <h1>AIR-79 muse memory 寫入閘道 user-scope plugin — 任務簡報殼</h1>
-    <div class="meta">task baseline 5bb4100 · projection c330523 · 卡 AIR-79</div>
+    <div class="meta">task baseline 5bb4100 · 卡 AIR-79 · 弧=air-79 branch</div>
   </div>
   <ul>
     <li><a href="#s1" onclick="return go('s1',this)"><span class="num">01</span>任務總覽</a></li>
     <li><a href="#s2" onclick="return go('s2',this)"><span class="num">02</span>設計與雙審</a></li>
     <li><a href="#s3" onclick="return go('s3',this)"><span class="num">03</span>回源</a></li>
+    <li><a href="#s4" onclick="return go('s4',this)"><span class="num">04</span>實作結算</a></li>
   </ul>
   <div class="backlinks">
     <span>← backlog board（VSCode Backlog Cards）</span><br>
@@ -143,10 +144,27 @@
   <h2>回源</h2>
   <div class="sub">殼是展示層——本體（source of record）與證據鏈全在 repo</div>
   <p class="src">
-    EP：<a href="ep.md">ai-analysis/_tasks/09-12-muse-memory-governance-plugin/ep.md</a><br>
-    task baseline：5bb4100 · projection source：c330523 · 卡：AIR-79（backlog board）<br>
-    雙審證據：codex job-mtxq1dxw-zxv0we（bridge ledger）· GLM-5.3-Flash code-reviewer（registry agent）
+    EP：<a href="ep.md">ai-analysis/_tasks/09-12-muse-memory-governance-plugin/ep.md</a>（歸檔後位於 _tasks/done/）<br>
+    task baseline：5bb4100 · 卡：AIR-79（backlog board）<br>
+    雙審證據：codex job-mtxq1dxw（EP）＋job-mtxsd4ap（code）· GLM-5.3-Flash code-reviewer ×2 · judge＝主 session GLM-5.3
   </p>
+</section>
+
+<section id="s4">
+  <h2>實作結算</h2>
+  <div class="sub">S1 本體＋S2/S3 offline＋S4-lite cutover＋S5 控制面同步；live 腿 user 豁免（09-12）</div>
+  <ul class="dots">
+    <li><b>S1</b>：共享核心 <code>muse_memory_governance.sh</code>（決策序＋fail-closed 分流）＋launcher（origin-mode＋解析序 env→repo-local→固定點）＋manifest＋42 測試——impl-lite（flash）執行、主 session 獨立重跑驗收。</li>
+    <li><b>S2/S3 offline</b>：harness 全流程綠（divert＋deny＋effects blocked）、gate② 對照、overhead 7ms/50ms、P-UPGRADE 靜態半（<code>plugins list</code> 不暴露 approve）；install 實證修正 manifest schema（version/description 必填、timeout_ms 不支援）。</li>
+    <li><b>code-review 雙腿＋judge</b>：2🔴（deny 控制字元 escape——兩腿獨立命中；matcher word-boundary）＋4🟡 全修＋12 新測試——<b>343 passed</b>；帳本 .review/（結案清除）。</li>
+    <li><b>S4-lite cutover</b>：plugin install＋approve 常駐、ai-rules marker 進版控、雙路 offline 驗證（plugin-origin 對 working legacy 讓位＝SM-5 疊窗態證實；registered-origin 導流收據落地）。</li>
+    <li><b>S5</b>：AGENTS.md／memory-audit／hooks/AGENTS／MULTI-MACHINE／blueprint×3／.gitignore 控制面同步；活面殘留掃描綠。</li>
+    <li><b>遺留（user 豁免範圍）</b>：live 腿 L1-L6（muse 額度 429→09-14 重置）——legacy <code>.muse/hooks.json</code> 過渡註冊保留，live 驗證後移除＋退役 launcher；恢復程序＝<code>poc/poc_activation.md</code> 末段。渲染管線圖未產（mermaid 選型/嵌法未載入，degraded 槽如實標注）。</li>
+  </ul>
+  <div class="frame-wrap degraded">
+    <div class="bar"><span>圖槽位（降級）：決策序圖待補</span></div>
+    <div class="degraded-body"><b>圖未產</b>——post-build hook 2 未載入 diagram-selection/mermaid 嵌法，degraded 槽保留；後續 illustrate 弧可補。</div>
+  </div>
 </section>
 
 </main>

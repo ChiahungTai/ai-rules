@@ -394,6 +394,7 @@ rg 殘留掃描（scoped，排除 ref-docs/reports/done/backlog）→ 活面 0; 
 | ⑤ | upgrade re-approval 語義確定（fire 續存或 health check 攔截） | 靜態半✓（poc O7：list 不暴露 approve 欄位→欄位式健檢死路；update 後 review 警告復現）；live 腿 parked |
 
 > **Park 狀態（09-12）**：live 腿 L1-L6 全部停在 muse 額度窗口（恢復程序見 `poc/poc_activation.md`）；S4 cutover 需 gate ③⑤ live 證據——弧停在 S2/S3 live 段，S1 已結算（03376b5）。
+> **終態（09-12 結案）**：user 裁定「muse 沒有測試沒關係」——live 腿 L1-L6 豁免、gate ③⑤ 以 offline harness 證據收斂；S4 以 **S4-lite** 形態交付（install＋approve 常駐、marker 進版控、雙路 offline 驗證；3df3386），legacy `.muse/hooks.json` 保留為過渡註冊——** deferred 步**：額度重置後跑 `poc/poc_activation.md` 恢復程序（live 驗證）→ 移除 `.muse/hooks.json`＋退役 `hooks/muse_memory_inbox.sh` launcher＋`setup-muse-hooks.sh`＋`verify-memory-topology.sh` 51-57/60-67 段最終 patch。S5 控制面同步完成（活面殘留掃描綠）。
 
 ### Fallback 判定點與形態（決策⑨——細節現在凍結，不留「fallback 時定案」）
 

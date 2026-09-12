@@ -22,11 +22,14 @@ hooks/setup-memory-symlinks.sh --apply    # 執行；被換掉的原條目一律
 - CC project 目錄不存在→腳本 fail-loud：先去新機器 repo 開一次 CC session 再重跑。
 - muse 端零動作（project scope 跟 repo 走）。
 
-### 3. 重跑 hook 生成
+### 3. Muse memory 閘（AIR-79 plugin 化）
 
 ```bash
-hooks/setup-muse-hooks.sh
+muse plugins install <repo>/muse-plugins/memory-governance --scope user
+muse plugins approve muse-memory-governance
 ```
+
+user-scope plugin 裝一次全 marker repo 生效（repo opt-in marker＝`.agents/memory-governance.json`，隨 repo 走無需重跑）。過渡期 legacy machine-local `.muse/hooks.json`（`setup-muse-hooks.sh` 重建）仍可作後備註冊；live 驗證後退役。
 
 ### 4. 重建排程（最易漏——僅 primary 機）
 

@@ -161,12 +161,7 @@ WT 化沿用這個 canonical state，不重新遷移 memory 主體。
 - Muse secondary WT 對 directory symlink 的 native memory 能力可能退化，因此 native `read_memory` 不列為所有 secondary WT 的 invariant；必要時按正式契約使用可達 canonical state 的 fallback。
 - Muse write gate 必須最終把寫入導向 canonical inbox。
 
-Muse hook 接線的實作策略由 WT 基建弧在兩案中選一並驗證：
-
-1. 每個 WT 生成正確的 machine-local `.muse/hooks.json`；
-2. 將 hook implementation 參數化，使同一生成流程可顯式取得 canonical repo/inbox。
-
-本藍圖不預先指定其中一案。
+Muse hook 接線策略已由 AIR-79 落地：user-scope plugin `muse-memory-governance`＋repo marker 三態（install/approve 每機一次，marker 隨 repo 走）——「每 WT 生成 hooks.json」與「參數化生成」兩案的共同後繼形態；過渡期 legacy 註冊（launcher 顯式傳 repo root）仍在場，live 驗證後退役。
 
 ## Board single-writer — ❌ target 尚未落地
 
