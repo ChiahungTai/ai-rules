@@ -37,17 +37,19 @@ L2 部署接線（各 harness 全域位置）
 
 - **reference 分層配對**（rule 留 always-on 核心＋pointer，深層住同名/鄰名 skill；DRAFT-5 的 slimming 波次延續此模式）：
 
-| rule | skill（深層載體） | 分層內容 |
-| --- | --- | --- |
-| design-thinking | deep-thinking | 輸出格式模板、8 問清單、查證細則 |
-| acceptance-evidence | acceptance-evidence | Intent Drift、filter trap、Runtime Invariant 深層理論 |
-| symbol-query-routing | symbol-query-routing | LSP 速查表、rg 陷阱群、跨 harness 載體對照 |
-| instruction-writing | instruction-writing | 撰寫規範全量、五維自洽檢查 |
-| llm-output-convention | llm-output-convention | print tag 全表、閉環細則 |
-| modern-cli-preference | modern-cli-preference | fd/rg 陷阱目錄、雙掃陷阱 |
-| model-routing | model-routing | tier×provider 解析表、收法決策樹、family 契約 |
-| context-management | memory-audit | 寫入端紀律（六問）、載體統一定義表 |
-| quality-constraints | validation-strategy | 消費端驗證模式、整合器判定、漸進驗證細則 |
+| rule | skill（深層載體） | 分層內容 | bundle role |
+| --- | --- | --- | --- |
+| design-thinking | deep-thinking | 輸出格式模板、8 問清單、查證細則 | bootstrap split |
+| acceptance-evidence | acceptance-evidence | Intent Drift、filter trap、Runtime Invariant 深層理論 | bootstrap split |
+| symbol-query-routing | symbol-query-routing | LSP 速查表、rg 陷阱群、跨 harness 載體對照 | bootstrap split |
+| instruction-writing | instruction-writing | 撰寫規範全量、五維自洽檢查 | conditional projection eligible（AIR-85 pilot） |
+| llm-output-convention | llm-output-convention | print tag 全表、閉環細則 | conditional projection eligible（AIR-85 第二） |
+| modern-cli-preference | modern-cli-preference | fd/rg 陷阱目錄、雙掃陷阱 | reference layering（近完成態） |
+| model-routing | model-routing | tier×provider 解析表、收法決策樹、family 契約 | bootstrap split |
+| context-management | memory-audit | 寫入端紀律（六問）、載體統一定義表 | bootstrap split |
+| quality-constraints | validation-strategy | 消費端驗證模式、整合器判定、漸進驗證細則 | bootstrap split |
+
+> bundle role 欄：bootstrap split＝rule 留 minimal semantic closure/bootstrap、body 在 skill；conditional projection eligible＝AIR-85 條件載入投影候選（顯式 opt-in marker，非 CC 端 body→pointer）；reference layering＝常規深層配對。判準源＝scope 分界研究（reports/2026-09-13-scope-boundary-memory-rules-skills/）＋memory-audit 載體統一定義表。
 
 - 其餘 rule→skill pointer 為常規跳轉（不配對，如 tool-discipline→debugging-and-error-recovery／agent-workflow）；skill→rule 反向引用 20+ 檔（驗證/紀律 anchored 回 rule）。
 - skill→skill：review-engine 是 review 家族（ep-review／code-review／audit-test／execution-plan EP Review／implement Agent Review）的 domain 真相源；`_common/` 20 檔被 15+ skills 引用（work-order、workflow-review-pattern、illustrate 家族、state-md-write 等）；工作流 skill 鏈互引見核心流程拓撲。
