@@ -11,7 +11,7 @@ harness-scope: neutral
 ## 必須遵守的約束
 
 - 依賴遵循 library 與 scripts 入口層級，scripts 不反向侵入 library 內部；可複用邏輯上抽 library，勿讓 scripts 成第二個 library。
-- 遵循 SOLID（SRP/OCP/LSP/ISP/DIP——子型可替換、介面隔離、對擴展開放對修改封閉）：單一改變理由、多責任拆分；高層透過內層 interface 反轉依賴；公開介面不暴露內部資料/型別。
+- 遵循 SOLID：依賴向內、介面隔離、單一改變理由；公開介面不暴露內部資料/型別。
 - 每個新增 validation/logging/config 必能回答解決什麼具體問題，禁投機。
 
 ## 衝突寫法處理（禁止混合）

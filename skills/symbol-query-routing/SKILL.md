@@ -1,11 +1,11 @@
 ---
 name: symbol-query-routing
-description: 符號查詢路由深層參考 — LSP operation 速查表（自 rule 下沉 2026-08-31）、驗證任務 workflow 與輸出格式、rg 陷阱真實案例群（truncation/masking/local import/覆蓋判斷 false negative）、方法論限制 loopback、Agent prompt 工具指定模板（spawn agent 必填工具選擇）、跨 harness LSP 載體對照（Claude native vs ZCode bridge）、workspace staleness/reindex 與條件式 fallback。always-on 核心（cr-first 四路路由、任務啟動 gate、code-reality 分工）在 rules/symbol-query-routing.md；做依賴審計/符號查證/review 需要反例論證、operation 對照、spawn agent 工具指定或跨 harness 呼叫細節時載入。觸發詞：符號查詢路由、LSP、findReferences、reindex、workspace stale、rg 陷阱、載體對照、operation 速查、agent prompt 工具指定。
+description: 符號查詢路由深層參考 — LSP operation 速查表（自 rule 下沉 2026-08-31）、驗證任務 workflow 與輸出格式、rg 陷阱真實案例群（truncation/masking/local import/覆蓋判斷 false negative）、方法論限制 loopback、Agent prompt 工具指定模板（spawn agent 必填工具選擇）、跨 harness LSP 載體對照（Claude native vs ZCode bridge）、workspace staleness/reindex 與條件式 fallback。always-on 核心（cr-first 路由、任務啟動 gate、fallback/zero-hit 紀律）在 rules/symbol-query-routing.md；做依賴審計/符號查證/review 需要反例論證、operation 對照、spawn agent 工具指定或跨 harness 呼叫細節時載入。觸發詞：符號查詢路由、LSP、findReferences、reindex、workspace stale、rg 陷阱、載體對照、operation 速查、agent prompt 工具指定。
 ---
 
 # 符號／型別查詢路由 — 深層參考
 
-> 本 skill 是 `rules/symbol-query-routing.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（cr-first 四路路由、任務啟動 gate、code-reality 分工）；本檔承載 LSP operation 速查表、驗證 workflow 與輸出格式、反例論證、Agent prompt 工具指定模板、跨 harness 載體細節與 staleness 處置。
+> 本 skill 是 `rules/symbol-query-routing.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（cr-first 路由、任務啟動 gate、fallback/zero-hit 紀律）；本檔承載 LSP operation 速查表、驗證 workflow 與輸出格式、反例論證、Agent prompt 工具指定模板、跨 harness 載體細節與 staleness 處置。
 
 ## LSP operation 速查表（自 rule 下沉 2026-08-31）
 
@@ -14,7 +14,7 @@ description: 符號查詢路由深層參考 — LSP operation 速查表（自 ru
 | 符號引用（dead code、API 變更影響範圍） | `findReferences` | LSP 區分 scope；rg 只匹配文字 |
 | 介面的具體實作 | `goToImplementation` | ZCode pyright 不支援（載體差異見下方對照） |
 | 型別/簽名即時查 | `hover` | 不耗 context（不讀檔知型別） |
-| 編輯後型別檢查 | `diagnostics`（即時） | mypy 是權威驗證（rule 端「Diagnostics 定位」） |
+| 編輯後型別檢查 | `diagnostics`（即時） | mypy 是權威驗證（見下方「重構與 diagnostics 查證義務」） |
 | 註解/字串/config 值/日誌/TODO；Markdown、YAML、TOML、JSON 等非程式碼 | rg | LSP 不索引非程式碼內容 |
 | 檔案搜尋（按名稱模式） | fd | LSP 不處理檔案系統 |
 
@@ -99,6 +99,8 @@ task prompt 寫「若有 LSP 工具可用...無 LSP 則用 rg」是**提醒確�
 
 LSP operation 語義一致，差異只在載體（native tool vs MCP tool）— 決策樹、反例、驗證 workflow 跨 harness 通用。mosaic_alpha `lsp-python` MCP 已進一步對齊 CC：單一 tool + `operation` 參數 + camelCase operation 值，跨 harness 呼叫結構一致（差異僅 `LSP` vs `mcp__lsp-python__lsp` 前綴）。goToImplementation：CC 有、ZCode pyright 不支援（`implementationProvider` 未實作）。
 
+ZCode 無原生 LSP：型別面由 code-reality-lsp-bridge 承接（.py→pyrefly、.rs→rust-analyzer）；pyright-langserver 是 harvest golden oracle，禁解除安裝。
+
 ## Workspace 狀態相依性（reindex 後再下結論）
 
 LSP 結果是 workspace 狀態相依的 — 若 `findReferences` 回傳意外少的結果（尤其對 `_`-prefixed 私有 symbol），**先觸發 workspace reindex 再下結論**，不要直接推論為工具固有 false-negative。
@@ -112,7 +114,7 @@ LSP 結果是 workspace 狀態相依的 — 若 `findReferences` 回傳意外少
 
 **真實案例（cross-harness 驗證）**：同一 `_PREV_COUNT` 符號（mosaic_alpha `structure/wave_scalars.py:50`），Claude session `findReferences` 只回傳 intra-file ref（誤判為工具對私有 symbol 的 false-negative），ZCode session 卻成功回傳跨檔引用 — 差異根因是 pyright workspace reindex 時機，非 LSP 對私有 symbol 的固有限制。**兩 session 結果矛盾時，先懷疑 workspace 狀態，再懷疑工具能力。**
 
-> **符號查詢的預設繞道（2026-08-27 起，不再 Rust 限定）**：code-reality index 在場（`~/.mosaic/code-reality/scip/<repo>/` 或 code-reality MCP 工具可用）時，符號查詢**優先** code-reality（MCP `refs`/`callers`／CLI `scip_refs`＋`--callers`/`--closure` 旗標；`[SRC]` provenance＋stale WARN）——免 workspace stale、跨 session 一致。**雙語料**：Rust＝rust-analyzer SCIP；**Python＝`pyrefly-index`**（code-reality producer；refs 密度低於 LSP 面是已知語義，詳 code-reality skill）。index 缺場/過期 → 重建（Python 跑 `pyrefly-index --repo <repo>`）或退 LSP＋標「未 index 驗證」。**LSP 保留面**：Rust hover／型別簽名（P2 橋接前）、documentSymbol 即時形、working-tree 即時性（index 是 build-time 產物）——Python hover／diagnostics 已由 `code-reality-lsp-bridge` 承接（2026-08-28 P1；bridge 缺場退 LSP，詳 rule「code-reality 分工」段）。
+> **符號查詢的預設繞道（2026-08-27 起，不再 Rust 限定）**：code-reality index 在場（`~/.mosaic/code-reality/scip/<repo>/` 或 code-reality MCP 工具可用）時，符號查詢**優先** code-reality（MCP `refs`/`callers`／CLI `scip_refs`＋`--callers`/`--closure` 旗標；`[SRC]` provenance＋stale WARN）——免 workspace stale、跨 session 一致。**雙語料**：Rust＝rust-analyzer SCIP；**Python＝`pyrefly-index`**（code-reality producer；refs 密度低於 LSP 面是已知語義，詳 code-reality skill）。index 缺場/過期 → 重建（Python 跑 `pyrefly-index --repo <repo>`）或退 LSP＋標「未 index 驗證」。**LSP 保留面**：Rust hover／型別簽名（P2 橋接前）、documentSymbol 即時形、working-tree 即時性（index 是 build-time 產物）——Python hover／diagnostics 已由 `code-reality-lsp-bridge` 承接（2026-08-28 P1；bridge 缺場退 LSP，詳 rule「核心原則（cr-first 路由）」段）。
 
 ### 條件式 fallback（無原生 reloadWorkspace 的 harness）
 

@@ -4,7 +4,7 @@ title: rules corpus 依分界原則 v2 搬遷——slim 三檔＋B 拓撲拆分�
 status: In Progress
 assignee: []
 created_date: '2026-09-13 00:38'
-updated_date: '2026-09-13 03:28'
+updated_date: '2026-09-13 05:09'
 labels: []
 dependencies: []
 ordinal: 72000
@@ -68,4 +68,6 @@ structure.md 引用邊表已加 bundle role 欄（bootstrap split / conditional 
 - **需要跨 context 接續時先結算**：context 將耗盡先把進度與待辦寫回 EP／card；同一工作稍後續跑用 /at，交給另一個 session／repo／provider 用 /handoff。
 
 **禁令**：導引不放八站名稱/glyph（防 UC 段 slim 掉的內容從此入口長回）；STATE.md 不寫成高於 board/EP 的 authority；skills/CLAUDE.md 描述為索引非 authority。材料＝materials/codex-navdesign-out.txt。
+
+09-13 批二完成（待 commit）：ED 1,265→1,139/SQR 1,549→1,258/QC 2,341→1,797/ME 1,155→985；C1 承接 validation-strategy「crash-only 邊界」＋sqr skill 載體事實；impl drift 攔截 2 錨點→ledger 補 consumer 同步 3 筆；雙審 13/13 DELETE-OK、四檔 band 全上修（C-core 承重，C7 前例）、B2-F1 落 AIR-70；consistency 3 實質問題全處置（F1 in-batch/F2F3 隨 AIR-87）；deployed 31,427→30,296B 三端 identical；364 tests。帳本＝materials/review-ledger-air86-batch2.md。剩批三（guide＋開場導引＋collaboration/context/python）、批四（tool-discipline/outward）。
 <!-- SECTION:NOTES:END -->

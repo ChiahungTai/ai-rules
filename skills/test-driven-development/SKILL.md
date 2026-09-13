@@ -173,7 +173,7 @@ def test_x_should_do_y():
     assert actual == expected  # target behavior, currently fails
 ```
 
-**關鍵**：xfail 釘的是「該實現的正確行為」，不是「接受錯誤行為」。這是 TDD red 驅動後續 EP 的機制，避免目標被遺忘 — 優於「移除斷言默默接受」（用 crash-only 等設計哲學合理化不修，見 [quality-constraints](../../rules/quality-constraints.md) 誤用警告）。
+**關鍵**：xfail 釘的是「該實現的正確行為」，不是「接受錯誤行為」。這是 TDD red 驅動後續 EP 的機制，避免目標被遺忘 — 優於「移除斷言默默接受」（用 crash-only 等設計哲學合理化不修，見 [validation-strategy](../validation-strategy/SKILL.md)「crash-only 邊界」）。
 
 ## Verification
 

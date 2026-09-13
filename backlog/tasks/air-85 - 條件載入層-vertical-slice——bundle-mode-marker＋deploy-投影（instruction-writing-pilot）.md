@@ -4,6 +4,7 @@ title: 條件載入層 vertical slice——bundle-mode marker＋deploy 投影（
 status: To Do
 assignee: []
 created_date: '2026-09-13 00:37'
+updated_date: '2026-09-13 04:53'
 labels: []
 dependencies: []
 ordinal: 71000
@@ -39,3 +40,9 @@ ai-rules main @ 209966a（scope 研究報告已落檔）。材料源＝reports/2
 - [ ] #3 fail-closed 實測非 0 exit
 - [ ] #4 deploy 全端綠＋bundle 量測記錄
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+09-13 user 確認排序：AIR-86 四批收斂＋結案後接續開工（86 不依賴 85；批三 python-standards「AIR-85 前禁 pointer-only」即兩卡銜接點）。85 落地後回頭投影 instruction-writing/llm-output 兩支，bundle 終態 band 19–23.5KB 才閉合。user 明示定位＝「很重要的東西」——bundle 縮減的第三手段（刪除/下沉之外的結構性投影），機制卡走 execution-plan 建卡流程。
+<!-- SECTION:NOTES:END -->

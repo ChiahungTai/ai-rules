@@ -1,0 +1,46 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T04:19:38.587677Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:19:38.597944Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:19:38.599420Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:19:39.186579Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:19:39.186733Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:19:39.186772Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:19:39.188292Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T04:19:40.381005Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:19:40.399375Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:19:40.413004Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+**A. 建議：主規則放 [rules/context-management.md](<rules/context-management.md>)，[rules/AGENTS.md](<rules/AGENTS.md>) deploy discipline 只放 trigger/pointer；不要放 `workflow.md` 當權威。**  
+理由：本質是 **session freshness**，redeploy 只是其中一種觸發；`workflow.md` 是人類 lifecycle mapping，不該承擔 runtime instruction contract（[ai-analysis/blueprint/workflow.md:28](<ai-analysis/blueprint/workflow.md:28>) 已明說不重述內部步驟）。
+
+建議語義：
+
+> Governing rules / bundle 在 session 中變更後，下一個依賴該規則的 consequential action 前必 refresh context；若有刪除、反轉或衝突語義，須 reset/new session，不能只靠重讀新檔覆蓋舊 context。
+
+`rules/AGENTS.md:12-22` deploy 後加一句 pointer：「redeploy 後若本 session 續作，依 context-management Rule Freshness refresh/reset 後再繼續。」
+
+**⚠️ 分歧點：我不建議把「重讀 bundle」本身當充分條件。** AIR-86 這種 slimming/deletion，舊 rule body 已在 context；再 Read 新 bundle 只是新增新內容，舊內容不會消失。這類應 **fresh session/reset + 恢復主題材料**。
+
+**B. 建議：正式化既有 continuation read-set，但不要新增持久化「topic kit」artifact。**  
+理由：載體其實已齊：
+
+- card `desc + notes + references + EP` 已定義為 **card 即 handoff**（`skills/handoff/SKILL.md:73-75`）。
+- 中斷續作已有 `journal/EP/card notes`（`rules/context-management.md:15-18`）。
+- compact 已有 `.agent-tmp/compact-context-*` preserve-list（[skills/compact-prep/SKILL.md:15](<skills/compact-prep/SKILL.md:15>)）。
+- `.review/<branch>.md` 只適合 active review chain，不是通用 resume kit（[skills/code-review/SKILL.md:178](<skills/code-review/SKILL.md:178>)、[post-build/SKILL.md:40](<post-build/SKILL.md:40>)）。
+
+所以缺的是一個 **resume read-set pointer/順序**，不是新 carrier。可定成：
+
+`task identity → card/EP/notes → active journal/compact-context → active .review（若在 review 鏈）→ card/EP 指向的 target-state/report → 下一動作所需 skills`
+
+STATE.md 可作 observation 補充，但不要升成唯一入口；它本來就是 Last session observation，不是 handoff authority。
+
+**C. 建議：要修 `agent-workflow` Rule Freshness，但只補「兩面分工」，不要再複製主 session 規則。**  
+目前 `skills/agent-workflow/SKILL.md:217-223` 已捕捉「更新不傳播」，但偏 spawn-side。建議明確拆：
+
+- **main session freshness** → pointer 到 `context-management`；必要時 refresh/reset。
+- **spawned agent freshness** → 既有規則不變：已 spawn agent 不會熱更新，critical rule 直接注入 prompt；需新規則則 respawn。
+
+這樣 single-source 最乾淨：**context-management 管 session freshness；agent-workflow 管 spawned-agent snapshot；rules/AGENTS deploy discipline 只負責觸發。**
+
+對 AIR-86 當下，我會選 **fresh session + 讀 card/目標態材料 + 載當前 batch skills**，而不是只重讀 30,938B bundle 後直接續批二。
+[delegate-bridge] job job-mtzb1vg9-8wqmtt status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

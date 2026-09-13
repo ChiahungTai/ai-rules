@@ -1,0 +1,39 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T04:52:08.528515Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:52:08.552613Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:52:08.552728Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:52:09.006964Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:52:09.007058Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:52:09.013003Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:52:09.345154Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T04:52:10.200744Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:52:10.217302Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T04:52:10.239009Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+批二審查結論：**13/13 deletion ledger 全部 DELETE-OK，四檔 band 全接受上修，三必查通過；可進 post-build。** 我只留 1 個非阻擋的既存 SQR historical drift，並非本批 regression。
+
+| Ledger | Verdict | 理由 / 證據 |
+| --- | --- | --- |
+| ED-1 | **DELETE-OK** | SOLID 教科書展開已壓成真正約束，依賴方向／介面隔離／單一改變理由／公開介面邊界仍在 edit-discipline.md:14；符合 ledger L10。 |
+| SQ-1 | **DELETE-OK** | ZCode/bridge/golden-oracle 細節已沉 skill；現行承接在 symbol-query-routing/SKILL.md:102，rule 留 route＋pointer rule:9。 |
+| SQ-2 | **DELETE-OK** | `.py→pyrefly / .rs→rust-analyzer` 已隨 SQ-1 在 skill L102，rule 無需重複。 |
+| SQ-3 | **DELETE-OK** | rule 保留 consequential 的 working-tree 即時性 L9；documentSymbol 細節仍在 skill 的 LSP 保留面 L117。 |
+| SQ-4 | **DELETE-OK** | 原三 bullets 已收斂成一個完整 cr-first route：refs/callers/closure、`[SRC]`、bridge/type、working-tree/index freshness 都還在 rule:9。 |
+| SQ-5 | **DELETE-OK** | startup gate 完整保留：「第一步確認 cr 在場」仍在 L13。 |
+| SQ-6 | **DELETE-OK** | fallback 階梯、唯讀優先、degraded marker、zero-hit 禁斷言均在 L17。 |
+| SQ-7 | **DELETE-OK** | rule 保留 truncation/masking/命名差異詞彙錨＋skill pointer L17，反例 body 留在 skill；符合 ledger L34。 |
+| QC-1 | **DELETE-OK** | crash-only mechanics／TemporaryDirectory／ReplayHost 誤用已承接至 validation skill L44，rule 留 invariant＋pointer quality-constraints.md:13。 |
+| QC-2 | **DELETE-OK** | data-integrity 核心與適用／不適用邊界完整保留 L13。 |
+| QC-3 | **DELETE-OK** | consumer-validation 的 consequential invariant 留 rule L21，skill 小節名枚舉只是導航噪音。 |
+| ME-1 | **DELETE-OK** | 「為什麼」案例 body 刪除安全；psycopg COPY、轉型/FK、循環 import 三個 calibration anchors 已併回核心句 L9。 |
+| ME-2 | **DELETE-OK** | `commit 2.7` 內部 reference 已去掉，但 POC 到 build＋commit、正式 test/docstring/EP 固化後可清的 lifecycle 還在 L15。 |
+
+**1\. deletion ledger。** 沒有 RESTORE，也沒有 NEEDS-JUDGE。實際 diff 與 frozen ledger 的 A/S/C disposition 一致；尤其 SQ/QC 兩個 MOVE 都先在 destination skill 找得到 body，沒有「rule 刪了、skill 沒接住」的 fail-open。負詞彙 gate 亦對上：SOLID 展開、`pyright-langserver`、`ReplayHost`、`TemporaryDirectory` 在 rules/ 都是 0 hits，gate-fast.txt:10–13。
+
+**2\. band 裁決。** 四檔我都接受 band 上修，不要求再砍。原規劃本來就是 disposition 偵測帶：ED 目標 0.75–0.95KB codex-out.txt:81、ME 0.65–0.85KB L86、QC 1.3–1.7KB L89、SQR 0.75–0.95KB L90。終態 1,139 / 1,258 / 1,797 / 985B 雖全略高，但剩餘內容已是 bootstrap/C-core：ED 是反主流 editing calibration；SQR 正好只剩 route→startup gate→fallback；QC 是 fail-loud/data-integrity/consumer/progressive-validation；ME 是 executable runtime gate＋TDD execute＋POC lifecycle＋真 exceptions。再為 byte band 砍會開始傷 consequential semantics，和批一 MR C7 的處理原則相同。
+
+**3\. 三必查。** PASS。第一，MOVE 後的 bootstrap pointers 不只 source 在場，deployed [~/.zcode/AGENTS.md](<~/.zcode/AGENTS.md>) 也實際在場：SQR pointer 在 AGENTS.md:490，QC crash-only pointer 在 L460，startup／zero-hit gates 分別在 L494、L498。第二，C-core 如上全部存活。第三，三筆 consumer sync 都正確：TDD 誤用警告已改指 validation skill test-driven-development/SKILL.md:176；SQR 舊「code-reality 分工」段名引用已消失，gate 為 0 gate-fast.txt:22；skill description 與 ownership 都改成「cr-first 路由、任務啟動 gate、fallback/zero-hit 紀律」SQR skill:3、L8。364 tests 全綠 gate-pytest.txt:26；deploy dry-run 三端都生成 30,296B 且 exit 0 gate-deploy-dryrun.txt:3、L11。我另外實查的是 ZCode deployed bundle；「三端已部署檔 byte-identical」仍是主 session 的證據，本輪沒有把它冒充成我獨立重驗。
+
+**4\. 語義陰影掃描。** 批二新增／搬移部分沒有發現新的過時宣稱、V 類額度/訂閱/帳號現值、反向 ownership 或 second source；SQR rule→skill 分工本身自洽。唯一 finding 是 **既存、非本批引入的低嚴重度 drift**：skill L108 已明講 `lsp-python` MCP 停擺，且把後兩節標成歷史設計，但 L121–125 仍以現在式寫「連接 lsp-python MCP」「ZCode 已在用同一 server」。因前面的 historical disclaimer 已把作用域框住，而且這些行未由 AIR-86 diff 引入，我裁為 **non-blocking cleanup**；後續可把該段改成明確過去式，避免讀者跳讀時誤當現行操作指令。
+
+**最終 verdict：AIR-86 批二可進 post-build，需修 0 個 blocking finding。** SQR historical wording 可另列 drift cleanup，不應把它回灌成這批 deletion ledger 的 restore。
+[delegate-bridge] job job-mtzc7obd-4bckhy status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

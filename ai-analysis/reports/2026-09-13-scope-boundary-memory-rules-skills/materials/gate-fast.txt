@@ -1,0 +1,44 @@
+== GATE 1: wc -c after ==
+    1139 rules/edit-discipline.md
+    1258 rules/symbol-query-routing.md
+    1797 rules/quality-constraints.md
+     985 rules/must-execute-before-complete.md
+    7581 skills/validation-strategy/SKILL.md
+   16003 skills/symbol-query-routing/SKILL.md
+   28763 total
+== GATE 2: negative lexemes in rules/ (expect 0 each) ==
+SRP/OCP/LSP/ISP/DIP = 0
+pyright-langserver = 0
+ReplayHost = 0
+TemporaryDirectory = 0
+commit 2\.7 = 0
+零消費者 = 0
+== GATE 2: skill-side expected counts ==
+pyright-langserver in sqr skill (expect 1) = 1
+ReplayHost in validation skill (expect 1) = 1
+TemporaryDirectory in validation skill (expect 1) = 1
+commit 2.7 in rules+skills (expect 0) = 0
+== GATE 2 supplement ==
+code-reality 分工 in sqr skill (expect 0) = 0
+== GATE 3: positive lexemes in rules/ (must survive) ==
+第一步確認 cr 在場 = rules/symbol-query-routing.md:1
+禁把未查到斷言為不存在 = rules/symbol-query-routing.md:1
+DEPTH-MIN→SAMPLE→FULL = rules/quality-constraints.md:2
+uv run python = rules/AGENTS.md:1
+rules/must-execute-before-complete.md:1
+rules/tool-discipline.md:1
+rules/code-edit-constraints.md:1
+禁默默混合 = rules/edit-discipline.md:1
+預設不保留向後相容 = rules/edit-discipline.md:1
+適用量化交易 = rules/quality-constraints.md:1
+== GATE 3 supplement ==
+crash-only 邊界 in tdd skill (expect >=1) = 1
+== GATE 6: cross-file reference survival ==
+-- guide -> quality-constraints 適用範圍 pointer:
+45:- 數據完整性優先：損壞比缺失更危險，無效資料/溢出立即失敗，禁靜默傳播；Crash-Only 適用範圍見 [quality-constraints.md](rules/quality-constraints.md)。
+-- quality-constraints 適用範圍 sentence (pointer target):
+13:損壞數據比缺失更危險。無效輸入、溢出、轉型/解析失敗立即崩潰，禁吞錯續行或修補損壞輸入；驗非空、必要欄位、NaN、inf。適用量化交易、高頻、實時風控、批次；不適用長會話、複雜 UI 狀態、UX 優先互動。設計方法（狀態外部化/等冪/持久化路徑）與誤用邊界見 validation-strategy skill「crash-only 邊界」。
+-- acceptance-evidence -> quality-constraints:
+17:驗證深度按風險分級（L1 靜態→L6 人類觀察）；**禁用低層證據冒充高層驗收**，低風險不必爬滿六層。層級表、A/B 軸分工、驗證順序見 [quality-constraints](quality-constraints.md)與 acceptance-evidence skill。
+-- tool-discipline -> symbol-query-routing.md:
+9:符號→code-reality、型別→bridge、文字→rg、檔案→fd（詳 [symbol-query-routing.md](symbol-query-routing.md)）。視覺判讀用 vision-review agent，禁主 session 直接 Read 圖（佔滿主 context），verdict 見 agent 定義；spawn prompt 必指定工具（如 LSP hover、rg），不能只寫「讀取/驗證」。

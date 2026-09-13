@@ -1,6 +1,6 @@
 ---
 name: validation-strategy
-description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 replay >>> live、驗證放 scripts/、不重驗 package 已驗證的部分、整合器型變更判定（三條件＋mock 循環論證＋兩層整合測試：接線 guard＋真實邊界）、消費端驗證模式（完整流程＋測試集機械反查）。用於 build/commit 驗證段決定測試類型與方式。觸發詞：e2e、replay、驗證策略、測試類型、live、不重驗 package、驗證放哪、交易驗證、回放、整合器型、真實邊界、整合測試、mock、消費端、機械反查。
+description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 replay >>> live、驗證放 scripts/、不重驗 package 已驗證的部分、整合器型變更判定（三條件＋mock 循環論證＋兩層整合測試：接線 guard＋真實邊界）、消費端驗證模式（完整流程＋測試集機械反查）、crash-only 邊界（設計方法與誤用）。用於 build/commit 驗證段決定測試類型與方式。觸發詞：e2e、replay、驗證策略、測試類型、live、不重驗 package、驗證放哪、交易驗證、回放、整合器型、真實邊界、整合測試、mock、消費端、機械反查。
 ---
 
 # Validation Strategy — 驗證策略紀律
@@ -40,6 +40,13 @@ description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 rep
 判準：
 - 驗「NT 的 submit_order 在你的 context 怎麼行為」（你的整合）→ 驗
 - 驗「NT submit_order 內部是否正確」（package 內部）→ 不驗（package 自己驗）
+
+## crash-only 邊界（自 quality-constraints rule 承接 2026-09-13）
+
+- **設計方法**：狀態外部化（DB/隊列），操作等冪、服務無狀態；停止即崩潰、恢復即初始化。持久化輸出/備份禁 `tempfile.TemporaryDirectory`（scope 結束即毀），須放專案外持久路徑。
+- **誤用警告**：crash-only 只保證意外失敗後可恢復，不豁免可預期的整合 bug、配置或合約錯誤。真實案例：ReplayHost SIGTERM 失敗曾被以 crash-only 跳過 graceful 處置；正解是 TDD red（xfail strict）釘 graceful 目標再修。
+
+rule 端留核心句＋適用範圍＋pointer（[quality-constraints](../../rules/quality-constraints.md)）。
 
 ## 整合器型變更判定（真實邊界整合測試）
 

@@ -1,0 +1,7 @@
+    1265 rules/edit-discipline.md
+    1549 rules/symbol-query-routing.md
+    2341 rules/quality-constraints.md
+    1155 rules/must-execute-before-complete.md
+    6831 skills/validation-strategy/SKILL.md
+   15815 skills/symbol-query-routing/SKILL.md
+   28956 total

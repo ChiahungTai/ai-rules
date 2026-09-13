@@ -4,7 +4,7 @@ title: 一致性掃描修復弧——13 中級全修＋低級順手批次（09-1
 status: In Progress
 assignee: []
 created_date: '2026-09-09 22:40'
-updated_date: '2026-09-13 03:45'
+updated_date: '2026-09-13 04:59'
 labels:
   - governance
   - consistency
@@ -32,4 +32,6 @@ ordinal: 56000
 **段一 11 群仍待修**（G1/G2/G4/S1/S2/S3/S5/S6/F1/F3/F4——抽驗細節見盤點報告）；**F1 惡化**：deploy/launchd/ 已被 aa3c5e6（09-11）整刪，acceptance-evidence SKILL:43 仍宣稱其存在——宣稱撈空。**段二先鋒 8 條 0/8 落地**（條目全在、規範面落點全零命中；先鋒1 規範面已被 AIR-66 上 rule——刪除條件成熟）。
 
 **處置裁定（user 09-13 拍板）**：剩餘屬雜項性質非 workflow 弧——不採弧儀式，規劃為清掃 session 批次消化（與 AIR-67 剩餘合併評估）；audit 與 draft-1/2 兩軸性質不同另行歸位。
+
+09-13 批二雙審移入（codex finding，non-blocking）：skills/symbol-query-routing/SKILL.md L121-125「條件式 fallback」段仍以現在式描述 lsp-python MCP 連接（server 已於 2026-08-28 停擺，L106 disclaimer 已框住歷史作用域）——改明確過去式即可，防跳讀誤當現行指令。來源＝AIR-86 批二 codex 審查（.agent-tmp/air86-batch2/codex-review-batch2.txt §4）。
 <!-- SECTION:NOTES:END -->
