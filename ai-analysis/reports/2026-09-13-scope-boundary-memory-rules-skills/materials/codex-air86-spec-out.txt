@@ -1,0 +1,233 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T03:18:50.289331Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:18:50.363716Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:18:50.393787Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:18:50.758832Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:18:50.810357Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:18:50.859276Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:18:51.102889Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T03:18:51.960569Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:18:52.008540Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:18:52.095942Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+A. 批次一我建議固定成 **`acceptance-evidence → design-thinking → model-routing`**。前兩檔先把 reference split 模板做對，`model-routing` 最後，因為它目前還帶一個 AIR-76 未 materialize 完成的 authority conflict。
+
+**1\. [rules/acceptance-evidence.md](<rules/acceptance-evidence.md>)**
+
+目標 band：**1.0–1.3KB**。現在真正該常駐的是三件事。
+
+- **留 `rules/acceptance-evidence.md:7-9`**：證據獨立性。可再壓，但不能失去「AI 同寫 test＋impl 只能證自洽」這個 calibration。
+- **留 `:11-13`**：`no-impact claim → independent mechanical evidence`。這不是一般「證據要好」的 A 共識，而是具體行為 gate；`self-report` 不能替代 diff/rg/references。
+- **留 `:34` 的核心半句**：低層證據不得冒充高層驗收；驗證深度按風險決定。後半所有 lookup 都可 pointer 化。
+- 留一條明確 pointer：詳細 claim taxonomy、L1–L6、A/B 軸、案例與 runtime assurance → `acceptance-evidence skill`。
+
+要移出 rule：
+
+- `:15-21`：數字/清單、dead-code、silent-failure、自報 metadata、review 雙向等 **B body**。其中 `:17`「LSP zero-hit 不足，還要 scripts/config/dynamic consumers」不能刪知識，必須搬進 skill 的 normative taxonomy。
+- `:23-32`：完整 L1–L6 表，屬 lookup/reference body，搬 skill。
+- 真實案例全部 skill-only。
+
+skill 目前**還不能直接接**。`skills/acceptance-evidence/SKILL.md:14-20` 已有案例，但 `:3`、`:8` 仍宣稱「L1–L6 / Claim taxonomy 在 rule」。Carrier-prep 要先：
+
+1. 在案例節前新增 normative `Claim→Evidence taxonomy`，承接 rule `:15-20` 的判準，尤其 dead-code consumer coverage。
+2. 新增完整 L1–L6 lookup 表。
+3. 改 `SKILL.md:3,8` ownership 敘述：rule 只擁 bootstrap evidence gates；skill 擁 taxonomy/table/theory/examples。
+4. 再刪 rule body。
+
+這檔不要為了「全部保存」把 textbook A 再複製到 skill；但這次主要移的是 B lookup，真正純 A 的刪除量不大。
+
+* * *
+
+**2\. [rules/design-thinking.md](<rules/design-thinking.md>)**
+
+目標 band：**0.7–0.95KB**。這檔可以最乾淨地做 A-shell slimming。
+
+應留：
+
+- `rules/design-thinking.md:7-11` 中的真正 calibration：**所有決策至少追蹤兩層連鎖後果**。建議直接壓成一句，而不是保留六步。
+- `:13` pointer：完整六步、0–7 問、輸出模板 → `deep-thinking skill`。
+- `:15-17` 壓成決策分級最小核心：單向門需多層追蹤；雙向門仍做第二層思考；判斷交 LLM、確定性機械工作交程式。
+- `:19-27` 只保留三個 lens 名稱：dependency direction / bounded context / use case，以及「不強制模板／過度分層」；深層 → `arch-thinking skill`。
+- `:29-31` 只保留 routing：架構/技術選型等走上述方法；股票分析走 `trading-analysis skill`。
+
+可刪：
+
+- `:11` 的 `①→⑥` 完整 chain 是 **A methodology body**；`skills/deep-thinking/SKILL.md:10-26` 已完整承接。
+- `:17` 的 DB migration、公開 API 等 textbook examples。
+- `:23-25` CA/DDD 三段教科書展開，例如 `domain ← use case ← adapter ← infra`、`_private`、逐問法。深層 carrier 已有 `arch-thinking`。
+- 不需要把這些 A shell 再搬進 skill；已有內容足夠。
+
+[skills/deep-thinking/SKILL.md](<skills/deep-thinking/SKILL.md>) 已 ready：六步在 `:10-26`，問題集 `:28-40`，輸出模板 `:42-61`，source verification/checklist `:63-73`。這檔 carrier-prep 幾乎只需核對 ownership wording，不需要新 methodology。
+
+* * *
+
+**3\. [rules/model-routing.md](<rules/model-routing.md>)**
+
+目標 band：**1.4–1.8KB**。這是 batch 1 風險最高檔。
+
+應留：
+
+- [rules/model-routing.md:7](<rules/model-routing.md:7>)：**兩跳 contract**——role→tier 在 rule；tier→provider/model 查 skill；主 session model 不決定 subagent tier。
+- `:9`：`full / vision / lite` 的 requirement 語義。
+- `:11`：native-ID vocabulary 的 **user ruling**，但把 `GLM-5.3` / `GLM-5.3-Flash` 這類具體現值移出。rule 留「doctrine/bridge 用 provider native ID；CC alias 只在 CC 接線；禁 native+alias 混寫」及 guard pointer 即可。
+- `:13-26`：**role→tier 的 user rulings**，但每列縮到 tier＋例外判準。mem-distill hook、vision remote/MCP、registry 現況等 operational body 都沉 skill。
+- `:28-32`：留 `family/profile` vocabulary，以及最重要的 bootstrap：  
+  **外部委派、收法、定向接續/fork 前必載 `model-routing skill`。**
+- 「工單禁再委派時，載 skill 不等於自行 spawn」也是行為校準，可留一句。
+
+要移出：
+
+- `:32` 中 materialized 的 webgpt、background Bash、`wait <jobId>`、eligibility、reviewer handoff、bridge 命令、rate-limit/classifier 等全部 lookup body。skill 已有完整 carrier。
+- role table 裡所有 transport/runtime 細節。
+- concrete model IDs / current provider availability 不應重新 materialize 到 rule。
+
+[skills/model-routing/SKILL.md](<skills/model-routing/SKILL.md>) 已承接大部分：provider/tier table 約 `:14+`、dispatch `:34+`、role mapping `:58-68`、external-runtime `:95+`、eligibility `:153+`、reviewer handoff `:170+`、continuation `:192+`、rate limit `:258+`。
+
+但這檔 **C1 carrier gate 有兩個前置修正**：
+
+第一個是 blocker：目前 rule 說 `cr-research` 已裁升 full，而 skill `:64` 還把它列在 lite，`:43` 也仍描述 GLM Flash 路徑。AIR-76 卡面已明確定案「**cr-research 升 full，Explore fallback 維 lite**」，且驗收要求九 routing 錨點全 full。因此 AIR-86 **不能藉 slimming 把 rule 這個衝突提示刪掉**。最乾淨的時序是：AIR-76 先 materialize；若 AIR-86 先跑，`model-routing` 子步直接 fail-closed，acceptance/design 可先做。
+
+第二個是剛落地 V/P 分界的 cleanup。skill 目前仍有 current entitlement：
+
+- [skills/model-routing/SKILL.md:46](<skills/model-routing/SKILL.md:46>)：`Anthropic 直訂閱未訂、xai 未訂閱禁派`
+- `:119`：現行 ChatGPT 帳號可不可派 native slug 等 mixed sentence
+
+這些 V 現值不要在 AIR-86 搬動時重新固化。skill 已有 `model-runtime-entitlements` spine pointer，應保留 stable policy/mechanism，把「目前哪個帳號/訂閱可用」改回 pointer。
+
+* * *
+
+B. 批次間驗收我建議固定成六段：**source bytes → carrier/pointer gate → negative body gate → deploy dry-run → deploy＋deployed bytes → single-source＋semantic consistency**。Byte 只抓漏瘦，不能反過來驅動刪條文。
+
+下面這組可以直接成為 batch-1 驗收模板；所有 `rg` 都是**單一 pattern**，沒有 alternation：
+
+Bash
+
+```
+set -euo pipefail
+
+# 1. source bytes：對照 AIR-86 bands
+wc -c rules/acceptance-evidence.md
+wc -c rules/design-thinking.md
+wc -c rules/model-routing.md
+
+# 2. positive bootstrap / pointer gates
+rg -n "acceptance-evidence skill" rules/acceptance-evidence.md
+rg -n "deep-thinking skill" rules/design-thinking.md
+rg -n "arch-thinking skill" rules/design-thinking.md
+rg -n "model-routing skill" rules/model-routing.md
+
+# acceptance-evidence：舊 reference body 不得仍 materialize 在 rule
+if rg -n "數字/清單類 claim" rules/acceptance-evidence.md; then exit 41; fi
+if rg -n "刪除/死碼自述" rules/acceptance-evidence.md; then exit 42; fi
+if rg -n "silent-failure claim" rules/acceptance-evidence.md; then exit 43; fi
+if rg -n "自報元資料不可信" rules/acceptance-evidence.md; then exit 44; fi
+if rg -n "| L1 靜態 |" rules/acceptance-evidence.md; then exit 45; fi
+
+# design-thinking：A/textbook body 不得殘留
+if rg -n "①本質需求" rules/design-thinking.md; then exit 51; fi
+if rg -n "domain ← use case" rules/design-thinking.md; then exit 52; fi
+if rg -n "禁跨域直接存取 _private" rules/design-thinking.md; then exit 53; fi
+if rg -n "先問消費者行為" rules/design-thinking.md; then exit 54; fi
+
+# model-routing：lookup/transport body 不得留在 rule
+if rg -n "background Bash 直呼 bridge" rules/model-routing.md; then exit 61; fi
+if rg -n "wait <jobId>" rules/model-routing.md; then exit 62; fi
+if rg -n "eligibility" rules/model-routing.md; then exit 63; fi
+if rg -n "reviewer handoff" rules/model-routing.md; then exit 64; fi
+if rg -n "classifier failure" rules/model-routing.md; then exit 65; fi
+if rg -n "webgpt 使用約束" rules/model-routing.md; then exit 66; fi
+
+# AIR-76 authority：cr-research 不得再掛 lite
+rg -n "cr-research" rules/model-routing.md
+rg -n "cr-research" skills/model-routing/SKILL.md
+if rg -n "lite.*cr-research" skills/model-routing/SKILL.md; then exit 67; fi
+
+# V-state 不得留在 model-routing instruction
+if rg -n "Anthropic 直訂閱未訂" skills/model-routing/SKILL.md; then exit 68; fi
+if rg -n "xai 未訂閱禁派" skills/model-routing/SKILL.md; then exit 69; fi
+
+# 3. diff hygiene
+git diff --check
+
+# 4. 先驗 bundle 組裝與 size gates；dry-run 不寫全域檔
+uv run python scripts/deploy_agents.py --dry-run
+
+# 5. 真 deploy；三端都要成功
+uv run python scripts/deploy_agents.py
+
+# 6. deployed bytes：zcode/codex/muse 三端各量
+wc -c "$HOME/.zcode/AGENTS.md"
+wc -c "$HOME/.codex/AGENTS.md"
+wc -c "$HOME/.config/muse/AGENTS.md"
+
+# 7. single-source / projection freshness
+uv run python skills/scan-project/scripts/check_single_source.py
+```
+
+`deploy_agents.py` 現行確實是三端 deploy；`--dry-run` 會完整建 bundle、跑 size gate 後跳過寫入。正式 deploy 才寫 [~/.zcode/AGENTS.md](<~/.zcode/AGENTS.md>)、[~/.codex/AGENTS.md](<~/.codex/AGENTS.md>)、[~/.config/muse/AGENTS.md](<~/.config/muse/AGENTS.md>)。
+
+機械命令之後仍要跑三組 semantic consistency，因 regex 不足以判 carrier boundary：
+
+- rule 是否還能在**不載 skill**時作出第一個有後果決策所需的判斷。
+- 被刪 B body 是否真的已存在 destination skill，而且 ownership 敘述沒有反向宣稱「仍在 rule」。
+- rule/skill 是否產生相反 authority；batch 1 的正向測試就是 `cr-research`。
+
+這裡不建議把 byte band 寫成 `exit 1` hard gate。AIR-86 卡已定義 semantic form 才是 hard acceptance。
+
+* * *
+
+C. 「先補 skill、後刪 rule」我會用 **兩個 filesystem phase gate** 機械保證，不採「每檔兩 commit」。
+
+**C1 Carrier-prep phase**
+
+這階段允許改 destination skills，禁止刪 rule。每一個 move candidate 都要先有：
+
+`source clause → destination section → destination anchor → move/delete classification`
+
+然後 positive `rg` 必須找到 destination。`acceptance-evidence` 的 taxonomy/L1-L6 若尚不存在，gate 就停；`model-routing` 的 authority conflict 未消除也停。
+
+**C2 Rule-slim phase**
+
+只有 C1 全綠才允許縮 rule。縮完再跑 pointer positive gates＋rule negative gates＋consistency。
+
+兩個 commit/批可以作 audit checkpoint：
+
+`carrier-prep(batch1)` → `rule-slim(batch1)`
+
+但我不建議**每檔兩 commit**，會把同一 semantic transaction 切成六個 commit，沒有增加 carryover 證明力。真正的保證是 C1 gate；commit 只是 history checkpoint，而且是否 commit 仍依現有 `/commit` 授權流程。
+
+`model-routing` 更應如此：AIR-76 authority 未 materialize 時，C1 就停在該檔，不能進 C2；不應靠 commit 順序掩掉 conflict。
+
+* * *
+
+D. 我同意你的做法：**不要再多設一個獨立 deletion-review stage**，直接把 A-shell deletion safety 併進既定雙審，但 writer 執行前要先 freeze candidate ledger。
+
+每個 candidate 最少記：
+
+`ID | file:lines | A-shell/B-body | DELETE/MOVE | destination | 必須保留的 C-core`
+
+Flash 只能執行 frozen candidates；看到新的「好像也能刪」不能順手擴 scope，只能報 new candidate。
+
+批次完成後 5.3 與 Codex 各自獨立對每列打：
+
+`DELETE-OK / RESTORE / NEEDS-JUDGE`
+
+並同時檢查 MOVE destination 是否真的承接。兩邊都先獨立判完再互看；分歧送 Judge。Reviewer 額外發現的刪除機會留到下一 candidate set，不在 review 裡直接越界刪。
+
+所以流程就是：
+
+**5.3＋Codex freeze candidate/spec → Flash C1 carrier-prep → C1 gate → Flash C2 slim → batch mechanical gate → 5.3/Codex 獨立複核 deletion ledger＋carrier → 互改 → Judge → 修正 → post-build。**
+
+這已滿足 writer/reviewer separation，不需再插第 4 個 reviewer。
+
+* * *
+
+E. 三檔最容易誤砍的各一條，我會把它們直接列成 reviewer 必查：
+
+- **acceptance-evidence**：`rules/acceptance-evidence.md:11-13`。最容易被認為只是「證據獨立性重複句」而刪掉；其實 `no-impact claim → independent mechanical evidence` 是具體 bootstrap 行為 gate，必留。
+- **design-thinking**：[rules/design-thinking.md:11](<rules/design-thinking.md:11>) 是混合句。六步 ①→⑥ 是 A shell，但「**至少兩層連鎖後果**」是 user calibration。不能整行刪；必須先抽出 C-core 再刪六步。
+- **model-routing**：[rules/model-routing.md:32](<rules/model-routing.md:32>)。lookup 清單確實要沉，但「**委派／收法／定向接續前必載 model-routing skill**」是 trigger-bootstrap；整段砍掉就會使 on-demand carrier 失去可達性。
+
+另有一個不是「誤砍」而是**開工 blocker**：`cr-research` 現在 rule=full、skill=lite，而 AIR-76 已明確裁決 full。我的規格因此是：**batch 1 可以先完成 acceptance-evidence、design-thinking；model-routing C2 必須等 AIR-76 authority materialize，或由已授權的同一弧先按 AIR-76 定案把 skill/registry 同步成 full。禁止用 slimming 把衝突從畫面上刪掉。**
+
+就 AIR-86 執行規格而言，這樣已足以 freeze 給 Flash；我不再看到需要新增第四個設計步驟。
+[delegate-bridge] job job-mtz8vob0-yazzfn status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

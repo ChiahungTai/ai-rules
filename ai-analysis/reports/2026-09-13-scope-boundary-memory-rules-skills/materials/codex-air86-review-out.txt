@@ -1,0 +1,73 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T03:54:36.988036Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:54:37.019298Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:54:37.041635Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:54:37.424036Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:54:37.471869Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:54:37.491224Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:54:38.081104Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T03:54:38.630852Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:54:38.673633Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T03:54:38.680255Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+1. deletion ledger：**9/9 都是 DELETE-OK**。我按上一輪凍結規格的三個刪除群對號：
+
+| ID | Verdict | 理由 |
+| --- | --- | --- |
+| AE-1 | **DELETE-OK** | evidence-independence 段把深層內容枚舉縮成 skill pointer；bootstrap 原則仍完整留在 acceptance-evidence.md。 |
+| AE-2 | **DELETE-OK** | Claim taxonomy 從 rule 移除正確；normative body 已在 acceptance-evidence/SKILL.md 承接。 |
+| AE-3 | **DELETE-OK** | L1–L6 完整 lookup table 移除正確；rule 只留「低層不可冒高層」，完整表已在 skill `:22-31`。 |
+| DT-1 | **DELETE-OK** | `①→⑥` 六步 methodology 可刪；deep-thinking 已持有完整方法，而 C-core「至少兩層」被抽出保留。 |
+| DT-2 | **DELETE-OK** | 單向門/雙向門 textbook examples 刪除後，真正 calibration「單向門多層、雙向門仍第二層」仍在。 |
+| DT-3 | **DELETE-OK** | CA/DDD 展開 body 壓成三 lens＋pointer 合理；arch-thinking 已承接方法論。 |
+| MR-1 | **DELETE-OK** | rule 移除具體 GLM model IDs，保留 native-ID/alias vocabulary policy，符合「model 值在 skill」authority。 |
+| MR-2 | **DELETE-OK** | role→tier 各列的 operational explanation 縮掉合理；8 條 user routing rulings 本身仍完整可判。 |
+| MR-3 | **DELETE-OK** | external-runtime 的 transport/eligibility/wait/reviewer/rate-limit lookup body 全沉 skill；trigger-bootstrap 沒一起被砍。 |
+
+所以 deletion safety 本身我沒有 `RESTORE` 或 `NEEDS-JUDGE`。
+
+2. 三條必查項全部存活。
+
+- AE no-impact gate：acceptance-evidence.md:13 仍明確要求「不影響 X」必須有獨立機械證據，`self-report` 不可替代。
+- DT C-core：design-thinking.md:9 明確保留 **「至少兩層連鎖後果」**。
+- MR trigger-bootstrap：model-routing.md:28 明確保留 **「委派、收法、定向接續/fork 前必載 model-routing skill」**。
+
+而且這三條我也直接在目前 deployed [~/.zcode/AGENTS.md](<~/.zcode/AGENTS.md>) 中查到，代表不是只有 source 在場、projection 漏掉。
+
+3. carrier 驗證主體是 **pass，但有 1 個 V drift finding**。
+
+AE carrier 完整：ownership 已正確翻轉。acceptance-evidence/SKILL.md:3 與 :8 都改成「rule 留 bootstrap gates；skill 擁 taxonomy、L1–L6、theory/examples」，不再反向宣稱 table/taxonomy 在 rule。Taxonomy 在 `:14-20`，L1–L6 在 `:22-31`，尤其 dead-code 全消費端/LSP-zero-hit 不足也確實存在。
+
+DT carrier pass：`deep-thinking` 未改，但六步、問題集、輸出格式仍在；`arch-thinking` 也仍有 dependency/bounded-context/use-case 深層 body。
+
+MR carrier 的 AIR-76 authority conflict 已閉合：skill 的 requirement table 現在是 `full | cr-research`，[scripts/sync_agents.py](<scripts/sync_agents.py>) 是 `"cr-research": "full"`，ZCode registry pin=`glm-5.3`，Claude registry pin=`opus`。原先 rule=full / skill=lite 的矛盾已消失。
+
+但我抓到一個 **需要修的 carrier drift**：
+
+> **MR-V1 — `model-routing` skill 還 materialize 了 volatile user entitlement/quota state。**
+
+model-routing/SKILL.md:36 已明文「額度現值（V）不住本檔」，但：
+
+- :45 還寫「**額度面已恢復**」；
+- `:16-18` 的 xai 欄仍直接寫「**未訂閱禁派／未訂閱＋本機未安裝**」。
+
+這些不是 stable policy，而是目前使用者 entitlement/state；跟同檔自己的 V 原則衝突。Remedy 很窄：移除「已恢復」與 xai 現況 materialization，保留「未訂閱家禁派」這種穩定 policy，現值統一 pointer 到 `model-runtime-entitlements`。`Plus 帳號不可用` 若代表 provider/plan compatibility fact，可作 F 留；不要跟 user 當前帳號狀態混寫。
+
+4. 機械複驗結果：
+
+- source bytes：AE **1,050B**；DT **1,014B**；MR **2,138B**。
+- AE taxonomy/body negative scans：乾淨。
+- DT 六步與 textbook dependency chain negative scans：乾淨。
+- MR background-Bash / wait / reviewer-handoff / classifier lookup negative scans：乾淨。
+- AIR-76 舊 `cr-research lite` row：固定字串重驗 **0 hit**；full row＋兩 registry pins 都正確。
+- `git diff --check`：**pass**。
+- 三個 deployed bundle：ZCode/Codex/Muse 都是 **30,938B**，而且 `cmp` 顯示三份 byte-for-byte 相同。
+- 前面兩個一度出現的「AE L1 row remains」「cr-research still lite」是我 probe regex 自己造成的 false-positive；改 `rg -F` 單 literal 後兩者都綠，因此不列 finding。
+
+有兩個 command 我這個 reviewer sandbox **無法 fresh rerun**：`uv run python scripts/deploy_agents.py --dry-run` 與 `check_single_source.py` 都在 `uv` 初始化 `~/.cache/uv` 時被 `Operation not permitted` 擋住。我沒有改 cache 路徑繞過 read-only。這兩項因此本輪標 `unverified`；不是 implementation failure。你提供的實施證據仍是 deploy 3/3 綠，以及 single-source 只有既存 instruction-testing allow-list finding。
+
+5. **MR band 上修我同意。** 2,138B 現態看不到 transport/lookup body 回流，額外 bytes 主要就是 role→tier、tier/family/profile authority 與 user rulings；原先 1.4–1.8KB 確實估得過低。把 MR 目標接受到約 **2.1KB semantic closure** 合理。
+
+**最終 verdict：需修 1 點，再進後續 Judge／post-build。**
+
+唯一要修的是 **MR-V1 volatile state 殘留**；9/9 deletion ledger、三個 bootstrap 核心、carrier move、AIR-76 full parity 與 bundle projection 本身我都接受。這一點修完後，我這邊沒有第二個阻擋項。
+[delegate-bridge] job job-mtza5p5m-wf4dqs status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

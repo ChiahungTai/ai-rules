@@ -1,21 +1,40 @@
 ---
 name: acceptance-evidence
-description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限、Intent Drift Type A/B、filter trap 重構查證義務、L3 整合測試實例、Runtime Invariant Assurance、B 軸人類驗收層演進、盤點執行點雙掃（間接層＋直呼層）、抽樣推廣與全量對帳、機械閘門的環境前提（gate 輸出也是 claim）。always-on 核心（L1-L6 階層表、證據獨立性、Claim→Evidence）在 rules/acceptance-evidence.md；審查/規劃/測試策略需要深層論證或失敗案例時載入。觸發詞：證據階層、L3、整合測試、filter trap、runtime invariant、intent drift、B 軸、人類驗收、認知誤差、EP 預見極限、盤點執行點、誰呼叫、影響域、CI 執行點、雙掃、抽樣、全量對帳、樣本選擇、false-red、false-green、gate 前提。
+description: 驗收證據階層深層理論 — 認知誤差與 EP 預見極限、Intent Drift Type A/B、filter trap 重構查證義務、L3 整合測試實例、Runtime Invariant Assurance、B 軸人類驗收層演進、盤點執行點雙掃（間接層＋直呼層）、抽樣推廣與全量對帳、機械閘門的環境前提（gate 輸出也是 claim）。rule 端留 bootstrap gates（證據獨立性＋no-impact claim gate＋禁低層冒充高層）；本 skill 擁 Claim→Evidence taxonomy、L1-L6 階層表、深層理論與案例；審查/規劃/測試策略需要判準、lookup 表或深層論證時載入。觸發詞：證據階層、L3、整合測試、filter trap、runtime invariant、intent drift、B 軸、人類驗收、認知誤差、EP 預見極限、盤點執行點、誰呼叫、影響域、CI 執行點、雙掃、抽樣、全量對帳、樣本選擇、false-red、false-green、gate 前提。
 ---
 
 # Acceptance Evidence — 驗收證據深層理論
 
-> 本 skill 是 `rules/acceptance-evidence.md` 的 on-demand 深層載體：rule 端保留 always-on 核心（證據獨立性、Claim→Evidence→Trust、L1-L6 階層、A/B 軸分工）；本檔承載審查/規劃/測試策略工作流才需要的深層論證、失敗案例與設計方向。兩者同一概念體系，分層載入。
+> 本 skill 是 `rules/acceptance-evidence.md` 的 on-demand 深層載體：rule 端留 bootstrap gates（證據獨立性＋no-impact claim gate＋禁低層冒充高層）；本 skill 擁 Claim→Evidence taxonomy、L1-L6 lookup 表、深層理論與案例（審查/規劃/測試策略工作流需要的深層論證與設計方向）。兩者同一概念體系，分層載入。
 
 ## 證據時效性與 A/B 軸限制
 
 重構後必須重新確認測試仍驗原意；過時但綠、被改成迎合實作、行為已無關的測試都會給虛假信心。A 軸機器自驗（L1–L3）必要但不充分，天花板是 AI 自洽；B 軸人類驗收（L4–L6）提供外部正確性。獨立 context 不等於獨立智能，同家族模型仍可能共享偏誤；人類亦有疲勞與確認偏差。P0 invariant 因此要以 A 軸機械、B 軸人審、Runtime Invariant Assurance 三層共同守衛；任何一層只能降風險，不能消除風險。
 
-## Claim 群的真實案例（rule 端舉證義務的案例載體）
+## Claim→Evidence taxonomy（normative——判準源自 rule 遷入 09-13）
 
-> rule 端「Claim→Evidence→Trust」段列同型 claim 群與舉證義務（always-on 核心）；本段承載對應**真實案例**（失敗教訓案例屬 Low Noise 保留例外，須含「真實案例」marker）。
+- **數字/清單類 claim**（計數、規模、盤點）:寫進文檔前用獨立計數命令（`rg | wc -l` / `rg -c`）核對完整輸出，不靠印象或截斷結果人工數——AI 寫盤點清單易憑印象混入/漏掉成員（真實案例：consumers 數 41 誤寫 20，因 `rg | head -20` 截斷）。
+- **刪除/死碼自述**（zero caller /「沒人用」）:證據須涵蓋**全消費端**——靜態 import（LSP `findReferences`）+ 字串引用（rg 跨 .py/.yaml/.json）+ **非函式庫消費者**（scripts/、lab/、demo、saved config）+ 動態派發（getattr/importlib/registry auto-discovery/StrEnum 字串值）。只跑 LSP 宣稱「zero hits = 確認」**不足**。最低門檻：刪整檔/整 class 前，rg 符號名跨全專案 + 實際執行 import 測試（L4）受影響消費者——靜態 zero-hit ≠ runtime 無消費者（真實案例：自述「雙工具驗證零 caller」，實際 scripts/ 有 hard-import caller → runtime `ModuleNotFoundError`）。
+- **silent-failure claim**:宣稱「行為 silent」須附**執行證據**（跑了該輸入、觀察到靜默通過），非靜態推論。誤判 loud（實為 silent）以為會炸卻靜默腐敗（危險）；誤判 silent（實為 loud）虛驚、跑測試推翻（安全）。無執行證據時**預設標 'inferred loud'，禁標 'silent'**。
+- **自報元資料不可信**：agent 對自己輸出的 label 統計禁當驗收統計源；正解＝llm_label vs 標準答案逐案機械比對。
+（review 雙向應用條留在 rule——屬 code-review 消費端 bootstrap）
 
-- **數字/清單類 claim**（真實案例）：features leaf 清單把 VolumeFeature 寫成 KeyCandleFeature，與 `list_feature_classes` 實際輸出不符，自審抓不到——AI 寫盤點清單易憑印象混入/漏掉成員（同型：consumers 數 41 誤寫 20，`rg | head -20` 截斷；此簡版 rule 端保留）。
+## 證據階層 L1–L6（lookup 表——自 rule 遷入 09-13）
+
+| 層 | 證據與覆蓋 | 限制/風險 |
+|---|---|---|
+| L1 靜態 | type check/ruff/ast.parse；語法、型別 | 低風險 |
+| L2 單元 | unit test（含 mock）；函式邏輯 | mock 假設可能即 bug |
+| L3 整合 | 真 DB/跨模組 fixture；組合/FK/擴散 | 仍可能 mock 關鍵邊界 |
+| L4 可執行 demo | 真腳本/資料；API/第三方真實行為 | 可能只挑 happy path |
+| L5 對抗性 POC | 髒資料/已知陷阱：除權息、NaN、時區、溢出等 | AI 仍可能避開盲區 |
+| L6 人類觀察 | 真輸出/畫面/log；需求理解 | 疲勞、確認偏差 |
+
+## Claim 群的真實案例（taxonomy 判準的案例載體）
+
+> Claim→Evidence taxonomy 判準在本檔上節（normative）；本段承載對應**真實案例**（失敗教訓案例屬 Low Noise 保留例外，須含「真實案例」marker）。
+
+- **數字/清單類 claim**（真實案例）：features leaf 清單把 VolumeFeature 寫成 KeyCandleFeature，與 `list_feature_classes` 實際輸出不符，自審抓不到——AI 寫盤點清單易憑印象混入/漏掉成員（同型：consumers 數 41 誤寫 20，`rg | head -20` 截斷——判準與此例已併上節 taxonomy）。
 - **silent-failure claim**（真實案例）：smell-detector baseline（原 codebase-sweep）state.yaml 把 Interval 自創名稱（如 `"1M"`）標「silent drift」——靜態推論「1M 撞 1m」沒跑 `Interval("1M")`，實證 StrEnum 精確比對 + raise → loud crash 非 silent。同類：tilde bug 靜態推論「消費端 inline 沒問題」沒執行 → 實證推翻。教訓通用（silent-claim 須執行證據），不依賴特定符號現狀。
 - **自報元資料不可信**（真實案例）：vision 判讀 111 案中模型自報 contradicts 漏報 44——模型給了不同 label 卻自報未推翻；正解＝llm_label vs 標準答案逐案機械比對，禁用自報欄位做統計。Review 雙向應用觸發形態：審查時看到以自報分類／判讀欄位彙算的統計（通過率／推翻率）→ 視為須逐案機械比對的觸發信號，不得直接採信。
 
