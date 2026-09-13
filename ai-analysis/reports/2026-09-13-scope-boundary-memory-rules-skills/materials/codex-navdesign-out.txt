@@ -1,0 +1,61 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T02:31:37.276147Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:31:37.292482Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:31:37.308669Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:31:37.742433Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:31:37.754898Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:31:37.768534Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:31:38.228153Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T02:31:38.946241Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:31:38.971789Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:31:38.988113Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+我同意你劃的邊界，而且我會保留「一句鏈」，不只留查詢順序。
+
+關鍵區分是：**bootstrap 負責 routing，不負責 workflow semantics**。所以 user-level guide 可以常駐兩種資訊：
+
+- 「我現在在哪／下一步去哪查」：必須常駐。
+- 「標準開發鏈有哪些入口」：可常駐一行，讓模型知道有哪些門可進。
+- 「每一站怎麼執行、狀態 glyph、前後條件、例外、內部 review chain」：沉到 skills。
+
+因此 `execution-plan → implement → post-build → commit` 這一行我認為**通過 Bootstrap test**。如果連 command 名稱和大方向都沉掉，新 session 在還沒知道該 trigger 哪支 skill 前，就已經要先決定下一個 consequential action，反而失去 routing bootstrap。
+
+但我會挑戰你目前第 1 行的順序：**不要把 `STATE.md` 寫成 unconditional source of truth。** 既有定義裡 STATE 是 Last-session observation，可能不存在，也可能只是一個接續提示；真正的 committed/current work state 還是在 board/card/EP。比較穩的語義是：
+
+`STATE.md（若有，作最近觀察入口） → board/card 定位 active work → card notes / EP progress 確認 resume point`
+
+也就是 STATE 可以先讀，但不能被寫成高於 board/EP 的 authority。
+
+### A. 放哪裡
+
+我建議放 **guide 最前段，intro 後、演化性思維之前**，標題就叫 `## Session 開場導引`。
+
+這比放在 Solo+AI 後面更符合資格公式：它的目的就是影響 session 的第一個 substantive decision。若要翻到 guide 中後段才能看到，就已經削弱 bootstrap 性質。
+
+而且這個位置也能讓後面的 UC-Driven slimming 更乾淨：UC 節不再需要偷偷承擔「下一步去哪」的導航責任，只談 UC/work artifact 的 calibration。
+
+### B. 我建議的三行定稿
+
+我會把你原本的三行稍微改成以下版本：
+
+Session 開場導引
+
+## Session 開場導引
+
+- **先定位現在在哪**：有 `STATE.md` 先讀最近 session 觀察，再以 active card／board 狀態與 card notes／EP 進度節核對目前工作、已完成處與 resume point；觀察層不能取代現況來源。
+- **再決定下一個入口**：標準開發主鏈為 `/execution-plan` → `/implement` → `/post-build` → `/commit`；需求釐清、審查、修復等分支及各步方法論查 [skills/CLAUDE.md](<skills/CLAUDE.md>) 索引與對應 skill。
+- **需要跨 context 接續時先結算**：context 將耗盡先把進度與待辦寫回 EP／card；同一工作稍後續跑用 `/at`，交給另一個 session／repo／provider 用 `/handoff`。
+
+我特別保留了「**標準開發主鏈**」四個字。這是避免一句鏈被誤讀成所有任務都必須從 `/execution-plan` 起跑；resume 到一半的工作可能直接進 `/implement` 或 `/post-build`，小型免 EP 工作也有例外。
+
+另外有兩個小修正建議。
+
+第一，**不要在這三行放八站名稱或 glyph**。八站是 human lifecycle model；session bootstrap 只需要知道「定位 → routing → continuation」。把八站塞進來，UC 段剛要 slim 掉的內容會從另一個入口重新長回來。
+
+第二，[skills/CLAUDE.md](<skills/CLAUDE.md>) 在這裡應被描述成**索引**，不是 authority。真正的方法論仍是對應 `SKILL.md`。你原本的「方法論查 skills/CLAUDE.md 索引」語義已經很接近，我會維持這個 distinction。
+
+所以最後的 boundary 我會定成：
+
+**Guide 常駐「where am I / where do I enter / how do I continue」；skills 承載「what exactly happens after I enter」。**
+
+這樣和前一輪 UC-Driven slimming 完全相容，甚至能讓那一節再瘦得更乾淨。
+[delegate-bridge] job job-mtz76yl7-3evzju status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

@@ -4,7 +4,7 @@ title: rules corpus 依分界原則 v2 搬遷——slim 三檔＋B 拓撲拆分�
 status: To Do
 assignee: []
 created_date: '2026-09-13 00:38'
-updated_date: '2026-09-13 02:22'
+updated_date: '2026-09-13 02:32'
 labels: []
 dependencies: []
 ordinal: 72000
@@ -57,4 +57,15 @@ ai-rules main @（AIR-85 建卡 commit）。材料源＝report.md §四＋materi
 **雙量測驗收**：每檔記 semantic source size＋deployed bundle size——source sum 禁直接對 gate（deploy framing ~964B；skip-\* 區段現抵 ~1,957B；機制 deploy_agents.py:304-340）。
 
 structure.md 引用邊表已加 bundle role 欄（bootstrap split / conditional projection eligible / reference layering）——本卡實施時對照該欄。
+
+09-13 補充裁定：guide 新增「Session 開場導引」小節（批三 guide 範圍；codex 對齊定稿）：
+
+**定位**：放 guide 最前段（intro 後、演化性思維前）——session 首個 substantive decision 的 routing bootstrap。邊界公式＝**guide 常駐「where am I / where do I enter / how do I continue」；skills 承載「what exactly happens after I enter」**——一句鏈（標準開發主鏈）通過 Bootstrap test 留常駐；各站執行細節/glyph/條件沉 skills（與 UC-Driven slimming 完全相容，UC 節不再偷扛導航責任）。
+
+**三行定稿（逐字入 bundle）**：
+- **先定位現在在哪**：有 STATE.md 先讀最近 session 觀察，再以 active card／board 狀態與 card notes／EP 進度節核對目前工作、已完成處與 resume point；觀察層不能取代現況來源。
+- **再決定下一個入口**：標準開發主鏈為 /execution-plan → /implement → /post-build → /commit；需求釐清、審查、修復等分支及各步方法論查 skills/CLAUDE.md 索引與對應 skill。
+- **需要跨 context 接續時先結算**：context 將耗盡先把進度與待辦寫回 EP／card；同一工作稍後續跑用 /at，交給另一個 session／repo／provider 用 /handoff。
+
+**禁令**：導引不放八站名稱/glyph（防 UC 段 slim 掉的內容從此入口長回）；STATE.md 不寫成高於 board/EP 的 authority；skills/CLAUDE.md 描述為索引非 authority。材料＝materials/codex-navdesign-out.txt。
 <!-- SECTION:NOTES:END -->
