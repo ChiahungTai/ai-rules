@@ -31,6 +31,4 @@ harness-scope: neutral
 
 ## Agent 派發與產出回收
 
-跨 repo 寫入由主 session 負責；spawn 前確認 worktree 能力，優先目標 repo session，agent 寫不進目標就回報主 session，禁把責任丟給受限 agent。spawned/automation 只在卡 owning WT 操作；不能判定就回報。真實案例：監控 session 因規則未載入，誤結 owning=main 的卡。
-
-寫檔 agent prompt 必注入三條（禁 /tmp／寫不進就回報／暫存集中 `.agent-tmp/`）；完整條文見 **agent-workflow skill** 自檢清單「Agent tool spawn 前」。
+跨 repo 寫入由主 session 負責；spawned/automation 只在卡 owning WT 操作，agent 寫不進目標或不能判定 owning 就回報主 session，禁把責任丟給受限 agent（案例：監控 session 因規則未載入誤結 owning=main 的卡）。寫檔 agent prompt 必注入三條（禁 /tmp／寫不進就回報／暫存集中 `.agent-tmp/`）；worktree 能力確認與完整自檢清單見 **agent-workflow skill**「Agent tool spawn 前」。

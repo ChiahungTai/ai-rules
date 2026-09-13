@@ -1,0 +1,42 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T05:24:52.129260Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T05:24:52.164069Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T05:24:52.164136Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T05:24:52.579819Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T05:24:52.631747Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T05:24:52.633761Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T05:24:52.959966Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T05:24:53.779079Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T05:24:53.829491Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T05:24:53.859211Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+批三的 **12 個 deletion/compression ledger 項目我全部判 `DELETE-OK`**；四個 byte band 也都接受上修，沒有看到為了追 band 還能安全砍掉的 reference body。另有 **1 個批三新引入的 instruction-governance finding**：metadata-sync 承接標題寫入日期，違反目前 instruction 的「禁更新日期」規則。我的最終 verdict 是：**需修 1 點後可進 post-build**。
+
+| Ledger | Verdict | 判斷依據 |
+| --- | --- | --- |
+| G-1 | **DELETE-OK** | deploy/symlink 是治理拓撲，不是 session bootstrap；guide intro 留跨專案定位即可。guide:3 |
+| G-2 | **DELETE-OK** | 「持續測試→重構→確認」是可推導通則；真正 calibration「品質優先／預設不保相容」仍在。guide:15 |
+| G-4 | **DELETE-OK** | glyph/body 已完整移到 metadata-sync SKILL.md:24，guide 留明確 pointer guide:35。 |
+| G-5 | **DELETE-OK** | guide 保留首後果 bootstrap「動卡第一動 In Progress」＋ kanban authority pointer guide:39；kanban 實際仍有 In Progress kanban:41、結案兩步 kanban:59、precheck kanban:64。 |
+| G-6 | **DELETE-OK** | compact 時點細節可沉；session 級「先結算再接續」現在已有更直接 bootstrap guide:11，Solo+AI 仍留 model 退化→handoff guide:43。 |
+| G-7 | **DELETE-OK** | CA/DDD、禁止過度分層仍在；依賴方向/bounded-context/use-case 展開已有 design-thinking/deep skill 承接。guide:47 |
+| G-8 | **DELETE-OK** | data-integrity calibration 留在 guide，Crash-Only 正文改 pointer 至 quality authority，沒有語義丟失。guide:51 |
+| CO-2 | **DELETE-OK** | owning-WT、受限 agent 回報、三條 prompt 注入均留在 rule；worktree capability mechanics 正確 pointer 到 agent-workflow。collaboration:34 |
+| CT-2 | **DELETE-OK** | 只壓案例敘事，quota/context-loss→durable checkpoint 的因果仍完整。context:15 |
+| PY-1 | **DELETE-OK** | 兩 bullet 純合行，舊 typing 禁令與 typing allow-list 均完整。python:31 |
+| PY-2 | **DELETE-OK** | Facade 判準「consumer 是否 external」及 `_internal` 出路皆存活。python:21 |
+| PY-3 | **DELETE-OK** | 「禁先刪→查全 consumers→全改完再清 re-export→rg/symbol 分工」完整保留；只拿掉可推導例子。python:25 |
+
+**1\. deletion/compression ledger。** 12/12 都與 frozen ledger 相符，沒有 RESTORE / NEEDS-JUDGE。特別是兩個真正有 carrier movement 的位置都閉合：G-4 的完整 UC glyph 已在 metadata-sync L24，而 guide 的 consumer 只留 pointer L35；CO-2 則仍在 always-on rule 保留「owning WT／不能判定就回報」這些 spawn 前不可延後的約束 L34。CT-1 Session freshness 沒被順手動到，現值仍完整位於 context-management.md:11，本批 diff 的 context hunk只有 CT-2 案例壓縮。
+
+**2\. band 裁決。** 四檔我都接受上修。原 §C 自己已把 byte band 定義成「偵測是否仍塞 reference body」，不是 hard gate codex-out.txt:95。Guide 4,266B 雖高於原 2.6–3.2K，而且即使加回本輪約 430B bootstrap insert 後仍偏高，但剩下的大塊都是已明定 C-core：新 Session 導引 guide:7、risk table L21、UC/規模 bootstrap L29、Summary preserve-list L56。Collaboration 2,434B 的剩餘正文是 source-backed verification、destructive-choice、anti-sycophancy、workspace ownership 等直接 calibration collaboration:9–34。Context 2,115B 超 band 很大一部分是後來新增、明確要求保留的 Session freshness context:11。Python 1,953B 則主要都是 re-export／typing 等反主流 user rulings＋防 rationalization 論證 python:13–32。這四檔目前都沒有我願意為了 byte 數再砍的具體條文。
+
+**3\. 三必查。** PASS，但帶一個 metadata finding。開場導引三行與 AIR-86 卡面定稿逐字一致：卡 66–68 對 guide 9–11，且實際 deployed ZCode bundle 也在 `~/.zcode/AGENTS.md:14-16`；我獨立量到 deployed bundle 是 **30,084B**。UC glyph pointer 在 deployed bundle，Crash-Only pointer 也在；metadata-sync 完整承接在 L24。C-core 的 risk table、規模段、Summary、freshness、re-export 真實案例分別仍在 guide:23、guide:37、guide:58、context:11、python:17。我也按 erratum 重新逐詞掃了負詞彙，包括新的 `銜接：execution-plan`，全部 0 hit；metadata-sync 的 consumer 回 link 已改成「本檔前述承接註記」L41，沒有形成 guide↔skill 循環。機械 gate 本身亦是 364 tests pass＋deploy dry-run 30,084B 三端生成一致。
+
+這裡唯一要修的是 metadata-sync/SKILL.md:24 的 `（自 guide 承接 2026-09-13）`。這是本批新增文字，但 guide 明文禁止 instruction 內日期 guide:5，skills 自己也寫「禁止版本號、更新日期、統計資訊」skills/CLAUDE.md:13。最小 remedy 是保留承接語義、刪日期，例如 `**UC 狀態流轉（自 guide 承接）**`；不需改 body 或回滾 G-4。
+
+**4\. 語義陰影掃描。** 導引層符合三個禁令：guide 沒有八站名或 glyph 字串；STATE.md 被明確標成 observation，且同句要求回到 active card／board＋notes／EP 核對，沒有升格為 authority guide:9；[skills/CLAUDE.md](<skills/CLAUDE.md>) 被 guide 稱為「索引與對應 skill」guide:10，其本體也明說 Skill 索引只供「一眼看全」、不是載入機制 skills/CLAUDE.md:21–23。Guide slimming 後，execution-plan 對規模分級的有效引用仍可落到 guide execution-plan:40、48；kanban 的 In Progress／結案兩步／precheck target 均實存；root AGENTS 對 guide 的「演化/驗證/UC-Driven/架構/量化鐵律」章節枚舉仍成立 AGENTS.md:3。
+
+`execution-plan` L155 的「guide Scenario Matrix」確實是 broken pointer，但我獨立確認 **HEAD 版本已經存在這句，而且舊 guide 與新 guide 都沒有 Scenario Matrix 節**，所以不是 AIR-86 批三造成。把它收進 AIR-70 是合理處置：AIR-70 本身就是 consistency cleanup 弧，而且卡面已留下具體 defect＋remedy AIR-70:38。我不會把它拿來阻擋本批。
+
+**最終 verdict：ledger 12/12 DELETE-OK；四檔 band 全接受上修；語義與 carrier movement 成立。先修 metadata-sync L24 的日期元資訊 1 點，修後即可進 post-build。**
+[delegate-bridge] job job-mtzddrdj-5fr4tr status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

@@ -1,0 +1,98 @@
+== GATE 1: wc -c (after edits) ==
+    4266 ai-development-guide.md
+    2434 rules/collaboration-constraints.md
+    2115 rules/context-management.md
+    1953 rules/python-standards.md
+   13718 skills/metadata-sync/SKILL.md
+   24486 total
+
+== GATE 2: negative lexicon (rg_exit 1 = 0 hits; rg_exit 0 = HIT) ==
+--- TERM: 持續測試→重構→確認
+rg_exit=1
+--- TERM: UC 狀態：✅
+rg_exit=1
+--- TERM: 建卡即 commit 防 id 撞
+ai-development-guide.md:39:動卡第一動設 In Progress；銜接機制（建卡即 commit 防 id 撞、結案兩步、precheck）單一源 kanban-board skill。
+rg_exit=0
+--- TERM: deploy_agents.py 打包到全域位置
+rg_exit=1
+--- TERM: compact 分布於規劃後/build 段間
+rg_exit=1
+--- TERM: 優先目標 repo session
+rg_exit=1
+--- TERM: 禁 List/Dict/Set/Tuple/Optional/Union 舊 typing，改內建泛型與 T | None / T1 | T2
+rg_exit=1
+
+== GATE 3: positive survival (rg_exit 0 = present) ==
+--- TERM: | 高 | 核心架構  IN: ai-development-guide.md
+23:| 高 | 核心架構、跨 context domain service、會計/風控總量與 sizing、數據庫、安全、重大 API | 完整驗證相關功能 |
+rg_exit=0
+--- TERM: 碰單位邊界/除權息/時區/會計/風控即非 simple  IN: ai-development-guide.md
+37:規模：大型跨模組/新功能→execution-plan 建卡；中型→更新既有能力/卡；跨檔 refactor 亦按大型/中型，僅單檔小 tweak 算小型。小 bug/doc 免 UC；碰單位邊界/除權息/時區/會計/風控即非 simple，至少列受影響 invariant＋驗證式（silent-corruption 例外）。
+rg_exit=0
+--- TERM: 一 EP＝一 session  IN: ai-development-guide.md
+43:一人＋AI、無團隊/CI；一 EP＝一 session，段落自含、可結算接續。model 退化先結算再 handoff 新 session；Writer/Reviewer 分離，review 支援跨 session findings 回貼。
+rg_exit=0
+--- TERM: 回測完全可重現  IN: ai-development-guide.md
+52:- 回測完全可重現（hash＋config＋seed），波動 >0.01 必須重做。
+rg_exit=0
+--- TERM: 先定位現在在哪  IN: ai-development-guide.md
+9:- **先定位現在在哪**：有 STATE.md 先讀最近 session 觀察，再以 active card／board 狀態與 card notes／EP 進度節核對目前工作、已完成處與 resume point；觀察層不能取代現況來源。
+rg_exit=0
+--- TERM: 禁猜測實作  IN: rules/collaboration-constraints.md
+9:需求不明先複述理解、列可能解讀並澄清，禁猜測實作；疑問一次彙整（避每次往返重送 context）。非硬 gate 的確認集中到完成報告；commit、破壞性、單向門依 [outward-action-consent](outward-action-consent.md)。
+rg_exit=0
+--- TERM: 盲改指標會靜默污染回測  IN: rules/collaboration-constraints.md
+25:建議先 READ→UNDERSTAND→VERIFY codebase→EVALUATE→RESPOND→IMPLEMENT；核對適用性、既有功能與決策。查不了明說；錯誤建議附理由反對，成立就修——盲改指標會靜默污染回測。YAGNI（刪）與 filter trap（驗證不能刪）見 acceptance-evidence skill。
+rg_exit=0
+--- TERM: 機械衝突訊號  IN: rules/collaboration-constraints.md
+30:- 他人未提交變更預設不相關，不審不改；commit 只 add 指名檔。**僅目標檔已有他人變更或同區域不同改法才是停下確認的機械衝突訊號**。
+rg_exit=0
+--- TERM: 誤結 owning=main  IN: rules/collaboration-constraints.md
+34:跨 repo 寫入由主 session 負責；spawned/automation 只在卡 owning WT 操作，agent 寫不進目標或不能判定 owning 就回報主 session，禁把責任丟給受限 agent（案例：監控 session 因規則未載入誤結 owning=main 的卡）。寫檔 agent prompt 必注入三條（禁 /tmp／寫不進就回報／暫存集中 `.agent-tmp/`）；worktree 能力確認與完整自檢清單見 **agent-workflow skill**「Agent tool spawn 前」。
+rg_exit=0
+--- TERM: Session freshness  IN: rules/context-management.md
+11:**Session freshness**：governing rules/bundle 在 session 中變更後（redeploy、slimming、刪除、政策反轉），下一個依賴該規則的 consequential action 前必 refresh context（重讀新版）；**涉及刪除/反轉/衝突語義時重讀不是充分條件**——舊文已在 context 不會因重讀消失，須 reset/new session＋恢復主題材料（resume read-set：卡/EP/notes→journal/compact-context→active .review→目標態報告→所需 skills）。
+rg_exit=0
+--- TERM: resume read-set  IN: rules/context-management.md
+11:**Session freshness**：governing rules/bundle 在 session 中變更後（redeploy、slimming、刪除、政策反轉），下一個依賴該規則的 consequential action 前必 refresh context（重讀新版）；**涉及刪除/反轉/衝突語義時重讀不是充分條件**——舊文已在 context 不會因重讀消失，須 reset/new session＋恢復主題材料（resume read-set：卡/EP/notes→journal/compact-context→active .review→目標態報告→所需 skills）。
+rg_exit=0
+--- TERM: 重型 re-export 讓輕量 enum import 從毫秒變秒  IN: rules/python-standards.md
+17:真實案例：重型 re-export 讓輕量 enum import 從毫秒變秒；隱性依賴又促成循環 import、使 jump-to-def 指錯來源。
+rg_exit=0
+--- TERM: __all__  IN: rules/python-standards.md
+15:只放 docstring/註解/__version__，禁 `from .submodule import Symbol` re-export（含 __all__）；消費端用 `from package.module import Class`。每個例外內容都須回答為何不放子模組，handy function/註冊初始化衡量全消費者代價，不以行數判。
+rg_exit=0
+
+== GATE 4: metadata-sync glyph arrival ==
+--- TERM: UC 狀態流轉  IN: skills/metadata-sync/SKILL.md
+24:> **UC 狀態流轉（自 guide 承接 2026-09-13）**：✅→主要實作模組 Capabilities（同一 UC 一處，`能力|入口|狀態`，入口含 CLI＋函式）；🟢→附限制；❌→移出；📋/🔧→backlog To Do；🟡→In Progress；未承諾→drafts。scripts/ 是人類 demo，不放 Capabilities。
+rg_exit=0
+--- TERM: 未承諾→drafts  IN: skills/metadata-sync/SKILL.md
+24:> **UC 狀態流轉（自 guide 承接 2026-09-13）**：✅→主要實作模組 Capabilities（同一 UC 一處，`能力|入口|狀態`，入口含 CLI＋函式）；🟢→附限制；❌→移出；📋/🔧→backlog To Do；🟡→In Progress；未承諾→drafts。scripts/ 是人類 demo，不放 Capabilities。
+rg_exit=0
+
+== GATE 5: cross-file references ==
+--- execution-plan guide links
+40:**觸發條件**（避免過度工程）：任務含 ≥ 5 段都是[中型變更](../../ai-development-guide.md)（變更規模分級見 ai-development-guide）→ blueprint；否則 implementation。視複雜度調整 — 小型任務硬拆成 blueprint 是過度工程。
+48:| **simple** | 單檔 bug fix、小 tweak、🟢 低風險 | **不寫 EP** — 直接 TDD + 驗證（`/implement` 裸任務或直接實作）；對齊 [ai-development-guide](../../ai-development-guide.md)「小型變更不需 UC」 |
+155:**欄位含義**：見 [ai-development-guide.md](../../ai-development-guide.md) 的「Scenario Matrix」段落
+rg_exit=0
+--- root AGENTS.md guide enumeration
+3:> 本檔是 **ai-rules 專案指令**（開本 repo 時讀）。**全域開發指南**（演化/驗證/UC-Driven/架構/量化鐵律）是另一份獨立檔 `ai-development-guide.md`，經各 harness 全域位置載入——非 Claude 端：`~/.zcode/AGENTS.md` 等四家 → guide bundle；Claude 端：`~/.claude/CLAUDE.md` symlink → guide + `~/.claude/rules/` auto-load（不走 bundle）——非本檔。
+rg_exit=0
+--- TERM: ## 演化性思維  IN: ai-development-guide.md
+13:## 演化性思維
+rg_exit=0
+--- TERM: ## 驗證約束  IN: ai-development-guide.md
+17:## 驗證約束
+rg_exit=0
+--- TERM: ## UC-Driven Development  IN: ai-development-guide.md
+29:## UC-Driven Development
+rg_exit=0
+--- TERM: ## 架構設計紀律  IN: ai-development-guide.md
+45:## 架構設計紀律
+rg_exit=0
+--- TERM: ## 量化交易專屬鐵律  IN: ai-development-guide.md
+49:## 量化交易專屬鐵律
+rg_exit=0

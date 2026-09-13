@@ -1,0 +1,3 @@
+== PROBE: old 銜接 mechanism sentence remnants (expect rg_exit=1 both) ==
+rg_exit=1
+rg_exit=1

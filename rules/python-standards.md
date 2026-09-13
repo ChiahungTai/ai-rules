@@ -18,18 +18,17 @@ demo 用 demo_，禁 test_；測試用 test_。demo 暫存到 commit 時移 scri
 
 ### 補充論證：Facade Pattern 為何不適用內部專案
 
-Facade 對外部消費者有穩定 API 解耦價值；內部 modules/scripts/tests/AI 共同重構，收益不足以抵銷 import/循環/IDE 代價。判準是消費者是否外部；未來發佈外部套件可用 _internal 私有實作＋__init__ 只導出穩定 API。
+Facade 只對外部消費者有價值；內部共同重構，收益不足抵銷 import/循環/IDE 代價——判準是消費者是否外部；發佈外部套件可用 _internal 私有實作＋__init__ 只導出穩定 API。
 
 ### 遷移既有 re-export
 
-禁先刪：先查全消費者（含 `from package import` 與 `from .` 相對 import），逐一改完整 module 路徑，全部改完才清 __init__ re-export。文字掃描用 rg，符號查證依 symbol-query-routing。
+禁先刪：先查全消費者（含相對 import）逐一改完整 module 路徑，全部改完才清 __init__ re-export；文字 rg、符號依 symbol-query-routing。
 
 ## 型別註解（Python 3.12+）
 
 - 禁 from __future__ import annotations，字串化會掩蓋缺失/circular import；其他 class 前向引用用字串。
 - 禁 TYPE_CHECKING，循環須重構解決；回傳自身/子類用 Self（cls、enter、copy 等）。
-- 禁 List/Dict/Set/Tuple/Optional/Union 舊 typing，改內建泛型與 T | None / T1 | T2。
-- typing 只 import Callable、Protocol、TypeVar、ParamSpec、Self、Any。
+- 禁 List/Dict/Set/Tuple/Optional/Union 舊 typing——改內建泛型與 T | None / T1 | T2；typing 只 import Callable、Protocol、TypeVar、ParamSpec、Self、Any。
 - Any 限 JSON/第三方外部邊界並註明理由——先查 venv 套件 py.typed 與 source 型別，確認無法推導才用，禁猜。
 
 ## Python 命令執行

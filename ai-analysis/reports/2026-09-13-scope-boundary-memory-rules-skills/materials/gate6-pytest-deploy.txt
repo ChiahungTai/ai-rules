@@ -1,0 +1,21 @@
+== GATE 6a: uv run pytest ==
+........................................................................ [ 19%]
+........................................................................ [ 39%]
+........................................................................ [ 59%]
+........................................................................ [ 79%]
+........................................................................ [ 98%]
+....                                                                     [100%]
+364 passed in 13.80s
+pytest_exit=0
+== GATE 6b: uv run python scripts/deploy_agents.py --dry-run ==
+[OK] [zcode] bundle: 16 rules (scope=neutral) + guide
+     rules: _ai-behavior-constraints.md, acceptance-evidence.md, collaboration-constraints.md, context-management.md, design-thinking.md, edit-discipline.md, instruction-writing.md, llm-output-convention.md, model-routing.md, modern-cli-preference.md, must-execute-before-complete.md, outward-action-consent.md, python-standards.md, quality-constraints.md, symbol-query-routing.md, tool-discipline.md
+     size: 558 lines, 30,084 bytes (~9K tokens est, 32% of 90KiB gate)
+[OK] [codex] bundle: 16 rules (scope=neutral) + guide
+     rules: _ai-behavior-constraints.md, acceptance-evidence.md, collaboration-constraints.md, context-management.md, design-thinking.md, edit-discipline.md, instruction-writing.md, llm-output-convention.md, model-routing.md, modern-cli-preference.md, must-execute-before-complete.md, outward-action-consent.md, python-standards.md, quality-constraints.md, symbol-query-routing.md, tool-discipline.md
+     size: 558 lines, 30,084 bytes (~9K tokens est, 32% of 90KiB gate)
+[OK] [muse] bundle: 16 rules (scope=neutral) + guide
+     rules: _ai-behavior-constraints.md, acceptance-evidence.md, collaboration-constraints.md, context-management.md, design-thinking.md, edit-discipline.md, instruction-writing.md, llm-output-convention.md, model-routing.md, modern-cli-preference.md, must-execute-before-complete.md, outward-action-consent.md, python-standards.md, quality-constraints.md, symbol-query-routing.md, tool-discipline.md
+     size: 558 lines, 30,084 bytes (~9K tokens est, 81% of 36KiB gate)
+[DRY-RUN] skipping deploy
+deploy_exit=0

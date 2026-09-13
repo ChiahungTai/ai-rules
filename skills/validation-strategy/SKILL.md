@@ -41,7 +41,7 @@ description: 驗證策略紀律 — e2e 優先於單元隔離、交易相關 rep
 - 驗「NT 的 submit_order 在你的 context 怎麼行為」（你的整合）→ 驗
 - 驗「NT submit_order 內部是否正確」（package 內部）→ 不驗（package 自己驗）
 
-## crash-only 邊界（自 quality-constraints rule 承接 2026-09-13）
+## crash-only 邊界（自 quality-constraints rule 承接）
 
 - **設計方法**：狀態外部化（DB/隊列），操作等冪、服務無狀態；停止即崩潰、恢復即初始化。持久化輸出/備份禁 `tempfile.TemporaryDirectory`（scope 結束即毀），須放專案外持久路徑。
 - **誤用警告**：crash-only 只保證意外失敗後可恢復，不豁免可預期的整合 bug、配置或合約錯誤。真實案例：ReplayHost SIGTERM 失敗曾被以 crash-only 跳過 graceful 處置；正解是 TDD red（xfail strict）釘 graceful 目標再修。

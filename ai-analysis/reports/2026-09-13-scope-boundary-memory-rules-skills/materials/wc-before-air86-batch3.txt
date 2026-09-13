@@ -1,0 +1,6 @@
+    4284 ai-development-guide.md
+    2488 rules/collaboration-constraints.md
+    2155 rules/context-management.md
+    2053 rules/python-standards.md
+   13395 skills/metadata-sync/SKILL.md
+   24375 total

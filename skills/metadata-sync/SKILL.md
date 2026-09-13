@@ -21,6 +21,8 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 
 > **為什麼結算在 build 不在 commit**:finalization 是 working tree 編輯(改 CLAUDE.md / mv EP / 搬 Kanban),不是 git 寫入 —— build 階段 5 自主做,commit 退回純 git 提交(一次帶走 code + finalization)。舊設計(commit 階段 3 內嵌)對 LLM 是建議性、會漏跑(實證:commit 歷史多個「補漏」單獨 commit)。working tree 編輯沒 commit 就不永久,跟 code 一起 stash/checkout,不會「Capabilities 標 ✅ 但沒進 git」不一致 —— 真正風險是選擇性 commit(只 commit code 不 commit CLAUDE.md),靠 commit `git add` 納入 finalization 檔規範。
 
+> **UC 狀態流轉（自 guide 承接）**：✅→主要實作模組 Capabilities（同一 UC 一處，`能力|入口|狀態`，入口含 CLI＋函式）；🟢→附限制；❌→移出；📋/🔧→backlog To Do；🟡→In Progress；未承諾→drafts。scripts/ 是人類 demo，不放 Capabilities。
+
 ### 結算情境矩陣(build mode 核心 spec)
 
 | # | 情境 | UC/EP 完成變化 | 結算動作 |
@@ -36,8 +38,8 @@ build 後的「文檔狀態結算」方法論（commit 不再內嵌 finalization
 
 | 項目 | 情境 | 做什麼 |
 |------|------|--------|
-| **Capabilities 寫入** | A（時點＝5a） | 對應模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）`## Capabilities` 表格新增 ✅ 行(格式 `\| 能力 \| 入口 \| 狀態 \|`,入口含 CLI + 函式路徑;見 [ai-development-guide](../../ai-development-guide.md)) |
-| **消費場景寫入** | A（時點＝5a） | 從 EP Scenario Matrix 提煅引用該 UC 的場景為自包含一句話(不引用 EP/SM 編號),寫入 Capabilities 備註或 backlog 卡(`backlog task edit <id> --append-notes`) |
+| **Capabilities 寫入** | A（時點＝5a） | 對應模組 instruction 檔（AGENTS.md 為主，legacy CLAUDE.md）`## Capabilities` 表格新增 ✅ 行(格式 `\| 能力 \| 入口 \| 狀態 \|`,入口含 CLI + 函式路徑;UC 狀態流轉見本檔前述承接註記) |
+| **消費場景寫入** | A（時點＝5a） | 從 EP Scenario Matrix 提煉引用該 UC 的場景為自包含一句話(不引用 EP/SM 編號),寫入 Capabilities 備註或 backlog 卡(`backlog task edit <id> --append-notes`) |
 | **backlog 結案** | A（時點＝收斂後） | 已完成 UC 的卡結案兩步＋弧結案蒸餾第三動（本弧 memory 條目終態化）：`task edit <id> -s Done --final-summary` → `--ref` 換 `done/` 新 URL，卡留 Done 欄（命令合約見 [kanban-board](../kanban-board/SKILL.md)） |
 | **SYSTEM-MAP 結算** | A（時點＝收斂後） | 受影響功能生命週期升級(`✅ Built → ✅🔍 Verified`,若有整合驗證);移除已修復 ⚠️;更新全域統計(若有) |
 | **SYSTEM-MAP 預覽** | B | 中間段:生命週期 `📋→✅ Built`(全 UC ✅ + 測試通過 + build loop 收斂);**不升級 Verified**;loop 未收斂 → 阻止升級 + 標 ⚠️;**全域統計由情境 A 結算,預覽不動** |
@@ -85,7 +87,7 @@ build 情境 A 憑整合驗證升 Verified;情境 B(中間段)只到 Built 預�
 ## 兩段式執行(三 mode 共用)
 
 1. **偵測 → 展示清單**:build mode 依情境矩陣列該做的結算項；收斂後結案 mode 列結案段四件；standalone mode 列漏項/過時項
-2. **用戶確認**:standalone mode 遵循 [outward-action-consent](../../rules/outward-action-consent.md) 精神獨立確認；build mode 免確認（授權來源＝EP 已批准＋finalization consent 單一 owner＝build 流程——流程內機械結算不另確認）；**收斂後結案 mode**——機械結算三件（backlog 結案兩步／SYSTEM-MAP 升級／EP 歸檔）免確認（授權＝EP 已批准＋收斂 gate 已過），**flow-feedback 歸檔屬判斷型結算、保留獨立確認**（與 :46 flow-feedback 判斷 gate 同義）
+2. **用戶確認**:standalone mode 遵循 [outward-action-consent](../../rules/outward-action-consent.md) 精神獨立確認；build mode 免確認（授權來源＝EP 已批准＋finalization consent 單一 owner＝build 流程——流程內機械結算不另確認）；**收斂後結案 mode**——機械結算三件（backlog 結案兩步／SYSTEM-MAP 升級／EP 歸檔）免確認（授權＝EP 已批准＋收斂 gate 已過），**flow-feedback 歸檔屬判斷型結算、保留獨立確認**（與 :48 flow-feedback 判斷 gate 同義）
 3. **執行**:寫入 / 搬移 / 歸檔
 4. **consistency 閘門**:對動過的導航文檔跑 `/consistency`
 

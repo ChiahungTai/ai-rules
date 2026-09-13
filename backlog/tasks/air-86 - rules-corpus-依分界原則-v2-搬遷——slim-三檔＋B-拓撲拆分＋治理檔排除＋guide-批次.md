@@ -4,7 +4,7 @@ title: rules corpus 依分界原則 v2 搬遷——slim 三檔＋B 拓撲拆分�
 status: In Progress
 assignee: []
 created_date: '2026-09-13 00:38'
-updated_date: '2026-09-13 05:09'
+updated_date: '2026-09-13 05:37'
 labels: []
 dependencies: []
 ordinal: 72000
@@ -70,4 +70,6 @@ structure.md 引用邊表已加 bundle role 欄（bootstrap split / conditional 
 **禁令**：導引不放八站名稱/glyph（防 UC 段 slim 掉的內容從此入口長回）；STATE.md 不寫成高於 board/EP 的 authority；skills/CLAUDE.md 描述為索引非 authority。材料＝materials/codex-navdesign-out.txt。
 
 09-13 批二完成（待 commit）：ED 1,265→1,139/SQR 1,549→1,258/QC 2,341→1,797/ME 1,155→985；C1 承接 validation-strategy「crash-only 邊界」＋sqr skill 載體事實；impl drift 攔截 2 錨點→ledger 補 consumer 同步 3 筆；雙審 13/13 DELETE-OK、四檔 band 全上修（C-core 承重，C7 前例）、B2-F1 落 AIR-70；consistency 3 實質問題全處置（F1 in-batch/F2F3 隨 AIR-87）；deployed 31,427→30,296B 三端 identical；364 tests。帳本＝materials/review-ledger-air86-batch2.md。剩批三（guide＋開場導引＋collaboration/context/python）、批四（tool-discipline/outward）。
+
+09-13 批三完成（待 commit）：guide 4,284→4,248（開場導引三行版逐字插入 +430B 抵銷清理；UC glyph 沉 metadata-sync、銜接壓縮單源 kanban）＋collaboration 2,488→2,434＋context 2,155→2,115（freshness 段未動）＋python 2,053→1,953（只 A-slim）＋metadata-sync 承接+323。雙審 12/12 DELETE-OK、band 全上修；B3-F1 日期違規修＋批二同型自糾；consistency 6/6＋minor 修 3 筆；reviewer 衝突（bundle 新舊）機械裁決。deployed 30,296→30,008B 三端 identical；364 tests。帳本＝materials/review-ledger-air86-batch3.md。剩批四。
 <!-- SECTION:NOTES:END -->

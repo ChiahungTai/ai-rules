@@ -12,7 +12,7 @@ harness-scope: neutral
 
 ## 想法即時落盤（durable checkpoint）
 
-context 揮發且 quota 可能突然耗盡。真實案例：Codex 審查弧只落中間 findings，最終合成留 transcript 後 session 死亡，接手需昂貴考古。
+context 揮發且 quota 可能突然耗盡（案例：審查弧只落中間 findings、session 死亡後接手需昂貴考古）。
 
 - 關鍵發現/理由、排除路徑/原因、下一步意圖產生即記，附「中間檢查點／最終」＋尚待事項，防未驗收被當完成。
 - 有 EP→append；有卡→`task edit --append-notes`；都無→`.agent-tmp/session-journal.md`。長任務 spawn prompt 注入落盤要求。

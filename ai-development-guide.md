@@ -1,12 +1,18 @@
 # AI 協作開發指南
 
-跨專案、harness-neutral 協作規範，量化交易優先；Claude 用 symlink＋auto-load，其餘由 `deploy_agents.py` 打包到全域位置。專案指令放各 repo AGENTS.md。
+跨專案、harness-neutral 協作規範，量化交易優先；專案指令放各 repo AGENTS.md。
 
 改 instruction 前載 instruction-writing skill；禁行數/字數/版本號/日期/Changelog。雙檔與引用規範見 [instruction-writing.md](rules/instruction-writing.md)。
 
+## Session 開場導引
+
+- **先定位現在在哪**：有 STATE.md 先讀最近 session 觀察，再以 active card／board 狀態與 card notes／EP 進度節核對目前工作、已完成處與 resume point；觀察層不能取代現況來源。
+- **再決定下一個入口**：標準開發主鏈為 /execution-plan → /implement → /post-build → /commit；需求釐清、審查、修復等分支及各步方法論查 skills/CLAUDE.md 索引與對應 skill。
+- **需要跨 context 接續時先結算**：context 將耗盡先把進度與待辦寫回 EP／card；同一工作稍後續跑用 /at，交給另一個 session／repo／provider 用 /handoff。
+
 ## 演化性思維
 
-測試保護下優先架構品質/正確性/清晰度，持續測試→重構→確認；預設不保留向後相容。需確認情境見 [edit-discipline.md](rules/edit-discipline.md)。
+測試保護下優先架構品質/正確性/清晰度，預設不保留向後相容；需確認情境見 [edit-discipline.md](rules/edit-discipline.md)。
 
 ## 驗證約束
 
@@ -22,27 +28,27 @@
 
 ## UC-Driven Development
 
-功能先定義 Use Case。AGENTS.md Capabilities＝已完成能力索引，backlog＝承諾池；操作/refs/precheck 單一源為 kanban-board skill。多卡優先序可由 project blueprint dependency graph 決定（backbone），未被支撐的卡走 kanban triage。
+功能先定義 Use Case。AGENTS.md Capabilities＝已完成能力索引，backlog＝承諾池；多卡優先序可由 project blueprint dependency graph 決定（backbone），未被支撐的卡走 kanban triage；操作/refs/precheck 單一源為 kanban-board skill。
 
-文檔：AGENTS.md（Claude 以 CLAUDE.md wrapper）＝導航/完成能力 what/where；architecture.md＝why；SYSTEM-MAP.md＝跨域現狀；dependency-graph.md＝人工依賴/ripple 地圖（機械查詢交 code-reality）；backlog/＝任務卡。長文按需 link，禁全量 transclude。
+文檔角色：AGENTS.md＝導航/完成能力 what/where；architecture.md＝why；SYSTEM-MAP.md＝跨域現狀；dependency-graph.md＝人工依賴/ripple 地圖（機械查詢交 code-reality）；backlog/＝任務卡。長文按需 link，禁全量 transclude。
 
-UC 狀態：✅→主要實作模組 Capabilities（同一 UC 一處，`能力|入口|狀態`，入口含 CLI＋函式）；🟢→附限制；❌→移出；📋/🔧→backlog To Do；🟡→In Progress；未承諾→drafts。scripts/ 是人類 demo，不放 Capabilities。
+UC 狀態流轉與 Capabilities 寫入格式見 metadata-sync skill。
 
-規模：大型跨模組/新功能→execution-plan 建卡；中型→更新既有能力/卡；純 refactor 跨檔/模組/架構描述亦按大型/中型，僅單檔小 tweak 算小型。小 bug/doc 免 UC；碰單位邊界/除權息/時區/會計/風控即非 simple，至少列受影響 invariant＋驗證式（silent-corruption 例外）。
+規模：大型跨模組/新功能→execution-plan 建卡；中型→更新既有能力/卡；跨檔 refactor 亦按大型/中型，僅單檔小 tweak 算小型。小 bug/doc 免 UC；碰單位邊界/除權息/時區/會計/風控即非 simple，至少列受影響 invariant＋驗證式（silent-corruption 例外）。
 
-銜接：execution-plan 建卡即 commit 防 id 撞→implement 開工設 In Progress、完成寫 Capabilities（✅ 只在收斂後結案兩步）→post-build：code-review→judge-review→修正→consistency→metadata-sync（停 commit 前）→一次 commit code＋finalization。任何 session 動卡第一動設 In Progress；結案/清板前跑 kanban-board precheck，exit 1 停手。
+動卡第一動設 In Progress；銜接機制（建卡即 commit 防 id 撞、結案兩步、precheck）單一源 kanban-board skill。
 
 ## Solo + AI 開發工作流
 
-一人＋AI、無團隊/CI；一 EP＝一 session。段落須自含、可結算接續；compact 分布於規劃後/build 段間。model 退化就先結算再 handoff 新 session；Writer/Reviewer 分離，review 支援跨 session findings 回貼。
+一人＋AI、無團隊/CI；一 EP＝一 session，段落自含、可結算接續。model 退化先結算再 handoff 新 session；Writer/Reviewer 分離，review 支援跨 session findings 回貼。
 
 ## 架構設計紀律
 
-spec/EP/implement/review 用 Clean Architecture＋DDD 視角，不強制模板/過度分層；兩層思考、依賴方向、bounded context、use case 見 [design-thinking.md](rules/design-thinking.md)，SOLID/編輯見 [edit-discipline.md](rules/edit-discipline.md)；深入用 arch-thinking，介面用 api-and-interface-design skill。
+spec/EP/implement/review 用 Clean Architecture＋DDD 視角，不強制模板/過度分層；兩層思考/SOLID 見 [design-thinking.md](rules/design-thinking.md) 與 [edit-discipline.md](rules/edit-discipline.md)，深入用 arch-thinking，介面用 api-and-interface-design skill。
 
 ## 量化交易專屬鐵律
 
-- 數據完整性優先：損壞比缺失更危險，無效資料/溢出立即失敗，禁靜默傳播；Crash-Only 適用範圍見 [quality-constraints.md](rules/quality-constraints.md)。
+- 數據完整性優先：損壞比缺失更危險，禁靜默傳播（正文與 Crash-Only 適用範圍見 [quality-constraints.md](rules/quality-constraints.md)）。
 - 回測完全可重現（hash＋config＋seed），波動 >0.01 必須重做。
 - 狀態外部化；Live/Backtest 共用邏輯，避免模式分支。
 - 隨機 seed 必須可注入，避免 np.random。

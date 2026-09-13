@@ -4,7 +4,7 @@ title: 一致性掃描修復弧——13 中級全修＋低級順手批次（09-1
 status: In Progress
 assignee: []
 created_date: '2026-09-09 22:40'
-updated_date: '2026-09-13 04:59'
+updated_date: '2026-09-13 05:30'
 labels:
   - governance
   - consistency
@@ -34,4 +34,8 @@ ordinal: 56000
 **處置裁定（user 09-13 拍板）**：剩餘屬雜項性質非 workflow 弧——不採弧儀式，規劃為清掃 session 批次消化（與 AIR-67 剩餘合併評估）；audit 與 draft-1/2 兩軸性質不同另行歸位。
 
 09-13 批二雙審移入（codex finding，non-blocking）：skills/symbol-query-routing/SKILL.md L121-125「條件式 fallback」段仍以現在式描述 lsp-python MCP 連接（server 已於 2026-08-28 停擺，L106 disclaimer 已框住歷史作用域）——改明確過去式即可，防跳讀誤當現行指令。來源＝AIR-86 批二 codex 審查（.agent-tmp/air86-batch2/codex-review-batch2.txt §4）。
+
+09-13 批三 impl 發現（既存 drift）：skills/execution-plan/SKILL.md L155 引 ai-development-guide 的「Scenario Matrix」段落——新舊 guide 皆無此節（該節實住 execution-plan skill 自身 L137）。修正＝改指自檔或刪 link。來源＝AIR-86 批三依賴掃描。
+
+09-13 批三 codex 審查補充（同型既存違規）：skills/symbol-query-routing/SKILL.md L10「（自 rule 下沉 2026-08-31）」標題含日期——違 guide 禁日期規（與本次批二/批三新增兩處已修同型；codex B3-F1）。修法＝刪日期留承接語義。
 <!-- SECTION:NOTES:END -->
