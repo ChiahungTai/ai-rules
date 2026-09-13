@@ -1,0 +1,144 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T00:59:33.104550Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:59:33.133956Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:59:33.167995Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:59:33.737667Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:59:33.739145Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:59:33.836383Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:59:33.837517Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:59:33.876244Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:59:33.899818Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:59:35.046666Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:59:35.058378Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:59:35.109692Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+審查完成。結論不是「整體失敗」：核心 authority 已大致正確落地，A/B 也有補上，AGENTS 兩個 shadow 清得合理；但目前仍有 **3 個 confirmed findings，其中 3 個都建議在進 post-build 前修掉**。沒有 design-reversal finding。
+
+### 7 軸 verdict
+
+| 軸 | Verdict | 結論 |
+| --- | --- | --- |
+| ① faithful application | **FAIL** | 五個同步面大多有落，但 [skills/memory-audit/SKILL.md:162](<skills/memory-audit/SKILL.md:162>) 的「該寫哪」一行流根本沒改，仍是舊 `每次都要＝rule／on-demand＝skill`。A/B、Q2/Q6、AGENTS:100/117 都有改；changed files 也只有預期的兩檔，無 unrelated drift。 |
+| ② 語義完整性 | **FAIL** | 主閱讀序 `scope gate → qualification → 三測試 → table → flow → misuse` 已成立；條件載入也沒有變成第四種 scope。但 L162 舊 flow 與新 qualification 正面衝突；另 `:146` 指到不存在的 deployment contract。 |
+| ③ inbound 引用完整性 | **FINDING** | [rules/context-management.md:27](<rules/context-management.md:27>)、[skills/instruction-writing/SKILL.md:18](<skills/instruction-writing/SKILL.md:18>) 都仍能正確指到 authority。`memory-audit:3` description **不必為 correctness 強制改**；`:71` 收斂落點也仍相容，無須本弧動。反而真正有問題的是 authority 自己在 `:146` 宣稱 instruction-writing 有 marker contract，但實際不存在。 |
+| ④ drift / negative vocabulary | **FAIL** | `每次都要的紀律`、`每次 session 都需要`、`rule＝每次`、`desc＝唯一觸發面` 在指定 active scope 都 0 hit；`ai-development-guide.md` 也沒有舊 carrier 判準殘留。唯一殘留是 `memory-audit:162` 的 `每次都要＝rule`。 |
+| ⑤ decision replay | **FAIL** | 新 authority 本身可判四案，但實際 consumer 存在歧義：TDD 案會被 `:221` 的 shortcut 推向 rule，而 qualification formula 未必允許；其餘三案明確。 |
+| ⑥ single-source authority hygiene | **FAIL** | 完整 qualification formula 目前只在 `:142`，這點很好；AGENTS:100/117 是可接受的最小摘要＋pointer。但 `:221`、`:225`、A row `:169` 又把「三測試」寫成近似充分判準，重新長出 semantic shadow。 |
+| ⑦ Decoder regression | **FAIL（8/9 clear）** | B、M1–M5、B1、SM-5 都仍能明確回答「該寫哪／為什麼」。A row 只寫「依 residency 三測試判定 rule/skill」，漏掉 qualification formula，因此 A 是唯一 regression。 |
+
+`git diff --check` 是 clean；branch 為 `air-70`，working tree 仍只改 `AGENTS.md` 與 [skills/memory-audit/SKILL.md](<skills/memory-audit/SKILL.md>)。
+
+### Findings
+
+1. **Important · confirmed · bug — 一行流漏改，舊二分法仍是 active authority。**  
+   [skills/memory-audit/SKILL.md:162](<skills/memory-audit/SKILL.md:162>) 仍寫：  
+   `通用方法論 → 每次都要＝rule／on-demand＝skill`。  
+   這不是 harmless historical wording，因為標題就是「該寫哪（一行流）」；它與 `:142` 的 qualification formula 衝突，也違反本次 faithful-application spec。
+   
+   Remedy：照原 r2 定稿把 flow 改成「先 scope gate；user-level 方法論只有同時滿足 qualification + pre-trigger 條件才進 minimal rule；可靠及時 trigger → skill」，不要再保留 `每次都要` 作充分條件。
+   
+   驗證式：
+   
+   Bash
+   
+   ```
+   rg -n '每次都要＝rule' skills rules AGENTS.md agents ai-analysis/blueprint ai-development-guide.md
+   ```
+   
+   預期 active scope **0 hits**。
+2. **Important · confirmed · drift — A row、Q2、Q6 把 residency 三測試誤寫成 qualification 的替代品。**  
+   三個位置有同一類問題：
+   
+   - [skills/memory-audit/SKILL.md:169](<skills/memory-audit/SKILL.md:169>)：A row 寫「rule／skill 依 residency 三測試判定」
+   - `:221`：直接寫「首個有後果決策前必須在場→最小 rule」
+   - `:225`：Q6 寫「先套層級硬閘與 residency 三測試」
+   
+   但真正 authority 在 `:142` 是：  
+   `scope-compatible ∩ pre-consequential ∩ (verified calibration ∪ user special ∪ bootstrap)`。
+   
+   所以 **三測試不是 qualification formula 的替代物**。最明顯反例就是你給的 TDD：generic TDD 確實要在 coding 前出現，但若沒有 verified calibration/user override/bootstrap necessity，它不能只靠「出現得早」就自動升 rule。
+   
+   Remedy：三處都改成 pointer 型：
+   
+   - A row：`rule／skill 依 rule 資格公式＋residency 三測試判定`
+   - Q2：不要再寫 `pre-consequential → rule` shortcut，只寫「rules/skills 歸屬查統一定義表資格公式＋三測試；通用≠rule」
+   - Q6：`先套層級硬閘、rule 資格公式與 residency 三測試`
+   
+   驗證式：
+   
+   Bash
+   
+   ```
+   rg -n '首個有後果決策前必須在場→最小 rule' skills/memory-audit/SKILL.md
+   ```
+   
+   預期 **0 hits**。
+   
+   以及：
+   
+   Bash
+   
+   ```
+   rg -n '依 residency 三測試判定' skills/memory-audit/SKILL.md
+   ```
+   
+   預期 **0 hits**，應改成明列 qualification formula + 三測試。
+3. **Important · confirmed · drift — 條件載入層存在 present-tense broken pointer。**  
+   [skills/memory-audit/SKILL.md:146](<skills/memory-audit/SKILL.md:146>) 說：  
+   `deployment contract 與 marker 細則見 instruction-writing skill`。
+   
+   但實查 [skills/instruction-writing/SKILL.md](<skills/instruction-writing/SKILL.md>)：
+   
+   - 無 `projection`
+   - 無 `bootstrap-pointer`
+   - 無 `deploy_agents`
+   - 無這套 explicit projection marker contract
+   
+   現有 `paths:` 討論只是一般 instruction/按需載入內容，不能算這個 contract。AIR-86 卡目前也沒有明列這個 marker contract，只寫 corpus 搬遷、python paths 洞與 deploy 驗收。
+   
+   我不建議為了修 pointer 把 deployment schema 硬塞進 AIR-70。較乾淨的 remedy 是：**AIR-70 只保留 principle，刪掉「細則見 instruction-writing」的現時態宣稱，明寫 projection mechanism 尚未落地、落地前不得據此排除 non-CC body；真正 schema 放後續 deploy/corpus 弧。**
+   
+   驗證式若採此 remedy：
+   
+   Bash
+   
+   ```
+   rg -n 'deployment contract' skills/memory-audit/SKILL.md
+   ```
+   
+   預期 **0 hits**，直到真正 contract 上線再建立正式 pointer。
+
+### 四案例 replay
+
+| 案例 | 新 authority 應得判定 | 實際文件狀態 |
+| --- | --- | --- |
+| TDD 通用方法論 | **skill** 為預設；若另有 verified calibration / user 特殊裁定且必須 pre-trigger，才升 minimal rule | **目前有衝突**：`:221` shortcut 可能直接推 rule |
+| 某 repo port 號慣例 | project-specific normative convention → **repo/module AGENTS.md**；若只是 config 可推導現值 → **不重寫** | 清楚 |
+| commit consent | user-level 特殊裁定＋首個有後果 action 前必須存在 → **rule** | 清楚 |
+| Mermaid 選型方法 | 有清楚 trigger、可安全按需載入 → **skill** | 清楚 |
+
+所以 axis ⑤ 不是因新模型本身判不了，而是**實施後的 semantic consumers 還沒有完全服從新模型**。
+
+### Decoder regression
+
+A/B/M1–M5/B1/SM-5 共 9 行中，**8 行 pass**。唯一有問題的是 A：
+
+`A user-level 規範進 project memory` 的 scope correction 本身完全正確；問題只在第二階段 rule/skill selection 寫成「依 residency 三測試」，少了 qualification formula。補成「依 rule 資格公式＋residency 三測試」後，9/9 應可恢復。
+
+B 的 `project-specific → project carrier`、M1 任務狀態→卡/EP、M3 草稿→scratch、M4 repo 可推導→不寫、M5 mechanism carrier、B1、SM-5 都沒有被新公式翻壞。
+
+### 你特別問的兩個未動位置
+
+[skills/memory-audit/SKILL.md:3](<skills/memory-audit/SKILL.md:3>) 的 description **可以不動**。它的「載體職責×常駐-按需×寫入預設」現在只是 skill catalog 摘要，不是 decision procedure；雖然不再完整描述新 authority，但沒有給出錯誤判決。若之後做 terminology cleanup，可把「常駐-按需」換成 `scope×residency×carrier`，但我不把它列為 post-build blocker。
+
+[skills/memory-audit/SKILL.md:71](<skills/memory-audit/SKILL.md:71>) **也不用因 AIR-70 強制改**。它先明說「處置去處判斷單一源＝本表」，後面的跨 repo / 模組 / user-project 三分只是 coarse destination summary，沒有自行決定 rule qualification；目前與新 scope gate 相容。
+
+## 最終 verdict
+
+**需修 3 點，暫不建議進 post-build。**
+
+好的部分很多：scope hard gate、qualification formula、三測試、rule/skill rows、A/B misplacement、AGENTS:100/117 都已落到正確方向，而且沒有 unrelated diff。現在不是設計要重來，而是三個「authority implementation closure」問題：
+
+**漏改一行流 + downstream consumer 少 qualification gate + conditional-loading pointer 指向不存在的 contract。**
+
+三點修完後，我預期 7 軸可直接收斂；不需要重新討論 v2 原則本身。
+[delegate-bridge] job job-mtz3wk0t-fpugox status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

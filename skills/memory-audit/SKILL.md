@@ -135,12 +135,20 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 
 ## 載體統一定義表（該寫哪——判準單一源）
 
-> 三處分散判準合一（本 skill 寫入六問 Q6 載體判定 × instruction-writing「載體選擇」（原載體決策樹）× 層 3 收斂落點慣例）——「該寫哪」一律查本表，引用處皆指針回此。稀缺性軸＝北極星分層（開場常駐最貴 → 任務中載入 → 按需檢索 → 零 context）；**載體職責與常駐-按需是正交軸**——同一載體可兩層並存（memory：索引常駐＋body 按需），不硬配「rule 都重要、memory 都次要」。
+> **先判層級，再判稀缺：層級是硬閘，由部署拓撲決定可達性；user-level 知識不得以 project-only 載體作權威源，project-specific 知識不得上提為 user-level 規範；僅在層級相容後，才以 always-on／on-demand／檢索成本選載體。以下表格與「該寫哪」一行流皆先套此閘。**
+>
+> 三處分散判準合一（本 skill 寫入六問 Q6 載體判定 × instruction-writing「載體選擇」× 層 3 收斂落點慣例）——「該寫哪」一律查本表，引用處皆指針回此。稀缺性軸＝開場常駐 → 任務中載入 → 按需檢索 → 零 context；**載體職責與 residency 是正交軸**。
+>
+> **rule 資格＝層級相容 ∩「首個有後果的決策前必須在場」∩（經驗證的模型校準需求 ∪ user 特殊裁定 ∪ trigger-bootstrap 必要資訊）。**「模型已知／通用工程共識」只產生 delete candidate，不是自動刪除判決。
+>
+> **residency 三測試**：① Bootstrap——body 下沉後，模型不知道其內容仍能可靠知道何時載對應 skill；不能則最小 bootstrap 留 rule。② First consequential action——若等 on-demand 載入時首個不可忽略行為已可能發生，核心須提前常駐。③ Portfolio duplication——若同一約束已由更高優先級 instruction、hook、repo AGENTS 或可靠 skill trigger 承載，user-level 重複 rule 應退出。
+>
+> **條件載入層**：Claude Code `paths:` 僅表示「Read 到 matching path 後載入 rule body」的原生 runtime 條件，不單獨作為 non-CC bundle 排除訊號；portable body→skill／bootstrap-pointer projection 必須顯式 opt-in；**projection 機制尚未落地（落地弧＝AIR-85），落地前不得據此排除 non-CC bundle body**。新增 path-scoping 亦須重新通過上述 Bootstrap／First consequential action 測試。
 
 | 載體 | 職責（收什麼） | 稀缺層（context 佔用） | 寫入預設 |
 |---|---|---|---|
-| rule（`rules/`） | 每次 session 都需要的硬紀律（一行能說完最好） | **開場常駐**（bundle 部署——最貴；on-demand 級內容下沉 skill＝reference 分層） | 寫作治理（AGENTS.md：修剪測試/選載體/驗證附著/長度預算/部署同步） |
-| skill（`skills/`） | on-demand 方法論（理論深掘/失敗案例群/撰寫細則） | 清單常駐（name+desc）＋**body 按需載入**（desc 觸發） | SKILL.md 撰寫規範；desc＝唯一觸發面 |
+| rule（`rules/`） | 通過 rule 資格公式、須在首個有後果決策前生效的**最小核心／bootstrap** | portable baseline＝開場常駐最貴；可安全延後的 body 下沉 skill；CC 可另用 `paths:` 原生條件載入 | 寫作治理＋三測試；common/known 只作 delete candidate，不逐檔自動刪 |
+| skill（`skills/`） | 有可靠 task trigger 的 on-demand 方法論／深層 body（理論深掘、失敗案例群、操作細則） | metadata/listing 常駐＋**body 按需載入** | desc＝implicit routing 面；亦可由 rule/bootstrap pointer explicit 觸發 |
 | memory 條目 | 跨 session、與 user/專案綁定的事實（偏好/糾正/教訓） | 索引常駐（B 形態＝常駐定額）＋body 按需（rg） | 一句話測試 → 寫入六問 → 尺寸預算（本檔寫入端紀律段） |
 | 模組 AGENTS.md | 模組層約束與入口 | 開該模組任務時載入（路徑觸發） | 3-6 行約束形態，非流水帳搬移 |
 | backlog 卡 | 任務狀態/承諾/待辦——弧工作單元 | 按需（board/命令查詢；不進 context） | `task create`/`edit`；建卡即 commit |
@@ -151,13 +159,15 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 
 ### 該寫哪（一行流）
 
-**知識產生時**：任務終態/進度/承諾 → 卡 notes／EP 進度節（永不進 memory）→ repo 可推導 → 不寫 → 通用方法論（與 user 無關）→ 每次都要＝rule／on-demand＝skill／模組層＝模組 AGENTS.md → 跨 session user/專案綁定事實（確定才寫）→ memory 條目 → 暫存/草稿 → scratch。
+**知識產生時**：先套層級硬閘 → 任務終態/進度/承諾 → 卡 notes／EP 進度節（永不進 memory）→ repo 可推導 → 不寫 → user-level 方法論套 rule 資格公式：首個有後果決策前必須在場**且**屬 verified calibration／user 裁定／trigger-bootstrap → 最小 rule；有可靠 trigger 且可在首個有害行為前載入 → skill；CC 檔案讀取型條件內容可依條件載入層處置 → 模組層約束 → 模組 AGENTS.md → 跨 session user/專案綁定事實（事故證據／偏好例外／pointer，確定才寫）→ memory 條目 → 暫存/草稿 → scratch。
 **機制設計時**：純機械＋單一入口＋無語義例外 → hook；缺一 → rule/skill/prompt（LLM 流程編排）按稀缺層。
 
 ### 誤置 → 處置（AIR-48 P1 taxonomy 鑑識輸入——各類頻率/統計快照見任務家 p1-taxonomy.md，不入本檔）
 
 | 誤置（P1 實證） | 表判決（該寫哪） | 處置設計（實作另裁） | 層 |
 |---|---|---|---|
+| A user-level 規範進 project memory | 規範回 user-level 單一源；rule／skill 依 rule 資格公式＋residency 三測試判定。memory 只留事故證據／偏好例外／pointer，不複製規範正文 | mixed 條目拆層：規範正文移回 user-level source，memory 僅保留三物；禁止以 resident memory 解 scope 錯置 | LLM 流程（層級硬閘） |
+| B project-specific 知識上提 user-level rule／skill | 下沉 project carrier：規範→repo／module AGENTS.md；user/project 綁定事實→memory；任務狀態／承諾→backlog／EP。user-level 僅留可泛化方法論 | mixed 內容拆層，移除 user-level source 中的 repo-specific 狀態／參數／入口／例外；依內容性質歸回 project carrier | LLM 流程（層級硬閘） |
 | M1 任務終態/進度入池 | 卡 notes／EP 進度節 | **放置閘**——新建條目 hook 注入六問指針（機械提醒；Q1 判斷留 LLM） | hook 提醒＋LLM 流程 |
 | M2 desc 三不違反（鑑識時內容閘不存在，日期流水全放行） | desc 不放易變快照（現值/日期/session-id） | **內容閘**——desc regex 偵測日期 MM-DD／`sess_` 形態硬擋（三判準：純機械/單入口/語義例外有條件通過——desc 語彙內合法碰撞罕見，邊界見 hook 註解；09-10 已落地） | hook 機械閘 |
 | M3 多 writer 草稿式迭代（stale-collision 多發） | 草稿 → scratch；條目收終態事實（寫入當下即蒸後形） | stale-collision 訊息擴充——碰撞 error 附改道提示（既有 collision error 即觸發點） | hook 訊息 |
@@ -208,11 +218,11 @@ harness auto memory 預設「one file = one fact」的「fact」操作定義 = *
 ### 寫入六問（新教訓產生時依序）
 
 1. **任務終態 or 活知識？**（09-05 user 拍板，MOS-36 實證）→ 知識生命週期跟不跟任務綁：**任務終態**（弧歷程、session 流水、處理軌跡、已結案任務過程細節——**完成/退役一句話若只記歷程同樣回卡，不因短就合法**）→ 卡/report，**不進 memory**；**跨任務活知識**（行為教訓、入口指針）→ 才繼續往下問。**活躍線 blocker 拆兩半**：任務狀態（等誰、進度、卡在哪）歸卡；**已確認的外部限制**（跨任務成立的事實約束）才留 memory（AIR-42.1）。**此問先於「repo 可推導」**——它是分類判準（該不該進 memory），非來源判準（哪裡可查）
-2. **repo 可推導 or 通用原則？** → git log / instruction 檔 / 程式碼 / **進行中 EP 的進度與狀態（住 EP 檔）**可推導 → 不寫；**LLM 通用做事原則/方法論**（與 user 個人化無關、任何 session 都適用）屬 rules/skills 知識——**先判用途與最小適用範圍再落載體**（每次都要的紀律→範圍最小的 rule；on-demand 方法→skill；**通用 ≠ rule**——scope 判斷，AIR-42.1），不開 memory 條目。memory 收與 user／專案綁定的事實（偏好、糾正、專案約束、外部資源參照）——通用工程原則不收
+2. **repo 可推導 or 通用原則？** → git log / instruction 檔 / 程式碼 / **進行中 EP 的進度與狀態（住 EP 檔）**可推導 → 不寫；**LLM 通用做事原則/方法論**（與 user 個人化無關、任何 session 都適用）屬 rules/skills 知識——**先判用途與最小適用範圍再落載體**（rules/skills 歸屬查本檔「載體統一定義表」rule 資格公式＋residency 三測試；**通用 ≠ rule**——scope 判斷，AIR-42.1），不開 memory 條目。memory 收與 user／專案綁定的事實（偏好、糾正、專案約束、外部資源參照）——通用工程原則不收
 3. **同主題已有？** → `rg -i <關鍵詞> <memory-dir>/` 全檔掃（**不信 MEMORY.md 索引**——載入截斷下尾部條目不可見）；命中 → 既有檔加段（段標題保留原始 name、標 original type）；**進行中弧線條目禁加段**——弧線進度每 session 追加是膨脹主因（實證：單檔 98 次 Edit 養到 84KB），等弧線收案一次性蒸餾；無 → 才開新檔
 4. **project-\* 已完結？** → 任務閉環先收斂既有 project 條目（刪現況細節、留決策教訓）再開新檔
 5. **尺寸預算？** → frontmatter `description` ≤100 chars（索引行原料；>100 被 PreToolUse hook 硬擋——hook 僅攔主 session，subagent 寫入不觸發）；**新建條目 ≤3,000 chars（寫入當下即蒸後形——形態見寫入六問後「body 形態」段）**；條目檔（含 frontmatter）≤12,000 chars（膨脹超限被 hook 擋；收斂方向＝改後比原檔短，放行）——超額 = 內容該住 EP 檔/repo 的訊號；索引軟上限 150 行，逼近 = cluster merge／收斂觸發；消費端另有一層 muse 直達注入 8KB 軟壓力（非閘——見「Inbox 消費」節）
-6. **載體對嗎？** → 查「載體統一定義表」（本檔上節）一行流——每次都要的紀律→rule／on-demand 方法論→skill／跨 session 事實→memory／模組層→模組 AGENTS.md；**承諾/待辦→backlog 卡**（memory 只收事實與教訓，不收承諾；手冊形內容不住 memory——它該住 skill）
+6. **載體對嗎？** → 查「載體統一定義表」（本檔上節），先套層級硬閘、rule 資格公式與 residency 三測試後依一行流判定；跨 session user/project 綁定事實→memory、模組層→模組 AGENTS.md、**承諾/待辦→backlog 卡**（memory 只收事實與教訓，不收承諾；手冊形內容不住 memory——它該住 skill）
 
 **rank 初判**（六問之後順手標，一句裁量非機械）：新條目 frontmatter 初判 `rank`——hot＝活躍弧/高頻教訓，core＝default，cold＝冷門/清候選。
 

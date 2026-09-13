@@ -1,0 +1,70 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T01:05:53.803155Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T01:05:53.805148Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T01:05:53.808198Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T01:05:54.362245Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T01:05:54.362255Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T01:05:54.362294Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T01:05:54.573051Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T01:05:54.576238Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T01:05:54.649907Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T01:05:55.548247Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T01:05:55.572275Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T01:05:55.573400Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+複驗完成。**最終 verdict：可進 post-build，0 個 blocker / 0 個新 finding。** 上一輪 F1/F2/F3 都已實質收斂。
+
+| 軸 | Verdict | 複驗結果 |
+| --- | --- | --- |
+| ① faithful application | **PASS** | `git diff` 現在完整涵蓋 scope gate、qualification、三測試、carrier rows、一行流、A/B、Q2/Q6、AGENTS 兩處 shadow。變更仍只在 `AGENTS.md` 與 [skills/memory-audit/SKILL.md](<skills/memory-audit/SKILL.md>)，未見旁支漂移。 |
+| ② 語義完整性 | **PASS** | `scope gate → rule qualification → residency 三測試 → carrier table → 一行流 → misuse table` 現在是一致鏈。L162 已不再用「每次都要＝rule」，而是完整套 qualification；條件載入仍只是 residency/deployment projection，不是第四種 scope。 |
+| ③ inbound 引用完整性 | **PASS** | `context-management.md:27` 與 `instruction-writing:18` 仍正確指向 SSOT。`memory-audit:3`、`:71` 保持 coarse summary/pointer，不構成競爭判準，維持上一輪「不用為本弧改」的裁決。 |
+| ④ drift / negative vocabulary | **PASS** | 六個指定 negative patterns，加 `desc＝唯一觸發面`，在 active scope 均為 0 hits。完整 qualification formula 仍只有 `memory-audit:142` 一個權威定義。 |
+| ⑤ decision replay | **PASS 4/4** | TDD→skill；repo port convention→project carrier；commit consent→rule；Mermaid 選型→skill。F2 修後已沒有「出現得早 ⇒ rule」的錯誤捷徑。 |
+| ⑥ single-source authority hygiene | **PASS** | 完整公式只有 `:142`；三測試完整定義只有 `:144`。A row / Q2 / Q6 現在都是「formula + tests」的 pointer/摘要，不再把三測試冒充 qualification。AGENTS:100/117 是帶 SSOT pointer 的最小 bootstrap 摘要，可接受。 |
+| ⑦ Decoder regression | **PASS 9/9** | A/B/M1–M5/B1/SM-5 全部仍能唯一回答「該寫哪、為什麼」。上一輪唯一失敗的 A row 已修復。 |
+
+### F3'：AIR-85 指針
+
+**採納，沒有異議。**
+
+我實際讀了 AIR-85，卡題就是「條件載入層 vertical slice——bundle-mode marker＋deploy 投影」，而且明確承接：
+
+- `paths:` 不單獨作 non-CC 排除訊號
+- explicit marker 決定 projection
+- non-CC 留作者寫的 bootstrap pointer
+- deploy fail-closed
+- instruction-writing 作 pilot
+
+所以 `memory-audit:146` 現在寫：
+
+> projection 機制尚未落地（落地弧＝AIR-85），落地前不得據此排除 non-CC bundle body
+
+是**準確的 future-work pointer**，不是 broken present-tense contract。它同時保留 negative guard，因此不會讓 reader 把 AIR-85 的未完成能力當成已上線能力。這版比單純刪 pointer 更好。
+
+### Decision replay
+
+四案現在都能從同一套判準直接推出：
+
+- **TDD 通用紀律**：user-level、但「通用工程共識」本身不取得 rule 資格；若已有可靠 task trigger，可在 coding 前載入 TDD skill ⇒ **skill**。只有另有 verified calibration／user 裁定／bootstrap necessity 才升 minimal rule。
+- **某 repo port 號慣例**：先被 scope hard gate 擋在 project level；規範性慣例 ⇒ **repo/module AGENTS.md**。若只是 config/code 已可推導的現值，更前面就 ⇒ **不另寫**。
+- **commit consent**：user 特殊裁定，而且必須在第一個 outward commit action 前生效 ⇒ qualification 全滿足 ⇒ **rule**。
+- **Mermaid 選型方法**：可靠 `mermaid/diagram` task trigger，且可在真正選型前載入 ⇒ **skill**。
+
+TDD 反例現在尤其重要：L162、A row、Q2、Q6 四處已不再給出「pre-consequential 就足以成 rule」的推論。
+
+### Decoder 9/9
+
+A 現在是「先把 user-level 規範移回正確 scope，再由 **rule 資格公式＋residency 三測試** 分 rule/skill」；這正是上一輪缺口。
+
+其餘 B、M1–M5、B1、SM-5 均未被新公式翻壞：project-specific 下沉 project carrier；任務狀態去 card/EP；草稿去 scratch；repo 可推導不重寫；機械機制按 hook/外部 runtime carrier；既有 bundle/attribution 類處置仍各自成立。
+
+### 關於你方自有 finding (a)
+
+同意 **defer** `AGENTS.md:117` 的「常駐-按需」術語清理。它目前是軸名摘要，且同句明確把資格公式指回 memory-audit SSOT；不像上一輪 Q2 shortcut 會直接產生錯誤 carrier 決策。因此是 terminology cleanup，不是 AIR-70 correctness blocker。
+
+**Findings：無。**
+
+`git diff --check` 亦為 clean。你方報告的 `pytest 364 passed` 我這輪沒有重跑；本輪獨立複驗聚焦於 final diff、authority/pointer、negative scan、decision replay 與 decoder regression，且遵守 read-only red line。
+
+**最終：AIR-70 段二回填可進 post-build。**
+[delegate-bridge] job job-mtz44q8h-1wue0v status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

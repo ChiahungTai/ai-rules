@@ -1,0 +1,125 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T00:49:52.849963Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:49:52.878625Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:49:52.879853Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:49:53.475395Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:49:53.476659Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:49:53.646358Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:49:53.665129Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:49:53.665345Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:49:53.828072Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:49:54.871578Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:49:54.885681Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:49:55.044255Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+A、B、C 三部分我都確認完了。這次有一個實質新發現：**r2 的三段 diff 本身仍適用，但如果實施只碰 L136–155，會留下兩個 active semantic shadow，單一源會當場自相矛盾。**
+
+## A. diff 適用性終檢
+
+**結論：r2 三段 diff 的落點與內容仍成立；但實施 scope 必須補同步面。**
+
+目前 HEAD 已前進到 `c989eae`，working tree 仍 clean。現檔 memory-audit/SKILL.md 的 L136–175 與我 r2 草擬時看到的結構一致，因此三個主要 edit anchor 沒有被近三日改動撞掉：
+
+- L138：統一定義表前言，仍可整段替換成「層級閘＋資格公式＋三測試＋條件載入 pointer」。
+- L142–143：rule / skill 兩列仍是舊定義，可照 r2 替換。
+- L154：一行流仍是舊的「每次都要＝rule／on-demand＝skill」，可照 r2 替換。
+- L155 hook 三判準與新模型相容，**不用改**。
+
+但現在有兩個 r2 當時未納入的 active duplicate：
+
+同檔 L211：
+
+> 每次都要的紀律→範圍最小的 rule；on-demand 方法→skill
+
+以及 L215：
+
+> 每次都要的紀律→rule／on-demand 方法論→skill
+
+其中 **L215 是寫入六問 Q6 的真正 consumer path**。如果上面 L136–154 換成 residency 三測試，Q6 卻仍教舊二分法，這是明確 contradiction，不能留。
+
+另外 root AGENTS.md:117 也仍寫：
+
+> rule＝每次 session 都需要的硬紀律；skill＝on-demand 方法論
+
+這不是單純 pointer，而是另一份 normative summary，也需要同步。相較之下 instruction-writing/SKILL.md:18 只是「統一定義表在 memory-audit」的 pointer；「常駐-按需」字樣雖可日後改成 residency，但沒有形成相反判決，不是 blocker。
+
+所以 A 的實施判斷是：
+
+> **三段 r2 diff 照用，但 implementation scope 至少加 `memory-audit:L211/L215` 與 `AGENTS.md:117`。最好的修法不是把新公式再複製三份，而是把 consumer 處縮成 pointer，真正公式只留 L136 的 authority。**
+
+尤其 Q6 我建議改成類似：
+
+Diff
+
+```
+-6. **載體對嗎？** → 查「載體統一定義表」（本檔上節）一行流——每次都要的紀律→rule／on-demand 方法論→skill／跨 session 事實→memory／模組層→模組 AGENTS.md；...
++6. **載體對嗎？** → 查「載體統一定義表」（本檔上節），先套層級硬閘與 residency 三測試後依一行流判定；跨 session user/project 綁定事實→memory、模組層→模組 AGENTS.md、承諾/待辦→backlog 卡。...
+```
+
+這比在 Q6 重抄完整資格公式更符合 single-source。
+
+* * *
+
+## B. 09-10 誤置表 A/B：本次必須一併落
+
+**裁定：是，而且不是 scope creep，是 AIR-70 原本就明列的未完成 acceptance item。**
+
+證據有三層一致：
+
+- 09-10 裁決書明確說「統一定義表兩處修補」，第二處就是 A/B。
+- 現行 AIR-70 卡明寫「層級閘首句＋誤置表 A/B」。
+- blueprint matrix 也把 memory-audit/SKILL.md 的 AIR-70 段二 A 定義成這兩項。
+
+因此只落首句、資格公式、表格和一行流，卻漏 A/B，AIR-70 仍然不完整。
+
+我建議 A/B 放在「誤置 → 處置」表**最前面、M1 之前**，因為 scope hard gate 邏輯上先於所有 carrier-level misuse。
+
+diff-able 條文如下：
+
+Diff
+
+```
+ | 誤置（P1 實證） | 表判決（該寫哪） | 處置設計（實作另裁） | 層 |
+ |---|---|---|---|
++| A user-level 規範進 project memory | 規範回 user-level 單一源；rule／skill 依 residency 三測試判定。memory 只留事故證據／偏好例外／pointer，不複製規範正文 | mixed 條目拆層：規範正文移回 user-level source，memory 僅保留三物；禁止以 resident memory 解 scope 錯置 | LLM 流程（層級硬閘） |
++| B project-specific 知識上提 user-level rule／skill | 下沉 project carrier：規範→repo／module AGENTS.md；user/project 綁定事實→memory；任務狀態／承諾→backlog／EP。user-level 僅留可泛化方法論 | mixed 內容拆層，移除 user-level source 中的 repo-specific 狀態／參數／入口／例外；依內容性質歸回 project carrier | LLM 流程（層級硬閘） |
+ | M1 任務終態/進度入池 | ...
+```
+
+有兩個刻意修正自 09-10 原文：
+
+第一，A 不再寫舊的「rule/skill 依 always-on/on-demand」，而是接今天的新 authority：**依 residency 三測試**。
+
+第二，B 把「project carrier」展開成規範／事實／任務狀態三分，這與新一行流一致，也避免「全部下沉 memory」這種錯讀。
+
+* * *
+
+## C. 審查軸裁決
+
+你提的五軸我都同意，但我會對 ③、④、⑤加強，另外新增兩軸。最終我建議用 **7 軸**。
+
+| 軸 | 裁決 | 修正／補充 |
+| --- | --- | --- |
+| ① faithful application | **同意** | 不只對 r2 三塊 diff；acceptance scope 要包含 A/B 兩行、L211/L215 consumer shadow、AGENTS.md:117 active duplicate。逐塊核「該改有改、不該改未漂」。 |
+| ② 語義完整性 | **同意** | 閱讀順序正確：**scope gate → rule qualification → residency 三測試 → carrier table → 一行流 → misuse table**。另外驗「條件載入層」只是 residency 的特殊 projection，不反客為主成第四種 scope。 |
+| ③ inbound 引用完整性 | **同意，但拆成 pointer 與 semantic consumer 兩類** | `context-management.md:27`、`instruction-writing:18` 這種 pointer 只要仍可達即可；L211/L215、AGENTS:117 是**複製判準的 consumer**，必須同步或收成 pointer。只檢查 link 不壞不夠。 |
+| ④ drift 殘留 | **同意，加 negative vocabulary scan** | 不只 rg 新條文是否存在；還要逐 pattern 掃舊判準，如 `每次都要的紀律`、`rule＝每次 session 都需要`、`desc＝唯一觸發面`。歷史 report/done EP 可存在，active authority / consumer 不得殘留矛盾。 |
+| ⑤ 消費端流程 | **同意，升級成實際 decision replay** | 寫入六問 Q6 與 instruction-writing 不能只是「仍指得到表」；實際帶案例走一遍，確認得出新判決。至少測 user-level method、project-specific fact、pre-trigger calibration、可安全 on-demand method。 |
+| ⑥ Single-source authority hygiene | **新增，必要** | 檢查這次是否又在 AGENTS/Q6/skill description 生出第二份資格公式。authority 只在統一定義表；其他位置應 pointer 或最小摘要。這是 docs-mode 單檔權威編輯最容易漏的軸。 |
+| ⑦ Decoder regression | **新增，必要** | 沿用 AIR-48 P2 已有的 Decoder test 思路：拿既有 misuse taxonomy 反查新表，要求仍能回答「該寫哪、為什麼」，尤其 A/B 新 case 與原 M1–M5/B1/SM-5 不得被新公式翻壞。 |
+
+我尤其重視 ⑥、⑦。**docs-mode 沒有 compiler 替你抓 semantic shadow**；`rg` 只能證字串，不能證 decision procedure 沒變壞。原 AIR-48 P2 已經用過「9/9 Decoder test」，這次改的是判準核心，理應再跑一次同類 regression，而不是只做 consistency prose review。
+
+另外，09-10 的「同 commit 原子性」仍應保留為 acceptance constraint：hard gate 首句與 A/B 誤置處置如果分開落，短暫狀態會變成「定義層說有 scope gate，但 misuse table 還不會處理 scope mismatch」。
+
+## 最終結論
+
+**AIR-70 段二可以開工，但我會把實施清單從 r2 的三塊擴成五個同步面：**
+
+1. L138 authority 前言：層級閘＋資格公式＋三測試＋conditional-loading pointer。
+2. L142–143 rule/skill rows。
+3. L154 一行流。
+4. 誤置表新增 A/B，置於 M1 前。
+5. 清掉 active semantic shadows：至少 `memory-audit` L211/L215 與 root `AGENTS.md:117`，優先改成 pointer 而非再複製完整公式。
+
+因此這不是「r2 diff 要推翻」，而是 **r2 主體適用，終檢抓到 09-10 漏項 + 既有 consumer shadow**。這兩項若一起收掉，我會認為 implementation spec 足夠完整，可以交 flash 苦力實施，再按上面 7 軸做 5.3/Codex 雙審。
+[delegate-bridge] job job-mtz3k4hw-h4cyqp status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

@@ -97,7 +97,7 @@
 
 ## 專案結構
 
-- `rules/` — 行為規範的 **always-on 核心**（載入機制因 harness 而異；部署紀律 + scope 分類 + 截斷線/尺寸 gate 見 `rules/AGENTS.md`——非 Claude 端是單檔 bundle，受 harness 截斷線約束（ZCode 實測 100KiB 硬編碼），rule 只放每次 session 都需要的內容）
+- `rules/` — 行為規範的 **always-on 核心**（載入機制因 harness 而異；部署紀律 + scope 分類 + 截斷線/尺寸 gate 見 `rules/AGENTS.md`——非 Claude 端是單檔 bundle，受 harness 截斷線約束（ZCode 實測 100KiB 硬編碼），rule 只放須在首個有後果決策前在場的最小核心——資格判準見 memory-audit 統一定義表）
 - `skills/` — 領域知識和工作流 skills（on-demand；SKILL.md 開放標準，跨 harness 可攜；Claude 端 `/name` slash 與 Skill tool 皆可觸發，工作流 skills 索引見 `skills/CLAUDE.md`）。**reference skill 分層**：on-demand 級 rule 內容下沉至此——rule 留 always-on 核心＋pointer，深層住 `skills/<同名>/SKILL.md` 經全域 symlink 四 harness 按需可讀；這是控制 bundle 尺寸的既定模式（先例：acceptance-evidence / symbol-query-routing / instruction-writing）
 - `skills/_common/` — 共用子範本（跨 skill 引用單元，非 skill；`instruction-*` 等使用）
 - `hooks/` — Hook 實作腳本（跨 Claude/ZCode 單一來源。hooks 無目錄載入點，**不能 symlink**——兩家 config 以絕對路徑引用本目錄腳本：Claude `~/.claude/settings.json`；ZCode 3.7.7+ user-level hooks，註冊範本 `hooks/zcode-registration.json`——**範本內容是 `~/.zcode/cli/config.json` `hooks:` 鍵下的子樹值，merge 進去而非整檔覆蓋**（整檔覆蓋會毀掉 config 的 mcp/plugins 區塊）、`notification.sh` 不移植。詳細實測與 ZCode 限制（事件子集、專案層忽略、per-session 快照）見 [04 報告 §7 修訂](ai-analysis/reports/_done/superpowers/04-multi-harness機制對照.md)）
@@ -114,7 +114,7 @@
 新增 rule/skill/command 時遵守：
 
 1. **先修剪測試**：這行知識從程式碼推導得出嗎？是 → 不寫
-2. **選對載體**：Hook？Rule？Skill？Prompt/LLM 流程？判準——hook＝純機械＋單一入口＋無語義例外**三者皆是**（缺一即退 LLM 流程，假確定性比真語義危險）；rule＝每次 session 都需要的硬紀律（always-on 預算稀缺）；skill＝on-demand 方法論（理論深掘、失敗案例群、撰寫規範細則＝reference 分層）；語義判斷（有「看情況」例外）＝prompt/LLM 流程。「該寫哪」統一定義表（載體職責×常駐-按需×寫入預設）單一源見 memory-audit skill；hook 資格論證與對照組見 instruction-writing skill「載體選擇」；`deploy_agents.py` 的 90KiB gate 撞線時以此為處方
+2. **選對載體**：Hook？Rule？Skill？Prompt/LLM 流程？判準——hook＝純機械＋單一入口＋無語義例外**三者皆是**（缺一即退 LLM 流程，假確定性比真語義危險）；rule＝須在首個有後果決策前在場的最小核心/bootstrap（always-on 預算稀缺；資格公式見 memory-audit 統一定義表）；skill＝on-demand 方法論（理論深掘、失敗案例群、撰寫規範細則＝reference 分層）；語義判斷（有「看情況」例外）＝prompt/LLM 流程。「該寫哪」統一定義表（載體職責×常駐-按需×寫入預設）單一源見 memory-audit skill；hook 資格論證與對照組見 instruction-writing skill「載體選擇」；`deploy_agents.py` 的 90KiB gate 撞線時以此為處方
 3. **驗證附著**：rule/command 是否包含可驗證的標準？沒有驗證的規則是噪音
 4. **長度預算**：CLAUDE.md 越長，AI 越容易忽略重要規則。一條規則一行能說完最好
 5. **部署同步**：編輯 `rules/` 後的部署與驗證紀律見 [rules/AGENTS.md](rules/AGENTS.md)「部署紀律」（含 `/sync-sources` 機械新鮮度檢查）
