@@ -1,0 +1,222 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T00:23:44.863826Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:23:44.883224Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:23:44.903148Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:23:45.329389Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:23:45.335050Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:23:45.335784Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:23:45.624887Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:23:46.518844Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:23:46.559158Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:23:46.559238Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+## A. §四「條件載入層」最終挑戰
+
+### A1. `paths:` 不宜直接升格成 non-CC deploy marker
+
+這裡我會要求修正。**`paths:` 可以是訊號來源，但不能單獨承擔第二個語義。**
+
+目前三個事實已經很清楚：
+
+- CC 的 `paths:` 已由 L4 probe 證實是 runtime 語義：**Read tool 讀到 glob matching file 後才 lazy inject**，不是 session-start，也不是 task-intent trigger。`leg5-probe-paths-verdict.md:7,18-20`
+- `deploy_agents.py` 現況只解析 `harness-scope:`：`read_scope()` / `discover_rules()` 在 `scripts/deploy_agents.py:168-188`。
+- bundler 對通過 scope 的 rule 預設整份放進 bundle，`scripts/deploy_agents.py:321-338`；目前完全沒有 `paths:` 的 deployment semantics。
+
+更關鍵的是，現在已經有三個 rule 帶 `paths:`：
+
+`instruction-writing.md:3`、`llm-output-convention.md:3`、`python-standards.md:3`。
+
+所以如果實作成：
+
+> `if paths: non-CC bundle 排除 body`
+
+那不是新增一個無害 optimization，而是**retroactive semantic migration**：deploy script 一升級，三檔在 ZCode/Muse/Codex 的行為立即改變。
+
+我建議三個欄位各守一個維度：
+
+| 欄位 | 唯一語義 |
+| --- | --- |
+| `harness-scope:` | **誰**消費：neutral / claude-specific / meta |
+| `paths:` | **Claude Code 何時**載 native rule body：Read path match |
+| 另設 explicit projection marker | **非 CC 如何 materialize**：full body / bootstrap pointer |
+
+例如概念上可叫 `bundle-mode: pointer`。名稱可以再裁，但一定要 explicit opt-in。
+
+處理順序也應固定：
+
+> `harness-scope` → target eligibility → portable projection mode
+
+因此 `claude-specific + paths` 不應生成任何 non-CC pointer；`meta` 也不應。只有 `neutral + explicit pointer mode` 才做 body→skill/pointer projection。
+
+這和現有架構也比較一致：deploy 已經有 `slim_for_bundle()` 的 projection 概念，`scripts/deploy_agents.py:304-318`。**source applicability 與 bundle projection 本來就是兩件事。**
+
+### A2. bootstrap pointer：選「author-written semantics + deploy-generated placement」
+
+我反對 deploy 自己從 `paths:`、filename 或 skill name**生成 pointer 語句**。
+
+理由很具體。`llm-output-convention.md` 的 `paths` 是 [**/*.py](<**/*.py>)，但它真正的 applicability 是「Python output/logging」，其 skill description 也是這樣寫；不能自動生成成：
+
+> 所有 Python 工作前載 llm-output-convention
+
+那會過度觸發。
+
+`python-standards` 更直接：現在根本沒有配對 `python-standards` skill。`draft-v1-principles.md:45,48` 已經碰到這個問題。
+
+因此最佳形態不是：
+
+> deploy 猜一句話
+
+也不是：
+
+> 另外維護一份手寫 pointer rule
+
+而是：
+
+> **pointer 的語義文字由作者寫在同一 source；deploy 只負責投影到 non-CC bundle。**
+
+例如 source metadata/marker 持有：
+
+```
+bundle mode = pointer
+target skill = ...
+bootstrap pointer = 作者明寫的精確 trigger 句
+```
+
+deploy 做機械工作：
+
+1. 驗 target skill 存在；
+2. 驗 target harness 可達；
+3. 把作者那一行原樣 materialize；
+4. body 不進 non-CC bundle。
+
+這樣 pointer 仍只有一個 source，不會產生第二份 drift；同時 deploy 不需要做語義推理。
+
+而且應 **fail closed**：要求 pointer mode 卻找不到 skill / pointer / deployment target 時，deploy 失敗，不能靜默把 body 拿掉。
+
+### A3. 兩個新增 `paths:` 候選
+
+**`python-standards`：目前不過 gate；補齊承載後可以。**
+
+它其實已經有 `paths: **/*.py`，`python-standards.md:3`，所以對 CC 而言不是「候選加入 paths」，而是**現有 conditional rule**。
+
+Path congruence 算合理：讀 `.py` 後，命名、typing、re-export 等規範確實相關。
+
+但有兩個 blocker：
+
+第一，**沒有配對 skill**。如果 non-CC body 被拿掉，pointer 沒有 retrieval target。現有搜尋只有其他 skill 引用它，沒有承接它的完整 on-demand body。
+
+第二，probe 只證明 **Read** 會觸發。新建 `.py` 時，第一個 consequential action 可能就是 Write，前面根本沒有 matching Read。`leg5-probe-paths-verdict.md:18`
+
+所以裁決是：
+
+> **現況不能直接成為 non-CC pointer projection。**
+
+先把深層規範搬到真正的 Python standards skill，並保證「首次建立 Python 檔前」存在一個可達 bootstrap trigger，才過 bootstrap + first-consequential-action test。
+
+相較之下，`instruction-writing` 是很好的 pilot：它已有 `paths`、已有配對 skill，而且 guide 已有明確 bootstrap：「改 instruction 前載 instruction-writing skill」，`ai-development-guide.md:5`。這幾乎就是條件載入層的 golden specimen。
+
+**`design-thinking + **/*.md`：不通過，建議不要做。**
+
+它的 applicability 是「decision/architecture/refactor」，不是 Markdown。
+
+`design-thinking.md` 自己寫的是架構、技術選型、性能、重構等情境；`deep-thinking` skill description 也明確把 rule 定位成 always-on core、skill 是深層 body，`skills/deep-thinking/SKILL.md:3,8`。
+
+若加 `paths: **/*.md`：
+
+- 讀 README 就可能無謂載入；
+- 在 `.py` / `.rs` 做架構重構卻可能永遠不載；
+- 很多 consequential architectural decision 在第一次 Markdown Read 以前已發生。
+
+所以它同時違反 trigger congruence 與 first-consequential-action test。
+
+正確方向仍是現在的：
+
+> **最小 decision bootstrap/core 留 always-on；A 類 textbook 肥肉刪掉；深層方法放 deep-thinking skill。**
+
+不應拿 path-scoping 解它。
+
+* * *
+
+## B. v1 整體最後一輪
+
+r1 的主要挑戰我認為**都有落實到位**。
+
+資格公式已從「模型做不到」改成真正的 residency 判準，`draft-v1-principles.md:13`；三測試完整落下，`:19-21`。A 改 candidate、C 拆 rule/skill/hook、D 與 residency 解耦、B 拆 bootstrap/lookup、Codex 32KiB 降成 unverified 語義、portable baseline 修正、ZCode skills tax 改管 enabled surface、guide 納入、AIR-70 與 corpus migration 分弧，這些都沒有退步。
+
+現在只剩 **§四新增設計帶出的 4 個 hole**：
+
+1. **`paths:` dual semantics**：不能由 CC runtime selector 自動變成 non-CC exclusion marker；必須 explicit opt-in。
+2. **auto-generated pointer 不可靠**：trigger 語義不能由 glob/filename 推導；改成 author-written、deploy-projected。
+3. **probe boundary 沒完全反映在 §四**：實證是 Read-trigger。新增 `paths:` 到一個原本 always-on rule 是 CC behavior change；不能泛稱「CC 行為不變」。只有既有 `paths:` 檔才成立。
+4. **reachability 必須成 deploy gate**：body 排除之前，必須驗 target skill 存在、對該 harness 可達，且需要 enabled 的 harness 已啟用；否則會製造「bundle 變小但規範消失」的 false green。
+
+其中第 3 點建議直接改 §四一句：
+
+> 「既有 `paths:` rule 在 CC 行為不變；新增 `paths:` 屬 residency 行為變更，須以實際 Read-trigger 時點重跑 bootstrap／first-consequential-action test。」
+
+還有一個現行 single-source 在 AIR-70 回填時順手要修：[memory-audit/SKILL.md:143](<memory-audit/SKILL.md:143>) 說 skill 的 `desc＝唯一觸發面`，現在顯然過窄。bootstrap pointer 也可以 explicit invoke skill；應改成「desc＝implicit routing 面，另可由 bootstrap pointer explicit 觸發」。
+
+* * *
+
+## C. 回填 AIR-70 的定版條文
+
+我建議只改 `memory-audit/SKILL.md:138-154` 的 authority，而**不要把 deploy marker implementation 細節塞進 memory-audit**。這裡定義 placement principle；marker schema 留 `instruction-writing` / deploy contract。
+
+可以直接按下面形態做 diff。
+
+Diff
+
+```
+@@ 載體統一定義表開頭：替換現行 L138 @@
+-> 三處分散判準合一（本 skill 寫入六問 Q6 載體判定 × instruction-writing「載體選擇」（原載體決策樹）× 層 3 收斂落點慣例）——「該寫哪」一律查本表，引用處皆指針回此。稀缺性軸＝北極星分層（開場常駐最貴 → 任務中載入 → 按需檢索 → 零 context）；**載體職責與常駐-按需是正交軸**——同一載體可兩層並存（memory：索引常駐＋body 按需），不硬配「rule 都重要、memory 都次要」。
+
++> **先判層級，再判稀缺：層級是硬閘，由部署拓撲決定可達性；user-level 知識不得以 project-only 載體作權威源，project-specific 知識不得上提為 user-level 規範；僅在層級相容後，才以 always-on／on-demand／檢索成本選載體。以下表格與「該寫哪」一行流皆先套此閘。**
++>
++> 三處分散判準合一（本 skill 寫入六問 Q6 載體判定 × instruction-writing「載體選擇」× 層 3 收斂落點慣例）——「該寫哪」一律查本表，引用處皆指針回此。稀缺性軸＝開場常駐 → 任務中載入 → 按需檢索 → 零 context；**載體職責與 residency 是正交軸**。
++>
++> **rule 資格＝層級相容 ∩「首個有後果的決策前必須在場」∩（經驗證的模型校準需求 ∪ user 特殊裁定 ∪ trigger-bootstrap 必要資訊）。**「模型已知／通用工程共識」只產生 delete candidate，不是自動刪除判決。
++>
++> **residency 三測試**：① Bootstrap——body 下沉後，模型不知道其內容仍能可靠知道何時載對應 skill；不能則最小 bootstrap 留 rule。② First consequential action——若等 on-demand 載入時首個不可忽略行為已可能發生，核心須提前常駐。③ Portfolio duplication——若同一約束已由更高優先級 instruction、hook、repo AGENTS 或可靠 skill trigger 承載，user-level 重複 rule 應退出。
++>
++> **條件載入層**：Claude Code `paths:` 僅表示「Read 到 matching path 後載入 rule body」的原生 runtime 條件，不單獨作為 non-CC bundle 排除訊號；portable body→skill／bootstrap-pointer projection 必須顯式 opt-in，deployment contract 與 marker 細則見 instruction-writing skill。新增 path-scoping 亦須重新通過上述 Bootstrap／First consequential action 測試。
+```
+
+接著改 rule / skill 兩列：
+
+Diff
+
+```
+@@ table：替換現行 L142-L143 @@
+-| rule（`rules/`） | 每次 session 都需要的硬紀律（一行能說完最好） | **開場常駐**（bundle 部署——最貴；on-demand 級內容下沉 skill＝reference 分層） | 寫作治理（AGENTS.md：修剪測試/選載體/驗證附著/長度預算/部署同步） |
+-| skill（`skills/`） | on-demand 方法論（理論深掘/失敗案例群/撰寫細則） | 清單常駐（name+desc）＋**body 按需載入**（desc 觸發） | SKILL.md 撰寫規範；desc＝唯一觸發面 |
+
++| rule（`rules/`） | 通過 rule 資格公式、須在首個有後果決策前生效的**最小核心／bootstrap** | portable baseline＝開場常駐最貴；可安全延後的 body 下沉 skill；CC 可另用 `paths:` 原生條件載入 | 寫作治理＋三測試；common/known 只作 delete candidate，不逐檔自動刪 |
++| skill（`skills/`） | 有可靠 task trigger 的 on-demand 方法論／深層 body（理論深掘、失敗案例群、操作細則） | metadata/listing 常駐＋**body 按需載入** | desc＝implicit routing 面；亦可由 rule/bootstrap pointer explicit 觸發 |
+```
+
+最後改一行流：
+
+Diff
+
+```
+@@ 該寫哪：替換現行 L154 @@
+-**知識產生時**：任務終態/進度/承諾 → 卡 notes／EP 進度節（永不進 memory）→ repo 可推導 → 不寫 → 通用方法論（與 user 無關）→ 每次都要＝rule／on-demand＝skill／模組層＝模組 AGENTS.md → 跨 session user/專案綁定事實（確定才寫）→ memory 條目 → 暫存/草稿 → scratch。
+
++**知識產生時**：先套層級硬閘 → 任務終態/進度/承諾 → 卡 notes／EP 進度節（永不進 memory）→ repo 可推導 → 不寫 → user-level 方法論套 residency 三測試：首個有後果決策前必須在場且屬 verified calibration／user 裁定／trigger-bootstrap → 最小 rule；有可靠 trigger 且可在首個有害行為前載入 → skill；CC 檔案讀取型條件內容可依條件載入層處置 → 模組層約束 → 模組 AGENTS.md → 跨 session user/專案綁定事實（事故證據／偏好例外／pointer，確定才寫）→ memory 條目 → 暫存/草稿 → scratch。
+```
+
+`L155` 的 hook 判準我認為不用改，因為 v1 已經正確把 D 機械性與 residency 解耦；現行「純機械＋單一入口＋無語義例外」仍是合理的 hook gate。
+
+## 最終 verdict
+
+**v1 尚需修 4 點；修完即可定稿。**
+
+最核心的一刀是：**不要把 `paths:` 本身變成 portable deployment policy。** 它已經有很精確的 CC runtime 語義，而且 repo 現在已有三個使用者。把 non-CC projection 做成獨立 explicit opt-in，會讓三個軸乾淨分開：
+
+> `harness-scope` 決定 **who** → `paths` 決定 CC **when** → projection marker 決定 non-CC **how**。
+
+如此一來，user 那句「CC rules 機制可能是解掉 bundle AGENTS.md 很難減少的關鍵」我認為是成立的，而且會比 v1 現在的設計更安全：**利用 CC 的原生第三層，但不把 CC 專屬機制硬偽裝成跨 harness 共同語義。**
+
+候選排序上，我會先拿 `instruction-writing` 做第一個完整 vertical slice；`llm-output-convention` 可當第二個。`python-standards` 先補 retrieval carrier；`design-thinking(**/*.md)` 則直接駁回 path-scoping，維持「minimal always-on core + deep-thinking skill」較合理。
+
+本輪只有 `cat` / 單 pattern `rg` 類只讀查證，沒有寫檔。中間一個含 backtick 的 `rg` pattern 曾被 shell 展開而失敗；我已用單引號的同一單 pattern 重跑，相關結論只採重跑成功的證據。
+[delegate-bridge] job job-mtz2miom-mixzj4 status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

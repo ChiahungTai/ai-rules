@@ -1,0 +1,164 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+Reading additional input from stdin...
+2026-09-13T00:03:03.545366Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:03:03.573088Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:03:03.575711Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:03:03.582619Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:03:03.995034Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:03:04.025972Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:03:04.061562Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:03:04.308322Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:03:04.372481Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T00:03:05.211643Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:03:05.320424Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:03:05.412751Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T00:07:19.340557Z ERROR codex_core::tools::router: error=apply_patch verification failed: invalid patch: multiple operations target /Users/ctai/.codex/memories/memory_summary.md
+1. **對草案 v0 的總判斷：有條件成立。**
+
+主方向是對的：先做 09-10 已定的 scope 硬閘，再把「common engineering consensus 不應無條件佔 always-on」正式化，能直接解決 user 的北極星需求。現行單一源本來也已把「載體職責」與「常駐/按需成本」視為正交軸，memory-audit/SKILL.md:138；rule 是「每次 session 都需要」、skill 是 body 按需、memory 是 user/project-bound fact，memory-audit/SKILL.md:142\-144。09-10 又已確立「層級是硬閘、稀缺是軟優化」與 memory 三物原則，carrier-placement-v2-conference.md:7、carrier-placement-v2-conference.md:10。
+
+我認為 v0 最大需要修的是：**「模型已知/未知」適合當刪減候選訊號，不適合升格為 rule 的硬資格本身。** 草案目前把 rule 定義成「每次 session 都需要 ∩ 模型自己做不到 ∩ 層級相容」draft-v0-principles.md:18，會漏掉真正決定 residency 的另一軸：**這項知識是否必須在模型有機會觸發 skill 之前就已經在場。**
+
+我建議定稿改成：
+
+> rule 資格 = 層級相容 ∩「首個有後果的決策前必須在場」∩（經驗證的模型校準需求 ∪ user 特殊裁定 ∪ trigger-bootstrap 必要資訊）。
+
+「模型本來就知道」則是強烈的**刪除候選訊號**；不是數學式中的硬反條件。
+
+* * *
+
+2. **六開放問題逐題立場**
+
+**Q1 A 類刪除安全閥：A 應是 candidate-only，不應自動刪。**
+
+草案直接寫 A 共識 → 刪，draft-v0-principles.md:24，方向可用，但執行層我會加兩層安全閥。
+
+第一層是**逐條文判，不逐檔判**。A 殼 C 核必拆。例如 `design-thinking.md` 的 Clean Architecture/DDD 本身高度 A，design-thinking.md:21，但「至少兩層連鎖後果」「多模組、公開 API、跨專案方法論等情境強制深入」是實際行為校準，design-thinking.md:11。
+
+第二層是**刪除者與初判者分離**：writer/維護 session 可標 A candidate；真正移除時由獨立 reviewer 查目前支援的 model families 是否仍有反覆失敗證據。高保護面可做少量 adversarial probe；低風險條款不必為每行建立昂貴 benchmark。
+
+因此我與 v0 的分歧是：`A → 刪` 應改成 **`A → delete candidate；若有 observed violation / user override / pre-trigger necessity，重新分類 C/B`**。
+
+**Q2 C 類代際衰減：需要 re-audit，但不要 calendar-driven sunset。**
+
+C 的確會衰減；例如模型未來也許天然遵循某些 `rg`/validation 習慣。但固定每月/每季審容易造治理工作本身。
+
+我會用事件觸發：
+
+- 主力 model family 大換代；
+- harness/tool 行為改版；
+- bundle 壓力重新逼近 gate；
+- 某 C 條文相關事故長時間消失，且獨立 probe 無 rule 時仍穩定；
+- 該 rule/skill 本身被修改時順手重判。
+
+而 C 的退出不只有「留/刪」：若校準只在明確任務出現，而且 skill 可在第一個有害行為之前穩定觸發，可以**降 skill**；若判定完全機械且單入口、無語義例外，可以**移 hook**；只有跨任務且需要在 trigger 前就生效的校準才保留 always-on rule。
+
+所以我反對草案 draft-v0-principles.md:27 隱含的「C 幾乎天然＝always-on rule」。
+
+**Q3 B 拓撲檔：支持更激進 pointer 化，但保留 trigger-bootstrap 骨架。**
+
+這是我認為最值得繼續瘦的部分。
+
+`model-routing.md` 開頭的兩跳規則「role→tier，再查 skill」是真正需要常駐的 bootstrap，model-routing.md:7。但委派、resume/fork、rate-limit、bridge 失敗態等大量內容本身已經明確要求載 skill，model-routing.md:32。這一類應繼續向 skill 收。
+
+`symbol-query-routing.md` 同理：真正的 always-on 價值是「符號型任務第一步確認 CR 在場」這個 gate，symbol-query-routing.md:17，以及不能因 rg 0-hit 就斷言零消費者的校準，symbol-query-routing.md:21。SCIP/pyrefly/LSP 的操作細節更適合 skill。
+
+所以 B 不應問「特殊知識要不要 rule」，而應問：
+
+> **模型若不知道這一行，還知道何時、為什麼要載對應 skill 嗎？**
+
+不知道 → bootstrap 核心留 rule。知道 → 下沉 skill。
+
+**Q4 ZCode skills 稅：要治理，但不要制定固定 skill 數量上限。**
+
+腿 2 證據很清楚：ZCode body 仍是 on-demand，但 enabled skills 的 metadata 每輪都注入共享預算，過載會讓自動觸發退化，leg2-four-family-comparison.md:48。
+
+因此 `79+` 本身不是錯誤門檻。應治理的是：
+
+- enabled surface，而非 repo 裡有多少 skill；
+- descriptions 的總預算與區辨度；
+- 多個 skill 是否競爭同一 trigger vocabulary；
+- rare/manual-only skills 是否仍值得在 ZCode enable；
+- 實際是否發生 description dropping / auto-trigger degradation。
+
+沒有材料支撐一個通用的「最多 N 個」，不應發明 N。ZCode 應有 harness-specific enable policy。
+
+**Q5 guide：同標準，原則本次就納入；完整逐條量測可以後續做。**
+
+這不是 optional scope。`ai-development-guide.md` 本身就是 user-level instruction surface，所以如果北極星是「user-level AGENTS bundle 不塞 common consensus」，guide 必須受同一標準。
+
+抽樣已足以證明它是混合型：`測試保護下優先品質/持續測試重構` 有明顯 A 基底，但「預設不保留向後相容」帶 C 校準，ai-development-guide.md:9；UC/Capabilities/backlog/kanban 的整套契約明顯是特殊工作流，ai-development-guide.md:25；量化回測 reproducibility 又是領域規範，ai-development-guide.md:46。
+
+所以：**判準本次就明確涵蓋 guide；但 19 rules 的 slimming 與 guide 的完整 corpus audit 可以分兩個 implementation batch。**
+
+**Q6 回填歸屬：原則回填併 AIR-70；實際 corpus slimming 分弧。**
+
+09-10 已明定單一源就是 memory-audit 的「載體統一定義表」，而且層級閘首句也是定版條文，carrier-placement-v2-conference.md:21。現行一行流仍是「每次都要＝rule／on-demand＝skill」memory-audit/SKILL.md:154。
+
+因此這次研究產生的**資格判準修訂應併 AIR-70 段二**，避免再開第二個 authority。可是 19 檔＋guide 的實際逐條 slim 是另一種 blast radius，應在單一源落定後再開獨立 migration/audit 弧，否則會把「改判準」與「依新判準搬 corpus」混在同一次驗收。
+
+* * *
+
+3. **挑戰點清單**
+
+- **Challenge 1：`模型自己做不到` 被放得太高。** draft-v0-principles.md:18 把它列成 rule 必要條件，但模型能力會隨 family/代際變動，而且 unknown knowledge 也未必需要 always-on。修成「刪減/校準候選訊號」，另外加入 pre-trigger criticality。
+- **Challenge 2：D 機械 → rule 短行，是軸混淆。** draft-v0-principles.md:28 把「機械性」映到 residency；但現行單一源已明說載體職責與 residency 正交，memory-audit/SKILL.md:138。D 只說明它**容易成 hook/config/recipe**，不代表每 session 都要看到。
+- **Challenge 3：C → rule 也太絕對。** draft-v0-principles.md:27。若 C 有清楚 task trigger，而且 skill 能在 first consequential action 前載入，skill 足夠。真正 always-on C 是那些會影響 skill 是否被觸發、授權邊界、驗收宣稱等「先於 routing」的行為。
+- **Challenge 4：「四家 instruction bundle 全 always-on 全量注入」需要降格。** draft-v0-principles.md:32 同句自己其實又承認 CC path-scoped 例外；腿 1 明確說有 `paths` 的 rule 是讀到 matching file 才觸發，leg1-cc-mechanisms.md:9。較準確的寫法是：「跨 harness 的 portable baseline 不可依賴 path-scoping；CC 另有原生中間層。」
+- **Challenge 5：`Codex 32KiB 鏈` 現在寫成已定事實過頭。** v0 同樣在 draft-v0-principles.md:32 使用它，但腿 2 明列「鏈合計還是 per-file」兩份官方描述尚未調和，leg2-four-family-comparison.md:41。可以用「Codex instruction budget 有界」支持 slimming，不應用「32KiB chain」作精確前提。
+- **Challenge 6：A 有教學價值就降 skill，也太寬。** 純 textbook knowledge 搬 skill 仍會增加 catalog metadata 與 trigger competition，尤其 ZCode 有每輪 metadata 稅。只有它形成「可被任務觸發的具體方法」才值得 skill；純教學 A 應直接刪。
+
+* * *
+
+4. **腿 3 抽驗結果**
+
+我完整對照了 4 檔，三檔已足驗收，第四檔用來交叉 Q3。
+
+| 檔 | Verdict | 證據 |
+| --- | --- | --- |
+| `design-thinking.md` | **方向同意，比例修正為 heuristic** | 第一性原理、Clean Architecture/DDD 確實 A 很高，design-thinking.md:9、design-thinking.md:21；但強制兩層、特定深入條件與 skill routing 有 C/B，design-thinking.md:11、design-thinking.md:31。所以「A 最高、優先 slim」成立；`~60%` 不應當精確量測值。腿 3 本身標為約值，leg3-rules-tagging.md:177。 |
+| `edit-discipline.md` | **同意 C/A mixed，~35% 同樣只作排序** | SOLID 是典型 A，edit-discipline.md:14；但「預設不保留向後相容」與「矛盾寫法禁止折衷混合」是明顯 C，edit-discipline.md:9、edit-discipline.md:19。腿 3 的 mixed 判定合理，leg3-rules-tagging.md:178。 |
+| `model-routing.md` | **同意近純 B，但反對由此推出整檔 always-on** | 兩跳 routing、native-ID/user 裁定、role tier 都是模型無從自行知道的 B；腿 3 判 B 0%A 合理，leg3-rules-tagging.md:181。但檔內已明確把深層委派細節指向 skill，model-routing.md:32，所以「B 純度」與「always-on 正當性」必須分開判。 |
+| `symbol-query-routing.md` | **腿 3 判 B~95% 成立，並支持 trigger-bootstrap 原則** | 啟動 gate 明確需要早期在場，symbol-query-routing.md:17；具體工具細節可下沉。腿 3 的 ~95%B 判定合理，leg3-rules-tagging.md:187。 |
+
+腿 3 的「全庫 A 約 10%、design/edit/python 是 slimming 主戰場」我認為可當**優先排序 heuristic**，不要升成精確 corpus metric；那些百分比來自人工形態估計，不是 clause-weighted mechanical measurement。
+
+* * *
+
+5. **草案沒問但我認為該問的問題**
+
+第一個是 **bootstrap test**：一段知識若移進 skill，模型在不知道該段知識的情況下，是否仍能可靠地知道「現在該觸發這個 skill」？這比「模型知不知道內容」更直接決定 rule/skill 分界。
+
+第二個是 **first consequential action test**：該規範最晚可以在哪個時點出現？如果等 skill 被觸發時已可能 commit、選錯 model、用 rg 錯判零 consumer，則核心必須提前常駐。
+
+第三個是 **portfolio duplication test**：同一校準是否已由 system/developer harness、hook、repo AGENTS 或 skill trigger 承載？如果已被更高優先級或機械層可靠承載，user-level rule 即使本身正確，也可能只是重複 token 稅。
+
+* * *
+
+6. **環境前提自曝**
+
+HEAD 實查為 `1158dc9`，與工單 baseline 一致。`git status --short` 空；`git diff --name-only` 空，因此本 advisory 沒有造成 tracked/untracked working-tree 變更。
+
+指定驗收實跑結果：
+
+- draft 存在：`test -f .../draft-v0-principles.md` exit 0。
+- `Cowork`：1 hit。
+- [rules/*.md](<rules/*.md>)：19 檔。
+- 09-10 報告「層級」：6 hits。
+- 腿 3 抽驗：上表 4 檔完成。
+
+材料 1–6 已讀；第 7 [memory-audit/SKILL.md](<memory-audit/SKILL.md>) 的全檔 `cat` 輸出被工具截斷，但本工單指定的「載體統一定義表」及其一行流完整讀到並取得 138–154 行。`rules/` 已抽驗 4 檔。另補讀 `ai-development-guide.md` 以回答 Q5。
+
+過程有兩個只讀批次因自動工具審查被拒，我改單檔讀取後完成；另兩個早期 `rg` pattern 含 backtick 被 zsh 展開，該失敗輸出沒有用於任何結論，所需錨點之後改成安全的單一 pattern 重新取得。沒有寫檔。
+
+* * *
+
+7. **建議主 session 聚焦點**
+
+我建議定稿不要把 A/B/C/D 再發展成一套過重 taxonomy，而是只補一個真正缺失的 residency 判準：
+
+> **Scope gate → first-consequential-action / bootstrap test → carrier。**  
+> common/known 是 delete candidate；observed calibration failure 是 C evidence；project/user special fact 依三物進 memory；能被可靠 task trigger 的深層方法進 skill；只有 trigger 前就必須生效的最小核心留 rule。
+
+接著修正 v0 兩個事實表述：CC path-scoped 例外，以及 Codex 32KiB 語義仍 unverified。再把這版判準直接併入 AIR-70 的 memory-audit 單一源。之後才用它重判 19 rules＋guide；第一批最值得動的是 `design-thinking`、`edit-discipline`，而 B 拓撲類則做「bootstrap core 留 rule、lookup body 下沉 skill」的第二種 slimming。
+[delegate-bridge] job job-mtz1vwwb-o6pzpw status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa
