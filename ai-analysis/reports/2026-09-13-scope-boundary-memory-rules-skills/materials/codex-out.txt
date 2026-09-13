@@ -1,0 +1,136 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T02:00:17.507211Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:00:17.514582Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:00:17.538929Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:00:17.978304Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:00:17.980612Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:00:18.040399Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T02:00:18.083620Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:00:19.187873Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:00:19.195076Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:00:19.292199Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+## A. 對草案 §二的逐組件初判：我會修正成「檔案大致留，body 明顯再瘦一輪」
+
+總判斷是：**草案方向成立，但「留」的粒度太粗。** v3 真正要求的不是 file-level keep/delete，而是先套 rule 資格公式，再對 body 做 Bootstrap / First consequential action / Portfolio duplication 三測試。這在 memory-audit/SKILL.md 與 同檔 residency 三測試 已經定得很清楚。也就是說，「這支 rule 有 C 核心」不代表整支正文都應常駐。
+
+草案說 guide「大致健康、七節都留」我認為**過於樂觀**。七節的骨架可以全留，但至少四到五節都有可以明顯移除的 A／可按需 body。
+
+| Guide 節 | 我的裁決 | 具體修正 |
+| --- | --- | --- |
+| 演化性思維 | **留骨架，縮** | 真正的 user calibration 是「預設不保留向後相容」；「測試保護下持續測試→重構→確認」較接近通用工程共識，而且已在 edit-discipline 承載。guide:9 |
+| 驗證約束 | **留，但去重** | 風險分級表與「不預測絕對耗時」是跨任務 bootstrap；「修改後實跑」已有 must-execute / quality authority，guide 應指過去，不再複述。guide:13 |
+| UC-Driven Development | **草案最需要修正的一節** | 「功能先定義 UC」「Capabilities vs backlog 的角色」「何時要 EP」是 bootstrap；狀態 glyph 全表、完整 execution-plan→implement→post-build→metadata-sync 鏈屬可靠 trigger 後的操作 body，應沉 skill。guide:25-33。`Capabilities` 在 skills 已有大量專門 consumer，證明它不是只能靠 guide 承載。 |
+| Solo + AI | **留 identity，縮 mechanics** | 「solo、無 CI」「一 EP≈一 session」「review 要獨立 context」是 user 工作形態；compact 放哪、model 退化怎麼 handoff、findings 如何回貼已有 context-management / agent-workflow / implement 承載。guide:37；Writer/Reviewer 也已在 context-management:9 與多個 skills 出現。 |
+| 架構設計紀律 | **留一句 calibration＋pointer** | 「用 CA/DDD lens，但不強制模板／過度分層」值得常駐；CA/DDD 方法本身是 A/B body，design-thinking / arch-thinking 已有載體。guide:41 |
+| 量化交易專屬鐵律 | **留，但逐 bullet 判，不可因『量化專屬』整段免審** | 資料完整性與 quality-constraints:13 重疊，Portfolio duplication 應讓 guide 改 pointer；回測重現、Live/Backtest 共邏輯、seed 注入目前反而是獨有 user calibration，可留。guide:45-48 |
+| Summary Instructions | **留** | 這是跨 harness compact 前的 pre-trigger calibration；等 compact 才想起來已太晚，符合 First consequential action。guide:52 |
+
+所以我會把 draft 的「guide 大致健康」改成：**「七節資訊架構健康，但 body 是 mixed carrier；UC、Solo、Architecture、Evolution、Quant 都需要 A/B 清理。」**
+
+rules 的初判也有一個相同問題。草案把十支稱為「C 大宗，留」，我不會照這個粒度執行。`acceptance-evidence`、`collaboration-constraints`、`quality-constraints`、`tool-discipline` 都是**C 核心＋大量 B/A body**。例如 `acceptance-evidence` 真正需要常駐的是證據獨立性、不可用低層證據冒充高層，以及少數 claim gate；完整 taxonomy 可以更大幅沉回同名 skill。acceptance-evidence:7
+
+草案的另外兩組我大致同意，但加兩個限定。`model-routing` / `symbol-query-routing` 確實應變成 bootstrap rule＋lookup skill；其中 role→tier 與「符號查詢第一步確認 CR 在場／不可把 zero hit 當不存在」本身仍是 pre-action calibration，不能一併沉掉。model-routing:7 symbol-query-routing:17
+
+條件載入候選則不能把三支視為同成熟度。`instruction-writing`、`llm-output-convention` 已有正式 paired skill，AIR-85 後可以做 non-CC pointer projection；**`python-standards` 現在沒有等價 paired carrier，因此目前不過「body 移除後模型仍能可靠載對內容」的 Bootstrap test。** 不能只因有 `paths: "**/*.py"` 就把 non-CC body 拿掉；v3 也明定 AIR-85 落地前禁止這樣做。memory-audit:146
+
+另外，我重新量了現況：[/Users/ctai/.codex/AGENTS.md](</Users/ctai/.codex/AGENTS.md>) 實際就是 **32,835B**，與草案吻合。source guide＋16 rules 直接相加是 33,845B，兩者不能直接比較，因 deployer 會處理 `bundle: skip-start/end` 等 source-only 區段；機制在 deploy\_agents.py:153。所以後面的 byte 預算以 **32,835B deployed bundle** 為基準。
+
+* * *
+
+## B. 五個設計問題
+
+| 問題 | 我的推薦 | 最強反方論證 | 裁決 |
+| --- | --- | --- | --- |
+| 1\. 骨架化到什麼程度 | **minimal semantic closure＋pointer**。不是統一「一行」。 | 每支 rule 一行可把 bundle 壓到最小；skill 又可 trigger。 | **不採全一行。** 只有 Bootstrap＋First-action 皆通過才可 pointer-only。`modern-cli-preference` 已很接近理想兩行；`outward-action-consent`、`tool-discipline` 這類不能硬壓成 slogan。 |
+| 2\. guide 定位 | **thin but coherent user operating contract**：描述你的工作環境、跨任務 calibration、rule/skill routing。 | pure index 幾乎零重複，而且 authority 更清楚。 | **不做 pure index。** guide 的價值是讓新 session 在任何 task trigger 前知道「這個 user 怎麼工作」；但它不該再當流程手冊。 |
+| 3\. 16 rules 是否聚合 | **維持 16 個 authoring units。** | 合併編輯類／驗證類可少 header、少檔案、降低導航成本。 | **目前不合併。** 節省的 bytes 太小，卻會犧牲 `paths:`、rule↔skill pairing、single-source invariant、獨立 re-audit 邊界。只有兩檔真的有同一 trigger、同一 authority 才值得合併。 |
+| 4\. guide 唯一入口＋rules 全 pointer | **不採。** guide orchestration，rules 各自保留必要 gate。 | 單一 router 最乾淨，也最省 context。 | 這會把 guide 變第二份 qualification authority，而且 agent 在第一個 consequential action 前可能尚未觸發 skill。AIR-85 應做的是**逐 rule opt-in projection**，不是全域 pointer 化。 |
+| 5\. AIR-85 / AIR-86 順序 | **先定 semantic source target；AIR-85 必須在「最終 deployed bundle 驗收」前完成。** | AIR-85 先做，先知道真實 deployment shape，再改內容較直觀。 | 兩層拆開最好：AIR-86 現在就能定「每檔應留下什麼」；`instruction-writing` / `llm-output` 的 non-CC pointer-only 驗收則等 AIR-85。不要讓 deployment mechanism 反過來決定知識應不應常駐。 |
+
+其中第五點我認為很關鍵：**AIR-86 的 semantic acceptance 不需要等 AIR-85，但 AIR-86 若要宣稱「user-level bundle 最終形態已完成」，就必須等 AIR-85 projection 也被驗收。**
+
+* * *
+
+## C. 我建議餵給 AIR-86 的 bundle 目標態
+
+byte 是 planning band，不應變成「為了過數字硬砍語義」的 acceptance gate。semantic form 才是硬驗收；byte range 用來抓明顯沒有瘦下來的檔。
+
+### Guide 七節
+
+| 節 | AIR-86 目標形態 | 預估變化 |
+| --- | --- | --- |
+| 演化性思維 | 留「品質優先／預設不保 backward compatibility」的 user calibration＋edit-discipline pointer；刪通用重構循環敘述 | −120～−180B |
+| 驗證約束 | 保留風險三級與不報絕對時間；執行細則 pointer 到 must-execute / quality | −120～−200B |
+| UC-Driven | 保留 UC-first、Capabilities/backlog 角色、何時升 EP 的 trigger-bootstrap；狀態 glyph、完整 lifecycle 全沉專門 skills | **−500～−750B** |
+| Solo+AI | 保留 solo/no-CI、一 EP/session、獨立 reviewer；compact/handoff mechanics pointer | −120～−180B |
+| 架構設計 | 留「CA/DDD lens、禁止模板化/過度分層」＋ pointers | −80～−140B |
+| 量化鐵律 | guide 不重複 quality 的 data-integrity 正文；保留回測重現、Live/Backtest 共邏輯、seed calibration | −80～−150B |
+| Summary | 留 compact 前不可丟失的資訊類型，語句收斂 | −50～−100B |
+
+guide 整體我會把 **4,284B → 約 2.6–3.2KB** 當合理區間。不是變索引，而是把現在的流程手冊成分拿掉。
+
+### 16 支 neutral rules
+
+| Rule | 現 source B | 定稿後一行描述 | 建議 bundle band |
+| --- | --- | --- | --- |
+| `_ai-behavior-constraints` | 529 | 保留「改定義源必掃 consumer 並同步」這個 drift gate＋深層 pointer；已非常接近完成態 | 0.45–0.53KB |
+| `acceptance-evidence` | 3,527 | 保留 evidence independence、claim 需獨立證據、低層不可冒高層；taxonomy／案例／理論沉同名 skill | 1.0–1.3KB |
+| `collaboration-constraints` | 2,488 | 保留實碼查證、破壞性選擇查證、反 sycophancy、workspace ownership 核心；agent 操作 body 沉 agent-workflow | 1.5–1.8KB |
+| `context-management` | 1,666 | 保留 task/context 隔離、長任務 durable checkpoint、readonly 優先、memory lifecycle pointer；STATE/細流程按需 | 0.9–1.2KB |
+| `design-thinking` | 1,510 | 保留「兩層思考強制」＋單向門／架構三視角 trigger；完整六步、模板、8 問在 deep-thinking | 0.7–0.95KB |
+| `edit-discipline` | 1,265 | 保留 backward-compat user ruling、衝突寫法不可混、必要 scope／external integration gate；SOLID 教科書展開刪或沉 | 0.75–0.95KB |
+| `instruction-writing` | 1,146 | source 留 path-scoped bootstrap＋少量不可延後的 instruction invariants；AIR-85 後 non-CC bundle 投影成 explicit skill pointer | **0.18–0.28KB projected**；pre-AIR85 約 0.7–0.9KB |
+| `llm-output-convention` | 1,022 | source 留 print-vs-logger 核心 invariant；tag 表／logging mechanics 在 skill；AIR-85 後 non-CC pointer projection | **0.18–0.28KB projected**；pre-AIR85 約 0.65–0.8KB |
+| `model-routing` | 3,019 | 留 role→tier user rulings、native-ID vocabulary gate、external-runtime trigger；provider/model/收法 lookup 全在 skill | 1.4–1.8KB |
+| `modern-cli-preference` | 304 | 保持「text→rg/file→fd/symbol→CR」＋陷阱 pointer；幾乎已定稿 | 0.28–0.30KB |
+| `must-execute-before-complete` | 1,155 | 保留「改 executable 必實跑」＋真正 exceptions；POC lifecycle／案例細節縮掉 | 0.65–0.85KB |
+| `outward-action-consent` | 2,366 | 保留 reversibility test、exact quote authorization、commit 特例與 autonomous 邊界；這支不宜激進瘦 | 1.8–2.2KB |
+| `python-standards` | 2,053 | 留反主流 user rulings：re-export、annotations/TYPE\_CHECKING、typing boundary、migration guard；generic style 壓縮 | 1.2–1.5KB |
+| `quality-constraints` | 2,341 | 留 fail-loud/data-integrity、完整交付、consumer-validation trigger、progressive-validation gate；案例與方法 body 沉 validation skill | 1.3–1.7KB |
+| `symbol-query-routing` | 1,549 | 留 route、CR-presence startup gate、fallback／zero-hit 禁斷言；工具速查與陷阱群沉 skill | 0.75–0.95KB |
+| `tool-discipline` | 3,621 | 保留 user 高頻事故 guardrails：tool routing、skill-before-action、Python invocation、edit recovery、background/gate/read 核心；長 mechanics 指向專門 skills | 2.2–2.7KB |
+
+這組目標若照推薦版收斂，我預期 **AIR-85 落地後 user-level bundle 約 19–23KB**；AIR-85 尚未做、`instruction-writing` / `llm-output` 仍攜完整 portable body 時，大約 **20–24KB**。相對目前實測 32,835B，大致有 **9–14KB** 的真實 headroom，而不是靠把 rule 名義上換成另一份 always-on prose。
+
+我特別不建議 AIR-86 設「必須低於 20KB」之類硬閘。應把上表的「final form」當 acceptance contract；byte band 只用來偵測某檔是否還塞著明顯的 reference body。
+
+* * *
+
+## D. `structure.md` 的 9 對 reference-layering 要不要修
+
+**要修描述，但目前不要增加第 10 對。**
+
+現在的 9 對表在 structure.md:38-50 基本正確。AIR-86 定稿後，我會讓它明確反映三種成熟度：
+
+| Pair | 定稿後應強調的角色 |
+| --- | --- |
+| design-thinking → deep-thinking | 從「已有 pointer」升成明確 **bootstrap core ↔ methodology body** |
+| acceptance-evidence → acceptance-evidence | 更強的 reference split：rule 留 evidence gate，taxonomy／理論／案例入 skill |
+| symbol-query-routing → symbol-query-routing | 明確標「startup gate＋fallback/no-zero-hit 在 rule；速查／陷阱 body 在 skill」 |
+| instruction-writing → instruction-writing | 加註 **AIR-85 conditional-projection eligible** |
+| llm-output-convention → llm-output-convention | 同上，屬第二個 projection pilot |
+| modern-cli-preference → modern-cli-preference | 已近完成態，不需結構改動 |
+| model-routing → model-routing | 強化成正式 bootstrap split：role→tier/routing vocabulary 在 rule，provider lookup/transport mechanics 在 skill |
+| context-management → memory-audit | 維持；rule 只留「何時進 memory」入口，六問／carrier table 在 skill |
+| quality-constraints → validation-strategy | 強化 consumer-validation／DEPTH trigger 與完整方法 body 的分界 |
+
+我**現在不會加入 `python-standards → python-type-gap`**。`python-type-gap` 只覆蓋第三方 typing gap，並不是 `python-standards` 正文的深層 carrier。若 AIR-86/AIR-85 後真的要讓 Python rule 進 conditional projection，先建立可承接完整正文的 paired carrier，再跑 Bootstrap test；成立後 structure 才加第 10 對。
+
+同樣地，`tool-discipline → agent-workflow/debugging-and-error-recovery`、`collaboration-constraints → acceptance/outward/agent-workflow` 都維持普通 multi-pointer。`structure.md:52` 已經明確說這類是「常規跳轉，不配對」，我認為這個邊界是對的。structure.md:52
+
+我會再建議 structure 的 9 對表增加一個很小的欄位概念：**bundle role = `bootstrap split` / `conditional projection eligible`**。它不創造新 carrier taxonomy，只讓 AIR-86/AIR-85 能直接由 structure 看出哪些 pairing 只是 reference layering，哪些已可做 deployment projection。
+
+## 收斂版本比較
+
+| 方案 | 形態 | 我判斷 |
+| --- | --- | --- |
+| 保守版 | 七節 guide 幾乎原樣；16 rules 只刪案例與少量重複；約 26–29KB | 安全，但沒有真正解掉 bundle 長期膨脹原因 |
+| 激進版 | guide 變純索引；多數 rules 一行 pointer；約 12–16KB | context 很漂亮，但會破壞 Bootstrap / First consequential action 保證 |
+| **推薦版** | **guide＝薄而完整的 user operating contract；16 個 rule 邊界保留；每支 rule 只留 semantic closure/bootstrap；methodology/lookup/cases 下沉 skills；AIR-85 只對通過測試的 path rules 做 projection** | **約 19–23KB，兼顧冷啟動可靠性與後續擴張空間** |
+
+因此我會把 AIR-86 的一句話目標定成：
+
+**不是「把 AGENTS.md 壓小」，而是把 user-level bundle 收斂成「跨任務 user calibration＋首個 consequential action 前不可缺的 bootstrap」，其餘內容必須能說明為何不能可靠 on-demand；檔案邊界維持細粒度，AIR-85 再把已證實可條件載入的 rule 做 deployment projection。**
+
+這比 draft v0 的最大修正，是 **guide 也要跟 rules 接受完全相同的稀缺性審查**；「guide 是主體」不能成為豁免 A/B body 的理由。
+[delegate-bridge] job job-mtz62odj-2pmp1c status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

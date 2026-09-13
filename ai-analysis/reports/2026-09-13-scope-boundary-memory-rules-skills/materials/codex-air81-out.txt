@@ -1,0 +1,122 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T02:21:55.238310Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:21:55.238600Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:21:55.245465Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:21:55.698101Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:21:55.699595Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:21:55.724176Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:21:55.924347Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T02:21:55.996772Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T02:21:56.900632Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:21:56.900679Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:21:56.921165Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+A 我同意你的歸屬，但要把「單一源」定義得窄一點：**`workflow.md` 是「八站 → 入口命令／詳讀來源」的人類 lifecycle mapping 單一源；各 command 的語義仍以各自 `SKILL.md` 為權威。** 這樣不會違反 blueprint 本身「不建立第二套規則」的治理原則。
+
+目前四層可以明確切成：
+
+| 載體 | 負責什麼 |
+| --- | --- |
+| `workflow.md` | 八站順序、每站責任、**每站從哪個 entrypoint 進入、去哪詳讀** |
+| `index.html` | `workflow.md` 的 human viewport projection，只負責可視化／可點擊 |
+| [skills/CLAUDE.md](<skills/CLAUDE.md>) | LLM command topology：commands 彼此怎麼串、完整流程索引 |
+| `skills/<x>/SKILL.md` | command/方法的實際行為契約與細節 |
+
+drift 防線我建議寫成一條很硬的 boundary：**`workflow.md` 只列 command/skill ID＋link＋runtime status，不重述 command 內部步驟；command rename／退役／生命週期位置改變時，必覆核 workflow 的八站 mapping，再刷新 index projection。** [blueprint/AGENTS.md](<blueprint/AGENTS.md>) 現有 trigger 9/12 已很接近，之後可把「核心 command topology 改變」明列進去。
+
+## B. 欄位 schema
+
+我不建議把「命令、skill、rule、狀態」各拆一欄，會把 source table 變成索引牆。`workflow.md` 現有三欄後面加一個 **「怎麼做」** 就夠，cell 固定只有三種資訊：
+
+**入口**：這站人或 agent 實際從什麼 command/skill 進去。  
+**詳讀**：1–3 個真正的 method/rule authority link。  
+**過渡**：只有 target 尚未落地時才出現，明寫 `❌ target` 與 `現行`。
+
+治理 rule 不需要每站硬塞一個；只有它真的決定該站行為時才放進「詳讀」。否則會把 human navigation 變成 instruction dependency graph。
+
+③④尤其要用這個寫法：
+
+> `❌ target: wt-open / persistent WT 尚未落地；現行：依 repo AGENTS.md「git 慣例」＋ kanban-board 起手式。`
+
+不能把 `wt-open` 做成正常 command link，否則 viewport 看起來會像已可執行。這和 workflow.md 現在明寫 target/runtime 分離是一致的。
+
+## C. `index.html`：我選「保留總覽表＋八張 compact guide cards」
+
+我不會把第五欄直接塞進現有表格。section 02 現在已有四欄，而且「怎麼做」天然是多連結、多狀態文字；加第五欄後 desktop 勉強可看，窄 viewport 會變成文字牆。index.html:236
+
+也不推薦 `<details>` 預設折疊，因為你新增這層的目的就是「看到站就能知道下一步去哪」，把入口藏起來反而降低導航價值。
+
+我推薦：
+
+- 上半部保持現有 Mermaid＋四欄 overview table。
+- table 下新增「逐站怎麼做」。
+- 8 張 compact card，desktop 2 欄、窄版 1 欄。
+- 每張只有：站名、command chips、1 行「何時用」、2–3 個深連結、status/transition badge。
+- card 文案完全投影 `workflow.md` 的「怎麼做」欄。
+
+因此 source 維護仍只改一處；HTML 可以為 human viewport 做較好的視覺拆解。
+
+## D. AIR-81 卡面要擴充，而且現有一條已決策文字必須改
+
+現卡目前寫著「**本卡只刷新投影，不改四檔內容**」，這和現在要先改 `workflow.md` 成為逐站導引 source 直接衝突。所以不能只 append scope；要同步改掉這句。
+
+建議卡面文字：
+
+AIR-81 Description 擴充稿
+
+〔human-summary〕  
+blueprint 的人類導覽網頁（index.html）是治理檔的投影，目前需同步三類內容：Priority backbone、structure.md 載體結構章，以及 section 02「一件工作的八站生命週期」的逐站導引。八站目前只有敘事／載體／現況，缺少「此站該從哪個 command/skill 進入、去哪讀方法論」的人類導航。
+
+〔scope〕
+
+1. `workflow.md` 的「八站主軸」新增「怎麼做」source 欄：每站只維護 entry command/skill、權威詳讀連結，以及 target 尚未落地時的現行 runtime authority；不重述各 command 內部 workflow。
+2. `index.html` section 02 將上述 mapping 投影成可點擊的逐站導引，保留現有 Mermaid＋總覽表，再增加八站 compact guide cards。
+3. [skills/CLAUDE.md](<skills/CLAUDE.md>) 維持 LLM command topology 索引；各 `skills/<name>/SKILL.md` 維持 command semantics 單一源。`workflow.md` 只擁有「八站→入口」的人類 lifecycle mapping。
+4. ③開工／④實作須明確區分 target 與 runtime：`wt-open`／persistent card WT 尚未落地時，不得渲染成已可執行 command；導引須回到 repo `AGENTS.md`「git 慣例」與 `kanban-board` 現行流程。
+
+〔已決策勿重辯〕  
+① index.html 是 human viewport projection，不成為 command/rule 第二權威。  
+② workflow.md 是八站 lifecycle mapping source；command 行為仍由各 SKILL.md 定義。  
+③ 本卡允許為逐站導引更新 `workflow.md` source；其餘 blueprint source 不因刷新投影而改寫。  
+④ Priority backbone 與 structure 章既有裁決維持。
+
+〔新增驗收〕  
+⑤ `workflow.md` 八站每站皆有可操作的「怎麼做」入口與詳讀 link。  
+⑥ index.html section 02 八站皆能直接點到相應 command/skill/method authority。  
+⑦ ③④清楚顯示 target vs 現行做法，不產生 `wt-open` 已落地的假象。  
+⑧ HTML 不複製 SKILL.md 的內部步驟；command rename／退役／生命週期位置改變時，可由 workflow mapping 明確辨識需要刷新 projection。
+
+這段可和現卡原本 Priority backbone／structure 的驗收合併，不需要另開卡。
+
+## E. 執行拆分
+
+**同意：先做 `workflow.md` source＋AIR-81 卡 scope，`index.html` 留 AIR-81 實作弧。**
+
+這個拆分是乾淨的，因為 source/projection ownership 已經分開。唯一條件是 source 一旦先行，必須讓卡明確記錄「index projection 暫時 stale、由 AIR-81 收斂」，不能讓它變成無 owner 的 drift。
+
+也就是：
+
+`workflow.md source 定稿 → AIR-81 明列 pending projection → AIR-81 刷 index.html`
+
+而不是要求 source 與 human viewport 永遠原子提交。後者會讓「先把資訊架構定對」與「HTML rendering」不必要地綁死。
+
+* * *
+
+下面是我建議可直接餵實施者的 `workflow.md` 第四欄。它刻意只寫 entrypoints 與 authority links，不複製 skills 內部流程。
+
+workflow.md 八站「怎麼做」欄草案
+
+| 站 | 怎麼做 |
+| --- | --- |
+| ① 想法 | **入口**：未承諾想法留 draft／pending；決定承諾時依 [kanban-board](../../skills/kanban-board/SKILL.md) 建 card，不先進實作流程。**詳讀**：看板生命週期與建卡／狀態／refs 以 kanban-board 為準。 |
+| ② 規劃 | **入口**：需求仍需釐清可先 `/spec`；正式規劃走 `[/execution-plan](../../skills/execution-plan/SKILL.md)`，需要獨立覆核時用 `[/ep-review](../../skills/ep-review/SKILL.md)`，高技術風險假設可加 `[/ep-validate](../../skills/ep-validate/SKILL.md)`。pre-EP whole-picture 可用 `[/illustrate](../../skills/illustrate/SKILL.md)` 作人類 viewport。**詳讀**：[spec](../../skills/spec/SKILL.md)／[execution-plan](../../skills/execution-plan/SKILL.md)。 |
+| ③ 開工 | **目標入口**：`wt-open <card>` 建立 card branch／persistent WT／baseline／cwd identity。**❌ target 尚未落地**：目前不得把 `wt-open` 當可執行介面；現行依 [repo AGENTS.md「git 慣例」](../../AGENTS.md#git-慣例本-repo-卡-branch) 建 card branch，並依 [kanban-board](../../skills/kanban-board/SKILL.md) 完成 In Progress／refs 起手式。**詳讀**：本檔「Worktree 形態定案／過渡條款」。 |
+| ④ 實作 | **入口**：標準 EP 工作走 `[/implement](../../skills/implement/SKILL.md)`；程式邏輯變更依 [test-driven-development](../../skills/test-driven-development/SKILL.md) 的 TDD 方法。**execution plane**：target 為 persistent card WT／免卡小修 ephemeral WT；**目前仍依 repo AGENTS.md 現行 card-branch 慣例執行**，不得假定 WT helper 已存在。 |
+| ⑤ 驗證 | **入口**：實作流程內依 `/implement` 執行測試與 `[/audit-test](../../skills/audit-test/SKILL.md)`；instruction artifact 另依 [instruction-testing](../../skills/instruction-testing/SKILL.md) 做行為驗證。變更級獨立 review 在收斂站由 `/post-build` 編排 `/code-review`。**詳讀**：[acceptance-evidence rule](../../rules/acceptance-evidence.md)＋[acceptance-evidence skill](../../skills/acceptance-evidence/SKILL.md)。 |
+| ⑥ 收斂 | **入口**：`[/post-build](../../skills/post-build/SKILL.md)` 編排 `/code-review` → `/judge-review` → 修正 → consistency／metadata finalization；人類方向／結構 checkpoint 可按需用 `[/illustrate](../../skills/illustrate/SKILL.md)` 或 `[/debrief](../../skills/debrief/SKILL.md)`；最後走 `[/commit](../../skills/commit/SKILL.md)`。**git 收斂**：target 為 `wt-close`；尚未落地前依 [repo AGENTS.md「git 慣例」](../../AGENTS.md#git-慣例本-repo-卡-branch) 的 rebase→ff-only 規則。 |
+| ⑦ 沉澱 | **入口**：通常由 `/implement`／`/post-build` 內的 `[metadata-sync](../../skills/metadata-sync/SKILL.md)` 把 Capabilities、SYSTEM-MAP、architecture／相關 metadata 收回正確載體；需要跨 session 保存的事實再依 [memory-audit](../../skills/memory-audit/SKILL.md) 判斷，規範正文不得複製進 memory。**詳讀**：repo `AGENTS.md` 的載體治理＋memory-audit 載體統一定義表。 |
+| ⑧ 運維 | **入口**：例行維護走 `[/daily-maintain](../../skills/daily-maintain/SKILL.md)`；fresh-machine／重建路徑從 [onboarding.md](onboarding.md) 進入。**詳讀**：[maintain](../../skills/maintain/SKILL.md) 承載維護核心；排程現況看 [schedule-registry](../schedule-registry.md)，code-reality 接線看 [code-reality skill](../../skills/code-reality/SKILL.md)。 |
+
+有一個小調整我會特別堅持：**第五站不要把 `/code-review` 寫成主要入口，第六站才是它在實際 command pipeline 裡的位置。** 第五站描述的是「驗證這件事」，`/implement` 內測試／audit-test 是它的日常 execution；獨立 diff review 已由現行拓撲明確放在 `/post-build` 收斂鏈。這樣八站敘事和 skills/CLAUDE.md:27-57 才不會產生兩種流程順序。
+
+我的整體裁決是：**A 同意但縮窄 authority；B 採一欄三子語義；C 用可見 compact cards；D AIR-81 必須改掉「不改四檔」的舊 scope；E 同意 source 先行、projection 後收斂。** 本輪維持 read-only，沒有修改 repo。
+[delegate-bridge] job job-mtz6uhef-n3hj9a status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

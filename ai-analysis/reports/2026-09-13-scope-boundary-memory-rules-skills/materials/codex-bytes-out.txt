@@ -1,0 +1,32 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T02:09:47.430321Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:09:47.444729Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:09:47.450191Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:09:47.853185Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:09:47.874990Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:09:47.877705Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:09:48.474200Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T02:09:49.060220Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:09:49.070333Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:09:49.097424Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+1. **加總是你算的對。** 我前一輪的 16 rules bands 合計是 **15.24–19.29KB**；加 guide 2.6–3.2KB = **17.84–22.49KB**。
+
+deploy 還會加 header、每支 rule 的 separator/comment、join newline、`bundle-end`。依 deploy\_agents.py:326-340，現行 16 rules 的這層 framing 約 **964B**，所以較嚴謹的 deployed target 應寫成約 **18.8–23.45KB**，四捨五入就是 **19–23.5KB**。我前面寫 19–23KB，上緣少算了約 0.5KB。
+
+另有一個容易混淆處：source-only `bundle: skip-*` 會在 deploy 時刪除。deploy\_agents.py:304-318 目前 raw source 合計 33,845B，實際 bundle 32,835B；按上述 framing 回推，現有 skip body 約抵掉 **1,957B**。所以 AIR-86 最好同時記兩個量：**semantic source size** 與 **deployed bundle size**，不要直接拿 source sum 對 gate。
+
+2. **我建議重排，但不是「最大檔優先」，而是按「可安全削減量 × 判準確定性」排。**
+
+我會改成：
+
+- **第一批：`acceptance-evidence` + `model-routing` + `design-thinking`**。三者都有明確 paired skill，rule/core ↔ skill/body 邊界最好判；同時可一次拿到約 **3.4–4.4KB** 的主要收益，也能把 reference-layering 模式先定型。
+- **第二批：`edit-discipline` + `symbol-query-routing` + `quality-constraints` + `must-execute`**。延續已證明的 slimming pattern。
+- **第三批：guide + collaboration/context/python**。其中 `python-standards` 沒完整 paired carrier，所以只做 A-content slimming，不做 pointer-only。
+- **最後才碰 `tool-discipline` / `outward-action-consent`**。`tool-discipline` 雖然是大戶，但它橫跨 tool routing、Python invocation、edit failure、background、gate、read discipline，多個 first-action guard；太早以 byte ROI 驅動，很容易誤砍 bootstrap。`outward` 同理，屬高後果 calibration。
+
+所以我會**放棄「先三個 A 比例最高」作為批次排序本身**，但也不改成單純「3.6KB 最大戶先砍」。AIR-86 的排序指標應是：
+
+**paired-carrier 完整度／Bootstrap test 清晰度 → semantic risk → 可削 bytes。**
+
+這樣 `acceptance-evidence`、`model-routing` 會自然提前；`tool-discipline` 即使 byte 潛力很大仍留後段。這個排序也比較適合 AIR-86：前兩三檔先形成一個可重複的「minimal semantic closure」實例，後面難檔就有實際模板可比，而不是每檔重新辯一次原則。
+[delegate-bridge] job job-mtz6evta-vya720 status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa
