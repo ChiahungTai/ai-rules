@@ -1,0 +1,12 @@
+=== autonomous-execution skill → outward-action-consent 引用（repo 源） ===
+40:| Git commit | `git commit`（[outward-action-consent](../../rules/outward-action-consent.md) commit 段的免確認例外〔清單見該段，此處不枚舉〕僅限互動 session——autonomous session 所有 commit 需用戶確認，半夜自主跑亦不例外） |
+47:> **`git commit` 跳過的語義**：deep-work 階段 5 finalization 不自主 commit，變更留在 working tree 等用戶接手（用戶回來後 `/commit` 走 outward-action-consent 流程）。這對齊 [outward-action-consent](../../rules/outward-action-consent.md) commit 段——其免確認例外僅限互動 session，autonomous session 不繼承。
+72:| Git local 可逆 | `git tag`、`git stash`、`git add`（stage 可逆） | 自主執行（`git commit` 見紅線段——outward-action-consent 要求用戶確認） |
+77:> **紅線清單與通用 rule 的邊界**：紅線清單是 outward action 的 deep-work 場景列舉（快查子集），通用定義（reversibility test + AUTH line + source of truth 邊界）見 [outward-action-consent](../../rules/outward-action-consent.md)。
+=== outward 檔內 commit skill 程序引用 ===
+33:每次 git commit 都需獨立確認：展示摘要＋建議 message，等 user 明確 OK；前次授權不延伸。程序見 commit skill。
+=== agent-workflow「Spawn 預設背景」section 在場（TD-1 pointer 目標） ===
+66:### Spawn 預設背景（ZCode spawn 原生預設前台——規則補上）
+235:- [ ] spawn 帶 `run_in_background: true`（前台僅限 <30s 短 probe **且 prompt 帶 `[fg]`**——見上「Spawn 預設背景」；省略參數已被 gate 自動轉背景）
+=== commit skill 在場 ===
+/Users/ctai/Github/ai-rules/skills/commit/SKILL.md

@@ -1,0 +1,3 @@
+    3459 /Users/ctai/Github/ai-rules/rules/tool-discipline.md
+    2366 /Users/ctai/Github/ai-rules/rules/outward-action-consent.md
+    5825 total

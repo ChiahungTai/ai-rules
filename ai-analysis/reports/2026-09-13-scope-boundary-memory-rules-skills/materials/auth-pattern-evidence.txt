@@ -1,0 +1,28 @@
+# 開場條件式 commit 授權模式——對話紀錄查證（lite-verify，2026-09-13）
+
+> 任務源：user 09-13 原話「我會是一開頭就說 post-build 後就可以 commit 你可以去查對話紀錄，派個flash去查」。
+> 方法：DB ~/.zcode/cli/db.sqlite；唯讀（file:...?mode=ro）；真人判別＝role='user'＋part 無 synthetic；DB 全量 span 2026-08-17 → 2026-09-13。
+
+## 結論
+模式存在且為慣例：三週 33 sessions、38 則明確「post-build 過/做完/跑過/處理好 → 就可以 commit」條件式授權（去重 40 則 distinct 語句含 2 則邊界），句式高度一致。含 2 則自動免再問升級。
+
+## 數據
+- user 訊息 10,757 則中 587 則同含 post-build＋commit → 收斂授權句式後 48 則人類輸入（排除 4 則 AI 撰寫 subagent/fork prompt）→ 去重 40 則 distinct、33 sessions（2026-08-22 09:00 → 2026-09-13 16:07）
+- 位置分布：msg#1-2＝3/40（8%）；msg#1-5＝7/40（18%）；中途 33/40（82%）——**慣例準確形態＝任務派發訊息內給授權**（長壽 session 派發常在中段，如 09-12 22:31 deep-work 派發在 msg#16/119），非字面 session 第一則
+- 污染聲明：38 則明確命令式授權＋2 則邊界（sess_fd1f5e6c 08-31 設計描述非授權、sess_c16a8998 08-28 回引先前授權），均已標明計入
+
+## 代表性逐字引用
+- [2026-08-22 09:00] sess_a8347285（msg#6/6）：「post-build 做完就 commit」
+- [2026-08-24 19:27] sess_67246202（msg#91/95）：「ＯＫ，你有跑過 post-build 就可以commit」
+- [2026-08-25 20:00] sess_8c23a685（msg#25/70）：「post-build 過就可commit,然後繼續往下做ep」
+- [2026-08-26 08:11] sess_d381b5e2（msg#32/93）：「post-build 跑過就可以 commit 然後 新的兩個ep…」
+- [2026-09-02 13:00] sess_89592a9f（msg#22/42）：「你跑 post-build 後就可以 commit 另外 handoff…」
+- [2026-09-03 08:33] sess_12512035（msg#25/26）：「1 post-build 有做就可以Commit, 2. 刪除 ３．…」
+- [2026-09-04 19:31] sess_4e705e51（msg#16/25）：「看起來不錯 post-build 之後可以 commit, 再跟你討論些調整跟確認的地方」
+- [2026-09-12 22:31] sess_25e53da0（msg#16/119，deep-work 派發）：「deep-work 主線UC4, UC5 就照之前的步調一直走下去，commit在 post-build 處理好就可以commit, 不用我同意。主線之外的 polish 池, 都先不要commit…」
+- [2026-09-13 02:10] sess_25e53da0（msg#17/119，排程接續）：「UC4 收尾（review 迴圈→post-build→commit〔已授權 post-build 完即可 commit 不需再問〕）→ UC5 開弧全流程」
+- [2026-09-13 16:07] sess_874bab7a（msg#44/45，meta 語句＝本查證任務源）：「基本上自動我都不會讓他commit, 然後平常非半夜那種，我會是一開頭就說 post-build 後就可以 commit」
+
+## 治理含義（writer 註）
+- 證據＝AUTH line 機制的實踐面（user 原話涵蓋具體動作＝合法授權路徑），支持 B4-F1 裁定的政策形態：互動＝條件授權鏈、autonomous＝一律待確認
+- 不寫入任何 rule（documentation≠authorization——規則不得預授權）；僅作治理記錄存 materials

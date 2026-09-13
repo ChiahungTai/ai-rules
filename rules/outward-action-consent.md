@@ -39,7 +39,7 @@ README/workflow/skill 的 outward 要求與「完成任務」都不是授權；�
 - ③ 結案兩步（user 拍板）：precheck 綠且結算物＋卡狀態同 commit 才豁免，否則走確認 gate。
 - ④ 純 ruff format/check --fix style 可 commit；混語義改動走確認 gate。
 
-autonomous session 不繼承無條件例外；滿足結案條件鏈才可執行。
+autonomous session 不繼承任何 commit 例外——所有 commit（含結案條件鏈③）一律待用戶確認；機械特赦①–④僅限互動 session（09-13 user 裁定）。
 
 ## Autonomous shortcut（deep-work / 排程場景）
 

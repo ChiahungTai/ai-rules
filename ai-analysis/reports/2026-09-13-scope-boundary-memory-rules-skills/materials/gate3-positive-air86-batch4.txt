@@ -1,0 +1,13 @@
+TD 一律明帶 => 1
+TD 自動補背景 => 1
+TD \[fg\] => 1
+TD 禁臆造工具 => 1
+TD uv run python => 1
+TD args=\(--flag 1\) => 1
+TD 禁 sed => 1
+TD set -o pipefail => 1
+TD 86KB => 1
+OW PENDING: <action> => 1
+OW AUTH: user said => 1
+OW 前次授權不延伸 => 1
+OW 紅線枚舉優先 => 1

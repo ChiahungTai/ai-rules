@@ -61,7 +61,7 @@ backlog task edit <id> --ref "<EP repo 相對路徑>[,<shell index.html 相對�
 backlog task edit <id> -s Done --final-summary "<一句>"
 backlog task edit <id> --ref "<done/ EP 相對路徑>[,<shell 相對路徑>]"   # --ref 整組替換
 ```
-**結案 metadata commit 特赦（user 09-11，條件授權鏈）**：結案兩步＋其 commit（僅 `backlog/`＋結算搬移檔、**同 commit**）在 **precheck 綠（跨線掃描 exit 0）** 時免逐次確認——機械守門替代人確認（例外條款③，autonomous session 同條件可執行）；條件不滿足 → 走確認 gate。註：precheck 在此是特赦的守門條件，非結案兩步本身的新要求（「結案兩步不需 precheck」現狀不變）。
+**結案 metadata commit 特赦（user 09-11，條件授權鏈；autonomous 適用性 09-13 user 裁定收回）**：結案兩步＋其 commit（僅 `backlog/`＋結算搬移檔、**同 commit**）在 **precheck 綠（跨線掃描 exit 0）** 時免逐次確認——機械守門替代人確認（例外條款③，**限互動 session**；autonomous session 所有 commit 一律待用戶確認）；條件不滿足 → 走確認 gate。註：precheck 在此是特赦的守門條件，非結案兩步本身的新要求（「結案兩步不需 precheck」現狀不變）。
 
 **弧結案蒸餾（第三動，同時機）**：owning session 將本弧 project_/feedback_ memory 條目重寫為終態 facts——刪日期/session id/進度流水與 git 可推導內容，留決策教訓與終態結論，敘事指向 repo 檔案（EP/卡）；無相關條目明示無。規則細節＝[memory-audit](../memory-audit/SKILL.md)「寫入端紀律」（含 desc 三不）。
 

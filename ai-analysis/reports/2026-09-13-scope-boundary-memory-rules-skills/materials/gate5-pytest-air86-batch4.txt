@@ -1,0 +1,26 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /Users/ctai/Github/ai-rules
+configfile: pyproject.toml
+collected 364 items
+
+tests/test_check_report_shells.py ......                                 [  1%]
+tests/test_check_single_source.py ...................................... [ 12%]
+........                                                                 [ 14%]
+tests/test_compact_tail_inject.py .....                                  [ 15%]
+tests/test_crawl.py ......                                               [ 17%]
+tests/test_deploy_agents.py ..........................                   [ 24%]
+tests/test_hooks.py ..........                                           [ 27%]
+tests/test_memory_hooks.py ........                                      [ 29%]
+tests/test_memory_lifecycle.py ......................................... [ 40%]
+...................................                                      [ 50%]
+tests/test_memory_read_observation.py .............                      [ 53%]
+tests/test_memory_telemetry.py ......................................... [ 65%]
+..........................                                               [ 72%]
+tests/test_memory_topology_setup.py .....                                [ 73%]
+tests/test_muse_memory_governance_plugin.py ............................ [ 81%]
+..........................                                               [ 88%]
+tests/test_muse_memory_inbox.py ..........                               [ 91%]
+tests/test_sync_agents.py ................................               [100%]
+
+============================= 364 passed in 13.99s =============================
