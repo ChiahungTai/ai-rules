@@ -4,7 +4,7 @@ title: 一致性掃描修復弧——13 中級全修＋低級順手批次（09-1
 status: In Progress
 assignee: []
 created_date: '2026-09-09 22:40'
-updated_date: '2026-09-13 00:55'
+updated_date: '2026-09-13 03:45'
 labels:
   - governance
   - consistency
@@ -24,4 +24,12 @@ ordinal: 56000
 〔triage 併弧 09-10——升級為一致性×錯置總治理弧（兩段連續做）〕段二＝AIR-69 全部內容併入（原卡搬 completed/ 可查）：memory-audit 統一定義表 v2 兩處修補（層級閘首句＋誤置表 A/B——裁決書 ai-analysis/reports/2026-09-10-carrier-placement-v2-conference.md §二逐字條文；零 bundle 增量硬約束＋同 commit 原子性）＋先鋒 8 條已裁執行（user 拍板：bridge-job-completion-no-push 規範正文刪/backlog-cli-entry 刪/global-vs-project-permissions 重寫/cross-session-commit-on-active-branch 規範搬 kanban SKILL＋留事故/backlog-card-edit-precheck 進 kanban 卡操作段/skill-deletion-consumer-scan 併 zcode-skill-usage-audit 後刪/work-order-contract 進 work-order.md/diagnose-installed-vs-source 進 debugging skill）＋雙池全量 audit（forward/reverse lane 掃描＋歸因投影）＋draft-1/2（telemetry 源接線）併入本段。段一（原 13 中級＋低級修復）收斂後無縫接段二——兩段共用 kanban SKILL 等重疊面避免並行。
 
 09-13 scope 分界研究擴充段二輸入：判準回填 diff（層級閘首句＋rule 資格公式＋residency 三測試＋條件載入層 pointer＋desc 觸發面修訂）已備妥於 ai-analysis/reports/2026-09-13-scope-boundary-memory-rules-skills/report.md §六（逐字 diff 全文＝materials/codex-followup-out.txt §C；judge 已採納）。實施時連同 09-10 原定義表兩處修補一次落，rg 驗零殘留（muse r2 原子性條款）。後續 corpus 搬遷（AIR-86）與 vertical slice（AIR-85）都依本卡回填後的載體表為準——先回填後搬遷。
+
+09-13 現況盤點（lite-verify 機械核對，逐項附 file:line 證據）：
+
+**可銷三項**：①段二判準回填＋09-10 v2 修補整塊——commit 809aacd 覆蓋（層級閘首句＋資格公式＋三測試＋條件載入層＋desc 觸發面＋誤置表 A/B/V 列）②四處舊判準 shadow 清理（rg 零命中實證）③段一 S4 usage-ping 語音殘留＝washed-out（標的 :30/:118 已不存在）。
+
+**段一 11 群仍待修**（G1/G2/G4/S1/S2/S3/S5/S6/F1/F3/F4——抽驗細節見盤點報告）；**F1 惡化**：deploy/launchd/ 已被 aa3c5e6（09-11）整刪，acceptance-evidence SKILL:43 仍宣稱其存在——宣稱撈空。**段二先鋒 8 條 0/8 落地**（條目全在、規範面落點全零命中；先鋒1 規範面已被 AIR-66 上 rule——刪除條件成熟）。
+
+**處置裁定（user 09-13 拍板）**：剩餘屬雜項性質非 workflow 弧——不採弧儀式，規劃為清掃 session 批次消化（與 AIR-67 剩餘合併評估）；audit 與 draft-1/2 兩軸性質不同另行歸位。
 <!-- SECTION:NOTES:END -->
