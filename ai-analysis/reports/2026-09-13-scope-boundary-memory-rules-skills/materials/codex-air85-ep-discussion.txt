@@ -1,0 +1,73 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules/.agents/memory)
+2026-09-13T08:34:07.728843Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T08:34:07.729705Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T08:34:07.747129Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T08:34:08.187794Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T08:34:08.187812Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T08:34:08.290061Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T08:34:08.672302Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T08:34:09.394254Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T08:34:09.402453Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T08:34:09.515234Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+## 1\. OPEN-Q 表態
+
+整體上我仍支持 §A 的三軸分離，但會把 EP 的 schema 再收緊一點：**deploy 不應解析 `paths:`**。`paths:` 是 Claude Code runtime 軸；AIR-85 新機制只需要解析 `harness-scope` 與 projection 軸。現在 EP 的 `RuleMeta.paths`（`ep.md:47-53`）雖註明「deploy 不消費語義」，但既然 deploy 現況根本不解析它（`scripts/deploy_agents.py:167-188`），最好連 parser 都不要碰，才能從結構上維持 A1 的軸分離。
+
+| OPEN-Q | 我的選擇 | 理由 | 反方案弱點 |
+| --- | --- | --- | --- |
+| **Q1 marker 定名** | **`bundle-projection: pointer`** | 比 `bundle-mode` 更精確：這個欄位描述的不是 rule 本身 mode，而是「portable bundle 如何投影」。剛好對應 §A 的第三軸 `portable projection mode`（`codex-followup-out.txt:34-48`）。 | `bundle-mode` 可用但語義較寬，日後容易混入 scope/load timing；`non-cc-mode` 又把目前三家 harness 集合寫死在 schema 名稱。 |
+| **Q2 schema** | **三個 flat frontmatter keys**：`bundle-projection` / `pointer-target` / `bootstrap-pointer` | machine-readable、可在 body 進 pipeline 前 fail-closed、pointer 語義仍與 source 共置，完全符合 A2「author-written semantics + deploy-generated placement」（`:52-93`）。 | HTML marker/body 區塊會讓 parser 同時處理 frontmatter＋Markdown marker nesting/unbalanced 情況，等於重造第二套 `SKIP_PATTERN` 類機制；多行 pointer 目前也沒有需求。 |
+| **Q3 reachability** | **source existence + portable runtime reachability 分開驗；real deploy 與 `--dry-run` 共用同一 preflight**。runtime 以 `~/.agents/skills/<target>/SKILL.md` 作 non-CC canonical portable root。 | Codex 的 user skill native root 是 `~/.agents/skills`（`codex-extraction.md:89-91`）；Muse 也把 `~/.agents/skills` 列為 account-wide native source（`muse-extraction.md:49-53`）；ZCode 現行規範也掃 `.agents` root（[skills/CLAUDE.md:17](<skills/CLAUDE.md:17>)）。本機三根目前都指同 repo，pilot target 可達。 | 僅查 repo `skills/<name>` 只能證 source 在，不能證 deployed harness 找得到；反過來逐端只檢查「是不是 symlink」太 implementation-specific，real directory/copy 其實同樣可達。 |
+| **Q3 CC unknown keys** | **不要把「官方 docs 沒反對」當證據；要求一個 L4 runtime probe 才關閉。** | Anthropic 現行 docs 明確規範 `.claude/rules` 的 `paths` frontmatter 與 Read-trigger，但沒有給 arbitrary unknown rule frontmatter keys 的相容性契約。[Claude](https://code.claude.com/docs/en/memory) 你們現有 probe 已建立很好模板：Claude Code 2.1.263、`load_reason:path_glob_match`、實驗/對照分離（`leg5-probe-paths-verdict.md:5-20`）。 | 單靠 [skills/instruction-writing/SKILL.md:26](<skills/instruction-writing/SKILL.md:26>) 的「frontmatter 欄位可容忍」只是 repo doctrine，不是外部 runtime evidence；單靠官方文件沉默更不能推出 unknown keys guaranteed ignored。 |
+| **Q4 矛盾組合** | **hard fail**，而且不只 `claude-specific/meta + projection`；所有 orphan/invalid projection 組合都 fail。 | 這是 configuration contradiction，不是 runtime warning。若 warn-skip，作者以為做了 pointer projection，實際卻 full/skip，正是 silent policy drift。 | warn-skip 會把 typo 變成 deployment semantics。例如 `bundle-projection: poitner` 若退回 full，bundle 會悄悄重新膨脹。 |
+
+Q2 我還會要求 schema validation 至少涵蓋四個 invariant：`pointer` mode 時 target/pointer 必須都存在；非 `pointer` 的未知 mode fail；沒有 mode 卻出現 `pointer-target` 或 `bootstrap-pointer` fail；`pointer-target` 限 skill-id slug，禁止 `../` 之類 path interpretation。這些應落在段 1，而不是段 2 才臨時判斷。
+
+另外，我建議不要把現在的 `read_scope()` 直接改成 `RuleMeta` 回傳。它已有既有 caller/tests（`deploy_agents.py:181-188, 227-250`；`tests/test_deploy_agents.py:26-41`）。比較穩的是新增 `read_rule_meta()`，再讓 `read_scope()` 成 compatibility wrapper。這樣 vertical slice 不必順便重寫 scope API。
+
+## 2\. EP 結構審
+
+**四段切分基本自足，可以 implement，但段 1、2、3 各需要補一個 contract。**
+
+段 1 應改成「projection metadata parser + schema validation」，並明寫 **deploy 不解析 `paths:`**。目前 `ep.md:47-53` 把 `paths` 放入 `RuleMeta`，和本卡最重要的三軸隔離精神有一點逆向。`paths:` 的 CC 行為已由既有 L4 probe 證實，AIR-85 不需要重新擁有它（`ep.md:25-29`；`leg5-probe...:7-20`）。
+
+段 2 最大漏項是 **global preflight vs 現行 partial deploy semantics**。現在 `main()` 對每個 target 獨立 build/gate，某端失敗仍會把其他 `ready` targets 部署出去，只是最後 exit 1；原始碼甚至明寫這是「有意」partial deploy（`scripts/deploy_agents.py:448-506`）。可是 EP `:68` 說 pointer 三驗任一失敗要「deploy 整體失敗」。因此 pointer schema/target/reachability validation 必須放在 **任何 target write 之前的全域 preflight**；不能在 per-target loop 中發現 Muse pointer unreachable 後仍部署 ZCode/Codex。這個應有專門測試。
+
+段 3 的 **AC#2 wording 要修**。卡面寫「CC 端 rules 原樣部署」（`air-85...md:38-41`），EP 又說 [~/.claude/rules/instruction-writing.md](<~/.claude/rules/instruction-writing.md>) 內容不變（`ep.md:78-81`），但 pilot 本身必須替 source 新增三個 frontmatter keys，所以不可能 byte-identical。「原樣」應正式定義成：
+
+> CC 不經 bundle projection；既有 `paths:` 與 rule body 保持不變，新增 projection metadata 不改變 path-trigger/runtime 行為。
+
+然後用兩層證據：靜態 diff 證 body/`paths` 不動；L4 probe 證新增 unknown keys 後 matching Read 仍注入 rule。現行官方 docs也確認 path-scoped rule 是 Read match 才觸發。[Claude](https://code.claude.com/docs/en/memory)
+
+段 4 沒問題，但我會把「90KiB gate」再寫成一個明確驗證點。實際上現在有兩種 gate：ZCode/Codex `90KiB`、Muse `36KiB`（`deploy_agents.py:128-145`；`rules/AGENTS.md:25-32`）。**projection 必須先發生，再計算 bundle bytes/gate**。目前 build → bytes → size gate 的順序是 `main():462-505`，所以實作時只要讓 `build_bundle()` 產生投影後內容即可；不要先拿 full body 做 gate 再 projection。
+
+`--dry-run` 也值得加入 Scenario Matrix。目前它完整走 broken-ref、purity、build、size gate，直到 `:508-510` 才跳過 write。所以 AIR-85 的 projection/schema/reachability preflight **dry-run 和真跑必須完全一致，只差最後 filesystem replacement**。否則會出現 dry-run 綠、真 deploy 才因 pointer unreachable 失敗的假驗收。
+
+AC#1–4 大致都有覆蓋；我建議 Scenario Matrix 再補三格：`--dry-run` 與 real run 同一 invalid marker 都 exit≠0；unknown `bundle-projection` value / orphan key fail；projection 後尺寸才送 size gate。另有一個保守但重要的 known limitation：`check_broken_refs()` / `check_neutral_purity()` 現在掃的是 **full source**（`deploy_agents.py:217-301`），不是 projected representation。這會造成 pointer-mode body 即使不 ship，仍可能被 purity/broken-ref 擋住。這是 false-positive、不是安全漏洞，所以 vertical slice 可以暫不改，但 EP 應記為後續 interface debt，否則第二支/第三支 pilot 很容易突然踩到。
+
+## 3\. pilot bootstrap-pointer 句
+
+我會拿掉目前草稿裡的 `CC 端本 rule 由 paths...`。那是 deployment mechanism，不是 non-CC LLM 此刻需要的行為語義，而且 pointer materialize 到非 CC bundle 後提 CC 只增加噪音。
+
+我建議一句：
+
+> **新增或修改 AGENTS.md、CLAUDE.md、rules 或 SKILL.md 等 instruction 檔前，先載入 `instruction-writing` skill；frontmatter、載體選擇、引用、Signal/Noise 與自洽檢查以該 skill 為準。**
+
+這比 EP 現稿 `ep.md:77` 好的地方是：trigger 是「新增或修改 instruction」，不是「看到 Markdown」；因此不會因普通 README/doc 工作過度觸發。它也直接對齊 skill 自己的 applicability（`skills/instruction-writing/SKILL.md:2-10`），且不攜帶任何 Claude-specific `paths:` implementation detail。
+
+如果你想再瘦一點，我認為至少要保住「新增或修改 instruction 檔前」和「先載入 skill」兩個成分；後半的 taxonomy 可以縮，但 trigger 不能縮成泛泛的「instruction 見 skill」。
+
+## 4\. 還缺的段落／風險
+
+我認為 EP 在定稿前還值得補四個 interface-level 決定。
+
+第一是 **projection API 要純函數化**。現在 `build_bundle()` 直接 `read_text → slim_for_bundle()`（`deploy_agents.py:321-340`）。建議中間形成一個概念上類似 `project_rule_for_bundle(path, meta) -> str` 的純步驟：full mode → 現有 `slim_for_bundle()`；pointer mode → 只回作者 pointer。如此 `instruction-writing`、之後 `llm-output-convention` 都走同一介面，而不是在 `build_bundle()` 裡長出第二個 if forest。
+
+第二是 **pointer-mode bundle 不要殘留 source frontmatter/body**。section provenance marker `<!-- rules/instruction-writing.md -->` 應保留，但其後直接放 bootstrap pointer 即可。否則把 `paths:`、`bundle-projection:` 等 metadata 一起 materialize 到 AGENTS.md，對非 CC model 沒有功能，只多出第二層可誤讀語義。EP `:66` 已說保留 section header，這方向正確，建議寫清楚「header + pointer only」。
+
+第三是 **為後兩支預留「能力條件」而不是寫死 filename**。`llm-output-convention` 已有 paired skill，所以 AIR-85 後只需要為它做 first-consequential-action/bootstrap 判斷；`python-standards` 則目前根本沒有 paired skill，§A 已把它列為 blocker（`codex-followup-out.txt:95-115`）。因此 schema validator 應只知道「target skill 是否存在/可達」，不應 special-case instruction-writing。這樣第二支直接 opt-in；python-standards 在承載補齊前會自然 fail-closed。
+
+第四是 **CC unknown frontmatter 相容性應升成 AIR-85 pilot gate，而非一句 `unverified` 就放行**。官方現行 docs能支持 `paths:` 和 Read-trigger，但我找不到官方對 arbitrary unknown rule frontmatter keys 的 compatibility guarantee。[Claude](https://code.claude.com/docs/en/memory) 既然 AIR-85 的整個設計會把自訂 metadata 放進同一 rule frontmatter，這不是旁枝細節。最好的驗收是沿用既有 `leg5-probe` 方法做一次最小 A/B：同一 path-scoped rule，加 projection unknown keys 後 matching Read 仍有 `path_glob_match` attachment；對照非 matching Read 零注入。若這一關不過，再考慮把 projection metadata 移出 CC 會解析的 YAML，而不是事後補 workaround。
+
+**我的總判斷：EP 架構可用，三軸思想沒有偏；定稿前最值得修的不是加新段，而是把三個 contract 寫死：deploy 不解析 `paths:`、projection validation 是全域 preflight、AC#2 驗的是 CC runtime semantics 不變而非檔案 byte 不變。** 這三點補上後，AIR-85 會是一個很乾淨的 vertical slice，而不是只對 instruction-writing 特製的 slimming patch。
+[delegate-bridge] job job-mtzk55aa-w93a3l status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

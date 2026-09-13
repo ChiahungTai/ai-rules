@@ -17,6 +17,18 @@ Rule classification is auto-discovered from per-rule frontmatter:
     ---
 Scopes: neutral | claude-specific | meta
 
+Bundle projection axis (AIR-85): neutral rules may opt into pointer projection
+with `bundle-projection: pointer` + `pointer-target: <skill-id slug>` +
+`bootstrap-pointer: "<trigger sentence>"`; parse-time schema violations fail
+closed (read_rule_meta). deploy never parses `paths:` -- that is the Claude
+runtime axis, structurally isolated from bundle projection.
+
+Pointer rules project to an annotation header + the verbatim bootstrap line
+(project_rule_for_bundle); a global preflight (check_pointer_preflight: repo
+skill source exists, pointer line present, ~/.agents runtime reachable) runs
+once before ANY target write -- dry-run and real deploy share it, and any
+failure aborts with exit 1 and zero targets written.
+
 Default bundles 'neutral'. New rules without an explicit harness-scope
 default to 'neutral' (generic knowledge defaults to cross-harness). Rules
 that are Claude-specific must declare `harness-scope: claude-specific`
@@ -57,6 +69,7 @@ import sys
 REPO = pathlib.Path(__file__).resolve().parent.parent
 GUIDE = REPO / "ai-development-guide.md"
 RULES_DIR = REPO / "rules"
+SKILLS_DIR = REPO / "skills"  # pointer preflight 驗一：repo skill source
 
 
 @dataclasses.dataclass(frozen=True)
@@ -165,17 +178,134 @@ HEADER = (
 
 
 def read_scope(path: pathlib.Path) -> str:
-    """Extract harness-scope from YAML frontmatter. Default: neutral."""
+    """Compatibility wrapper：harness-scope 軸（既有 caller/tests API 不變）。"""
+    return read_rule_meta(path).scope
+
+
+# --- projection metadata（AIR-85 三軸分離）--------------------------------
+#
+# harness-scope 是 scope 軸；paths: 是 CC runtime 軸（契約一：deploy 不解析）；
+# bundle-projection 是 portable bundle 投影軸——作者顯式 opt-in 的 marker，
+# deploy 只機械投影＋fail-closed（投影：project_rule_for_bundle；全域
+# preflight：check_pointer_preflight）。
+
+PROJECTION_MODES = ("full", "pointer")
+
+# skill-id slug：小寫開頭＋小寫/數字/hyphen——禁 `../`、路徑字元、空白。
+SKILL_SLUG_PATTERN = re.compile(r"^[a-z][a-z0-9-]*$")
+
+# Frontmatter 只消費 flat `key: value` 純量；list item／縮排續行（如 paths: 的
+# `- "**/*.md"`）不是 flat 純量，不匹配即略過。
+_FLAT_FRONTMATTER_KEY = re.compile(r"^([a-z][a-z0-9_-]*):(.*)$")
+
+
+class RuleMetaError(ValueError):
+    """rule frontmatter projection metadata 違反 schema invariant（解析期 fail-closed）。"""
+
+
+@dataclasses.dataclass(frozen=True)
+class RuleMeta:
+    """單一 rule 的 deploy 可視 metadata（scope 軸＋projection 軸）。
+
+    契約一：無 paths 欄位——paths: 是 CC runtime 軸，deploy 結構上不解析。
+    """
+
+    scope: str
+    projection: str = "full"  # PROJECTION_MODES 之一；full body 為預設不標
+    pointer_target: str | None = None
+    bootstrap_pointer: str | None = None
+
+
+def _frontmatter_fields(path: pathlib.Path) -> dict[str, str]:
+    """Opening `---` fence 內的 flat `key: value` 純量（fence 外不算）。
+
+    解析語義與舊 read_scope 一致：無 fence、fence 內無該鍵、或鍵值為空，
+    皆由呼叫端以預設值兜底。
+    """
     content = path.read_text(encoding="utf-8")
     if not content.startswith("---"):
-        return "neutral"
+        return {}
+    fields: dict[str, str] = {}
     for line in content.split("\n")[1:]:
         if line.strip() == "---":
             break
-        if line.strip().startswith("harness-scope:"):
-            scope = line.split(":", 1)[1].strip()
-            return scope or "neutral"
-    return "neutral"
+        match = _FLAT_FRONTMATTER_KEY.match(line.strip())
+        if match:
+            fields[match.group(1)] = match.group(2).strip()
+    return fields
+
+
+def _unquote(value: str) -> str:
+    """剝除一對對稱 YAML 引號（bootstrap-pointer 逐字 materialize 的前置）。"""
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+        return value[1:-1]
+    return value
+
+
+def read_rule_meta(path: pathlib.Path) -> RuleMeta:
+    """解析 harness-scope＋projection metadata；invariant 違反即 raise RuleMetaError。
+
+    Schema（flat keys）::
+
+        bundle-projection: pointer   # 唯一 projection 語義值；full 為預設不標
+        pointer-target: <skill-id slug>
+        bootstrap-pointer: "<作者明寫 trigger 句>"
+
+    四 invariant（解析期 fail-closed）：
+        1. pointer mode → target/pointer 必須齊備且非空
+        2. 未知 projection 值 → fail
+        3. 非 pointer mode 卻帶 target/pointer 孤兒鍵 → fail
+        4. pointer-target 非 skill-id slug → fail
+    矛盾組合 hard fail：claude-specific / meta 帶任一 projection 鍵——
+    typo 不得靜默變 deployment semantics。
+    """
+    fields = _frontmatter_fields(path)
+    scope = fields.get("harness-scope", "") or "neutral"
+
+    mode_value = fields.get("bundle-projection")
+    target_value = fields.get("pointer-target")
+    pointer_value = fields.get("bootstrap-pointer")
+    has_orphan = target_value is not None or pointer_value is not None
+
+    if scope in ("claude-specific", "meta") and (mode_value is not None or has_orphan):
+        raise RuleMetaError(
+            f"{path.name}: harness-scope {scope!r} must not carry projection "
+            "metadata (bundle-projection/pointer-target/bootstrap-pointer)"
+        )
+
+    mode = _unquote(mode_value) if mode_value is not None else "full"
+    if mode not in PROJECTION_MODES:
+        raise RuleMetaError(
+            f"{path.name}: unknown bundle-projection value {mode_value!r} "
+            f"(expected one of {list(PROJECTION_MODES)})"
+        )
+
+    if mode != "pointer":
+        if has_orphan:
+            raise RuleMetaError(
+                f"{path.name}: pointer-target/bootstrap-pointer are orphans "
+                f"under {mode!r} projection (only pointer mode consumes them)"
+            )
+        return RuleMeta(scope=scope, projection=mode)
+
+    target = _unquote(target_value or "")
+    pointer = _unquote(pointer_value or "")
+    if not target or not pointer:
+        raise RuleMetaError(
+            f"{path.name}: bundle-projection pointer requires non-empty "
+            "pointer-target and bootstrap-pointer"
+        )
+    if not SKILL_SLUG_PATTERN.match(target):
+        raise RuleMetaError(
+            f"{path.name}: pointer-target {target_value!r} is not a skill-id "
+            "slug (lowercase [a-z0-9-], no path characters)"
+        )
+    return RuleMeta(
+        scope=scope,
+        projection="pointer",
+        pointer_target=target,
+        bootstrap_pointer=pointer,
+    )
 
 
 def discover_rules(
@@ -318,6 +448,69 @@ def slim_for_bundle(content: str, rule_name: str = "") -> str:
     return SKIP_PATTERN.sub("", content)
 
 
+# Pointer 投影的 bundle 註解標頭：指名 skill 來源，on-demand body 不 ship。
+POINTER_ANNOTATION = (
+    "<!-- pointer projection: on-demand body not shipped in this bundle; "
+    "full text -> skill `{target}` (load the skill when triggered) -->"
+)
+
+
+def project_rule_for_bundle(path: pathlib.Path, meta: RuleMeta) -> str:
+    """單一 rule 的 bundle 投影：純函數（內容只由 path 內容＋meta 決定）。
+
+    full mode → 既有 slim_for_bundle()（無 marker 時 byte-identical）；
+    pointer mode → 投影註解標頭＋bootstrap-pointer 逐字（無 frontmatter／
+    body 殘留）。之後的 rule 走同一介面（第二支 pilot：llm-output），
+    零 special-case filename。
+    """
+    content = path.read_text(encoding="utf-8")
+    if meta.projection != "pointer":
+        return slim_for_bundle(content, path.name)
+    assert meta.pointer_target is not None and meta.bootstrap_pointer is not None, (
+        "pointer mode meta must carry target and pointer (parse-time invariant)"
+    )
+    annotation = POINTER_ANNOTATION.format(target=meta.pointer_target)
+    return f"{annotation}\n{meta.bootstrap_pointer}"
+
+
+def check_pointer_preflight(
+    rules: list[tuple[pathlib.Path, RuleMeta]],
+    skills_dir: pathlib.Path,
+    home: pathlib.Path,
+) -> list[str]:
+    """全域 preflight 三驗（契約二）：在任何 target write 之前對全部 pointer rule 跑完。
+
+        1. target skill source 存在（repo skills/<target>/SKILL.md）
+        2. pointer 行在場（bootstrap-pointer 非空；解析期已擋一次，此為防禦層）
+        3. runtime 可達（~/.agents/skills/<target>/SKILL.md——non-CC 三家
+           canonical portable root）
+
+    回傳失敗訊息清單（空＝全過）。呼叫端（main 的 deploy 與 --dry-run 共用）
+    必須以此 exit≠0 且不寫出任何 target——發現在 per-target loop 後段＝
+    partial deploy 已發生，禁止。
+    """
+    failures: list[str] = []
+    for path, meta in rules:
+        if meta.projection != "pointer":
+            continue
+        target = meta.pointer_target or ""
+        if not (meta.bootstrap_pointer or "").strip():
+            failures.append(
+                f"{path.name}: bootstrap-pointer empty (pointer line missing)"
+            )
+        source = skills_dir / target / "SKILL.md"
+        if not source.is_file():
+            failures.append(
+                f"{path.name}: pointer target skill source missing: {source}"
+            )
+        runtime = home / ".agents" / "skills" / target / "SKILL.md"
+        if not runtime.is_file():
+            failures.append(
+                f"{path.name}: pointer target skill not reachable at runtime: {runtime}"
+            )
+    return failures
+
+
 def build_bundle(
     rule_paths: list[pathlib.Path],
     scopes_label: str,
@@ -330,10 +523,9 @@ def build_bundle(
         if rule_path.name in exclude:
             continue
         parts.append(f"\n---\n<!-- rules/{rule_path.name} -->\n")
+        # 投影先於 bytes／size gate（S9）：bundle 內容即投影後內容。
         parts.append(
-            slim_for_bundle(
-                rule_path.read_text(encoding="utf-8"), rule_path.name
-            ).strip()
+            project_rule_for_bundle(rule_path, read_rule_meta(rule_path)).strip()
         )
         parts.append("")
     parts.append(BUNDLE_END_SENTINEL)
@@ -351,17 +543,31 @@ def check_size_gate(bundle_bytes: int, target: DeployTarget) -> str | None:
 
 
 def deploy_all(targets: list[pathlib.Path], bundle: str) -> list[pathlib.Path]:
-    """Stage-then-commit 部署，回傳成功替換的 targets。
+    """Stage-then-commit 部署，回傳成功就位的 targets（含 identical 跳過者）。
 
     被寫入的是 always-on agent policy：單檔用同目錄 temp＋fsync＋os.replace
     保證原子（target 永不出現截斷/partial）；全部 temp 寫完才開始 replace，
     把跨 harness split 窗口壓到 replace 循環內。staging 任一失敗＝全部回滾
     temp、不動任何 target；replace 失敗＝回報該 target、其餘照常（殘餘 split
     由 check_single_source 的 freshness gate 兜底偵測）。
+
+    冪等零寫入（AIR-85 EP:78）：target 已存在、非 symlink 且 bytes 與新
+    bundle 完全一致 → 跳過 stage/replace（零寫入、mtime 不變、不留 .tmp），
+    仍計入回傳清單（就位＝成功）。symlink 或內容不同 → 照舊 stage＋replace。
     """
     staged: list[tuple[pathlib.Path, pathlib.Path]] = []
+    skipped: list[pathlib.Path] = []
+    new_bytes = bundle.encode("utf-8")
     try:
         for target in targets:
+            if (
+                target.exists()
+                and not target.is_symlink()
+                and target.read_bytes() == new_bytes
+            ):
+                print(f"  [SKIP] {target} (identical)")
+                skipped.append(target)
+                continue
             target.parent.mkdir(parents=True, exist_ok=True)
             if target.exists() and not target.is_symlink():
                 existing = target.read_text(encoding="utf-8")
@@ -382,7 +588,7 @@ def deploy_all(targets: list[pathlib.Path], bundle: str) -> list[pathlib.Path]:
             tmp.unlink(missing_ok=True)
         print(f"  [FAIL] staging: {exc}", file=sys.stderr)
         return []
-    deployed: list[pathlib.Path] = []
+    deployed: list[pathlib.Path] = list(skipped)
     for tmp, target in staged:
         try:
             os.replace(tmp, target)
@@ -409,7 +615,20 @@ def main() -> int:
         help="preview bundle stats without writing (stats only; use `cat` on a deployed target or import build_bundle to inspect content)",
     )
     args = ap.parse_args()
+    try:
+        return _deploy(args)
+    except RuleMetaError as exc:
+        # RuleMetaError＝rule frontmatter schema 解析期全域 fail-closed：
+        # 以可判讀 [FAIL] 收場，不讓裸 traceback 直接噴給操作者。
+        print(f"[FAIL] rule frontmatter schema: {exc}", file=sys.stderr)
+        print(
+            "     deploy aborted (fail-closed); fix the rule frontmatter and rerun.",
+            file=sys.stderr,
+        )
+        return 1
 
+
+def _deploy(args: argparse.Namespace) -> int:
     scope_override = (
         {s.strip() for s in args.scope.split(",")} if args.scope != "neutral" else None
     )
@@ -445,7 +664,34 @@ def main() -> int:
         )
         return 1
 
-    targets = resolve_targets(pathlib.Path.home())
+    # 全域 preflight（契約二）：pointer 三驗在任何 target write 之前一次跑完，
+    # --dry-run 與真跑共用（S7——根除「dry-run 綠、真跑 fail」的假驗收）；
+    # 發現在 per-target loop 中後段＝partial deploy 已發生，禁止。
+    home = pathlib.Path.home()
+    targets = resolve_targets(home)
+    if scope_override is not None:
+        preflight_scopes: set[str] = set(scope_override)
+    else:
+        preflight_scopes = set().union(*(set(t.scopes) for t in targets))
+    preflight_failures = check_pointer_preflight(
+        [(p, read_rule_meta(p)) for p in discover_rules(RULES_DIR, preflight_scopes)],
+        SKILLS_DIR,
+        home,
+    )
+    if preflight_failures:
+        print(
+            f"[FAIL] {len(preflight_failures)} pointer preflight failure(s) "
+            "(aborted before ANY target write):",
+            file=sys.stderr,
+        )
+        for msg in preflight_failures:
+            print(f"  {msg}", file=sys.stderr)
+        print(
+            "     pointer rule needs repo skills/<target>/SKILL.md and "
+            "~/.agents/skills/<target>/SKILL.md (non-CC canonical portable root).",
+            file=sys.stderr,
+        )
+        return 1
     # partial-deploy 語義（有意）：各端獨立 build＋gate，一端失敗只跳過該端，
     # 其餘端照樣部署；exit code 仍為 1 告警（F4 聲明）。
     ready: list[tuple[DeployTarget, str]] = []

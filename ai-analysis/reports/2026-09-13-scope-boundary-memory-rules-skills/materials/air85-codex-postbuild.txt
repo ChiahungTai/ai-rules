@@ -1,0 +1,27 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T10:21:52.227032Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T10:21:52.258203Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T10:21:52.260775Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T10:21:52.696700Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T10:21:52.719433Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T10:21:52.729756Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T10:21:53.062073Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T10:21:53.910416Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T10:21:53.944662Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T10:21:53.961552Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+**最終 verdict：PASS，可進結案 commit；0 個 blocking finding。**
+
+1. **AC#1 — PASS**：`instruction-writing` 已以三鍵 opt-in，portable bundle 只留下固定 provenance annotation＋作者 bootstrap pointer，body 不進 bundle（`rules/instruction-writing.md:1-12`、`scripts/deploy_agents.py:451-473`）。我本輪再驗三端皆 **29,161B**，SHA-256 完全相同；ZCode bundle 的 pointer 在 L236-237，原 body heading 查無。EP 實測紀錄在 `ep.md:121`。
+2. **AC#2 — PASS**：契約正確落成「CC runtime semantics 不變」，不是 byte identity。`paths:` 與原 body 保留，新增 projection metadata；L4 三臂 probe 已證 treatment/control 同為 `path_glob_match`、nonmatch 零注入（`ep.md:66-79,122`）。  
+   三軸分離也成立：`RuleMeta` 沒有 `paths` 欄位，`read_rule_meta()` 只消費 scope/projection 三鍵（`scripts/deploy_agents.py:206-216,245-267`）。嚴格字面上 generic `_frontmatter_fields()` 會 tokenize `paths:` 這個 flat key，但 deploy **不賦予它任何語義、不據此決策**；符合本弧 contract 的實質要求。
+3. **AC#3 — PASS**：pointer 三驗是任何 target write 前的全域 preflight，失敗直接 return 1（`scripts/deploy_agents.py:667-694`）；真環境移除 skill 的 exit 1＋zero-write 已記錄於 `ep.md:123`。
+4. **AC#4 — PASS**：projection 在 `build_bundle()` 內先完成（`:514-532`），之後才計 bytes、跑各端 size gate（`:708-752`）；dry-run 也經過同一 preflight，直到 `:754-756` 才分流。實際全端 deploy 與量測紀錄在 `ep.md:124`。
+
+三個 frozen contract 因此都是 **PASS**：**`paths:` 無 deploy semantic ownership／global preflight before writes／AC#2 以 runtime semantics 驗證**（`ep.md:108-117`）。段 2 先前的 annotation 與 idempotent `[SKIP]` 裁決也沒有被後續變更翻壞；identical target 在 staging 前跳過並算「已就位」（`scripts/deploy_agents.py:545-600`）。
+
+殘餘風險只有已知 **interface debt，非 AIR-85 blocker**：`check_broken_refs()` 與 `check_neutral_purity()` 目前仍掃 full source，而非 projected representation（`scripts/deploy_agents.py:640-665`；`ep.md:60,117`）。第二支 `llm-output-convention` opt-in 前應先用其現有 full body 試這兩個 gate；若出現 false positive，應統一修 checker 的 representation boundary，避免加 filename-specific exception。之後第二支直接重用 `RuleMeta → project_rule_for_bundle → global preflight`，只補它自己的 trigger/runtime behavior probe；`structure.md:45-46` 的狀態標示與此一致。
+
+結案 commit 收斂語：
+
+`air-85: add fail-closed pointer projection with runtime-verified conditional loading`
+[delegate-bridge] job job-mtznzpae-cdbrpi status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

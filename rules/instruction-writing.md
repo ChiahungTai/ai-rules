@@ -2,6 +2,9 @@
 harness-scope: neutral
 paths:
   - "**/*.md"
+bundle-projection: pointer
+pointer-target: instruction-writing
+bootstrap-pointer: "新增或修改 AGENTS.md、CLAUDE.md、rules 或 SKILL.md 等 instruction 檔前，先載入 `instruction-writing` skill；frontmatter、載體選擇、引用、Signal/Noise 與自洽檢查以該 skill 為準。"
 ---
 
 # Instruction File 撰寫規範

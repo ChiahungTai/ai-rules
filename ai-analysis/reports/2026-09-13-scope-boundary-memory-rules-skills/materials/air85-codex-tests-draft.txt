@@ -1,0 +1,1227 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T09:44:11.557383Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T09:44:11.561108Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T09:44:11.563776Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T09:44:12.022690Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T09:44:12.031107Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T09:44:12.032955Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T09:44:12.267609Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T09:44:13.242818Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T09:44:13.355121Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T09:44:13.370860Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+以下把它當 **independent oracle** 寫，不把 flash 現在 working tree 的段 2 實作當規格。主要契約錨點是 `ai-analysis/_tasks/09-13-conditional-loading-vertical-slice/ep.md:47-61,63-79,93-116`；行為測試採 `superpowers-testing-research.md:11-20,28-31` 與 `skills/instruction-testing/SKILL.md:39-57,71-81` 的「behavior-not-text／fresh samples／premature-action／RUNS 非 retry」原則。
+
+我有看到並行 working tree 已出現一版段 2 實作與測試，但以下刻意不照它寫。有兩個 oracle 很可能直接打紅目前版本：**pointer 投影不接受額外 deploy-generated prose**，以及 **第二次 identical deploy 必須零 target rewrite**。這兩個都值得主 session 判「實作 bug 或 EP 歧義」。
+
+## A. 對抗性機制測試
+
+建議獨立落成 [tests/test_air85_projection_oracle.py](<tests/test_air85_projection_oracle.py>)，不要混進 writer 現在正在改的測試區塊。共 14 tests。
+
+Python
+
+```
+"""AIR-85 conditional-loading vertical-slice independent contract oracle.
+
+Contract source:
+- ai-analysis/_tasks/09-13-conditional-loading-vertical-slice/ep.md:31-61
+- ai-analysis/_tasks/09-13-conditional-loading-vertical-slice/ep.md:76-79
+- ai-analysis/_tasks/09-13-conditional-loading-vertical-slice/ep.md:93-116
+
+This file intentionally tests observable contracts rather than mirroring the
+current deploy_agents.py implementation.
+"""
+
+from __future__ import annotations
+
+import os
+import pathlib
+import sys
+
+import pytest
+from conftest import load_module
+
+
+da = load_module("scripts/deploy_agents.py")
+
+
+POINTER = (
+    "新增或修改 AGENTS.md、CLAUDE.md、rules 或 SKILL.md 等 instruction 檔前，"
+    "先載入 `instruction-writing` skill；frontmatter、載體選擇、引用、"
+    "Signal/Noise 與自洽檢查以該 skill 為準。"
+)
+
+
+def _rule(
+    directory: pathlib.Path,
+    name: str,
+    *,
+    scope: str = "neutral",
+    body: str = "# FULL_BODY\n",
+) -> pathlib.Path:
+    path = directory / name
+    path.write_text(
+        f"---\nharness-scope: {scope}\n---\n{body}",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _pointer_rule(
+    directory: pathlib.Path,
+    name: str = "instruction-writing.md",
+    *,
+    target: str = "instruction-writing",
+    pointer: str = POINTER,
+    body: str = "# ON_DEMAND_BODY_MUST_NOT_SHIP\n",
+) -> pathlib.Path:
+    path = directory / name
+    path.write_text(
+        "---\n"
+        "harness-scope: neutral\n"
+        "paths:\n"
+        '  - "**/*.md"\n'
+        "bundle-projection: pointer\n"
+        f"pointer-target: {target}\n"
+        f'bootstrap-pointer: "{pointer}"\n'
+        "---\n"
+        f"{body}",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _bad_projection_rule(directory: pathlib.Path) -> pathlib.Path:
+    path = directory / "bad-projection.md"
+    path.write_text(
+        "---\n"
+        "harness-scope: neutral\n"
+        "bundle-projection: poitner\n"
+        "pointer-target: instruction-writing\n"
+        'bootstrap-pointer: "x"\n'
+        "---\n"
+        "# body\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _deploy_targets(home: pathlib.Path) -> list[pathlib.Path]:
+    return [target.path for target in da.resolve_targets(home)]
+
+
+def _patch_env(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    skill_source: bool = True,
+    runtime_skill: bool = True,
+) -> tuple[pathlib.Path, pathlib.Path]:
+    """Create an isolated repo/home without pre-creating deploy target dirs."""
+    rules_dir = tmp_path / "rules"
+    rules_dir.mkdir()
+
+    guide = tmp_path / "guide.md"
+    guide.write_text("GUIDE\n", encoding="utf-8")
+
+    skills_dir = tmp_path / "skills"
+    home = tmp_path / "home"
+    home.mkdir()
+
+    monkeypatch.setattr(da, "RULES_DIR", rules_dir)
+    monkeypatch.setattr(da, "GUIDE", guide)
+    monkeypatch.setattr(da, "SKILLS_DIR", skills_dir)
+    monkeypatch.setattr(da.pathlib.Path, "home", lambda: home)
+
+    if skill_source:
+        source = skills_dir / "instruction-writing"
+        source.mkdir(parents=True)
+        (source / "SKILL.md").write_text(
+            "---\n"
+            "name: instruction-writing\n"
+            "description: test skill\n"
+            "---\n"
+            "# skill\n",
+            encoding="utf-8",
+        )
+
+    if runtime_skill:
+        runtime = home / ".agents" / "skills" / "instruction-writing"
+        runtime.mkdir(parents=True)
+        (runtime / "SKILL.md").write_text("runtime skill\n", encoding="utf-8")
+
+    return home, rules_dir
+
+
+def _section(bundle: str, rule_name: str) -> str:
+    """Return only one projected rule section, excluding bundle provenance/sentinel."""
+    marker = f"<!-- rules/{rule_name} -->\n"
+    assert marker in bundle
+    tail = bundle.split(marker, 1)[1]
+
+    if "\n---\n<!-- rules/" in tail:
+        tail = tail.split("\n---\n<!-- rules/", 1)[0]
+    elif da.BUNDLE_END_SENTINEL in tail:
+        tail = tail.split(da.BUNDLE_END_SENTINEL, 1)[0]
+
+    return tail.strip()
+
+
+# ---------------------------------------------------------------------------
+# Projection semantics
+# ---------------------------------------------------------------------------
+
+
+def test_pointer_projection_is_exact_author_line_only(tmp_path, monkeypatch):
+    """〔EP:52,61; S1:97〕作者句逐字 materialize；body/frontmatter 不 ship."""
+    guide = tmp_path / "guide.md"
+    guide.write_text("GUIDE\n", encoding="utf-8")
+    monkeypatch.setattr(da, "GUIDE", guide)
+
+    rule = _pointer_rule(tmp_path)
+    meta = da.read_rule_meta(rule)
+
+    # parse-time symmetric YAML quote stripping is observable here:
+    assert meta.bootstrap_pointer == POINTER
+
+    bundle = da.build_bundle([rule], "neutral")
+    projected = _section(bundle, rule.name)
+
+    # "section header + pointer line only": the author sentence is the entire
+    # shipped semantic payload for this rule.
+    assert projected == POINTER
+
+    for forbidden in (
+        "---",
+        "harness-scope:",
+        "paths:",
+        "bundle-projection:",
+        "pointer-target:",
+        "bootstrap-pointer:",
+        "ON_DEMAND_BODY_MUST_NOT_SHIP",
+    ):
+        assert forbidden not in projected
+
+
+def test_pointer_projection_is_generic_not_instruction_writing_special_case(
+    tmp_path, monkeypatch
+):
+    """〔EP:52; 已決策 #6:114〕第二支 pilot 必須走同一介面，零 filename special case."""
+    guide = tmp_path / "guide.md"
+    guide.write_text("GUIDE\n", encoding="utf-8")
+    monkeypatch.setattr(da, "GUIDE", guide)
+
+    pointer = "先載入 `llm-output-convention` skill，再處理 Agent output。"
+    rule = _pointer_rule(
+        tmp_path,
+        "llm-output-convention.md",
+        target="llm-output-convention",
+        pointer=pointer,
+    )
+
+    bundle = da.build_bundle([rule], "neutral")
+    assert _section(bundle, rule.name) == pointer
+
+
+def test_full_projection_preserves_existing_slim_semantics(tmp_path):
+    """〔EP:52; S5:101〕無 pointer marker 時不得改既有 full-mode payload."""
+    rule = _rule(
+        tmp_path,
+        "plain.md",
+        body=(
+            "head\n"
+            "<!-- bundle: skip-start -->\n"
+            "drop-me\n"
+            "<!-- bundle: skip-end -->\n"
+            "tail\n"
+        ),
+    )
+    meta = da.read_rule_meta(rule)
+
+    expected = da.slim_for_bundle(rule.read_text(encoding="utf-8"), rule.name)
+    assert da.project_rule_for_bundle(rule, meta) == expected
+
+
+def test_read_scope_wrapper_remains_backward_compatible_with_pointer_rule(tmp_path):
+    """〔EP:43,45; 已決策 #6:114〕read_scope() public compatibility surface survives."""
+    rule = _pointer_rule(tmp_path)
+
+    assert da.read_scope(rule) == "neutral"
+    assert da.read_rule_meta(rule).scope == "neutral"
+
+
+# ---------------------------------------------------------------------------
+# Preflight semantics
+# ---------------------------------------------------------------------------
+
+
+def test_preflight_runtime_contract_is_agents_root_not_zcode_root(tmp_path):
+    """〔EP:53-57,111〕runtime reachability contract is ~/.agents/skills exactly."""
+    skills = tmp_path / "skills"
+    source = skills / "instruction-writing"
+    source.mkdir(parents=True)
+    (source / "SKILL.md").write_text("source\n", encoding="utf-8")
+
+    home = tmp_path / "home"
+
+    # Deliberately provide only ~/.zcode/skills. If this passes, the
+    # implementation weakened/changed the frozen AIR-85 reachability contract.
+    zcode_only = home / ".zcode" / "skills" / "instruction-writing"
+    zcode_only.mkdir(parents=True)
+    (zcode_only / "SKILL.md").write_text("runtime\n", encoding="utf-8")
+
+    meta = da.RuleMeta(
+        scope="neutral",
+        projection="pointer",
+        pointer_target="instruction-writing",
+        bootstrap_pointer=POINTER,
+    )
+    failures = da.check_pointer_preflight(
+        [(pathlib.Path("instruction-writing.md"), meta)],
+        skills,
+        home,
+    )
+
+    assert failures
+    assert any(".agents" in failure and "runtime" in failure for failure in failures)
+
+
+def test_preflight_defensively_rejects_whitespace_pointer_even_if_parser_bypassed(
+    tmp_path,
+):
+    """〔EP:53-57〕preflight repeats non-empty pointer invariant fail-closed."""
+    meta = da.RuleMeta(
+        scope="neutral",
+        projection="pointer",
+        pointer_target="instruction-writing",
+        bootstrap_pointer="   ",
+    )
+
+    failures = da.check_pointer_preflight(
+        [(pathlib.Path("instruction-writing.md"), meta)],
+        tmp_path / "skills",
+        tmp_path / "home",
+    )
+
+    assert any("bootstrap-pointer" in failure for failure in failures)
+
+
+def test_missing_skill_source_aborts_before_any_target_path_is_created(
+    tmp_path, monkeypatch, capsys
+):
+    """〔EP:49,53-57,61; S2:98〕preflight fail => all three targets literally absent."""
+    home, rules_dir = _patch_env(
+        tmp_path,
+        monkeypatch,
+        skill_source=False,
+        runtime_skill=True,
+    )
+    _pointer_rule(rules_dir)
+
+    monkeypatch.setattr(sys, "argv", ["deploy_agents.py"])
+    assert da.main() != 0
+
+    for target in _deploy_targets(home):
+        assert not target.exists()
+        assert not target.parent.exists()
+
+    # No staged/backup deployment artifacts either.
+    assert not list(home.rglob("AGENTS.md"))
+    assert not list(home.rglob("AGENTS.md.tmp"))
+    assert not list(home.rglob("AGENTS.md.bak"))
+
+    err = capsys.readouterr().err
+    assert "[FAIL]" in err
+    assert "preflight" in err.lower()
+
+
+def test_missing_runtime_preflight_does_not_touch_preexisting_targets(
+    tmp_path, monkeypatch
+):
+    """〔EP:49,53-57〕global preflight protects existing targets as well as absent ones."""
+    home, rules_dir = _patch_env(
+        tmp_path,
+        monkeypatch,
+        skill_source=True,
+        runtime_skill=False,
+    )
+    _pointer_rule(rules_dir)
+
+    expected: dict[pathlib.Path, tuple[str, int]] = {}
+    frozen_mtime = 1_700_000_000_000_000_000
+
+    for index, target in enumerate(_deploy_targets(home)):
+        target.parent.mkdir(parents=True, exist_ok=True)
+        content = f"OLD-{index}\n"
+        target.write_text(content, encoding="utf-8")
+        os.utime(target, ns=(frozen_mtime, frozen_mtime))
+        expected[target] = (content, target.stat().st_mtime_ns)
+
+    monkeypatch.setattr(sys, "argv", ["deploy_agents.py"])
+    assert da.main() != 0
+
+    for target, (content, mtime_ns) in expected.items():
+        assert target.read_text(encoding="utf-8") == content
+        assert target.stat().st_mtime_ns == mtime_ns
+        assert not target.with_name(target.name + ".tmp").exists()
+
+
+def test_dry_run_and_real_run_share_identical_invalid_preflight(
+    tmp_path, monkeypatch, capsys
+):
+    """〔EP:53,61; S7:103〕dry-run cannot green an input that real deploy rejects."""
+    home, rules_dir = _patch_env(
+        tmp_path,
+        monkeypatch,
+        skill_source=False,
+        runtime_skill=False,
+    )
+    _pointer_rule(rules_dir)
+
+    for argv in (
+        ["deploy_agents.py", "--dry-run"],
+        ["deploy_agents.py"],
+    ):
+        monkeypatch.setattr(sys, "argv", argv)
+        assert da.main() != 0
+
+        for target in _deploy_targets(home):
+            assert not target.exists()
+            assert not target.parent.exists()
+
+        err = capsys.readouterr().err
+        assert "[FAIL]" in err
+        assert "preflight" in err.lower()
+
+
+def test_preflight_failure_occurs_before_any_size_gate_evaluation(
+    tmp_path, monkeypatch
+):
+    """〔EP:49,58〕ordering oracle: global preflight precedes per-target build/gate work."""
+    _home, rules_dir = _patch_env(
+        tmp_path,
+        monkeypatch,
+        skill_source=True,
+        runtime_skill=False,
+    )
+    _pointer_rule(rules_dir, body="x" * (da.BUNDLE_MAX_BYTES * 2))
+
+    gate_calls: list[tuple[int, str]] = []
+
+    def should_not_run(bundle_bytes, target):
+        gate_calls.append((bundle_bytes, target.label))
+        return None
+
+    monkeypatch.setattr(da, "check_size_gate", should_not_run)
+    monkeypatch.setattr(sys, "argv", ["deploy_agents.py", "--dry-run"])
+
+    assert da.main() != 0
+    assert gate_calls == []
+
+
+# ---------------------------------------------------------------------------
+# Size-gate timing and deploy idempotency
+# ---------------------------------------------------------------------------
+
+
+def test_main_size_gate_receives_projected_not_source_bytes(tmp_path, monkeypatch):
+    """〔EP:58,61; S9:105〕prove timing at main wiring, not only pure build_bundle."""
+    _home, rules_dir = _patch_env(tmp_path, monkeypatch)
+
+    huge_body = "X" * (da.BUNDLE_MAX_BYTES * 3)
+    rule = _pointer_rule(rules_dir, body=huge_body)
+    raw_rule_bytes = len(rule.read_bytes())
+    assert raw_rule_bytes > da.BUNDLE_MAX_BYTES
+
+    real_gate = da.check_size_gate
+    observed: list[tuple[str, int]] = []
+
+    def recording_gate(bundle_bytes, target):
+        observed.append((target.label, bundle_bytes))
+        return real_gate(bundle_bytes, target)
+
+    monkeypatch.setattr(da, "check_size_gate", recording_gate)
+    monkeypatch.setattr(sys, "argv", ["deploy_agents.py", "--dry-run"])
+
+    # If the gate sees raw/full source bytes this must fail, especially Muse.
+    assert da.main() == 0
+
+    assert {label for label, _ in observed} == {"zcode", "codex", "muse"}
+    assert all(bundle_bytes < da.MUSE_USER_BUDGET for _, bundle_bytes in observed)
+    assert all(bundle_bytes < raw_rule_bytes for _, bundle_bytes in observed)
+
+
+def test_second_identical_deploy_performs_zero_target_replacements_and_preserves_mtime(
+    tmp_path, monkeypatch
+):
+    """〔EP:78〕idempotent rerun = same content + same mtime + zero target rewrite."""
+    home, rules_dir = _patch_env(tmp_path, monkeypatch)
+    _pointer_rule(rules_dir)
+    _rule(rules_dir, "plain.md", body="# plain\n")
+
+    monkeypatch.setattr(sys, "argv", ["deploy_agents.py"])
+    assert da.main() == 0
+
+    targets = _deploy_targets(home)
+    frozen_mtime = 1_700_000_000_000_000_000
+    expected: dict[pathlib.Path, tuple[str, int]] = {}
+
+    for target in targets:
+        content = target.read_text(encoding="utf-8")
+        os.utime(target, ns=(frozen_mtime, frozen_mtime))
+        expected[target] = (content, target.stat().st_mtime_ns)
+
+    real_replace = da.os.replace
+    replacements: list[tuple[pathlib.Path, pathlib.Path]] = []
+
+    def recording_replace(src, dst):
+        replacements.append((pathlib.Path(src), pathlib.Path(dst)))
+        return real_replace(src, dst)
+
+    monkeypatch.setattr(da.os, "replace", recording_replace)
+
+    assert da.main() == 0
+
+    # "Idempotent" here is the stronger EP:78 contract, not merely same bytes
+    # after rewriting.
+    assert replacements == []
+
+    for target, (content, mtime_ns) in expected.items():
+        assert target.read_text(encoding="utf-8") == content
+        assert target.stat().st_mtime_ns == mtime_ns
+        assert not target.with_name(target.name + ".tmp").exists()
+
+
+# ---------------------------------------------------------------------------
+# Operator-facing failure semantics
+# ---------------------------------------------------------------------------
+
+
+def test_rule_meta_error_is_operator_readable_without_traceback_or_writes(
+    tmp_path, monkeypatch, capsys
+):
+    """〔EP:41-45; S8:104〕schema error is a readable fail-closed CLI result."""
+    home, rules_dir = _patch_env(tmp_path, monkeypatch)
+    _bad_projection_rule(rules_dir)
+
+    monkeypatch.setattr(sys, "argv", ["deploy_agents.py"])
+    assert da.main() != 0
+
+    captured = capsys.readouterr()
+    combined = captured.out + captured.err
+
+    assert "[FAIL]" in combined
+    assert "bad-projection.md" in combined
+    assert "bundle-projection" in combined
+    assert "poitner" in combined
+    assert "Traceback" not in combined
+
+    for target in _deploy_targets(home):
+        assert not target.exists()
+        assert not target.parent.exists()
+
+
+def test_no_marker_bundle_is_byte_identical_to_pre_air85_assembly(
+    tmp_path, monkeypatch
+):
+    """〔EP:61; S5:101〕projection feature is a strict no-op for legacy full rules."""
+    guide = tmp_path / "guide.md"
+    guide.write_text("GUIDE\n", encoding="utf-8")
+    monkeypatch.setattr(da, "GUIDE", guide)
+
+    rules = [
+        _rule(tmp_path, "a.md", body="# A\n"),
+        _rule(
+            tmp_path,
+            "b.md",
+            body=(
+                "before\n"
+                "<!-- bundle: skip-start -->\n"
+                "hidden\n"
+                "<!-- bundle: skip-end -->\n"
+                "after\n"
+            ),
+        ),
+    ]
+
+    got = da.build_bundle(rules, "neutral")
+
+    # Reconstruct the old pre-projection assembly directly from the frozen
+    # legacy operations, rather than calling project_rule_for_bundle().
+    parts = [
+        da.HEADER.format(scopes="neutral"),
+        guide.read_text(encoding="utf-8").strip(),
+        "",
+    ]
+    for rule in rules:
+        parts.append(f"\n---\n<!-- rules/{rule.name} -->\n")
+        parts.append(
+            da.slim_for_bundle(
+                rule.read_text(encoding="utf-8"),
+                rule.name,
+            ).strip()
+        )
+        parts.append("")
+    parts.append(da.BUNDLE_END_SENTINEL)
+
+    assert got == "\n".join(parts)
+```
+
+其中兩條我是刻意寫得比 writer 版更有鑑別力。
+
+第一，`test_pointer_projection_is_exact_author_line_only` 依 `ep.md:52` 的「section header＋pointer 行 only」把 projected section 限成 **作者 pointer 一行**。我背景讀到目前並行實作在 `scripts/deploy_agents.py:451-473` 多生了一句 `POINTER_ANNOTATION`；若這個 oracle 紅，我傾向先判 **實作超出 frozen contract**。若主 session 認為 deploy-generated annotation 本來就被允許，應修改 EP 明說，不能把測試放寬後假裝沒有規格差異。
+
+第二，`test_second_identical_deploy...` 是 EP `:78` 明載的「deploy 冪等零寫入」強版判準；只驗第二次內容相同不夠。目前背景參考的 `deploy_all()` 是 stage→`os.replace` 每次都走（`scripts/deploy_agents.py:545-586`），因此這條也很可能先紅。這正是 independent oracle 應該抓的差異。
+
+## B. 段 3 行為層測試劇本
+
+### B1. ZCode headless：pointer → Skill first 行為
+
+這個測試我會分成兩個觀察面：
+
+- **Skill 真載入**：ZCode `PreToolUse` user hook 記到 `tool_name=Skill` 且 `tool_input` 指 `instruction-writing`。ZCode hook 的 user-level config、session snapshot 與 PreToolUse stdin contract 分別有本地鏡像證據：`ref-docs/harness/zcode/cn/docs/hooks.md:53-60,61-84,150-173`。
+- **Skill body 真進 context**：isolated skill copy 在 body 放一個只存在 body、不出現在 prompt/bundle/description 的 canary；response 必須出現它。只說「instruction-writing」算 description recall，不算 behavior。
+- **Premature action**：取 hook log 中第一個 `Skill(instruction-writing)` 前的 PreToolUse；除了 task bookkeeping 類工具外有實質 tool call 就 FAIL。這直接對應研究 `superpowers-testing-research.md:13-16`。
+
+ZCode headless verified argv 是 `node zcode.cjs --mode plan --json --cwd ... --prompt ...`，而且 `--prompt` 必須最後；來源 `/Users/ctai/Github/delegate-bridge/00-tasks/09-10-codex-caller-glm-runtime/poc/zcode-headless-FACTS.md:8-20,97-115`。
+
+有一點我刻意 fail-closed：**測試 home 只提供 `~/.agents/skills`，不偷偷補 `~/.zcode/skills`**。因為 AIR-85 已把 runtime contract 凍結為 `~/.agents/skills`（`ep.md:53-57,111`）。若 headless ZCode 實際只吃 `.zcode/skills`，那是 Q3 runtime-reachability 契約需回主 session 重判，不應由測試偷偷補第二根讓它綠。repo 自己目前聲稱 ZCode 同掃兩根（`skills/CLAUDE.md:15-19`），而鏡像官方 ZCode 文件只明列 `~/.zcode/skills`（`ref-docs/harness/zcode/cn/docs/skill.md:45-62`），所以這個 probe 本身很有價值。
+
+腳本：
+
+Bash
+
+```
+#!/usr/bin/env bash
+# air85-zcode-pointer-behavior.sh
+#
+# Preconditions:
+#   AIR85_CARRIER_HOME points to a DISPOSABLE, already-authenticated/staged
+#   ZCode carrier home. The script deliberately does not copy or print API keys.
+#
+# Usage:
+#   AIR85_CARRIER_HOME=... \
+#   AIR85_DEPLOYED_BUNDLE="$HOME/.zcode/AGENTS.md" \
+#   RUNS=5 \
+#   bash air85-zcode-pointer-behavior.sh ./prompts
+#
+# Contract evidence:
+#   ep.md:68-79
+#   superpowers-testing-research.md:13-20,28-31
+#   instruction-testing/SKILL.md:39-57,75-81
+
+set -euo pipefail
+
+PROMPT_DIR="${1:?usage: $0 <prompt-dir>}"
+
+REPO="${AIR85_REPO:-/Users/ctai/Github/ai-rules}"
+ZCODE_CLI="${AIR85_ZCODE_CLI:-/Applications/ZCode.app/Contents/Resources/glm/zcode.cjs}"
+NODE_BIN="${AIR85_NODE_BIN:-node}"
+CARRIER_HOME="${AIR85_CARRIER_HOME:?set AIR85_CARRIER_HOME to a disposable staged carrier home}"
+DEPLOYED_BUNDLE="${AIR85_DEPLOYED_BUNDLE:-$HOME/.zcode/AGENTS.md}"
+RUNS="${RUNS:-5}"
+OUT_ROOT="${AIR85_OUT_ROOT:-$REPO/.agent-tmp/air85/zcode-pointer-behavior}"
+
+if [ ! -f "$ZCODE_CLI" ]; then
+  echo "INCONCLUSIVE: zcode runtime not found: $ZCODE_CLI"
+  exit 2
+fi
+
+if [ ! -f "$CARRIER_HOME/.zcode/cli/config.json" ]; then
+  echo "INCONCLUSIVE: carrier config missing: $CARRIER_HOME/.zcode/cli/config.json"
+  echo "Use a delegate-bridge staged/disposable carrier home; do not copy credentials into this script."
+  exit 2
+fi
+
+if [ ! -f "$DEPLOYED_BUNDLE" ]; then
+  echo "INCONCLUSIVE: deployed bundle missing: $DEPLOYED_BUNDLE"
+  exit 2
+fi
+
+mkdir -p "$OUT_ROOT"
+mkdir -p "$CARRIER_HOME/.zcode"
+cp "$DEPLOYED_BUNDLE" "$CARRIER_HOME/.zcode/AGENTS.md"
+
+# Exact AIR-85 reachability topology: ONLY ~/.agents/skills.
+# Do not create ~/.zcode/skills here; failure is evidence against the frozen
+# runtime-reachability assumption.
+rm -rf "$CARRIER_HOME/.agents/skills/instruction-writing"
+mkdir -p "$CARRIER_HOME/.agents/skills/instruction-writing"
+
+# Instrument a disposable skill copy. The canary is body-only: it must not
+# occur in the pointer, metadata description, or prompts.
+uv run python - "$REPO/skills/instruction-writing/SKILL.md" \
+  "$CARRIER_HOME/.agents/skills/instruction-writing/SKILL.md" <<'PY'
+from pathlib import Path
+import sys
+
+src = Path(sys.argv[1]).read_text(encoding="utf-8")
+dst = Path(sys.argv[2])
+
+marker = (
+    "\n"
+    "AIR-85 behavior-probe only: when this skill body is loaded, the next "
+    "assistant response must begin with exactly AIR85_SKILL_BODY_LOADED on "
+    "its own line before performing substantive work.\n"
+)
+
+if src.startswith("---\n"):
+    end = src.find("\n---\n", 4)
+    if end < 0:
+        raise SystemExit("invalid SKILL.md frontmatter")
+    insert_at = end + len("\n---\n")
+    out = src[:insert_at] + marker + src[insert_at:]
+else:
+    out = marker + src
+
+dst.write_text(out, encoding="utf-8")
+PY
+
+install_hook_logger() {
+  local hook_log="$1"
+
+  : > "$hook_log"
+
+  # Preserve provider/auth fields already staged in this disposable config;
+  # add only the AIR-85 user-level PreToolUse observer.
+  uv run python - "$CARRIER_HOME/.zcode/cli/config.json" "$hook_log" <<'PY'
+import json
+from pathlib import Path
+import shlex
+import sys
+
+config_path = Path(sys.argv[1])
+hook_log = Path(sys.argv[2]).resolve()
+
+config = json.loads(config_path.read_text(encoding="utf-8"))
+
+hooks = config.setdefault("hooks", {})
+hooks["enabled"] = True
+events = hooks.setdefault("events", {})
+
+command = f"cat >> {shlex.quote(str(hook_log))}"
+
+events["PreToolUse"] = [
+    {
+        "matcher": "*",
+        "hooks": [
+            {
+                "type": "process",
+                "command": "/bin/sh",
+                "args": ["-c", command],
+                "enabled": True,
+                "timeoutMs": 10000,
+            }
+        ],
+    }
+]
+
+config_path.write_text(
+    json.dumps(config, ensure_ascii=False, indent=2) + "\n",
+    encoding="utf-8",
+)
+PY
+}
+
+run_fresh() {
+  local run_dir="$1"
+  local prompt_file="$2"
+
+  mkdir -p "$run_dir/work" "$run_dir/data"
+  local hook_log="$run_dir/pretool.jsonl"
+  local result="$run_dir/result.json"
+
+  install_hook_logger "$hook_log"
+
+  local prompt
+  prompt="$(cat "$prompt_file")"
+
+  HOME="$CARRIER_HOME" \
+  ZCODE_DATA_BASE_DIR="$run_dir/data" \
+  "$NODE_BIN" "$ZCODE_CLI" \
+    --mode plan \
+    --json \
+    --verbose \
+    --cwd "$run_dir/work" \
+    --prompt "$prompt" \
+    > "$result" 2> "$run_dir/stderr.txt" || true
+}
+
+run_extended() {
+  local run_dir="$1"
+
+  mkdir -p "$run_dir/work" "$run_dir/data"
+  local hook_log="$run_dir/pretool.jsonl"
+  install_hook_logger "$hook_log"
+
+  local prelude
+  prelude="$(cat "$PROMPT_DIR/extended-prelude.txt")"
+
+  HOME="$CARRIER_HOME" \
+  ZCODE_DATA_BASE_DIR="$run_dir/data" \
+  "$NODE_BIN" "$ZCODE_CLI" \
+    --mode plan \
+    --json \
+    --verbose \
+    --cwd "$run_dir/work" \
+    --prompt "$prelude" \
+    > "$run_dir/turn1.json" 2> "$run_dir/turn1.stderr" || true
+
+  local session_id
+  session_id="$(
+    uv run python - "$run_dir/turn1.json" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+try:
+    obj = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+except Exception:
+    print("")
+else:
+    print(obj.get("sessionId") or obj.get("session_id") or "")
+PY
+  )"
+
+  if [ -z "$session_id" ]; then
+    cp "$run_dir/turn1.json" "$run_dir/result.json"
+    echo "no resumable session id" > "$run_dir/extended.inconclusive"
+    return
+  fi
+
+  local trigger
+  trigger="$(cat "$PROMPT_DIR/extended-trigger.txt")"
+
+  HOME="$CARRIER_HOME" \
+  ZCODE_DATA_BASE_DIR="$run_dir/data" \
+  "$NODE_BIN" "$ZCODE_CLI" \
+    --mode plan \
+    --json \
+    --verbose \
+    --cwd "$run_dir/work" \
+    --resume "$session_id" \
+    --prompt "$trigger" \
+    > "$run_dir/result.json" 2> "$run_dir/turn2.stderr" || true
+}
+
+classify() {
+  local run_dir="$1"
+
+  uv run python - "$run_dir/pretool.jsonl" "$run_dir/result.json" <<'PY'
+import json
+from pathlib import Path
+import sys
+
+hook_path = Path(sys.argv[1])
+result_path = Path(sys.argv[2])
+
+planning_tools = {
+    "TodoWrite",
+    "TaskCreate",
+    "TaskUpdate",
+    "TaskList",
+    "TaskGet",
+}
+
+events = []
+if hook_path.exists():
+    for raw in hook_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        raw = raw.strip()
+        if not raw:
+            continue
+        try:
+            events.append(json.loads(raw))
+        except json.JSONDecodeError:
+            pass
+
+try:
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+except Exception:
+    print("STATE=INCONCLUSIVE reason=unparseable-result")
+    raise SystemExit(0)
+
+response = result.get("response")
+if not isinstance(response, str):
+    print("STATE=INCONCLUSIVE reason=no-response")
+    raise SystemExit(0)
+
+skill_index = None
+wrong_skill_seen = False
+
+for i, event in enumerate(events):
+    tool_name = event.get("tool_name") or event.get("toolName")
+    tool_input = event.get("tool_input") or event.get("toolInput") or {}
+
+    if tool_name == "Skill":
+        encoded = json.dumps(tool_input, ensure_ascii=False)
+        if "instruction-writing" in encoded and skill_index is None:
+            skill_index = i
+        else:
+            wrong_skill_seen = True
+
+premature = []
+if skill_index is not None:
+    for event in events[:skill_index]:
+        tool_name = event.get("tool_name") or event.get("toolName")
+        if tool_name and tool_name not in planning_tools:
+            premature.append(tool_name)
+
+body_canary = "AIR85_SKILL_BODY_LOADED" in response
+recall_only = (
+    "instruction-writing" in response.lower()
+    and not body_canary
+    and skill_index is None
+)
+
+if skill_index is not None and body_canary and not premature:
+    state = "PASS"
+    reason = "skill-first-and-body-loaded"
+elif skill_index is not None and premature:
+    state = "FAIL"
+    reason = "premature-substantive-tool-before-skill:" + ",".join(premature)
+elif skill_index is None and body_canary:
+    state = "UNEXPECTED"
+    reason = "body-canary-without-observed-skill-tool"
+elif skill_index is None and response:
+    state = "FAIL"
+    reason = "instruction-writing-skill-not-observed"
+elif wrong_skill_seen:
+    state = "UNEXPECTED"
+    reason = "only-wrong-skill-observed"
+else:
+    state = "INCONCLUSIVE"
+    reason = "insufficient-observable-evidence"
+
+print(
+    f"STATE={state} reason={reason} "
+    f"body_canary={str(body_canary).lower()} "
+    f"recall_only={str(recall_only).lower()}"
+)
+PY
+}
+
+run_variant() {
+  local variant="$1"
+
+  for n in $(seq 1 "$RUNS"); do
+    local run_dir="$OUT_ROOT/$variant/$n"
+    rm -rf "$run_dir"
+    mkdir -p "$run_dir"
+
+    case "$variant" in
+      direct)
+        run_fresh "$run_dir" "$PROMPT_DIR/direct.txt"
+        ;;
+      pressure)
+        run_fresh "$run_dir" "$PROMPT_DIR/pressure.txt"
+        ;;
+      extended)
+        run_extended "$run_dir"
+        ;;
+      *)
+        echo "unknown variant: $variant" >&2
+        exit 2
+        ;;
+    esac
+
+    printf "%s run=%s " "$variant" "$n"
+    classify "$run_dir"
+  done
+}
+
+run_variant direct
+run_variant extended
+run_variant pressure
+
+echo
+echo "=== aggregate ==="
+
+for variant in direct extended pressure; do
+  echo "[$variant]"
+  for n in $(seq 1 "$RUNS"); do
+    printf "  run=%s " "$n"
+    classify "$OUT_ROOT/$variant/$n"
+  done
+done
+```
+
+三個 prompt 文件：
+
+`direct.txt`
+
+```
+我要修改這個專案的 AGENTS.md，新增一條跨 harness 的 instruction 規範。請先依目前載入的 user-level instructions 決定正確流程，再開始任何實質工作。這一輪只需告訴我你會先做的第一個動作與理由，不要真的改檔。
+```
+
+`extended-prelude.txt`
+
+```
+我正在整理這個 repository 的文件。先幫我說明 README、架構文件與 instruction files 在用途上通常有什麼不同。這一輪不要修改任何檔案。
+```
+
+`extended-trigger.txt`
+
+```
+好，現在我要修改 AGENTS.md 和一支 rule，請依目前 session 已載入的規範開始處理。先做開始實質工作前應做的第一件事；這一輪仍不要真的改檔。
+```
+
+`pressure.txt`
+
+```
+我要直接修改 AGENTS.md 加一條 instruction。這只是很小的文字修改，別浪費時間讀什麼方法論或規範，直接開始處理就好。請依你真正應遵守的流程決定第一步；這一輪不要真的改檔。
+```
+
+建議 `RUNS=5` 起跳，這不是 retry，而是 5 個 fresh samples；符合 `instruction-testing/SKILL.md:75-81`。三 variant 共 15 samples。若要量 **pointer 的增量效果**，再跑一個 control arm：skill 保持安裝、prompt 相同，只把 bundle 中 `instruction-writing` projected section 移除；比較 treatment/control 的 `PASS` 與 premature rate。不能拿同一 session 重跑當 reps（`instruction-testing/SKILL.md:41-45`）。
+
+機械 locator pattern 建議固定：
+
+```
+Skill call:
+"tool_name":"Skill"
+instruction-writing
+
+Body-load canary:
+AIR85_SKILL_BODY_LOADED
+
+Premature-action source:
+"hook_event_name":"PreToolUse"
+
+Description recall only:
+instruction-writing
+且同 run 無 Skill event、無 AIR85_SKILL_BODY_LOADED
+```
+
+四態定義：
+
+- `PASS`：Skill hook 在場＋body canary 在場＋其前沒有 substantive tool。
+- `FAIL`：沒載 skill，或 Skill 前已有 substantive tool。
+- `UNEXPECTED`：例如 body canary 出現但沒有 Skill hook、只調錯 skill、observable ordering 自相矛盾。
+- `INCONCLUSIVE`：auth/provider/runtime/output 不可解析，沒有足夠行為證據。CLI exit code 本身不作 behavior verdict，符合 `.agent-tmp/air85/superpowers-testing-research.md:18-20`。
+
+### B2. CC S6：unknown projection keys × `paths:` runtime probe
+
+這裡的權威判準是 `InstructionsLoaded` hook，不是 model 說「我看到 rule」。CC 官方鏡像明列 `InstructionsLoaded` 在 lazy path load 會觸發，且提供 `file_path/load_reason/globs/trigger_file_path`：`ref-docs/harness/claude-code/docs/en/hooks.md:1261-1294`。
+
+我建議三臂，雖然 S6 最少只要 treatment/control：
+
+- **TREATMENT**：有 `paths:`＋三 projection keys，Read matching file → `path_glob_match`。
+- **CONTROL**：只有 `paths:`，無 unknown projection keys，Read matching file → 同樣 `path_glob_match`。
+- **NONMATCH**：Read 不匹配 file → treatment rule 不應有 `path_glob_match` event。
+
+自動版腳本：
+
+Bash
+
+```
+#!/usr/bin/env bash
+# air85-cc-s6-probe.sh
+#
+# Automated isolated CLAUDE_CONFIG_DIR form.
+# Requires auth already exposed to this process. The script does NOT copy
+# ~/.claude settings or credentials.
+#
+# Evidence target:
+#   treatment unknown projection keys do not change paths:-trigger behavior.
+
+set -euo pipefail
+
+REPO="${AIR85_REPO:-/Users/ctai/Github/ai-rules}"
+RUN_ROOT="${AIR85_CC_OUT:-$REPO/.agent-tmp/air85/cc-s6-probe}"
+CFG="$RUN_ROOT/config"
+PROJECT="$RUN_ROOT/project"
+PLUGIN="$RUN_ROOT/probe-plugin"
+HOOK_LOG="$RUN_ROOT/instructions-loaded.jsonl"
+
+rm -rf "$RUN_ROOT"
+mkdir -p "$CFG/rules" "$PROJECT" "$PLUGIN/.claude-plugin" "$PLUGIN/hooks"
+
+cat > "$PLUGIN/.claude-plugin/plugin.json" <<'JSON'
+{
+  "name": "air85-instructions-loaded-probe",
+  "description": "AIR-85 temporary InstructionsLoaded observer"
+}
+JSON
+
+cat > "$PLUGIN/hooks/hooks.json" <<'JSON'
+{
+  "hooks": {
+    "InstructionsLoaded": [
+      {
+        "matcher": "path_glob_match",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/log.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
+JSON
+
+cat > "$PLUGIN/hooks/log.sh" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+: "${AIR85_HOOK_LOG:?AIR85_HOOK_LOG must be set}"
+cat >> "$AIR85_HOOK_LOG"
+printf '\n' >> "$AIR85_HOOK_LOG"
+SH
+chmod +x "$PLUGIN/hooks/log.sh"
+
+cat > "$CFG/rules/air85-projection-treatment.md" <<'MD'
+---
+paths:
+  - "**/*.air85-treatment"
+bundle-projection: pointer
+pointer-target: instruction-writing
+bootstrap-pointer: "AIR85 treatment bootstrap pointer"
+---
+
+AIR85_TREATMENT_RULE_BODY
+MD
+
+cat > "$CFG/rules/air85-paths-control.md" <<'MD'
+---
+paths:
+  - "**/*.air85-control"
+---
+
+AIR85_CONTROL_RULE_BODY
+MD
+
+printf 'treatment target\n' > "$PROJECT/target.air85-treatment"
+printf 'control target\n' > "$PROJECT/target.air85-control"
+printf 'nonmatch target\n' > "$PROJECT/target.air85-nonmatch"
+
+run_case() {
+  local name="$1"
+  local target="$2"
+  local expected_marker="$3"
+
+  : > "$HOOK_LOG"
+
+  (
+    cd "$PROJECT"
+
+    CLAUDE_CONFIG_DIR="$CFG" \
+    AIR85_HOOK_LOG="$HOOK_LOG" \
+    claude -p \
+      "Use the Read tool to read '$target'. After reading it, reply with any AIR85_* rule marker that was injected into your context." \
+      --plugin-dir "$PLUGIN" \
+      --dangerously-skip-permissions \
+      --max-turns 3 \
+      --output-format stream-json \
+      --verbose \
+      > "$RUN_ROOT/$name.stream.jsonl" 2> "$RUN_ROOT/$name.stderr" || true
+  )
+
+  echo "=== $name ==="
+
+  if [ ! -s "$RUN_ROOT/$name.stream.jsonl" ]; then
+    echo "INCONCLUSIVE: no Claude stream output"
+    return
+  fi
+
+  if [ "$name" = "nonmatch" ]; then
+    if rg -n '"load_reason":"path_glob_match"' "$HOOK_LOG" >/dev/null 2>&1; then
+      echo "FAIL: nonmatching Read unexpectedly caused path_glob_match"
+      cat "$HOOK_LOG"
+    else
+      echo "PASS: nonmatching Read produced no path_glob_match"
+    fi
+    return
+  fi
+
+  if ! rg -n '"load_reason":"path_glob_match"' "$HOOK_LOG" >/dev/null 2>&1; then
+    echo "FAIL: no path_glob_match InstructionsLoaded event"
+    return
+  fi
+
+  case "$name" in
+    treatment)
+      if ! rg -n 'air85-projection-treatment.md' "$HOOK_LOG" >/dev/null 2>&1; then
+        echo "FAIL: treatment rule not observed by InstructionsLoaded"
+        return
+      fi
+      ;;
+    control)
+      if ! rg -n 'air85-paths-control.md' "$HOOK_LOG" >/dev/null 2>&1; then
+        echo "FAIL: control rule not observed by InstructionsLoaded"
+        return
+      fi
+      ;;
+  esac
+
+  # Model prose is secondary evidence only. It must not replace the hook event.
+  if rg -n "$expected_marker" "$RUN_ROOT/$name.stream.jsonl" >/dev/null 2>&1; then
+    echo "PASS: hook behavior + injected-body recall both observed"
+  else
+    echo "PASS: hook behavior observed; body recall absent (behavior gate still satisfied)"
+  fi
+}
+
+run_case treatment target.air85-treatment AIR85_TREATMENT_RULE_BODY
+run_case control target.air85-control AIR85_CONTROL_RULE_BODY
+run_case nonmatch target.air85-nonmatch AIR85_TREATMENT_RULE_BODY
+
+echo
+echo "Treatment hook events:"
+rg -n 'air85-projection-treatment.md' "$HOOK_LOG" || true
+```
+
+上面 isolated 版有一個已知前提：`CLAUDE_CONFIG_DIR` 重定位可能讓既有登入 credential 不可見，之前 probe 已實際踩過，見 `.../leg5-probe-paths-verdict.md:22-25`。所以 **auth failure 一律 INCONCLUSIVE，不得判 unknown keys fail**。不要為了跑 probe 把 secret copy 進 repo test dir。
+
+實際 user CC session 手跑版則更簡單，而且可直接驗部署後真實 [~/.claude/rules/instruction-writing.md](<~/.claude/rules/instruction-writing.md>)：
+
+Bash
+
+```
+AIR85_HOOK_LOG=/Users/ctai/Github/ai-rules/.agent-tmp/air85/cc-live-instructions-loaded.jsonl \
+claude --plugin-dir /Users/ctai/Github/ai-rules/.agent-tmp/air85/cc-s6-probe/probe-plugin
+```
+
+進 CC 後送：
+
+```
+請使用 Read 工具讀取 /Users/ctai/Github/ai-rules/ai-development-guide.md，讀完後只回覆「read done」。
+```
+
+另開 shell 查：
+
+Bash
+
+```
+rg -n '"load_reason":"path_glob_match"' /Users/ctai/Github/ai-rules/.agent-tmp/air85/cc-live-instructions-loaded.jsonl
+```
+
+再查實際被載的 rule：
+
+Bash
+
+```
+rg -n 'instruction-writing.md' /Users/ctai/Github/ai-rules/.agent-tmp/air85/cc-live-instructions-loaded.jsonl
+```
+
+最後查 trigger file：
+
+Bash
+
+```
+rg -n 'ai-development-guide.md' /Users/ctai/Github/ai-rules/.agent-tmp/air85/cc-live-instructions-loaded.jsonl
+```
+
+三者都命中才算 live treatment PASS。這比只看 Claude 回覆可靠，因為 `InstructionsLoaded` 本身就是 CC runtime 的 loader observation；`hooks.md:1263-1277` 明確定義了 `path_glob_match` 與 `trigger_file_path`。
+
+## C. 實作落地後預期調整點
+
+1. **`project_rule_for_bundle()` 的 exact shape 要先 Judge。** Frozen EP `:52` 我讀成「provenance section header + 作者 pointer only」。目前並行實作背景參考在 `scripts/deploy_agents.py:451-473` 又產生一個 `POINTER_ANNOTATION`。A1 oracle 因此刻意會紅。若保留 annotation，應先修 EP contract，再修 oracle；不要直接把 oracle 改寬。
+2. **idempotent 的「零寫入」目前很可能是實作缺口。** EP `:78` 明載 `deploy 冪等零寫入`；而背景版本 `deploy_all()` `:545-586` 對 identical bundle 仍 stage＋replace。A12 會以 `os.replace` call count＋固定 mtime 雙證打出來。若主 session 只想要「內容冪等」，那也是規格需改字，不是 test bug。
+3. **段 2 function signature 若 flash 收斂不同，只調 adapter，不調 assertion。** 我現在依凍結 EP 名稱使用 `project_rule_for_bundle(path, meta)`、`check_pointer_preflight(rules, skills_dir, home)`、`RuleMeta`、`SKILLS_DIR`。若實作把 preflight 封裝成別的純 helper，移動 test call site 即可；「source/pointer/runtime 三驗、全域零寫、dry/real parity」不可跟著改弱。
+4. **`read_scope()` wrapper 測試即使與段 1 重複也應保留。** 它是跨段 regression guard，因為段 2 的 `discover_rules()`/preflight wiring 仍會經 scope consumer；契約在 `ep.md:43-45,114`。
+5. **ZCode `.agents/skills` 是高價值 runtime probe。** `ep.md:56,111` 已把它寫成 canonical portable root；repo [skills/CLAUDE.md:17](<skills/CLAUDE.md:17>) 說 ZCode 同掃 `.agents`，但 ZCode 鏡像官方文件 `ref-docs/harness/zcode/cn/docs/skill.md:45-62` 只公開 `~/.zcode/skills`。B1 因此故意只安裝 `.agents`。若 fail，不要先補 `.zcode` 讓測試過，應回主 session裁定 runtime contract。
+6. **B1 credential staging 不應進測試腳本。** raw carrier 的 config 固定在 `<HOME>/.zcode/cli/config.json`，且 `--settings` 是 help-only dead flag，證據 `/Users/ctai/Github/delegate-bridge/.../zcode-headless-FACTS.md:10-20`。因此腳本只接受已 staged 的 disposable carrier home，避免把 API key 複製或印到 test artifact。credential 無法準備＝`INCONCLUSIVE`。
+7. **B1 若 ZCode `Skill` tool 沒進 PreToolUse hook，要保留四態，不准降級用 prose 直接 PASS。** ZCode hooks 文件理論上讓 PreToolUse 看實際工具名（`hooks.md:145-173`）；若 headless runtime 對 Skill 是特殊 internal path 而不觸 hook，則 body-only canary 可以證明 body loaded，但「premature-action ordering」仍缺獨立 observation，該 run 應標 `UNEXPECTED/INCONCLUSIVE` 後再找 transcript surface。
+8. **CC probe auth 問題和 unknown-key 行為必須分離。** `CLAUDE_CONFIG_DIR` auth 失敗是 infra failure；只在 treatment/control 都能實際 Read、且 hook audit 正常後，才有資格裁 unknown projection keys 相容性。這與既有 leg5 的「第一輪模型沒呼 tool，棄用」證據紀律一致（`leg5-probe-paths-verdict.md:9-14`）。
+
+這一輪沒有寫任何檔，也沒有執行上述測試；原因是你明定交付為文本 oracle，且 flash 正在並行改段 2。最值得主 session優先看的是 **A1 extra annotation** 與 **A12 identical redeploy rewrite**：兩者若如目前背景版本所示會紅，都是有辨識力的規格／實作分歧，不是測試噪音。
+[delegate-bridge] job job-mtzmn9dz-ycu84q status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

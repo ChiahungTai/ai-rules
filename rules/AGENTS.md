@@ -20,6 +20,7 @@ uv run python scripts/deploy_agents.py
 → 重新 bundle guide + neutral rules → 部署到 `~/.{zcode,codex,config/muse}/AGENTS.md`（非 Claude 端的 rules 唯一來源）。
 → Claude 端不需 deploy（`~/.claude/rules/` 目錄 symlink 即時同步）。
 → 注意：deploy 會將非 Claude 端的 AGENTS.md 從 symlink（live-sync）轉為 generated snapshot — 改 rule 後需重跑 generator 才同步。
+→ 投影軸（AIR-85）：rule frontmatter 三鍵 `bundle-projection: pointer`＋`pointer-target`＋`bootstrap-pointer`＝非 CC bundle 投影——body 不進 bundle、作者 pointer 句逐字投影；deploy 全域 preflight（repo source＋`~/.agents/skills` runtime 可達）fail-closed、identical 重跑零寫入；`paths:` 是 CC runtime 軸，deploy 不解析（三軸分離）。
 → redeploy 後若本 session 續作，依 [context-management](context-management.md)「Session freshness」refresh/reset 後再繼續（刪除/反轉弧重讀不足，須 reset＋恢復主題材料）。
 
 ### 尺寸 gate 與截斷線（bundle 上限）

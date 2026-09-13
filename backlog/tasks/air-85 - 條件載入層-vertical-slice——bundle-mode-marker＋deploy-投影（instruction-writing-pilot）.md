@@ -4,7 +4,7 @@ title: 條件載入層 vertical slice——bundle-mode marker＋deploy 投影（
 status: In Progress
 assignee: []
 created_date: '2026-09-13 00:37'
-updated_date: '2026-09-13 09:10'
+updated_date: '2026-09-13 10:21'
 labels: []
 dependencies: []
 references:
@@ -47,4 +47,6 @@ ai-rules main @ 209966a（scope 研究報告已落檔）。材料源＝reports/2
 
 <!-- SECTION:NOTES:BEGIN -->
 09-13 user 確認排序：AIR-86 四批收斂＋結案後接續開工（86 不依賴 85；批三 python-standards「AIR-85 前禁 pointer-only」即兩卡銜接點）。85 落地後回頭投影 instruction-writing/llm-output 兩支，bundle 終態 band 19–23.5KB 才閉合。user 明示定位＝「很重要的東西」——bundle 縮減的第三手段（刪除/下沉之外的結構性投影），機制卡走 execution-plan 建卡流程。
+
+09-13 四段完成＋全 AC 證據（材料＝ai-analysis/_tasks/09-13-conditional-loading-vertical-slice/ep.md「段 3 驗收證據」節）：AC#1 三端 29,161B byte-identical（29,949→29,161，−788B；Muse headroom 對 36KiB gate 79%）；AC#2 CC 靜態＋L4 三臂 probe PASS（unknown keys 相容；settings.json symlink 隔離法）；AC#3 真環境 fail-closed exit1 實測；AC#4 deploy 全端綠。pointer 行為測試 5/5（ZCode headless 直連 GLM-5.3：.agents 單根可達實證、canary/逐字引用雙證、壓力變體全真載入）。oracle 14/14＋全套 404 tests＋冪等真跑雙驗。deployed 終態 29,161B。
 <!-- SECTION:NOTES:END -->

@@ -42,14 +42,14 @@ L2 部署接線（各 harness 全域位置）
 | design-thinking | deep-thinking | 輸出格式模板、8 問清單、查證細則 | bootstrap split |
 | acceptance-evidence | acceptance-evidence | Intent Drift、filter trap、Runtime Invariant 深層理論 | bootstrap split |
 | symbol-query-routing | symbol-query-routing | LSP 速查表、rg 陷阱群、跨 harness 載體對照 | bootstrap split |
-| instruction-writing | instruction-writing | 撰寫規範全量、五維自洽檢查 | conditional projection eligible（AIR-85 pilot） |
-| llm-output-convention | llm-output-convention | print tag 全表、閉環細則 | conditional projection eligible（AIR-85 第二） |
+| instruction-writing | instruction-writing | 撰寫規範全量、五維自洽檢查 | projected（AIR-85 已落地：三鍵標註＋deploy 投影＋行為測試 5/5） |
+| llm-output-convention | llm-output-convention | print tag 全表、閉環細則 | second pilot ready（同介面 opt-in，AIR-85 機制已驗證） |
 | modern-cli-preference | modern-cli-preference | fd/rg 陷阱目錄、雙掃陷阱 | reference layering（近完成態） |
 | model-routing | model-routing | tier×provider 解析表、收法決策樹、family 契約 | bootstrap split |
 | context-management | memory-audit | 寫入端紀律（六問）、載體統一定義表 | bootstrap split |
 | quality-constraints | validation-strategy | 消費端驗證模式、整合器判定、漸進驗證細則 | bootstrap split |
 
-> bundle role 欄：bootstrap split＝rule 留 minimal semantic closure/bootstrap、body 在 skill；conditional projection eligible＝AIR-85 條件載入投影候選（顯式 opt-in marker，非 CC 端 body→pointer）；reference layering＝常規深層配對。判準源＝scope 分界研究（reports/2026-09-13-scope-boundary-memory-rules-skills/）＋memory-audit 載體統一定義表。
+> bundle role 欄：bootstrap split＝rule 留 minimal semantic closure/bootstrap、body 在 skill；projected＝AIR-85 投影已落地（三鍵 opt-in、非 CC 端 body→pointer、preflight fail-closed）；second pilot ready＝機制已驗證、待該 rule 自行 opt-in；reference layering＝常規深層配對。判準源＝scope 分界研究（reports/2026-09-13-scope-boundary-memory-rules-skills/）＋memory-audit 載體統一定義表。
 
 - 其餘 rule→skill pointer 為常規跳轉（不配對，如 tool-discipline→debugging-and-error-recovery／agent-workflow）；skill→rule 反向引用 20+ 檔（驗證/紀律 anchored 回 rule）。
 - skill→skill：review-engine 是 review 家族（ep-review／code-review／audit-test／execution-plan EP Review／implement Agent Review）的 domain 真相源；`_common/` 20 檔被 15+ skills 引用（work-order、workflow-review-pattern、illustrate 家族、state-md-write 等）；工作流 skill 鏈互引見核心流程拓撲。
