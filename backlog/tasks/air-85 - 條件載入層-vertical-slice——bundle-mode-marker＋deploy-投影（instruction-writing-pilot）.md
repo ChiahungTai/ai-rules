@@ -1,12 +1,14 @@
 ---
 id: AIR-85
 title: 條件載入層 vertical slice——bundle-mode marker＋deploy 投影（instruction-writing pilot）
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-13 00:37'
-updated_date: '2026-09-13 04:53'
+updated_date: '2026-09-13 09:10'
 labels: []
 dependencies: []
+references:
+  - ai-analysis/_tasks/09-13-conditional-loading-vertical-slice/ep.md
 ordinal: 71000
 ---
 
