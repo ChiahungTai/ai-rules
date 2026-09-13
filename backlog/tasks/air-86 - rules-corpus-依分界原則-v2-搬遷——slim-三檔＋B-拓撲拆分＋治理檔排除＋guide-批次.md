@@ -4,6 +4,7 @@ title: rules corpus 依分界原則 v2 搬遷——slim 三檔＋B 拓撲拆分�
 status: To Do
 assignee: []
 created_date: '2026-09-13 00:38'
+updated_date: '2026-09-13 02:22'
 labels: []
 dependencies: []
 ordinal: 72000
@@ -41,3 +42,19 @@ ai-rules main @（AIR-85 建卡 commit）。材料源＝report.md §四＋materi
 - [ ] #3 rules/AGENTS.md 排除出 bundle（CC 端驗證）
 - [ ] #4 獨立複核記錄＋consistency/deploy 全綠
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+09-13 bundle 定稿裁定（user 拍板：推薦版；與 codex 兩輪討論收斂，材料＝reports/2026-09-13-scope-boundary-memory-rules-skills/materials/codex-out.txt＋codex-bytes-out.txt）：
+
+**形態**：bundle 收斂為「跨任務 user calibration＋首個有後果行動前不可缺的 bootstrap」，其餘內容須能說明為何不能可靠 on-demand。guide 不豁免 A/B 審查（七節骨架留、body 清理——UC-Driven 節削最多：狀態 glyph 全表＋完整 lifecycle 鏈沉 skills，−500~750B）。16 支 rule 每支留 minimal semantic closure，methodology/lookup/案例沉同名 skill；邊界維持不併檔；不設硬 byte gate（semantic form 為硬驗收，byte band 只抓漏瘦）。
+
+**批次重排**（排序指標＝paired-carrier 完整度→semantic risk→可削 bytes；取代原 A 密度優先）：批一 acceptance-evidence＋model-routing＋design-thinking（~3.4–4.4KB 主收益＋定型可重複模板）；批二 edit-discipline＋symbol-query-routing＋quality-constraints＋must-execute；批三 guide＋collaboration＋context-management＋python-standards（python 只 A-slimming——無完整 paired carrier，AIR-85 前禁 pointer-only）；批四 tool-discipline＋outward-action-consent（高後果 calibration，最後）。
+
+**驗收對照**＝目標態表（逐檔 final form 一行描述＋bundle band）：materials/codex-out.txt §C。推薦版 deployed 目標 19–23.5KB（AIR-85 後）/20–24KB（前）；現值 32,835B，headroom 9–14KB。
+
+**雙量測驗收**：每檔記 semantic source size＋deployed bundle size——source sum 禁直接對 gate（deploy framing ~964B；skip-\* 區段現抵 ~1,957B；機制 deploy_agents.py:304-340）。
+
+structure.md 引用邊表已加 bundle role 欄（bootstrap split / conditional projection eligible / reference layering）——本卡實施時對照該欄。
+<!-- SECTION:NOTES:END -->
