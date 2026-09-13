@@ -23,6 +23,21 @@
 
 八站是整體敘事，不取代各 skill 的細部 workflow。免 UC 的小型 fix 可以不建立 card/EP，但仍須有明確 execution plane、validation 與收斂路徑。
 
+### 逐站怎麼做（導引層）
+
+> 本表＝「八站 → 入口命令／詳讀來源」的人類 lifecycle mapping 單一源（index.html section 02 投影自此）；只列 command/skill ID＋link＋runtime status，**不重述 command 內部步驟**——command 語義以各 `skills/<x>/SKILL.md` 為權威，LLM 端命令拓撲在 [skills/CLAUDE.md](../../skills/CLAUDE.md)。command rename／退役／生命週期位置改變時，覆核本表再刷新 projection。
+
+| 站 | 怎麼做 |
+| --- | --- |
+| ① 想法 | **入口**：未承諾想法留 draft／pending；決定承諾時依 [kanban-board](../../skills/kanban-board/SKILL.md) 建 card，不先進實作流程。**詳讀**：看板生命週期與建卡／狀態／refs 以 kanban-board 為準。 |
+| ② 規劃 | **入口**：需求仍需釐清可先 `/spec`；正式規劃走 [`/execution-plan`](../../skills/execution-plan/SKILL.md)，需要獨立覆核時用 [`/ep-review`](../../skills/ep-review/SKILL.md)，高技術風險假設可加 [`/ep-validate`](../../skills/ep-validate/SKILL.md)。pre-EP whole-picture 可用 [`/illustrate`](../../skills/illustrate/SKILL.md) 作人類 viewport。**詳讀**：[spec](../../skills/spec/SKILL.md)／[execution-plan](../../skills/execution-plan/SKILL.md)。 |
+| ③ 開工 | **目標入口**：`wt-open <card>` 建立 card branch／persistent WT／baseline／cwd identity——**❌ target 尚未落地，不得當可執行介面**；現行依 [repo AGENTS.md「git 慣例」](../../AGENTS.md) 建 card branch，並依 [kanban-board](../../skills/kanban-board/SKILL.md) 完成 In Progress／refs 起手式。**詳讀**：本檔「Worktree 形態定案／過渡條款」。 |
+| ④ 實作 | **入口**：標準 EP 工作走 [`/implement`](../../skills/implement/SKILL.md)；程式邏輯變更依 [test-driven-development](../../skills/test-driven-development/SKILL.md) 的 TDD 方法。**execution plane**：target 為 persistent card WT／免卡小修 ephemeral WT；目前仍依 repo AGENTS.md 現行 card-branch 慣例執行，不得假定 WT helper 已存在。 |
+| ⑤ 驗證 | **入口**：實作流程內依 `/implement` 執行測試與 [`/audit-test`](../../skills/audit-test/SKILL.md)；instruction artifact 另依 [instruction-testing](../../skills/instruction-testing/SKILL.md) 做行為驗證。**詳讀**：[acceptance-evidence rule](../../rules/acceptance-evidence.md)＋[acceptance-evidence skill](../../skills/acceptance-evidence/SKILL.md)。（變更級獨立 review 在⑥收斂站由 `/post-build` 編排，非本站日常入口） |
+| ⑥ 收斂 | **入口**：[`/post-build`](../../skills/post-build/SKILL.md) 編排 `/code-review` → `/judge-review` → 修正 → consistency／metadata finalization；人類方向／結構 checkpoint 按需用 [`/illustrate`](../../skills/illustrate/SKILL.md) 或 [`/debrief`](../../skills/debrief/SKILL.md)；最後走 [`/commit`](../../skills/commit/SKILL.md)。**git 收斂**：target 為 `wt-close`；尚未落地前依 [repo AGENTS.md「git 慣例」](../../AGENTS.md) 的 rebase→ff-only 規則。 |
+| ⑦ 沉澱 | **入口**：通常由 `/implement`／`/post-build` 內的 [metadata-sync](../../skills/metadata-sync/SKILL.md) 把 Capabilities、SYSTEM-MAP、architecture／相關 metadata 收回正確載體；跨 session 事實再依 [memory-audit](../../skills/memory-audit/SKILL.md) 判斷，規範正文不得複製進 memory。**詳讀**：repo `AGENTS.md` 的載體治理＋memory-audit 載體統一定義表。 |
+| ⑧ 運維 | **入口**：例行維護走 [`/daily-maintain`](../../skills/daily-maintain/SKILL.md)；fresh-machine／重建路徑從 [onboarding.md](onboarding.md) 進入。**詳讀**：[maintain](../../skills/maintain/SKILL.md)；排程現況看 [schedule-registry](../schedule-registry.md)，code-reality 接線看 [code-reality skill](../../skills/code-reality/SKILL.md)。 |
+
 ## Worktree 形態定案
 
 正式裁決採「control plane 與 execution plane 分離」，分界按**寫入責任**，不是按任務時間或大小。
