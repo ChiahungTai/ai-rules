@@ -358,7 +358,7 @@ Capabilities 表每行（能力 | 入口 | 狀態）須帶可檢索 desc，文�
 
 兩類日期分開裁決——**會腐爛的陳述才標日期**：
 
-- **可標（YYYY-MM-DD 全格式）**：①truth 隨外部狀態腐爛的 state 快照（額度現值、容量實值——時效誠實標記，防 stale 偽裝現況）；②同處多修訂並存需裁決（新壓舊錨點）
+- **可標（YYYY-MM-DD 全格式）**：①truth 隨外部狀態腐爛的 state 快照（時效誠實標記，防 stale 偽裝現況）——**user/account 類現值（額度/訂閱/帳號）不住 instruction：住 memory 條目標 as-of（跨 repo 住 spine），instruction 留一行 pointer**；instruction 內合法快照僅限 repo/config 類（容量實值、部署現值）；②同處多修訂並存需裁決（新壓舊錨點）
 - **禁標**：純 policy 決策 provenance（保留「user 拍板／裁定／定案」字樣，歷史交 git log）、實驗 provenance（歷史以 AIR-id／repo-observed 錨點承載）、失敗履歷（保留「真實案例」marker）、檔案履歷／Changelog
 
 > 💡 **原理**：日期不能讓內容正確，只標記不確定性——到處標會稀釋「注意時效」信號；policy 不隨時間腐爛（只被新決策取代），歷史歸 git log。

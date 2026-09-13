@@ -30,7 +30,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 
 ## callstack 場景敘事生成（斷點③解法——tour-bootstrap 場景層上游）
 
-**何時**：**獨立觸發**（「幫這個 repo 生成 callstack」）——本章高成本（單 session 一天額度／agent 群 ~150M token、牆鐘 ~2h），骨架流程走到此處＝**停點報價**（兩模式並列），不自動跑。輸出目錄 `ai-analysis/blueprint/callstack/`——**一律無版號**：世代交替＝舊版退役 `_done/`（標籤帶世代）、新版原地寫回 `callstack/`；版號並行目錄僅當新舊 code 並存跑且兩份地圖同時活消費（罕見）。mosaic 既有 `callstack-v1/` 屬歷史遺留——其 v2 cutover 也是退役路線，**不是** `callstack-v2/`。骨架的 callstack 區塊狀態四態：📋 未枚舉→📋 已枚舉（plan 在）→🤖 逐鏈生成中（分批）→✅。
+**何時**：**獨立觸發**（「幫這個 repo 生成 callstack」）——本章高成本（agent 群 ~150M token、牆鐘 ~2h——單 session 可能超出當日 token 上限），骨架流程走到此處＝**停點報價**（兩模式並列），不自動跑。輸出目錄 `ai-analysis/blueprint/callstack/`——**一律無版號**：世代交替＝舊版退役 `_done/`（標籤帶世代）、新版原地寫回 `callstack/`；版號並行目錄僅當新舊 code 並存跑且兩份地圖同時活消費（罕見）。mosaic 既有 `callstack-v1/` 屬歷史遺留——其 v2 cutover 也是退役路線，**不是** `callstack-v2/`。骨架的 callstack 區塊狀態四態：📋 未枚舉→📋 已枚舉（plan 在）→🤖 逐鏈生成中（分批）→✅。
 
 **新功能回填（UC-B→UC-A 交接）＝盤點入 plan、生成仍獨立觸發**：功能 arc 收尾時盤點本 UC 對素材的影響——①新機制/入口/流程→plan 加一行；②實質改動既有鏈→標待重生成；③參數調整/內部重構/bug fix→不動（bug 知識歸 delta 與既有鏈⑥不變量段；步驟 0 邊際值與三軌過濾照套）。提示掛人必經流程點、**報庫存不催行動、附量級報價**：post-build 收尾報告列「菜單積壓」（機械＝plan **成鏈行數**（①-③ 軌行；④索引行不計）− `callstack/` 既有 md 數）；EP 段落 0 全域研究列待生成行。
 
@@ -52,7 +52,7 @@ allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent"]
 5. **findings 彙整**：跨系列 🔴／🟡／🟢 優先序（深挖副產品＝code review 輸入）
 6. **UC 映射表**：任務／UC × 鏈（「查某 UC 的 how 從這進」）
 
-**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（原地）或退役 `_done/`——平行版本需求才開版號目錄。**執行模式與效率**：①單 session 逐鏈（原版實證：16 篇／24 模組／一個完整 session 額度）②agent 群並行（跑批實證：29 篇／~2.5k 幀／牆鐘 ~2h／token ~150M——高於單 session 額度，但每篇自帶錨定機械驗證、可並行；token 量級是模式抉擇的輸入）——**並行上限 ≤3**（全強度模型實證：mosaic 六並行掛 2；NT 13 agents 併 ≤3 零失敗——lite tier〔現值 glm-5.3-flash〕並發上限較寬，見 [model-routing](../model-routing/SKILL.md) 並發表）＋失敗者**序列重試一次一個**，勿立即重 spawn。agent 群模式**共用 context 打包**：枚舉產物（鏈清單＋每鏈入口細節＋相關 AGENTS.md 段）直接嵌入每篇 agent prompt——冷啟重讀是重複成本主因，打包入口細節實證有效。品質基準：工具實測錨定率（>90%）＋`  # ` 附註率（~100%）。
+**人審停點**：每份文檔初稿即停——敘事品質（幀職責一行是否講對重點）是使用者策展職責；系列收尾跑機械驗證（下段）。**維護紀律**：行號 drift 不逐行修（符號名優先、LSP `workspaceSymbol` 重錨後重寫該幀）；整條鏈大改→整份重生成（原地）或退役 `_done/`——平行版本需求才開版號目錄。**執行模式與效率**：①單 session 逐鏈（原版實證：16 篇／24 模組／約一日滿載 session）②agent 群並行（跑批實證：29 篇／~2.5k 幀／牆鐘 ~2h／token ~150M——超出單 session 負荷，但每篇自帶錨定機械驗證、可並行；token 量級是模式抉擇的輸入）——**並行上限 ≤3**（全強度模型實證：mosaic 六並行掛 2；NT 13 agents 併 ≤3 零失敗——lite tier 並發上限較寬，見 [model-routing](../model-routing/SKILL.md) 並發表）＋失敗者**序列重試一次一個**，勿立即重 spawn。agent 群模式**共用 context 打包**：枚舉產物（鏈清單＋每鏈入口細節＋相關 AGENTS.md 段）直接嵌入每篇 agent prompt——冷啟重讀是重複成本主因，打包入口細節實證有效。品質基準：工具實測錨定率（>90%）＋`  # ` 附註率（~100%）。
 
 ## audit 模式（既有 blueprint——預設防護）
 

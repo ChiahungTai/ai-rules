@@ -1,0 +1,188 @@
+[delegate-bridge] spawning codex (cwd=/Users/ctai/Github/ai-rules)
+2026-09-13T02:40:05.728358Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:40:05.744269Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:40:05.823654Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:40:06.179497Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:40:06.196882Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:40:06.281943Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:40:06.496163Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: HTTP error: 426 Upgrade Required, url: ws://127.0.0.1:17841/v1/responses
+2026-09-13T02:40:07.385745Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:40:07.410842Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+2026-09-13T02:40:07.497491Z ERROR rmcp::transport::worker: worker quit with fatal: Unexpected content type: Some("missing-content-type; body: "), when send initialized notification
+我的立場是：**同意 user 的新方向，但不建議只用 V/P 二分；應升成 V/P/F 三分。** 這樣才不會把「使用者現在有沒有額度」和「bridge 本身怎麼認證／計費」混成同一類。
+
+### A. 分界線：V → memory、P → instruction，我同意；但要加 F
+
+我建議正式分類成：
+
+| 類 | 定義 | 正確載體 |
+| --- | --- | --- |
+| **V — volatile user state** | 使用者目前訂閱哪家、哪個帳號啟用、哪個 quota pool 可用、目前耗盡／恢復、帳號切換 | **memory**，而且是 rolling state |
+| **P — policy** | 任務該如何 route、何時 failover、顯式指定優先權、usage limit 後禁止盲重派、review 用哪類 family | **rule/skill** |
+| **F — operational fact** | bridge/harness/provider 實際能力與認證機制，例如某 adapter 會剝 `OPENAI_API_KEY`、某 runtime 是否只有 subscription auth face | **repo/code/ref-docs/reference fact**；若外部且不可從 repo 推導，可放 reference memory |
+
+這個第三類很重要。
+
+例如你舉的：
+
+> `計費鐵則＝muse 純訂閱無 API key 面`
+
+它**不是單純 P，也不一定是 V**。如果「Muse runtime 根本沒有 API-key billing path」是產品／runtime contract，那是 **F**；但「user 現在有 Muse 訂閱、這個窗口目前有額度」才是 **V**。
+
+同理：
+
+> bridge 剝 `OPENAI_API_KEY` 防 API-key 計費翻轉
+
+如果這確實由 bridge 實作保證，就是 repo 可驗的 **F**，照 `memory-audit` Q2 原則甚至不應搬進 memory，而應由程式碼／bridge docs 承載，instruction 最多 pointer。
+
+所以我的 boundary 是：
+
+**instruction 不存 user/account snapshot；memory 不吞 stable policy；repo 可驗的 mechanism fact 也不要因為碰到「計費」兩字就扔進 memory。**
+
+這比單純 `額度|訂閱|帳號|計費 → memory` 安全很多。
+
+* * *
+
+### B. model-routing 額度現值：搬，但我不建議直接塞回現有 `quota-failover-policy`
+
+我同意把 `skills/model-routing/SKILL.md:34-36` 那種：
+
+> 可用＝GLM＋muse＋codex、帳號切換後恢復、Anthropic/xai 未訂閱……
+
+移出 skill。
+
+但現有 [.agents/memory/feedback_quota-failover-policy.md](<.agents/memory/feedback_quota-failover-policy.md>) **本身也是 mixed carrier**，不能原封不動當新家。
+
+現在它：
+
+- `:3` description 就直接 materialize `GLM+muse+codex（帳號切換後恢復）`
+- `:22` 還明寫「memory 不複製現值」
+- `:24` 又記錄 09-07「固定記載在 skill」
+- body 同時混有政策、歷史勘正、訂閱現況、runtime facts。
+
+而 `memory-audit` 現行規範又明確說 desc 不應放「現值／日期／session-id」類易變 snapshot。也就是說，**若只是把 skill 那段搬進這個條目，會把錯置從 instruction 換成 memory 內另一種錯置。**
+
+我推薦形態是：
+
+**建立一個專用 rolling state reference**，概念例如 `model-runtime-entitlements` / `model-quota-status`：
+
+- description 只寫穩定召回語義，例如「external model dispatch 前的 user entitlement/quota 現況」；
+- body 有 `as-of` 現值，只保存當前狀態＋最多極少量必要前態；
+- policy 不住這裡；
+- provider/bridge mechanism facts能從 repo/ref-docs 查的也不住這裡。
+
+而且我會再往前一步：**這是跨 repo 的 user state，最佳位置不是 ai-rules project-local memory，而是 shared memory spine。** 你 repo 現在已經有 `~/.agents/memory-spine/` 這個跨池共享層；model-routing 又是 user-level skill、跨 project 消費，將 global subscription state 只放 ai-rules project memory，會重新製造「別的 repo 看不到」問題。
+
+skill 則只留 bootstrap pointer，例如語義上：
+
+> 當 external dispatch 取決於使用者當前 entitlement／quota 時，查 shared memory 的 model-runtime entitlement state；查不到不得從歷史 instruction 推定。
+
+這多一次 lookup，我認為是**合理成本**。因為這個 state 本來就是會腐爛的；為省一次查詢把它複製回 instruction，正是這次要消掉的問題。
+
+而且不是每次 model routing 都要查。`task requirement → family/profile` 的 P 規則仍在 skill；**只有「這家現在能不能派」這一步才讀 V**。
+
+* * *
+
+### C. 制度化：我建議「語義 taxonomy + 窄機械 guard」，不贊成 broad regex gate
+
+我建議三層，但職責不要混：
+
+**第一層，`memory-audit` 誤置表新增正式 taxonomy。** 這才是規範單一源。例如新增：
+
+> V：user/account/runtime 現況進 user-level instruction → global user state 歸 memory；穩定 policy 留 instruction；repo 可推導 mechanism fact 回 repo/ref source。mixed 內容必拆層。
+
+這一層最重要。
+
+**第二層，機械檢查只能當 candidate detector，不能把 `額度|訂閱|帳號|計費|現值` 做 hard forbidden。**
+
+理由就是 A 的 F 類。像：
+
+- 「額度耗盡不得盲重試」是合法 P；
+- 「subscription auth 無 API-key path」可能是 F；
+- 「目前 Anthropic 未訂閱」才是 V。
+
+regex 不可能只靠詞彙正確判 carrier。
+
+現有 `check_single_source.py` 已有 `forbidden_pattern` infrastructure，但它現在定位是**能機械判定的 single-source contract 殘留**。拿 broad billing vocabulary 塞進去會違反你們自己「hook/check 必須無語義例外」的原則。
+
+所以若要放進 `sync-sources`，我只贊成**migration 後非常窄的 regression guard**，例如抓已退役的具體 snapshot 句型／header，或新增 advisory `candidate_pattern` 類型而不是 critical gate。
+
+**第三層，不放 `corrections-weekly` 當主掃描。** 它目前職責是挖 user correction、CR 使用、memory telemetry；把 source-carrier lint 塞進去會讓週報變垃圾桶。它可以在再次出現「你又把我的額度寫進 rules」這類 correction 時提供治理證據，但不負責檔案 correctness。
+
+所以我的組合是：
+
+**memory-audit taxonomy = normative；instruction/source audit = semantic candidate scan；sync-sources 只守能機械證明的窄 invariant；corrections-weekly 不加常規掃描。**
+
+* * *
+
+### D. 09-07 舊裁定：今天的新指示已足以 supersede，不需要再問一次「確定嗎」
+
+這點我的立場很明確。
+
+今天 user 已經主動指出：
+
+> ai rules 不應該放使用者特殊狀況，像 coding plan 的額度情境。
+
+這正面改變了 09-07「額度狀況固定記載在 skill」的 carrier 決策。**不需要要求 user 再重複授權一次原則。**
+
+但不能把歷史直接擦掉。正確做法是：
+
+**舊裁定保留為 superseded lesson，current authority 改成新 boundary。**
+
+而且這次 ripple 不只 model-routing。現有 `.agents/memory/project_date-marking-discipline-0911.md:14-18` 還明確說：
+
+- 額度現值是 instruction 中合法的 state snapshot；
+- future audit 不要再報；
+- 其固定記載點就是 model-routing skill。
+
+如果只搬 model-routing、不修這個舊裁定，未來 audit 會被 memory 指示「不要報」甚至可能把 snapshot 搬回去。
+
+所以回填時至少要一起把這個**active contradictory guidance 標 superseded**。這比單純記一條「教訓」更重要。
+
+不過你們現在是三方共識制，因此「可以執行」仍要等你＋GLM＋我共識；我的意思只是：**不用因 09-07 舊話再向 user 要一次 principle confirmation。**
+
+* * *
+
+### E. root `AGENTS.md`：要一併處理，但不是整句搬 memory
+
+`AGENTS.md:107` 現在的「計費鐵則」是一個典型 mixed sentence：
+
+- delegate-bridge 在哪、family CLI 怎麼跑 → repo architecture **F**
+- bridge 剝 `OPENAI_API_KEY` → 若程式實際保證，是 repo mechanism **F**
+- user 目前走 ChatGPT subscription account／哪家帳號 → **V**
+- 5h window 等 provider contract → 外部 **F**，可能會演化，但不是 user 狀況
+- 現在有哪些 plan／entitlement → **V**
+
+所以我贊成 **AIR-86 類似的 split，不贊成整段搬 memory**。
+
+root 的「專案結構」其實根本不需要知道 user 現在買了什麼方案。理想終態只要留下：
+
+> delegate-bridge 的 repo／CLI／billing-auth isolation mechanism；routing policy 見 model-routing；user entitlement/quota 現況查 shared memory state。
+
+外部 provider 的具體 billing contract 若需要保存，放 bridge docs／ref-docs／reference fact；current account state 才放 memory。
+
+這樣 root AGENTS 也會乾淨很多。
+
+* * *
+
+### 我認為三方最容易沒有共識的三點
+
+**① 最大爭議：`muse 純訂閱、無 API key 面` 到底算 F 還是 V。**  
+我的票是：**「有沒有這個 API path」＝F；「user 現在有沒有這個 subscription」＝V。必須拆句，不能整句定類。**
+
+**② global V 要放 project memory 還是 memory spine。**  
+我的票明確給 **memory spine／user-level shared state**。因為 model-routing 是跨 repo user-level skill；放 ai-rules project memory 會有 discoverability mismatch。若 GLM 主張沿用既有 `quota-failover-policy` project entry，這點值得拿給 user 裁。
+
+**③ checker 要不要 hard regex。**  
+我的票是 **不要 broad hard regex**。`額度|訂閱|帳號|計費|現值` 只能 surface candidates；真正 carrier 判定必須 LLM triage。只有 migration 後可以機械確定的舊 snapshot pattern 才適合 `check_single_source` hard guard。
+
+整體上我與你的方向是高度一致的，但我會把原命題從：
+
+> **V → memory，P → instruction**
+
+收斂成更精確的：
+
+> **V（user/account current state）→ shared memory；P（durable behavioral policy）→ instruction；F（mechanism/provider fact）→ 最接近的可驗 source/reference。任何一句混三者就拆。**
+
+這個版本我認為才足以成為之後的「檢查該放 memory 的有沒有混入 ai-rules」正式判準。本輪全程 read-only，未修改任何檔案。
+[delegate-bridge] job job-mtz7huy0-9xps91 status=completed exit=0 session=01a09813-1698-77a1-a45b-ccf7880ec6fa

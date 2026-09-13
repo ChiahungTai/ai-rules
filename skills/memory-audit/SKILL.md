@@ -168,6 +168,7 @@ last_index_chars: <n> # 上次 --check chars——lite 流入率監控基線
 |---|---|---|---|
 | A user-level 規範進 project memory | 規範回 user-level 單一源；rule／skill 依 rule 資格公式＋residency 三測試判定。memory 只留事故證據／偏好例外／pointer，不複製規範正文 | mixed 條目拆層：規範正文移回 user-level source，memory 僅保留三物；禁止以 resident memory 解 scope 錯置 | LLM 流程（層級硬閘） |
 | B project-specific 知識上提 user-level rule／skill | 下沉 project carrier：規範→repo／module AGENTS.md；user/project 綁定事實→memory；任務狀態／承諾→backlog／EP。user-level 僅留可泛化方法論 | mixed 內容拆層，移除 user-level source 中的 repo-specific 狀態／參數／入口／例外；依內容性質歸回 project carrier | LLM 流程（層級硬閘） |
+| V user/account 現況進 user-level instruction（額度/訂閱/帳號/量測現值） | 跨 repo user state→shared memory（spine，as-of rolling state）；repo 綁定現值→本池 reference 條目；穩定 policy 留 instruction；repo 可驗機制 fact 回 repo/ref source；mixed 句拆句 | 條目 desc 只寫召回語義（禁現值）；body 存 as-of＋更新紀律（事件當下改）；instruction 留一行 bootstrap pointer（查不到＝探測後派，禁歷史推定） | LLM 流程（candidate 詞彙：現值/額度/訂閱/帳號切換——值域二級判別，regex 只產 candidate） |
 | M1 任務終態/進度入池 | 卡 notes／EP 進度節 | **放置閘**——新建條目 hook 注入六問指針（機械提醒；Q1 判斷留 LLM） | hook 提醒＋LLM 流程 |
 | M2 desc 三不違反（鑑識時內容閘不存在，日期流水全放行） | desc 不放易變快照（現值/日期/session-id） | **內容閘**——desc regex 偵測日期 MM-DD／`sess_` 形態硬擋（三判準：純機械/單入口/語義例外有條件通過——desc 語彙內合法碰撞罕見，邊界見 hook 註解；09-10 已落地） | hook 機械閘 |
 | M3 多 writer 草稿式迭代（stale-collision 多發） | 草稿 → scratch；條目收終態事實（寫入當下即蒸後形） | stale-collision 訊息擴充——碰撞 error 附改道提示（既有 collision error 即觸發點） | hook 訊息 |
