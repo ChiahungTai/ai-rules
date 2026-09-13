@@ -8,6 +8,8 @@ harness-scope: neutral
 
 不同任務重置 context（Claude: /clear）；大範圍探索用獨立 context agent 回摘要，Writer/Reviewer 分離。同題連續糾正兩次仍失敗就換 prompt＋重置 context，超過兩次應檢討 prompt。
 
+**Session freshness**：governing rules/bundle 在 session 中變更後（redeploy、slimming、刪除、政策反轉），下一個依賴該規則的 consequential action 前必 refresh context（重讀新版）；**涉及刪除/反轉/衝突語義時重讀不是充分條件**——舊文已在 context 不會因重讀消失，須 reset/new session＋恢復主題材料（resume read-set：卡/EP/notes→journal/compact-context→active .review→目標態報告→所需 skills）。
+
 ## 想法即時落盤（durable checkpoint）
 
 context 揮發且 quota 可能突然耗盡。真實案例：Codex 審查弧只落中間 findings，最終合成留 transcript 後 session 死亡，接手需昂貴考古。

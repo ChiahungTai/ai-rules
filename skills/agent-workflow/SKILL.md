@@ -216,7 +216,7 @@ spawn 失敗處理依失敗類型分階梯 —— classifier unavailable retry �
 
 ## Rule Freshness（spawn 時注入）
 
-Rules 檔在 session 啟動時載入，但**更新不會傳播到已 spawn 的 agent 或執行中的任務**——agent 帶著 spawn 當下的 context 跑完全程。「它在 rules 裡」不等於「agent 會遵守」：
+Rules 檔在 session 啟動時載入，但**更新不會傳播到已 spawn 的 agent 或執行中的任務**——agent 帶著 spawn 當下的 context 跑完全程。「它在 rules 裡」不等於「agent 會遵守」。**兩面分工**：main session 自身的 freshness（redeploy/slimming 後續作）歸 [context-management](../../rules/context-management.md)「Session freshness」——refresh 或 reset＋恢復主題材料；本節管 spawned-agent snapshot 面：
 
 - 高頻被違反的規則（mock patterns、property patching）→ **spawn prompt 直接注入該規則摘錄**，不假設 agent 會自己讀 rules 檔
 - 高風險 rule 更新後 → 下一個依賴該規則的任務前先 reset context（`/clear` 或重新載入 rule）
