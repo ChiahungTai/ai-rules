@@ -1,10 +1,10 @@
 ---
 id: AIR-86
 title: rules corpus 依分界原則 v2 搬遷——slim 三檔＋B 拓撲拆分＋治理檔排除＋guide 批次
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-13 00:38'
-updated_date: '2026-09-13 02:32'
+updated_date: '2026-09-13 03:28'
 labels: []
 dependencies: []
 ordinal: 72000
