@@ -1,12 +1,14 @@
 ---
 id: AIR-86
 title: rules corpus 依分界原則 v2 搬遷——slim 三檔＋B 拓撲拆分＋治理檔排除＋guide 批次
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-13 00:38'
-updated_date: '2026-09-13 08:11'
+updated_date: '2026-09-13 08:31'
 labels: []
 dependencies: []
+references:
+  - ai-analysis/reports/2026-09-13-scope-boundary-memory-rules-skills/report.md
 ordinal: 72000
 ---
 
@@ -75,3 +77,9 @@ structure.md 引用邊表已加 bundle role 欄（bootstrap split / conditional 
 
 09-13 批四完成（待 commit）：keep-decision 驗證批——tool-discipline 僅「背景執行」壓縮 3621→3459（mechanics 實證由 agent-workflow L70-75 承接）、outward 零削減；codex 確認「沒有值得再砍的條文」、TD 全 KEEP 成立、band 全上修。B4-F1（codex NEEDS-JUDGE）：autonomous commit policy 三方矛盾（outward/kanban 09-11 記錄 autonomous 可 vs autonomous-execution 全面禁）——user 09-13 裁定＝自動一律不 commit，outward L42+kanban L64 已改「特赦限互動、autonomous 待用戶確認」（等於收回 09-11 的 autonomous 延伸）。deployed 30,008→29,949B；364 tests。收尾：ff main＋結案兩步。
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+rules corpus＋guide 依 v2 分界四批搬遷定稿：16 rules＋guide minimal semantic closure（source 19,546B 削減；deployed 32,835→29,949B 三端）、開場導引三行版上線、機制單源化（glyph→metadata-sync／銜接→kanban／crash-only→validation-strategy）；雙審 37 列 verdict 零未決、三衝突被審查鏈翻出並裁決（B4-F1 autonomous commit 統一：autonomous 一律待用戶確認）；AC#1-4 達成（#3 CC 端驗證=部署三面同步舉證）。後續：AIR-85 條件載入層（bundle 終態最後一塊）。
+<!-- SECTION:FINAL_SUMMARY:END -->
