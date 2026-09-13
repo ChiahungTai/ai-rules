@@ -1,10 +1,10 @@
 ---
 id: AIR-70
 title: 一致性掃描修復弧——13 中級全修＋低級順手批次（09-10 scan-report 承接）
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-09 22:40'
-updated_date: '2026-09-13 00:38'
+updated_date: '2026-09-13 00:55'
 labels:
   - governance
   - consistency
