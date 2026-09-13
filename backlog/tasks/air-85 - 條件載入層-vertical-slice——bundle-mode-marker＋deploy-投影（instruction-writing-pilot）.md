@@ -1,10 +1,10 @@
 ---
 id: AIR-85
 title: 條件載入層 vertical slice——bundle-mode marker＋deploy 投影（instruction-writing pilot）
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-13 00:37'
-updated_date: '2026-09-13 10:21'
+updated_date: '2026-09-13 10:29'
 labels: []
 dependencies: []
 references:
@@ -50,3 +50,9 @@ ai-rules main @ 209966a（scope 研究報告已落檔）。材料源＝reports/2
 
 09-13 四段完成＋全 AC 證據（材料＝ai-analysis/_tasks/09-13-conditional-loading-vertical-slice/ep.md「段 3 驗收證據」節）：AC#1 三端 29,161B byte-identical（29,949→29,161，−788B；Muse headroom 對 36KiB gate 79%）；AC#2 CC 靜態＋L4 三臂 probe PASS（unknown keys 相容；settings.json symlink 隔離法）；AC#3 真環境 fail-closed exit1 實測；AC#4 deploy 全端綠。pointer 行為測試 5/5（ZCode headless 直連 GLM-5.3：.agents 單根可達實證、canary/逐字引用雙證、壓力變體全真載入）。oracle 14/14＋全套 404 tests＋冪等真跑雙驗。deployed 終態 29,161B。
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+條件載入層 vertical slice 落地：bundle-projection 三鍵 schema＋deploy 投影（凍結模板 annotation＋作者句逐字）＋全域 preflight fail-closed＋冪等零寫入；instruction-writing pilot 上線（三端 bundle −788B、CC unknown-keys L4 三臂 PASS、ZCode headless pointer 行為 5/5、.agents 單根實證）；404 tests＋codex oracle 14/14。AC#1-4 全證據（EP 段 3 驗收證據節）。後續：llm-output 第二支 opt-in（機制已驗證）＋interface debt（purity/broken-ref 掃 full source）。
+<!-- SECTION:FINAL_SUMMARY:END -->
